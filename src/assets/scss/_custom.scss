@@ -1,0 +1,116 @@
+// Here you can add other styles
+@import "vue-select/src/scss/vue-select.scss";
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+input {
+    color: #768192;
+}
+
+.vs__selected {
+    border-radius: 0px;
+    text-transform: lowercase;
+    color: #768192
+}
+
+.vs__dropdown-option--selected {
+    color: #b8b8b8;
+}
+
+
+.btn {
+    box-shadow: 0 1px 1px 0 rgba(60,75,100,.14), 0 2px 1px -1px rgba(60,75,100,.12), 0 1px 3px 0 rgba(60,75,100,.2)
+}
+
+.stepper {
+    width:100%;
+    display: table;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    table-layout: fixed;
+}
+
+.stepper .step {
+    display: table-cell;
+    position: relative;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.step > button {
+    display: inline-block;
+    width:100%;
+    height:100%;
+    border: none;
+    background: transparent;
+}
+
+.step > button:focus {
+    display: inline-block;
+    width:100%;
+    height:100%;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+.stepper .step .step-icon {
+    width: 30px;
+    height: 30px;
+    margin: 0 auto;
+    margin-bottom: 5px;
+    background-color: #cfcfcf;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 28px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #fff;
+    border: 1px solid #fff;
+    box-shadow: 0 1px 1px 0 rgba(60,75,100,.14), 0 2px 1px -1px rgba(60,75,100,.12), 0 1px 3px 0 rgba(60,75,100,.2)
+}
+
+.stepper .step:hover .step-icon {
+    background-color: #2a1ab9;
+}
+
+.stepper .step.active .step-icon {
+    background-color: #321fdb;
+}
+
+.stepper .step.complete .step-icon {
+    background-color: #26994d;
+    border-color: #248f48;
+    border: 1px solid;
+    content: "C";
+}
+
+.stepper .step .md-step-bar-left,
+.stepper .step .md-step-bar-right {
+	position:absolute;
+	top:25px;
+	height:1px;
+	border-top:2px solid #DDDDDD;
+}
+
+.stepper .step .step-label {
+    display: inline;
+    top: 50px;
+    padding-left: 5px;
+}
+
+.stepper .step .md-step-bar-right {
+	right:0;
+	left:50%;
+	margin-left:20px;
+}
+
+.stepper .step .md-step-bar-left {
+	left:0;
+	right:50%;
+	margin-right:20px;
+}
