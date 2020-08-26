@@ -16,6 +16,16 @@ const Playbooks = () => import('@/views/Playbooks')
 const PlaybooksList = () => import('@/views/PlaybooksList')
 const PlaybookDetails = () => import('@/views/PlaybookDetails')
 const CreatePlaybook = () => import('@/views/CreatePlaybook')
+const InputDetails = () => import('@/views/InputDetails')
+const InputsList = () => import('@/views/InputsList')
+const Inputs = () => import ('@/views/Inputs')
+const Alerts = () => import ('@/views/Alerts')
+const AlertsList = () => import('@/views/AlertsList')
+const Credentials = () => import('@/views/Credentials')
+const CredentialsList = () => import('@/views/CredentialsList')
+const CreateCredential = () => import('@/views/CreateCredential')
+const AlertDetails = () => import('@/views/AlertDetails')
+const CreateInput = () => import ('@/views/CreateInput')
 const Settings = () => import('@/views/Settings')
 
 // Views - Pages
@@ -97,6 +107,103 @@ function configRoutes () {
               path: ':uuid',
               name: 'View Organization',
               component: OrganizationDetails,
+              meta: {
+                requiresAuth: true
+              }
+            }
+          ]
+        },
+        {
+          path: 'inputs',
+          name: 'Inputs',
+          component: Inputs,
+          redirect: 'inputs/list',
+          meta: {
+            requiresAuth: true
+          },
+          children: [
+            {
+              path: 'create',
+              name: 'Create Input',
+              component: CreateInput,
+              meta: {
+                requiresAuth: true
+              }
+            },
+            {
+              path: 'list',
+              name: '',
+              component: InputsList,
+              meta: {
+                requiresAuth: true
+              }
+            },
+            {
+              path: ':uuid',
+              name: 'View Input',
+              component: InputDetails,
+              meta: {
+                requiresAuth: true
+              }
+            }
+          ]
+        },
+        {
+          path: 'credentials',
+          name: 'Credentials',
+          component: Credentials,
+          redirect: 'credentials/list',
+          meta: {
+            requiresAuth: true
+          },
+          children: [
+            {
+              path: 'create',
+              name: 'Create Credential',
+              component: CreateCredential,
+              meta: {
+                requiresAuth: true
+              }
+            },
+            {
+              path: 'list',
+              name: '',
+              component: CredentialsList,
+              meta: {
+                requiresAuth: true
+              }
+            }/*,
+            {
+              path: ':uuid',
+              name: 'View Credential',
+              component: CredentialDetails,
+              meta: {
+                requiresAuth: true
+              }
+            }*/
+          ]
+        },
+        {
+          path: 'alerts',
+          name: 'Alerts',
+          component: Alerts,
+          redirect: 'alerts/list',
+          meta: {
+            requiresAuth: true
+          },
+          children: [
+            {
+              path: 'list',
+              name: '',
+              component: AlertsList,
+              meta: {
+                requiresAuth: true
+              }
+            },
+            {
+              path: ':uuid',
+              name: 'View Alert',
+              component: AlertDetails,
               meta: {
                 requiresAuth: true
               }

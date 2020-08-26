@@ -27,7 +27,7 @@
                 <CInput
                   placeholder="Password"
                   type="password"
-                  autocomplete="curent-password"
+                  autocomplete="current-password"
                   required
                   v-model="password"
                 >
@@ -51,7 +51,7 @@
             body-wrapper
           >
             <h2>Welcome</h2>
-            <p>Welcome to Penman, your Penetration Test Management framework!  To get started, log in to the left. </p>
+            <p>Welcome to Reflex, your Security Orchestration, Automation and Response Platform.  To get started, log in to the left. </p>
             
           </CCard>
         </CCardGroup>

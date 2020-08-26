@@ -10,12 +10,21 @@ const state = {
   access_token: localStorage.getItem('access_token') || '',
   refresh_token: localStorage.getItem('refresh_token') || '',
   user: {},
-  organizations: [],
-  organization: {},
+  credentials: [],
+  credential: {},
+  alerts: [],
+  alert: {},
+  users: [],
+  user: {},
+  roles: [],
+  role: {},
   playbooks: [],
   playbook: {},
+  inputs:[],
+  input:{},
   orguuid: '',
-  tags: []
+  tag_list: [],
+  credential_list: []
 }
 
 const mutations = {
@@ -53,26 +62,70 @@ const mutations = {
     state.access_token = access_token
     state.refresh_token = refresh_token
   },
-  save_organizations(state, organizations){
-    state.organizations = organizations
+  save_credentials(state, credentials){
+    state.credentials = credentials
   },
-  save_playbooks(state, organizations){
-    state.playbooks = organizations
+  save_playbooks(state, credentials){
+    state.playbooks = credentials
   },
-  save_organization(state, organization) {
-    state.organization = organization
+  save_alerts(state, alerts) {
+    state.alerts = alerts
+  },
+  save_alert(state, alert) {
+    state.alert = alert
+  },
+  save_users(state, users) {
+    state.users = users
+  },
+  save_user(state, user) {
+    state.user = user
+  },
+  save_roles(state, roles) {
+    state.roles = roles
+  },
+  save_role(state, role) {
+    state.role = role
+  },
+  save_credential(state, credential) {
+    state.credential = credential
   },
   save_playbook(state, playbook) {
     state.playbook = playbook
   },
-  add_organization(state, organization){
-    state.organizations.push(organization)
-    state.organization = organization
+  save_inputs(state, inputs) {
+    state.inputs = inputs
+  },
+  save_input(state, input) {
+    state.input = input
+  },
+  add_credential(state, credential){
+    state.credentials.push(credential)
+    state.credential = credential
     state.status = 'success'
   },
   add_playbook(state, playbook){
     state.playbooks.push(playbook)
     state.playbook = playbook
+    state.status = 'success'
+  },
+  add_input(state, input){
+    state.inputs.push(input)
+    state.input = input
+    state.status = 'success'
+  },
+  add_alert(state, alert) {
+    state.alerts.push(alert)
+    state.alert = alert
+    state.status = 'success'
+  },
+  add_user(state, user) {
+    state.users.push(user)
+    state.user = user
+    state.status = 'success'
+  },
+  add_role(state, role) {
+    state.roles.push(role)
+    state.role = role
     state.status = 'success'
   },
   add_success(state) {
@@ -82,10 +135,13 @@ const mutations = {
     state.status = 'loading'
   },
   tags_success(state, tags) {
-    state.tags = tags
+    state.tag_list = tags
+  },
+  creds_success(state, creds) {
+    state.credential_list = creds
   },
   tags_error(state) {
-    state.tags = []
+    state.tag_list = []
   },
   logout(state){
     state.status = ''
@@ -166,6 +222,103 @@ const actions = {
       })
     })
   },
+  getInputs({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/input`, method: 'GET'})
+      .then(resp => {
+        commit('save_inputs', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createInput({commit}, input) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/input`, data: input, method: 'POST'})
+      .then(resp => {
+        commit('add_input', input)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getInput({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/input/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_input', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  addTagsToInput({commit}, postData) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/input/${postData.uuid}/bulktag`, data: postData.data, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCredentialList({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/credential`, method: 'GET'})
+      .then(resp => {
+        let credentials = []
+        resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name+" - "+cred.description}))
+        commit('creds_success', credentials)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCredentials({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/credential`, method: 'GET'})
+      .then(resp => {
+        commit('save_credentials', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCredential({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/credential/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_credential', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createCredential({commit}, credential) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/credential/encrypt`, data: credential, method: 'POST'})
+      .then(resp => {
+        commit('add_credential', credential)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getPlaybooks({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/playbook`, method: 'GET'})
@@ -178,11 +331,11 @@ const actions = {
       })
     })
   },
-  getOrganization({commit}, uuid) {
+  getAlerts({commit}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/organization/${uuid}`, method: 'GET'})
+      Axios({url: `${BASE_URL}/alert`, method: 'GET'})
       .then(resp => {
-        commit('save_organization', resp.data)
+        commit('save_alerts', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -190,11 +343,11 @@ const actions = {
       })
     })
   },
-  getOrganizations({commit}) {
+  getAlert({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/organization`, method: 'GET'})
+      Axios({url: `${BASE_URL}/alert/${uuid}`, method: 'GET'})
       .then(resp => {
-        commit('save_organizations', resp.data)
+        commit('save_alert', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -202,11 +355,23 @@ const actions = {
       })
     })
   },
-  createOrganization({commit}, organization) {
+  getUsers({commit}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/organization`, data: organization, method: 'POST'})
+      Axios({url: `${BASE_URL}/user`, method: 'GET'})
       .then(resp => {
-        commit('add_organization', organization)
+        commit('save_users', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getRoles({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/role`, method: 'GET'})
+      .then(resp => {
+        commit('save_roles', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -231,17 +396,6 @@ const actions = {
       Axios({url: `${BASE_URL}/playbook/${uuid}`, method: 'GET'})
       .then(resp => {
         commit('save_playbook', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
-    })
-  },
-  addTagsToOrganization({commit}, postData) {
-    return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/organization/${postData.uuid}/bulktag`, data: postData.data, method: 'POST'})
-      .then(resp => {
         resolve(resp)
       })
       .catch(err => {

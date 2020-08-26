@@ -32,9 +32,21 @@ export default [
       },
       {
         _name: 'CSidebarNavItem',
+        name: 'Inputs',
+        to: '/inputs',
+        icon: 'cil-input'
+      },
+      {
+        _name: 'CSidebarNavItem',
         name: 'Reports',
         to: '/reports',
         icon: 'cil-chart'
+      },
+      {
+        _name: 'CSidebarNavItem',
+        name: 'Credentials',
+        to: '/credentials',
+        icon: 'cil-fingerprint'
       },
       {
         _name: 'CSidebarNavItem',

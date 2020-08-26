@@ -6,8 +6,8 @@
     @update:show="(value) => $store.commit('set', ['sidebarShow', value])"
   >
     <CSidebarBrand class="d-md-down-none" to="/">
-      <h4 class="c-sidebar-brand-full">Penman</h4>
-      <h4 class="c-sidebar-brand-minimized">PM</h4>
+      <h1 class="c-sidebar-brand-full" style="margin-bottom:0px">re<span class="text-info">flex</span></h1>
+      <h3 class="c-sidebar-brand-minimized" style="margin-bottom:0px">R<span class="text-info">F</span></h3>
     </CSidebarBrand>
 
     <CRenderFunction flat :content-to-render="$options.nav"/>
