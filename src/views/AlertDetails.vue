@@ -86,7 +86,7 @@
             
             <CRow class="bg-dark">
                 <CCol col="12" class="bg-dark">
-                    <pre class="bg-dark text-white">{{alert}}</pre>
+                    <pre class="bg-dark text-white">{{alert.raw_log | pretty}}</pre>
                 </CCol>
             </CRow>
             
@@ -184,6 +184,11 @@ export default {
         },
         defang: function(value) {
             return value.replace(':','[:]').replace('http','hxxp').replace('.','[.]')
+        },
+        pretty: function(value) {
+            console.log(value)
+            return value
+            return JSON.stringify(JSON.parse(value.replace("'",'')), null, 2)
         }
     }
 }
