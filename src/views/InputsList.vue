@@ -1,6 +1,14 @@
 <template>
   <CRow>
-    <CCol col>
+    <CCol col v-if="loading">
+        <div style="margin: auto; text-align:center; verticle-align:middle;">
+           <CSpinner
+                color="dark"
+                style="width:6rem;height:6rem;"
+            />
+        </div>
+    </CCol>
+    <CCol col v-else>
       <CButton color="primary" to="create">New Input</CButton><br><br>
       <CCard>
           <CCardHeader>
@@ -62,17 +70,21 @@ export default {
     dark: Boolean,
     alert: false
     },
-    created() {
-        this.$store.dispatch('getInputs')
+    created: function () {
+        this.loadData()
+        //this.$store.dispatch('getInputs')
+        this.refresh = setInterval(function() {
+          this.loadData()
+        }.bind(this), 60000)
     },
-    computed: mapState(['inputs']),
     data(){
       return {
         name: "",
         description: "",
         url: "",
         orgs: Array,
-        dismissCountDown: 10
+        dismissCountDown: 10,
+        loading: true
       }
     },
     methods: {
@@ -82,7 +94,17 @@ export default {
         } else {
           return false
         }
+      },
+      loadData: function() {
+        this.loading = true
+        this.$store.dispatch('getInputs').then(resp => {
+            this.inputs = resp.data
+            this.loading = false
+        })
       }
+    },
+    beforeDestroy: function() {
+      clearInterval(this.refresh)
     }
 }
 </script>
