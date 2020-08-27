@@ -14,6 +14,9 @@ const state = {
   credential: {},
   alerts: [],
   alert: {},
+  agents: [],
+  agent: {},
+  pairing_token: "",
   users: [],
   user: {},
   roles: [],
@@ -74,6 +77,12 @@ const mutations = {
   save_alert(state, alert) {
     state.alert = alert
   },
+  save_agents(state, agents) {
+    state.agents = agents
+  },
+  save_agent(state, agent) {
+    state.agent = agent
+  },
   save_users(state, users) {
     state.users = users
   },
@@ -97,6 +106,9 @@ const mutations = {
   },
   save_input(state, input) {
     state.input = input
+  },
+  save_pairing_token(state, token) {
+    state.pairing_token = token
   },
   add_credential(state, credential){
     state.credentials.push(credential)
@@ -227,6 +239,30 @@ const actions = {
       Axios({url: `${BASE_URL}/input`, method: 'GET'})
       .then(resp => {
         commit('save_inputs', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getAgents({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent`, method: 'GET'})
+      .then(resp => {
+        commit('save_agents', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getPairingToken({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent/pair_token`, method: 'GET'})
+      .then(resp => {
+        commit('save_pairing_token', resp.data)
         resolve(resp)
       })
       .catch(err => {

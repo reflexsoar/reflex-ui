@@ -100,7 +100,7 @@ export default {
         let tags = this.tags
         let credential_list = this.credential_list
         let tag_list = this.tag_list
-        this.$store.dispatch('createInput', { name, description, config, field_mapping, credential, tags })
+        this.$store.dispatch('createInput', { name, description, config, field_mapping, plugin, credential, tags })
         .then(resp => {
           this.$router.go(-1)
         })
@@ -122,18 +122,22 @@ export default {
         let conf = ""
         let map = ""
         let value = event.target.value
+        this.plugin = event.target.value
         if (value == "Elasticsearch") {
           conf = '{"hosts": ["https://localhost:9200"], "scheme": "https", "auth_method": "api_key","index": ".siem-signals-*", "cafile": "","check_hostname": false,"cert_verification": "none"}'
           map = '[{"field": "host.name", "dataType": "host", "tlp": 3, "tags": ["workstation"]}]'
         }
         if (value == "Exchange Mailbox") {
           conf = '{"hosts": ["https://ews.mydomain.com"], "mailbox_name": "phishing@reflexsoar.com", "poll_interval": "30m"}'
+          map = '{}'
         }
         if (value == "API") {
           conf = '{"url":"https://myapi.com"}'
+          map = '{}'
         }
         if (value == "Webhook") {
           conf = '{"url":"https://mywebhook.com"}'
+          map = '{}'
         }
 
         this.field_mapping = JSON.stringify(JSON.parse(map), null, 4)
@@ -149,6 +153,7 @@ export default {
         config: "",
         field_mapping: "",
         credential: "",
+        plugin: "",
         type: "",
         success: false,
         errorMessage: "",

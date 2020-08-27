@@ -86,7 +86,6 @@
                     {{alert.raw_log}}
                 </CCol>
             </CRow>
-            
         </CCardBody></CCollapse>
     </CCard>
   </CCol>

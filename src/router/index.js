@@ -26,6 +26,8 @@ const CredentialsList = () => import('@/views/CredentialsList')
 const CreateCredential = () => import('@/views/CreateCredential')
 const AlertDetails = () => import('@/views/AlertDetails')
 const CreateInput = () => import ('@/views/CreateInput')
+const Agents = () => import('@/views/Agents')
+const AgentsList = () => import('@/views/AgentsList')
 const Settings = () => import('@/views/Settings')
 
 // Views - Pages
@@ -208,6 +210,33 @@ function configRoutes () {
                 requiresAuth: true
               }
             }
+          ]
+        },
+        {
+          path: 'agents',
+          name: 'Agents',
+          component: Agents,
+          redirect: 'agents/list',
+          meta: {
+            requiresAuth: true
+          },
+          children: [
+            {
+              path: 'list',
+              name: '',
+              component: AgentsList,
+              meta: {
+                requiresAuth: true
+              }
+            }/*,
+            {
+              path: ':uuid',
+              name: 'View Agent',
+              component: AlertDetails,
+              meta: {
+                requiresAuth: true
+              }
+            }*/
           ]
         },
         {

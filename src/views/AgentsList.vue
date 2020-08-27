@@ -9,10 +9,10 @@
         </div>
     </CCol>
     <CCol col v-else>
-      <CButton color="primary" to="create">New Input</CButton><br><br>
+      <CButton color="primary" @click="generateToken()">New Agent</CButton><br><br>
       <CCard>
           <CCardHeader>
-              <b>Inputs</b>
+              <b>Agents</b>
           </CCardHeader>
           <CCardBody>
               <CDataTable
@@ -33,9 +33,24 @@
                       <router-link :to="`${item.uuid}`">{{item.name}}</router-link>
                   </td>
               </template>
-              <template #tags="{item}">
+              <template #inputs="{item}">
+                  <td>
+                    {{item.inputs.length}}
+                  </td>
+              </template>
+              <template #roles="{item}">
+                  <td>
+                    <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role.name"><CButton color="primary" size="sm" disabled>{{ role.name }}</CButton></li>
+                  </td>
+              </template>
+              <template #active="{item}">
                 <td>
-                  <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
+                  <CButton :color="getStatus(item.active)" size="sm" disabled>{{item.active | getStatusText }}</CButton>
+                </td>
+              </template>
+              <template #last_heartbeat="{item}">
+                <td>
+                  {{item.last_heartbeat | moment('from', 'now')}}
                 </td>
               </template>
               
@@ -43,7 +58,20 @@
           </CCardBody>
       </CCard>
     </CCol>
-  </CRow>
+    <CModal
+      title="Agent Pairing Token"
+      color="dark"
+      :centered="true"
+      size="lg"
+      :show.sync="pairingModal"
+    >
+      <div class="text-center">
+        <h4>Pairing Token</h4>
+        Copy the command below to pair a new agent
+        <pre class='text-white bg-dark text-left prewrap' style="padding: 10px; border-radius: 5px;">python agent.py --pair --token "{{pairingToken}}" --console http://localhost:5000 --roles poller,runner</pre>
+      </div>
+    </CModal>
+  </CRow>  
 </template>
 
 <script>
@@ -55,7 +83,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['name', 'description', 'tags']
+        return ['name', 'roles', 'inputs', 'ip_address', 'active', 'last_heartbeat']
       }
     },
     caption: {
@@ -72,7 +100,6 @@ export default {
     },
     created: function () {
         this.loadData()
-        //this.$store.dispatch('getInputs')
         this.refresh = setInterval(function() {
           this.loadData()
         }.bind(this), 60000)
@@ -82,6 +109,8 @@ export default {
         name: "",
         description: "",
         url: "",
+        pairingModal: false,
+        pairingToken: "Failed to load pairing token",
         orgs: Array,
         dismissCountDown: 10,
         loading: true
@@ -97,10 +126,32 @@ export default {
       },
       loadData: function() {
         this.loading = true
-        this.$store.dispatch('getInputs').then(resp => {
+        this.$store.dispatch('getAgents').then(resp => {
             this.inputs = resp.data
             this.loading = false
         })
+      },
+      getStatus(status) { 
+        switch (status) {
+          case true: return 'success'
+          case false: return 'danger'
+          default: 'primary'
+        }
+      },
+      generateToken() {
+        this.pairingModal = true
+        this.$store.dispatch('getPairingToken').then(resp => {
+          this.pairingToken = resp.data
+        })
+      }
+    },
+    filters: {
+      getStatusText(status) {
+        switch (status) {
+          case true: return 'Active'
+          case false: return 'Inactive'
+          default: 'Inactive'
+        }
       }
     },
     beforeDestroy: function() {

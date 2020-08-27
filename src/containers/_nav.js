@@ -50,6 +50,12 @@ export default [
       },
       {
         _name: 'CSidebarNavItem',
+        name: 'Agents',
+        to: '/agents',
+        icon: 'cil-terminal'
+      },
+      {
+        _name: 'CSidebarNavItem',
         name: 'Settings',
         to: '/settings',
         icon: 'cil-settings'

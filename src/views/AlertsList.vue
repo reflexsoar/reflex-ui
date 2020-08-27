@@ -10,9 +10,14 @@
                   :items="alerts"
                   :fields="fields"
                   items-per-page-select
-                  :items-per-page="5"
+                  :items-per-page="10"
                   pagination
               >
+              <template #created_at="{item}">
+                  <td>
+                      {{item.created_at | moment('from', 'now')}}
+                  </td>
+              </template>
               <template #name="{item}">
                   <td>
                       <router-link :to="`${item.uuid}`">{{item.title}}</router-link>
@@ -60,7 +65,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['name', 'status', 'severity', 'tlp', 'observable_count', 'tags']
+        return ['created_at', 'name', 'status', 'severity', 'tlp', 'observable_count', 'tags']
       }
     },
     caption: {
