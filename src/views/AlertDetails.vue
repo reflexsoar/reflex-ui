@@ -20,9 +20,7 @@
                 </CCol>
             </CRow>
             <CRow>
-                <CCol col="12" lg="6" sm="12">
-                    {{alert.description}}
-                </CCol>
+                <CCol col="12" lg="6" sm="12" class="pre-formatted">{{alert.description}}</CCol>
             </CRow>
         </CCardHeader>
         <CCardBody>
@@ -39,9 +37,9 @@
     </CCard>
     <CCard class="shadow-sm bg-white rounded" >
         <CCardHeader>
-            <CRow @click="collapse_observables = !collapse_observables">
+            <CRow >
                 <CCol col="12" lg="12" sm="12" class="text-left">
-                    <b>Observables</b> <span class="float-right" v-if="collapse_observables">-</span><span class="float-right" v-if="!collapse_observables">+</span>
+                    <b @click="collapse_observables = !collapse_observables" style='display: inline-block'>Observables</b> <CButton class="float-right" color="primary" size="sm">New Observable</Cbutton>
                 </CCol>
             </CRow>
         </CCardHeader>
@@ -82,11 +80,10 @@
             </CRow>
         </CCardHeader>
         <CCollapse :show="collapse_raw_log">
-        <CCardBody class="bg-dark">
-            
-            <CRow class="bg-dark">
-                <CCol col="12" class="bg-dark">
-                    <pre class="bg-dark text-white">{{alert.raw_log | pretty}}</pre>
+        <CCardBody class="bg-dark" style="overflow:scroll">
+            <CRow class="bg-dark" >
+                <CCol col="12" class="bg-dark pre-formatted raw_log">
+                    {{alert.raw_log}}
                 </CCol>
             </CRow>
             
@@ -184,11 +181,6 @@ export default {
         },
         defang: function(value) {
             return value.replace(':','[:]').replace('http','hxxp').replace('.','[.]')
-        },
-        pretty: function(value) {
-            console.log(value)
-            return value
-            return JSON.stringify(JSON.parse(value.replace("'",'')), null, 2)
         }
     }
 }

@@ -13,29 +13,50 @@
                   label="Input Name"
                 >
                 </CInput>
-                <CSelect sm="4"
-                  label="Credential"
-                  :options="credential_list"
-                  v-model="credential"
-                  @change="selectCredential($event)"
-                  placeholder="Select a credential if required by the input"
-                >
-                </CSelect>
+                <CRow>
+                  <CCol lg="6" sm="12">
+                  <CSelect 
+                    label="Plugin"
+                    placeholder="Select an input type"
+                    :options="['Elasticsearch','Exchange Mailbox','API','Webhook']"
+                    v-model="plugin"
+                    @change="populateConfig($event)"
+                  > 
+                  </CSelect>
+                  </CCol>
+                  <CCol lg="6" sm="12">
+                  <CSelect 
+                    label="Credential"
+                    :options="credential_list"
+                    v-model="credential"
+                    @change="selectCredential($event)"
+                    placeholder="Select a credential if required by the input"
+                  >
+                  </CSelect>
+                  </CCol>
+                </CRow>
                 <CTextarea
                   placeholder="Enter a description for the input.  The more detail the better."
                   required
                   v-model="description"
                   label="Description"
+                  rows=5
                 >
                 </CTextarea>
                 <CTextarea
-                  placeholder=
-                  '{
-  "setting": "value"
-}'
+                  placeholder='{}'
                   required
                   v-model="config"
                   label="Configuration"
+                  rows=8
+                >
+                </CTextarea>
+                <CTextarea
+                  placeholder='{}'
+                  required
+                  v-model="field_mapping"
+                  label="Field Mapping"
+                  rows=8
                 >
                 </CTextarea>
                 <div role="group" class="form-group">
@@ -59,6 +80,7 @@
 import {mapState} from "vuex";
 import {vSelect} from "vue-select";
 import {required, minLength, between} from 'vuelidate/lib/validators'
+import { parse } from '@babel/core';
 
 export default {
     name: 'CreateInput',
@@ -73,10 +95,12 @@ export default {
         let description = this.description
         let credential = this.credential
         let config = btoa(this.config)
+        let field_mapping = btoa(this.field_mapping)
+        let plugin = this.plugin
         let tags = this.tags
         let credential_list = this.credential_list
         let tag_list = this.tag_list
-        this.$store.dispatch('createInput', { name, description, config, credential, tags })
+        this.$store.dispatch('createInput', { name, description, config, field_mapping, credential, tags })
         .then(resp => {
           this.$router.go(-1)
         })
@@ -93,6 +117,28 @@ export default {
       },
       selectCredential(event) {
         this.credential = event.target.value        
+      },
+      populateConfig(event) {
+        let conf = ""
+        let map = ""
+        let value = event.target.value
+        if (value == "Elasticsearch") {
+          conf = '{"hosts": ["https://localhost:9200"], "scheme": "https", "auth_method": "api_key","index": ".siem-signals-*", "cafile": "","check_hostname": false,"cert_verification": "none"}'
+          map = '[{"field": "host.name", "dataType": "host", "tlp": 3, "tags": ["workstation"]}]'
+        }
+        if (value == "Exchange Mailbox") {
+          conf = '{"hosts": ["https://ews.mydomain.com"], "mailbox_name": "phishing@reflexsoar.com", "poll_interval": "30m"}'
+        }
+        if (value == "API") {
+          conf = '{"url":"https://myapi.com"}'
+        }
+        if (value == "Webhook") {
+          conf = '{"url":"https://mywebhook.com"}'
+        }
+
+        this.field_mapping = JSON.stringify(JSON.parse(map), null, 4)
+        this.config = JSON.stringify(JSON.parse(conf), null, 4)
+        return
       }
     },
     computed: mapState(['tag_list', 'credential_list']),
@@ -101,7 +147,9 @@ export default {
         name: "",
         description: "",
         config: "",
+        field_mapping: "",
         credential: "",
+        type: "",
         success: false,
         errorMessage: "",
         test: 0,

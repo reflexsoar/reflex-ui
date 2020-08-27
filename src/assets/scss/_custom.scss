@@ -114,3 +114,16 @@ input {
 	right:50%;
 	margin-right:20px;
 }
+
+.pre-formatted {
+    white-space: pre;
+}
+
+div > .table {
+    margin-bottom: 0px;
+}
+
+.raw_log {
+    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+    max-height: 400px
+}

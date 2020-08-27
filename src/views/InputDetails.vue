@@ -19,7 +19,7 @@
                     <template #tags='{tag}'>
                         {{tag.name}}
                     </template>
-                    <li style="display: inline; margin-right: 2px;" v-for="tag in input.tags" :key="tag.name"><CButton color="dark" size="sm">{{ tag.name }}</CButton></li>
+                    <li style="display: inline; margin-right: 2px;" v-for="tag in input.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
                 </CCol>
             </CRow>
             <CRow>
@@ -46,14 +46,30 @@
         <CCardHeader>
             <CRow>
                 <CCol col="12" lg="6" sm="12" class="text-left">
-                    <h3>Configuration</h3>
+                    <b>Configuration</b>
                 </CCol>
             </CRow>
         </CCardHeader>
-        <CCardBody>
+        <CCardBody class="bg-dark" style="overflow:scroll">
+            <CRow class="bg-dark" >
+                <CCol col="12" class="bg-dark pre-formatted raw_log">
+                    {{input.config}}
+                </CCol>
+            </CRow>
+        </CCardBody>
+    </CCard>
+    <CCard class="shadow-sm bg-white rounded" >
+        <CCardHeader>
             <CRow>
-                <CCol col="12">
-                    <pre>{{input.config}}</pre>
+                <CCol col="12" lg="6" sm="12" class="text-left">
+                    <b>Field Mapping</b>
+                </CCol>
+            </CRow>
+        </CCardHeader>
+        <CCardBody class="bg-dark" style="overflow:scroll">
+            <CRow class="bg-dark" >
+                <CCol col="12" class="bg-dark pre-formatted raw_log">
+                    {{input.field_mapping}}
                 </CCol>
             </CRow>
         </CCardBody>
@@ -79,11 +95,6 @@ export default {
     created() {
         this.$store.dispatch('getInput', this.$route.params.uuid).then(resp => {
             this.input = resp.data
-            let {projects} = this.input
-            for(const project in projects) {
-                let uuid = projects[project].uuid
-                this.$set(this.collapse, uuid, true)
-            }
             this.loading = false
         })        
     },
