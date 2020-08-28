@@ -5,14 +5,14 @@
            <CSpinner
                 color="dark"
                 style="width:6rem;height:6rem;"
-            />  
+            />
         </div>
     </CCol>
     <CCol col v-else>
-      <CButton color="primary" @click="generateToken()">New Agent</CButton><br><br>
+      <CButton color="primary" to="create">New Plugin</CButton><br><br>
       <CCard>
           <CCardHeader>
-              <b>Agents</b>
+              <b>Plugins</b>
           </CCardHeader>
           <CCardBody>
               <CDataTable
@@ -21,7 +21,7 @@
                   :bordered="bordered"
                   :small="small"
                   :fixed="fixed"
-                  :items="inputs"
+                  :items="plugins"
                   :fields="fields"
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
@@ -33,45 +33,22 @@
                       <router-link :to="`${item.uuid}`">{{item.name}}</router-link>
                   </td>
               </template>
-              <template #inputs="{item}">
+              <template #created_at="{item}">
                   <td>
-                    {{item.inputs.length}}
+                      {{ item.created_at | moment('from', 'now') }}
                   </td>
               </template>
-              <template #roles="{item}">
+              <template #modified_at="{item}">
                   <td>
-                    <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role.name"><CButton color="primary" size="sm" disabled>{{ role.name }}</CButton></li>
+                      {{ item.modified_at | moment('from', 'now') }}
                   </td>
-              </template>
-              <template #active="{item}">
-                <td>
-                  <CButton :color="getStatus(item.active)" size="sm" disabled>{{item.active | getStatusText }}</CButton>
-                </td>
-              </template>
-              <template #last_heartbeat="{item}">
-                <td>
-                  {{item.last_heartbeat | moment('from', 'now')}}
-                </td>
               </template>
               
               </CDataTable>
           </CCardBody>
       </CCard>
     </CCol>
-    <CModal
-      title="Agent Pairing Token"
-      color="dark"
-      :centered="true"
-      size="lg"
-      :show.sync="pairingModal"
-    >
-      <div class="text-center">
-        <h4>Pairing Token</h4>
-        Copy the command below to pair a new agent
-        <pre class='text-white bg-dark text-left prewrap' style="padding: 10px; border-radius: 5px;">python agent.py --pair --token "{{pairingToken}}" --console http://localhost:5000 --roles poller,runner</pre>
-      </div>
-    </CModal>
-  </CRow>  
+  </CRow>
 </template>
 
 <script>
@@ -83,7 +60,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['name', 'roles', 'inputs', 'ip_address', 'active', 'last_heartbeat']
+        return ['name', 'description', 'created_at', 'modified_at', 'filename', 'file_hash']
       }
     },
     caption: {
@@ -108,10 +85,6 @@ export default {
       return {
         name: "",
         description: "",
-        url: "",
-        pairingModal: false,
-        pairingToken: "Failed to load pairing token",
-        orgs: Array,
         dismissCountDown: 10,
         loading: true
       }
@@ -126,32 +99,10 @@ export default {
       },
       loadData: function() {
         this.loading = true
-        this.$store.dispatch('getAgents').then(resp => {
-            this.inputs = resp.data
+        this.$store.dispatch('getPlugins').then(resp => {
+            this.plugins = resp.data
             this.loading = false
         })
-      },
-      getStatus(status) { 
-        switch (status) {
-          case true: return 'success'
-          case false: return 'danger'
-          default: 'primary'
-        }
-      },
-      generateToken() {
-        this.pairingModal = true
-        this.$store.dispatch('getPairingToken').then(resp => {
-          this.pairingToken = resp.data
-        })
-      }
-    },
-    filters: {
-      getStatusText(status) {
-        switch (status) {
-          case true: return 'Active'
-          case false: return 'Inactive'
-          default: 'Inactive'
-        }
       }
     },
     beforeDestroy: function() {

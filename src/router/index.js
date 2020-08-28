@@ -28,6 +28,10 @@ const AlertDetails = () => import('@/views/AlertDetails')
 const CreateInput = () => import ('@/views/CreateInput')
 const Agents = () => import('@/views/Agents')
 const AgentsList = () => import('@/views/AgentsList')
+const AgentDetails = () => import('@/views/AgentDetails')
+const Plugins = () => import('@/views/Plugins')
+const PluginList = () => import('@/views/PluginList')
+const PluginDetails = () => import('@/views/PluginDetails')
 const Settings = () => import('@/views/Settings')
 
 // Views - Pages
@@ -213,6 +217,33 @@ function configRoutes () {
           ]
         },
         {
+          path: 'plugins',
+          name: 'Plugin',
+          component: Plugins,
+          redirect: 'plugins/list',
+          meta: {
+            requiresAuth: true
+          },
+          children: [
+            {
+              path: 'list',
+              name: '',
+              component: PluginList,
+              meta: {
+                requiresAuth: true
+              }
+            },
+            {
+              path: ':uuid',
+              name: 'View Plugin',
+              component: PluginDetails,
+              meta: {
+                requiresAuth: true
+              }
+            }
+          ]
+        },
+        {
           path: 'agents',
           name: 'Agents',
           component: Agents,
@@ -228,15 +259,15 @@ function configRoutes () {
               meta: {
                 requiresAuth: true
               }
-            }/*,
+            },
             {
               path: ':uuid',
               name: 'View Agent',
-              component: AlertDetails,
+              component: AgentDetails,
               meta: {
                 requiresAuth: true
               }
-            }*/
+            }
           ]
         },
         {

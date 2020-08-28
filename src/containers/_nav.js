@@ -6,11 +6,7 @@ export default [
         _name: 'CSidebarNavItem',
         name: 'Dashboard',
         to: '/dashboard',
-        icon: 'cil-speedometer',
-        badge: {
-          color: 'primary',
-          text: 'NEW'
-        }
+        icon: 'cil-speedometer'
       },
       {
         _name: 'CSidebarNavItem',
@@ -26,8 +22,8 @@ export default [
       },
       {
         _name: 'CSidebarNavItem',
-        name: 'Integrations',
-        to: '/integrations',
+        name: 'Plugins',
+        to: '/plugins',
         icon: 'cil-layers'
       },
       {

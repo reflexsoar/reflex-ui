@@ -30,7 +30,7 @@
               </template>
               <template #tags="{item}">
                 <td>
-                  <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
+                  <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton color="primary" class="tag"  size="sm" disabled>{{ tag.name }}</CButton></li>
                 </td>
               </template>
               <template #tlp="{item}">
@@ -86,7 +86,6 @@ export default {
           this.loadData()
         }.bind(this), 5000)
     },
-    computed: mapState(['alerts']),
     data(){
       return {
         name: "",
@@ -96,6 +95,7 @@ export default {
         observable_count: 0,
         tags: [],
         status: "",
+        alerts: [],
         dismissCountDown: 10
       }
     },

@@ -13,72 +13,31 @@
         <CCardHeader>
             <CRow>
                 <CCol col="12" lg="6" sm="12" class="text-left">
-                    <h1>{{input.name}}</h1>
+                    <h1>{{plugin.name}}</h1>
                 </CCol>
                 <CCol col="12" lg="6" sm="12" class="text-right">
-                    <template #tags='{tag}'>
-                        {{tag.name}}
-                    </template>
-                    <li style="display: inline; margin-right: 2px;" v-for="tag in input.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
+                        <CIcon name="cid-cloud-download"></CIcon>
                 </CCol>
             </CRow>
             <CRow>
                 <CCol col="12" lg="6" sm="12">
-                    {{input.description}}
+                    {{plugin.description}}
                 </CCol>
             </CRow>
         </CCardHeader>
         <CCardBody>
             <CRow>
                 <CCol col="6">
-                    <b>Name: </b> {{input.name}}<br>
-                    <b>Enabled: </b> True
+                    <b>Name: </b> {{plugin.name}}<br>
+                    <b>Enabled: </b> {{plugin.enabled}}
                 </CCol>
                 <CCol col="6">
-                    <b>Plugin: </b> Elasticsearch<br>
-                    <b>Date Created: </b>{{input.created_at | moment('LLLL')}}<br>
-                    <b>Last Updated: </b>{{input.modified_at | moment('from', 'now')}}
+                    <b>Date Created: </b>{{plugin.created_at | moment('LLLL')}}<br>
+                    <b>Last Updated: </b>{{plugin.modified_at | moment('from', 'now')}}
                 </CCol>
             </CRow>
         </CCardBody>
     </CCard>
-    <CRow>
-        <CCol>
-        <CCard class="shadow-sm bg-white rounded" >
-            <CCardHeader>
-                <CRow>
-                    <CCol col="12" lg="6" sm="12" class="text-left">
-                        <b>Configuration</b>
-                    </CCol>
-                </CRow>
-            </CCardHeader>
-            <CCardBody class="bg-dark" style="overflow:scroll; min-height:300px; max-height:300px;">
-                <CRow class="bg-dark" >
-                    <CCol col="12" class="bg-dark pre-formatted raw_log">
-                        {{input.config}}
-                    </CCol>
-                </CRow>
-            </CCardBody>
-        </CCard>
-        </CCol>
-        <CCol>
-        <CCard class="shadow-sm bg-white rounded" >
-            <CCardHeader>
-                <CRow>
-                    <CCol col="12" lg="6" sm="12" class="text-left">
-                        <b>Field Mapping</b>
-                    </CCol>
-                </CRow>
-            </CCardHeader>
-            <CCardBody class="bg-dark" style="overflow:scroll; min-height:300px; max-height:300px;">
-                <CRow class="bg-dark" >
-                    <CCol col="12" class="bg-dark pre-formatted raw_log">
-                        {{input.field_mapping}}
-                    </CCol>
-                </CRow>
-            </CCardBody>
-        </CCard>
-        </CCol></CRow>
   </CCol>
   </CRow>
 </template>
@@ -86,11 +45,11 @@
 <script>
 import {mapState} from "vuex";
 export default {
-    name: 'InputDetails',
+    name: 'PluginDetails',
     data() {
         return {
             uuid: this.$route.params.uuid,
-            input: {},
+            plugin: {},
             loading: true,
             cardCollapse: true,
             collapse: {},
@@ -98,8 +57,8 @@ export default {
         }
     },
     created() {
-        this.$store.dispatch('getInput', this.$route.params.uuid).then(resp => {
-            this.input = resp.data
+        this.$store.dispatch('getPlugin', this.$route.params.uuid).then(resp => {
+            this.plugin = resp.data
             this.loading = false
         })        
     },

@@ -2,12 +2,12 @@
 @import "vue-select/src/scss/vue-select.scss";
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
 
-body {
-    font-family: 'Roboto', sans-serif;
-}
-
 input {
     color: #768192;
+}
+
+a {
+    text-decoration: none !important;
 }
 
 .vs__selected {
@@ -131,4 +131,13 @@ div > .table {
 .prewrap {
     white-space: pre-wrap; 
     word-wrap: break-word;
+}
+
+.tag {
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: 12px;
+    font-weight: normal;
 }

@@ -43,22 +43,30 @@
                   rows=5
                 >
                 </CTextarea>
-                <CTextarea
-                  placeholder='{}'
-                  required
-                  v-model="config"
-                  label="Configuration"
-                  rows=8
-                >
-                </CTextarea>
-                <CTextarea
-                  placeholder='{}'
-                  required
-                  v-model="field_mapping"
-                  label="Field Mapping"
-                  rows=8
-                >
-                </CTextarea>
+                <CRow>
+                  <CCol>
+                  <CTextarea
+                    placeholder='{}'
+                    description="The configuration tells the reflex agent what sources to poll."
+                    required
+                    v-model="config"
+                    label="Configuration"
+                    rows=8
+                  >
+                  </CTextarea>
+                  </CCol>
+                  <CCol>
+                  <CTextarea
+                    placeholder='{}'
+                    description="Field mappings tell the input what source data to extract as observables."
+                    required
+                    v-model="field_mapping"
+                    label="Field Mapping"
+                    rows=8
+                  >
+                  </CTextarea>
+                  </CCol>
+                </CRow>
                 <div role="group" class="form-group">
                   <label class="typo__label">Tags</label>
                   <multiselect v-model="selected" placeholder="Select tags to apply to this input" :taggable="true" tag-placeholder="Add new tag" track-by="name" label="name" :options="tag_list" :multiple="true" @tag="addTag">

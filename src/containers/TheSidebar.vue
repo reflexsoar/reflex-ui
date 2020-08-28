@@ -24,6 +24,11 @@ import nav from './_nav'
 export default {
   name: 'TheSidebar',
   nav,
+  created: function() {
+    if (this.$store.state.unread_alert_count > 0) {
+      nav[0]._children[1]['badge'] = {'color': 'danger', 'text': this.$store.state.unread_alert_count}
+    }
+  },
   computed: {
     show () {
       return this.$store.state.sidebarShow 

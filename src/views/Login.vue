@@ -10,7 +10,7 @@
               Failed to login. Invalid username or password.
             </CAlert>
         <CCardGroup>
-          <CCard >
+          <CCard color="light">
             <CCardBody>
               
               <CForm @submit.prevent="login">
@@ -45,12 +45,13 @@
             </CCardBody>
           </CCard>
           <CCard
-            color="primary"
-            text-color="white"
+            color="muted"
+            text-color="dark"
             class="text-center py-5 d-sm-down-none"
             body-wrapper
           >
-            <h2>Welcome</h2>
+            
+            <h1 style="font-size: 5em">re<span class="text-info">flex</span></h1>
             <p>Welcome to Reflex, your Security Orchestration, Automation and Response Platform.  To get started, log in to the left. </p>
             
           </CCard>
@@ -61,6 +62,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'Login',
   data(){

@@ -14,6 +14,7 @@ const state = {
   credential: {},
   alerts: [],
   alert: {},
+  unread_alert_count: 0,
   agents: [],
   agent: {},
   pairing_token: "",
@@ -23,6 +24,8 @@ const state = {
   role: {},
   playbooks: [],
   playbook: {},
+  plugins: [],
+  plugin: {},
   inputs:[],
   input:{},
   orguuid: '',
@@ -73,6 +76,7 @@ const mutations = {
   },
   save_alerts(state, alerts) {
     state.alerts = alerts
+    state.unread_alert_count = alerts.length
   },
   save_alert(state, alert) {
     state.alert = alert
@@ -101,6 +105,12 @@ const mutations = {
   save_playbook(state, playbook) {
     state.playbook = playbook
   },
+  save_plugin(state, plugin) {
+    state.plugin = plugin
+  },
+  save_plugins(state, plugins) {
+    state.plugins = plugins
+  },
   save_inputs(state, inputs) {
     state.inputs = inputs
   },
@@ -109,6 +119,12 @@ const mutations = {
   },
   save_pairing_token(state, token) {
     state.pairing_token = token
+  },
+  add_plugin(state, plugin) {
+    state.plugins.push(plugin)
+    state.plugin = plugin
+    state.stats = 'success'
+
   },
   add_credential(state, credential){
     state.credentials.push(credential)
@@ -151,6 +167,9 @@ const mutations = {
   },
   creds_success(state, creds) {
     state.credential_list = creds
+  },
+  inputs_success(state, inputs) {
+    state.inputs_list = inputs
   },
   tags_error(state) {
     state.tag_list = []
@@ -294,6 +313,18 @@ const actions = {
       })
     })
   },
+  getAgent({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_agent', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   addTagsToInput({commit}, postData) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/input/${postData.uuid}/bulktag`, data: postData.data, method: 'POST'})
@@ -311,6 +342,20 @@ const actions = {
       .then(resp => {
         let credentials = []
         resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name+" - "+cred.description}))
+        commit('creds_success', credentials)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getInputList({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/input`, method: 'GET'})
+      .then(resp => {
+        let credentials = []
+        resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name}))
         commit('creds_success', credentials)
         resolve(resp)
       })
@@ -384,6 +429,30 @@ const actions = {
       Axios({url: `${BASE_URL}/alert/${uuid}`, method: 'GET'})
       .then(resp => {
         commit('save_alert', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getPlugins({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/plugin`, method: 'GET'})
+      .then(resp => {
+        commit('save_plugins', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getPlugin({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/plugin/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_plugin', resp.data)
         resolve(resp)
       })
       .catch(err => {
