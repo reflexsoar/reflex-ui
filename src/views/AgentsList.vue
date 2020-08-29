@@ -68,7 +68,7 @@
       <div class="text-center">
         <h4>Pairing Token</h4>
         Copy the command below to pair a new agent
-        <pre class='text-white bg-dark text-left prewrap' style="padding: 10px; border-radius: 5px;">python agent.py --pair --token "{{pairingToken}}" --console http://localhost:5000 --roles poller,runner</pre>
+        <pre class='text-white bg-dark text-left prewrap' style="padding: 10px; border-radius: 5px;">python reflex-agent.py --pair --token "{{pairingToken}}" --console http://localhost:5000 --roles poller,runner</pre>
       </div>
     </CModal>
   </CRow>  

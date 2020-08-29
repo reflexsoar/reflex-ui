@@ -325,6 +325,19 @@ const actions = {
       })
     })
   },
+  setAgentInput({commit}, uuid, inputs) {
+    return new Promise((resolve, reject) => {
+      console.log(uuid)
+      Axios({url: `${BASE_URL}/agent/${uuid}`, data: inputs, method: 'PUT'})
+      .then(resp => {
+        commit('save_input', resp.data)
+        resolve(resp)
+      })
+      .catch(err => { 
+        reject(err)
+      })
+    })
+  },
   addTagsToInput({commit}, postData) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/input/${postData.uuid}/bulktag`, data: postData.data, method: 'POST'})

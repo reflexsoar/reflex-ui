@@ -103,8 +103,7 @@ export default {
             this.toggleCollapse = true
         },
         addInput(input) {
-            console.log(input)
-            this.inputs.push(newTag)
+            this.inputs.push(input)
             this.input_list.push(t)
             this.selected.push(t)
         },
@@ -115,7 +114,9 @@ export default {
             }
         },
         test(event) {
-            console.log(event)
+            let uuid = this.$route.params.uuid
+            let inputs = event[0].uuid
+            this.$store.dispatch('setAgentInput', {uuid, inputs} )
         }
     },
     filters: {
