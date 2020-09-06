@@ -1,4 +1,5 @@
 <template>
+   
   <CRow><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
     <CCol col v-if="loading">
         <div style="margin: auto; text-align:center; verticle-align:middle;">
@@ -9,6 +10,9 @@
         </div>
     </CCol>
     <CCol col v-if="!loading">
+    <CAlert :show.sync="alert" color="success" closeButton>
+        {{alert_message}}
+    </CAlert>
     <CCard class="shadow-sm bg-white rounded" >
         <CCardHeader>
             <CRow>
@@ -32,9 +36,7 @@
             <CRow>
                 <CCol col="6">
                     <b>Name: </b> {{agent.name}}<br>
-                    <b>Enabled: </b> True
-                </CCol>
-                <CCol col="6">
+                    <b>Enabled: </b> True<br>
                     <b>Plugin: </b> Elasticsearch<br>
                     <b>Last Heartbeat: </b>{{agent.last_heartbeat | moment('from', 'now')}}
                 </CCol>
@@ -43,7 +45,14 @@
                 <CCol><hr>
                   <h3>Inputs</h3>
                   Inputs selected here will be polled by the agent at the period defined in the input configuration.<br><br>
-                  <multiselect v-model="selected" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list" :multiple="true" @input="test($event)">
+                  <multiselect v-model="selected" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list" :multiple="true" @input="updateInputs()">
+                  </multiselect>
+                </div>
+                </CCol>
+                <CCol><hr>
+                  <h3>Groups</h3>
+                  Groups selected here can be targeted by plugins to run plugins on select agents.<br><br>
+                  <multiselect v-model="selected_groups" placeholder="Select the groups this agent belongs to" track-by="uuid" label="name" :options="group_list" :multiple="true" @input="updateGroups()">
                   </multiselect>
                 </div>
                 </CCol>
@@ -64,11 +73,16 @@ export default {
             uuid: this.$route.params.uuid,
             agent: {},
             input_list: [],
+            group_list: [],
             selected: [],
+            selected_groups: [],
             loading: true,
             cardCollapse: true,
             collapse: {},
-            toggleCollapse: true
+            toggleCollapse: true,
+            alert:false,
+            alert_message:"",
+            animate: true
         }
     },
     created() {
@@ -77,9 +91,15 @@ export default {
                 this.input_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
             }
         })
+        this.$store.dispatch('getAgentGroups').then(resp => {
+            for(let i in resp.data){ 
+                this.group_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
+            }
+        })
         this.$store.dispatch('getAgent', this.$route.params.uuid).then(resp => {
             this.agent = resp.data
             this.selectedInputs()
+            this.selectedGroups()
             this.loading = false
         })
         
@@ -110,13 +130,34 @@ export default {
         selectedInputs() {
             for(const i in this.agent.inputs) {
                 let input = this.agent.inputs[i]
-                this.selected.push({'value': input.uuid, 'name': input.name})
+                this.selected.push({'uuid': input.uuid, 'name': input.name})
             }
         },
-        test(event) {
-            let uuid = this.$route.params.uuid
-            let inputs = event[0].uuid
-            this.$store.dispatch('setAgentInput', {uuid, inputs} )
+        selectedGroups() {
+            for(const i in this.agent.groups) {
+                let group = this.agent.groups[i]
+                this.selected_groups.push({'uuid': group.uuid, 'name': group.name})
+            }
+        },
+        updateInputs(event) {
+            this.alert = 5
+            this.alert_message = "Successfully updated the agents inputs."
+            let uuid = this.uuid
+            let inputs = { "inputs": []}
+            for(const inp in this.selected) {
+                inputs['inputs'].push(this.selected[inp].uuid)
+            }
+            this.$store.dispatch('setAgentInputs', {uuid, inputs} )
+        },
+        updateGroups(event) {
+            this.alert = 5
+            this.alert_message = "Successfully updated the agents groups."
+            let groups = { "groups": [] }
+            for(const grp in this.selected_groups) {
+                groups['groups'].push(this.selected_groups[grp].uuid)
+            }
+            let uuid = this.uuid
+            this.$store.dispatch('setAgentGroups', {uuid, groups})
         }
     },
     filters: {

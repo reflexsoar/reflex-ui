@@ -27,6 +27,7 @@ const CreateCredential = () => import('@/views/CreateCredential')
 const AlertDetails = () => import('@/views/AlertDetails')
 const CreateInput = () => import ('@/views/CreateInput')
 const Agents = () => import('@/views/Agents')
+const AgentManagement = () => import('@/views/AgentManagement')
 const AgentsList = () => import('@/views/AgentsList')
 const AgentDetails = () => import('@/views/AgentDetails')
 const Plugins = () => import('@/views/Plugins')
@@ -255,7 +256,7 @@ function configRoutes () {
             {
               path: 'list',
               name: '',
-              component: AgentsList,
+              component: AgentManagement,
               meta: {
                 requiresAuth: true
               }

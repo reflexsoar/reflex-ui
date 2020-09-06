@@ -9,7 +9,7 @@
         </div>
     </CCol>
     <CCol col v-else>
-      <CButton color="primary" to="create">New Plugin</CButton><br><br>
+      <CButton color="primary" to="create">Upload Plugin</CButton><br><br>
       <CCard>
           <CCardHeader>
               <b>Plugins</b>

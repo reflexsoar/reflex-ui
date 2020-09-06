@@ -17,6 +17,8 @@ const state = {
   unread_alert_count: 0,
   agents: [],
   agent: {},
+  agent_groups: [],
+  agent_group: {},
   pairing_token: "",
   users: [],
   user: {},
@@ -87,6 +89,12 @@ const mutations = {
   save_agent(state, agent) {
     state.agent = agent
   },
+  save_agent_group(state, agent_group) {
+    state.agent_group = agent_group
+  },
+  save_agent_groups(state, agent_groups) {
+    state.agent_groups = agent_groups
+  },
   save_users(state, users) {
     state.users = users
   },
@@ -125,6 +133,11 @@ const mutations = {
     state.plugin = plugin
     state.stats = 'success'
 
+  },
+  add_agent_group(state, agent_group) {
+    state.agent_groups.push(agent_group)
+    state.agent_group = agent_group
+    state.status = 'success'
   },
   add_credential(state, credential){
     state.credentials.push(credential)
@@ -277,6 +290,18 @@ const actions = {
       })
     })
   },
+  getAgentGroups({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_group`, method: 'GET'})
+      .then(resp => {
+        commit('save_agent_groups', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getPairingToken({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/agent/pair_token`, method: 'GET'})
@@ -294,6 +319,18 @@ const actions = {
       Axios({url: `${BASE_URL}/input`, data: input, method: 'POST'})
       .then(resp => {
         commit('add_input', input)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createAgentGroup({commit}, agent_group) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_group`, data: agent_group, method: 'POST'})
+      .then(resp => {
+        commit('add_agent_group', agent_group)
         resolve(resp)
       })
       .catch(err => {
@@ -325,12 +362,23 @@ const actions = {
       })
     })
   },
-  setAgentInput({commit}, uuid, inputs) {
+  setAgentGroups({commit}, {uuid, groups}) {
     return new Promise((resolve, reject) => {
-      console.log(uuid)
+      Axios({url: `${BASE_URL}/agent/${uuid}`, data: groups, method: 'PUT'})
+      .then(resp => {
+        commit('save_agent_groups', resp.data)
+        resolve(resp)
+      })
+      .catch(err => { 
+        reject(err)
+      })
+    })
+  },
+  setAgentInputs({commit}, {uuid, inputs}) {
+    return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/agent/${uuid}`, data: inputs, method: 'PUT'})
       .then(resp => {
-        commit('save_input', resp.data)
+        commit('save_inputs', resp.data)
         resolve(resp)
       })
       .catch(err => { 

@@ -89,7 +89,8 @@ import {
   cilClock,
   cilInput,
   cilFingerprint,
-  cilTerminal
+  cilTerminal,
+  cilObjectGroup
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -155,7 +156,8 @@ export const iconsSet = Object.assign(
     cilClock,
     cilInput,
     cilFingerprint,
-    cilTerminal
+    cilTerminal,
+    cilObjectGroup
   },
   {
     cifUs,

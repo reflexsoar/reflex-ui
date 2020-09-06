@@ -10,11 +10,7 @@
     </CCol>
     <CCol col v-else>
       <CButton color="primary" @click="generateToken()">New Agent</CButton><br><br>
-      <CCard>
-          <CCardHeader>
-              <b>Agents</b>
-          </CCardHeader>
-          <CCardBody>
+      
               <CDataTable
                   :hover="hover"
                   :striped="striped"
@@ -55,8 +51,7 @@
               </template>
               
               </CDataTable>
-          </CCardBody>
-      </CCard>
+
     </CCol>
     <CModal
       title="Agent Pairing Token"
@@ -77,7 +72,7 @@
 <script>
 import {mapState} from "vuex";
 export default {
-    name: 'Inputs',
+    name: 'Agents',
     props: {
     items: Array,
     fields: {
