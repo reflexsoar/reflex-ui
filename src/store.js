@@ -521,6 +521,20 @@ const actions = {
       })
     })
   },
+  uploadPlugin({commit}, formData) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/plugin/upload`, data: formData, method: 'POST', config:{headers: {'Content-Type': 'multipart/form-data'}}})
+      .then(resp => resp.data)
+      .then(resp => resp.map(plugin => Object.assign({}, plugin, { name: plugin.name })))
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        console.log(err)
+        reject(err)
+      })
+    })
+  },
   getUsers({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/user`, method: 'GET'})
