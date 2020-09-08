@@ -1,108 +1,229 @@
 <template>
   <CRow>
     <CCol col v-if="loading">
-        <div style="margin: auto; text-align:center; verticle-align:middle;">
-           <CSpinner
-                color="dark"
-                style="width:6rem;height:6rem;"
-            />
-        </div>
+      <div style="margin: auto; text-align:center; verticle-align:middle;">
+        <CSpinner color="dark" style="width:6rem;height:6rem;" />
+      </div>
     </CCol>
-    <CCol col v-if="!loading">
-    <CCard class="shadow-sm bg-white rounded" >
+    <CCol col="12" v-if="!loading">
+      <CAlert :show.sync="alert" color="success" closeButton>{{alert_message}}</CAlert>
+      <span v-if="plugin.manifest.config_template">
+        <CButton color="primary" @click="showModal">Add Configuration</CButton>
+        <br />
+        <br />
+      </span>
+      <CCard class="shadow-sm bg-white rounded">
         <CCardHeader>
-            <CRow>
-                <CCol col="12" lg="6" sm="12" class="text-left">
-                    <h1>{{plugin.name}}</h1>
-                </CCol>
-                <CCol col="12" lg="6" sm="12" class="text-right">
-                        <CIcon name="cid-cloud-download"></CIcon>
-                </CCol>
-            </CRow>
-            <CRow>
+          <CRow>
+            <CCol col="12" lg="6" sm="12" class="text-left">
+              <CRow>
                 <CCol col="12" lg="6" sm="12">
-                    {{plugin.description}}
+                  <h1>{{plugin.name}}</h1>
                 </CCol>
-            </CRow>
+              </CRow>
+              <CRow>
+                <CCol col="12" lg="6" sm="12">{{plugin.description}}</CCol>
+              </CRow>
+            </CCol>
+            <CCol col="12" lg="6" sm="12" class="text-right">
+              <img
+                style="max-width:50%; max-height: 200px;"
+                :src="`data:image/png;base64,${plugin.logo}`"
+              />
+            </CCol>
+          </CRow>
         </CCardHeader>
         <CCardBody>
-            <CRow>
-                <CCol col="6">
-                    <b>Name: </b> {{plugin.name}}<br>
-                    <b>Enabled: </b> {{plugin.enabled}}
-                </CCol>
-                <CCol col="6">
-                    <b>Date Created: </b>{{plugin.created_at | moment('LLLL')}}<br>
-                    <b>Last Updated: </b>{{plugin.modified_at | moment('from', 'now')}}
-                </CCol>
-            </CRow>
+          <CRow>
+            <CCol col="6">
+              <b>Enabled:</b>
+              {{plugin.enabled}}
+            </CCol>
+            <CCol col="6">
+              <b>Date Created:</b>
+              {{plugin.created_at | moment('LLLL')}}
+              <br />
+              <b>Last Updated:</b>
+              {{plugin.modified_at | moment('from', 'now')}}
+            </CCol>
+          </CRow>
         </CCardBody>
-    </CCard>
-  </CCol>
+      </CCard>
+    </CCol>
+    <CCol>
+      <CCard class="shadow-sm bg-white rounded">
+        <CCardHeader>
+          <b>Supported actions</b>
+        </CCardHeader>
+        <CCardBody>
+          <ul class="list-unstyled">
+            <li
+              style="padding-bottom:5px;"
+              v-for="action in plugin.manifest.actions"
+              :key="action.name"
+            >
+              <b>{{ action.name }}</b>
+              <br />
+              {{ action.description }}
+            </li>
+          </ul>
+        </CCardBody>
+      </CCard>
+    </CCol>
+    <CCol v-if="plugin.configs.length > 0">
+      <CCard class="shadow-sm bg-white rounded">
+        <CCardHeader>
+          <b>Configs</b>
+        </CCardHeader>
+        <CCardBody>
+          <ul class="list-unstyled">
+            <li style="padding-bottom:5px;" v-for="config in plugin.configs" :key="config.name">
+              <b>{{ config.name }}</b>
+              <br />
+              {{ config.description }}
+              <br />
+              <pre>{{ config.config }}</pre>
+            </li>
+          </ul>
+        </CCardBody>
+      </CCard>
+    </CCol>
+    <CModal title="New Config" color="dark" :centered="true" size="lg" :show.sync="configModal">
+      <div>
+        <CForm>
+          <CInput
+            placeholder="Configuration Name"
+            required
+            v-model="name"
+            label="Configuration Name"
+          ></CInput>
+          <CTextarea
+            placeholder="Enter a description for the configuration.  The more detail the better."
+            required
+            v-model="description"
+            label="Description"
+            rows="3"
+          ></CTextarea>
+          <div v-if="plugin.manifest.config_template">
+            <h4>Plugin Options</h4>
+            <CInput
+              required
+              v-for="field in configFields"
+              :key="field.name"
+              v-model="configValues[field.name]"
+              :label="field.name | firstLetter"
+              :placeholder="field.placeholder"
+            ></CInput>
+          </div>
+        </CForm>
+      </div>
+      <template #footer>
+        <CButton @click="createConfig()" color="primary">Create</CButton>
+      </template>
+    </CModal>
   </CRow>
 </template>
 
 <script>
-import {mapState} from "vuex";
+import { mapState } from "vuex";
 export default {
-    name: 'PluginDetails',
-    data() {
-        return {
-            uuid: this.$route.params.uuid,
-            plugin: {},
-            loading: true,
-            cardCollapse: true,
-            collapse: {},
-            toggleCollapse: true
-        }
+  name: "PluginDetails",
+  data() {
+    return {
+      uuid: this.$route.params.uuid,
+      plugin: {},
+      name: "",
+      description: "",
+      loading: true,
+      cardCollapse: true,
+      collapse: {},
+      toggleCollapse: true,
+      configModal: false,
+      configFields: [],
+      configValues: {},
+      alert: 0,
+      alert_message: ""
+    };
+  },
+  created() {
+    this.$store.dispatch("getPlugin", this.$route.params.uuid).then((resp) => {
+      this.plugin = resp.data;
+      this.loading = false;
+      for (let field in this.plugin.manifest.config_template) {
+        this.configValues[field] = null;
+      }
+    });
+  },
+  methods: {
+    showModal() {
+      this.configModal = true;
+      for (let field in this.plugin.manifest.config_template) {
+        this.configFields.push({
+          name: field,
+          placeholder: this.plugin.manifest.config_template[field],
+        });
+      }
     },
-    created() {
-        this.$store.dispatch('getPlugin', this.$route.params.uuid).then(resp => {
-            this.plugin = resp.data
-            this.loading = false
-        })        
-    },
-    methods: {
-        expandAll() {
-            for(const c in this.collapse) {
-                if(!this.collapse[c]) {
-                    this.collapse[c] = true
-                }
-            }
+    createConfig() {
+      let config = this.configValues;
+      let name = this.name;
+      let description = this.description;
+      let uuid = this.uuid;
+      this.$store.dispatch("createPluginConfig", {
+        name,
+        description,
+        config,
+        plugin_uuid: uuid,
+      });
+      this.plugin.configs.push({
+        name: name,
+        description: description,
+        config: config,
+      });
+      this.alert_message = "Successfully created plugin configuration"
+      this.alert = 10      
+      this.configModal = false;
 
-            this.toggleCollapse = false
-        },
-        collapseAll() {
-            for(const c in this.collapse) {
-                if(this.collapse[c]) {
-                    this.collapse[c] = false
-                }                
-            }
-            this.toggleCollapse = true
-        }
     },
-    filters: {
-        firstTwo: function(value) {
-            if (!value) return ''
-            value = value.toString()
-            return value.substring(0,2)
-        },
-        capitalize: function (value) {
-            if (!value) return ''
-            value = value.toString()
-            return value.toUpperCase()
-        },
-        truncate: function (value) {
-            let maxLength = 250
-            if (!value) return ''
-            value = value.toString()
-            if (value.length > maxLength) {
-                return value.substring(0,maxLength) + "..."
-            } else {
-                return value.substring(0,maxLength)
-            }
-            
+    expandAll() {
+      for (const c in this.collapse) {
+        if (!this.collapse[c]) {
+          this.collapse[c] = true;
         }
-    }
-}
+      }
+
+      this.toggleCollapse = false;
+    },
+    collapseAll() {
+      for (const c in this.collapse) {
+        if (this.collapse[c]) {
+          this.collapse[c] = false;
+        }
+      }
+      this.toggleCollapse = true;
+    },
+  },
+  filters: {
+    firstLetter: function (value) {
+      if (!value) return "";
+      value = value.charAt(0).toUpperCase() + value.slice(1);
+      return value;
+    },
+    capitalize: function (value) {
+      if (!value) return "";
+      value = value.toString();
+      return value.toUpperCase();
+    },
+    truncate: function (value) {
+      let maxLength = 250;
+      if (!value) return "";
+      value = value.toString();
+      if (value.length > maxLength) {
+        return value.substring(0, maxLength) + "...";
+      } else {
+        return value.substring(0, maxLength);
+      }
+    },
+  },
+};
 </script>

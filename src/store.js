@@ -28,6 +28,8 @@ const state = {
   playbook: {},
   plugins: [],
   plugin: {},
+  plugin_configs: [],
+  plugin_config: {},
   inputs:[],
   input:{},
   orguuid: '',
@@ -119,6 +121,12 @@ const mutations = {
   save_plugins(state, plugins) {
     state.plugins = plugins
   },
+  save_plugin_config(state, plugin_config) {
+    state.plugin_config = plugin_config
+  },
+  save_plugin_configs(state, plugin_configs) {
+    state.plugin_configs = plugin_configs
+  },
   save_inputs(state, inputs) {
     state.inputs = inputs
   },
@@ -133,6 +141,11 @@ const mutations = {
     state.plugin = plugin
     state.stats = 'success'
 
+  },
+  add_plugin_config(state, plugin_config) {
+    state.plugin_configs.push(plugin_config)
+    state.plugin_config = plugin_config
+    state.state = 'success'
   },
   add_agent_group(state, agent_group) {
     state.agent_groups.push(agent_group)
@@ -531,6 +544,42 @@ const actions = {
       })
       .catch(err => {
         console.log(err)
+        reject(err)
+      })
+    })
+  },
+  getPluginConfig({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/plugin_config/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_plugin_config', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getPluginConfigs({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/plugin_config`, method: 'GET'})
+      .then(resp => {
+        commit('save_plugin_configs', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createPluginConfig({commit}, config) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/plugin_config`, data: config, method: 'POST'})
+      .then(resp => {
+        commit('add_plugin_config', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })

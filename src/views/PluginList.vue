@@ -18,20 +18,21 @@
       <CRow>
         
         <CCol v-for="plugin in plugins" :key="plugin.name" lg="4">
-        <CCard>
+        <CCard class="shadow-sm bg-white rounded">
             <CCardBody>
               <div class="text-center">
                 <img style="max-width:100%; max-height: 200px;" :src="`data:image/png;base64,${plugin.logo}`">
               </div>
               {{plugin.description}}<br>
+              Number of actions: {{plugin.manifest.actions.length}}<br>
             </CCardBody>
             <CCardFooter>
               <CRow>
                 <CCol class="text-left">
-                  <span style="font-size: .85em;"><b>Last Updated:</b> {{plugin.modified_at | moment('from', 'now')}}</span>
+                  <span style="font-size: .85em;"><b>Last Updated:</b> {{plugin.modified_at | moment('from', 'now')}}<br><b>Configured:</b> {{plugin.configs.length}}</span>
                 </CCol>
                 <CCol class="text-right">
-                  <CButton color="primary" size="sm">Configure</CButton>
+                  <CButton color="primary" :to="plugin.uuid" size="sm">Configure</CButton>
                 </CCol>
               </CRow>
             </CCardFooter>
