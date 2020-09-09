@@ -37,7 +37,8 @@
           <CRow>
             <CCol col="6">
               <b>Enabled:</b>
-              {{plugin.enabled}}
+              {{plugin.enabled}}<br>
+              <b>Checksum:</b> {{ plugin.file_hash }}
             </CCol>
             <CCol col="6">
               <b>Date Created:</b>
@@ -55,19 +56,13 @@
         <CCardHeader>
           <b>Supported actions</b>
         </CCardHeader>
-        <CCardBody>
-          <ul class="list-unstyled">
-            <li
-              style="padding-bottom:5px;"
-              v-for="action in plugin.manifest.actions"
-              :key="action.name"
-            >
-              <b>{{ action.name }}</b>
-              <br />
-              {{ action.description }}
-            </li>
-          </ul>
-        </CCardBody>
+        <CListGroup flush>
+          <CListGroupItem v-for="action in plugin.manifest.actions" :key="action.name">
+            <b>{{action.name}}</b>
+            <br />
+            {{action.description}}
+          </CListGroupItem>
+        </CListGroup>
       </CCard>
     </CCol>
     <CCol v-if="plugin.configs.length > 0">
@@ -75,17 +70,20 @@
         <CCardHeader>
           <b>Configs</b>
         </CCardHeader>
-        <CCardBody>
-          <ul class="list-unstyled">
-            <li style="padding-bottom:5px;" v-for="config in plugin.configs" :key="config.name">
-              <b>{{ config.name }}</b>
-              <br />
-              {{ config.description }}
-              <br />
-              <pre>{{ config.config }}</pre>
-            </li>
-          </ul>
-        </CCardBody>
+        <CListGroup flush>
+          <CListGroupItem
+            v-for="config in plugin.configs"
+            :key="config.name"
+            class="flex-column align-items-start"
+          >
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">{{config.name}}</h5>
+              <small>Created {{config.created_at | moment('from', 'now')}}</small>
+            </div>
+            <p class="mb-1">{{config.description}}</p>
+            <small>{{config.config}}</small>
+          </CListGroupItem>
+        </CListGroup>
       </CCard>
     </CCol>
     <CModal title="New Config" color="dark" :centered="true" size="lg" :show.sync="configModal">
@@ -126,6 +124,7 @@
 
 <script>
 import { mapState } from "vuex";
+import { template } from "@babel/core";
 export default {
   name: "PluginDetails",
   data() {
@@ -142,27 +141,32 @@ export default {
       configFields: [],
       configValues: {},
       alert: 0,
-      alert_message: ""
+      alert_message: "",
     };
   },
   created() {
     this.$store.dispatch("getPlugin", this.$route.params.uuid).then((resp) => {
       this.plugin = resp.data;
       this.loading = false;
-      for (let field in this.plugin.manifest.config_template) {
-        this.configValues[field] = null;
-      }
     });
   },
   methods: {
     showModal() {
+      this.reset();
       this.configModal = true;
       for (let field in this.plugin.manifest.config_template) {
+        this.configValues[field] = null;
         this.configFields.push({
           name: field,
           placeholder: this.plugin.manifest.config_template[field],
         });
       }
+    },
+    reset() {
+      this.configValues = {};
+      this.configFields = [];
+      this.name = "";
+      this.description = "";
     },
     createConfig() {
       let config = this.configValues;
@@ -180,10 +184,9 @@ export default {
         description: description,
         config: config,
       });
-      this.alert_message = "Successfully created plugin configuration"
-      this.alert = 10      
+      this.alert_message = "Successfully created plugin configuration";
+      this.alert = 10;
       this.configModal = false;
-
     },
     expandAll() {
       for (const c in this.collapse) {
