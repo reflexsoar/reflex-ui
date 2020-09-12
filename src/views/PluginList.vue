@@ -20,6 +20,9 @@
         <CCol v-for="plugin in plugins" :key="plugin.name" lg="4">
         <CCard class="shadow-sm bg-white rounded">
             <CCardBody>
+              <div class="text-right">
+                <CSwitch color="success" label-on="On" label-off="Off" v-bind:checked="plugin.enabled"/>
+              </div>
               <div class="text-center">
                 <img style="max-width:100%; max-height: 200px;" :src="`data:image/png;base64,${plugin.logo}`">
               </div>
@@ -33,6 +36,7 @@
                 </CCol>
                 <CCol class="text-right">
                   <CButton color="primary" :to="plugin.uuid" size="sm">Configure</CButton>
+                  
                 </CCol>
               </CRow>
             </CCardFooter>

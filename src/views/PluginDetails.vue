@@ -36,8 +36,7 @@
         <CCardBody>
           <CRow>
             <CCol col="6">
-              <b>Enabled:</b>
-              {{plugin.enabled}}<br>
+              <CSwitch color="success" label-on="On" label-off="Off" v-bind:checked="plugin.enabled"/><br>
               <b>Checksum:</b> {{ plugin.file_hash }}
             </CCol>
             <CCol col="6">

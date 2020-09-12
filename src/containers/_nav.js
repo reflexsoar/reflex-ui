@@ -10,7 +10,13 @@ export default [
       },
       {
         _name: 'CSidebarNavItem',
-        name: 'Alerts',
+        name: 'Cases',
+        to: '/cases',
+        icon: 'cil-briefcase'
+      },
+      {
+        _name: 'CSidebarNavItem',
+        name: 'Events',
         to: '/alerts',
         icon: 'cil-bell'
       },

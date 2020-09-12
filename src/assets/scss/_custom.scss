@@ -170,3 +170,67 @@ div > .table {
     font-size: 12px;
     font-weight: normal;
 }
+
+.danger-accent {
+    border-left-color: red !important;
+    border-left: 10px solid !important;
+}
+
+.warning-accent {
+    border-left-color: yellow;
+    border-left: 10px;
+}
+
+.success-accent {
+    border-left-color: green;
+    border-left: 10px;
+}
+
+.tools {
+  height: 30px;
+  padding: 5px 10px;
+  background: #333;
+  border-radius: 3px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-425%, -700%);
+  transition: 0.2s all;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tools:after {
+
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-425%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #333;
+}
+
+.item {
+  color: #FFF;
+  cursor: pointer;
+} 
+
+.item path {
+  fill: #FFF;
+}
+
+.item:hover path {
+  fill: #1199ff;
+}
+
+.item:hover {
+  color: #1199ff;
+}
+
+.item + .item {
+  margin-left: 10px;
+}

@@ -3,16 +3,40 @@
     <CCol col>
       <CCard>
           <CCardHeader>
-              <b>Alerts</b>
+            <CRow>
+              <CCol>
+                <b>Events</b>
+              </CCol>
+              <CCol class="text-right">
+                <CDropdown 
+                        toggler-text="Actions" 
+                        color="secondary"
+                        size="sm"
+                    >
+                        <CDropdownItem @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
+                        <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
+                        <CDropdownItem>Create Case</CDropdownItem>
+                        <CDropdownDivider/>
+                        <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
+                    </CDropdown>
+                </CCol>
+            </CRow>
           </CCardHeader>
           <CCardBody>
               <CDataTable
-                  :items="alerts"
+                  :items="events"
                   :fields="fields"
                   items-per-page-select
                   :items-per-page="10"
+                  :striped="true"
+                  :sorter='{resetable:true}'
                   pagination
               >
+              <template #select="{item}">
+                <td class="text-center">
+                    <input type="checkbox" :value="item.uuid" v-model="selected"/>
+                </td>
+              </template>
               <template #created_at="{item}">
                   <td>
                       {{item.created_at | moment('from', 'now')}}
@@ -53,19 +77,53 @@
           </CCardBody>
       </CCard>
     </CCol>
+    <CModal title="Dismiss Event" color="danger" :centered="true" size="lg" :show.sync="dismissEventModal">
+      <div>
+        <p>Dismissing an event indicates that no action is required.  For transparency purposes, it is best to leave a comment as to why this event is being dismissed.  Fill out the comment field below.</p>
+        <p>This comment will apply to <b>{{selected.length}}</b> events.</p>
+        <CForm>
+            <CRow>
+                <CCol><br>
+            <CSelect :options="['False Positive','Alarm requires tuning','Administrative Activity']" v-model="dismissalReason" label="Reason"/>
+            <CTextarea
+                placeholder="Enter a comment as to why this Event is being dismissed."
+                required
+                v-model="dismissalComment"
+                label="Comment"
+                rows=5
+            >
+            </CTextarea>            
+                </CCol>
+            </CRow>
+        </CForm>
+      </div>
+      <template #footer>
+        <CButton @click="dismissEvent()" color="danger">Dismiss</CButton>
+      </template>
+    </CModal>
+    <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
+      <div>
+        <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
+        <p>This action will apply to <b>{{selected.length}}</b> events.</p>
+      </div>
+      <template #footer>
+          <CButton @click="deleteEventModal = !deleteEventModal" color="secondary">Dismiss</CButton>
+        <CButton @click="deleteEvent()" color="danger">Delete</CButton>
+      </template>
+    </CModal>
   </CRow>
 </template>
 
 <script>
 import {mapState} from "vuex";
 export default {
-    name: 'Alerts',
+    name: 'Events',
     props: {
     items: Array,
     fields: {
       type: Array,
       default () {
-        return ['created_at', 'name', 'status', 'severity', 'tlp', 'observable_count', 'tags']
+        return ['select','created_at', 'name', 'status', 'severity', 'tlp', 'observable_count', 'tags']
       }
     },
     caption: {
@@ -78,7 +136,7 @@ export default {
     small: Boolean,
     fixed: Boolean,
     dark: Boolean,
-    alert: false
+    event: false
     },
     created: function () {
         this.loadData()
@@ -95,8 +153,14 @@ export default {
         observable_count: 0,
         tags: [],
         status: "",
-        alerts: [],
-        dismissCountDown: 10
+        events: [],
+        dismissCountDown: 10,
+        selectAll: false,
+        selected: [],
+        dismissEventModal:false,
+        deleteEventModal: false,
+        dismissalComment: "",
+        dismissalReason: null
       }
     },
     methods: {
@@ -109,10 +173,18 @@ export default {
       },
       loadData: function() {
         this.loading = true
-        this.$store.dispatch('getAlerts').then(resp => {
-            this.alerts = resp.data
+        this.$store.dispatch('getEvents').then(resp => {
+            this.events = resp.data
             this.loading = false
         })
+      },
+      select() {
+        this.selected = [];
+        if (!this.selectAll) {
+          for (let i in this.events) {
+            this.selected.push(this.events[i].uuid)
+          }
+        }
       }
     },
     beforeDestroy: function() {

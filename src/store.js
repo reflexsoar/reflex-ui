@@ -12,9 +12,13 @@ const state = {
   user: {},
   credentials: [],
   credential: {},
-  alerts: [],
-  alert: {},
-  unread_alert_count: 0,
+  events: [],
+  event: {},
+  cases: [],
+  case: {},
+  case_templates: [],
+  case_template: {},
+  unread_event_count: 0,
   agents: [],
   agent: {},
   agent_groups: [],
@@ -78,12 +82,12 @@ const mutations = {
   save_playbooks(state, credentials){
     state.playbooks = credentials
   },
-  save_alerts(state, alerts) {
-    state.alerts = alerts
-    state.unread_alert_count = alerts.length
+  save_events(state, events) {
+    state.events = events
+    state.unread_event_count = events.length
   },
-  save_alert(state, alert) {
-    state.alert = alert
+  save_event(state, event) {
+    state.event = event
   },
   save_agents(state, agents) {
     state.agents = agents
@@ -167,9 +171,9 @@ const mutations = {
     state.input = input
     state.status = 'success'
   },
-  add_alert(state, alert) {
-    state.alerts.push(alert)
-    state.alert = alert
+  add_event(state, event) {
+    state.events.push(event)
+    state.event = event
     state.status = 'success'
   },
   add_user(state, user) {
@@ -212,7 +216,7 @@ const getters = {
   addStatus: state => state.status
 }
 
-const BASE_URL = 'http://localhost:5000'
+const BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v1.0'
 
 const actions = {
   login({commit}, user) {
@@ -486,11 +490,11 @@ const actions = {
       })
     })
   },
-  getAlerts({commit}) {
+  getEvents({commit}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/alert`, method: 'GET'})
+      Axios({url: `${BASE_URL}/event`, method: 'GET'})
       .then(resp => {
-        commit('save_alerts', resp.data)
+        commit('save_events', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -498,11 +502,11 @@ const actions = {
       })
     })
   },
-  getAlert({commit}, uuid) {
+  getEvent({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/alert/${uuid}`, method: 'GET'})
+      Axios({url: `${BASE_URL}/event/${uuid}`, method: 'GET'})
       .then(resp => {
-        commit('save_alert', resp.data)
+        commit('save_event', resp.data)
         resolve(resp)
       })
       .catch(err => {
