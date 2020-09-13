@@ -33,6 +33,9 @@ const AgentDetails = () => import('@/views/AgentDetails')
 const Plugins = () => import('@/views/Plugins')
 const PluginList = () => import('@/views/PluginList')
 const PluginDetails = () => import('@/views/PluginDetails')
+const Cases = () => import('@/views/Cases')
+const CaseList = () => import('@/views/CaseList')
+const CaseDetails = () => import('@/views/CaseDetails')
 const Settings = () => import('@/views/Settings')
 
 // Views - Pages
@@ -114,6 +117,33 @@ function configRoutes () {
               path: ':uuid',
               name: 'View Organization',
               component: OrganizationDetails,
+              meta: {
+                requiresAuth: true
+              }
+            }
+          ]
+        },
+        {
+          path: 'cases',
+          name: 'Cases',
+          component: Cases,
+          redirect: 'cases/list',
+          meta: {
+            requiresAuth: true
+          },
+          children: [
+            {
+              path: 'list',
+              name: '',
+              component: CaseList,
+              meta: {
+                requiresAuth: true
+              }
+            },
+            {
+              path: ':uuid',
+              name: 'view_case',
+              component: CaseDetails,
               meta: {
                 requiresAuth: true
               }

@@ -11,11 +11,12 @@
                 <CDropdown 
                         toggler-text="Actions" 
                         color="secondary"
-                        size="sm"
+                        size="sm" v-bind:disabled="selected.length < 1"
                     >
                         <CDropdownItem @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
-                        <CDropdownItem>Create Case</CDropdownItem>
+                        <CDropdownItem @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
+                        <CDropdownItem @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
                         <CDropdownDivider/>
                         <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
                     </CDropdown>
@@ -34,7 +35,7 @@
               >
               <template #select="{item}">
                 <td class="text-center">
-                    <input type="checkbox" :value="item.uuid" v-model="selected"/>
+                    <input v-if="!item.case_uuid" type="checkbox" :value="item.uuid" v-model="selected"/>
                 </td>
               </template>
               <template #created_at="{item}">
@@ -101,6 +102,7 @@
         <CButton @click="dismissEvent()" color="danger">Dismiss</CButton>
       </template>
     </CModal>
+    <CreateCaseModal :show.sync="createCaseModal" :events="selected"></CreateCaseModal>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
@@ -116,8 +118,13 @@
 
 <script>
 import {mapState} from "vuex";
+import {vSelect} from "vue-select";
+import CreateCaseModal from './CreateCaseModal'
 export default {
     name: 'Events',
+    components: {
+      CreateCaseModal
+    },
     props: {
     items: Array,
     fields: {
@@ -150,15 +157,21 @@ export default {
         description: "",
         severity: 0,
         tlp: 0,
+        tag_list: [],
+        selected_tags: [],
         observable_count: 0,
         tags: [],
         status: "",
         events: [],
+        case_tlp: 2,
+        case_severity: 1,
+        use_case_template: false,
         dismissCountDown: 10,
         selectAll: false,
-        selected: [],
+        selected: Array(),
         dismissEventModal:false,
         deleteEventModal: false,
+        createCaseModal: false,
         dismissalComment: "",
         dismissalReason: null
       }
@@ -185,7 +198,7 @@ export default {
             this.selected.push(this.events[i].uuid)
           }
         }
-      }
+      }  
     },
     beforeDestroy: function() {
       clearInterval(this.refresh)

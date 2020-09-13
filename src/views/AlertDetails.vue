@@ -16,18 +16,22 @@
                     <h3>{{event.title | truncate}}</h3>
                 </CCol>
                 <CCol col="12" lg="6" sm="12" class="text-right">
-                    <CDropdown 
+                    <CButtonGroup>
+                        
+                        <CDropdown 
                         toggler-text="Actions" 
                         color="secondary"
-                        size="sm"
-                    >
-                        <CDropdownItem @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
+                        >
+                        <CDropdownItem v-if="!event.case_uuid" @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
-                        <CDropdownItem>Create Case</CDropdownItem>
+                        <CDropdownItem v-if="!event.case_uuid">Create Case</CDropdownItem>
                         <CDropdownDivider/>
                         <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
-                    </CDropdown>
+                        </CDropdown>
+                        <CButton v-if="event.case_uuid" :to="`/cases/${event.case_uuid}`" color="success">ViewCase</CButton>
+                    </CButtonGroup>
                 </CCol>
+                
             </CRow>
             <CRow>
                 <CCol col="12" lg="6" sm="12" class="pre-formatted">{{event.description}}</CCol>

@@ -171,6 +171,10 @@ div > .table {
     font-weight: normal;
 }
 
+label {
+    font-weight:500;
+}
+
 .danger-accent {
     border-left-color: red !important;
     border-left: 10px solid !important;
@@ -233,4 +237,8 @@ div > .table {
 
 .item + .item {
   margin-left: 10px;
+}
+
+.table-responsive {
+    height:auto;
 }

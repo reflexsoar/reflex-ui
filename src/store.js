@@ -95,6 +95,12 @@ const mutations = {
   save_agent(state, agent) {
     state.agent = agent
   },
+  save_cases(state, cases) {
+    state.cases = cases
+  },
+  save_case(state, c) {
+    state.case = c
+  },
   save_agent_group(state, agent_group) {
     state.agent_group = agent_group
   },
@@ -159,6 +165,11 @@ const mutations = {
   add_credential(state, credential){
     state.credentials.push(credential)
     state.credential = credential
+    state.status = 'success'
+  },
+  add_case(state, data) {
+    state.cases.push(data)
+    state.case = data
     state.status = 'success'
   },
   add_playbook(state, playbook){
@@ -640,6 +651,42 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/playbook/${postData.uuid}/bulktag`, data: postData.data, method: 'POST'})
       .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCases({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case`, method: 'GET'})
+      .then(resp => {
+        commit('save_cases', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCase({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_case', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createCase({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_case', data)
         resolve(resp)
       })
       .catch(err => {
