@@ -33,19 +33,20 @@
                   :sorter='{resetable:true}'
                   pagination
               >
-              <template #select="{item}">
-                <td class="text-center">
-                    <input v-if="!item.case_uuid" type="checkbox" :value="item.uuid" v-model="selected"/>
-                </td>
+              <template #name="{item}">
+                  <td>
+                      <input v-if="!item.case_uuid" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<router-link :to="`${item.uuid}`">{{item.title}}</router-link>
+                  </td>
+              </template>
+              <template #reference="{item}">
+                <td><span v-c-tooltip="{
+        content: `${item.reference}`,
+        placement: 'top'
+      }">{{item.reference | truncate}}</span></td>
               </template>
               <template #created_at="{item}">
                   <td>
                       {{item.created_at | moment('from', 'now')}}
-                  </td>
-              </template>
-              <template #name="{item}">
-                  <td>
-                      <router-link :to="`${item.uuid}`">{{item.title}}</router-link>
                   </td>
               </template>
               <template #status="{item}">
@@ -60,18 +61,18 @@
               </template>
               <template #tlp="{item}">
                 <td>
-                  <CButton v-if="item.tlp == 0" color="light" size="sm">TLP:WHITE</CButton>
-                  <CButton v-if="item.tlp == 1" color="success" size="sm">TLP:GREEN</CButton>
-                  <CButton v-if="item.tlp == 2" color="warning" size="sm">TLP:AMBER</CButton>
-                  <CButton v-if="item.tlp >= 3" color="danger" size="sm">TLP:RED</CButton>
+                  <CButton v-if="item.tlp == 1" color="light" size="sm">TLP:WHITE</CButton>
+                  <CButton v-if="item.tlp == 2" color="success" size="sm">TLP:GREEN</CButton>
+                  <CButton v-if="item.tlp == 3" color="warning" size="sm">TLP:AMBER</CButton>
+                  <CButton v-if="item.tlp >= 4" color="danger" size="sm">TLP:RED</CButton>
                 </td>
               </template>
               <template #severity="{item}">
                 <td>
-                  <CButton v-if="item.severity == 0" color="light" size="sm">L</CButton>
-                  <CButton v-if="item.severity == 1" color="warning" size="sm">M</CButton>
-                  <CButton v-if="item.severity == 2" color="danger" size="sm">H</CButton>
-                  <CButton v-if="item.severity >= 3" color="dark" size="sm">C</CButton>
+                  <CButton v-if="item.severity == 1" color="light" size="sm">L</CButton>
+                  <CButton v-if="item.severity == 2" color="warning" size="sm">M</CButton>
+                  <CButton v-if="item.severity == 3" color="danger" size="sm">H</CButton>
+                  <CButton v-if="item.severity >= 4" color="dark" size="sm">C</CButton>
                 </td>
               </template>
               </CDataTable>
@@ -130,7 +131,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['select','created_at', 'name', 'status', 'severity', 'tlp', 'observable_count', 'tags']
+        return ['name', 'created_at', 'reference', 'status', 'severity', 'tlp', 'observable_count', 'tags']
       }
     },
     caption: {
@@ -202,6 +203,19 @@ export default {
     },
     beforeDestroy: function() {
       clearInterval(this.refresh)
+    },
+    filters: {
+      truncate: function (value) {
+            let maxLength = 6
+            if (!value) return ''
+            value = value.toString()
+            if (value.length > maxLength) {
+                return value.substring(0,maxLength) + "..."
+            } else {
+                return value.substring(0,maxLength)
+            }
+            
+        }
     }
 }
 </script>

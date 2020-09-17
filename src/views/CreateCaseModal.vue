@@ -23,7 +23,7 @@
             <CTextarea
               placeholder="Enter a description for the case.  The more detail the better."
               required
-              :v-model.sync="description"
+              v-model="description"
               label="Description"
               rows=5
             >
@@ -129,13 +129,12 @@ export default {
             for(let tag in this.selected_tags) {
                 tags.push(this.selected_tags[tag].name)
             }
-            console.log(title,description,events,tlp,severity,tags);
             this.$store.dispatch('createCase', {title,description,events,tlp,severity,tags})
             .then(resp => {
                 if(resp.status == 200) {
                     this.modalStatus = false
                     let case_uuid = resp.data.uuid
-                    this.$router.push({name:'view_case', params:{uuid:case_uuid}})
+                    this.$router.push({name:'View Case', params:{uuid:case_uuid}})
                 }
             })
             .catch(err => {

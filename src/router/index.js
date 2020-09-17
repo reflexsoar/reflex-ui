@@ -35,6 +35,7 @@ const PluginList = () => import('@/views/PluginList')
 const PluginDetails = () => import('@/views/PluginDetails')
 const Cases = () => import('@/views/Cases')
 const CaseList = () => import('@/views/CaseList')
+const CaseManagement = () => import('@/views/CaseManagement')
 const CaseDetails = () => import('@/views/CaseDetails')
 const Settings = () => import('@/views/Settings')
 
@@ -135,14 +136,14 @@ function configRoutes () {
             {
               path: 'list',
               name: '',
-              component: CaseList,
+              component: CaseManagement,
               meta: {
                 requiresAuth: true
               }
             },
             {
               path: ':uuid',
-              name: 'view_case',
+              name: 'View Case',
               component: CaseDetails,
               meta: {
                 requiresAuth: true

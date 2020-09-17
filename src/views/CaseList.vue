@@ -9,12 +9,7 @@
         </div>
     </CCol>
     <CCol col v-else>
-      <CButton color="primary" @click="newCaseModal = !newCaseModal">New Case</CButton><br><br>
-      <CCard>
-          <CCardHeader>
-              <b>Cases</b>
-          </CCardHeader>
-          <CCardBody>
+      <div style="padding:10px"><CButton color="primary" @click="newCaseModal = !newCaseModal">New Case</CButton></div>
               <CDataTable
                   :hover="hover"
                   :striped="striped"
@@ -27,6 +22,7 @@
                   :dark="dark"
                   :sorter='{external: true, resetable: true}'
                   pagination
+                  style="border-top: 1px solid #cfcfcf;"
               >
               <template #title="{item}">
                   <td>
@@ -43,18 +39,18 @@
               </template>
               <template #tlp="{item}">
                 <td>
-                  <CButton v-if="item.tlp == 0" color="light" size="sm">TLP:WHITE</CButton>
-                  <CButton v-if="item.tlp == 1" color="success" size="sm">TLP:GREEN</CButton>
-                  <CButton v-if="item.tlp == 2" color="warning" size="sm">TLP:AMBER</CButton>
-                  <CButton v-if="item.tlp >= 3" color="danger" size="sm">TLP:RED</CButton>
+                  <CButton v-if="item.tlp == 1" color="light" size="sm">TLP:WHITE</CButton>
+                  <CButton v-if="item.tlp == 2" color="success" size="sm">TLP:GREEN</CButton>
+                  <CButton v-if="item.tlp == 3" color="warning" size="sm">TLP:AMBER</CButton>
+                  <CButton v-if="item.tlp >= 4" color="danger" size="sm">TLP:RED</CButton>
                 </td>
               </template>
               <template #severity="{item}">
                 <td>
-                  <CButton v-if="item.severity == 0" color="light" size="sm">L</CButton>
-                  <CButton v-if="item.severity == 1" color="warning" size="sm">M</CButton>
-                  <CButton v-if="item.severity == 2" color="danger" size="sm">H</CButton>
-                  <CButton v-if="item.severity >= 3" color="dark" size="sm">C</CButton>
+                  <CButton v-if="item.severity == 1" color="light" size="sm">Low</CButton>
+                  <CButton v-if="item.severity == 2" color="warning" size="sm">Medium</CButton>
+                  <CButton v-if="item.severity == 3" color="danger" size="sm">High</CButton>
+                  <CButton v-if="item.severity >= 4" color="dark" size="sm">Critical</CButton>
                 </td>
               </template>
               <template #owner="{item}">
@@ -67,8 +63,6 @@
                 </td>
               </template>
               </CDataTable>
-          </CCardBody>
-      </CCard>
     </CCol>
     <CreateCaseModal :show.sync='newCaseModal'></CreateCaseModal>
   </CRow>

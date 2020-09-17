@@ -12,14 +12,16 @@ import Multiselect from 'vue-multiselect'
 import VueMoment from 'vue-moment'
 import moment from 'moment-timezone'
 import VueMarkdown from 'vue-markdown'
-
+import VueClipboard from 'vue-clipboard2'
 
 Vue.config.performance = true
 Vue.use(CoreuiVue)
 Vue.use(Vuelidate)
 Vue.component('multiselect', Multiselect)
 Vue.use(VueMoment, {moment})
+Vue.use(VueClipboard)
 Vue.component('vue-markdown', VueMarkdown)
+
 
 Vue.prototype.$log = console.log.bind(console)
 Vue.prototype.$http = Axios;

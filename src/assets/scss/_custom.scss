@@ -148,12 +148,20 @@ a {
     white-space: pre;
 }
 
-div > .table {
-    margin-bottom: 0px;
+.console-output {
+    padding:10px;
+}
+
+.tab-pane .table {
+    margin-bottom:0px;
 }
 
 .raw_log {
-    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+    width: 100%;
+    min-height: 30rem;
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 0.8rem;
+    line-height: 1.2;
     max-height: 400px
 }
 
@@ -242,3 +250,51 @@ label {
 .table-responsive {
     height:auto;
 }
+
+.comments .timeline .timeline-item {
+    padding-bottom: 0px;
+}
+
+.tabbed > .nav, .nav-tabs {
+    border-bottom: 1px solid #d8dbe0;
+}
+
+.tabbed > .nav, .nav-tabs li:first-child .nav-link {
+    border-left:0px;
+    border-top:0px;
+}
+
+.tabbed > .nav, .nav-tabs .nav-link {
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+    background-color: white;
+    border-top: 0px;
+    border-bottom: 1px solid #d8dbe0;
+    color: #000;
+}
+
+.tabbed > .tab-content, .tab-pane th {
+    border-top: 0px;
+}
+
+.tabbed > .nav, .nav-tabs .nav-link.active {
+    background-color: $secondary;
+    color: white;
+}
+
+.timeline-circle {
+    left: -33px;
+}
+
+.tabbed {
+    padding:0px;
+}
+
+.fullscreen {
+    background:red;
+    position:absolute;
+    top:0px;
+    right:0px;
+    bottom:0px;
+    left:0px;
+  }

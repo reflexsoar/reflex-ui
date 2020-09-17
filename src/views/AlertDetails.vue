@@ -76,11 +76,26 @@
                         {{item.value | defang}}
                     </td>
                 </template>
+                <template #ioc="{item}">
+                    <td>
+                        <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.ioc"/>
+                    </td>
+                </template>
+                <template #spotted="{item}">
+                    <td>
+                        <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.spotted"/>
+                    </td>
+                </template>
+                <template #safe="{item}">
+                    <td>
+                        <CSwitch style="padding-top:3px" color="success" label-on="Yes" label-off="No" :checked.sync="item.safe"/>
+                    </td>
+                </template>
                 <template #dataType="{item}">
                     <td>
                         {{item.dataType.name | defang}}
                     </td>
-                </template>
+                </template>                
                 <template #tags="{item}">
                     <td>
                         <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
@@ -174,7 +189,7 @@ export default {
         observable_fields: {
             type: Array,
             default () {
-            return ['value', 'ioc', 'spotted', 'dataType', 'tags']
+            return ['value', 'ioc', 'spotted', 'safe', 'dataType', 'tags']
             }
         },
         caption: {

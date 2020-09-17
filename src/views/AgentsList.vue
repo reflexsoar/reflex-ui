@@ -9,8 +9,7 @@
         </div>
     </CCol>
     <CCol col v-else>
-      <CButton color="primary" @click="generateToken()">New Agent</CButton><br><br>
-      
+          <div style="padding: 10px;"><CButton color="primary" @click="generateToken()">New Agent</CButton></div>
               <CDataTable
                   :hover="hover"
                   :striped="striped"
@@ -23,6 +22,7 @@
                   :dark="dark"
                   :sorter='{external: true, resetable: true}'
                   pagination
+                  style="border-top: 1px solid #cfcfcf;"
               >
               <template #name="{item}">
                   <td>

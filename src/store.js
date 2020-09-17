@@ -9,7 +9,7 @@ const state = {
   status: '',
   access_token: localStorage.getItem('access_token') || '',
   refresh_token: localStorage.getItem('refresh_token') || '',
-  user: {},
+  current_user: "",
   credentials: [],
   credential: {},
   events: [],
@@ -18,6 +18,8 @@ const state = {
   case: {},
   case_templates: [],
   case_template: {},
+  case_statuses: [],
+  case_status: {},
   unread_event_count: 0,
   agents: [],
   agent: {},
@@ -60,7 +62,7 @@ const mutations = {
     state.status = 'success'
     state.access_token = access_token
     state.refresh_token = refresh_token
-    state.user = user
+    state.current_user = user
   },
   auth_error(state){
     state.status = 'error'
@@ -94,6 +96,12 @@ const mutations = {
   },
   save_agent(state, agent) {
     state.agent = agent
+  },
+  save_case_statuses(state, statuses) {
+    state.case_statuses = statuses
+  },
+  save_case_status(state, status) {
+    state.status = status
   },
   save_cases(state, cases) {
     state.cases = cases
@@ -172,6 +180,17 @@ const mutations = {
     state.case = data
     state.status = 'success'
   },
+  add_case_status(state, data) {
+    state.case_statuses.push(data)
+    state.case_status = data
+    state.status = 'success'
+  },
+  add_case_comment(state, data) {
+    state.case.comments.push(data)
+  },
+  add_case_observables(state, data) {
+    state.case.observables = data
+  },
   add_playbook(state, playbook){
     state.playbooks.push(playbook)
     state.playbook = playbook
@@ -224,7 +243,8 @@ const mutations = {
 const getters = {
   isLoggedIn: state => !!state.access_token,
   authStatus: state => state.status,
-  addStatus: state => state.status
+  addStatus: state => state.status,
+  current_user: state => state.current_user
 }
 
 const BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v1.0'
@@ -237,7 +257,7 @@ const actions = {
       .then(resp => {
         const access_token = resp.data['access_token']
         const refresh_token = resp.data['refresh_token']
-        const user = resp.data.user
+        const user = resp.data['user']
         localStorage.setItem('access_token', access_token)
         localStorage.setItem('refresh_token', refresh_token)
         Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
@@ -259,7 +279,7 @@ const actions = {
     .then(resp => {
         const access_token = resp.data['access_token']
         const refresh_token = resp.data['refresh_token']
-        const user = resp.data.user
+        const user = resp.data['user']
         localStorage.setItem('access_token', access_token)
         localStorage.setItem('refresh_token', refresh_token)
         Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
@@ -670,6 +690,30 @@ const actions = {
       })
     })
   },
+  getCaseStatus({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_status`, method: 'GET'})
+      .then(resp => {
+        commit('save_case_status', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getUsersByName({commit}, username) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user?username=${username}`, method: 'GET'})
+      .then(resp => {
+        commit('save_users', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCase({commit}, uuid) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET'})
@@ -693,7 +737,44 @@ const actions = {
         reject(err)
       })
     })
+  },
+  updateCase({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_case', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createCaseComment({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_comment`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_case_comment', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  bulkAddObservablesToCase({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}/add_observables/_bulk`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_case_observables', resp.data.observables)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
+
 }
 
 export default new Vuex.Store({

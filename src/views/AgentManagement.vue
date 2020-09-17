@@ -1,11 +1,9 @@
 <template>
   <CCol xs="12" lg="12">
+        <h2>Agent Management</h2><br>
         <CCard>
-          <CCardHeader>
-            Agent Management
-          </CCardHeader>
-          <CCardBody>
-            <CTabs><br>
+          <CCardBody class="tabbed">
+            <CTabs>
               <CTab active>
                 <template slot="title">
                   <CIcon name="cil-terminal"/> Agents
