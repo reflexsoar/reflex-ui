@@ -32,6 +32,8 @@
     "@coreui/utils": "^1.2.4",
     "@coreui/vue": "^3.0.6",
     "@coreui/vue-chartjs": "^1.0.5",
+    "@syncfusion/ej2-vue-dropdowns": "^18.2.58",
+    "@syncfusion/ej2-vue-grids": "^18.2.58",
     "axios": "^0.19.2",
     "moment-timezone": "^0.5.28",
     "v-markdown-editor": "^1.2.6",
@@ -50,6 +52,7 @@
     "vue-router": "~3.1.6",
     "vue-select": "^3.10.0",
     "vue-tooltip": "^0.1.0",
+    "vuedraggable": "^2.24.1",
     "vuelidate": "^0.7.5",
     "vuex": "~3.1.3"
   },

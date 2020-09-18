@@ -54,7 +54,13 @@ export default {
   methods: {
     leaveComment() {
         let data = {'message': this.comment, 'case_uuid': this.uuid}
-        this.$store.dispatch('createCaseComment', data)
+        this.$store.dispatch('createCaseComment', data).then(resp => {
+          if(this.comment_list.length) {
+            this.comment_list = [resp.data]
+          } else {
+            this.comment_list.push(resp.data)
+          }
+        })
         this.comment = "";
     }
   },

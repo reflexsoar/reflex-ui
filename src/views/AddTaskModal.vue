@@ -1,12 +1,57 @@
 <template>
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
     <CModal title="Create Task" :centered="true" size="lg" :show.sync="modalStatus">
-      <div>
-        Add Case Tasks
-      </div>
+      <CAlert :show.sync="error" color="danger" closeButton>
+        {{error_message}}
+      </CAlert>
+      <CForm id="createTaskForm" @submit.prevent="createTask" >
+            <CInput
+              placeholder="Task Title"
+              required
+              v-model="title"
+              label="Title"
+            >
+            </CInput>
+            <CTextarea
+              placeholder="Enter a description for the task.  The more detail the better."
+              required
+              v-model="description"
+              label="Description"
+              rows=5
+            >
+            </CTextarea>
+            <label>Owner</label>
+            <div role="group" class="form-group">
+                <multiselect 
+                    v-model="owner" 
+                    label="username" 
+                    :options="users" 
+                    track-by="username" 
+                    :searchable="true"
+                    :internal-search="false"
+                    :options-limit="25"
+                    :show-no-results="false"
+                    @search-change="usersFind">
+                </multiselect>
+            </div>
+            <label>User Group</label>
+            <div role="group" class="form-group">
+                <multiselect 
+                    v-model="group" 
+                    label="group" 
+                    :options="groups" 
+                    track-by="group" 
+                    :searchable="true"
+                    :internal-search="false"
+                    :options-limit="25"
+                    :show-no-results="false"
+                    @search-change="groupsFind">
+                </multiselect>
+            </div>
+        </CForm>
       <template #footer>
-          <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
-        <CButton @click="createTask()" color="primary">Create</CButton>
+        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton type="submit" form="createTaskForm" color="primary">Create</CButton>
       </template>
     </CModal>
 </div>
@@ -17,19 +62,22 @@ import {vSelect} from "vue-select";
 export default {
     name: 'AddTaskModal',
     props: {
-        show: false
+        show: Boolean,
+        case_uuid: String,
+        task_count: Number
     },
     data(){
         return {
-            value: "",
-            dataType: "",
-            selected_tags: Array(),
-            case_template: "",
-            ioc: false,
-            spotted: false,
+            title: "",
+            description: "",
+            groups: [],
+            users: [],
+            owner: "",
+            group: "",
             modalStatus: this.show,
-            tag_list: [],
-            tags: Array
+            error: false,
+            error_message: "",
+            required: true
         }
     },
     watch: {
@@ -41,14 +89,53 @@ export default {
                 this.loadTags()
             }
             this.$emit('update:show', this.modalStatus)
+        
+            if(!this.modalStatus) {
+                this.reset()
+            }
         }
     },
     created() {
         this.loadTags()
     },
     methods: {
+        usersFind(query) {
+            this.$store.dispatch('getUsersByName', query).then(resp => {
+                this.users = resp.data
+            })
+        },
+        groupsFind(query) {
+            this.$store.dispatch('getGrousByName', query).then(resp => {
+                this.users = resp.data
+            })
+        },
         createTask() {
-            console.log('create task')
+
+            let title = this.title
+            let description = this.description
+            let owner = this.owner
+            let group = this.group
+            let case_uuid = this.case_uuid
+            let order = this.task_count+1
+
+            let data = {title, description, case_uuid, order}
+
+            if(owner) {
+                data['owner_uuid'] = owner.uuid
+            }
+
+            if(group) {
+                data['group_uuid'] = group.uuid
+            }
+            
+            this.$store.dispatch('createCaseTask', data).then(resp => {
+                this.modalStatus = false
+            }).catch(err => {
+                this.error = true
+                if(err.response.status == 409) {
+                    this.error_message = "A task with this title already exists"
+                }
+            })
         },
         loadTags: function() {
             this.tag_list = Array()
@@ -56,11 +143,19 @@ export default {
                 for(let i in resp.data) {
                     this.tag_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
                 }
-            })},
+            })
+        },
+        reset() {
+            this.title = "",
+            this.description = "",
+            this.owner = null,
+            this.group = null
+            this.error = false
+            this.error_message = ""
+        },
         dismiss() {
-            this.use_case_template = false
+            this.reset()
             this.modalStatus = false
-            this.selected_tags = Array()
         },
         addTag(newTag) {
             const t = {
@@ -69,7 +164,6 @@ export default {
             }
             this.tag_list.push(t)
             this.selected_tags.push(t)
-            console.log(this.selected_tags)
         }
     }
 }

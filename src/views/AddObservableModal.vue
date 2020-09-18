@@ -62,7 +62,8 @@
       <template #footer>
         <CButton @click="restart()" color="danger">Restart</CButton>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
-        <CButton v-if="step != final_step" @click="nextStep()" color="primary">Next</CButton>
+        <CButton v-if="step != 1" @click="previousStep()" color="info">Previous</CButton>
+        <CButton v-if="step != final_step" @click="nextStep()" v-bind:disabled="observables == ''" color="primary">Next</CButton>
         <CButton v-if="step == final_step" @click="createObservables()" color="primary">Save</CButton>
       </template>
     </CModal>
@@ -122,6 +123,12 @@ export default {
     created() {
     },
     methods: {
+        previousStep() {
+            this.step -= 1;
+            if(this.step == 1){
+                this.new_observables = Array()
+            }
+        },
         nextStep() {
             if(this.step == 2) {
                 this.final_step = true;

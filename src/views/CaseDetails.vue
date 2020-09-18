@@ -118,8 +118,11 @@
                 pagination
             >
                 <template #title="{item}">
-                    <td>
-                        <router-link :to="`/alerts/${item.uuid}`">{{item.title}}</router-link>
+                    <td style="min-width:200px; max-width:300px;">
+                        <router-link :to="`/alerts/${item.uuid}`">{{item.title}}</router-link><br>
+                        <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
+                            <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag.name }}</CBadge>
+                        </li>
                     </td>
                 </template>
                 <template #status="{item}">
@@ -141,11 +144,6 @@
                     <CButton v-if="item.severity >= 4" color="dark" size="sm">C</CButton>
                 </td>
                 </template>
-                <template #tags="{item}">
-                    <td>
-                        <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
-                    </td>
-              </template>
               <template #actions="{item}">
                   <td>
                     <CDropdown 
@@ -165,45 +163,7 @@
             </CDataTable>
               </CTab>
               <CTab title="Tasks">
-                <CListGroup flush>
-                    <CListGroupItem v-for="task in tasks" :key="task.title">
-                        <CRow>
-                            <CCol col="8">
-                                <b>{{task.title}}</b><br/>
-                                <b>Phase:</b> {{task.phase}}<br>
-                            </CCol>
-                            <CCol col="2">
-                                Assigned To: n3tsurge
-                            </CCol>
-                            <CCol col="1" class="text-right">
-                                <CDropdown 
-                                    toggler-text="Actions" 
-                                    color="secondary"
-                                    size="sm"
-                                >
-                                <CDropdownItem>Assign to Me</CDropdownItem>
-                                <CDropdownItem @click="task.show_details = !task.show_details">View Notes</CDropdownItem>
-                                <CDropdownDivider/>
-                                <CDropdownItem>Complete</CDropdownItem>
-                                <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
-                                </CDropdown>
-                            </CCol>
-                        </CRow>
-                        <CCollapse :show.sync="task.show_details">
-                            <CRow>
-                                <CCol>
-                                    <br><b>Description: </b><br>{{task.description}}<br><br>
-                                    <CCard>
-                                        <CCardBody>
-                                            NOTES HERE
-                                        </CCardBody>
-                                    </CCard>
-                                </CCol>
-                            </CRow>
-                        </CCollapse>
-
-                    </CListGroupItem>
-                </CListGroup>
+                <CaseTaskList :tasks="case_data.tasks"></CaseTaskList>
               </CTab>
               <CTab title="Attachments">
                  Case attachments here
@@ -227,8 +187,8 @@
             </CTabs>
           </CCardBody>
         </CCard>
-    <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid"></AddObservableModal>
-    <AddTaskModal :show.sync="caseTaskModal"></AddTaskModal>
+    <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" ></AddObservableModal>
+    <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid" :task_count.sync="case_data.tasks.length"></AddTaskModal>
   </CCol>
   </CRow>
 </template>
@@ -237,6 +197,7 @@
 import {mapState} from "vuex";
 import AddObservableModal from './AddObservableModal'
 import ObservableList from './ObservableList'
+import CaseTaskList from './CaseTaskList'
 import AddTaskModal from './AddTaskModal'
 import Comments from './Comments'
 import { Timeline, TimelineItem, TimelineTitle } from 'vue-cute-timeline'
@@ -247,6 +208,7 @@ export default {
     components: {
         AddObservableModal,
         ObservableList,
+        CaseTaskList,
         AddTaskModal,
         Timeline,
         TimelineItem,
@@ -258,7 +220,7 @@ export default {
         event_fields: {
             type: Array,
             default() {
-                return ['title','status','severity','observable_count','tags','actions']
+                return ['title','status','severity','observable_count','actions']
             }
         },
         caption: {
@@ -297,7 +259,7 @@ export default {
             edit_description: false,
             lockCase: false,
             users: [],
-            assignee: {username:'n3tsurge', uuid:'xxx'},
+            assignee: null,
             comment: "",
             comments: [{
                 "author":"n3tsurge",
@@ -370,7 +332,7 @@ export default {
             ]
         }
     },
-    created() {
+    beforeCreate() {
         this.$store.dispatch('getCase', this.$route.params.uuid).then(resp => {
             this.case_data = resp.data
             this.loading = false

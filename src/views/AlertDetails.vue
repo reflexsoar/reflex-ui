@@ -78,7 +78,7 @@
                 </template>
                 <template #ioc="{item}">
                     <td>
-                        <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.ioc"/>
+                        <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.ioc" disabled/>
                     </td>
                 </template>
                 <template #spotted="{item}">

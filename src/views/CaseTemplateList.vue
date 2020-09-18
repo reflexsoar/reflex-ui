@@ -9,14 +9,14 @@
         </div>
     </CCol>
     <CCol col v-else>
-      <div style="padding:10px"><CButton color="primary" @click="newCaseModal = !newCaseModal">New Case</CButton></div>
+      <div style="padding:10px"><CButton color="primary" @click="newCaseTemplateModal = !newCaseTemplateModal">New Case Template</CButton></div>
               <CDataTable
                   :hover="hover"
                   :striped="striped"
                   :bordered="bordered"
                   :small="small"
                   :fixed="fixed"
-                  :items="cases"
+                  :items="case_templates"
                   :fields="fields"
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
@@ -26,19 +26,13 @@
               >
               <template #title="{item}">
                   <td>
-                      <router-link :to="`${item.uuid}`">{{item.title}}</router-link><br>
-                      <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
-                        <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag.name }}</CBadge>
-                      </li>
+                      <router-link :to="`${item.uuid}`">{{item.title}}</router-link>
                   </td>
               </template>
-              <template #status="{item}">
+              <template #tasks="{item}">
                 <td>
-                  {{item.status.name}}
+                  {{ item.tasks.length }}
                 </td>
-              </template>
-              <template #events="{item}">
-                <td>{{item.events.length}}</td>
               </template>
               <template #tlp="{item}">
                 <td>
@@ -60,36 +54,26 @@
                 <td v-if="item.owner.username">{{item.owner.username}}</td>
                 <td v-if="!item.owner.username">Unassigned</td>
               </template>
-              <template #actions='{item}'>
-                <td>
-                  <CDropdown toggler-text="Actions" color="secondary" size="sm">
-                    <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Close</CDropdownItem>
-                    <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Execute Playbook</CDropdownItem>
-                    <CDropdownDivider />
-                    <CDropdownItem @click="deleteObservableModal = !deleteObservableModal">Delete</CDropdownItem>
-                  </CDropdown>
-                </td>
-              </template>
               </CDataTable>
     </CCol>
-    <CreateCaseModal :show.sync='newCaseModal'></CreateCaseModal>
+    <CreateCaseTemplateModal :show.sync='newCaseTemplateModal'></CreateCaseTemplateModal>
   </CRow>
 </template>
 
 <script>
 import {mapState} from "vuex";
-import CreateCaseModal from './CreateCaseModal'
+import CreateCaseTemplateModal from './CreateCaseTemplateModal'
 export default {
-    name: 'Cases',
+    name: 'CaseTemplates',
     components: {
-      CreateCaseModal
+      CreateCaseTemplateModal
     },
     props: {
     items: Array,
     fields: {
       type: Array,
       default () {
-        return ['title','status','events','tlp','severity','owner','actions']
+        return ['title','description','tasks','severity','tlp']
       }
     },
     caption: {
@@ -116,21 +100,14 @@ export default {
         description: "",
         dismissCountDown: 10,
         loading: true,
-        newCaseModal: false
+        newCaseTemplateModal: false
       }
     },
     methods: {
-      addSuccess: function() {
-        if (this.$store.getters.addSuccess == 'success') {
-          return true
-        } else {
-          return false
-        }
-      },
       loadData: function() {
         this.loading = true
-        this.$store.dispatch('getCases').then(resp => {
-            this.cases = resp.data
+        this.$store.dispatch('getCaseTemplates').then(resp => {
+            this.case_templates = resp.data
             this.loading = false
         })
       }

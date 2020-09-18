@@ -7,7 +7,7 @@
             <b>Settings</b>
           </CCardHeader>
 
-          <CCardBody>
+          <CCardBody class="tabbed">
             <CTabs>
               <CTab active>
                 <template slot="title">
@@ -23,7 +23,7 @@
                 <template slot="title">
                   <CIcon name="cil-user"/> {{tabs[1]}}
                 </template>
-                <Users/>
+                <UsersList/>
               </CTab>
               <CTab>
                 <template slot="title">
@@ -54,11 +54,11 @@
 </template>
 
 <script>
-import Users from './users/Users'
+import UsersList from './UsersList'
 export default {
   name: 'Settings',
   components: {
-    Users
+    UsersList
   },
   data () {
     return {

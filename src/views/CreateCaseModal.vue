@@ -12,14 +12,24 @@
             >
             </CInput>
             <label style="text-align:center; vertical-align:middle; padding-bottom:.8em">Assign Case Template?</label>&nbsp;&nbsp;&nbsp;<CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="use_case_template"/>
-            <CSelect 
-                label="Case Template"
-                :options="[]"
-                v-model="case_template"
-                placeholder="Select a case template"
-                v-if="use_case_template"
-              >
-              </CSelect>
+            <div role="group" class="form-group" v-if="use_case_template">
+                <multiselect 
+                    v-model="case_template" 
+                    label="title" 
+                    :options="case_templates" 
+                    track-by="uuid" 
+                    :searchable="true"
+                    :internal-search="false"
+                    :options-limit="10"
+                    :show-no-results="false" 
+                    @search-change="caseTemplateFind">
+                    <template slot="option" slot-scope="props">
+                        {{props.option.title}}</br>
+                        <small>{{props.option.description}} - Contains {{props.option.task_count}} tasks.</small>
+                    </template>
+                </multiselect>
+            </div>
+            <span v-if="case_template && case_template.task_count > 0"><label>Tasks</label><br><b>{{case_template.task_count}}</b> tasks will be added automatically to this case.<br><br></span>
             <CTextarea
               placeholder="Enter a description for the case.  The more detail the better."
               required
@@ -50,7 +60,7 @@
             </CRow>                
             <div role="group" class="form-group">
                 <label class="typo__label">Tags</label>
-                <multiselect v-model="selected_tags" placeholder="Select tags to apply to this input" :taggable="true" tag-placeholder="Add new tag" track-by="name" label="name" :options="tag_list" :multiple="true" @tag="addTag">
+                <multiselect v-model="selected_tags" placeholder="Select tags to apply to this input" :taggable="true" tag-placeholder="Add new tag" track-by="name" label="name" :options="tag_list" :multiple="true" @tag="addTag" :close-on-select="false">
                 </multiselect>
             </div>
         </CForm>
@@ -68,8 +78,8 @@ import {vSelect} from "vue-select";
 export default {
     name: 'CreateCaseModal',
     props: {
-        show: false,
-        events: Array(),
+        show: Boolean,
+        events: Array,
     },
     data(){
         return {
@@ -77,7 +87,8 @@ export default {
             description: "",
             selected_tags: Array(),
             use_case_template: false,
-            case_template: "",
+            case_templates: [],
+            case_template: null,
             tlp: 2,
             severity: 2,
             modalStatus: this.show,
@@ -106,12 +117,60 @@ export default {
                 this.loadTags()
             }
             this.$emit('update:show', this.modalStatus)
+            if(!this.modalStatus) {
+                this.reset()
+            }
+        },
+        case_template: function() {
+            this.applyCaseTemplate()
+        },
+        use_case_template: function() {
+            if(!this.use_case_template) {
+                this.case_template = null
+            }
+            
+            this.applyCaseTemplate()
         }
     },
     created() {
         this.loadTags()
+        this.loadData()
     },
     methods: {
+        applyCaseTemplate() {
+            if(this.case_template) {
+                this.severity = this.case_template.severity
+                this.tlp = this.case_template.tlp
+            }
+
+            // Remove tags when the template was changed
+            // removing only case template tags
+            for(let tag in this.selected_tags) {
+                if('from_template' in this.selected_tags[tag]) {
+                    this.selected_tags.splice(tag, 1)
+                }
+            }
+
+            // Add the tags from the new case template
+            if(this.case_template) {
+                for(let tag in this.case_template.tags) {
+                    if(this.selected_tags.filter(t => t.uuid === this.case_template.tags[tag].uuid).length < 1) {
+                        this.case_template.tags[tag]['from_template'] = true
+                        this.selected_tags.push(this.case_template.tags[tag])
+                    }                    
+                }
+            }
+        },
+        loadData() {
+            this.$store.dispatch('getCaseTemplateList', '').then(resp => {
+                this.case_templates = resp.data
+            })
+        },
+        caseTemplateFind(query) {
+            this.$store.dispatch('getCaseTemplateList', query).then(resp => {
+                this.case_templates = resp.data
+            })
+        },
         createCase() {
             let title = this.title;
             let description = this.description;
@@ -129,7 +188,15 @@ export default {
             for(let tag in this.selected_tags) {
                 tags.push(this.selected_tags[tag].name)
             }
-            this.$store.dispatch('createCase', {title,description,events,tlp,severity,tags})
+
+            let request_data = {title,description,events,tlp,severity,tags}
+            if(this.case_template) {
+                let case_template_uuid = this.case_template.uuid;
+                request_data = {title,description,case_template_uuid, events,tlp,severity,tags}
+                
+            }
+
+            this.$store.dispatch('createCase', request_data)
             .then(resp => {
                 if(resp.status == 200) {
                     this.modalStatus = false
@@ -147,11 +214,18 @@ export default {
                 for(let i in resp.data) {
                     this.tag_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
                 }
-            })},
-        dismiss() {
+            })
+        },
+        reset () {
             this.use_case_template = false
-            this.modalStatus = false
+            this.case_template = null
+            this.severity = 2
+            this.tlp = 2
             this.selected_tags = Array()
+        },
+        dismiss() {
+            this.reset()
+            this.modalStatus = false            
         },
         addTag(newTag) {
             const t = {
@@ -160,7 +234,6 @@ export default {
             }
             this.tag_list.push(t)
             this.selected_tags.push(t)
-            console.log(this.selected_tags)
         }
     }
 }

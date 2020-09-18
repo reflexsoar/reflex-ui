@@ -14,7 +14,7 @@
             <template slot="title">
               Case Templates
             </template>
-            STUFF
+            <CaseTemplates></CaseTemplates>
           </CTab>
         </CTabs>
       </CCardBody>
@@ -25,10 +25,12 @@
 <script>
 
 const Cases = () => import('@/views/CaseList')
+const CaseTemplates = () => import('@/views/CaseTemplateList')
 export default {
     name: 'CaseManagement',
     components: {
-      'Cases': Cases
+      'Cases': Cases,
+      CaseTemplates
     },
     created() {
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages

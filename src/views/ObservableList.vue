@@ -9,10 +9,14 @@
     pagination
   >
     <template #value="{item}">
-      <td>
+      <td style="min-width:200px; max-width:300px;">
         <span
           v-c-tooltip="{content: `${item.value}`, placement:'bottom', appendToBody:'true'}"
-        >{{item.value | defang | truncate}}</span>
+        >{{item.value | defang | truncate}}</span><br>
+        <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
+          <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag.name }}</CBadge>
+        </li>
+        
       </td>
     </template>
     <template #type="{item}">
@@ -53,16 +57,9 @@
         />
       </td>
     </template>
-    <template #instances="{item}">
-      <td v-if="observableStats(item.value) > 1 && this.events">{{observableStats(item.value)}}</td>
+    <template #count="{item}">
+      <td v-if="observableStats(item.value) > 1">{{observableStats(item.value)}}</td>
       <td v-else>1</td>
-    </template>
-    <template #tags="{item}">
-      <td>
-        <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
-          <CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton>
-        </li>
-      </td>
     </template>
     <template #actions="{item}">
       <td>
@@ -85,7 +82,7 @@ export default {
     observable_fields: {
         type: Array,
         default () {
-            return ['value', 'ioc', 'spotted', 'safe', 'instances', 'type', 'tags', 'actions']
+            return ['value', 'ioc', 'spotted', 'safe', 'count', 'type', 'actions']
         }
     }
   },

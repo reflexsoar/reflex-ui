@@ -16,10 +16,13 @@ const state = {
   event: {},
   cases: [],
   case: {},
+  tags: {},
+  tag: [],
   case_templates: [],
   case_template: {},
   case_statuses: [],
   case_status: {},
+  case_template_list: [],
   unread_event_count: 0,
   agents: [],
   agent: {},
@@ -28,6 +31,8 @@ const state = {
   pairing_token: "",
   users: [],
   user: {},
+  user_groups: [],
+  user_group: {},
   roles: [],
   role: {},
   playbooks: [],
@@ -81,6 +86,9 @@ const mutations = {
   save_credentials(state, credentials){
     state.credentials = credentials
   },
+  save_case_template_list(state, templates) {
+    state.case_template_list = templates
+  },
   save_playbooks(state, credentials){
     state.playbooks = credentials
   },
@@ -106,6 +114,12 @@ const mutations = {
   save_cases(state, cases) {
     state.cases = cases
   },
+  save_tags(state, tags) {
+    state.tags = tags
+  },
+  save_case_templates(state, templates) {
+    state.case_templates = templates
+  },
   save_case(state, c) {
     state.case = c
   },
@@ -117,6 +131,9 @@ const mutations = {
   },
   save_users(state, users) {
     state.users = users
+  },
+  save_user_groups(state, groups) {
+    state.user_groups = groups
   },
   save_user(state, user) {
     state.user = user
@@ -158,7 +175,6 @@ const mutations = {
     state.plugins.push(plugin)
     state.plugin = plugin
     state.stats = 'success'
-
   },
   add_plugin_config(state, plugin_config) {
     state.plugin_configs.push(plugin_config)
@@ -179,6 +195,17 @@ const mutations = {
     state.cases.push(data)
     state.case = data
     state.status = 'success'
+  },
+  add_case_task(state, task) {
+    state.case.tasks.push(task)
+    state.status = 'success'
+  },
+  add_case_template(state, data) {
+    state.case_templates.push(data)
+    state.case_template = data
+    state.status = 'success'
+    state.case_template_list.push({title:data.title, description:data.description, uuid:data.uuid, tags:data.tags, severity:data.severity, tlp:data.tlp})
+    state.tags.concat(data.tags)
   },
   add_case_status(state, data) {
     state.case_statuses.push(data)
@@ -244,7 +271,8 @@ const getters = {
   isLoggedIn: state => !!state.access_token,
   authStatus: state => state.status,
   addStatus: state => state.status,
-  current_user: state => state.current_user
+  current_user: state => state.current_user,
+  tags: state => state.tags
 }
 
 const BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v1.0'
@@ -305,7 +333,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/tag`, method: 'GET'})
       .then(resp => {
-        commit('tags_success', resp.data)
+        commit('save_tags', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -678,6 +706,42 @@ const actions = {
       })
     })
   },
+  getCaseTemplates({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_template`, method: 'GET'})
+      .then(resp => {
+        commit('save_case_templates', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createCaseTemplate({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_template`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_case_template', data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCaseTemplateList({commit}, title) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_template?title=${title}`, method: 'GET', headers: {'X-Fields': 'uuid,title,description,tlp,severity,tags,task_count'}})
+      .then(resp => {
+        commit('save_case_template_list', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCases({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case`, method: 'GET'})
@@ -714,6 +778,18 @@ const actions = {
       })
     })
   },
+  getGroupsByName({commit}, name) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user_group?name=${name}`, method: 'GET'})
+      .then(resp => {
+        commit('save_user_groups', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCase({commit}, uuid) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET'})
@@ -731,6 +807,18 @@ const actions = {
       Axios({url: `${BASE_URL}/case`, data: data, method: 'POST'})
       .then(resp => {
         commit('add_case', data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createCaseTask({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_task`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_case_task', resp.data)
         resolve(resp)
       })
       .catch(err => {
