@@ -10,6 +10,7 @@ const state = {
   access_token: localStorage.getItem('access_token') || '',
   refresh_token: localStorage.getItem('refresh_token') || '',
   current_user: "",
+  user_perms: [],
   credentials: [],
   credential: {},
   events: [],
@@ -63,11 +64,12 @@ const mutations = {
   auth_request(state){
     state.status = 'loading'
   },
-  auth_success(state, access_token, refresh_token, user) {
+  auth_success(state, data) {
     state.status = 'success'
-    state.access_token = access_token
-    state.refresh_token = refresh_token
-    state.current_user = user
+    state.access_token = data['access_token']
+    state.refresh_token = data['refresh_token']
+    state.current_user = data['user']
+    state.user_perms = data['perms']
   },
   auth_error(state){
     state.status = 'error'
@@ -78,10 +80,10 @@ const mutations = {
   refresh_request(state) {
     state.status = 'loading'
   },
-  refresh_success(state, access_token, refresh_token) {
+  refresh_success(state, data) {
     state.status = 'success'
-    state.access_token = access_token
-    state.refresh_token = refresh_token
+    state.access_token = data['access_token']
+    state.refresh_token = data['refresh_token']
   },
   save_credentials(state, credentials){
     state.credentials = credentials
@@ -272,7 +274,11 @@ const getters = {
   authStatus: state => state.status,
   addStatus: state => state.status,
   current_user: state => state.current_user,
-  tags: state => state.tags
+  tags: state => state.tags,
+  user_perms: state => state.user_perms,
+  has_perm: (state) => (perm) => {
+    return state.user_perms.includes(perm)
+  }
 }
 
 const BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v1.0'
@@ -285,11 +291,13 @@ const actions = {
       .then(resp => {
         const access_token = resp.data['access_token']
         const refresh_token = resp.data['refresh_token']
-        const user = resp.data['user']
+        let token_data = JSON.parse(atob(access_token.split('.')[1]));
+        const user = token_data['uuid']
+        let perms = token_data['perms']
         localStorage.setItem('access_token', access_token)
         localStorage.setItem('refresh_token', refresh_token)
         Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
-        commit('auth_success', access_token, refresh_token, user)
+        commit('auth_success', {access_token, refresh_token, user, perms})
         resolve(resp)
       })
       .catch(err => {
@@ -311,7 +319,7 @@ const actions = {
         localStorage.setItem('access_token', access_token)
         localStorage.setItem('refresh_token', refresh_token)
         Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
-        commit('refresh_success', access_token, refresh_token)
+        commit('refresh_success', {access_token, refresh_token})
         resolve(resp)
     })
     .catch(err => {

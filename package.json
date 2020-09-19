@@ -35,6 +35,7 @@
     "@syncfusion/ej2-vue-dropdowns": "^18.2.58",
     "@syncfusion/ej2-vue-grids": "^18.2.58",
     "axios": "^0.19.2",
+    "jwt-decode": "^3.0.0-beta.2",
     "moment-timezone": "^0.5.28",
     "v-markdown-editor": "^1.2.6",
     "v-tooltip": "^2.0.3",
