@@ -6,8 +6,8 @@
       </div>
     </CCol>
     <CCol col v-else>
-      <div style="padding: 10px;">
-        <CButton color="primary" @click="createUserModal()">New User</CButton>
+      <div style="padding: 10px;" v-if="userHas('add_user')">
+        <CButton  color="primary" @click="createUserModal()">New User</CButton>
       </div>
       <CDataTable
         :hover="hover"
@@ -43,13 +43,14 @@
         </template>
         <template #actions="{item}">
           <td style="max-width:150px" class="text-right">
-            <CButton v-if="item.locked" @click="unlockUserModal(item.uuid)" size="sm" color="warning" class="unlock">Unlock User</CButton>&nbsp;
-            <CButton @click="editUserModal(item.uuid)" size="sm" color="primary">Edit User</CButton>&nbsp;
-            <CButton @click="deleteUser(item.uuid)" size="sm" color="danger">Delete User</CButton>&nbsp;            
+            <CButton v-if="item.locked && item.uuid != current_user && userHas('unlock_user')" @click="unlockUserModal(item.uuid)" size="sm" color="warning" class="unlock">Unlock User</CButton>&nbsp;
+            <CButton v-if="item.uuid != current_user && userHas('update_user')" @click="editUserModal(item.uuid)" size="sm" color="primary">Edit User</CButton>&nbsp;
+            <CButton v-if="item.uuid != current_user  && userHas('delete_user')" @click="deleteUser(item.uuid)" size="sm" color="danger">Delete User</CButton>&nbsp;
           </td>
         </template>
       </CDataTable>
     </CCol>
+    
     <CModal :title="modal_title" :centered="true" size="lg" :show.sync="modal_status">
       <CAlert :show.sync="this.error" color="danger" closeButton>
             {{error_message}}
@@ -133,6 +134,8 @@ export default {
   },
   data() {
     return {
+      current_user: this.$store.getters.current_user,
+      user_perms: this.$store.getters.user_perms,
       loading: true,
       newUserModal: false,
       modal_action: null,
@@ -177,6 +180,9 @@ export default {
     }
   },
   methods: {
+    userHas(permission) {
+      return this.user_perms.includes(permission);
+    },
     createUserModal() {
       this.modal_title = "Create User"
       this.modal_submit_text = 'Create'

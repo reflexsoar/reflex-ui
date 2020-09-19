@@ -63,7 +63,7 @@
       <div class="text-center">
         <h4>Pairing Token</h4>
         Copy the command below to pair a new agent
-        <pre class='text-white bg-dark text-left prewrap' style="padding: 10px; border-radius: 5px;">python reflex-agent.py --pair --token "{{pairingToken}}" --console http://localhost:5000 --roles poller,runner</pre>
+        <pre class='text-white bg-dark text-left prewrap' style="padding: 10px; border-radius: 5px;">python reflex-agent.py --pair --token "{{pairingToken}}" --console {{current_url}} --roles poller,runner</pre>
       </div>
     </CModal>
   </CRow>  
@@ -94,14 +94,16 @@ export default {
     alert: false
     },
     created: function () {
+      this.current_url = window.location.origin;
+      this.loadData()
+      this.refresh = setInterval(function() {
         this.loadData()
-        this.refresh = setInterval(function() {
-          this.loadData()
-        }.bind(this), 60000)
+      }.bind(this), 60000)
     },
     data(){
       return {
         name: "",
+        current_url: "",
         description: "",
         url: "",
         pairingModal: false,

@@ -11,7 +11,7 @@ function loadPermissions(access_token) {
 
 function loadUser(access_token) {
   let token_data = JSON.parse(atob(access_token.split('.')[1]));
-  let user = token_data['user']
+  let user = token_data['uuid']
   return user
 }
 
