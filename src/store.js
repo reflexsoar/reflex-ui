@@ -672,9 +672,10 @@ const actions = {
       })
     })
   },
-  updateUser({commit}, {uuid, data}) {
+  updateUser({commit}, {uuid, user}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/${uuid}`, data: data, method: 'PUT'})
+      console.log(user)
+      Axios({url: `${BASE_URL}/user/${uuid}`, data: user, method: 'PUT'})
       .then(resp => {
         commit('save_user', resp.data.user)
         resolve(resp)

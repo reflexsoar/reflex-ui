@@ -162,6 +162,7 @@ export default {
         'role_uuid': '',
         'confirm_password': ''
       },
+      user_original_data: {},
       error: false,
       error_message: null,
       user_loading: false,
@@ -188,7 +189,9 @@ export default {
       this.modal_title = "Edit User"
       this.modal_submit_text = 'Edit'
       this.modal_mode = 'edit'
-      this.user = this.users.find(user => user.uuid === uuid)
+      this.modal_action = this.editUser
+      Object.assign(this.user, this.users.find(user => user.uuid === uuid))
+      this.user.role_uuid = this.user.role.uuid
       this.modal_status = true
     },
     unlockUserModal(uuid) {
@@ -198,7 +201,6 @@ export default {
     },
     createUser() {
       let user = this.user
-      console.log(user)
 
       if (user['confirm_password'] != user['password']) {
         this.error = true
@@ -219,7 +221,20 @@ export default {
       })
     },
     editUser() {
-      console.log('edit user')
+      let user = {
+        username: this.user.username,
+        first_name: this.user.first_name,
+        last_name: this.user.last_name,
+        email: this.user.email,
+        role_uuid: this.user.role_uuid,
+        locked: this.user.locked
+      }
+      let uuid = this.user.uuid
+      this.$store.dispatch('updateUser', {uuid, user}).then(resp => {
+        let userIndex = this.users.findIndex((user => user.uuid == uuid))
+        Object.assign(this.users[userIndex], resp.data)
+        this.modal_status = false
+      })
     },
     unlockUser(uuid) {
       this.$store.dispatch('unlockUser', uuid).then(resp => {

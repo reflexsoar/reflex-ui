@@ -24,7 +24,6 @@ Vue.use(VueClipboard)
 Vue.use(GridPlugin)
 Vue.component('vue-markdown', VueMarkdown)
 
-
 Vue.prototype.$log = console.log.bind(console)
 Vue.prototype.$http = Axios;
 
