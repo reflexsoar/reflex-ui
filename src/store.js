@@ -3,14 +3,26 @@ import Vuex from 'vuex'
 import Axios from 'axios'
 Vue.use(Vuex)
 
+function loadPermissions(access_token) {
+  let token_data = JSON.parse(atob(access_token.split('.')[1]));
+  let perms = token_data['perms']
+  return perms
+}
+
+function loadUser(access_token) {
+  let token_data = JSON.parse(atob(access_token.split('.')[1]));
+  let user = token_data['user']
+  return user
+}
+
 const state = {
   sidebarShow: 'responsive',
   sidebarMinimize: false,
   status: '',
   access_token: localStorage.getItem('access_token') || '',
   refresh_token: localStorage.getItem('refresh_token') || '',
-  current_user: "",
-  user_perms: [],
+  current_user: loadUser(localStorage.getItem('access_token')) || "",
+  user_perms: loadPermissions(localStorage.getItem('access_token')) || [],
   credentials: [],
   credential: {},
   events: [],
