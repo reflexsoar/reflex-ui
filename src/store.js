@@ -659,6 +659,55 @@ const actions = {
       })
     })
   },
+  unlockUser({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      console.log(uuid)
+      Axios({url: `${BASE_URL}/user/${uuid}/unlock`, method: 'PUT'})
+      .then(resp => {
+        commit('save_user', resp.data.user)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateUser({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_user', resp.data.user)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getUser({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_user', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createUser({commit}, user) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user`, data: user, method: 'POST'})
+      .then(resp => {
+        commit('add_user', resp.data.user)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getRoles({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/role`, method: 'GET'})
