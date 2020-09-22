@@ -3,26 +3,13 @@ import Vuex from 'vuex'
 import Axios from 'axios'
 Vue.use(Vuex)
 
-function loadPermissions(access_token) {
-  let token_data = JSON.parse(atob(access_token.split('.')[1]));
-  let perms = token_data['perms']
-  return perms
-}
-
-function loadUser(access_token) {
-  let token_data = JSON.parse(atob(access_token.split('.')[1]));
-  let user = token_data['uuid']
-  return user
-}
-
 const state = {
   sidebarShow: 'responsive',
   sidebarMinimize: false,
   status: '',
   access_token: localStorage.getItem('access_token') || '',
   refresh_token: localStorage.getItem('refresh_token') || '',
-  current_user: loadUser(localStorage.getItem('access_token')) || "",
-  user_perms: loadPermissions(localStorage.getItem('access_token')) || [],
+  current_user: {},
   credentials: [],
   credential: {},
   events: [],
@@ -80,8 +67,6 @@ const mutations = {
     state.status = 'success'
     state.access_token = data['access_token']
     state.refresh_token = data['refresh_token']
-    state.current_user = data['user']
-    state.user_perms = data['perms']
   },
   auth_error(state){
     state.status = 'error'
@@ -96,6 +81,10 @@ const mutations = {
     state.status = 'success'
     state.access_token = data['access_token']
     state.refresh_token = data['refresh_token']
+  },
+  save_current_user(state, user) {
+    state.current_user = user
+    state.success ='success'
   },
   save_credentials(state, credentials){
     state.credentials = credentials
@@ -151,6 +140,9 @@ const mutations = {
   },
   save_user(state, user) {
     state.user = user
+  },
+  remove_user(state, user) {
+    state.user = {}
   },
   save_roles(state, roles) {
     state.roles = roles
@@ -286,11 +278,7 @@ const getters = {
   authStatus: state => state.status,
   addStatus: state => state.status,
   current_user: state => state.current_user,
-  tags: state => state.tags,
-  user_perms: state => state.user_perms,
-  has_perm: (state) => (perm) => {
-    return state.user_perms.includes(perm)
-  }
+  tags: state => state.tags
 }
 
 const BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v1.0'
@@ -303,13 +291,10 @@ const actions = {
       .then(resp => {
         const access_token = resp.data['access_token']
         const refresh_token = resp.data['refresh_token']
-        let token_data = JSON.parse(atob(access_token.split('.')[1]));
-        const user = token_data['uuid']
-        let perms = token_data['perms']
         localStorage.setItem('access_token', access_token)
         localStorage.setItem('refresh_token', refresh_token)
         Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
-        commit('auth_success', {access_token, refresh_token, user, perms})
+        commit('auth_success', {access_token, refresh_token})
         resolve(resp)
       })
       .catch(err => {
@@ -347,6 +332,19 @@ const actions = {
       localStorage.removeItem('access_token')
       delete Axios.defaults.headers.common['Authorization']
       resolve()      
+    })
+  },
+  getMe({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/me`, method: 'GET'})
+      .then(resp => {
+        commit('save_current_user', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        commit('tags_error')
+        reject(err)
+      })
     })
   },
   getTags({commit}) {
@@ -698,6 +696,18 @@ const actions = {
       Axios({url: `${BASE_URL}/user/${uuid}`, data: user, method: 'PUT'})
       .then(resp => {
         commit('save_user', resp.data.user)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteUser({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_user', resp.data)
         resolve(resp)
       })
       .catch(err => {

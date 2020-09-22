@@ -261,55 +261,8 @@ export default {
             users: [],
             assignee: null,
             comment: "",
-            comments: [{
-                "author":"n3tsurge",
-                "created_at": "2020-09-14 12:31:44",
-                "comment": "Something definitely doesn't seem right here @claymation. This is an interesting command that was run `whoami /priv`"
-            },
-            {
-                "author":"claymation",
-                "created_at": "2020-09-14 12:59:44",
-                "comment": "Ran the response playbook and pinged the user.  Turns out they were troubleshooting an issue with VENDOR support and the vendor was trying to determine what permissions the user had."
-            }],
-            tasks: [
-                {
-                    'order': 1,
-                    'title': 'Qualify the threat',
-                    'phase': 'Identification',
-                    'description': 'Determine if the event or events are valid and gain additional information',
-                    'show_details': false
-                },
-                {
-                    'order': 2,
-                    'title': 'Quantify the threat',
-                    'phase': 'Identification',
-                    'description': 'How many assets are impacted?  Assets could be hardware, software or users.',
-                    'show_details': false
-
-                },
-                {
-                    'order': 3,
-                    'title': 'Quarantine the impacted systems',
-                    'phase': 'Containment',
-                    'description': 'Invoke host isolation, lock accounts, etc.',
-                    'show_details': false
-                },
-                {
-                    'order': 4,
-                    'title': 'Block attacker indicators',
-                    'phase': 'Eradication',
-                    'description': 'Block attacker IPs, hosts, ingress/egress routes, etc.',
-                    'show_details': false
-
-                },
-                {
-                    'order': 5,
-                    'title':'Lessons Learned',
-                    'phase':'Lessons Learned',
-                    'description': 'Do a post-mortem analysis and share the results with the team',
-                    'show_details': false
-                }
-            ],
+            comments: [],
+            tasks: [],
             collapse_tasks: Array(),
             case_statuses: [],
             severities: [

@@ -51,12 +51,16 @@ Vue.component('v-select', vSelect)
 
 let router = new Router({
   mode: 'hash', // https://router.vuejs.org/api/#mode
-  linkActiveClass: 'active',
+  linkActiveClass: '2',
   scrollBehavior: () => ({ y: 0 }),
   routes: configRoutes()
 })
 
 router.beforeEach((to, from, next) => {
+
+  // Get the users details before each route visit
+  // to refresh user information and permissions that
+  // may have changed from other sessions
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isLoggedIn) {
       next()
@@ -66,6 +70,7 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+
 })
 
 export default router

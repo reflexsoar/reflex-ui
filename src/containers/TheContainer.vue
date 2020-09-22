@@ -28,6 +28,9 @@ export default {
     TheSidebar,
     TheHeader,
     TheFooter
+  },
+  created() {
+    this.$store.dispatch('getMe')
   }
 }
 </script>

@@ -43,9 +43,9 @@
         </template>
         <template #actions="{item}">
           <td style="max-width:150px" class="text-right">
-            <CButton v-if="item.locked && item.uuid != current_user && userHas('unlock_user')" @click="unlockUserModal(item.uuid)" size="sm" color="warning" class="unlock">Unlock User</CButton>&nbsp;
-            <CButton v-if="item.uuid != current_user && userHas('update_user')" @click="editUserModal(item.uuid)" size="sm" color="primary">Edit User</CButton>&nbsp;
-            <CButton v-if="item.uuid != current_user  && userHas('delete_user')" @click="deleteUser(item.uuid)" size="sm" color="danger">Delete User</CButton>&nbsp;
+            <CButton v-if="item.locked && item.uuid != current_user.uuid && userHas('unlock_user')" @click="unlockUserModal(item.uuid)" size="sm" color="warning" class="unlock">Unlock User</CButton>&nbsp;
+            <CButton v-if="item.uuid != current_user.uuid && userHas('update_user')" @click="editUserModal(item.uuid)" size="sm" color="primary">Edit User</CButton>&nbsp;
+            <CButton v-if="item.uuid != current_user.uuid  && userHas('delete_user')" @click="deleteUserModal(item.uuid)" size="sm" color="danger">Delete User</CButton>&nbsp;
           </td>
         </template>
       </CDataTable>
@@ -79,11 +79,27 @@
     </CModal>
     <CModal title="Unlock User" color="danger" :centered="true" :show.sync="unlock_modal">
       <CForm id="unlockForm" @submit.prevent="unlockUser(user.uuid)">
-        Are you sure you want to unlock <b>{{user.username}}</b>? {{user.uuid}}
+        Are you sure you want to unlock <b>{{user.username}}</b>?
       </CForm>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">No</CButton>
         <CButton type="submit" form="unlockForm" color="danger">Yes</CButton>
+      </template>
+    </CModal>
+    <CModal title="Delete User" color="danger" :centered="true" :show.sync="delete_modal">
+      <CForm id="deleteForm" @submit.prevent="deleteUser(user.uuid)">
+        Are you sure you want to delete <b>{{user.username}}</b>?   Type their username in the box below to confirm your intent.
+        <CForm id="delete-confirm">
+          <CInput
+            v-model="delete_confirm"
+            label="Username"
+            required
+          ></CInput>
+        </CForm>
+      </CForm>
+      <template #footer>
+        <CButton @click="dismiss()" color="secondary">No</CButton>
+        <CButton type="submit" form="deleteForm" color="danger">Yes</CButton>
       </template>
     </CModal>
   </CRow>
@@ -134,14 +150,14 @@ export default {
   },
   data() {
     return {
-      current_user: this.$store.getters.current_user,
-      user_perms: this.$store.getters.user_perms,
       loading: true,
       newUserModal: false,
+      delete_modal: false,
       modal_action: null,
       modal_status: false,
       modal_title: "",
       modal_mode: 'new',
+      delete_confirm: "",
       modal_submit_text: 'Create',
       user: {
         'username': 'netsurge',
@@ -179,9 +195,14 @@ export default {
       }
     }
   },
+  computed: {
+    current_user: function () { 
+      return this.$store.getters.current_user
+    }
+  },
   methods: {
     userHas(permission) {
-      return this.user_perms.includes(permission);
+      return this.current_user.permissions.includes(permission);
     },
     createUserModal() {
       this.modal_title = "Create User"
@@ -203,7 +224,10 @@ export default {
     unlockUserModal(uuid) {
       this.user = this.users.find(user => user.uuid === uuid)
       this.unlock_modal = true
-      
+    },
+    deleteUserModal(uuid) {
+      this.user = this.users.find(user => user.uuid === uuid)
+      this.delete_modal = true
     },
     createUser() {
       let user = this.user
@@ -250,6 +274,18 @@ export default {
         this.error = true
         this.error_message = err.response.data.message
       })
+    },
+    deleteUser(uuid) {
+      let confirm = this.delete_confirm
+      if (this.user.username == confirm) {
+        this.$store.dispatch('deleteUser', uuid).then(resp => {
+          let userIndex = this.users.findIndex((user => user.uuid == uuid))
+          console.log(userIndex)
+          this.users.splice(userIndex, 1)
+          console.log(this.users)
+          this.delete_modal = false
+        })
+      }
     },
     addSuccess: function () {
       if (this.$store.getters.addSuccess == "success") {

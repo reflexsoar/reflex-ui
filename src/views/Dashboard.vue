@@ -1,14 +1,15 @@
 <template>
   <div>
     <h1>Dashboard</h1>
+    <h2>Welcome back, {{current_user.first_name}}</h2>
     <h2>DEBUG</h2>
     <h3>Permissions</h3>
-    {{user_perms}}
     <h3>Current User UUID</h3>
-    {{current_user}}
+    {{current_user.uuid}}
 
     <h3>Perm Check</h3>
-    <b>Can edit users:</b> {{edit_users}}
+    {{current_user.permissions}}<br><br>
+    <b>Can edit users:</b> {{current_user.permissions.includes('update_user')}}
   </div>
 </template>
 
@@ -26,9 +27,11 @@ export default {
   },
   data () {
     return {
-      current_user: this.$store.getters.current_user,
-      user_perms: this.$store.getters.user_perms,
-      edit_users: this.$store.getters.has_perm('update_user')
+    }
+  },
+  computed: {
+    current_user: function () { 
+      return this.$store.getters.current_user
     }
   },
   methods: {
