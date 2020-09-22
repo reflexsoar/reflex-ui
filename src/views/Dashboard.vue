@@ -2,12 +2,15 @@
   <div>
     <h1>Dashboard</h1>
     <h2>Welcome back, {{current_user.first_name}}</h2>
-    <h2>DEBUG</h2>
-    <h3>Permissions</h3>
-    <h3>Current User UUID</h3>
+    <h3>DEBUG</h3>
+
+
+    <h4>Organization Data</h4>
+    {{current_user.organization}}<br><br>
+    <h4>Current User UUID</h4>
     {{current_user.uuid}}
 
-    <h3>Perm Check</h3>
+    <h4>Perm Check</h4>
     {{current_user.permissions}}<br><br>
     <b>Can edit users:</b> {{current_user.permissions.includes('update_user')}}
   </div>

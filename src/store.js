@@ -677,6 +677,30 @@ const actions = {
       })
     })
   },
+  getGroups({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user_group`, method: 'GET'})
+      .then(resp => {
+        commit('save_users', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getUserGroupsByName({commit}, name) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user_groups?name={name}`, method: 'GET'})
+      .then(resp => {
+        commit('save_user_groups', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   unlockUser({commit}, uuid) {
     return new Promise((resolve, reject) => {
       console.log(uuid)

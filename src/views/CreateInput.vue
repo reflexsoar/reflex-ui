@@ -93,7 +93,7 @@ import { parse } from '@babel/core';
 export default {
     name: 'CreateInput',
     created() {
-      this.$store.dispatch('getTags')
+      this.loadTags()
       this.$store.dispatch('getCredentialList')
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages     
     },
@@ -107,7 +107,6 @@ export default {
         let plugin = this.plugin
         let tags = this.tags
         let credential_list = this.credential_list
-        let tag_list = this.tag_list
         this.$store.dispatch('createInput', { name, description, config, field_mapping, plugin, credential, tags })
         .then(resp => {
           this.$router.go(-1)
@@ -125,6 +124,13 @@ export default {
       },
       selectCredential(event) {
         this.credential = event.target.value        
+      },
+      loadTags: function() {
+          this.$store.dispatch('getTags').then(resp => {
+              for(let i in resp.data) {
+                  this.tag_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
+              }
+          })
       },
       populateConfig(event) {
         let conf = ""
@@ -153,7 +159,7 @@ export default {
         return
       }
     },
-    computed: mapState(['tag_list', 'credential_list']),
+    computed: mapState(['credential_list']),
     data(){
       return {
         name: "",
@@ -167,7 +173,8 @@ export default {
         errorMessage: "",
         test: 0,
         tags: [],
-        selected: []
+        selected: [],
+        tag_list: []
       }
     }
 }

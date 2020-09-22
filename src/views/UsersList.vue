@@ -209,8 +209,7 @@ export default {
       this.modal_submit_text = 'Create'
       this.modal_status = true
       this.modal_mode = 'new'
-      this.modal_action = this.createUser
-      this.user = this.empty_user
+      this.modal_action = this.createUser      
     },
     editUserModal(uuid) {
       this.modal_title = "Edit User"
@@ -280,9 +279,7 @@ export default {
       if (this.user.username == confirm) {
         this.$store.dispatch('deleteUser', uuid).then(resp => {
           let userIndex = this.users.findIndex((user => user.uuid == uuid))
-          console.log(userIndex)
           this.users.splice(userIndex, 1)
-          console.log(this.users)
           this.delete_modal = false
         })
       }
@@ -302,7 +299,7 @@ export default {
       });
     },
     reset() {
-      this.user = this.empty_user
+      this.user = {}
       this.error = false
       this.error_message = ""
     },
