@@ -58,7 +58,8 @@ const state = {
       'uuid': '',
       'name': '',
       'description': ''
-    }
+    },
+    'require_case_templates': false
   }
 }
 

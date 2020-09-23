@@ -11,7 +11,7 @@
               label="Case Title"
             >
             </CInput>
-            <label style="text-align:center; vertical-align:middle; padding-bottom:.8em">Assign Case Template?</label>&nbsp;&nbsp;&nbsp;<CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="use_case_template"/>
+            <label style="text-align:center; vertical-align:middle; padding-bottom:.8em">Assign Case Template?</label>&nbsp;&nbsp;&nbsp;<CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="use_case_template" v-bind:disabled="settings.require_case_templates"/>
             <div role="group" class="form-group" v-if="use_case_template">
                 <multiselect 
                     v-model="case_template" 
@@ -75,12 +75,14 @@
 
 <script>
 import {vSelect} from "vue-select";
+import { mapState} from 'vuex';
 export default {
     name: 'CreateCaseModal',
     props: {
         show: Boolean,
         events: Array,
     },
+    computed: mapState(['settings']),
     data(){
         return {
             title: "",
@@ -112,6 +114,9 @@ export default {
         show: function() {
             this.modalStatus = this.show
         },
+        settings: function() {
+            this.use_case_template = this.settings.require_case_templates
+        },
         modalStatus: function(){
             if(this.modalStatus) {
                 this.loadTags()
@@ -135,6 +140,7 @@ export default {
     created() {
         this.loadTags()
         this.loadData()
+        this.$store.dispatch('getSettings')
     },
     methods: {
         applyCaseTemplate() {
@@ -217,7 +223,7 @@ export default {
             })
         },
         reset () {
-            this.use_case_template = false
+            this.use_case_template = this.settings.require_case_templates
             this.case_template = null
             this.severity = 2
             this.tlp = 2
