@@ -25,7 +25,7 @@
                     @search-change="caseTemplateFind">
                     <template slot="option" slot-scope="props">
                         {{props.option.title}}</br>
-                        <small>{{props.option.description}} - Contains {{props.option.task_count}} tasks.</small>
+                        <small>{{props.option.description}}<br>Contains {{props.option.task_count}} tasks.</small>
                     </template>
                 </multiselect>
             </div>
@@ -120,6 +120,7 @@ export default {
         modalStatus: function(){
             if(this.modalStatus) {
                 this.loadTags()
+                this.loadData()
             }
             this.$emit('update:show', this.modalStatus)
             if(!this.modalStatus) {

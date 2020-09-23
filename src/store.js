@@ -228,7 +228,7 @@ const mutations = {
     state.case_templates.push(data)
     state.case_template = data
     state.status = 'success'
-    state.case_template_list.push({title:data.title, description:data.description, uuid:data.uuid, tags:data.tags, severity:data.severity, tlp:data.tlp})
+    state.case_template_list.push({title:data.title, description:data.description, uuid:data.uuid, tags:data.tags, severity:data.severity, task_count: data.task_count, tlp:data.tlp})
     state.tags.concat(data.tags)
   },
   add_case_status(state, data) {
@@ -307,6 +307,7 @@ const getters = {
   status: state => state.status,
   current_user: state => state.current_user,
   alert: state => state.alert,
+  case_templates: state => state.case_templates,
   user_has: function(permission) {
     return state => state.current_user.permissions.includes(permission)
   },

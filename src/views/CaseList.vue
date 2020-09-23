@@ -9,7 +9,20 @@
         </div>
     </CCol>
     <CCol col v-else>
-      <div style="padding:10px"><CButton color="primary" @click="newCaseModal = !newCaseModal">New Case</CButton></div>
+      <CRow style="padding:10px">
+        <CCol col="10">
+          <CButton color="primary" @click="newCaseModal = !newCaseModal">New Case</CButton>
+        </CCol>
+        <CCol col="2" class="text-right">
+          <multiselect 
+                    v-model="fields"
+                    :options="available_fields"
+                    multiple
+                    :close-on-select="false">
+                    <template slot="selection" slot-scope="{ values, search, isOpen }"><span class="multiselect__single" v-if="values.length &amp;&amp; !isOpen">{{ values.length }} fields selected</span></template>
+                </multiselect>
+        </CCol>
+      </CRow>
               <CDataTable
                   :hover="hover"
                   :striped="striped"
@@ -86,12 +99,6 @@ export default {
     },
     props: {
     items: Array,
-    fields: {
-      type: Array,
-      default () {
-        return ['title','status','events','tlp','severity','owner','actions']
-      }
-    },
     caption: {
       type: String,
       default: 'Table'
@@ -102,7 +109,7 @@ export default {
     small: Boolean,
     fixed: Boolean,
     dark: Boolean,
-    alert: false,
+    alert: false
     },
     created: function () {
         this.loadData()
@@ -116,7 +123,9 @@ export default {
         description: "",
         dismissCountDown: 10,
         loading: true,
-        newCaseModal: false
+        newCaseModal: false,
+        fields: ['title','status','events','tlp','severity','owner','actions'],
+        available_fields: ['title','status','events','tlp','severity','owner','actions','created_at','modified_at']
       }
     },
     methods: {

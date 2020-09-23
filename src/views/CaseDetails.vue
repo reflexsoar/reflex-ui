@@ -73,7 +73,7 @@
                             <CSelect label="Severity" :value.sync="case_data.severity" :options="severities" @change="updateSeverity()" v-bind:disabled="case_data.status.closed"></CSelect>
                         </CCol>
                         <CCol col="9" @mouseover="edit_description_hint = true" @mouseleave="edit_description_hint = false">
-                            <h5>Description <small><a v-if="edit_description_hint && !case_data.status.closed" href="#" @click="edit_description = !edit_description">edit</a></small></h5>
+                            <h5>Description <small><a v-if="edit_description_hint && !case_data.status.closed" @click="edit_description = !edit_description">edit</a></small></h5>
                             <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
                             <span v-if="edit_description"><CTextarea rows="10" v-model="case_data.description"></CTextarea><CButton color="danger" @click="edit_description = false">Cancel</CButton>&nbsp;<CButton color="primary" @click="saveDescription()">Save</CButton></span>
                             

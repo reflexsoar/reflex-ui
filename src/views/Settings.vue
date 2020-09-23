@@ -1,19 +1,9 @@
 <template>
 <div>
-    <CRow v-if="status == 'loading'">
-      <CCol>
-        <div style="margin: auto; text-align:center; verticle-align:middle;">
-           <CSpinner
-                color="dark"
-                style="width:6rem;height:6rem;"
-            />
-        </div>
-      </CCol>
-    </CRow>
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
-    <CRow v-if="status == 'success'">
+    <CRow>
       <CCol xs="12" lg="12">
         <CCard>
           <CCardHeader>

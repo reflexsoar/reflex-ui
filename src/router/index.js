@@ -59,15 +59,11 @@ let router = new Router({
 
 router.beforeEach((to, from, next) => {
 
-  // Get the users details before each route visit
-  // to refresh user information and permissions that
-  // may have changed from other sessions
-
+  // Clear any alerts before moving on to the next page
   store.commit('clear_alert')
 
   if(to.matched.some(record => {
     if(record.meta.requiresPermission && !store.getters.current_user.permissions.includes(record.meta.requiresPermission)) {
-      console.log('REDIRECT 401')
       next('/401')
     } else {
       next()
