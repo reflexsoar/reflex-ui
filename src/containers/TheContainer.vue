@@ -6,7 +6,7 @@
       <div class="c-body">
         <main class="c-main">
           <CContainer fluid>
-            
+           
               <router-view></router-view>
             
           </CContainer>
@@ -21,6 +21,7 @@
 import TheSidebar from './TheSidebar'
 import TheHeader from './TheHeader'
 import TheFooter from './TheFooter'
+import { mapState } from 'vuex'
 
 export default {
   name: 'TheContainer',
@@ -29,6 +30,7 @@ export default {
     TheHeader,
     TheFooter
   },
+  computed: mapState(['alert']),
   created() {
     this.$store.dispatch('getMe')
   }

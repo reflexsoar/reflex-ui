@@ -9,7 +9,9 @@ const state = {
   status: '',
   access_token: localStorage.getItem('access_token') || '',
   refresh_token: localStorage.getItem('refresh_token') || '',
-  current_user: {},
+  current_user: {
+    'permissions': []
+  },
   credentials: [],
   credential: {},
   events: [],
@@ -45,7 +47,19 @@ const state = {
   input:{},
   orguuid: '',
   tag_list: [],
-  credential_list: []
+  credential_list: [],
+  alert: {
+    'show': false,
+    'message': '',
+    'type': 'success'
+  },
+  settings: {
+    'email_secret': {
+      'uuid': '',
+      'name': '',
+      'description': ''
+    }
+  }
 }
 
 const mutations = {
@@ -128,6 +142,9 @@ const mutations = {
   },
   save_agent_group(state, agent_group) {
     state.agent_group = agent_group
+  },
+  save_settings(state, settings) {
+    state.settings = settings
   },
   save_agent_groups(state, agent_groups) {
     state.agent_groups = agent_groups
@@ -264,6 +281,15 @@ const mutations = {
   inputs_success(state, inputs) {
     state.inputs_list = inputs
   },
+  show_alert(state, data) {
+    state.alert.message = data['message']
+    state.alert.show = true
+    state.alert.type = 'success'
+  },
+  clear_alert(state) {
+    state.alert.show = false
+    state.alert_message = ''
+  },
   tags_error(state) {
     state.tag_list = []
   },
@@ -277,7 +303,12 @@ const getters = {
   isLoggedIn: state => !!state.access_token,
   authStatus: state => state.status,
   addStatus: state => state.status,
+  status: state => state.status,
   current_user: state => state.current_user,
+  alert: state => state.alert,
+  user_has: function(permission) {
+    return state => state.current_user.permissions.includes(permission)
+  },
   tags: state => state.tags
 }
 
@@ -338,7 +369,9 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/user/me`, method: 'GET'})
       .then(resp => {
+        commit('add_start')
         commit('save_current_user', resp.data)
+        commit('add_success')
         resolve(resp)
       })
       .catch(err => {
@@ -965,7 +998,33 @@ const actions = {
         reject(err)
       })
     })
+  },
+  getSettings({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/settings`, method: 'GET'})
+      .then(resp => {
+        commit('save_settings', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateSettings({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/settings`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('show_alert', {message: 'Successfully updated config', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        commit('show_alert', {message: err.response.data.message, 'type': 'danger'})
+        reject(err)
+      })
+    })
   }
+  
 
 }
 

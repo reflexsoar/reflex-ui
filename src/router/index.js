@@ -61,6 +61,9 @@ router.beforeEach((to, from, next) => {
   // Get the users details before each route visit
   // to refresh user information and permissions that
   // may have changed from other sessions
+
+  store.commit('clear_alert')
+
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isLoggedIn) {
       next()
