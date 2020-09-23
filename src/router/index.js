@@ -40,6 +40,7 @@ const CaseDetails = () => import('@/views/CaseDetails')
 const Settings = () => import('@/views/Settings')
 
 // Views - Pages
+const Page401 = () => import('@/views/pages/Page401')
 const Page404 = () => import('@/views/pages/Page404')
 const Page500 = () => import('@/views/pages/Page500')
 const Login = () => import('@/views/Login')
@@ -63,6 +64,16 @@ router.beforeEach((to, from, next) => {
   // may have changed from other sessions
 
   store.commit('clear_alert')
+
+  if(to.matched.some(record => {
+    if(record.meta.requiresPermission && !store.getters.current_user.permissions.includes(record.meta.requiresPermission)) {
+      console.log('REDIRECT 401')
+      next('/401')
+    } else {
+      next()
+      return
+    }
+  }))
 
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isLoggedIn) {
@@ -208,7 +219,8 @@ function configRoutes () {
               name: 'Create Credential',
               component: CreateCredential,
               meta: {
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'add_credential'
               }
             },
             {
@@ -216,7 +228,8 @@ function configRoutes () {
               name: '',
               component: CredentialsList,
               meta: {
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'view_credentials'
               }
             }/*,
             {
@@ -262,7 +275,8 @@ function configRoutes () {
           component: Plugins,
           redirect: 'plugins/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiresPermission: 'view_plugins'
           },
           children: [
             {
@@ -270,7 +284,8 @@ function configRoutes () {
               name: '',
               component: PluginList,
               meta: {
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'view_plugins'
               }
             },
             {
@@ -278,7 +293,8 @@ function configRoutes () {
               name: 'View Plugin',
               component: PluginDetails,
               meta: {
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'view_plugins'
               }
             }
           ]
@@ -289,7 +305,8 @@ function configRoutes () {
           component: Agents,
           redirect: 'agents/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiresPermission: 'view_agents'
           },
           children: [
             {
@@ -297,7 +314,8 @@ function configRoutes () {
               name: '',
               component: AgentManagement,
               meta: {
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'view_agents'
               }
             },
             {
@@ -350,8 +368,14 @@ function configRoutes () {
           name: 'Settings',
           component: Settings,
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiresPermission: 'update_settings'
           }
+        },
+        {
+          path: '401',
+          name: 'Page401',
+          component: Page401
         }
       ]
     },
@@ -361,13 +385,13 @@ function configRoutes () {
       component: Login
     },
     {
-      path: '/pages',
-      redirect: '/pages/404',
+      path: '/',
       name: 'Pages',
       component: {
         render (c) { return c('router-view') }
       },
       children: [
+        
         {
           path: '404',
           name: 'Page404',

@@ -160,14 +160,14 @@ export default {
       delete_confirm: "",
       modal_submit_text: 'Create',
       user: {
-        'username': 'netsurge',
-        'first_name': 'Brian',
-        'last_name': 'Carroll',
-        'email': 'brian@reflexsoar.com',
+        'username': '',
+        'first_name': '',
+        'last_name': '',
+        'email': '',
         'locked': false,
-        'password': 'password',
+        'password': '',
         'role_uuid': '',
-        'confirm_password': 'password'
+        'confirm_password': ''
       },
       users: [],
       roles: [],

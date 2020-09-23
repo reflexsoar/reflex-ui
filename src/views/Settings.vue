@@ -75,10 +75,10 @@ export default {
     UsersList,
     GlobalSettings
   },
-  beforeCreate() {
+  created() {
     if(this.current_user == null) {
       this.$store.dispatch('getMe')
-    }
+    }    
   },  
   data () {
     return {
