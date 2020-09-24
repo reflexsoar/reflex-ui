@@ -189,6 +189,9 @@ const mutations = {
   remove_user(state, user) {
     state.user = {}
   },
+  remove_comment(state) {
+    state.comment = {}
+  },
   save_roles(state, roles) {
     state.roles = roles
   },
@@ -1081,6 +1084,19 @@ const actions = {
       Axios({url: `${BASE_URL}/case_comment`, data: data, method: 'POST'})
       .then(resp => {
         commit('add_case_comment', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteCaseComment({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_comment/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_comment')
+        commit('show_alert', {message: 'Successfully deleted the comment.', 'type': 'success'})
         resolve(resp)
       })
       .catch(err => {

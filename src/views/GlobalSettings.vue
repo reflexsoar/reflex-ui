@@ -29,7 +29,8 @@
           <CSelect :value.sync="settings.email_secret_uuid" :options="credential_list" label="Email Credentials" placeholder="Select a credential"/>
           <h4>API Settings</h4>
           <CInput v-model="settings.api_key_valid_days" description="Changing this setting will only impact new API keys" label="API Key Valid Period (days)" placeholder="366"/>
-
+          <h4>Agent Settings</h4>
+          <CInput v-model="settings.agent_pairing_token_valid_minutes" label="Agent Pairing Token Validity (minutes)" placeholder="15"/>
         </CCol>
       </CRow>
       <CRow>
