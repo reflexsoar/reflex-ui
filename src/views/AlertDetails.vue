@@ -17,7 +17,6 @@
                 </CCol>
                 <CCol col="12" lg="6" sm="12" class="text-right">
                     <CButtonGroup>
-                        
                         <CDropdown 
                         toggler-text="Actions" 
                         color="secondary"

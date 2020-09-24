@@ -27,6 +27,9 @@
           <CInput v-model="settings.email_from" label="Email From" placeholder="admin@reflexsoar.com"/>
           <CInput v-model="settings.email_server" label="Email Server" placeholder="127.0.0.1:25"/>
           <CSelect :value.sync="settings.email_secret_uuid" :options="credential_list" label="Email Credentials" placeholder="Select a credential"/>
+          <h4>API Settings</h4>
+          <CInput v-model="settings.api_key_valid_days" description="Changing this setting will only impact new API keys" label="API Key Valid Period (days)" placeholder="366"/>
+
         </CCol>
       </CRow>
       <CRow>

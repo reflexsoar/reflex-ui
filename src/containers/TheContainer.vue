@@ -30,10 +30,7 @@ export default {
     TheHeader,
     TheFooter
   },
-  computed: mapState(['alert']),
-  created() {
-    this.$store.dispatch('getMe')
-  }
+  computed: mapState(['alert'])
 }
 </script>
 

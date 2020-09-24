@@ -58,6 +58,12 @@ export default [
       },
       {
         _name: 'CSidebarNavItem',
+        name: 'Intel Lists',
+        to: '/lists',
+        icon: 'cil-list'
+      },
+      {
+        _name: 'CSidebarNavItem',
         name: 'Settings',
         to: '/settings',
         icon: 'cil-settings'

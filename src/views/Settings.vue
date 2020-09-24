@@ -27,7 +27,7 @@
                 <template slot="title">
                   <CIcon name="cil-people"/> {{tabs[2]}}
                 </template>
-                GROUPS
+                <GroupList/>
               </CTab>
               <CTab>
                 <template slot="title">
@@ -56,19 +56,18 @@
 <script>
 import UsersList from './UsersList'
 import RolesList from './RolesList'
+import GroupList from './GroupList'
 import GlobalSettings from './GlobalSettings'
 import { mapState, mapGetters } from 'vuex'
 export default {
   name: 'Settings',
-  computed: mapState(['current_user', 'status', 'alert']),
+  computed: mapState(['current_user', 'alert']),
   components: {
     UsersList,
-    GlobalSettings
+    GlobalSettings,
+    GroupList
   },
   created() {
-    if(this.current_user == null) {
-      this.$store.dispatch('getMe')
-    }    
   },  
   data () {
     return {

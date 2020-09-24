@@ -34,9 +34,10 @@ const Plugins = () => import('@/views/Plugins')
 const PluginList = () => import('@/views/PluginList')
 const PluginDetails = () => import('@/views/PluginDetails')
 const Cases = () => import('@/views/Cases')
-const CaseList = () => import('@/views/CaseList')
 const CaseManagement = () => import('@/views/CaseManagement')
 const CaseDetails = () => import('@/views/CaseDetails')
+const Lists = () => import('@/views/Lists')
+const ListsList = () => import('@/views/ListsList')
 const Settings = () => import('@/views/Settings')
 
 // Views - Pages
@@ -62,14 +63,18 @@ router.beforeEach((to, from, next) => {
   // Clear any alerts before moving on to the next page
   store.commit('clear_alert')
 
-  if(to.matched.some(record => {
-    if(record.meta.requiresPermission && !store.getters.current_user.permissions.includes(record.meta.requiresPermission)) {
-      next('/401')
-    } else {
-      next()
-      return
-    }
-  }))
+  // Before each request refresh the users permissions
+  store.dispatch('getMe').then(() => {
+    if(to.matched.some(record => {
+      let current_user = store.getters.current_user
+      if(record.meta.requiresPermission && !current_user.permissions.includes(record.meta.requiresPermission)) {
+        next('/401')
+      } else {
+        next()
+        return
+      }
+    })) {}
+  })  
 
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isLoggedIn) {
@@ -358,7 +363,26 @@ function configRoutes () {
               }
             }
           ]
-        },        
+        },
+        {
+          path: 'lists',
+          name: 'Intel Lists',
+          component: Lists,
+          redirect: 'lists/list',
+          meta: {
+            requiresAuth: true
+          },
+          children: [
+            {
+              path: 'list',
+              name: 'View Lists',
+              component: ListsList,
+              meta: {
+                requiresAuth: true
+              }
+            }
+          ]
+        },
         {
           path: 'settings',
           name: 'Settings',

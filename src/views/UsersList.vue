@@ -1,11 +1,6 @@
 <template>
   <CRow>
-    <CCol col v-if="loading">
-      <div style="margin: auto; text-align:center; verticle-align:middle;">
-        <CSpinner color="dark" style="width:6rem;height:6rem;" />
-      </div>
-    </CCol>
-    <CCol col v-else>
+    <CCol col>
       <div style="padding: 10px;" v-if="userHas('add_user')">
         <CButton  color="primary" @click="createUserModal()">New User</CButton>
       </div>
@@ -156,12 +151,12 @@ export default {
       modal_action: null,
       modal_status: false,
       modal_title: "",
-      modal_mode: 'new',
-      delete_confirm: "",
       modal_submit_text: 'Create',
+      modal_mode: 'new',
+      delete_confirm: "",      
       user: {
-        'username': '',
-        'first_name': '',
+        'username': 'netsurge',
+        'first_name': 'Brian',
         'last_name': '',
         'email': '',
         'locked': false,
@@ -244,6 +239,7 @@ export default {
 
       this.$store.dispatch('createUser', user).then(resp => {
         this.modal_status = false
+        this.lists = this.$store.getters.lists
       }).catch(err => {
         this.error = true
         this.error_message = err.response.data.message

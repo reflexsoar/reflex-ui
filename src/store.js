@@ -24,6 +24,8 @@ const state = {
   case_template: {},
   case_statuses: [],
   case_status: {},
+  data_types: [],
+  data_type: {},
   case_template_list: [],
   unread_event_count: 0,
   agents: [],
@@ -47,6 +49,8 @@ const state = {
   input:{},
   orguuid: '',
   tag_list: [],
+  list: {},
+  lists: [],
   credential_list: [],
   alert: {
     'show': false,
@@ -117,6 +121,26 @@ const mutations = {
   save_event(state, event) {
     state.event = event
   },
+  save_lists(state, lists) {
+    state.lists = lists
+  },
+  save_list(state, list) {
+    state.list = list
+  },
+  add_list(state, list) {
+    state.lists.push(list)
+    state.list = list
+  },
+  save_data_types(state, data) {
+    state.data_types = data
+  },
+  save_data_type(state, data) {
+    state.data_type = data
+  },
+  add_data_type(state, data) {
+    state.data_types.push(data)
+    state.data_type = data
+  },
   save_agents(state, agents) {
     state.agents = agents
   },
@@ -158,6 +182,9 @@ const mutations = {
   },
   save_user(state, user) {
     state.user = user
+  },
+  remove_list(state, list) {
+    state.list = {}
   },
   remove_user(state, user) {
     state.user = {}
@@ -308,6 +335,15 @@ const getters = {
   current_user: state => state.current_user,
   alert: state => state.alert,
   case_templates: state => state.case_templates,
+  date_types: state => state.data_types,
+  data_types_list: function() {
+    return state.data_types.map(function(data_type) {
+      var newDataType = {};
+      newDataType['label'] = data_type.name;
+      newDataType['value'] = data_type.uuid;
+      return newDataType;
+    })
+  },
   user_has: function(permission) {
     return state => state.current_user.permissions.includes(permission)
   },
@@ -391,6 +427,69 @@ const actions = {
       })
       .catch(err => {
         commit('tags_error')
+        reject(err)
+      })
+    })
+  },
+  getDataTypes({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/data_type`, method: 'GET'})
+      .then(resp => {
+        commit('save_data_types', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getLists({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/list`, method: 'GET'})
+      .then(resp => {
+        commit('save_lists', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createList({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/list`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_list', resp.data)
+        commit('show_alert', {message: 'Successfully created list.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateList({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/list/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_list', resp.data)
+        commit('show_alert', {message: 'Successfully updated list.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteList({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/list/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_list')
+        commit('show_alert', {message: 'Successfully deleted list.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })
@@ -1005,7 +1104,9 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/settings`, method: 'GET'})
       .then(resp => {
+        commit('add_start')
         commit('save_settings', resp.data)
+        commit('add_success')
         resolve(resp)
       })
       .catch(err => {
