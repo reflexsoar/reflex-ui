@@ -51,19 +51,19 @@
             {{error_message}}
       </CAlert>
       <CForm @submit.prevent="modal_action()" id="userForm">
-        <CInput v-model="user.username" label="Username" required/>
+        <CInput v-model="user.username" label="Username" placeholder="Enter a unique username for the user" required/>
         <CRow>
           <CCol col="6">
-            <CInput v-model="user.first_name" label="First Name" required/>
+            <CInput v-model="user.first_name" label="First Name" placeholder="John" required/>
           </CCol>
           <CCol col="6">
-            <CInput v-model="user.last_name" label="Last Name" required/>
+            <CInput v-model="user.last_name" label="Last Name" placeholder="Doe" required/>
           </CCol>
         </CRow>
-        <CInput v-model="user.email" label="Email" required/>
+        <CInput v-model="user.email" label="Email" placeholder="user@reflexsoar.com" required/>
         <CSelect :options="roles" required label="Role" :value.sync="user.role_uuid" placeholder="Select a role"/>
-        <CInput v-if="modal_mode == 'new'" v-model="user.password" type="password" label="Password" required/>
-        <CInput v-if="modal_mode == 'new'" v-model="user.confirm_password"  type="password" label="Confirm Password" required/>
+        <CInput v-if="modal_mode == 'new'" v-model="user.password" type="password" label="Password" placeholder="Enter your desired password..." required/>
+        <CInput v-if="modal_mode == 'new'" v-model="user.confirm_password"  type="password" label="Confirm Password" placeholder="Confirm password" required/>
         <label>User Locked?</label><br>
         <CSwitch color="danger" label-on="Yes" label-off="No" v-bind:checked.sync="user.locked"/>
       </CForm>
@@ -155,8 +155,8 @@ export default {
       modal_mode: 'new',
       delete_confirm: "",      
       user: {
-        'username': 'netsurge',
-        'first_name': 'Brian',
+        'username': '',
+        'first_name': '',
         'last_name': '',
         'email': '',
         'locked': false,
