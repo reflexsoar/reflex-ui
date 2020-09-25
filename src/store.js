@@ -995,6 +995,18 @@ const actions = {
       })
     })
   },
+  getCasesByTitle({commit}, title) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case?title=${title}`, method: 'GET'})
+      .then(resp => {
+        commit('save_cases', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCaseStatus({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case_status`, method: 'GET'})
@@ -1060,6 +1072,18 @@ const actions = {
       Axios({url: `${BASE_URL}/case_task`, data: data, method: 'POST'})
       .then(resp => {
         commit('add_case_task', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  addEventsToCase({commit}, {uuid, events}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}/add_events`, data: events, method: 'PUT'})
+      .then(resp => {
+        commit('save_case', resp.data.case)
         resolve(resp)
       })
       .catch(err => {

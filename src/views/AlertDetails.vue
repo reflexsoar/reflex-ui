@@ -23,7 +23,8 @@
                         >
                         <CDropdownItem v-if="!event.case_uuid" @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
-                        <CDropdownItem v-if="!event.case_uuid">Create Case</CDropdownItem>
+                        <CDropdownItem v-if="!event.case_uuid" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
+                        <CDropdownItem v-if="!event.case_uuid" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
                         <CDropdownDivider/>
                         <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
                         </CDropdown>
@@ -173,16 +174,22 @@
         <CButton @click="deleteEvent()" color="danger">Delete</CButton>
       </template>
     </CModal>
+    <CreateCaseModal :show.sync="createCaseModal" :events="[event.uuid]"></CreateCaseModal>
+    <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="[event.uuid]"></MergeEventIntoCaseModal>
   </CRow>
 </template>
 
 <script>
 import {mapState} from "vuex";
 import hoverselect from './HoverSelect'
+import CreateCaseModal from './CreateCaseModal'
+import MergeEventIntoCaseModal from './MergeEventIntoCaseModal'
 export default {
     name: 'EventDetails',
     components: {
-        hoverselect
+        hoverselect,
+        CreateCaseModal,
+        MergeEventIntoCaseModal
     },
     props: {
         observable_fields: {
@@ -216,7 +223,9 @@ export default {
             runPlaybookModal: false,
             deleteEventModal: false,
             dismissalComment: "",
-            dismissalReason: null
+            dismissalReason: null,
+            createCaseModal: false,
+            mergeIntoCaseModal: false
         }
     },
     created() {

@@ -104,6 +104,7 @@
       </template>
     </CModal>
     <CreateCaseModal :show.sync="createCaseModal" :events="selected"></CreateCaseModal>
+    <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
@@ -114,6 +115,7 @@
         <CButton @click="deleteEvent()" color="danger">Delete</CButton>
       </template>
     </CModal>
+    
   </CRow>
 </template>
 
@@ -121,10 +123,12 @@
 import {mapState} from "vuex";
 import {vSelect} from "vue-select";
 import CreateCaseModal from './CreateCaseModal'
+import MergeEventIntoCaseModal from './MergeEventIntoCaseModal'
 export default {
     name: 'Events',
     components: {
-      CreateCaseModal
+      CreateCaseModal,
+      MergeEventIntoCaseModal
     },
     props: {
     items: Array,
@@ -170,6 +174,7 @@ export default {
         dismissCountDown: 10,
         selectAll: false,
         selected: Array(),
+        mergeIntoCaseModal: false,
         dismissEventModal:false,
         deleteEventModal: false,
         createCaseModal: false,

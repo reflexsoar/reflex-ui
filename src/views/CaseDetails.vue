@@ -9,7 +9,9 @@
         </div>
     </CCol>
     <CCol col v-if="!loading">
-    
+    <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
+      {{alert.message}}
+    </CAlert>
     <CCard class="shadow-sm bg-white rounded" >
         <CCardHeader>
             <CRow>
@@ -216,6 +218,7 @@ export default {
         Mentionable,
         Comments
     },
+    computed: mapState(['alert']),
     props: {
         event_fields: {
             type: Array,
