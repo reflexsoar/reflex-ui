@@ -315,7 +315,7 @@ const mutations = {
   show_alert(state, data) {
     state.alert.message = data['message']
     state.alert.show = true
-    state.alert.type = 'success'
+    state.alert.type = data['type']
   },
   clear_alert(state) {
     state.alert.show = false
@@ -1139,6 +1139,17 @@ const actions = {
       })
       .catch(err => {
         commit('show_alert', {message: err.response.data.message, 'type': 'danger'})
+        reject(err)
+      })
+    })
+  },
+  getPersistentPairingToken({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/settings/generate_persistent_pairing_token`, method: 'GET'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })

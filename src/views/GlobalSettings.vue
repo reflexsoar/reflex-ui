@@ -31,6 +31,7 @@
           <CInput v-model="settings.api_key_valid_days" description="Changing this setting will only impact new API keys" label="API Key Valid Period (days)" placeholder="366"/>
           <h4>Agent Settings</h4>
           <CInput v-model="settings.agent_pairing_token_valid_minutes" label="Agent Pairing Token Validity (minutes)" placeholder="15"/>
+          <CButton color="danger" @click="persistentTokenModal()">Generate Peristent Pairing Token</CButton>
         </CCol>
       </CRow>
       <CRow>
@@ -39,6 +40,20 @@
         </CCol>
       </CRow>  
     </CForm>
+    <CModal title="Persistent Pairing Token" color="danger" :centered="true" size="lg" :show.sync="generate_modal">
+      <CForm id="confirmPairingConfirm" @submit.prevent="deleteUser(user.uuid)">
+        <p>Are you sure you want to generate a persistent pairing token?</p>
+        <p>Persistent pairing tokens never expire, at which point they can be used to register new agents and agents have significant permissions.</p>
+        <p><b>WARNING</b>: If you already have a persistent pairing token, generating a new one will invalidate the old one.</p>
+        <p><center v-if="confirm_generate"><b>Pairing Token</b><br>{{persistent_pairing_token}}</center></p>
+        </CForm>
+      </CForm>
+      <template #footer>
+        <CButton v-if="!confirm_generate" @click="dismiss()" color="secondary">No</CButton>
+        <CButton v-if="!confirm_generate" @click="generateToken()" color="danger">Yes</CButton>
+        <CButton v-if="confirm_generate" @click="dismiss()" color="success">Finish</CButton>
+      </template>
+    </CModal>
   </CCardBody>
 </template>
 
@@ -49,19 +64,43 @@ export default {
   name: "GlobalSettings",
   data() {
     return {
+      persistent_pairing_token: "",
+      confirm_generate: false,
+      generate_modal: false
     };
   },
   created(){
     this.loadData()
+    
   },
   computed: mapState(['current_user', 'settings', 'credential_list']),
   methods: {
+    persistentTokenModal() {
+      this.generate_modal = true
+
+    },
+    generateToken() {
+      this.$store.dispatch('getPersistentPairingToken').then(resp => {
+        this.persistent_pairing_token = resp.data.token
+        this.confirm_generate = true
+      })
+    },
     loadData() {
       this.$store.dispatch('getSettings')
       this.$store.dispatch('getCredentialList')
     },
+    dismiss(){
+      this.generate_modal = false;
+      this.persistent_pairing_token = "";
+      this.confirm_generate = false;
+    },
     updateSettings() {
       let settings = this.settings
+      if(this.settings.agent_pairing_token_valid_minutes > 365) {
+        this.$store.commit('show_alert', {'message': 'Pairing tokens can not exceed 1 year in validity.', 'type':'danger'})
+        return
+      }
+      this.$store.commit('clear_alert')
       this.$store.dispatch('updateSettings', settings)
     }
   },
