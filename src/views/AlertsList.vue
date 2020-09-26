@@ -86,7 +86,7 @@
         </CCol>
         <CCol col="2" class="text-right">
           <div>
-            <CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block">Change View</CButton>&nbsp;
+            <CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;
             <CDropdown 
                 :toggler-text="`${selected.length} events`" 
                 color="secondary"
