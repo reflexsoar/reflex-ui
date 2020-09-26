@@ -92,7 +92,9 @@ import {
   cilTerminal,
   cilObjectGroup,
   cilBriefcase,
-  cilMenu
+  cilMenu,
+  cilTags,
+  cilBellSlash
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -161,7 +163,9 @@ export const iconsSet = Object.assign(
     cilTerminal,
     cilObjectGroup,
     cilBriefcase,
-    cilMenu
+    cilMenu,
+    cilTags,
+    cilBellSlash
   },
   {
     cifUs,

@@ -708,6 +708,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event`, method: 'GET'})
       .then(resp => {
+        commit('add_start')
         commit('save_events', resp.data)
         resolve(resp)
       })
