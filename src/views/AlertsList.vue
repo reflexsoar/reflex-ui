@@ -200,7 +200,7 @@
                 </CCol>
                 <CCol col="2" class="text-right">
                   <CButtonGroup>
-                    <CButton v-if="countStatusBySignature(event.signature, 'New') > 0 && countStatusBySignature(event.signature, 'New') < relatedEvents(event.signature)" size="sm" color="danger" @click="autoMerge(event.signature)">Create Event Rule</CButton>
+                    <CButton v-if="countStatusBySignature(event.signature, 'New') > 0 && countStatusBySignature(event.signature, 'New') < relatedEvents(event.signature)" size="sm" color="danger" @click="createEventRule(event.signature)">Create Event Rule</CButton>
                     <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`">View Case</CButton>
                   </CButtonGroup>
                 </CCol>
@@ -254,6 +254,7 @@
       </template>
     </CModal>
     <CreateCaseModal :show.sync="createCaseModal" :events="selected"></CreateCaseModal>
+    <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :rule_signature="rule_signature" :rule_observables="rule_observables"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
@@ -307,11 +308,13 @@ import {mapState} from "vuex";
 import {vSelect} from "vue-select";
 import CreateCaseModal from './CreateCaseModal'
 import MergeEventIntoCaseModal from './MergeEventIntoCaseModal'
+import CreateEventRuleModal from './CreateEventRuleModal'
 export default {
     name: 'Events',
     components: {
       CreateCaseModal,
-      MergeEventIntoCaseModal
+      MergeEventIntoCaseModal,
+      CreateEventRuleModal
     },
     props: {
     items: Array,
@@ -354,6 +357,7 @@ export default {
         dismissEventModal:false,
         deleteEventModal: false,
         createCaseModal: false,
+        createEventRuleModal: false,
         dismissalComment: "",
         dismissalReason: null,
         collapse: {},
@@ -364,7 +368,9 @@ export default {
         table_view: false,
         select_all: false,
         fields: ['name', 'created_at', 'related_events', 'reference', 'status', 'severity', 'tlp', 'observable_count'],
-        sort_by: 'date'
+        sort_by: 'date',
+        rule_signature: "",
+        rule_observables: []
       }
     },
     methods: {
@@ -411,9 +417,22 @@ export default {
           }          
         }
       },
-      autoMerge(signature) {
+      createEventRule(signature) {
         this.selected = []
-        this.selected = this.events.filter((event) => event.signature == signature && event.status.name == 'New')
+        this.rule_signature = signature
+        this.selected = this.events.filter((event) => event.signature == signature && event.status.name == 'New').map((event) => event.uuid)
+        this.rule_observables = this.events.filter((event) => 
+            this.selected.includes(event.uuid)
+          ).map(event => event.observables).flat().map( function(obs) { 
+            return {'dataType':obs.dataType.name, 'value': obs.value
+            }
+          })
+        let unique_observables = Array.from(new Set(this.rule_observables.map(a => a.value)))
+        .map(value => {
+          return this.rule_observables.find(a => a.value === value)
+        })
+        this.rule_observables = unique_observables
+        this.createEventRuleModal = true
       },
       selectedRelated(uuid) {
         let source_event = this.filtered_events.filter((event) => { 
