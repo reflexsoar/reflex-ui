@@ -13,7 +13,8 @@
                 :internal-search="false"
                 :options-limit="10"
                 :show-no-results="false" 
-                @search-change="caseFind">
+                @search-change="caseFind"
+                placeholder="Select a case">
                 <template slot="singleLabel" slot-scope="{option}">#{{option.id}} - {{option.title}} | {{getSeverity(option.severity)}}</template>
                 <template slot="option" slot-scope="props">
                     #{{props.option.id}} - {{props.option.title}}<br>
