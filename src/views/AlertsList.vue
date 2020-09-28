@@ -3,11 +3,11 @@
     <CCol col="12">
       <h2>Events</h2>
       <CRow>
-        <CRow col="12">
+        <CCol col="12">
           <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
             {{alert.message}}
           </CAlert>
-        </CRow>
+        </CCol>
       </CRow>
       <CRow>
         <CCol col="12">
