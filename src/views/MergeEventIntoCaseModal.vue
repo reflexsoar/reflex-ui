@@ -13,9 +13,9 @@
                 :internal-search="false"
                 :options-limit="10"
                 :show-no-results="false" 
+                :custom-label="caseLabel"
                 @search-change="caseFind"
                 placeholder="Select a case">
-                <template slot="singleLabel" slot-scope="{option}">#{{option.id}} - {{option.title}} | {{getSeverity(option.severity)}}</template>
                 <template slot="option" slot-scope="props">
                     #{{props.option.id}} - {{props.option.title}}<br>
                     <small><b>Severity: </b>{{getSeverity(props.option.severity)}} | <b>Owner:</b> {{props.option.owner.username || "Unassigned" }} | Contains {{props.option.event_count}} events.</small><br>
@@ -65,6 +65,11 @@ export default {
     methods: {
         loadData() {
             this.$store.dispatch('getCases', 'uuid,title,id,event_count,owner,severity')
+        },
+        caseLabel({id, title}) {
+            if(id && title) {
+                return `#${id} - ${title}`
+            }
         },
         getSeverity(severity) {
             switch(severity) {
