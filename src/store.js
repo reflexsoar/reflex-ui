@@ -26,6 +26,8 @@ const state = {
   case_status: {},
   data_types: [],
   data_type: {},
+  event_rules: [],
+  event_rule: {},
   case_template_list: [],
   unread_event_count: 0,
   agents: [],
@@ -140,6 +142,16 @@ const mutations = {
   add_data_type(state, data) {
     state.data_types.push(data)
     state.data_type = data
+  },
+  save_event_rules(state, data) {
+    state.event_rules = data
+  },
+  save_event_rule(state ,data) {
+    state.event_rule = data
+  },
+  add_event_rule(state, data) {
+    state.event_rules.push(data)
+    state.event_rule = data
   },
   save_agents(state, agents) {
     state.agents = agents
@@ -729,6 +741,19 @@ const actions = {
       })
     })
   },
+  createEventRule({commit}, rule) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_rule`, data: rule, method: 'POST'})
+      .then(resp => {
+        commit('save_event_rule', resp.data)
+        commit('show_alert', {message: 'Successfully created the Event Rule.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getPlugins({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/plugin`, method: 'GET'})
@@ -984,9 +1009,9 @@ const actions = {
       })
     })
   },
-  getCases({commit}) {
+  getCases({commit}, fields='') {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case`, method: 'GET'})
+      Axios({url: `${BASE_URL}/case`, method: 'GET', headers: {'X-Fields': fields}})
       .then(resp => {
         commit('save_cases', resp.data)
         resolve(resp)
@@ -996,9 +1021,9 @@ const actions = {
       })
     })
   },
-  getCasesByTitle({commit}, title) {
+  getCasesByTitle({commit}, {title, fields='uuid,title,id,event_count,owner,severity'}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case?title=${title}`, method: 'GET'})
+      Axios({url: `${BASE_URL}/case?title=${title}`, method: 'GET', headers: {'X-Fields': fields}})
       .then(resp => {
         commit('save_cases', resp.data)
         resolve(resp)

@@ -3,6 +3,13 @@
     <CCol col="12">
       <h2>Events</h2>
       <CRow>
+        <CRow col="12">
+          <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
+            {{alert.message}}
+          </CAlert>
+        </CRow>
+      </CRow>
+      <CRow>
         <CCol col="12">
           <CCard>
             <CCardHeader>
@@ -73,10 +80,10 @@
       <CRow>
         <CCol col="2">
             <div>
-              <CButton v-if="select_all || selected.length != 0" @click="clearSelected()" size="sm" color="secondary"><CIcon name="cilXCircle" v-if=""></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0" @click="selectAll()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="['Severity','Date Created','Name','TLP','Observable Count']" placeholder="Sort by" class="d-inline-block"/>
+              <CButton v-if="select_all || selected.length != 0" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0" @click="selectAll()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="['Severity','Date Created','Name','TLP','Observable Count']" placeholder="Sort by" class="d-inline-block"/>
             </div>
         </CCol>
-        <CCol col="5">
+        <CCol col="4">
           <center><CPagination :activePage="1" :pages="10"/></center>
         </CCol>
         <CCol col="3" class="text-right">
@@ -84,9 +91,9 @@
             <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'textsearch','dataType':'search','value':search_filter})">Search</CButton>
           </template></CInput>
         </CCol>
-        <CCol col="2" class="text-right">
+        <CCol col="3" class="text-right">
           <div>
-            <CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;
+            <CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;
             <CDropdown 
                 :toggler-text="`${selected.length} events`" 
                 color="secondary"
@@ -113,7 +120,22 @@
         </div>
         </CCol>
       </CRow>
-      <CRow v-if="table_view && status != 'loading'">
+            
+      <CRow v-if="events.length == 0 && status != 'loading'">
+      <CCol col="12" class='text-center'>
+              <CSpinner
+                color="dark"
+                style="width:6rem;height:6rem;"
+            />
+        </CCol>
+      </CRow>
+            
+      <CRow v-else-if="events.length == 0">
+      <CCol col="12" class='text-center'>
+          <h1>No Events</h1>
+        </CCol>
+      </CRow>
+      <CRow v-else-if="table_view">
         <CCol col="12">
         <CCard>
           <CCardBody>
@@ -174,33 +196,22 @@
         </CCard>
         </CCol>
       </CRow>
-      <div v-if="!table_view  && status != 'loading'" >
-        <div v-for="event in filtered_events" :key="event.uuid">
-        <CRow v-if="events.length == 0 && status != 'loading'">
-        <CCol col="12">
-          <CCard>
-            <CCardBody>
-              <center><h3>Great job, you cleared all the events!</h3></center>
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
       <CRow v-else>
-        <CCol col="12">
+        <CCol :col="12/columns" v-for="event in filtered_events" :key="event.uuid">
           <CCard :accent-color="getSeverityColor(event.severity)">
             <CCardBody>
               <CRow>
-                <CCol col="10">
+                <CCol col="9">
                   <h4>
                     <input type="checkbox" v-if="!event.case_uuid" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':event.title})">{{event.title}}</a></h4>
                   {{event.description}}<br>
-                  <li style="display: inline; margin-right: 2px;" v-for="obs in event.observables" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
+                  <li style="display: inline; margin-right: 2px;" v-for="obs in event.observables" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
                   <CCollapse :show="collapse[event.signature]"><li v-for="evt in events" :key="evt.uuid" v-if="event.signature == evt.signature && event.uuid != evt.uuid">{{evt.uuid}} | {{evt.reference}}</li></CCollapse>
                 </CCol>
-                <CCol col="2" class="text-right">
+                <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton v-if="countStatusBySignature(event.signature, 'New') > 0 && countStatusBySignature(event.signature, 'New') < relatedEvents(event.signature)" size="sm" color="danger" @click="createEventRule(event.signature)">Create Event Rule</CButton>
+                    <CButton v-if="countStatusBySignature(event.signature, 'New') > 0" size="sm" color="info" @click="createEventRule(event.signature)">Create Event Rule</CButton>
                     <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`">View Case</CButton>
                   </CButtonGroup>
                 </CCol>
@@ -227,7 +238,6 @@
           </CCard>
         </CCol>
       </CRow>
-      </div></div>
     </CCol>
     <CModal title="Dismiss Event" color="danger" :centered="true" size="lg" :show.sync="dismissEventModal">
       <div>
@@ -254,7 +264,7 @@
       </template>
     </CModal>
     <CreateCaseModal :show.sync="createCaseModal" :events="selected"></CreateCaseModal>
-    <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :rule_signature="rule_signature" :rule_observables="rule_observables"></CreateEventRuleModal>
+    <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :rule_observables="rule_observables"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
@@ -330,7 +340,7 @@ export default {
     dark: Boolean,
     event: false
     },
-    computed: mapState(['status']),
+    computed: mapState(['status','alert']),
     created: function () {
         this.loadData()
         this.refresh = setInterval(function() {
@@ -369,8 +379,9 @@ export default {
         select_all: false,
         fields: ['name', 'created_at', 'related_events', 'reference', 'status', 'severity', 'tlp', 'observable_count'],
         sort_by: 'date',
-        rule_signature: "",
-        rule_observables: []
+        event_signature: "",
+        rule_observables: [],
+        columns: 1
       }
     },
     methods: {
@@ -383,6 +394,13 @@ export default {
       },
       unique_event_sigs() {
         
+      },
+      setColumns(){
+        if(this.columns == 1) {
+          this.columns = 2;
+        } else {
+          this.columns = 1
+        }
       },
       eventCountByStatus(status) {
         return this.filtered_events.reduce(function(n, event) {
@@ -419,7 +437,7 @@ export default {
       },
       createEventRule(signature) {
         this.selected = []
-        this.rule_signature = signature
+        this.event_signature = signature
         this.selected = this.events.filter((event) => event.signature == signature && event.status.name == 'New').map((event) => event.uuid)
         this.rule_observables = this.events.filter((event) => 
             this.selected.includes(event.uuid)

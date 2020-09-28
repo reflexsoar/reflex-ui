@@ -18,7 +18,7 @@
                 <template slot="singleLabel" slot-scope="{option}">#{{option.id}} - {{option.title}} | {{getSeverity(option.severity)}}</template>
                 <template slot="option" slot-scope="props">
                     #{{props.option.id}} - {{props.option.title}}<br>
-                    <small><b>Severity: </b>{{getSeverity(props.option.severity)}} | <b>Owner:</b> {{props.option.owner.username || "Unassigned" }} | Contains {{props.option.events.length}} events.</small><br>
+                    <small><b>Severity: </b>{{getSeverity(props.option.severity)}} | <b>Owner:</b> {{props.option.owner.username || "Unassigned" }} | Contains {{props.option.event_count}} events.</small><br>
                     <small>{{props.option.description | truncate}}</small>
                 </template>
             </multiselect>
@@ -40,10 +40,9 @@ export default {
         show: Boolean,
         events: Array,
     },
-    computed: mapState(['settings']),
+    computed: mapState(['settings','cases']),
     data(){
         return {
-            cases: [],
             case_data: {},
             modalStatus: false
         }
@@ -61,8 +60,12 @@ export default {
     },
     created() {
         this.$store.dispatch('getSettings')
+        this.loadData()
     },
     methods: {
+        loadData() {
+            this.$store.dispatch('getCases', 'uuid,title,id,event_count,owner,severity')
+        },
         getSeverity(severity) {
             switch(severity) {
                 case 0: return "Low";
@@ -73,8 +76,9 @@ export default {
             }
         },
         caseFind(query) {
-            this.$store.dispatch('getCasesByTitle', query).then(resp => {
-                this.cases = resp.data
+            let fields = 'uuid,title,id,event_count,owner,severity'
+            this.$store.dispatch('getCasesByTitle', {title: query, fields}).then(resp => {
+                this.$store.commit('save_cases', resp.data)
             })
         },
         mergeEventIntoCase() {
@@ -87,7 +91,7 @@ export default {
             })
         },
         reset () {
-            this.cases = []
+            this.case_data = {}
         },
         dismiss() {
             this.reset()
