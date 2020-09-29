@@ -88,7 +88,7 @@
         </CCol>
         <CCol col="3" class="text-right">
           <CInput placeholder="Search" v-model="search_filter"><template #append>
-            <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'textsearch','dataType':'search','value':search_filter})">Search</CButton>
+            <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','dataType':'search','value':search_filter})">Search</CButton>
           </template></CInput>
         </CCol>
         <CCol col="3" class="text-right">
@@ -119,18 +119,8 @@
             />
         </div>
         </CCol>
-      </CRow>
-            
-      <CRow v-if="events.length == 0 && status != 'loading'">
-      <CCol col="12" class='text-center'>
-              <CSpinner
-                color="dark"
-                style="width:6rem;height:6rem;"
-            />
-        </CCol>
-      </CRow>
-            
-      <CRow v-else-if="events.length == 0">
+      </CRow>           
+      <CRow v-else-if="filtered_events.length == 0">
       <CCol col="12" class='text-center'>
           <h1>No Events</h1>
         </CCol>
@@ -167,7 +157,7 @@
               </template>
               <template #related_events="{item}">
                 <td>
-                  <CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':item.signature})" v-if="!filteredBySignature" color="dark" size="sm">{{relatedEvents(item.signature)}} occurences</CButton>
+                  <CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':item.signature})" v-if="!filteredBySignature" color="dark" size="sm">{{event.related_events_count}} occurences</CButton>
                 </td>
               </template>
               <template #status="{item}">
@@ -197,7 +187,7 @@
         </CCol>
       </CRow>
       <CRow v-else>
-        <CCol :col="12/columns" v-for="event in filtered_events" :key="event.uuid">
+        <CCol :col="12/columns" v-for="(event, index) in filtered_events" v-if="index < card_per_page*card_page_num" :key="event.uuid">
           <CCard :accent-color="getSeverityColor(event.severity)">
             <CCardBody>
               <CRow>
@@ -211,7 +201,7 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton v-if="countStatusBySignature(event.signature, 'New') > 0" size="sm" color="info" @click="createEventRule(event.signature)">Create Event Rule</CButton>
+                    <CButton v-if="(event.new_related_events && event.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)">Create Event Rule</CButton>
                     <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`">View Case</CButton>
                   </CButtonGroup>
                 </CCol>
@@ -222,7 +212,7 @@
                 <CCol col="8">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && relatedEvents(event.signature) > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && relatedEvents(event.signature) > 1" color="dark" size="sm">{{relatedEvents(event.signature)}} occurences <span v-if="countStatusBySignature(event.signature, 'New') >0"> | {{countStatusBySignature(event.signature, 'New')}} new</span></CButton>
+                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events.length > 0"> | {{event.new_related_events.length}} open</span></span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}</span>
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
@@ -381,7 +371,9 @@ export default {
         sort_by: 'date',
         event_signature: "",
         rule_observables: [],
-        columns: 1
+        columns: 1,
+        card_page_num: 1,
+        card_per_page: 10
       }
     },
     methods: {
@@ -417,9 +409,8 @@ export default {
         }, 0)
       },
       selectEvents(event) {
-        if(this.selected.some((item) => {
-          return item === event.target.value
-        })) {
+        
+        if(this.selected.some((item) => { return item === event.target.value })) {
 
           if(!this.filteredBySignature()) {
             this.selected = this.selected.filter(x => !this.selectedRelated(event.target.value).includes(x))
@@ -438,8 +429,9 @@ export default {
       createEventRule(signature) {
         this.selected = []
         this.event_signature = signature
-        this.selected = this.events.filter((event) => event.signature == signature && event.status.name == 'New').map((event) => event.uuid)
-        this.rule_observables = this.events.filter((event) => 
+        let source_event = this.filtered_events.filter((event) => event.signature == signature)
+        this.selected = this.selectedRelated(source_event[0].uuid)
+        this.rule_observables = this.filtered_events.filter((event) => 
             this.selected.includes(event.uuid)
           ).map(event => event.observables).flat().map( function(obs) { 
             return {'dataType':obs.dataType.name, 'value': obs.value
@@ -456,10 +448,7 @@ export default {
         let source_event = this.filtered_events.filter((event) => { 
           return event.uuid == uuid 
         })
-        let related = this.events.filter((evt) => { 
-          return evt.signature == source_event[0].signature && evt.status.name != 'Open' && evt.status.name != undefined
-        })
-        return related.map(evt => evt.uuid)
+        return source_event[0].new_related_events
       },
       filteredBySignature() {
         if(this.observableFilters.some((filter) => filter.filter_type == 'eventsig')) {
@@ -470,91 +459,61 @@ export default {
       },
       filterEvents: function () {
 
-        // Ungroup the results when we are looking at a specific event signature
-        if(this.observableFilters.some((filter) => filter.filter_type == 'eventsig')) {
-          for(let f in this.observableFilters) {
-            let filter = this.observableFilters[f]
-            if(filter.filter_type == 'eventsig') {
-              this.filtered_events = this.events.filter((event) => {
-                return event.signature == filter.value
-              })
-            }
-            // Apply the other filters
-            this.applyFilters()
-          }
-        } else {
-
-          // If no filters are applied return a list depuped by the signature of the event
-          if(this.observableFilters.some((filter) => filter.filter_type == 'status' && filter.value == 'New')) {
-            this.filtered_events = Array.from(new Set(this.events.map(a => a.signature)))
-              .map(sig => {
-                return this.events.find(a => a.signature === sig && a.status.name == 'New')
-              })         
-          } else {
-            this.filtered_events = Array.from(new Set(this.events.map(a => a.signature)))
-              .map(sig => {
-                return this.events.find(a => a.signature === sig)
-              })         
-          }
-
-          // Remove the related events field when in table view
-          this.fields = this.fields.filter(field => field !== 'related_events')
-
-          // Apply the other filters
-          this.applyFilters()
-        }
-
-        // Apply sorting
-        if(this.sort_by == 'date') { 
-          this.filtered_events = this.filtered_events.sort((a, b) => a.created_at - b.created_at)
-        }
-
-      },
-      applyFilters() {
+        // Build the filters based on what is currently selected
+        let status_filters = []
+        let tag_filters = []
+        let observables_filters = []
+        let severity_filter = []
+        let signature_filter = ""
+        let grouped = true
+        let search = ""
         for(let f in this.observableFilters) {
           let filter = this.observableFilters[f]
 
-          // Filter the event status
-          if(filter.filter_type == 'title') {
-            this.filtered_events = this.filtered_events.filter((event) => {
-              return event.title == filter.value
-            })
+          if(filter.filter_type == 'eventsig') {
+            signature_filter = filter.value
           }
-          else if(filter.filter_type == 'status') {
-            this.filtered_events = this.filtered_events.filter((event) => {
-              if(event) {
-                return event.status.name == filter.value
-              }
-              
-            })              
-          } else if (filter.filter_type == 'severity') {
-            // Filter based on the events severity
-            this.filtered_events = this.filtered_events.filter((event) => {
-              if(event) {
-                return event.severity == filter.value
-              }
-            })
-          } else if (filter.filter_type == 'observable') {
-            this.filtered_events = this.filtered_events.filter((event) => {
-              return event.observables.some((obs) => obs.value == filter.value && obs.dataType.name == filter.dataType)
-            })
-          } else if (filter.filter_type == 'tag') {
-            this.filtered_events = this.filtered_events.filter((event) => {
-              return event.tags.some((obs) => obs.name == filter.value)
-            })
-          } else if (filter.filter_type == 'textsearch') {
-            this.filtered_events = this.filtered_events.filter((event) => {
-              return event.description.toLowerCase().includes(filter.value.toLowerCase()) || 
-                event.title.toLowerCase().includes(filter.value.toLowerCase()) || 
-                event.observables.some((obs) => obs.value.toLowerCase().includes(filter.value.toLowerCase())) || 
-                event.reference.toLowerCase().includes(filter.value.toLowerCase())
-            })
-          } else if (filter.filter_type == 'eventsig') {
-            this.filtered_events = this.filtered_events.filter((event) => {
-              return event.signature == filter.value
-            })
+
+          if(filter.filter_type == 'status') {
+            status_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'tag') {
+            tag_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'observable') {
+            observables_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'search') {
+            search = filter.value
+          }
+
+          if(filter.filter_type == 'severity') {
+            severity_filter.push(filter.value)
           }
         }
+
+        this.$store.dispatch('getEvents', {
+          signature: signature_filter,
+          grouped: grouped,
+          tags: tag_filters,
+          status: status_filters,
+          observables: observables_filters,
+          severity: severity_filter,
+          search: search,
+          fields: 'id,uuid,title,description,observables,tags,severity,tlp,reference,signature,status,new_related_events,related_events_count,created_at,case_uuid',
+          page: 1,
+          page_size: 25
+        }).then(resp => {
+          this.filtered_events = resp.data
+          this.$store.commit('add_success')
+        })
+      },
+      transformFilter(filter) {
+        /* Returns a filter in the way the API wants to see it */
+        return {'field':filter['filter_type'],'value':filter['value']}
       },
       toggleObservableFilter(obs) {
         let exists = this.observableFilters.some((item) => {
@@ -580,24 +539,14 @@ export default {
         return this.events.filter((event) => event.signature === signature && event.status.name == status).length
       },
       loadData: function() {
-        this.$store.dispatch('getEvents').then(resp => {
-            this.events = resp.data
-            this.loading = false
-            this.filterEvents()
-            for(let event in this.events) {
-              if(!this.collapse[this.events[event].signature]) {
-                this.$set(this.collapse, this.events[event].signature, false)
-              }              
-            }
-            this.$store.commit('add_success')
-        })
+        this.filterEvents()
       },
       selectAll() {
         this.selected = [];
         if(!this.select_all) {
           for (let i in this.filtered_events) {
             let event = this.filtered_events[i]
-            if(!this.filteredBySignature() && this.relatedEvents(event.signature) > 1) {
+            if(!this.filteredBySignature() && event.related_events_count > 1) {
               if(event.signature) {
                 this.selected = [...this.selected, ...this.selectedRelated(event.uuid)]
               } else if (event.signature == null) {

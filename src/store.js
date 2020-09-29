@@ -716,9 +716,16 @@ const actions = {
       })
     })
   },
-  getEvents({commit}) {
+  getEvents({commit}, {signature=null, status=[], search, severity=[], page, tags=[], observables=[], page_size, grouped=true, fields=''}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event`, method: 'GET'})
+
+      let url = ""
+      if(signature) {
+        url = `${BASE_URL}/event?grouped=${grouped}&page=${page}&page_size=${page_size}&status=${status}&severity=${severity}&tags=${tags}&observables=${observables}&search=${search}&signature=${signature}`
+      } else {
+        url = `${BASE_URL}/event?grouped=${grouped}&page=${page}&page_size=${page_size}&status=${status}&severity=${severity}&tags=${tags}&observables=${observables}&search=${search}`
+      }
+      Axios({url: url, method: 'GET', headers:{'X-Fields': fields}})
       .then(resp => {
         commit('add_start')
         commit('save_events', resp.data)
