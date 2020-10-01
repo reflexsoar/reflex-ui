@@ -77,7 +77,10 @@ router.beforeEach((to, from, next) => {
   })  
 
   // Fetch the settings before each route in the event that they have changed
-  store.dispatch('getSettings')
+
+  if(to.matched.some(record => record.fetchSettings)) {
+    store.dispatch('getSettings')
+  }  
 
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isLoggedIn) {
@@ -112,6 +115,7 @@ function configRoutes () {
           name: 'Dashboard',
           component: Dashboard,
           meta: {
+            fetchSettings: true,
             requiresAuth: true
           }
         },
@@ -129,6 +133,7 @@ function configRoutes () {
               name: 'Create Organization',
               component: CreateOrganization,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             },
@@ -137,6 +142,7 @@ function configRoutes () {
               name: '',
               component: OrganizationsList,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             },
@@ -145,6 +151,7 @@ function configRoutes () {
               name: 'View Organization',
               component: OrganizationDetails,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             }
@@ -164,6 +171,7 @@ function configRoutes () {
               name: '',
               component: CaseManagement,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             },
@@ -172,6 +180,7 @@ function configRoutes () {
               name: 'View Case',
               component: CaseDetails,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             }
@@ -191,6 +200,7 @@ function configRoutes () {
               name: 'Create Input',
               component: CreateInput,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             },
@@ -199,6 +209,7 @@ function configRoutes () {
               name: '',
               component: InputsList,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             },
@@ -207,6 +218,7 @@ function configRoutes () {
               name: 'View Input',
               component: InputDetails,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             }
@@ -227,6 +239,7 @@ function configRoutes () {
               component: CreateCredential,
               meta: {
                 requiresAuth: true,
+                fetchSettings: true,
                 requiresPermission: 'add_credential'
               }
             },
@@ -236,6 +249,7 @@ function configRoutes () {
               component: CredentialsList,
               meta: {
                 requiresAuth: true,
+                fetchSettings: true,
                 requiresPermission: 'view_credentials'
               }
             }/*,
@@ -263,6 +277,7 @@ function configRoutes () {
               name: '',
               component: AlertsList,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             },
@@ -271,6 +286,7 @@ function configRoutes () {
               name: 'View Alert',
               component: AlertDetails,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             }
@@ -291,6 +307,7 @@ function configRoutes () {
               name: '',
               component: PluginList,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true,
                 requiresPermission: 'view_plugins'
               }
@@ -300,6 +317,7 @@ function configRoutes () {
               name: 'View Plugin',
               component: PluginDetails,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true,
                 requiresPermission: 'view_plugins'
               }
@@ -321,6 +339,7 @@ function configRoutes () {
               name: '',
               component: AgentManagement,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true,
                 requiresPermission: 'view_agents'
               }
@@ -330,6 +349,7 @@ function configRoutes () {
               name: 'View Agent',
               component: AgentDetails,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             }
@@ -349,6 +369,7 @@ function configRoutes () {
               name: 'Create Playbook',
               component: CreatePlaybook,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             },
@@ -357,6 +378,7 @@ function configRoutes () {
               name: '',
               component: PlaybooksList,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             },
@@ -384,6 +406,7 @@ function configRoutes () {
               name: 'View Lists',
               component: ListsList,
               meta: {
+                fetchSettings: true,
                 requiresAuth: true
               }
             }
@@ -394,6 +417,7 @@ function configRoutes () {
           name: 'Settings',
           component: Settings,
           meta: {
+            fetchSettings: true,
             requiresAuth: true,
             requiresPermission: 'update_settings'
           }

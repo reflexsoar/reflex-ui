@@ -73,6 +73,7 @@
                                 </multiselect>
                             </div>
                             <CSelect label="Severity" :value.sync="case_data.severity" :options="severities" @change="updateSeverity()" v-bind:disabled="case_data.status && case_data.status.closed"></CSelect>
+                            <span v-if="case_data.case_template.title != null"><b>Applied Case Template: </b> {{case_data.case_template.title}}</span>
                         </CCol>
                         <CCol col="9" @mouseover="edit_description_hint = true" style="overflow-y:scroll; max-height:350px;">
                             <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description">edit</a></small></h5>
@@ -204,48 +205,6 @@
             </CDataTable></CCol>
                     </CRow>
                     </div>
-                
-                <!--<CRow>
-                    <CCol :col="12" v-for="(event, index) in filtered_events" :key="event.uuid">
-                        <CCard :accent-color="getSeverityColor(event.severity)">
-                            <CCardBody>
-                            <CRow>
-                                <CCol col="9">
-                                <h4>
-                                    <input type="checkbox" v-if="!event.case_uuid" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
-                                    &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':event.title})">{{event.title}}</a></h4>
-                                {{event.description}}<br>
-                                <li style="display: inline; margin-right: 2px;" v-for="obs in event.observables" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
-                                </CCol>
-                                <CCol col="3" class="text-right">
-                                <CButtonGroup>
-                                    <CButton v-if="(event.new_related_events && event.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)">Create Event Rule</CButton>
-                                    <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`">View Case</CButton>
-                                </CButtonGroup>
-                                </CCol>
-                            </CRow>
-                            </CCardBody>
-                            <CCardFooter style="background-color:#f0f0f0;">
-                            <CRow>
-                                <CCol col="8">
-                                <small>
-                                    <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events.length > 0"> | {{event.new_related_events.length}} open</span></span></CButton>
-                                    <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
-                                    <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}</span>
-                                    <span class="separator">|</span><b>Reference:</b> {{event.reference}}
-                                    <span class="separator">|</span><b>Event Sig:</b> <span @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})">{{event.signature}}</span>
-                                    
-                                </small>
-                                </CCol>
-                                <CCol col="4" class="text-right">
-                                <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag.name})" color="dark" class="tag" size="sm">{{ tag.name }}</CButton></li>
-                                </CCol>
-                            </CRow>
-                            </CCardFooter>
-                        </CCard>
-                    </CCol>
-                </CRow>-->
               </CTab>
               <CTab title="Tasks">
                   <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
@@ -290,6 +249,7 @@
     <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" ></AddObservableModal>
     <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid"></AddTaskModal>
     <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status_uuid" :closed.sync="case_closed"></CloseCaseModal>
+    <ApplyCaseTemplateModal :show.sync="caseTemplateModal" :case_uuid="this.uuid" :current_case_template_uuid="case_data.case_template.uuid"/>
   </CCol>
   </CRow>
 </template>
@@ -310,6 +270,7 @@ import ObservableList from './ObservableList'
 import CaseTaskList from './CaseTaskList'
 import AddTaskModal from './AddTaskModal'
 import CloseCaseModal from './CloseCaseModal'
+import ApplyCaseTemplateModal from './ApplyCaseTemplateModal'
 import Comments from './Comments'
 import CaseHistoryTimeline from './CaseHistoryTimeline'
 
@@ -325,6 +286,7 @@ export default {
         CloseCaseModal,
         Mentionable,
         CaseHistoryTimeline,
+        ApplyCaseTemplateModal,
         Comments
     },
     computed: mapState(['alert']),
@@ -461,6 +423,11 @@ export default {
                 if(this.case_closed) {
                     this.case_data.status.closed = true  // This is hacky...figure out a better way
                 }
+            }
+        },
+        caseTemplateModal: function() {
+            if(!this.caseTemplateModal) {
+                this.loadData()
             }
         },
         activeTab: function() {

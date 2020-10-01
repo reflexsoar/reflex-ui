@@ -69,7 +69,7 @@
                   >
                   </CSelect>
               </CCol>
-            </CRow>{{owner}}
+            </CRow>
             <div role="group" class="form-group">
                 <label class="typo__label">Tags</label>
                 <multiselect v-model="selected_tags" placeholder="Select tags to apply to this input" :taggable="true" tag-placeholder="Add new tag" track-by="name" label="name" :options="tag_list" :multiple="true" @tag="addTag" :close-on-select="false">

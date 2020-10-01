@@ -187,9 +187,9 @@
         </CCol>
       </CRow>
       <CRow v-else>
-        <CCol :col="12/columns" v-for="(event, index) in filtered_events" :key="event.uuid">
+        <CCol :col="12/columns" v-for="event in filtered_events" :key="event.uuid">
           <CCard :accent-color="getSeverityColor(event.severity)">
-            <CCardBody>
+            <CCardBody  @mouseenter="pauseRefresh = true" @mouseleave="pauseRefresh = false">
               <CRow>
                 <CCol col="9">
                   <h4>
@@ -201,6 +201,7 @@
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
                     <CButton v-if="(event.new_related_events && event.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)">Create Event Rule</CButton>
+                    <CButton :to="`/alerts/${event.uuid}`" size="sm" color="secondary">View Event</CButton>
                     <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`">View Case</CButton>
                   </CButtonGroup>
                 </CCol>
@@ -334,7 +335,9 @@ export default {
     created: function () {
         this.loadData()
         this.refresh = setInterval(function() {
-         this.loadData()
+          if(!this.pauseRefresh) {
+            this.loadData()
+          }         
         }.bind(this), 5000)
     },
     data(){
@@ -348,6 +351,7 @@ export default {
         observable_count: 0,
         tags: [],
         events: [],
+        pauseRefresh: false,
         case_tlp: 2,
         case_severity: 1,
         use_case_template: false,

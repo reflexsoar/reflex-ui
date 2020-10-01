@@ -385,6 +385,7 @@ const getters = {
   current_user: state => state.current_user,
   alert: state => state.alert,
   case_templates: state => state.case_templates,
+  case_template_list: state => { return state.case_template_list },
   date_types: state => state.data_types,
   case_history: state => { return state.case_history },
   comments: state => { return state.comments},
