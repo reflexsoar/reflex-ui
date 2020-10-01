@@ -80,11 +80,11 @@
       <CRow>
         <CCol col="2">
             <div>
-              <CButton v-if="select_all || selected.length != 0" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0" @click="selectAll()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="['Severity','Date Created','Name','TLP','Observable Count']" placeholder="Sort by" class="d-inline-block"/>
+              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAll()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="['Severity','Date Created','Name','TLP','Observable Count']" placeholder="Sort by" class="d-inline-block"/>
             </div>
         </CCol>
         <CCol col="4">
-          <center><CPagination :activePage="1" :pages="10"/></center>
+          <center><CPagination v-if="!table_view" :activePage.sync="current_page" :pages="page_data.pages"/></center>
         </CCol>
         <CCol col="3" class="text-right">
           <CInput placeholder="Search" v-model="search_filter"><template #append>
@@ -187,7 +187,7 @@
         </CCol>
       </CRow>
       <CRow v-else>
-        <CCol :col="12/columns" v-for="(event, index) in filtered_events" v-if="index < card_per_page*card_page_num" :key="event.uuid">
+        <CCol :col="12/columns" v-for="(event, index) in filtered_events" :key="event.uuid">
           <CCard :accent-color="getSeverityColor(event.severity)">
             <CCardBody>
               <CRow>
@@ -197,7 +197,6 @@
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':event.title})">{{event.title}}</a></h4>
                   {{event.description}}<br>
                   <li style="display: inline; margin-right: 2px;" v-for="obs in event.observables" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
-                  <CCollapse :show="collapse[event.signature]"><li v-for="evt in events" :key="evt.uuid" v-if="event.signature == evt.signature && event.uuid != evt.uuid">{{evt.uuid}} | {{evt.reference}}</li></CCollapse>
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
@@ -270,6 +269,7 @@
 </template>
 
 <style scoped>
+
 .nav-item:not(:last-child) {
   border-right:1px solid #cfcfcf !important;
 }
@@ -373,7 +373,9 @@ export default {
         rule_observables: [],
         columns: 1,
         card_page_num: 1,
-        card_per_page: 10
+        card_per_page: 25,
+        page_data: {},
+        current_page: 1
       }
     },
     methods: {
@@ -465,7 +467,7 @@ export default {
         let observables_filters = []
         let severity_filter = []
         let signature_filter = ""
-        let grouped = true
+        let grouped = !this.filteredBySignature()
         let search = ""
         for(let f in this.observableFilters) {
           let filter = this.observableFilters[f]
@@ -503,11 +505,12 @@ export default {
           observables: observables_filters,
           severity: severity_filter,
           search: search,
-          fields: 'id,uuid,title,description,observables,tags,severity,tlp,reference,signature,status,new_related_events,related_events_count,created_at,case_uuid',
-          page: 1,
+          fields: '',
+          page: this.current_page,
           page_size: 25
         }).then(resp => {
-          this.filtered_events = resp.data
+          this.filtered_events = resp.data.events
+          this.page_data = resp.data.pagination
           this.$store.commit('add_success')
         })
       },
@@ -542,7 +545,7 @@ export default {
         this.filterEvents()
       },
       selectAll() {
-        this.selected = [];
+        //this.selected = [];
         if(!this.select_all) {
           for (let i in this.filtered_events) {
             let event = this.filtered_events[i]
@@ -554,11 +557,15 @@ export default {
               }
             } else {
               if(!event.case_uuid) {
-                this.selected.push(event.uuid)
+                if(!this.selected.includes(event.uuid)) {
+                  this.selected.push(event.uuid)
+                }
               }
             }
           }
-          this.select_all = true
+          if(!this.filteredBySignature()) {
+            this.select_all = true
+          }
         }
       },
       clearSelected() {
@@ -586,6 +593,11 @@ export default {
     },
     beforeDestroy: function() {
       clearInterval(this.refresh)
+    },
+    watch: {
+      current_page: function(){
+        this.filterEvents()
+      }
     },
     filters: {
       truncate: function (value) {

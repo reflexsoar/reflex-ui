@@ -20,18 +20,18 @@
                     <CButton v-if="case_data.severity == 1" color="light">Low</CButton>
                     <CButton v-if="case_data.severity == 2" color="warning">Medium</CButton>
                     <CButton v-if="case_data.severity == 3" color="danger">High</CButton>
-                    <CButton v-if="case_data.severity >= 4" color="dark">Critical</CButton>&nbsp;#{{case_data.id}} - {{case_data.title | truncate}} <span v-if="case_data.status.closed"> - Closed</span></h3>
+                    <CButton v-if="case_data.severity >= 4" color="dark">Critical</CButton>&nbsp;#{{case_data.id}} - {{case_data.title | truncate}} <span v-if="case_data.status && case_data.status.closed"> - Closed</span></h3>
                 </CCol>
                 <CCol col="12" lg="6" sm="12" class="text-right">
                         <CDropdown 
                         toggler-text="Actions" 
                         color="secondary"
-                        v-bind:disabled="case_data.status.closed"
+                        v-bind:disabled="case_data.status && case_data.status.closed"
                         >
                         <CDropdownItem @click="caseTemplateModal = !caseTemplateModal">Add Case Template</CDropdownItem>
                         <CDropdownItem @click="caseTaskModal = !caseTaskModal">Add Task</CDropdownItem>
                         <CDropdownItem @click="addObservableModal = !addObservableModal">Add Observables</CDropdownItem>
-                        <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
+                        <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Run Playbook</CDropdownItem>
                         <CDropdownDivider/>
                         <CDropdownItem @click="deleteCaseModal = !deleteCaseModal">Delete</CDropdownItem>
                         </CDropdown>
@@ -44,19 +44,19 @@
                     <b>Created: </b>{{case_data.created_at | moment('LLLL')}}&nbsp;<b>Updated: </b>{{case_data.modified_at | moment('from', 'now')}}&nbsp;<b>Created By: </b>{{case_data.created_by.username}}&nbsp;<b>Updated By: </b>{{case_data.updated_by.username}}
                 </CCol>
                 <CCol col="6" class="text-right">
-                    <li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li>
+                    <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li>
                 </CCol>
             </CRow>
         </CCardBody>
     </CCard>
     <CCard>
           <CCardBody class="tabbed">
-            <CTabs>
+            <CTabs :activeTab.sync="activeTab">
               <CTab title="Case Details" active>
                   <CCardBody>
                     <CRow>
                         <CCol col="3" style="border-right: 1px dotted #cfcfcf;">
-                            <CSelect label="Status" :options="case_statuses" :value.sync="case_data.status_uuid" @change="updateStatus()"></CSelect>
+                            <CSelect label="Status" v-bind:description="case_data.close_reason.title" :options="case_statuses" :value.sync="case_data.status_uuid" @change="updateStatus()"></CSelect>
                             <label>Assignee</label>
                             <div role="group" class="form-group">
                                 <multiselect 
@@ -72,13 +72,19 @@
                                     @search-change="usersFind">
                                 </multiselect>
                             </div>
-                            <CSelect label="Severity" :value.sync="case_data.severity" :options="severities" @change="updateSeverity()" v-bind:disabled="case_data.status.closed"></CSelect>
+                            <CSelect label="Severity" :value.sync="case_data.severity" :options="severities" @change="updateSeverity()" v-bind:disabled="case_data.status && case_data.status.closed"></CSelect>
                         </CCol>
-                        <CCol col="9" @mouseover="edit_description_hint = true" @mouseleave="edit_description_hint = false">
-                            <h5>Description <small><a v-if="edit_description_hint && !case_data.status.closed" @click="edit_description = !edit_description">edit</a></small></h5>
+                        <CCol col="9" @mouseover="edit_description_hint = true" style="overflow-y:scroll; max-height:350px;">
+                            <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description">edit</a></small></h5>
                             <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
-                            <span v-if="edit_description"><CTextarea rows="10" v-model="case_data.description"></CTextarea><CButton color="danger" @click="edit_description = false">Cancel</CButton>&nbsp;<CButton color="primary" @click="saveDescription()">Save</CButton></span>
-                            
+                            <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event"></CTextarea><CButton color="danger" @click="edit_description = false">Cancel</CButton>&nbsp;<CButton color="primary" @click="saveDescription()">Save</CButton></span>
+                            <span v-if="closureComments().length > 0 && case_data.status.closed">
+                                <br><h5>Closure Details</h5><br>
+                                <span v-for="comment in closureComments()" :key="comment.uuid">
+                                    <b>{{comment.created_at | moment('LLLL')}}</b> - {{comment.closure_reason.title}}
+                                    <br>{{comment.message}}<br><br>
+                                </span>
+                            </span>
                         </CCol>
                     </CRow>
                     <CRow style="border-top: 1px dotted #cfcfcf; padding-top:10px; margin-top: 10px;">
@@ -90,7 +96,7 @@
                                     </CWidgetSimple>
                                 </CCol>
                                 <CCol col="3">
-                                    <CWidgetSimple header="Total Events" :text="String(case_data.events.length)">
+                                    <CWidgetSimple header="Total Events" :text="String(case_data.event_count)">
                                     </CWidgetSimple>
                                 </CCol>
                                 <CCol col="3">
@@ -110,25 +116,52 @@
                 <ObservableList :observables="case_data.observables" :events="case_data.events"></ObservableList>
               </CTab>
               <CTab title="Events">
+                <CRow>
+                    <CCol col="12">
+                        <CCardBody style="border-bottom: 1px solid #cfcfcf; padding-bottom:0px;">
+                            <CRow>
+                                <CCol col="8">
+                                    <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length}} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events.length}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
+                                </CCol>
+                                <CCol col="2">
+                                    
+                                    <CInput placeholder="Search" :value="search_filter" @change="search_filter = $event" v-on:keydown.enter.native="toggleObservableFilter({'filter_type':'search','dataType':'search','value':$event.target.value})"><template #append>
+                                    <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','dataType':'search','value':search_filter})">Search</CButton></template></CInput>
+                                    </CCol>
+                                <CCol col="2">
+                                    <CPagination :activePage.sync="current_events_page" :pages="events_page_data.pages"/>
+                                </CCol>
+                            </CRow>
+                        </CCardBody>
+                    </CCol>
+                </CRow>
+                <CRow>
+                    <CCol col="12">
             <CDataTable
                 :hover="hover"
-                :items="case_data.events"
+                :items="filtered_events"
                 :fields="event_fields"
-                :items-per-page="small ? 25 : 10"
+                :items-per-page="events_per_page"
                 bordered
                 striped
-                pagination
+                :responsive="false"
+                :clickableRows="false"
             >
                 <template #title="{item}">
                     <td style="min-width:200px; max-width:300px;">
                         <router-link :to="`/alerts/${item.uuid}`">{{item.title}}</router-link><br>
-                        <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
-                            <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag.name }}</CBadge>
-                        </li>
+                        <CRow>
+                            <CCol col="12">
+                                <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag.name})" color="dark" class="tag" size="sm">{{ tag.name }}</CButton></li>
+                            </CCol>
+                        </CRow>
                     </td>
                 </template>
                 <template #status="{item}">
-                    <td >{{item.status.name}}</td>
+                    <td>
+                        <CRow
+                        <CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': item.status.name})" size="sm" color="info">{{item.status.name}}</CButton>
+                    </td>
                 </template>
                 <template #tlp="{item}">
                     <td>
@@ -140,11 +173,13 @@
                 </template>
                 <template #severity="{item}">
                     <td>
-                    <CButton v-if="item.severity == 1" color="light" size="sm">L</CButton>
-                    <CButton v-if="item.severity == 2" color="warning" size="sm">M</CButton>
-                    <CButton v-if="item.severity == 3" color="danger" size="sm">H</CButton>
-                    <CButton v-if="item.severity >= 4" color="dark" size="sm">C</CButton>
+                    <CButton @click="toggleObservableFilter({'filter_type':'severity','dataType':'severity','value':item.severity})" :color="getSeverityColor(item.severity)" size="sm">{{getSeverityText(item.severity)}}</CButton>                    
                 </td>
+                </template>
+                <template #occurences="{item}">
+                    <td>
+                        <CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':item.signature})" v-if="!filteredBySignature()" color="dark" size="sm">{{item.related_events_count}} occurences</CButton><span v-else>1</span>
+                    </td>
                 </template>
               <template #actions="{item}">
                   <td>
@@ -156,32 +191,75 @@
                         <CDropdownItem>Resolve</CDropdownItem>
                         <CDropdownItem>Remove from Case</CDropdownItem>
                         <CDropdownItem>Transfer Case</CDropdownItem>
-                        <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
+                        <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Run Playbook</CDropdownItem>
                         <CDropdownDivider/>
-                        <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
+                        <CDropdownItem @click="deleteEventModal = !deleteEventModal" disabled>Delete</CDropdownItem>
                         </CDropdown>
                     </td>
               </template>
-            </CDataTable>
+            </CDataTable></CCol>
+                    </CRow>
+                <div class="text-right"></div>
+                <!--<CRow>
+                    <CCol :col="12" v-for="(event, index) in filtered_events" :key="event.uuid">
+                        <CCard :accent-color="getSeverityColor(event.severity)">
+                            <CCardBody>
+                            <CRow>
+                                <CCol col="9">
+                                <h4>
+                                    <input type="checkbox" v-if="!event.case_uuid" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
+                                    &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':event.title})">{{event.title}}</a></h4>
+                                {{event.description}}<br>
+                                <li style="display: inline; margin-right: 2px;" v-for="obs in event.observables" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
+                                </CCol>
+                                <CCol col="3" class="text-right">
+                                <CButtonGroup>
+                                    <CButton v-if="(event.new_related_events && event.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)">Create Event Rule</CButton>
+                                    <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`">View Case</CButton>
+                                </CButtonGroup>
+                                </CCol>
+                            </CRow>
+                            </CCardBody>
+                            <CCardFooter style="background-color:#f0f0f0;">
+                            <CRow>
+                                <CCol col="8">
+                                <small>
+                                    <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
+                                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events.length > 0"> | {{event.new_related_events.length}} open</span></span></CButton>
+                                    <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
+                                    <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}</span>
+                                    <span class="separator">|</span><b>Reference:</b> {{event.reference}}
+                                    <span class="separator">|</span><b>Event Sig:</b> <span @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})">{{event.signature}}</span>
+                                    
+                                </small>
+                                </CCol>
+                                <CCol col="4" class="text-right">
+                                <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag.name})" color="dark" class="tag" size="sm">{{ tag.name }}</CButton></li>
+                                </CCol>
+                            </CRow>
+                            </CCardFooter>
+                        </CCard>
+                    </CCol>
+                </CRow>-->
               </CTab>
               <CTab title="Tasks">
-                <CaseTaskList :tasks="case_data.tasks"></CaseTaskList>
+                <CaseTaskList :tasks.sync="tasks"></CaseTaskList>                
               </CTab>
-              <CTab title="Attachments">
+              <CTab title="Attachments" disabled>
                  Case attachments here
               </CTab>
               <CTab title="Comments">
-                  <Comments :comments="case_data.comments" :uuid="case_data.uuid" comment_type="case"></Comments>                             
+                  <Comments :comments.sync="comments" :uuid="case_data.uuid" comment_type="case"></Comments>                             
               </CTab>
-              <CTab title="History">
+              <!--<CTab title="History">
                   <div style="overflow-y:scroll; overflow-x:hidden; max-height:400px">
                  <timeline>
                     <timeline-item bg-color="#9dd8e0"><small>{{case_data.created_at | moment('LLLL')}}</small><br>Case Opened by <b>{{case_data.created_by.username}}</b></timeline-item>
                     <timeline-item bg-color="#9dd8e0" style="padding-bottom:5px;" v-for="entry in case_data.history" :hollow="true" :key="entry.uuid"><small>{{entry.created_at | moment('LLLL')}}</small><vue-markdown style="margin-bottom:0px;">{{entry.message}} by *{{entry.created_by.username}}*</vue-markdown></timeline-item>
                 </timeline>
                   </div>
-              </CTab>
-              <CTab title="Playbook/Action Output" class="bg-dark">
+              </CTab>-->
+              <CTab title="Playbook/Action Output" disabled>
                  <div class="bg-dark console-output">
                      <code class="bg-dark pre-formatted raw_log">2020-09-13 20:33:50,591 - Extracting ZIP file<br>2020-09-13 20:33:50,593 - Running test plugin!<br>2020-09-13 20:33:54,716 - Running agent<br>2020-09-13 20:34:28,846 - Running agent<br>2020-09-13 20:34:28,847 - Running input ES_PROD<br>2020-09-13 20:34:28,847 - Fetching credentials for ES_PROD<br>2020-09-13 20:34:33,124 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:34:33,150 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.025s]<br>2020-09-13 20:34:33,154 - Pushing 26 events to bulk ingest...<br>2020-09-13 20:35:12,878 - Running agent<br>2020-09-13 20:35:12,879 - Running input ES_PROD<br>2020-09-13 20:35:12,879 - Fetching credentials for ES_PROD<br>2020-09-13 20:35:17,060 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:35:17,085 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.024s]<br>2020-09-13 20:35:17,089 - Pushing 26 events to bulk ingest...</code>
                  </div>
@@ -189,11 +267,22 @@
             </CTabs>
           </CCardBody>
         </CCard>
+        {{case_history}}
     <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" ></AddObservableModal>
-    <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid" :task_count.sync="case_data.tasks.length"></AddTaskModal>
+    <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid"></AddTaskModal>
+    <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status_uuid" :closed.sync="case_closed"></CloseCaseModal>
   </CCol>
   </CRow>
 </template>
+
+<style scoped>
+
+.separator {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+</style>
 
 <script>
 import {mapState} from "vuex";
@@ -201,6 +290,7 @@ import AddObservableModal from './AddObservableModal'
 import ObservableList from './ObservableList'
 import CaseTaskList from './CaseTaskList'
 import AddTaskModal from './AddTaskModal'
+import CloseCaseModal from './CloseCaseModal'
 import Comments from './Comments'
 import { Timeline, TimelineItem, TimelineTitle } from 'vue-cute-timeline'
 import { Mentionable } from 'vue-mention'
@@ -212,6 +302,7 @@ export default {
         ObservableList,
         CaseTaskList,
         AddTaskModal,
+        CloseCaseModal,
         Timeline,
         TimelineItem,
         TimelineTitle,
@@ -220,12 +311,6 @@ export default {
     },
     computed: mapState(['alert']),
     props: {
-        event_fields: {
-            type: Array,
-            default() {
-                return ['title','status','severity','observable_count','actions']
-            }
-        },
         caption: {
             type: String,
             default: 'Table'
@@ -240,19 +325,35 @@ export default {
     data() {
         return {
             uuid: this.$route.params.uuid,
-            case_data: {},
+            case_data: {
+                created_by: {
+                    username: ""
+                },
+                updated_by: {
+                    username: ""
+                },
+                status: {
+                    closed: false
+                },
+                observables: []
+            },
             loading: true,
             cardCollapse: true,
             collapse_comments: true,
             collapse_observables: true,
             collapse_events: true,
             collapse: {},
+            tasks: [],
+            task: {},
+            case_history: [],
+            event_fields: ['title','status','severity','observable_count','occurences','actions'],
             toggleCollapse: true,
             deleteCaseModal: false,
             addObservableModal: false,
             caseTemplateModal: false,
             addObservableModal: false,
             caseObservableModal: false,
+            closeCaseModal: false,
             runPlaybookModal: false,
             deleteCaseModal: false,
             caseTaskModal: false,
@@ -261,12 +362,21 @@ export default {
             edit_description_hint: false,
             edit_description: false,
             lockCase: false,
+            activeTab: 0,
             users: [],
             assignee: null,
             comment: "",
             comments: [],
             tasks: [],
+            selected: [],
+            search_filter: '',
+            filtered_events: [],
+            observableFilters: [{'filter_type':'status','dataType':'status','value':'Open'}],
             collapse_tasks: Array(),
+            events_per_page: 10,
+            current_events_page: 1,
+            events_page_data: {},
+            case_closed: false,
             case_statuses: [],
             severities: [
                 {
@@ -288,15 +398,17 @@ export default {
             ]
         }
     },
-    beforeCreate() {
-        this.$store.dispatch('getCase', this.$route.params.uuid).then(resp => {
-            this.case_data = resp.data
-            this.loading = false
-        })
+    created() {
+
+        this.loadData()
+        this.filterEvents()
+        this.loadTasks()
+        this.loadComments()
+        this.loadHistory()
 
         this.$store.dispatch('getCaseStatus').then(resp => {
             this.case_statuses = resp.data.map(function(status) {
-                return {'value': status.uuid, 'label': status.name}
+                return {'value': status.uuid, 'label': status.name, 'closed': status.closed}
             })
         })
 
@@ -307,9 +419,134 @@ export default {
     watch: {
         assignee: function() {
             this.updateAssignee(this.assignee.uuid)
+        },
+        current_events_page: function(){
+            this.filterEvents(this.uuid)
+        },
+        closeCaseModal: function() {
+            if(!this.closeCaseModal) {
+                if(this.case_closed) {
+                    this.case_data.status.closed = true  // This is hacky...figure out a better way
+                }
+            }
+        },
+        activeTab: function() {
+            if(this.activeTab == 2) {
+                this.filterEvents()
+            }
+            if(this.activeTab == 5) {
+                this.loadComments()
+            }
+            if(this.activeTab == 3) {
+                this.loadTasks()
+            }
         }
     },
     methods: {
+        closureComments() {
+            return this.comments.filter(comment => comment.is_closure_comment == true && comment.message != '')
+        },
+        loadHistory() {
+            this.$store.dispatch('getCaseHistory', this.$route.params.uuid).then(resp => {
+                this.case_history = this.$store.getters.case_history
+            })
+        },
+        loadTasks() {
+            this.$store.dispatch('getCaseTasks', this.$route.params.uuid).then(resp => {
+                this.tasks = this.$store.getters.case_tasks
+            })
+        },
+        loadComments(){
+            this.$store.dispatch('getCaseComments', this.$route.params.uuid).then(resp => {
+                this.comments = resp.data
+            })
+        },
+        loadData() {
+            this.$store.dispatch('getCase', this.$route.params.uuid).then(resp => {
+                this.case_data = resp.data
+                this.case_data.status_uuid = this.case_data.status.uuid
+                this.loading = false
+            })
+        },
+        filteredBySignature() {
+            if(this.observableFilters.some((filter) => filter.filter_type == 'eventsig')) {
+            return true
+            } else {
+            return false
+            }
+        },
+        toggleObservableFilter(obs) {
+            let exists = this.observableFilters.some((item) => {
+            return item.value === obs.value
+            })
+
+            // Can only have one status filter at a time
+            if(obs.filter_type == 'status') {
+            this.observableFilters = this.observableFilters.filter(item => item.filter_type !== obs.filter_type)
+            }
+
+            if(!exists) {
+                this.observableFilters.push(obs)
+            } else {
+                this.observableFilters = this.observableFilters.filter(item => item.value !== obs.value)
+            }
+            this.filterEvents()
+        },
+        filterEvents() {
+            let status_filters = []
+            let tag_filters = []
+            let observables_filters = []
+            let severity_filter = []
+            let signature_filter = ""
+            let grouped = !this.filteredBySignature()
+            let search = ""
+
+            for(let f in this.observableFilters) {
+                let filter = this.observableFilters[f]
+
+                if(filter.filter_type == 'eventsig') {
+                    signature_filter = filter.value
+                }
+
+                if(filter.filter_type == 'status') {
+                    status_filters.push(filter.value)
+                }
+
+                if(filter.filter_type == 'tag') {
+                    tag_filters.push(filter.value)
+                }
+
+                if(filter.filter_type == 'observable') {
+                    observables_filters.push(filter.value)
+                }
+
+                if(filter.filter_type == 'search') {
+                    search = filter.value
+                }
+
+                if(filter.filter_type == 'severity') {
+                    severity_filter.push(filter.value)
+                }
+            }
+
+            this.$store.dispatch('getEvents', {
+                signature: signature_filter,
+                grouped: grouped,
+                tags: tag_filters,
+                status: status_filters,
+                observables: observables_filters,
+                severity: severity_filter,
+                search: search,
+                fields: '',
+                case_uuid: this.uuid,
+                page: this.current_events_page,
+                page_size: 25
+            }).then(resp => {
+                this.filtered_events = resp.data.events
+                this.events_page_data = resp.data.pagination
+                this.$store.commit('add_success')
+            })
+        },
         expandAll() {
             for(const c in this.collapse) {
                 if(!this.collapse[c]) {
@@ -329,9 +566,16 @@ export default {
         updateStatus() {
             let uuid = this.uuid
             let status = {"status_uuid": this.case_data.status_uuid}
-            this.$store.dispatch('updateCase', {uuid, data: status}).then(resp => {
-                this.case_data = resp.data
-            })
+            
+            // Prompt for a reason before closing the case
+            // else change the status
+            if(this.case_statuses.filter((status) => status.value == this.case_data.status_uuid && status.closed === true).length > 0) {
+                this.closeCaseModal = true
+            } else {
+                this.$store.dispatch('updateCase', {uuid, data: status}).then(resp => {
+                    this.case_data = resp.data
+                })
+            }
         },
         saveDescription() {
             let uuid = this.uuid
@@ -370,6 +614,24 @@ export default {
         },
         daysOpen() {
             return String(moment().diff(this.case_data.created_at,'days'))+" days"
+        },
+        getSeverityColor(severity) {
+            switch(severity) {
+            case 0: return 'dark';
+            case 1: return 'info';
+            case 2: return 'warning';
+            case 3: return 'danger';
+            default: return 'dark';
+            }
+        },
+        getSeverityText(severity) {
+            switch(severity) {
+            case 0: return 'Low';
+            case 1: return 'Medium';
+            case 2: return 'High';
+            case 3: return 'Critical';
+            default: return 'Low';
+            }
         }
     },
     filters: {

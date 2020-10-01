@@ -76,6 +76,9 @@ router.beforeEach((to, from, next) => {
     })) {}
   })  
 
+  // Fetch the settings before each route in the event that they have changed
+  store.dispatch('getSettings')
+
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isLoggedIn) {
       next()
@@ -100,6 +103,9 @@ function configRoutes () {
       redirect: '/dashboard',
       name: 'Home',
       component: TheContainer,
+      meta: {
+        requiresAuth: true
+      },
       children: [
         {
           path: 'dashboard',

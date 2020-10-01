@@ -7,12 +7,13 @@
     bordered
     striped
     pagination
+    :responsive="false"
   >
     <template #value="{item}">
       <td style="min-width:200px; max-width:300px;">
         <span
           v-c-tooltip="{content: `${item.value}`, placement:'bottom', appendToBody:'true'}"
-        >{{item.value | defang | truncate}}</span><br>
+        >{{item.value | defang | truncate}}</span><br><CIcon v-if="item.tags.length > 0" name="cilTags"/>&nbsp;
         <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
           <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag.name }}</CBadge>
         </li>
@@ -64,7 +65,7 @@
     <template #actions="{item}">
       <td>
         <CDropdown toggler-text="Actions" color="secondary" size="sm">
-          <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Execute Action</CDropdownItem>
+          <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Execute Action</CDropdownItem>
           <CDropdownDivider />
           <CDropdownItem @click="deleteObservableModal = !deleteObservableModal">Delete</CDropdownItem>
         </CDropdown>

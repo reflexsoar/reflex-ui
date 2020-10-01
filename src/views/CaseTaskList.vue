@@ -1,7 +1,7 @@
 <template>
     <div>
-    <CListGroup flush v-if="this.tasks.length > 0">
-        <CListGroupItem v-for="task in tasks" :key="task.title">
+    <CListGroup flush v-if="tasks_list && tasks_list.length > 0">
+        <CListGroupItem v-for="task in tasks_list" :key="task.title">
         <CRow>
             <CCol col="6">
             <b>{{task.title}}</b>
@@ -52,8 +52,17 @@ export default {
   },
   data() {
       return {
-          show_details: []
+          show_details: [],
+          tasks_list: []
       }
+  },
+  watch: {
+      tasks: function() {
+          this.tasks_list = this.tasks
+      }
+  },
+  created() {
+      this.tasks_list = this.tasks
   },
   filters: {
       statusIcon(status) {

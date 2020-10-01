@@ -6,8 +6,7 @@
           <h4>Basic Settings</h4>
           <CInput v-model="settings.base_url" label="Base URL" v-bind:disabled="!current_user.permissions['set_baseurl']"/>
           <CInput v-model="settings.logon_password_attempts" label="Max Logon Attempts"/>
-          <label>Require Case Templates</label><br>
-          <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_case_templates"/><br><br>
+          
 
           <label>Allow Comment Deletion</label><br/>
           <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.allow_comment_deletion"/><br><br>
@@ -21,6 +20,17 @@
               <CInput v-model="settings.playbook_timeout" label="Playbook Action Timeout (seconds)"/>
             </CCol>
           </CRow>
+          <h4>Case/Event Settings</h4>
+          <label>Require Case Templates</label><br>
+          <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_case_templates"/><br><br>
+          <label v-c-tooltip="{
+            content: 'This will require users to add additional details when closing a case.',
+            placement: 'right'}">Require Case Closure Details</label><br>
+          <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_case_close_comment"/><br><br>
+          <label v-c-tooltip="{
+            content: 'This will require users to add additional details when dismissing an event.',
+            placement: 'right'}">Require Event Dismiss Comment</label><br>
+          <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_event_dismiss_comment"/><br><br>
         </CCol>
         <CCol col="6">
           <h4>Mail Settings</h4>

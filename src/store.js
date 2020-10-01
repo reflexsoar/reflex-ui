@@ -24,6 +24,9 @@ const state = {
   case_template: {},
   case_statuses: [],
   case_status: {},
+  case_tasks: [],
+  case_task: {},
+  case_history: [],
   data_types: [],
   data_type: {},
   event_rules: [],
@@ -34,6 +37,8 @@ const state = {
   agent: {},
   agent_groups: [],
   agent_group: {},
+  close_reasons: [],
+  close_reason: {},
   pairing_token: "",
   users: [],
   user: {},
@@ -45,6 +50,8 @@ const state = {
   playbook: {},
   plugins: [],
   plugin: {},
+  comments: [],
+  comment: {},
   plugin_configs: [],
   plugin_config: {},
   inputs:[],
@@ -118,7 +125,6 @@ const mutations = {
   },
   save_events(state, events) {
     state.events = events
-    state.unread_event_count = events.length
   },
   save_event(state, event) {
     state.event = event
@@ -132,6 +138,29 @@ const mutations = {
   add_list(state, list) {
     state.lists.push(list)
     state.list = list
+  },
+  save_comments(state, comments) {
+    state.comments = comments
+  },
+  save_comment(state, comment) {
+    state.comment = comment
+  },
+  add_comment(state, comment) {
+    state.comments.push(comment)
+    state.comment = comment
+  },
+  remove_comment(state, uuid) {
+    state.comments = state.comments.filter(comment => comment.uuid !== uuid)
+  },
+  save_close_reasons(state, reasons) {
+    state.close_reasons = reasons
+  },
+  save_close_reason(state, reason) {
+    state.close_reason = reason
+  },
+  add_close_reason(state, reason) {
+    state.close_reasons.push(reason)
+    state.close_reason = reason
   },
   save_data_types(state, data) {
     state.data_types = data
@@ -168,6 +197,9 @@ const mutations = {
   save_cases(state, cases) {
     state.cases = cases
   },
+  save_case_history(state, history) {
+    state.case_history = history
+  },
   save_tags(state, tags) {
     state.tags = tags
   },
@@ -200,9 +232,6 @@ const mutations = {
   },
   remove_user(state, user) {
     state.user = {}
-  },
-  remove_comment(state) {
-    state.comment = {}
   },
   save_roles(state, roles) {
     state.roles = roles
@@ -262,8 +291,14 @@ const mutations = {
     state.case = data
     state.status = 'success'
   },
+  save_case_tasks(state, tasks) {
+    state.case_tasks = tasks
+  },
+  save_case_task(state, task) {
+    state.case_task
+  },
   add_case_task(state, task) {
-    state.case.tasks.push(task)
+    state.case_tasks.push(task)
     state.status = 'success'
   },
   add_case_template(state, data) {
@@ -279,7 +314,7 @@ const mutations = {
     state.status = 'success'
   },
   add_case_comment(state, data) {
-    state.case.comments.push(data)
+    state.comments.push(data)
   },
   add_case_observables(state, data) {
     state.case.observables = data
@@ -351,6 +386,10 @@ const getters = {
   alert: state => state.alert,
   case_templates: state => state.case_templates,
   date_types: state => state.data_types,
+  case_history: state => { return state.case_history },
+  comments: state => { return state.comments},
+  case_tasks: state => { return state.case_tasks },
+  case_data: state => { return state.case },
   data_types_list: function() {
     return state.data_types.map(function(data_type) {
       var newDataType = {};
@@ -716,19 +755,42 @@ const actions = {
       })
     })
   },
-  getEvents({commit}, {signature=null, status=[], search, severity=[], page, tags=[], observables=[], page_size, grouped=true, fields=''}) {
+  getEvents({commit}, {signature=null, case_uuid, status=[], search, severity=[], page, tags=[], observables=[], page_size=25, grouped=true, fields=''}) {
     return new Promise((resolve, reject) => {
 
-      let url = ""
+      let url = `${BASE_URL}/event?grouped=${grouped}`
+
       if(signature) {
-        url = `${BASE_URL}/event?grouped=${grouped}&page=${page}&page_size=${page_size}&status=${status}&severity=${severity}&tags=${tags}&observables=${observables}&search=${search}&signature=${signature}`
-      } else {
-        url = `${BASE_URL}/event?grouped=${grouped}&page=${page}&page_size=${page_size}&status=${status}&severity=${severity}&tags=${tags}&observables=${observables}&search=${search}`
+        url = url+`&signature=${signature}`
+      } 
+      if(status) {
+        url = url+`&status=${status}`
+      } 
+      if(case_uuid) {
+        url = url+`&case_uuid=${case_uuid}`
+      } 
+      if(search) {
+        url = url+`&search=${search}`
+      } 
+      if(severity.length > 0) {
+        url = url+`&severity=${severity}`
+      } 
+      if(page) {
+        url = url+`&page=${page}`
+      }
+      if(page_size) {
+        url = url+`&page_size=${page_size}`
+      }
+      if(tags.length > 0) {
+        url = url+`&tags=${tags}`
+      }
+      if(observables.length > 0) {
+        url = url+`&observables=${observables}`
       }
       Axios({url: url, method: 'GET', headers:{'X-Fields': fields}})
       .then(resp => {
         commit('add_start')
-        commit('save_events', resp.data)
+        commit('save_events', resp.data.events)
         resolve(resp)
       })
       .catch(err => {
@@ -1028,11 +1090,59 @@ const actions = {
       })
     })
   },
+  getCloseReasons({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/close_reason`, method: 'GET'})
+      .then(resp => {
+        commit('save_close_reasons', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCasesByTitle({commit}, {title, fields='uuid,title,id,event_count,owner,severity'}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case?title=${title}`, method: 'GET', headers: {'X-Fields': fields}})
       .then(resp => {
         commit('save_cases', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCaseComments({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_comment?case_uuid=${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_comments', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCaseHistory({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_history?case_uuid=${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_case_history', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCaseTasks({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_task?case_uuid=${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_case_tasks', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -1152,7 +1262,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case_comment/${uuid}`, method: 'DELETE'})
       .then(resp => {
-        commit('remove_comment')
+        commit('remove_comment', uuid)
         commit('show_alert', {message: 'Successfully deleted the comment.', 'type': 'success'})
         resolve(resp)
       })

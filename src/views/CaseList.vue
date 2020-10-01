@@ -51,7 +51,7 @@
                 </td>
               </template>
               <template #events="{item}">
-                <td>{{item.events.length}}</td>
+                <td>{{item.event_count}}</td>
               </template>
               <template #tlp="{item}">
                 <td>
@@ -85,7 +85,7 @@
               </template>
               </CDataTable>
     </CCol>
-    <CreateCaseModal :show.sync='newCaseModal'></CreateCaseModal>
+    <!--<CreateCaseModal :show.sync='newCaseModal'></CreateCaseModal>-->
   </CRow>
 </template>
 
