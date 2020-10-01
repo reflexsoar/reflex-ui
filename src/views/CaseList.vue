@@ -85,7 +85,7 @@
               </template>
               </CDataTable>
     </CCol>
-    <!--<CreateCaseModal :show.sync='newCaseModal'></CreateCaseModal>-->
+    <CreateCaseModal :show.sync='newCaseModal'></CreateCaseModal>
   </CRow>
 </template>
 

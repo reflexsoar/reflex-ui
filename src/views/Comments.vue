@@ -24,8 +24,7 @@
       <CCol>
         <CCardBody>
           <CTextarea
-            :value="comment_text"
-            @change="comment_text = $event"
+            v-model="comment_text"
             rows="5"
             placeholder="Enter your comment here...Markdown format is supported"
           ></CTextarea>

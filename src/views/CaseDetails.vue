@@ -116,7 +116,11 @@
                 <ObservableList :observables="case_data.observables" :events="case_data.events"></ObservableList>
               </CTab>
               <CTab title="Events">
-                <CRow>
+                  <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
+                        <CSpinner color="dark" style="width:6rem;height:6rem;"/>
+                    </div>
+                    <div v-else>
+                        <CRow>
                     <CCol col="12">
                         <CCardBody style="border-bottom: 1px solid #cfcfcf; padding-bottom:0px;">
                             <CRow>
@@ -199,7 +203,8 @@
               </template>
             </CDataTable></CCol>
                     </CRow>
-                <div class="text-right"></div>
+                    </div>
+                
                 <!--<CRow>
                     <CCol :col="12" v-for="(event, index) in filtered_events" :key="event.uuid">
                         <CCard :accent-color="getSeverityColor(event.severity)">
@@ -243,22 +248,37 @@
                 </CRow>-->
               </CTab>
               <CTab title="Tasks">
-                <CaseTaskList :tasks.sync="tasks"></CaseTaskList>                
+                  <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
+                        <CSpinner color="dark" style="width:6rem;height:6rem;"/>
+                    </div>
+                    <div v-else>
+                        <CaseTaskList :tasks.sync="tasks"></CaseTaskList>
+                    </div>                
               </CTab>
               <CTab title="Attachments" disabled>
                  Case attachments here
               </CTab>
               <CTab title="Comments">
-                  <Comments :comments.sync="comments" :uuid="case_data.uuid" comment_type="case"></Comments>                             
+                    <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
+                        <CSpinner color="dark" style="width:6rem;height:6rem;"/>
+                    </div>
+                    <div v-else>
+                        <Comments :comments.sync="comments" :uuid="case_data.uuid" comment_type="case"></Comments>
+                    </div>
               </CTab>
-              <!--<CTab title="History">
+              <CTab title="History">
                   <div style="overflow-y:scroll; overflow-x:hidden; max-height:400px">
-                 <timeline>
+                      <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
+                        <CSpinner color="dark" style="width:6rem;height:6rem;"/>
+                      </div>
+                      <div v-else><CaseHistoryTimeline :entries="case_history"/></div>
+
+                <!-- <timeline>
                     <timeline-item bg-color="#9dd8e0"><small>{{case_data.created_at | moment('LLLL')}}</small><br>Case Opened by <b>{{case_data.created_by.username}}</b></timeline-item>
                     <timeline-item bg-color="#9dd8e0" style="padding-bottom:5px;" v-for="entry in case_data.history" :hollow="true" :key="entry.uuid"><small>{{entry.created_at | moment('LLLL')}}</small><vue-markdown style="margin-bottom:0px;">{{entry.message}} by *{{entry.created_by.username}}*</vue-markdown></timeline-item>
-                </timeline>
+                </timeline>-->
                   </div>
-              </CTab>-->
+              </CTab>
               <CTab title="Playbook/Action Output" disabled>
                  <div class="bg-dark console-output">
                      <code class="bg-dark pre-formatted raw_log">2020-09-13 20:33:50,591 - Extracting ZIP file<br>2020-09-13 20:33:50,593 - Running test plugin!<br>2020-09-13 20:33:54,716 - Running agent<br>2020-09-13 20:34:28,846 - Running agent<br>2020-09-13 20:34:28,847 - Running input ES_PROD<br>2020-09-13 20:34:28,847 - Fetching credentials for ES_PROD<br>2020-09-13 20:34:33,124 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:34:33,150 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.025s]<br>2020-09-13 20:34:33,154 - Pushing 26 events to bulk ingest...<br>2020-09-13 20:35:12,878 - Running agent<br>2020-09-13 20:35:12,879 - Running input ES_PROD<br>2020-09-13 20:35:12,879 - Fetching credentials for ES_PROD<br>2020-09-13 20:35:17,060 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:35:17,085 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.024s]<br>2020-09-13 20:35:17,089 - Pushing 26 events to bulk ingest...</code>
@@ -267,7 +287,6 @@
             </CTabs>
           </CCardBody>
         </CCard>
-        {{case_history}}
     <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" ></AddObservableModal>
     <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid"></AddTaskModal>
     <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status_uuid" :closed.sync="case_closed"></CloseCaseModal>
@@ -292,7 +311,8 @@ import CaseTaskList from './CaseTaskList'
 import AddTaskModal from './AddTaskModal'
 import CloseCaseModal from './CloseCaseModal'
 import Comments from './Comments'
-import { Timeline, TimelineItem, TimelineTitle } from 'vue-cute-timeline'
+import CaseHistoryTimeline from './CaseHistoryTimeline'
+
 import { Mentionable } from 'vue-mention'
 import moment from 'moment';
 export default {
@@ -303,10 +323,8 @@ export default {
         CaseTaskList,
         AddTaskModal,
         CloseCaseModal,
-        Timeline,
-        TimelineItem,
-        TimelineTitle,
         Mentionable,
+        CaseHistoryTimeline,
         Comments
     },
     computed: mapState(['alert']),
@@ -369,6 +387,7 @@ export default {
             comments: [],
             tasks: [],
             selected: [],
+            tab_loading: false,
             search_filter: '',
             filtered_events: [],
             observableFilters: [{'filter_type':'status','dataType':'status','value':'Open'}],
@@ -402,9 +421,12 @@ export default {
 
         this.loadData()
         this.filterEvents()
-        this.loadTasks()
-        this.loadComments()
-        this.loadHistory()
+        this.$store.dispatch('getUsers').then(resp => {
+            this.users = this.$store.getters.users
+        })
+        //this.loadTasks()
+        //this.loadComments()
+        //this.loadHistory()
 
         this.$store.dispatch('getCaseStatus').then(resp => {
             this.case_statuses = resp.data.map(function(status) {
@@ -418,7 +440,18 @@ export default {
     },
     watch: {
         assignee: function() {
-            this.updateAssignee(this.assignee.uuid)
+            if(this.case_data.owner.uuid == null && this.assignee.uuid == null) {
+                return
+            }
+            if(this.assignee && this.assignee.uuid) {
+                if(this.assignee.uuid != this.case_data.owner.uuid) {
+                    this.updateAssignee(this.assignee.uuid)
+                }
+            } else {
+                this.assignee = ""
+                this.updateAssignee('')
+                
+            }
         },
         current_events_page: function(){
             this.filterEvents(this.uuid)
@@ -440,6 +473,9 @@ export default {
             if(this.activeTab == 3) {
                 this.loadTasks()
             }
+            if(this.activeTab == 6) {
+                this.loadHistory()
+            }
         }
     },
     methods: {
@@ -447,24 +483,32 @@ export default {
             return this.comments.filter(comment => comment.is_closure_comment == true && comment.message != '')
         },
         loadHistory() {
+            this.tab_loading = true
             this.$store.dispatch('getCaseHistory', this.$route.params.uuid).then(resp => {
                 this.case_history = this.$store.getters.case_history
+                this.tab_loading = false
             })
+            
         },
         loadTasks() {
+            this.tab_loading = true
             this.$store.dispatch('getCaseTasks', this.$route.params.uuid).then(resp => {
                 this.tasks = this.$store.getters.case_tasks
+                this.tab_loading = false
             })
         },
         loadComments(){
+            this.tab_loading = true
             this.$store.dispatch('getCaseComments', this.$route.params.uuid).then(resp => {
-                this.comments = resp.data
+                this.comments = this.$store.getters.comments
+                this.tab_loading = false
             })
         },
         loadData() {
             this.$store.dispatch('getCase', this.$route.params.uuid).then(resp => {
                 this.case_data = resp.data
                 this.case_data.status_uuid = this.case_data.status.uuid
+                this.assignee = this.case_data.owner
                 this.loading = false
             })
         },
@@ -493,6 +537,7 @@ export default {
             this.filterEvents()
         },
         filterEvents() {
+            this.tab_loading = true
             let status_filters = []
             let tag_filters = []
             let observables_filters = []
@@ -545,6 +590,7 @@ export default {
                 this.filtered_events = resp.data.events
                 this.events_page_data = resp.data.pagination
                 this.$store.commit('add_success')
+                this.tab_loading = false
             })
         },
         expandAll() {

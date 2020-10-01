@@ -390,6 +390,7 @@ const getters = {
   comments: state => { return state.comments},
   case_tasks: state => { return state.case_tasks },
   case_data: state => { return state.case },
+  users: state => { return state.users },
   data_types_list: function() {
     return state.data_types.map(function(data_type) {
       var newDataType = {};

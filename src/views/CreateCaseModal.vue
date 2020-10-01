@@ -30,6 +30,18 @@
                 </multiselect>
             </div>
             <span v-if="case_template && case_template.task_count > 0"><label>Tasks</label><br><b>{{case_template.task_count}}</b> tasks will be added automatically to this case.<br><br></span>
+            <label>Case Owner</label>
+            <multiselect 
+                v-model="owner" 
+                label="username" 
+                :options="users" 
+                track-by="username" 
+                :searchable="true"
+                :internal-search="false"
+                :options-limit="25"
+                :show-no-results="false"
+                @search-change="usersFind">
+            </multiselect><br>
             <CTextarea
               placeholder="Enter a description for the case.  The more detail the better."
               required
@@ -57,7 +69,7 @@
                   >
                   </CSelect>
               </CCol>
-            </CRow>                
+            </CRow>{{owner}}
             <div role="group" class="form-group">
                 <label class="typo__label">Tags</label>
                 <multiselect v-model="selected_tags" placeholder="Select tags to apply to this input" :taggable="true" tag-placeholder="Add new tag" track-by="name" label="name" :options="tag_list" :multiple="true" @tag="addTag" :close-on-select="false">
@@ -92,6 +104,8 @@ export default {
             case_templates: [],
             case_template: null,
             tlp: 2,
+            users:[],
+            owner: null,
             severity: 2,
             modalStatus: this.show,
             severities: [
@@ -141,9 +155,17 @@ export default {
     created() {
         this.loadTags()
         this.loadData()
+        this.$store.dispatch('getUsers').then(resp => {
+            this.users = this.$store.getters.users
+        })
         this.$store.dispatch('getSettings')
     },
     methods: {
+        usersFind(query) {
+            this.$store.dispatch('getUsersByName', query).then(resp => {
+                this.users = this.$store.getters.users
+            })
+        },
         applyCaseTemplate() {
             if(this.case_template) {
                 this.severity = this.case_template.severity
@@ -197,10 +219,13 @@ export default {
             }
 
             let request_data = {title,description,events,tlp,severity,tags}
+            if(this.owner) {
+                request_data['owner_uuid'] = this.owner.uuid
+            }
+
             if(this.case_template) {
                 let case_template_uuid = this.case_template.uuid;
                 request_data = {title,description,case_template_uuid, events,tlp,severity,tags}
-                
             }
 
             this.$store.dispatch('createCase', request_data)
