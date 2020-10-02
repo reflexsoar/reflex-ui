@@ -27,6 +27,8 @@ const state = {
   case_tasks: [],
   case_task: {},
   case_history: [],
+  observables: [],
+  observable: {},
   data_types: [],
   data_type: {},
   event_rules: [],
@@ -208,6 +210,16 @@ const mutations = {
   },
   save_case(state, c) {
     state.case = c
+  },
+  save_observables(state, observables) {
+    state.observables = observables
+  },
+  save_observable(state, observable) {
+    state.observable = observable
+  },
+  add_observable(state, observable) {
+    state.observables.push(observable)
+    state.observable = observable
   },
   save_agent_group(state, agent_group) {
     state.agent_group = agent_group
@@ -392,6 +404,7 @@ const getters = {
   case_tasks: state => { return state.case_tasks },
   case_data: state => { return state.case },
   users: state => { return state.users },
+  observables: state => { return state.observables },
   data_types_list: function() {
     return state.data_types.map(function(data_type) {
       var newDataType = {};
@@ -1092,6 +1105,18 @@ const actions = {
       })
     })
   },
+  getCaseObservables({commit}, {uuid, fields='observables'}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields': fields}})
+      .then(resp => {
+        commit('save_observables', resp.data.observables)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCloseReasons({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/close_reason`, method: 'GET'})
@@ -1190,7 +1215,7 @@ const actions = {
   },
   getCase({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET'})
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,updated_by,close_reason'}})
       .then(resp => {
         commit('save_case', resp.data)
         resolve(resp)

@@ -73,7 +73,7 @@
                                 </multiselect>
                             </div>
                             <CSelect label="Severity" :value.sync="case_data.severity" :options="severities" @change="updateSeverity()" v-bind:disabled="case_data.status && case_data.status.closed"></CSelect>
-                            <span v-if="case_data.case_template.title != null"><b>Applied Case Template: </b> {{case_data.case_template.title}}</span>
+                            <span v-if="case_data.case_template && case_data.case_template.title != null"><b>Applied Case Template: </b> {{case_data.case_template.title}}</span>
                         </CCol>
                         <CCol col="9" @mouseover="edit_description_hint = true" style="overflow-y:scroll; max-height:350px;">
                             <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description">edit</a></small></h5>
@@ -93,7 +93,7 @@
                             <h5>Metrics</h5>
                             <CRow>
                                 <CCol col="3">
-                                    <CWidgetSimple header="Total Observables" :text="String(case_data.observables.length)">
+                                    <CWidgetSimple header="Total Observables" :text="String(case_data.observable_count)">
                                     </CWidgetSimple>
                                 </CCol>
                                 <CCol col="3">
@@ -114,7 +114,12 @@
                   </CCardBody>
               </CTab>
               <CTab title="Observables">
-                <ObservableList :observables="case_data.observables" :events="case_data.events"></ObservableList>
+                  <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
+                        <CSpinner color="dark" style="width:6rem;height:6rem;"/>
+                    </div>
+                    <div v-else>
+                        <ObservableList :observables="observables" :events="case_data.events"></ObservableList>
+                    </div>                
               </CTab>
               <CTab title="Events">
                   <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
@@ -249,7 +254,7 @@
     <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" ></AddObservableModal>
     <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid"></AddTaskModal>
     <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status_uuid" :closed.sync="case_closed"></CloseCaseModal>
-    <ApplyCaseTemplateModal :show.sync="caseTemplateModal" :case_uuid="this.uuid" :current_case_template_uuid="case_data.case_template.uuid"/>
+    <ApplyCaseTemplateModal :show.sync="caseTemplateModal" :case_uuid="this.uuid" :current_case_template_uuid="case_data.case_template ? case_data.case_template.uuid : null"/>
   </CCol>
   </CRow>
 </template>
@@ -315,7 +320,9 @@ export default {
                 status: {
                     closed: false
                 },
-                observables: []
+                case_template: {
+                    uuid: ""
+                }
             },
             loading: true,
             cardCollapse: true,
@@ -349,6 +356,7 @@ export default {
             comments: [],
             tasks: [],
             selected: [],
+            observables: [],
             tab_loading: false,
             search_filter: '',
             filtered_events: [],
@@ -431,6 +439,9 @@ export default {
             }
         },
         activeTab: function() {
+            if(this.activeTab == 1) {
+                this.loadObservables()
+            }
             if(this.activeTab == 2) {
                 this.filterEvents()
             }
@@ -448,6 +459,13 @@ export default {
     methods: {
         closureComments() {
             return this.comments.filter(comment => comment.is_closure_comment == true && comment.message != '')
+        },
+        loadObservables() {
+            this.tab_loading = true
+            this.$store.dispatch('getCaseObservables', {uuid: this.$route.params.uuid}).then(resp => {
+                this.observables = this.$store.getters.observables
+                this.tab_loading = false
+            })
         },
         loadHistory() {
             this.tab_loading = true

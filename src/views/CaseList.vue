@@ -137,8 +137,9 @@ export default {
         }
       },
       loadData: function() {
+        let fields = 'title,status,events,tlp,severity,owner,uuid,id'
         this.loading = true
-        this.$store.dispatch('getCases').then(resp => {
+        this.$store.dispatch('getCases', fields).then(resp => {
             this.cases = resp.data
             this.loading = false
         })

@@ -136,6 +136,7 @@ export default {
 
             if(this.step == 1) {
                 let observable_list = this.observables.split('\n')
+                observable_list = [...new Set(observable_list)]
                 for(let o in observable_list) {
                     this.new_observables.push({
                         value: observable_list[o], 
