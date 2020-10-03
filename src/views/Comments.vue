@@ -10,7 +10,7 @@
               <span v-else><b>{{comment.created_by.username}}</b> closed the case with the following comment at {{comment.created_at | moment('from', 'now')}}.</span>
               </CCol>
               <CCol col="6" class="text-right">
-                <CButton color="danger" size="sm" v-if="current_user.uuid == comment.created_by.uuid && settings.allow_comment_deletion && !comment.is_closure_comment" @click="deleteCommentModal(comment.uuid)">Delete</CButton>
+                <CButton color="danger" size="sm" v-if="current_user.uuid == comment.created_by.uuid && settings.allow_comment_deletion && !comment.is_closure_comment && current_user.permissions.includes('delete_case_comment')" @click="deleteCommentModal(comment.uuid)">Delete</CButton>
               </CCol>
             </CRow>
           </CCardHeader>

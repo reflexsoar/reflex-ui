@@ -18,7 +18,7 @@
                 <CDropdownItem @click="task.show = false">Hide Notes</CDropdownItem>
                 <CDropdownDivider />
                 <CDropdownItem>Complete</CDropdownItem>
-                <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
+                <CDropdownItem @click="deleteEventModal = !deleteEventModal" v-bind:hidden="task.from_template">Delete</CDropdownItem>
             </CDropdown>
             </CCol>
         </CRow>

@@ -1334,6 +1334,19 @@ const actions = {
       })
     })
   },
+  deleteCase({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_comment', uuid)
+        commit('show_alert', {message: 'Successfully deleted the case.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   deleteCaseComment({commit}, uuid) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case_comment/${uuid}`, method: 'DELETE'})

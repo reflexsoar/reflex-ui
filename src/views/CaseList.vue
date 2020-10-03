@@ -47,11 +47,11 @@
               </template>
               <template #status="{item}">
                 <td>
-                  {{item.status.name}}
+                  <span v-if="item.status">{{item.status.name}}</span>
                 </td>
               </template>
               <template #events="{item}">
-                <td>{{item.event_count}}</td>
+                <td>{{item.event_count > 0 ? item.event_count : 0}}</td>
               </template>
               <template #tlp="{item}">
                 <td>
@@ -70,8 +70,8 @@
                 </td>
               </template>
               <template #owner="{item}">
-                <td v-if="item.owner.username">{{item.owner.username}}</td>
-                <td v-if="!item.owner.username">Unassigned</td>
+                <td>{{(item.owner && item.owner.username) ? item.owner.username : "Unassigned"}}</td>
+
               </template>
               <template #actions='{item}'>
                 <td>
@@ -137,7 +137,7 @@ export default {
         }
       },
       loadData: function() {
-        let fields = 'title,status,events,tlp,severity,owner,uuid,id'
+        let fields = 'title,status,tlp,severity,owner,uuid,id,event_count'
         this.loading = true
         this.$store.dispatch('getCases', fields).then(resp => {
             this.cases = resp.data

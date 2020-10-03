@@ -15,12 +15,19 @@
     <CCard class="shadow-sm bg-white rounded" >
         <CCardHeader>
             <CRow>
-                <CCol col="12" lg="6" sm="12" class="text-left">
+                <CCol col="12" lg="6" sm="12" class="text-left" @mouseover="edit_title_hint = true" @mouseleave="edit_title_hint = false">
                     <h3 style="margin-bottom:0px;">
-                    <CButton v-if="case_data.severity == 1" color="light">Low</CButton>
-                    <CButton v-if="case_data.severity == 2" color="warning">Medium</CButton>
-                    <CButton v-if="case_data.severity == 3" color="danger">High</CButton>
-                    <CButton v-if="case_data.severity >= 4" color="dark">Critical</CButton>&nbsp;#{{case_data.id}} - {{case_data.title | truncate}} <span v-if="case_data.status && case_data.status.closed"> - Closed</span></h3>
+                    <span v-if="!edit_title">
+                    <CButton :color="getSeverityColor(case_data.severity)">{{getSeverityText(case_data.severity)}}</CButton>
+                    &nbsp;#{{case_data.id}} - {{case_data.title | truncate}}
+                        <small>
+                            <a v-if="edit_title_hint && case_data.status && !case_data.status.closed" @click="edit_title = !edit_title"><CIcon name="cilPencil" size="sm"/></a>
+                        </small>  
+                    <span v-if="case_data.status && case_data.status.closed"> - Closed</span>
+                    </span><span v-else><CInput v-model="case_data.title"><template #append>
+                        <CButton color="danger" @click="edit_title = !edit_title" size="sm"><CIcon name="cilXCircle"/></CButton>
+                    <CButton color="primary" @click="updateTitle()"  size="sm"><CIcon name="cilSave"/></CButton>
+                  </template></CInput></span></h3>
                 </CCol>
                 <CCol col="12" lg="6" sm="12" class="text-right">
                         <CDropdown 
@@ -32,8 +39,8 @@
                         <CDropdownItem @click="caseTaskModal = !caseTaskModal">Add Task</CDropdownItem>
                         <CDropdownItem @click="addObservableModal = !addObservableModal">Add Observables</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Run Playbook</CDropdownItem>
-                        <CDropdownDivider/>
-                        <CDropdownItem @click="deleteCaseModal = !deleteCaseModal">Delete</CDropdownItem>
+                        <CDropdownDivider v-if="current_user.permissions.includes('delete_case')"/>
+                        <CDropdownItem v-if="current_user.permissions.includes('delete_case')" @click="deleteCaseModal = !deleteCaseModal">Delete</CDropdownItem>
                         </CDropdown>
                 </CCol>
             </CRow>
@@ -78,10 +85,10 @@
                             <CSelect label="Severity" :value.sync="case_data.severity" :options="severities" @change="updateSeverity()" v-bind:disabled="case_data.status && case_data.status.closed"></CSelect>
                             <span v-if="case_data.case_template && case_data.case_template.title != null"><b>Applied Case Template: </b> {{case_data.case_template.title}}</span>
                         </CCol>
-                        <CCol col="9" @mouseover="edit_description_hint = true" style="overflow-y:scroll; max-height:350px;">
-                            <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description">edit</a></small></h5>
+                        <CCol col="9" @mouseover="edit_description_hint = true" @mouseleave="edit_description_hint = false" style="overflow-y:scroll; max-height:350px;">
+                            <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description"><CIcon name="cilPencil" size="sm"/></a></small></h5>
                             <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
-                            <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event"></CTextarea><CButton color="danger" @click="edit_description = false">Cancel</CButton>&nbsp;<CButton color="primary" @click="saveDescription()">Save</CButton></span>
+                            <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event"></CTextarea><CButton color="danger" @click="edit_description = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;<CButton color="primary" @click="saveDescription()" size="sm"><CIcon name="cilSave"/></CButton></span>
                             <span v-if="closureComments().length > 0 && case_data.status.closed">
                                 <br><h5>Closure Details</h5><br>
                                 <span v-for="comment in closureComments()" :key="comment.uuid">
@@ -166,8 +173,7 @@
                 </template>
                 <template #status="{item}">
                     <td>
-                        <CRow
-                        <CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': item.status.name})" size="sm" color="info">{{item.status.name}}</CButton>
+                        <CButton v-if="item.status" class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': item.status.name})" size="sm" color="info">{{item.status.name}}</CButton>
                     </td>
                 </template>
                 <template #tlp="{item}">
@@ -200,7 +206,7 @@
                         <CDropdownItem>Transfer Case</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Run Playbook</CDropdownItem>
                         <CDropdownDivider/>
-                        <CDropdownItem @click="deleteEventModal = !deleteEventModal" disabled>Delete</CDropdownItem>
+                        <CDropdownItem @click="deleteCaseModal = !deleteCaseModal" disabled>Delete</CDropdownItem>
                         </CDropdown>
                     </td>
               </template>
@@ -243,6 +249,15 @@
             </CTabs>
           </CCardBody>
         </CCard>
+        <CModal title="Delete Case" color="danger" :centered="true" size="lg" :show.sync="deleteCaseModal">
+        <div>
+            <p>Deleting a case is a permanent action, all work on the event will be removed and any associated events will be set to <b>New</b> status, are you sure you want to continue?</p>
+        </div>
+        <template #footer>
+            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Dismiss</CButton>
+            <CButton @click="deleteCase()" color="danger">Delete</CButton>
+        </template>
+    </CModal>
     <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" ></AddObservableModal>
     <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid"></AddTaskModal>
     <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status_uuid" :closed.sync="case_closed"></CloseCaseModal>
@@ -286,7 +301,7 @@ export default {
         ApplyCaseTemplateModal,
         Comments
     },
-    computed: mapState(['alert']),
+    computed: mapState(['alert','current_user']),
     props: {
         caption: {
             type: String,
@@ -321,6 +336,8 @@ export default {
             collapse_comments: true,
             collapse_observables: true,
             collapse_events: true,
+            edit_title: false,
+            edit_title_hint: false,
             collapse: {},
             tasks: [],
             task: {},
@@ -359,6 +376,7 @@ export default {
             current_events_page: 1,
             events_page_data: {},
             case_closed: false,
+            original_status: {},
             case_statuses: [],
             severities: [
                 {
@@ -383,13 +401,12 @@ export default {
     created() {
 
         this.loadData()
+
+        this.original_status = this.case_data.status_uuid
         this.filterEvents()
         this.$store.dispatch('getUsers').then(resp => {
             this.users = this.$store.getters.users
         })
-        //this.loadTasks()
-        //this.loadComments()
-        //this.loadHistory()
 
         this.$store.dispatch('getCaseStatus').then(resp => {
             this.case_statuses = resp.data.map(function(status) {
@@ -423,6 +440,9 @@ export default {
             if(!this.closeCaseModal) {
                 if(this.case_closed) {
                     this.case_data.status.closed = true  // This is hacky...figure out a better way
+                } else {
+                    console.log("SET IT BACK!")
+                    this.case_data.status_uuid = this.original_status
                 }
             }
         },
@@ -450,6 +470,23 @@ export default {
         }
     },
     methods: {
+        deleteCase() {
+            let uuid = this.uuid
+            this.$store.dispatch('deleteCase', uuid).then(resp => {
+                this.$router.push({path:'/cases/list'})
+            })
+        },
+        updateTitle() {
+            let uuid = this.uuid;
+            let data = {
+                title: this.case_data.title
+            }
+            this.$store.dispatch('updateCase', {uuid, data}).then(resp => {
+                this.case_data = this.$store.getters.case_data
+                this.edit_title = false
+                this.edit_title_hint = false
+            })
+        },
         closureComments() {
             return this.comments.filter(comment => comment.is_closure_comment == true && comment.message != '')
         },

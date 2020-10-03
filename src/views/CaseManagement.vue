@@ -1,6 +1,9 @@
 <template>
   <CCol xs="12" lg="12">
     <h2>Case Management</h2><br>
+     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
+      {{alert.message}}
+    </CAlert>
     <CCard>
       <CCardBody class="tabbed">
         <CTabs>
@@ -23,7 +26,7 @@
 </template>
 
 <script>
-
+import {mapState} from 'vuex';
 const Cases = () => import('@/views/CaseList')
 const CaseTemplates = () => import('@/views/CaseTemplateList')
 export default {
@@ -32,6 +35,7 @@ export default {
       'Cases': Cases,
       CaseTemplates
     },
+    computed: mapState(['alert']),
     created() {
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages
     }
