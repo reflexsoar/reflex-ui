@@ -40,8 +40,11 @@
         </CCardHeader>
         <CCardBody>
             <CRow>
-                <CCol col="6">
-                    <b>Created: </b>{{case_data.created_at | moment('LLLL')}}&nbsp;<b>Updated: </b>{{case_data.modified_at | moment('from', 'now')}}&nbsp;<b>Created By: </b>{{case_data.created_by.username}}&nbsp;<b>Updated By: </b>{{case_data.updated_by.username}}
+                <CCol col="3">
+                    <b>Created: </b>{{case_data.created_at | moment('LLLL')}}&nbsp;<br><b>Updated: </b>{{case_data.modified_at | moment('LLLL')}}&nbsp;
+                </CCol>
+                <CCol col="3">
+                    <b>Created By: </b>{{case_data.created_by.username}}&nbsp;<br><b>Updated By: </b>{{case_data.updated_by.username}}
                 </CCol>
                 <CCol col="6" class="text-right">
                     <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li>
@@ -114,12 +117,7 @@
                   </CCardBody>
               </CTab>
               <CTab title="Observables">
-                  <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
-                        <CSpinner color="dark" style="width:6rem;height:6rem;"/>
-                    </div>
-                    <div v-else>
-                        <ObservableList :observables="observables" :events="case_data.events"></ObservableList>
-                    </div>                
+                    <ObservableList :uuid="uuid" :events="case_data.events" :key="reloadObservables"></ObservableList>
               </CTab>
               <CTab title="Events">
                   <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
@@ -133,8 +131,7 @@
                                 <CCol col="8">
                                     <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length}} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events.length}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                                 </CCol>
-                                <CCol col="2">
-                                    
+                                <CCol col="2">                                    
                                     <CInput placeholder="Search" :value="search_filter" @change="search_filter = $event" v-on:keydown.enter.native="toggleObservableFilter({'filter_type':'search','dataType':'search','value':$event.target.value})"><template #append>
                                     <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','dataType':'search','value':search_filter})">Search</CButton></template></CInput>
                                     </CCol>
@@ -236,11 +233,6 @@
                         <CSpinner color="dark" style="width:6rem;height:6rem;"/>
                       </div>
                       <div v-else><CaseHistoryTimeline :entries="case_history"/></div>
-
-                <!-- <timeline>
-                    <timeline-item bg-color="#9dd8e0"><small>{{case_data.created_at | moment('LLLL')}}</small><br>Case Opened by <b>{{case_data.created_by.username}}</b></timeline-item>
-                    <timeline-item bg-color="#9dd8e0" style="padding-bottom:5px;" v-for="entry in case_data.history" :hollow="true" :key="entry.uuid"><small>{{entry.created_at | moment('LLLL')}}</small><vue-markdown style="margin-bottom:0px;">{{entry.message}} by *{{entry.created_by.username}}*</vue-markdown></timeline-item>
-                </timeline>-->
                   </div>
               </CTab>
               <CTab title="Playbook/Action Output" disabled>
@@ -357,6 +349,7 @@ export default {
             tasks: [],
             selected: [],
             observables: [],
+            reloadObservables: 1,
             tab_loading: false,
             search_filter: '',
             filtered_events: [],
@@ -440,7 +433,7 @@ export default {
         },
         activeTab: function() {
             if(this.activeTab == 1) {
-                this.loadObservables()
+                this.reloadObservables = Math.random()
             }
             if(this.activeTab == 2) {
                 this.filterEvents()

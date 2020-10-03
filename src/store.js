@@ -128,8 +128,14 @@ const mutations = {
   save_events(state, events) {
     state.events = events
   },
+  save_multiple_events(state, events) {
+    for(let evt in events) {
+      state.events = [...state.events.filter(e => e.uuid != evt.uuid), evt]
+    }
+  },
   save_event(state, event) {
     state.event = event
+    state.events = [...state.events.filter(e => e.uuid != event.uuid), event]
   },
   save_lists(state, lists) {
     state.lists = lists
@@ -405,6 +411,8 @@ const getters = {
   case_data: state => { return state.case },
   users: state => { return state.users },
   observables: state => { return state.observables },
+  events: state => { return state.events },
+  close_reasons: state => { return state.close_reasons },
   data_types_list: function() {
     return state.data_types.map(function(data_type) {
       var newDataType = {};
@@ -825,6 +833,32 @@ const actions = {
       })
     })
   },
+  updateEvent({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_event', resp.data)
+        commit('show_alert', {message: `Successfully dismissed Event.`, 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  dismissEvents({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/bulk_dismiss`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_multiple_events', resp.data)
+        commit('show_alert', {message: `Successfully dismissed ${data.events.length} Events.`, 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   createEventRule({commit}, rule) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event_rule`, data: rule, method: 'POST'})
@@ -1105,9 +1139,24 @@ const actions = {
       })
     })
   },
-  getCaseObservables({commit}, {uuid, fields='observables'}) {
+  getCaseObservables({commit}, {uuid, page=1, page_size=25, observable=[], dataType=[], tags=[]}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields': fields}})
+      
+      let base_url = `${BASE_URL}/case/${uuid}/observables?page=${page}&page_size=${page_size}`
+
+      if(observable.length > 0) {
+        base_url += `&observables=${observables}`
+      }
+
+      if(dataType.length > 0) {
+        base_url += `&dataType=${dataType}`
+      }
+
+      if(tags.length > 0) {
+        base_url += `&tags=${tag}`
+      }
+
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_observables', resp.data.observables)
         resolve(resp)
@@ -1215,7 +1264,7 @@ const actions = {
   },
   getCase({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,updated_by,close_reason'}})
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason'}})
       .then(resp => {
         commit('save_case', resp.data)
         resolve(resp)

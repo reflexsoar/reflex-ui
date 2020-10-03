@@ -200,27 +200,29 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton v-if="(event.new_related_events && event.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)">Create Event Rule</CButton>
-                    <CButton :to="`/alerts/${event.uuid}`" size="sm" color="secondary">View Event</CButton>
-                    <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`">View Case</CButton>
+                    <CButton v-if="(event.new_related_events && event.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)" v-c-tooltip="'Create Event Rule'"><CIcon name='cilGraph'/></CButton>
+                    <CButton :to="`/alerts/${event.uuid}`" size="sm" color="secondary" v-c-tooltip="'View Event'"><CIcon name="cilEnvelopeOpen"/></CButton>
+                    <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`" v-c-tooltip="'View Case'"><CIcon name="cilBriefcase"/></CButton>
+                    <CButton v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="'Dismiss Event'"><CIcon name="cilDeaf"/></CButton>
                   </CButtonGroup>
                 </CCol>
               </CRow>
             </CCardBody>
             <CCardFooter style="background-color:#f0f0f0;">
               <CRow>
-                <CCol col="8">
+                <CCol col="9">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
                     <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events.length > 0"> | {{event.new_related_events.length}} open</span></span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
+                    <span v-if="event.status.closed && event.dismiss_reason" class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}</span>
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
                     <span class="separator">|</span><b>Event Sig:</b> <span @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})">{{event.signature}}</span>
                     
                   </small>
                 </CCol>
-                <CCol col="4" class="text-right">
+                <CCol col="3" class="text-right">
                   <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag.name})" color="dark" class="tag" size="sm">{{ tag.name }}</CButton></li>
                 </CCol>
               </CRow>
@@ -233,14 +235,15 @@
       <div>
         <p>Dismissing an event indicates that no action is required.  For transparency purposes, it is best to leave a comment as to why this event is being dismissed.  Fill out the comment field below.</p>
         <p>This comment will apply to <b>{{selected.length}}</b> events.</p>
-        <CForm>
+        <CForm id="dismissEventForm" @submit.prevent="dismissEvent()">
             <CRow>
                 <CCol><br>
-            <CSelect :options="['False Positive','Alarm requires tuning','Administrative Activity']" v-model="dismissalReason" label="Reason"/>
+            <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value" label="Reason"/>
             <CTextarea
                 placeholder="Enter a comment as to why this Event is being dismissed."
                 required
-                v-model="dismissalComment"
+                :value="dismissalComment"
+                @change="dismissalComment = $event"
                 label="Comment"
                 rows=5
             >
@@ -250,7 +253,7 @@
         </CForm>
       </div>
       <template #footer>
-        <CButton @click="dismissEvent()" color="danger">Dismiss</CButton>
+        <CButton type="submit" form="dismissEventForm" color="danger">Dismiss Event</CButton>
       </template>
     </CModal>
     <CreateCaseModal :show.sync="createCaseModal" :events="selected"></CreateCaseModal>
@@ -334,6 +337,7 @@ export default {
     computed: mapState(['status','alert']),
     created: function () {
         this.loadData()
+        this.loadCloseReasons()
         this.refresh = setInterval(function() {
           if(!this.pauseRefresh) {
             this.loadData()
@@ -364,6 +368,7 @@ export default {
         createEventRuleModal: false,
         dismissalComment: "",
         dismissalReason: null,
+        close_reasons: [],
         collapse: {},
         observableFilters: [{'filter_type':'status','dataType':'status','value':'New'}],
         filtered_events: [],
@@ -383,6 +388,40 @@ export default {
       }
     },
     methods: {
+      dismissEventFromCard(uuid) {
+        this.selected = [uuid]
+        this.dismissEventModal = true
+      },
+      dismissEvent() {
+        
+        if(this.selected.length == 1) {
+          let data = {          
+            dismiss_reason_uuid: this.dismissalReason,
+            dismiss_comment: this.dismissalComment
+          }
+          this.$store.dispatch('updateEvent', {uuid: this.selected[0], data}).then(resp => {
+            this.filtered_events = this.$store.getters.events
+          })
+         } else if (this.selected.length > 1) {
+          let data = {          
+            dismiss_reason_uuid: this.dismissalReason,
+            dismiss_comment: this.dismissalComment,
+            events: this.selected
+          }
+          this.$store.dispatch('dismissEvents', data).then(resp => {
+            this.filtered_events = this.$store.getters.events
+            
+          })
+         }
+         this.selected = []
+         this.dismissEventModal = false
+         this.dismissalComment = ""
+      },
+      loadCloseReasons() {
+        this.$store.dispatch('getCloseReasons').then(resp => {
+          this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
+        })
+      },
       addSuccess: function() {
         if (this.$store.getters.addSuccess == 'success') {
           return true
@@ -513,7 +552,7 @@ export default {
           page: this.current_page,
           page_size: 25
         }).then(resp => {
-          this.filtered_events = resp.data.events
+          this.filtered_events = this.$store.getters.events
           this.page_data = resp.data.pagination
           this.$store.commit('add_success')
         })
