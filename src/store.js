@@ -227,6 +227,10 @@ const mutations = {
     state.observables.push(observable)
     state.observable = observable
   },
+  update_observable(state, observable) {
+    state.observable = observable
+    state.observables = state.observables.map(o => o.uuid == observable.uuid ? observable : o)
+  },
   save_agent_group(state, agent_group) {
     state.agent_group = agent_group
   },
@@ -314,6 +318,14 @@ const mutations = {
   },
   save_case_task(state, task) {
     state.case_task
+  },
+  update_case_task(state, task) {
+    state.case_task = task
+    state.case_tasks = state.case_tasks.map(t => t.uuid == task.uuid ? task : t)
+  },
+  remove_case_task(state, uuid) {
+    state.case_task = {}
+    state.case_tasks = state.case_tasks.filter(t => t.uuid !== uuid)
   },
   add_case_task(state, task) {
     state.case_tasks.push(task)
@@ -1166,6 +1178,18 @@ const actions = {
       })
     })
   },
+  updateObservable({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/observable/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_observable', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCloseReasons({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/close_reason`, method: 'GET'})
@@ -1264,7 +1288,7 @@ const actions = {
   },
   getCase({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason'}})
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason,total_tasks,open_tasks'}})
       .then(resp => {
         commit('save_case', resp.data)
         resolve(resp)
@@ -1303,6 +1327,30 @@ const actions = {
       Axios({url: `${BASE_URL}/case/${uuid}/add_events`, data: events, method: 'PUT'})
       .then(resp => {
         commit('save_case', resp.data.case)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateCaseTask({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_task/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_case_task', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteCaseTask({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_task/${uuid}`,method: 'DELETE'})
+      .then(resp => {
+        commit('remove_case_task', uuid)
         resolve(resp)
       })
       .catch(err => {

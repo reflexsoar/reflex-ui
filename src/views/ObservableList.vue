@@ -65,6 +65,7 @@
             label-off="No"
             :checked.sync="item.ioc"
             v-bind:disabled="item.safe"
+            v-on:change.native="toggleISS(item.uuid, 'ioc', item.ioc)"
           />
         </td>
       </template>
@@ -76,6 +77,7 @@
             label-on="Yes"
             label-off="No"
             :checked.sync="item.spotted"
+            v-on:change.native="toggleISS(item.uuid, 'spotted', item.spotted)"
           />
         </td>
       </template>
@@ -88,6 +90,7 @@
             label-off="No"
             :checked.sync="item.safe"
             v-bind:disabled="item.ioc"
+            v-on:change.native="toggleISS(item.uuid, 'safe', item.safe)"
           />
         </td>
       </template>
@@ -168,6 +171,14 @@ export default {
         }
       }
       return observables[uuid];
+    },
+    toggleISS(uuid, field, value) {
+      let data = {};
+      data[field] = value
+
+      this.$store.dispatch('updateObservable', {uuid, data}).then(resp => {
+        this.observables = this.$store.getters.observables
+      })
     },
     toggleObservableFilter(obs) {
       let exists = this.filters.some((item) => {

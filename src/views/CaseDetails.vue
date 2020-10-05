@@ -102,19 +102,23 @@
                         <CCol col="12" style="border-right: 1px dotted #cfcfcf;">
                             <h5>Metrics</h5>
                             <CRow>
-                                <CCol col="3">
+                                <CCol col="2">
+                                    <CWidgetSimple header="Remaining Tasks" :text="String(case_data.open_tasks)+'/'+String(case_data.total_tasks)">
+                                    </CWidgetSimple>
+                                </CCol>
+                                <CCol col="2">
                                     <CWidgetSimple header="Total Observables" :text="String(case_data.observable_count)">
                                     </CWidgetSimple>
                                 </CCol>
-                                <CCol col="3">
+                                <CCol col="2">
                                     <CWidgetSimple header="Total Events" :text="String(case_data.event_count)">
                                     </CWidgetSimple>
                                 </CCol>
-                                <CCol col="3">
+                                <CCol col="2">
                                     <CWidgetSimple header="Time Open" :text="daysOpen()">
                                     </CWidgetSimple>
                                 </CCol>
-                                 <CCol col="3">
+                                 <CCol col="2">
                                     <CWidgetSimple header="SLA Status" text="Okay">
                                     </CWidgetSimple>
                                 </CCol>
@@ -441,7 +445,6 @@ export default {
                 if(this.case_closed) {
                     this.case_data.status.closed = true  // This is hacky...figure out a better way
                 } else {
-                    console.log("SET IT BACK!")
                     this.case_data.status_uuid = this.original_status
                 }
             }
@@ -452,6 +455,9 @@ export default {
             }
         },
         activeTab: function() {
+            if(this.activeTab == 0) {
+                this.loadData()
+            }
             if(this.activeTab == 1) {
                 this.reloadObservables = Math.random()
             }

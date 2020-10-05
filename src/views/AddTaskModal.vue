@@ -59,6 +59,7 @@
 
 <script>
 import {vSelect} from "vue-select";
+import { mapState } from "vuex";
 export default {
     name: 'AddTaskModal',
     props: {
@@ -71,7 +72,6 @@ export default {
             title: "",
             description: "",
             groups: [],
-            users: [],
             owner: "",
             group: "",
             modalStatus: this.show,
@@ -95,6 +95,7 @@ export default {
             }
         }
     },
+    computed: mapState(['users']),
     created() {
         this.loadTags()
     },
