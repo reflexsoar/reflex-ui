@@ -327,6 +327,10 @@ const mutations = {
     state.case_task = {}
     state.case_tasks = state.case_tasks.filter(t => t.uuid !== uuid)
   },
+  remove_case(state, uuid) {
+    state.cases = state.cases.filter(c => c.uuid != uuid)
+    state.case = {}
+  },
   add_case_task(state, task) {
     state.case_tasks.push(task)
     state.status = 'success'
@@ -421,6 +425,7 @@ const getters = {
   comments: state => { return state.comments},
   case_tasks: state => { return state.case_tasks },
   case_data: state => { return state.case },
+  cases: state => { return state.cases },
   users: state => { return state.users },
   observables: state => { return state.observables },
   events: state => { return state.events },
@@ -1386,7 +1391,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case/${uuid}`, method: 'DELETE'})
       .then(resp => {
-        commit('remove_comment', uuid)
+        commit('remove_case', uuid)
         commit('show_alert', {message: 'Successfully deleted the case.', 'type': 'success'})
         resolve(resp)
       })

@@ -35,6 +35,7 @@
                   :dark="dark"
                   :sorter='{external: true, resetable: true}'
                   pagination
+                  :responsive="false"
                   style="border-top: 1px solid #cfcfcf;"
               >
               <template #title="{item}">
@@ -63,10 +64,7 @@
               </template>
               <template #severity="{item}">
                 <td>
-                  <CButton v-if="item.severity == 1" color="light" size="sm">Low</CButton>
-                  <CButton v-if="item.severity == 2" color="warning" size="sm">Medium</CButton>
-                  <CButton v-if="item.severity == 3" color="danger" size="sm">High</CButton>
-                  <CButton v-if="item.severity >= 4" color="dark" size="sm">Critical</CButton>
+                  <CButton :color="getSeverityColor(item.severity)" size="sm">{{getSeverityText(item.severity)}}</CButton>
                 </td>
               </template>
               <template #owner="{item}">
@@ -79,13 +77,22 @@
                     <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Close</CDropdownItem>
                     <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Execute Playbook</CDropdownItem>
                     <CDropdownDivider />
-                    <CDropdownItem @click="deleteObservableModal = !deleteObservableModal">Delete</CDropdownItem>
+                    <CDropdownItem @click="showDeleteCaseModal(item.uuid)">Delete</CDropdownItem>
                   </CDropdown>
                 </td>
               </template>
               </CDataTable>
     </CCol>
     <CreateCaseModal :show.sync='newCaseModal'></CreateCaseModal>
+    <CModal title="Delete Case" color="danger" :centered="true" size="lg" :show.sync="deleteCaseModal">
+        <div>
+            <p>Deleting a case is a permanent action, all work on the event will be removed and any associated events will be set to <b>New</b> status, are you sure you want to continue?</p>
+        </div>
+        <template #footer>
+            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Dismiss</CButton>
+            <CButton @click="deleteCase()" color="danger">Delete</CButton>
+        </template>
+    </CModal>
   </CRow>
 </template>
 
@@ -124,6 +131,8 @@ export default {
         dismissCountDown: 10,
         loading: true,
         newCaseModal: false,
+        deleteCaseModal: false,
+        target_case: "",
         fields: ['title','status','events','tlp','severity','owner','actions'],
         available_fields: ['title','status','events','tlp','severity','owner','actions','created_at','modified_at']
       }
@@ -135,6 +144,36 @@ export default {
         } else {
           return false
         }
+      },
+      showDeleteCaseModal(uuid) {
+        this.target_case = uuid
+        this.deleteCaseModal = !this.deleteCaseModal
+      },
+      deleteCase() {
+          let uuid = this.target_case
+          this.$store.dispatch('deleteCase', uuid).then(resp => {
+              this.cases = this.$store.getters.cases
+              this.target_case = ""
+              this.deleteCaseModal = !this.deleteCaseModal
+          })
+      },
+      getSeverityColor(severity) {
+          switch(severity) {
+          case 1: return 'dark';
+          case 2: return 'info';
+          case 3: return 'warning';
+          case 4: return 'danger';
+          default: return 'dark';
+          }
+      },
+      getSeverityText(severity) {
+          switch(severity) {
+          case 1: return 'Low';
+          case 2: return 'Medium';
+          case 3: return 'High';
+          case 4: return 'Critical';
+          default: return 'Low';
+          }
       },
       loadData: function() {
         let fields = 'title,status,tlp,severity,owner,uuid,id,event_count'

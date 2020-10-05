@@ -118,7 +118,6 @@ export default {
             let group = this.group
             let case_uuid = this.case_uuid
             let order = this.task_count+1
-
             let data = {title, description, case_uuid, order}
 
             if(owner) {

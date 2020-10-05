@@ -253,7 +253,7 @@
             </CTabs>
           </CCardBody>
         </CCard>
-        <CModal title="Delete Case" color="danger" :centered="true" size="lg" :show.sync="deleteCaseModal">
+    <CModal title="Delete Case" color="danger" :centered="true" size="lg" :show.sync="deleteCaseModal">
         <div>
             <p>Deleting a case is a permanent action, all work on the event will be removed and any associated events will be set to <b>New</b> status, are you sure you want to continue?</p>
         </div>
@@ -684,19 +684,19 @@ export default {
         },
         getSeverityColor(severity) {
             switch(severity) {
-            case 0: return 'dark';
-            case 1: return 'info';
-            case 2: return 'warning';
-            case 3: return 'danger';
+            case 1: return 'dark';
+            case 2: return 'info';
+            case 3: return 'warning';
+            case 4: return 'danger';
             default: return 'dark';
             }
         },
         getSeverityText(severity) {
             switch(severity) {
-            case 0: return 'Low';
-            case 1: return 'Medium';
-            case 2: return 'High';
-            case 3: return 'Critical';
+            case 1: return 'Low';
+            case 2: return 'Medium';
+            case 3: return 'High';
+            case 4: return 'Critical';
             default: return 'Low';
             }
         }

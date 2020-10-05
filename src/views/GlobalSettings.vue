@@ -21,16 +21,30 @@
             </CCol>
           </CRow>
           <h4>Case/Event Settings</h4>
-          <label>Require Case Templates</label><br>
-          <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_case_templates"/><br><br>
-          <label v-c-tooltip="{
-            content: 'This will require users to add additional details when closing a case.',
-            placement: 'right'}">Require Case Closure Details</label><br>
-          <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_case_close_comment"/><br><br>
-          <label v-c-tooltip="{
-            content: 'This will require users to add additional details when dismissing an event.',
-            placement: 'right'}">Require Event Dismiss Comment</label><br>
-          <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_event_dismiss_comment"/><br><br>
+          <CRow>
+            <CCol col="6">
+              <label>Require Case Templates</label><br>
+              <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_case_templates"/><br><br>
+              <label v-c-tooltip="{
+                content: 'This will require users to add additional details when closing a case.',
+                placement: 'right'}">Require Case Closure Details</label><br>
+              <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_case_close_comment"/><br><br>
+              <label v-c-tooltip="{
+                content: 'This will require users to add additional details when dismissing an event.',
+                placement: 'right'}">Require Event Dismiss Comment</label><br>
+              <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_event_dismiss_comment"/><br><br>
+            </CCol>
+            <CCol col="6">
+              <label v-c-tooltip="{
+                content: 'This will automatically assign a case to it\'s creator if they don\'t pick an owner.',
+                placement: 'right'}">Auto-Assign Case to Creator</label><br>
+                <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.assign_case_on_create"/><br><br>
+                <label v-c-tooltip="{
+                content: 'This will automatically assign a task to the user starting it if one isn\'t assigned already.',
+                placement: 'right'}">Auto-Assign Task to Starter</label><br>
+                <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.assign_task_on_start"/><br><br>
+            </CCol>
+          </CRow>
         </CCol>
         <CCol col="6">
           <h4>Mail Settings</h4>
@@ -66,6 +80,13 @@
     </CModal>
   </CCardBody>
 </template>
+
+<style scoped>
+h4 {
+  padding-bottom: 10px;
+  border-bottom: 1px dotted #cfcfcf;
+}
+</style>
 
 <script>
 import { vSelect } from "vue-select";
