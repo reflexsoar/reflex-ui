@@ -301,7 +301,7 @@ export default {
     },
     dismiss() {
       this.reset()
-      this.modal_status = false
+      this.delete_modal = false
     },
     loadRoles: function () {
       this.$store.dispatch("getRoles").then(resp => {

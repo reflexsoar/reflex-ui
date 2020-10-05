@@ -157,6 +157,10 @@ const mutations = {
     state.comments.push(comment)
     state.comment = comment
   },
+  update_case_comment(state, comment) {
+    state.comment = comment
+    state.comments = state.comments.map(c => c.uuid == comment.uuid ? comment : c)
+  },
   remove_comment(state, uuid) {
     state.comments = state.comments.filter(comment => comment.uuid !== uuid)
   },
@@ -423,6 +427,7 @@ const getters = {
   date_types: state => state.data_types,
   case_history: state => { return state.case_history },
   comments: state => { return state.comments},
+  comment: (state) => function (uuid) { state.comments.find(comment => comment.uuid == uuid) },
   case_tasks: state => { return state.case_tasks },
   case_data: state => { return state.case },
   cases: state => { return state.cases },
@@ -1332,6 +1337,18 @@ const actions = {
       Axios({url: `${BASE_URL}/case/${uuid}/add_events`, data: events, method: 'PUT'})
       .then(resp => {
         commit('save_case', resp.data.case)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateComment({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_comment/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_case_comment', resp.data)
         resolve(resp)
       })
       .catch(err => {

@@ -2,22 +2,7 @@
   <div class="comments">
     <timeline>
       <timeline-item v-for="comment in comments_list" :key="comment.uuid" bg-color="#9dd8e0">
-        <CCard>
-          <CCardHeader class="bg-light">
-            <CRow>
-              <CCol col="6">
-              <span v-if="!comment.is_closure_comment"><b>{{comment.created_by.username}}</b> commented {{comment.created_at | moment('from', 'now')}}.</span>
-              <span v-else><b>{{comment.created_by.username}}</b> closed the case with the following comment at {{comment.created_at | moment('from', 'now')}}.</span>
-              </CCol>
-              <CCol col="6" class="text-right">
-                <CButton color="danger" size="sm" v-if="current_user.uuid == comment.created_by.uuid && settings.allow_comment_deletion && !comment.is_closure_comment && current_user.permissions.includes('delete_case_comment')" @click="deleteCommentModal(comment.uuid)">Delete</CButton>
-              </CCol>
-            </CRow>
-          </CCardHeader>
-          <CCardBody>
-            <vue-markdown>{{comment.message}}</vue-markdown>
-          </CCardBody>
-        </CCard>
+        <Comment :comment="comment" :deleteAction="deleteComment"/>
       </timeline-item>
     </timeline>
     <CRow>
@@ -49,9 +34,11 @@ import { vSelect } from "vue-select";
 import { Timeline, TimelineItem, TimelineTitle } from "vue-cute-timeline";
 import { mapState } from 'vuex';
 import { loadOptions } from '@babel/core';
+import Comment from './Comment'
 export default {
   name: "Comments",
   components: {
+    Comment,
     Timeline,
     TimelineItem,
     TimelineTitle,
@@ -83,10 +70,9 @@ export default {
       this.target_comment = this.comments_list.find(comment => comment.uuid === uuid)
       this.delete_modal = true
     },
-    deleteComment() {
-      let uuid = this.target_comment.uuid
-      this.$store.dispatch('deleteCaseComment', this.target_comment.uuid).then(resp => {
-        this.comments_list = this.comments_list.filter(comment => comment.uuid !== this.target_comment.uuid)
+    deleteComment(uuid) {
+      this.$store.dispatch('deleteCaseComment', uuid).then(resp => {
+        this.comments_list = this.comments_list.filter(comment => comment.uuid !== uuid)
       })
       this.delete_modal = false
     },

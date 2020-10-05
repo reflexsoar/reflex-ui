@@ -305,7 +305,7 @@ export default {
         ApplyCaseTemplateModal,
         Comments
     },
-    computed: mapState(['alert','current_user']),
+    computed: mapState(['alert','current_user','settings']),
     props: {
         caption: {
             type: String,
@@ -408,6 +408,7 @@ export default {
 
         this.original_status = this.case_data.status_uuid
         this.filterEvents()
+        this.$store.dispatch('getSettings')
         this.$store.dispatch('getUsers').then(resp => {
             this.users = this.$store.getters.users
         })
