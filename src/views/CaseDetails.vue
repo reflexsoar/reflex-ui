@@ -66,6 +66,7 @@
                             :options="tags" 
                             :multiple="true"
                             :close-on-select="false"
+                            style="z-index:50"
                         ></multiselect>
                         <CButton color="danger" @click="edit_tags = !edit_tags" size="sm"><CIcon name="cilXCircle"/></CButton>
                     <CButton color="primary" @click="saveTags()"  size="sm"><CIcon name="cilSave"/></CButton>
