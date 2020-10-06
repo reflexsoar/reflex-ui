@@ -53,8 +53,23 @@
                 <CCol col="3">
                     <b>Created By: </b>{{case_data.created_by.username}}&nbsp;<br><b>Updated By: </b>{{case_data.updated_by.username}}
                 </CCol>
-                <CCol col="6" class="text-right">
-                    <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li>
+                <CCol col="6" class="text-right" @mouseenter="edit_tags_hint = true" @mouseleave="edit_tags_hint = false">
+                    <span v-if="!edit_tags"><CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li><a v-if="edit_tags_hint" @click="editTags()"><CIcon name="cilPencil" size="sm"/></a></span>
+                    <span v-if="edit_tags">
+                        <multiselect 
+                            v-model="current_tags" 
+                            placeholder="Select tags to apply to this case" 
+                            :taggable="true" 
+                            tag-placeholder="Add new tag" 
+                            track-by="name" 
+                            label="name" 
+                            :options="tags" 
+                            :multiple="true"
+                            :close-on-select="false"
+                        ></multiselect>
+                        <CButton color="danger" @click="edit_tags = !edit_tags" size="sm"><CIcon name="cilXCircle"/></CButton>
+                    <CButton color="primary" @click="saveTags()"  size="sm"><CIcon name="cilSave"/></CButton>
+                    </span>
                 </CCol>
             </CRow>
         </CCardBody>
@@ -305,7 +320,7 @@ export default {
         ApplyCaseTemplateModal,
         Comments
     },
-    computed: mapState(['alert','current_user','settings']),
+    computed: mapState(['alert','current_user','settings','tags']),
     props: {
         caption: {
             type: String,
@@ -382,6 +397,9 @@ export default {
             case_closed: false,
             original_status: {},
             case_statuses: [],
+            edit_tags: false,
+            edit_tags_hint: false,
+            current_tags: [],
             severities: [
                 {
                     'label': 'Low',
@@ -409,6 +427,7 @@ export default {
         this.original_status = this.case_data.status_uuid
         this.filterEvents()
         this.$store.dispatch('getSettings')
+        this.$store.dispatch('getTags')
         this.$store.dispatch('getUsers').then(resp => {
             this.users = this.$store.getters.users
         })
@@ -477,6 +496,18 @@ export default {
         }
     },
     methods: {
+        editTags() {
+            this.current_tags = this.case_data.tags
+            this.edit_tags = !this.edit_tags
+        },
+        saveTags() {
+            let uuid = this.uuid
+            let data = {tags: this.current_tags.map(tag => {return tag.name})}
+            this.$store.dispatch('updateCase', {uuid, data: data}).then(resp => {
+                this.case_data.tags = resp.data.tags
+                this.edit_tags = false
+            })
+        },
         deleteCase() {
             let uuid = this.uuid
             this.$store.dispatch('deleteCase', uuid).then(resp => {

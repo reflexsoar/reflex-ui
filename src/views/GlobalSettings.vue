@@ -6,11 +6,6 @@
           <h4>Basic Settings</h4>
           <CInput v-model="settings.base_url" label="Base URL" v-bind:disabled="!current_user.permissions['set_baseurl']"/>
           <CInput v-model="settings.logon_password_attempts" label="Max Logon Attempts"/>
-          
-
-          <label>Allow Comment Deletion</label><br/>
-          <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.allow_comment_deletion"/><br><br>
-
           <h4>Playbook Settings</h4>
           <CRow>
             <CCol col="6">
@@ -43,6 +38,14 @@
                 content: 'This will automatically assign a task to the user starting it if one isn\'t assigned already.',
                 placement: 'right'}">Auto-Assign Task to Starter</label><br>
                 <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.assign_task_on_start"/><br><br>
+                <label v-c-tooltip="{
+                content: 'This will allow users to edit their comments, no history is maintained.',
+                placement: 'right'}">Allow Comment Editing</label><br>
+                <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.allow_comment_editing"/><br><br>
+                <label v-c-tooltip="{
+                content: 'This will allow users to delete their commends',
+                placement: 'right'}">Allow Comment Deletion</label><br/>
+                <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.allow_comment_deletion"/><br><br>
             </CCol>
           </CRow>
         </CCol>

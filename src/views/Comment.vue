@@ -19,7 +19,7 @@
             <CButton color="secondary" 
               size="sm" 
               @click="edit = !edit"
-              v-if="current_user.uuid == comment.created_by.uuid"
+              v-if="current_user.uuid == comment.created_by.uuid && settings.allow_comment_editing && !comment.is_closure_comment"
               >Edit</CButton
             >
             <CButton
