@@ -66,6 +66,7 @@
                             :options="tags" 
                             :multiple="true"
                             :close-on-select="false"
+                            @tag="current_tags.push({'name':$event})"
                             style="z-index:50"
                         ></multiselect>
                         <CButton color="danger" @click="edit_tags = !edit_tags" size="sm"><CIcon name="cilXCircle"/></CButton>
@@ -497,6 +498,9 @@ export default {
         }
     },
     methods: {
+        addTag(event) {
+            console.log(event)
+        },
         editTags() {
             this.current_tags = this.case_data.tags
             this.edit_tags = !this.edit_tags
