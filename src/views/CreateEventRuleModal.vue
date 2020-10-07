@@ -53,7 +53,7 @@
                                 :searchable="true"
                                 :internal-search="false"
                                 :options-limit="10"
-                                :show-no-results="false" 
+                                :show-no-results="false"
                                 @search-change="caseFind"
                                 :custom-label="caseLabel"
                                 placeholder="Select a case"
@@ -113,10 +113,11 @@ export default {
         event_signature: String,
         rule_observables: Array
     },
-    computed: mapState(['settings','cases']),
+    computed: mapState(['settings']),
     data(){
         return {
             name: "",
+            cases: [],
             description: "",
             modalStatus: this.show,
             merge_into_case: false,
@@ -158,7 +159,7 @@ export default {
         }
     },
     created() {
-        this.loadData()
+        //this.loadData()
         //this.$store.dispatch('getSettings')
     },
     methods: {
@@ -185,12 +186,14 @@ export default {
             this.step -= 1;
         },
         loadData() {
-            this.$store.dispatch('getCases', 'uuid,title,id,event_count,owner,severity')
+            this.$store.dispatch('getCases', 'uuid,title,id,event_count,owner,severity').then(resp => {
+                this.cases = this.$store.getters.cases
+            })
         },
         caseFind(query) {
             let fields = 'uuid,title,id,event_count,owner,severity'
             this.$store.dispatch('getCasesByTitle', {title: query, fields}).then(resp => {
-                this.$store.commit('save_cases', resp.data)
+                this.cases = this.$store.getters.cases
             })
         },
         toggleMergeToCase() {

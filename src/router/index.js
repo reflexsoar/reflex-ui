@@ -78,7 +78,7 @@ router.beforeEach((to, from, next) => {
 
   // Fetch the settings before each route in the event that they have changed
 
-  if(to.matched.some(record => record.fetchSettings)) {
+  if(to.matched.some(record => record.meta.fetchSettings)) {
     store.dispatch('getSettings')
   }  
 

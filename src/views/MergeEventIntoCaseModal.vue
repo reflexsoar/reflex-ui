@@ -52,15 +52,14 @@ export default {
             this.modalStatus = this.show
         },
         modalStatus: function(){
+            if(this.modalStatus) {
+                this.loadData()
+            }
             this.$emit('update:show', this.modalStatus)
             if(!this.modalStatus) {
                 this.reset()
             }
         }
-    },
-    created() {
-        this.$store.dispatch('getSettings')
-        this.loadData()
     },
     methods: {
         loadData() {

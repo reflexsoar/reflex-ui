@@ -105,14 +105,6 @@ export default {
             this.$emit('update:closed', false)
             this.modalStatus = false
             this.$emit('update:show', this.modalStatus)
-        },
-        addTag(newTag) {
-            const t = {
-                name: newTag,
-                uuid: ''
-            }
-            this.tag_list.push(t)
-            this.selected_tags.push(t)
         }
     }
 }

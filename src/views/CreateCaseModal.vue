@@ -135,6 +135,7 @@ export default {
             if(this.modalStatus) {
                 this.loadTags()
                 this.loadData()
+                this.loadUsers()
             }
             this.$emit('update:show', this.modalStatus)
             if(!this.modalStatus) {
@@ -153,12 +154,6 @@ export default {
         }
     },
     created() {
-        this.loadTags()
-        this.loadData()
-        this.$store.dispatch('getUsers').then(resp => {
-            this.users = this.$store.getters.users
-        })
-        this.$store.dispatch('getSettings')
     },
     methods: {
         usersFind(query) {
@@ -189,6 +184,14 @@ export default {
                     }                    
                 }
             }
+        },
+        loadUsers() {
+            this.$store.dispatch('getUsers').then(resp => {
+                this.users = this.$store.getters.users
+            })
+        },
+        loadCaseTemplates() {
+
         },
         loadData() {
             this.$store.dispatch('getCaseTemplateList', '').then(resp => {
