@@ -78,7 +78,6 @@ export default {
 
             // Call the update case API endpoint
             let status = {"status_uuid": this.status_uuid, "close_reason_uuid": this.closure_reason_uuid}
-            console.log(status)
             let uuid = this.case_uuid
             this.$store.dispatch('updateCase', {uuid, data: status}).then(resp => {
                 this.case_data = resp.data

@@ -38,6 +38,7 @@
                         <CDropdownItem @click="caseTemplateModal = !caseTemplateModal">Add Case Template</CDropdownItem>
                         <CDropdownItem @click="caseTaskModal = !caseTaskModal">Add Task</CDropdownItem>
                         <CDropdownItem @click="addObservableModal = !addObservableModal">Add Observables</CDropdownItem>
+                        <CDropdownItem @click="linkCaseModal = !linkCaseModal">Link Cases</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Run Playbook</CDropdownItem>
                         <CDropdownDivider v-if="current_user.permissions.includes('delete_case')"/>
                         <CDropdownItem v-if="current_user.permissions.includes('delete_case')" @click="deleteCaseModal = !deleteCaseModal">Delete</CDropdownItem>
@@ -70,7 +71,7 @@
                             style="z-index:50"
                         ></multiselect>
                         <CButton color="danger" @click="edit_tags = !edit_tags" size="sm"><CIcon name="cilXCircle"/></CButton>
-                    <CButton color="primary" @click="saveTags()"  size="sm"><CIcon name="cilSave"/></CButton>
+                        <CButton color="primary" @click="saveTags()"  size="sm"><CIcon name="cilSave"/></CButton>
                     </span>
                 </CCol>
             </CRow>
@@ -107,9 +108,10 @@
                             <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
                             <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event"></CTextarea><CButton color="danger" @click="edit_description = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;<CButton color="primary" @click="saveDescription()" size="sm"><CIcon name="cilSave"/></CButton></span>
                             <span v-if="closureComments().length > 0 && case_data.status.closed">
-                                <br><h5>Closure Details</h5><br>
+                                <br><h5>Closure Details</h5><hr style="border-top: 1px dotted #cfcfcf;">
                                 <span v-for="comment in closureComments()" :key="comment.uuid">
-                                    <b>{{comment.created_at | moment('LLLL')}}</b> - {{comment.closure_reason.title}}
+                                    <b>Closed as: {{comment.closure_reason.title}} by {{comment.created_by.username}}</b><br>
+                                    <small>{{comment.created_at | moment('LLLL')}}</small>
                                     <br>{{comment.message}}<br><br>
                                 </span>
                             </span>
@@ -119,6 +121,10 @@
                         <CCol col="12" style="border-right: 1px dotted #cfcfcf;">
                             <h5>Metrics</h5>
                             <CRow>
+                                <CCol col="2">
+                                    <CWidgetSimple header="Related Cases" :text="String(related_cases.length)" v-on:click.native="activeTab=7">
+                                    </CWidgetSimple>
+                                </CCol>
                                 <CCol col="2">
                                     <CWidgetSimple header="Remaining Tasks" :text="String(case_data.open_tasks)+'/'+String(case_data.total_tasks)">
                                     </CWidgetSimple>
@@ -139,6 +145,7 @@
                                     <CWidgetSimple header="SLA Status" text="Okay">
                                     </CWidgetSimple>
                                 </CCol>
+                                
                             </CRow>
                         </CCol>
                     </CRow>
@@ -262,11 +269,43 @@
                       <div v-else><CaseHistoryTimeline :entries="case_history"/></div>
                   </div>
               </CTab>
+              <CTab title="Related Cases">
+                    <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
+                        <CSpinner color="dark" style="width:6rem;height:6rem;"/>
+                    </div>
+                    <div v-else>
+                      <CDataTable
+                      :fields="['title','event_count','observable_count','status','owner','actions']"
+                      :items="related_cases"
+                      >
+                      <template #title="{item}">
+                          <td>
+                              <router-link :to="`${item.uuid}`">{{item.title}}</router-link>
+                          </td>
+                      </template>
+                      <template #status="{item}">
+                          <td>
+                              {{item.status.name}}
+                          </td>
+                      </template>
+                      <template #owner="{item}">
+                          <td>
+                              {{item.owner.username ? item.owner.username : "Unassigned"}}
+                          </td>
+                      </template>
+                      <template #actions="{item}">
+                        <td>
+                            <CButton @click="unlinkCase(item.uuid)" color="danger" size="sm">Unrelate</CButton>
+                        </td>
+                      </template>
+                      </CDataTable>
+                  </div>
+              </CTab>
               <CTab title="Playbook/Action Output" disabled>
                  <div class="bg-dark console-output">
                      <code class="bg-dark pre-formatted raw_log">2020-09-13 20:33:50,591 - Extracting ZIP file<br>2020-09-13 20:33:50,593 - Running test plugin!<br>2020-09-13 20:33:54,716 - Running agent<br>2020-09-13 20:34:28,846 - Running agent<br>2020-09-13 20:34:28,847 - Running input ES_PROD<br>2020-09-13 20:34:28,847 - Fetching credentials for ES_PROD<br>2020-09-13 20:34:33,124 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:34:33,150 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.025s]<br>2020-09-13 20:34:33,154 - Pushing 26 events to bulk ingest...<br>2020-09-13 20:35:12,878 - Running agent<br>2020-09-13 20:35:12,879 - Running input ES_PROD<br>2020-09-13 20:35:12,879 - Fetching credentials for ES_PROD<br>2020-09-13 20:35:17,060 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:35:17,085 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.024s]<br>2020-09-13 20:35:17,089 - Pushing 26 events to bulk ingest...</code>
                  </div>
-              </CTab>
+              </CTab>              
             </CTabs>
           </CCardBody>
         </CCard>
@@ -283,6 +322,7 @@
     <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid"></AddTaskModal>
     <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status_uuid" :closed.sync="case_closed"></CloseCaseModal>
     <ApplyCaseTemplateModal :show.sync="caseTemplateModal" :case_uuid="this.uuid" :current_case_template_uuid="case_data.case_template ? case_data.case_template.uuid : null"/>
+    <LinkCaseModal :show.sync="linkCaseModal" :case_uuid="this.uuid" :related_cases="related_cases"/>
   </CCol>
   </CRow>
 </template>
@@ -304,6 +344,7 @@ import CaseTaskList from './CaseTaskList'
 import AddTaskModal from './AddTaskModal'
 import CloseCaseModal from './CloseCaseModal'
 import ApplyCaseTemplateModal from './ApplyCaseTemplateModal'
+import LinkCaseModal from './LinkCaseModal'
 import Comments from './Comments'
 import CaseHistoryTimeline from './CaseHistoryTimeline'
 
@@ -318,6 +359,7 @@ export default {
         AddTaskModal,
         CloseCaseModal,
         Mentionable,
+        LinkCaseModal,
         CaseHistoryTimeline,
         ApplyCaseTemplateModal,
         Comments
@@ -371,6 +413,7 @@ export default {
             addObservableModal: false,
             caseObservableModal: false,
             closeCaseModal: false,
+            linkCaseModal: false,
             runPlaybookModal: false,
             deleteCaseModal: false,
             caseTaskModal: false,
@@ -379,7 +422,7 @@ export default {
             edit_description_hint: false,
             edit_description: false,
             lockCase: false,
-            activeTab: 0,
+            activeTab: -1,
             users: [],
             assignee: null,
             comment: "",
@@ -391,6 +434,7 @@ export default {
             tab_loading: false,
             search_filter: '',
             filtered_events: [],
+            related_cases: [],
             observableFilters: [{'filter_type':'status','dataType':'status','value':'Open'}],
             collapse_tasks: Array(),
             events_per_page: 10,
@@ -423,28 +467,12 @@ export default {
         }
     },
     created() {
-
-        this.loadData()
-
-        this.original_status = this.case_data.status_uuid
-        this.filterEvents()
-        this.$store.dispatch('getSettings')
-        this.$store.dispatch('getTags')
-        this.$store.dispatch('getUsers').then(resp => {
-            this.users = this.$store.getters.users
-        })
-
-        this.$store.dispatch('getCaseStatus').then(resp => {
-            this.case_statuses = resp.data.map(function(status) {
-                return {'value': status.uuid, 'label': status.name, 'closed': status.closed}
-            })
-        })
-
-        for(let task in this.tasks) {
-            this.collapse_tasks[this.tasks[task].order] = false;
-        }
+        this.buildPage()        
     },
     watch: {
+        $route: function() {
+            this.buildPage()
+        },
         assignee: function() {
             if(this.case_data.owner.uuid == null && this.assignee.uuid == null) {
                 return
@@ -471,6 +499,11 @@ export default {
                 }
             }
         },
+        linkCaseModal: function() {
+            if(!this.linkCaseModal) {
+                this.loadRelatedCases()
+            }
+        },
         caseTemplateModal: function() {
             if(!this.caseTemplateModal) {
                 this.loadData()
@@ -495,9 +528,36 @@ export default {
             if(this.activeTab == 6) {
                 this.loadHistory()
             }
+            if(this.activeTab == 7) {
+                this.loadRelatedCases()
+            }
         }
     },
     methods: {
+        buildPage() {
+            this.loading = true
+            this.activeTab = 0
+            this.uuid = this.$route.params.uuid
+            this.loadRelatedCases()
+            this.loadComments()
+            this.original_status = this.case_data.status_uuid
+            this.filterEvents()
+            this.$store.dispatch('getSettings')
+            this.$store.dispatch('getTags')
+            this.$store.dispatch('getUsers').then(resp => {
+                this.users = this.$store.getters.users
+            })
+
+            this.$store.dispatch('getCaseStatus').then(resp => {
+                this.case_statuses = resp.data.map(function(status) {
+                    return {'value': status.uuid, 'label': status.name, 'closed': status.closed}
+                })
+            })
+
+            for(let task in this.tasks) {
+                this.collapse_tasks[this.tasks[task].order] = false;
+            }
+        },
         addTag(event) {
             console.log(event)
         },
@@ -532,6 +592,21 @@ export default {
         },
         closureComments() {
             return this.comments.filter(comment => comment.is_closure_comment == true && comment.message != '')
+        },
+        loadRelatedCases() {
+            let uuid = this.uuid
+            this.tab_loading = true
+            this.$store.dispatch('getRelatedCases', uuid).then(resp => {
+                this.related_cases = this.$store.getters.related_cases
+                this.tab_loading = false
+            })
+        },
+        unlinkCase(target_uuid) {
+            let uuid = this.uuid 
+            this.$store.dispatch('unlinkCases', {uuid, data: {'cases': [target_uuid]}}).then(resp => {
+                this.related_cases = this.$store.getters.related_cases
+                this.tab_loading = false
+            })
         },
         loadObservables() {
             this.tab_loading = true

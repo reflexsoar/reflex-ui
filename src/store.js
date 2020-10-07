@@ -27,6 +27,7 @@ const state = {
   case_tasks: [],
   case_task: {},
   case_history: [],
+  related_cases: [],
   observables: [],
   observable: {},
   data_types: [],
@@ -220,6 +221,9 @@ const mutations = {
   },
   save_case(state, c) {
     state.case = c
+  },
+  save_related_cases(state, data) {
+    state.related_cases = data
   },
   save_observables(state, observables) {
     state.observables = observables
@@ -433,6 +437,7 @@ const getters = {
   cases: state => { return state.cases },
   users: state => { return state.users },
   observables: state => { return state.observables },
+  related_cases: state => { return state.related_cases },
   events: state => { return state.events },
   close_reasons: state => { return state.close_reasons },
   data_types_list: function() {
@@ -1006,7 +1011,6 @@ const actions = {
   },
   unlockUser({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      console.log(uuid)
       Axios({url: `${BASE_URL}/user/${uuid}/unlock`, method: 'PUT'})
       .then(resp => {
         commit('save_user', resp.data.user)
@@ -1019,7 +1023,6 @@ const actions = {
   },
   updateUser({commit}, {uuid, user}) {
     return new Promise((resolve, reject) => {
-      console.log(user)
       Axios({url: `${BASE_URL}/user/${uuid}`, data: user, method: 'PUT'})
       .then(resp => {
         commit('save_user', resp.data.user)
@@ -1154,6 +1157,44 @@ const actions = {
       Axios({url: `${BASE_URL}/case`, method: 'GET', headers: {'X-Fields': fields}})
       .then(resp => {
         commit('save_cases', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getRelatedCases({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}/relate_cases`, method: 'GET'})
+      .then(resp => {
+        commit('save_related_cases', resp.data.related_cases)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  relateCases({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}/relate_cases`, data:data, method: 'PUT'})
+      .then(resp => {
+        commit('save_related_cases', resp.data.related_cases)
+        commit('show_alert', {message:'Successfully linked cases.', type:'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  unlinkCases({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}/relate_cases`, data:data, method: 'DELETE'})
+      .then(resp => {
+        commit('save_related_cases', resp.data.related_cases)
+        commit('show_alert', {message:'Successfully unlinked cases.', type:'success'})
         resolve(resp)
       })
       .catch(err => {
