@@ -98,7 +98,9 @@ import {
   cilDeaf,
   cilSave,
   cilNotes,
-  cilMediaPlay
+  cilMediaPlay,
+  cilTrash,
+  cilCenterFocus
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -173,7 +175,9 @@ export const iconsSet = Object.assign(
     cilDeaf,
     cilSave,
     cilNotes,
-    cilMediaPlay
+    cilMediaPlay,
+    cilTrash,
+    cilCenterFocus
   },
   {
     cifUs,

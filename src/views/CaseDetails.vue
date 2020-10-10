@@ -155,12 +155,12 @@
                     <ObservableList :uuid="uuid" :events="case_data.events" :key="reloadObservables"></ObservableList>
               </CTab>
               <CTab title="Events">
-                  <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
+                    <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
                         <CSpinner color="dark" style="width:6rem;height:6rem;"/>
                     </div>
                     <div v-else>
                         <CRow>
-                    <CCol col="12">
+                        <CCol col="12">
                         <CCardBody style="border-bottom: 1px solid #cfcfcf; padding-bottom:0px;">
                             <CRow>
                                 <CCol col="8">
@@ -243,15 +243,20 @@
                     </div>
               </CTab>
               <CTab title="Tasks">
-                  <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
+                    <div v-if="tab_loading" style="margin: auto; padding:10px; text-align:center; verticle-align:middle;">
                         <CSpinner color="dark" style="width:6rem;height:6rem;"/>
                     </div>
                     <div v-else>
-                        <CaseTaskList :tasks.sync="tasks"></CaseTaskList>
+                        <CaseTaskList :uuid="uuid" :key="reloadTasks"></CaseTaskList>
                     </div>                
               </CTab>
-              <CTab title="Attachments" disabled>
-                 Case attachments here
+              <CTab title="Attachments">
+                    <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
+                        <CSpinner color="dark" style="width:6rem;height:6rem;"/>
+                    </div>
+                    <div v-else>
+                        <CaseFileList :case_files="case_files" :uuid="uuid"/>
+                    </div>
               </CTab>
               <CTab title="Comments">
                     <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
@@ -347,6 +352,7 @@ import ApplyCaseTemplateModal from './ApplyCaseTemplateModal'
 import LinkCaseModal from './LinkCaseModal'
 import Comments from './Comments'
 import CaseHistoryTimeline from './CaseHistoryTimeline'
+import CaseFileList from './CaseFileList'
 
 import { Mentionable } from 'vue-mention'
 import moment from 'moment';
@@ -362,7 +368,8 @@ export default {
         LinkCaseModal,
         CaseHistoryTimeline,
         ApplyCaseTemplateModal,
-        Comments
+        Comments,
+        CaseFileList
     },
     computed: mapState(['alert','current_user','settings','tags']),
     props: {
@@ -431,10 +438,12 @@ export default {
             selected: [],
             observables: [],
             reloadObservables: 1,
+            reloadTasks: 1,
             tab_loading: false,
             search_filter: '',
             filtered_events: [],
             related_cases: [],
+            case_files: [],
             observableFilters: [{'filter_type':'status','dataType':'status','value':'Open'}],
             collapse_tasks: Array(),
             events_per_page: 10,
@@ -507,6 +516,7 @@ export default {
         caseTemplateModal: function() {
             if(!this.caseTemplateModal) {
                 this.loadData()
+                this.reloadTasks = Math.random()
             }
         },
         activeTab: function() {
@@ -516,6 +526,9 @@ export default {
             if(this.activeTab == 1) {
                 this.reloadObservables = Math.random()
             }
+            if(this.activeTab == 4) {
+                this.loadCaseFiles()
+            }
             if(this.activeTab == 2) {
                 this.filterEvents()
             }
@@ -523,7 +536,7 @@ export default {
                 this.loadComments()
             }
             if(this.activeTab == 3) {
-                this.loadTasks()
+                this.reloadTasks = Math.random()
             }
             if(this.activeTab == 6) {
                 this.loadHistory()
@@ -623,17 +636,17 @@ export default {
             })
             
         },
-        loadTasks() {
-            this.tab_loading = true
-            this.$store.dispatch('getCaseTasks', this.$route.params.uuid).then(resp => {
-                this.tasks = this.$store.getters.case_tasks
-                this.tab_loading = false
-            })
-        },
         loadComments(){
             this.tab_loading = true
             this.$store.dispatch('getCaseComments', this.$route.params.uuid).then(resp => {
                 this.comments = this.$store.getters.comments
+                this.tab_loading = false
+            })
+        },
+        loadCaseFiles() {
+            this.tab_loading = true
+            this.$store.dispatch('getCaseFiles', {uuid:this.$route.params.uuid}).then(resp => {
+                this.case_files = this.$store.getters.case_files
                 this.tab_loading = false
             })
         },

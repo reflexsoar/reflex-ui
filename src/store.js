@@ -27,6 +27,8 @@ const state = {
   case_tasks: [],
   case_task: {},
   case_history: [],
+  case_files: [],
+  case_file: {},
   related_cases: [],
   observables: [],
   observable: {},
@@ -212,6 +214,17 @@ const mutations = {
   },
   save_case_history(state, history) {
     state.case_history = history
+  },
+  save_case_files(state, case_files) {
+    state.case_files = case_files
+  },
+  save_case_file(state, case_file) {
+    state.case_file = case_file
+    state.case_files.push(case_file)
+  },
+  remove_case_file(state, uuid) {
+    state.case_file = {}
+    state.case_files = state.case_files.filter(c => c.uuid !== uuid)
   },
   save_tags(state, tags) {
     state.tags = tags
@@ -437,6 +450,7 @@ const getters = {
   cases: state => { return state.cases },
   users: state => { return state.users },
   observables: state => { return state.observables },
+  case_files: state => { return state.case_files },
   related_cases: state => { return state.related_cases },
   events: state => { return state.events },
   close_reasons: state => { return state.close_reasons },
@@ -798,6 +812,19 @@ const actions = {
       Axios({url: `${BASE_URL}/playbook`, method: 'GET'})
       .then(resp => {
         commit('save_playbooks', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCaseFiles({commit}, {uuid, page=1, page_size=25}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case/${uuid}/files?page=${page}&page_size=${page_size}`})
+      .then(resp => {
+        commit('add_start')
+        commit('save_case_files', resp.data.files)
         resolve(resp)
       })
       .catch(err => {

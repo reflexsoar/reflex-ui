@@ -1,70 +1,82 @@
 <template>
+
     <div>
-    <CListGroup flush v-if="tasks_list && tasks_list.length > 0">
-        <CListGroupItem v-for="task in tasks_list" :key="task.title">
-        <CRow>
-            <CCol col="8">
-            <b>{{task.title}}</b>
-            <br />
-            {{task.description}}
-            </CCol>
-            <CCol col="2">
-                <div @mouseenter="owner_hover[task.uuid] = true" @mouseleave="owner_hover[task.uuid] = false">
-                    <span v-if="!edit_owner[task.uuid]">
-                        <b>Assigned To: </b>&nbsp;
-                        <span v-if="task.owner.username">{{task.owner.username}}</span>
-                        <span v-else>Unassigned</span>
-                        <a v-if="owner_hover[task.uuid] && task.status != 2" @click="edit_owner[task.uuid] = !edit_owner[task.uuid]">&nbsp;<CIcon name='cilPencil' size="sm"></CIcon></a>
-                    </span>
-                    <span v-else>
-                        <multiselect 
-                            v-model="task.owner" 
-                            label="username" 
-                            :options="users" 
-                            track-by="username" 
-                            :searchable="true"
-                            :internal-search="false"
-                            :options-limit="25"
-                            :show-no-results="false"
-                            v-bind:disabled="task.status == 2" 
-                            @search-change="usersFind"
-                            @select="changeTaskOwner($event, task.uuid)"
-                            >
-                        </multiselect>
-                    </span>
+        <div v-if="loading">
+            <CRow >
+                <CCol col="12">
+                <div style="margin: auto; text-align:center; verticle-align:middle;">
+                    <CSpinner color="dark" style="width:6rem;height:6rem;"/>
                 </div>
-            </CCol>
-            <CCol col="1"><CButton color="primary" size="sm" disabled>{{task.status | statusIcon}}</CButton></CCol>
-            <CCol col="1" class="text-right">
-            <CButtonGroup>
-                <CButton size="sm" v-if="task.status == 1" color="success" @click="showCloseTaskModal(task.uuid)" v-c-tooltip="'Complete task'"><CIcon name="cilCheckCircle"/></CButton>
-                <CButton size="sm" v-if="task.status == 0" color="success" @click="startTask(task.uuid)" v-c-tooltip="'Start Task'"><CIcon name="cilMediaPlay"/></CButton>
-                <CButton size="sm" color="secondary" v-c-tooltip="'View Notes'" @click="collapse[task.uuid] = !collapse[task.uuid]"><CIcon name="cilNotes"/></CButton>                
-                <CButton size="sm" v-if="task.status == 0" color="danger" v-c-tooltip="'Delete task'" v-bind:hidden="task.from_template" @click="showDeleteTaskModal(task.uuid)"><CIcon name="cilXCircle"/></CButton>
-            </CButtonGroup>
-            </CCol>
-        </CRow>
-        <CCollapse :show.sync="collapse[task.uuid]">
-            <br>
-            <div style="max-height: 300px; overflow-y: scroll; overflow-x:hidden; padding-right: 10px;">
-            <CRow v-if="task.notes">
-                <CCol>
-                    <CCard  v-for="note in task.notes" :key="note.uuid" >
-                        <CCardBody><vue-markdown>{{note}}</vue-markdown></CCardBody>
-                    </CCard>
                 </CCol>
             </CRow>
-            </div><br>
-            <CRow>
-                <CCol>
-                    <CTextarea v-model="task_note" rows="5" placeholder="Enter your notes here..."></CTextarea>
-                    <CButton @click="createNote(task.uuid)" size="sm" color="primary">Save Note</CButton>
-                </CCol>
-            </CRow>
-            
-        </CCollapse>
-        </CListGroupItem>
-    </CListGroup>
+        </div>
+        <div v-else>
+        <CListGroup flush v-if="tasks && tasks.length > 0">
+            <CListGroupItem v-for="task in tasks" :key="task.title">
+                <CRow>
+                    <CCol col="8">
+                    <b>{{task.title}}</b>
+                    <br />
+                    {{task.description}}
+                    </CCol>
+                    <CCol col="2">
+                        <div @mouseenter="owner_hover[task.uuid] = true" @mouseleave="owner_hover[task.uuid] = false">
+                            <span v-if="!edit_owner[task.uuid]">
+                                <b>Assigned To: </b>&nbsp;
+                                <span v-if="task.owner.username">{{task.owner.username}}</span>
+                                <span v-else>Unassigned</span>
+                                <a v-if="owner_hover[task.uuid] && task.status != 2" @click="edit_owner[task.uuid] = !edit_owner[task.uuid]">&nbsp;<CIcon name='cilPencil' size="sm"></CIcon></a>
+                            </span>
+                            <span v-else>
+                                <multiselect 
+                                    v-model="task.owner" 
+                                    label="username" 
+                                    :options="users" 
+                                    track-by="username" 
+                                    :searchable="true"
+                                    :internal-search="false"
+                                    :options-limit="25"
+                                    :show-no-results="false"
+                                    v-bind:disabled="task.status == 2" 
+                                    @search-change="usersFind"
+                                    @select="changeTaskOwner($event, task.uuid)"
+                                    v-on:focusout.native="edit_owner[task.uuid] == false"
+                                    >
+                                </multiselect>
+                            </span>
+                        </div>
+                    </CCol>
+                    <CCol col="1"><CButton color="primary" size="sm" disabled>{{task.status | statusIcon}}</CButton></CCol>
+                    <CCol col="1" class="text-right">
+                    <CButtonGroup>
+                        <CButton size="sm" v-if="task.status == 1" color="success" @click="showCloseTaskModal(task.uuid)" v-c-tooltip="'Complete task'"><CIcon name="cilCheckCircle"/></CButton>
+                        <CButton size="sm" v-if="task.status == 0" color="success" @click="startTask(task.uuid)" v-c-tooltip="'Start Task'"><CIcon name="cilMediaPlay"/></CButton>
+                        <CButton size="sm" color="secondary" v-c-tooltip="'View Notes'" @click="collapse[task.uuid] = !collapse[task.uuid]"><CIcon name="cilNotes"/></CButton>                
+                        <CButton size="sm" v-if="task.status == 0" color="danger" v-c-tooltip="'Delete task'" v-bind:hidden="task.from_template" @click="showDeleteTaskModal(task.uuid)"><CIcon name="cilXCircle"/></CButton>
+                    </CButtonGroup>
+                    </CCol>
+                </CRow>
+                <CCollapse :show.sync="collapse[task.uuid]">
+                    <br>
+                    <div style="max-height: 300px; overflow-y: scroll; overflow-x:hidden; padding-right: 10px;">
+                    <CRow v-if="task.notes">
+                        <CCol>
+                            <CCard  v-for="note in task.notes" :key="note.uuid" >
+                                <CCardBody><vue-markdown>{{note}}</vue-markdown></CCardBody>
+                            </CCard>
+                        </CCol>
+                    </CRow>
+                    </div><br>
+                    <CRow>
+                        <CCol>
+                            <CTextarea v-model="task_note" rows="5" placeholder="Enter your notes here..."></CTextarea>
+                            <CButton @click="createNote(task.uuid)" size="sm" color="primary">Save Note</CButton>
+                        </CCol>
+                    </CRow>
+                </CCollapse>
+            </CListGroupItem>
+        </CListGroup>
+    </div>
     <CCardBody v-else>No tasks</CCardBody>
     <CModal title="Delete Task" color="danger" :centered="true" size="lg" :show.sync="deleteTaskModal">
       <div>
@@ -93,28 +105,42 @@ import { mapState } from "vuex";
 export default {
   name: "CaseTaskList",
   props: {
-    tasks: Array,
+    uuid: String
   },
   data() {
       return {
           show_details: [],
-          tasks_list: [],
           collapse: [],
+          tasks: [],
           owner_hover: [],
           edit_owner: [],
           task_note: "",
           deleteTaskModal: false,
           closeTaskModal: false,
-          target_task: ""
+          target_task: "",
+          loading: false
       }
   },
   computed: mapState(['users']),
-  watch: {
-      tasks: function() {
-          this.tasks_list = this.tasks
-      }
-  },
   methods: {
+    toggleNotes(uuid) {
+        this.collapse[uuid] = !this.collapse[uuid]
+    },
+    loadTasks() {
+        this.loading = true
+        this.$store.dispatch('getCaseTasks', this.uuid).then(resp => {
+            this.tasks = this.$store.getters.case_tasks
+            for(let t in this.tasks) {
+                let task = this.tasks[t]
+                task['notes'] = []
+                this.$set(this.collapse, task.uuid, false)
+                this.$set(this.owner_hover, task.uuid, false)
+                this.$set(this.edit_owner, task.uuid, false)
+            }
+            this.loading = false
+        })
+
+    },
     showCloseTaskModal(uuid) {
         this.target_task = uuid;
         this.closeTaskModal = !this.closeTaskModal
@@ -124,7 +150,7 @@ export default {
         this.deleteTaskModal = !this.deleteTaskModal
     },
     createNote(uuid) {
-        let task = this.tasks_list.filter(task => task.uuid === uuid)[0]
+        let task = this.tasks.filter(task => task.uuid === uuid)[0]
         if(!('notes' in task)) {
             task['notes'] = [this.task_note]
         } else {
@@ -146,18 +172,18 @@ export default {
            'owner_uuid': event.uuid
         }
         this.$store.dispatch('updateCaseTask', {uuid, data}).then(resp => {
-            this.tasks_list = this.$store.getters.case_tasks
+            this.tasks = this.$store.getters.case_tasks
         })
     },
     startTask(uuid) {
         this.$store.dispatch('updateCaseTask', {uuid, data: {status: 1}}).then(resp => {
-            this.tasks_list = this.$store.getters.case_tasks
+            this.tasks = this.$store.getters.case_tasks
         })
     },
     closeTask() {
         let uuid = this.target_task
         this.$store.dispatch('updateCaseTask', {uuid, data: {status: 2}}).then(resp => {
-            this.tasks_list = this.$store.getters.case_tasks
+            this.tasks = this.$store.getters.case_tasks
             this.target_task = ""
             this.closeTaskModal = !this.closeTaskModal    
         })
@@ -165,21 +191,15 @@ export default {
     deleteTask() {
         let uuid = this.target_task
         this.$store.dispatch('deleteCaseTask', uuid).then(resp => {
-            this.tasks_list = this.$store.getters.case_tasks
+            this.tasks = this.$store.getters.case_tasks
             this.target_task = ""
             this.deleteTaskModal = !this.deleteTaskModal            
         })        
     }
   },
   created() {
-      this.tasks_list = this.tasks
-      for(let t in this.tasks_list) {
-          let task = this.tasks_list[t]
-          task['notes'] = []
-          this.$set(this.collapse, task.uuid, false)
-          this.$set(this.owner_hover, task.uuid, false)
-          this.$set(this.edit_owner, task.uuid, false)
-      }
+      this.loadTasks()
+      
   },
   filters: {
       statusIcon(status) {

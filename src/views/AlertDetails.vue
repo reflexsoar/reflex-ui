@@ -43,12 +43,12 @@
         <CCardBody>
             <CRow>
                 <CCol col="6">
-                    <b>Source: </b> Elasticsearch<br>
-                    <b>Created: </b>{{event.created_at | moment('LLLL')}}<br>
-                    <b>Updated: </b>{{event.modified_at | moment('from', 'now')}}
+                    <label>Source: </label> Elasticsearch<br>
+                    <label>Created: </label> {{event.created_at | moment('LLLL')}}<br>
+                    <label>Updated: </label> {{event.modified_at | moment('from', 'now')}}
                 </CCol>
                 <CCol col="6" class="text-right">
-                    
+                    <label>Event Signature: </label>&nbsp;{{event.signature}}
                 </CCol>
             </CRow>
         </CCardBody>
@@ -57,7 +57,7 @@
         <CCardHeader style="border-bottom:none;">
             <CRow >
                 <CCol col="12" lg="12" sm="12" class="text-left">
-                    <b @click="collapse_observables = !collapse_observables" style='display: inline-block'>Observables</b> <CButton class="float-right" color="primary" size="sm">New Observable</Cbutton>
+                    <b @click="collapse_observables = !collapse_observables" style='display: inline-block'>Observables</b>
                 </CCol>
             </CRow>
         </CCardHeader>
@@ -215,7 +215,7 @@ export default {
             event: {},
             loading: true,
             cardCollapse: true,
-            collapse_raw_log: false,
+            collapse_raw_log: true,
             collapse_observables: true,
             collapse: {},
             toggleCollapse: true,
