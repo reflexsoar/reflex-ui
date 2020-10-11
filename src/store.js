@@ -20,6 +20,7 @@ const state = {
   case: {},
   tags: {},
   tag: [],
+  case_task_notes: [],
   case_templates: [],
   case_template: {},
   case_statuses: [],
@@ -149,6 +150,16 @@ const mutations = {
   add_list(state, list) {
     state.lists.push(list)
     state.list = list
+  },
+  save_case_task_notes(state, notes) {
+    state.case_task_notes = notes
+  },
+  add_case_task_note(state, note) {
+    if(state.case_task_notes.length == 0) {
+      state.case_task_notes = [note]
+    } else {
+      state.case_task_notes.push(note)
+    }
   },
   save_comments(state, comments) {
     state.comments = comments
@@ -445,7 +456,9 @@ const getters = {
   case_history: state => { return state.case_history },
   comments: state => { return state.comments},
   comment: (state) => function (uuid) { state.comments.find(comment => comment.uuid == uuid) },
+  task_notes: (state) => { return state.case_task_notes },
   case_tasks: state => { return state.case_tasks },
+  case_task: state => { return state.case_task },
   case_data: state => { return state.case },
   cases: state => { return state.cases },
   users: state => { return state.users },
@@ -1321,6 +1334,30 @@ const actions = {
       Axios({url: `${BASE_URL}/case_task?case_uuid=${uuid}`, method: 'GET'})
       .then(resp => {
         commit('save_case_tasks', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  addTaskNote({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/task_note`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_case_task_note', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getTaskNotes({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/task_note?task_uuid=${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_case_task_notes', resp.data)
         resolve(resp)
       })
       .catch(err => {
