@@ -243,7 +243,7 @@ export default {
       let tag_filters = [];
       let observables_filters = [];
       let type_filters = [];
-      let search = "";
+      let search = [];
 
       for (let f in this.filters) {
         let filter = this.filters[f];
@@ -257,7 +257,7 @@ export default {
         }
 
         if (filter.filter_type == "search") {
-          search = filter.value;
+          search.push(filter.value);
         }
       }
 
@@ -267,6 +267,7 @@ export default {
           observable: observables_filters,
           type: type_filters,
           tag: tag_filters,
+          search: search,
           page: this.current_page,
           page_size: 25,
         })

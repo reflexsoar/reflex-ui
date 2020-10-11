@@ -21,11 +21,11 @@
               <label>Require Case Templates</label><br>
               <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_case_templates"/><br><br>
               <label v-c-tooltip="{
-                content: 'This will require users to add additional details when closing a case.',
+                content: 'This will require users add additional details when closing a case.',
                 placement: 'right'}">Require Case Closure Details</label><br>
               <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_case_close_comment"/><br><br>
               <label v-c-tooltip="{
-                content: 'This will require users to add additional details when dismissing an event.',
+                content: 'This will require users add additional details when dismissing an event.',
                 placement: 'right'}">Require Event Dismiss Comment</label><br>
               <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_event_dismiss_comment"/><br><br>
               <CInput v-model="settings.events_page_refresh" description="Setting this too high may result in performance issues" label="Event queue refresh interval (seconds)" placeholder="60"/>
@@ -36,7 +36,7 @@
                 placement: 'right'}">Auto-Assign Case to Creator</label><br>
                 <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.assign_case_on_create"/><br><br>
                 <label v-c-tooltip="{
-                content: 'This will automatically assign a task to the user starting it if one isn\'t assigned already.',
+                content: 'This will automatically assign a task to the user starting the task if one isn\'t assigned already.',
                 placement: 'right'}">Auto-Assign Task to Starter</label><br>
                 <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.assign_task_on_start"/><br><br>
                 <label v-c-tooltip="{

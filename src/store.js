@@ -1248,7 +1248,7 @@ const actions = {
       })
     })
   },
-  getCaseObservables({commit}, {uuid, page=1, page_size=25, observable=[], dataType=[], tags=[]}) {
+  getCaseObservables({commit}, {uuid, page=1, page_size=25, observable=[], dataType=[], search=[], tags=[]}) {
     return new Promise((resolve, reject) => {
       
       let base_url = `${BASE_URL}/case/${uuid}/observables?page=${page}&page_size=${page_size}`
@@ -1259,6 +1259,10 @@ const actions = {
 
       if(dataType.length > 0) {
         base_url += `&dataType=${dataType}`
+      }
+
+      if(search.length > 0) {
+        base_url += `&search=${search}`
       }
 
       if(tags.length > 0) {
