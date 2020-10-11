@@ -54,10 +54,13 @@
         </td>
       </template>
       <template #type="{item}">
-        <td>{{item.dataType.name}}</td>
+        <td style="width:8%;">{{item.dataType.name}}</td>
+      </template>
+      <template #ioc-header>
+        IOC <CIcon name='cilFlagAlt' size='sm' style="cursor: pointer" v-on:click.native="toggleAllIocWarning('ioc')"/>
       </template>
       <template #ioc="{item}">
-        <td>
+        <td style="width:8%;">
           <CSwitch
             style="padding-top:3px"
             color="danger"
@@ -69,8 +72,11 @@
           />
         </td>
       </template>
+      <template #spotted-header>
+        Spotted <CIcon name='cilFlagAlt' size='sm' style="cursor: pointer" v-on:click.native="toggleAllIocWarning('spotted')"/>
+      </template>
       <template #spotted="{item}">
-        <td>
+        <td style="width:8%;">
           <CSwitch
             style="padding-top:3px"
             color="danger"
@@ -81,8 +87,11 @@
           />
         </td>
       </template>
+      <template #safe-header>
+        Safe <CIcon name='cilFlagAlt' size='sm' style="cursor: pointer" v-on:click.native="toggleAllIocWarning('safe')"/>
+      </template>
       <template #safe="{item}">
-        <td>
+        <td style="width:8%;">
           <CSwitch
             style="padding-top:3px"
             color="success"
@@ -95,11 +104,11 @@
         </td>
       </template>
       <template #count="{item}">
-        <td v-if="observableStats(item.value) > 1">{{observableStats(item.value)}}</td>
-        <td v-else>1</td>
+        <td style="width:8%" v-if="observableStats(item.value) > 1">{{observableStats(item.value)}}</td>
+        <td style="width:8%" v-else>1</td>
       </template>
       <template #actions="{item}">
-        <td>
+        <td style="width:10%;">
           <CDropdown toggler-text="Actions" color="secondary" size="sm">
             <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Execute Action</CDropdownItem>
             <CDropdownDivider />
@@ -110,6 +119,13 @@
     </CDataTable>
         </CCol>
       </CRow>
+      <CModal title="Tag all Observables" color="danger" :centered="true" size="lg" :show.sync="show_bulk_toggle_modal">
+        <p>Are you sure you want to toggle all observables as <b>{{bulk_toggle_field}}</b>?</p>
+        <p>This will skip any that are already tagged. In the case of IOC flagging, observables already marked as safe will be skipped.</p>
+        <template #footer>
+          <CButton @click="bulkToggleISS(bulk_toggle_field,true)" color="danger">Yes</CButton>
+        </template>
+      </CModal>
     </div>
   </div>
 </template>
@@ -146,7 +162,9 @@ export default {
       search_filter: "",
       current_page: 1,
       observables: [],
-      loading: true
+      loading: true,
+      show_bulk_toggle_modal: false,
+      bulk_toggle_field: ""
     };
   },
   watch: {
@@ -175,9 +193,30 @@ export default {
     toggleISS(uuid, field, value) {
       let data = {};
       data[field] = value
-
       this.$store.dispatch('updateObservable', {uuid, data}).then(resp => {
         this.observables = this.$store.getters.observables
+      })
+    },
+    toggleAllIocWarning(field) {
+        this.show_bulk_toggle_modal = true
+        this.bulk_toggle_field = field
+    },
+    bulkToggleISS(field, value) {
+      let targets = []
+      if(field != 'spotted') {
+        targets = this.observables.filter((obs) => obs.safe !== true).map(obs => { return obs.uuid} )
+      } else {
+        targets = this.observables.map(obs => { return obs.uuid })
+      }      
+
+      let data = {
+        'observables': targets,
+      }
+      data[field] = value
+      console.log(data)
+      this.$store.dispatch('bulkUpdateObservables', data).then(resp => {
+        this.observables = this.$store.getters.observables
+        this.show_bulk_toggle_modal = false
       })
     },
     toggleObservableFilter(obs) {

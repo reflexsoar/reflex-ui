@@ -101,6 +101,7 @@
                                 </multiselect>
                             </div>
                             <CSelect label="Severity" :value.sync="case_data.severity" :options="severities" @change="updateSeverity()" v-bind:disabled="case_data.status && case_data.status.closed"></CSelect>
+                            <CSelect label="TLP" :value.sync="case_data.tlp" :options="tlps" @change="updateTLP()" v-bind:disabled="case_data.status && case_data.status.closed"></CSelect>
                             <span v-if="case_data.case_template && case_data.case_template.title != null"><b>Applied Case Template: </b> {{case_data.case_template.title}}</span>
                         </CCol>
                         <CCol col="9" @mouseover="edit_description_hint = true" @mouseleave="edit_description_hint = false" style="overflow-y:scroll; max-height:350px;">
@@ -180,65 +181,72 @@
                 <CRow>
                     <CCol col="12">
             <CDataTable
-                :hover="hover"
-                :items="filtered_events"
-                :fields="event_fields"
-                :items-per-page="events_per_page"
-                bordered
-                striped
-                :responsive="false"
-                :clickableRows="false"
-            >
-                <template #title="{item}">
-                    <td style="min-width:200px; max-width:300px;">
-                        <router-link :to="`/alerts/${item.uuid}`">{{item.title}}</router-link><br>
-                        <CRow>
-                            <CCol col="12">
-                                <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag.name})" color="dark" class="tag" size="sm">{{ tag.name }}</CButton></li>
-                            </CCol>
-                        </CRow>
-                    </td>
-                </template>
-                <template #status="{item}">
-                    <td>
-                        <CButton v-if="item.status" class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': item.status.name})" size="sm" color="info">{{item.status.name}}</CButton>
-                    </td>
-                </template>
-                <template #tlp="{item}">
-                    <td>
-                    <CButton v-if="item.tlp == 1" color="light" size="sm">TLP:WHITE</CButton>
-                    <CButton v-if="item.tlp == 2" color="success" size="sm">TLP:GREEN</CButton>
-                    <CButton v-if="item.tlp == 3" color="warning" size="sm">TLP:AMBER</CButton>
-                    <CButton v-if="item.tlp >= 4" color="danger" size="sm">TLP:RED</CButton>
-                </td>
-                </template>
-                <template #severity="{item}">
-                    <td>
-                    <CButton @click="toggleObservableFilter({'filter_type':'severity','dataType':'severity','value':item.severity})" :color="getSeverityColor(item.severity)" size="sm">{{getSeverityText(item.severity)}}</CButton>                    
-                </td>
-                </template>
-                <template #occurences="{item}">
-                    <td>
-                        <CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':item.signature})" v-if="!filteredBySignature()" color="dark" size="sm">{{item.related_events_count}} occurences</CButton><span v-else>1</span>
-                    </td>
-                </template>
-              <template #actions="{item}">
+                  :items="filtered_events"
+                  :fields="event_fields"
+                  :striped="true"
+                  :sorter='{resetable:true}'
+                  :responsive="false"
+              >
+              <template #name="{item}">
                   <td>
+                      <input v-if="!(item.case_uuid || item.status.closed)" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':item.title})">{{item.title}}</a><br>
+                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,2)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 2" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(2))}"><small>&nbsp;+{{ item.observables.length - 2}}</small></span><br>
+                      <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag.name})" color="dark" class="tag" size="sm">{{ tag.name }}</CButton></li>
+                  </td>
+              </template>
+              <template #reference="{item}">
+                <td><span v-c-tooltip="{
+        content: `${item.reference}`,
+        placement: 'top'
+      }">{{item.reference | truncate}}</span></td>
+              </template>
+              <template #created="{item}">
+                  <td>
+                      <span v-c-tooltip="item.created_at">{{item.created_at | moment('from','now')}}</span>
+                  </td>
+              </template>
+              <template #events="{item}">
+                <td>
+                  <CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':item.signature})" v-if="!(filteredBySignature() || item.related_events_count < 1)" color="dark" size="sm">{{item.related_events_count}}</CButton>
+                </td>
+              </template>
+              <template #status="{item}">
+                <td>
+                  {{item.status.name}}
+                </td>
+              </template>
+              <template #severity="{item}">
+                <td>
+                  <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':item.severity})" class="tag" :color="getSeverityColor(item.severity)" size="sm">{{getSeverityText(item.severity)}}</CButton>
+                </td>
+              </template>
+              <template #actions="{item}">
+                <td align="right">
+                  <CButtonGroup>
                     <CDropdown 
                         toggler-text="Actions" 
                         color="secondary"
                         size="sm"
+                        right
                         >
-                        <CDropdownItem>Resolve</CDropdownItem>
+                        <CDropdownItem :to="`/alerts/${item.uuid}`">View Event</CDropdownItem>
+                        <CDropdownItem v-if="item.status != 2">Close</CDropdownItem>
+                        <CDropdownItem v-if="item.status == 2">Reopen</CDropdownItem>
                         <CDropdownItem>Remove from Case</CDropdownItem>
                         <CDropdownItem>Transfer Case</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Run Playbook</CDropdownItem>
                         <CDropdownDivider/>
                         <CDropdownItem @click="deleteCaseModal = !deleteCaseModal" disabled>Delete</CDropdownItem>
                         </CDropdown>
-                    </td>
+                  </CButtonGroup>
+                </td>
               </template>
-            </CDataTable></CCol>
+              <template #observables="{item}">
+                <td>
+                  {{item.observable_count}}
+                </td>
+              </template>
+              </CDataTable></CCol>
                     </CRow>
                     </div>
               </CTab>
@@ -412,7 +420,7 @@ export default {
             tasks: [],
             task: {},
             case_history: [],
-            event_fields: ['title','status','severity','observable_count','occurences','actions'],
+            event_fields: ['name', 'created', 'events', 'reference', 'status', 'severity', 'observables','actions'],
             toggleCollapse: true,
             deleteCaseModal: false,
             addObservableModal: false,
@@ -471,6 +479,24 @@ export default {
                 {
                     'label': 'Critical',
                     'value': 4
+                }
+            ],
+            tlps: [
+                {
+                    'label':'White',
+                    'value': 1,
+                },
+                {
+                    'label':'Green',
+                    'value': 2,
+                },
+                {
+                    'label':'Amber',
+                    'value': 3,
+                },
+                {
+                    'label':'Red',
+                    'value': 4,
                 }
             ]
         }
@@ -752,6 +778,13 @@ export default {
             let uuid = this.uuid
             let severity = {"severity": this.case_data.severity}
             this.$store.dispatch('updateCase', {uuid, data: severity}).then(resp => {
+                this.case_data = resp.data
+            })
+        },
+        updateTLP() {
+            let uuid = this.uuid
+            let tlp = {"tlp": this.case_data.tlp}
+            this.$store.dispatch('updateCase', {uuid, data: tlp}).then(resp => {
                 this.case_data = resp.data
             })
         },

@@ -263,6 +263,12 @@ const mutations = {
     state.observable = observable
     state.observables = state.observables.map(o => o.uuid == observable.uuid ? observable : o)
   },
+  update_observables(state, observables) {
+    for(let obs in observables) {
+      let observable = observables[obs]
+      state.observables = state.observables.map(o => o.uuid == observable.uuid ? observable : o)
+    }    
+  },
   save_agent_group(state, agent_group) {
     state.agent_group = agent_group
   },
@@ -1274,6 +1280,18 @@ const actions = {
       Axios({url: `${BASE_URL}/observable/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_observable', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  bulkUpdateObservables({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/observable/_bulk`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_observables', resp.data)
         resolve(resp)
       })
       .catch(err => {
