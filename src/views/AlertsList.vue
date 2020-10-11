@@ -340,7 +340,7 @@ export default {
     dark: Boolean,
     event: false
     },
-    computed: mapState(['status','alert']),
+    computed: mapState(['status','alert','settings']),
     created: function () {
         this.loadData()
         this.loadCloseReasons()
@@ -348,7 +348,7 @@ export default {
           if(!this.pauseRefresh) {
             this.loadData()
           }         
-        }.bind(this), 60000)
+        }.bind(this), this.settings.events_page_refresh*1000)
     },
     data(){
       return {
