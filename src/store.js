@@ -1198,11 +1198,42 @@ const actions = {
       })
     })
   },
-  getCases({commit}, fields='') {
+  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], my_cases=false, my_tasks=false, page=1, page_size=25}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case`, method: 'GET', headers: {'X-Fields': fields}})
+
+      let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}`
+
+      if(status.length > 0 ) {
+        base_url += `&status=${status}`
+      }
+
+      if(search.length > 0 ) {
+        base_url += `&search=${search}`
+      }
+
+      if(severity.length > 0 ) {
+        base_url += `&severity=${severity}`
+      }
+
+      if(owner.length > 0 ) {
+        base_url += `&owner=${owner}`
+      }
+
+      if(tag.length > 0 ) {
+        base_url += `&tag=${tag}`
+      }
+
+      if(my_tasks) {
+        base_url += `&my_tasks=${my_tasks}`
+      }
+
+      if(my_cases) {
+        base_url += `&my_cases=${my_cases}`
+      }
+
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
-        commit('save_cases', resp.data)
+        commit('save_cases', resp.data.cases)
         resolve(resp)
       })
       .catch(err => {
@@ -1317,9 +1348,9 @@ const actions = {
   },
   getCasesByTitle({commit}, {title, fields='uuid,title,id,event_count,owner,severity'}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case?title=${title}`, method: 'GET', headers: {'X-Fields': fields}})
+      Axios({url: `${BASE_URL}/case?title=${title}`, method: 'GET'})
       .then(resp => {
-        commit('save_cases', resp.data)
+        commit('save_cases', resp.data.cases)
         resolve(resp)
       })
       .catch(err => {

@@ -9,18 +9,75 @@
         </div>
     </CCol>
     <CCol col v-else>
+      <CRow>
+        <CCol col="12">
+            <CCardHeader>
+              <CRow>
+                <CCol col="10">
+                  <li style="display: inline; margin-right: 2px;" v-for="filter in caseFilters" :key="filter.value+filter.dataType"><CButton color="secondary" class="tag"  size="sm" @click="toggleCaseFilter({'dataType': filter.dataType.name, 'value': filter.value})"><b>{{filter.dataType}}</b>: <span v-if="filter.filter_type == 'severity'">{{getSeverityText(filter.value).toLowerCase()}}</span><span v-else>{{ filter.value }}</span></CButton></li><span v-if="caseFilters.length > 0" class="separator">|</span>Showing {{filtered_cases.length}} cases.
+                </CCol>
+                <CCol col="2" class="text-right">
+                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>
+                </CCol>
+              </CRow>
+            </CCardHeader>
+            <CCollapse :show="quick_filters">
+              <CNav variant="tabs" :justified="true">
+                <CNavItem>
+                  <div @click="toggleCaseFilter({'filter_type': 'status', 'dataType':'status','value':'New'})">
+                    New
+                  </div>
+                </CNavItem>
+                <CNavItem>
+                  <div @click="toggleCaseFilter({'filter_type': 'status', 'dataType':'status','value':'In Progress'})">
+                    In Progress
+                  </div>
+                </CNavItem>
+                <CNavItem>
+                  <div @click="toggleCaseFilter({'filter_type': 'status', 'dataType':'status','value':'Closed'})">
+                    Closed
+                  </div>
+                </CNavItem>
+                <CNavItem>
+                  <div @click="toggleCaseFilter({'filter_type': 'cases', 'dataType':'cases','value':'My Cases'})">
+                    My Cases
+                  </div>
+                </CNavItem>
+                <CNavItem>
+                  <div @click="toggleCaseFilter({'filter_type': 'tasks', 'dataType':'tasks','value':'Cases I have Tasks'})">
+                    My Tasks
+                  </div>
+                </CNavItem>
+                <CNavItem>
+                  <div @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':4})">
+                    Critical
+                  </div>
+                </CNavItem>
+                <CNavItem>
+                  <div @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':3})">
+                    High
+                  </div>
+                </CNavItem>
+                <CNavItem>
+                  <div @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':2})">
+                    Medium
+                  </div>
+                </CNavItem>
+                <CNavItem>
+                  <div @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':1})">
+                    Low
+                  </div>
+                </CNavItem>
+              </CNav>
+            </CCollapse>
+        </CCol>
+      </CRow>
       <CRow style="padding:10px">
         <CCol col="10">
           <CButton color="primary" @click="newCaseModal = !newCaseModal">New Case</CButton>
         </CCol>
         <CCol col="2" class="text-right">
-          <multiselect 
-                    v-model="fields"
-                    :options="available_fields"
-                    multiple
-                    :close-on-select="false">
-                    <template slot="selection" slot-scope="{ values, search, isOpen }"><span class="multiselect__single" v-if="values.length &amp;&amp; !isOpen">{{ values.length }} fields selected</span></template>
-                </multiselect>
+
         </CCol>
       </CRow>
               <CDataTable
@@ -29,7 +86,7 @@
                   :bordered="bordered"
                   :small="small"
                   :fixed="fixed"
-                  :items="cases"
+                  :items="filtered_cases"
                   :fields="fields"
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
@@ -42,7 +99,7 @@
                   <td>
                       <router-link :to="`${item.uuid}`">{{item.title}}</router-link><br>
                       <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
-                        <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag.name }}</CBadge>
+                        <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;cursor: pointer;" @click="toggleCaseFilter({'filter_type': 'tag', 'dataType':'tag','value':tag.name})">{{ tag.name }}</CBadge>
                       </li>
                   </td>
               </template>
@@ -64,7 +121,7 @@
               </template>
               <template #severity="{item}">
                 <td>
-                  <CButton :color="getSeverityColor(item.severity)" size="sm">{{getSeverityText(item.severity)}}</CButton>
+                  <CButton :color="getSeverityColor(item.severity)" size="sm" @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':item.severity})">{{getSeverityText(item.severity)}}</CButton>
                 </td>
               </template>
               <template #owner="{item}">
@@ -96,6 +153,15 @@
   </CRow>
 </template>
 
+<style scoped>
+
+.separator {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+</style>
+
 <script>
 import {mapState} from "vuex";
 import CreateCaseModal from './CreateCaseModal'
@@ -119,9 +185,9 @@ export default {
     alert: false
     },
     created: function () {
-        this.loadData()
+        this.filterCases()
         this.refresh = setInterval(function() {
-          this.loadData()
+          this.filterCases()
         }.bind(this), 60000)
     },
     data(){
@@ -134,7 +200,11 @@ export default {
         deleteCaseModal: false,
         target_case: "",
         fields: ['title','status','events','tlp','severity','owner','actions'],
-        available_fields: ['title','status','events','tlp','severity','owner','actions','created_at','modified_at']
+        available_fields: ['title','status','events','tlp','severity','owner','actions','created_at','modified_at'],
+        quick_filters: false,
+        caseFilters: [{'filter_type':'status','dataType':'status','value':'New'}],
+        filtered_cases: [],
+        page_data: {}
       }
     },
     methods: {
@@ -175,13 +245,94 @@ export default {
           default: return 'Low';
           }
       },
-      loadData: function() {
-        let fields = 'title,status,tlp,severity,owner,uuid,id,event_count'
-        this.loading = true
-        this.$store.dispatch('getCases', fields).then(resp => {
-            this.cases = resp.data
-            this.loading = false
+      filterCases: function () {
+
+        // Build the filters based on what is currently selected
+        this.$store.commit('add_start')
+        let status_filters = []
+        let tag_filters = []
+        let severity_filter = []
+        let search = []
+        let owner = []
+        let my_cases = false
+        let my_tasks = false
+        for(let f in this.caseFilters) {
+          let filter = this.caseFilters[f]
+
+          if(filter.filter_type == 'status') {
+            status_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'tag') {
+            tag_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'search') {
+            search = filter.value
+          }
+
+          if(filter.filter_type == 'severity') {
+            severity_filter.push(filter.value)
+          }
+
+          if(filter.filter_type == 'owner') {
+            owner.push(filter.value)
+          }
+
+          if(filter.filter_type == 'tasks') {
+            my_tasks = true
+          }
+
+          if(filter.filter_type == 'cases') {
+            my_cases = true
+          }
+        }
+
+        this.$store.dispatch('getCases', {
+          tag: tag_filters,
+          status: status_filters,
+          severity: severity_filter,
+          search: search,
+          owner: owner,
+          fields: ['title','status','tlp','severity','owner','uuid','id','event_count'],
+          my_cases: my_cases,
+          my_tasks: my_tasks,          
+          page: this.current_page,
+          page_size: this.card_per_page
+        }).then(resp => {
+          this.filtered_cases = this.$store.getters.cases
+          this.page_data = resp.data.pagination
+          this.$store.commit('add_success')
+          this.loading = false
         })
+      },
+      toggleCaseFilter(filter) {
+        let exists = this.caseFilters.some((item) => {
+          return item.value == filter.value
+        })
+        console.log(filter, exists)
+
+        // Can only have one status filter at a time
+        if(filter.filter_type == 'status') {
+          this.caseFilters = this.caseFilters.filter(item => item.filter_type !== filter.filter_type)
+        }
+
+        // Can't filter by my cases and my tasks at the same time
+        if(filter.filter_type == 'cases') {
+          this.caseFilters = this.caseFilters.filter(item => item.filter_type != 'tasks')
+        }
+
+        // Can't filter by my cases and my tasks at the same time
+        if(filter.filter_type == 'tasks') {
+          this.caseFilters = this.caseFilters.filter(item => item.filter_type != 'cases')
+        }
+
+        if(!exists) {
+          this.caseFilters.push(filter)
+        } else {
+          this.caseFilters = this.caseFilters.filter(item => item.value !== filter.value)
+        }
+        this.filterCases()
       }
     },
     beforeDestroy: function() {

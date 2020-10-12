@@ -81,9 +81,7 @@ export default {
         },
         caseFind(query) {
             let fields = 'uuid,title,id,event_count,owner,severity'
-            this.$store.dispatch('getCasesByTitle', {title: query, fields}).then(resp => {
-                this.$store.commit('save_cases', resp.data)
-            })
+            this.$store.dispatch('getCasesByTitle', {title: query, fields})
         },
         mergeEventIntoCase() {
             let uuid = this.case_data.uuid;
