@@ -708,6 +708,20 @@ export default {
             }
             this.filterEvents()
         },
+        sanitizeHTML(str) {
+            var temp = document.createElement('div');
+            temp.textContent = str
+            return temp.innerHTML
+        },
+        extraObservables(observables) {
+            let content = "<ul style='list-style-type: none; padding:0; margin: 0;'>"
+            for(let o in observables) {
+            let obs = observables[o]
+            content += `<li><b>${obs.dataType.name}</b>: ${this.sanitizeHTML(obs.value)}</li>`
+            }
+            content += "</ul>"
+            return content
+        },
         filterEvents() {
             this.tab_loading = true
             let status_filters = []

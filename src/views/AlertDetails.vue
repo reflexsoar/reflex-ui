@@ -34,7 +34,7 @@
                 
             </CRow>
             <CRow>
-                <CCol col="12" lg="6" sm="12" class="pre-formatted">{{event.description}}</CCol>
+                <CCol col="12" lg="10" sm="12">{{event.description}}<br><br></CCol>
             </CRow>
             <CRow>
                 <CCol col="12" lg="6" sm="12" style="margin-top:5px;"><li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li></CCol>
@@ -48,7 +48,8 @@
                     <label>Updated: </label> {{event.modified_at | moment('from', 'now')}}
                 </CCol>
                 <CCol col="6" class="text-right">
-                    <label>Event Signature: </label>&nbsp;{{event.signature}}
+                    <label>Event Signature: </label>&nbsp;{{event.signature}}<br>
+                    <label>Status: </label>&nbsp;{{event.status.name}}
                 </CCol>
             </CRow>
         </CCardBody>
@@ -115,9 +116,7 @@
         <CCollapse :show="collapse_raw_log">
         <CCardBody class="bg-dark" style="overflow:scroll">
             <CRow class="bg-dark" >
-                <CCol col="12" class="bg-dark pre-formatted raw_log">
-                    {{event.raw_log}}
-                </CCol>
+                <CCol col="12" class="bg-dark pre-formatted raw_log">{{jsonify(event.raw_log)}}</CCol>
             </CRow>
         </CCardBody></CCollapse>
     </CCard>
@@ -125,14 +124,15 @@
   <CModal title="Dismiss Event" color="danger" :centered="true" size="lg" :show.sync="dismissEventModal">
       <div>
         <p>Dismissing an event indicates that no action is required.  For transparency purposes, it is best to leave a comment as to why this event is being dismissed.  Fill out the comment field below.</p>
-        <CForm>
+        <CForm id="dismissEventForm" @submit.prevent="dismissEvent()">
             <CRow>
                 <CCol><br>
-            <CSelect :options="['False Positive','Alarm requires tuning','Administrative Activity']" v-model="dismissalReason" label="Reason"/>
+            <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value" label="Reason"/>
             <CTextarea
                 placeholder="Enter a comment as to why this Event is being dismissed."
-                required
-                v-model="dismissalComment"
+                v-bind:required="settings.require_event_dismiss_comment"
+                :value="dismissalComment"
+                @change="dismissalComment = $event"
                 label="Comment"
                 rows=5
             >
@@ -142,7 +142,7 @@
         </CForm>
       </div>
       <template #footer>
-        <CButton @click="dismissEvent()" color="danger">Dismiss</CButton>
+        <CButton type="submit" form="dismissEventForm" color="danger">Dismiss Event</CButton>
       </template>
     </CModal>
     <CModal title="Run Playbook" color="dark" :centered="true" size="lg" :show.sync="runPlaybookModal">
@@ -191,6 +191,7 @@ export default {
         CreateCaseModal,
         MergeEventIntoCaseModal
     },
+    computed: mapState(['settings']),
     props: {
         observable_fields: {
             type: Array,
@@ -225,7 +226,8 @@ export default {
             dismissalComment: "",
             dismissalReason: null,
             createCaseModal: false,
-            mergeIntoCaseModal: false
+            mergeIntoCaseModal: false,
+            close_reason: []
         }
     },
     created() {
@@ -237,9 +239,34 @@ export default {
                 this.$set(this.collapse, uuid, true)
             }
             this.loading = false
-        })        
+        })
+        this.loadCloseReasons()
     },
     methods: {
+        jsonify(s) {
+            try {
+                return JSON.parse(s)
+            } catch (e) {
+                return s
+            }
+        },
+        loadCloseReasons() {
+            this.$store.dispatch('getCloseReasons').then(resp => {
+                this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
+            })
+        },
+        dismissEvent() {
+            
+            let data = {          
+                dismiss_reason_uuid: this.dismissalReason,
+                dismiss_comment: this.dismissalComment
+            }
+            this.$store.dispatch('updateEvent', {uuid: this.uuid, data}).then(resp => {
+                this.event = this.$store.getters.event
+            })
+            this.dismissEventModal = false
+            this.dismissalComment = ""
+        },
         expandAll() {
             for(const c in this.collapse) {
                 if(!this.collapse[c]) {

@@ -310,7 +310,6 @@ export default {
         let exists = this.caseFilters.some((item) => {
           return item.value == filter.value
         })
-        console.log(filter, exists)
 
         // Can only have one status filter at a time
         if(filter.filter_type == 'status') {

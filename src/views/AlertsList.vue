@@ -176,7 +176,7 @@
                     <CButton v-if="(item.new_related_events && item.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && item.status.name == 'New')" size="sm" color="info" @click="createEventRule(item.signature)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(item.uuid)" v-if="!item.case_uuid" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton :to="`/alerts/${item.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
-                    <CButton v-if="item.status.closed" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
+                    <CButton v-if="item.status.closed" @click="reopenEvent(item.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
                     <CButton v-if="item.case_uuid" size="sm" color="secondary" :to="`/cases/${item.case_uuid}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton v-if="!item.status.closed" color="danger" size="sm" @click="dismissEventFromCard(item.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
                   </CButtonGroup>
@@ -209,7 +209,7 @@
                     <CButton v-if="(event.new_related_events && event.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(event.uuid)" v-if="!event.case_uuid" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton :to="`/alerts/${event.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
-                    <CButton v-if="event.status.closed" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
+                    <CButton v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
                     <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
                   </CButtonGroup>
@@ -247,7 +247,7 @@
             <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value" label="Reason"/>
             <CTextarea
                 placeholder="Enter a comment as to why this Event is being dismissed."
-                required
+                v-bind:required="settings.require_event_dismiss_comment"
                 :value="dismissalComment"
                 @change="dismissalComment = $event"
                 label="Comment"
@@ -348,7 +348,7 @@ export default {
           if(!this.pauseRefresh) {
             this.loadData()
           }         
-        }.bind(this), this.settings.events_page_refresh*1000)
+        }.bind(this), this.settings.events_page_refresh*1000 || 60000)
     },
     data(){
       return {
@@ -394,6 +394,11 @@ export default {
       }
     },
     methods: {
+      reopenEvent(uuid) {
+        this.$store.dispatch('updateEvent', {uuid: uuid, data: {'status': 0}}).then(resp => {
+          this.filtered_events = this.filterEvents()
+        })
+      },
       dismissEventFromCard(uuid) {
         this.selected = [uuid]
         this.dismissEventModal = true
@@ -406,7 +411,7 @@ export default {
             dismiss_comment: this.dismissalComment
           }
           this.$store.dispatch('updateEvent', {uuid: this.selected[0], data}).then(resp => {
-            this.filtered_events = this.$store.getters.events
+            this.filtered_events = this.filterEvents()
           })
          } else if (this.selected.length > 1) {
           let data = {          
@@ -415,7 +420,7 @@ export default {
             events: this.selected
           }
           this.$store.dispatch('dismissEvents', data).then(resp => {
-            this.filtered_events = this.$store.getters.events
+            this.filtered_events = this.filterEvents()
             
           })
          }
@@ -517,6 +522,7 @@ export default {
         let observables_filters = []
         let severity_filter = []
         let signature_filter = ""
+        let title_filter = []
         let grouped = !this.filteredBySignature()
         let search = ""
         for(let f in this.observableFilters) {
@@ -545,6 +551,10 @@ export default {
           if(filter.filter_type == 'severity') {
             severity_filter.push(filter.value)
           }
+
+          if(filter.filter_type == 'title') {
+            title_filter = [filter.value]
+          }
         }
 
         this.$store.dispatch('getEvents', {
@@ -554,6 +564,7 @@ export default {
           status: status_filters,
           observables: observables_filters,
           severity: severity_filter,
+          title: title_filter,
           search: search,
           fields: '',
           page: this.current_page,

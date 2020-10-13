@@ -324,9 +324,10 @@ function configRoutes () {
             }
           ]
         },
+        
         {
           path: 'agents',
-          name: 'Agents',
+          name: 'Agents & Agent Groups',
           component: Agents,
           redirect: 'agents/list',
           meta: {

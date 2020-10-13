@@ -134,7 +134,7 @@ const mutations = {
   },
   save_multiple_events(state, events) {
     for(let evt in events) {
-      state.events = [...state.events.filter(e => e.uuid != evt.uuid), evt]
+      state.events = [...state.events.filter(e => e.uuid != evt.uuid)]
     }
   },
   save_event(state, event) {
@@ -272,6 +272,10 @@ const mutations = {
   save_agent_group(state, agent_group) {
     state.agent_group = agent_group
   },
+  update_agent_group(state, agent_group) {
+    state.agent_group = agent_group
+    state.agent_groups = state.agent_groups.map(ag => ag.uuid == agent_group.uuid ? agent_group : ag)
+  },
   save_settings(state, settings) {
     state.settings = settings
   },
@@ -337,6 +341,7 @@ const mutations = {
     state.state = 'success'
   },
   add_agent_group(state, agent_group) {
+    console.log(agent_group)
     state.agent_groups.push(agent_group)
     state.agent_group = agent_group
     state.status = 'success'
@@ -473,6 +478,9 @@ const getters = {
   related_cases: state => { return state.related_cases },
   events: state => { return state.events },
   close_reasons: state => { return state.close_reasons },
+  agent_group : state => { return state.agent_group },
+  event: state => { return state.event },
+  events: state =>  { return state.events },
   data_types_list: function() {
     return state.data_types.map(function(data_type) {
       var newDataType = {};
@@ -659,7 +667,31 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/agent_group`, method: 'GET'})
       .then(resp => {
-        commit('save_agent_groups', resp.data)
+        commit('save_agent_groups', resp.data.groups)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getAgentGroup({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_group/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_agent_group', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateAgentGroup({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_group/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_agent_group', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -695,7 +727,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/agent_group`, data: agent_group, method: 'POST'})
       .then(resp => {
-        commit('add_agent_group', agent_group)
+        commit('add_agent_group', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -851,7 +883,7 @@ const actions = {
       })
     })
   },
-  getEvents({commit}, {signature=null, case_uuid, status=[], search, severity=[], page, tags=[], observables=[], page_size=25, grouped=true, fields=''}) {
+  getEvents({commit}, {signature=null, case_uuid, status=[], search, severity=[], page, tags=[], title=[], observables=[], page_size=25, grouped=true, fields=''}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event?grouped=${grouped}`
@@ -883,6 +915,9 @@ const actions = {
       if(observables.length > 0) {
         url = url+`&observables=${observables}`
       }
+      if(title.length > 0) {
+        url = url+`&title=${title}`
+      }
       Axios({url: url, method: 'GET', headers:{'X-Fields': fields}})
       .then(resp => {
         commit('add_start')
@@ -911,7 +946,7 @@ const actions = {
       Axios({url: `${BASE_URL}/event/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('save_event', resp.data)
-        commit('show_alert', {message: `Successfully dismissed Event.`, 'type': 'success'})
+        commit('show_alert', {message: `Successfully updated Event.`, 'type': 'success'})
         resolve(resp)
       })
       .catch(err => {
@@ -924,7 +959,7 @@ const actions = {
       Axios({url: `${BASE_URL}/event/bulk_dismiss`, data: data, method: 'PUT'})
       .then(resp => {
         commit('save_multiple_events', resp.data)
-        commit('show_alert', {message: `Successfully dismissed ${data.events.length} Events.`, 'type': 'success'})
+        commit('show_alert', {message: `Successfully updated ${data.events.length} Events.`, 'type': 'success'})
         resolve(resp)
       })
       .catch(err => {
