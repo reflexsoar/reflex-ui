@@ -184,18 +184,15 @@ label {
 }
 
 .danger-accent {
-    border-left-color: red !important;
-    border-left: 10px solid !important;
+    border-left: 10px solid red;
 }
 
 .warning-accent {
-    border-left-color: yellow;
-    border-left: 10px;
+    border-left: 10px solid yellow;
 }
 
 .success-accent {
-    border-left-color: green;
-    border-left: 10px;
+    border-left: 10px solid green;
 }
 
 .tools {

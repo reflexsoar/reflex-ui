@@ -78,12 +78,12 @@
         </CCol>
       </CRow>
       <CRow>
-        <CCol col="2">
+        <CCol col="3">
             <div>
-              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAll()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="['Severity','Status','Date Created','Name','TLP','Observable Count']" placeholder="Sort by" class="d-inline-block"/>
+              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAll()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="['Severity','Status','Date Created','Name','TLP','Observable Count']" placeholder="Sort by" class="d-inline-block"/>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
             </div>
         </CCol>
-        <CCol col="4">
+        <CCol col="3">
           <center><CPagination :activePage.sync="current_page" :pages="page_data.pages"/></center>
         </CCol>
         <CCol col="3" class="text-right">
@@ -225,7 +225,7 @@
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span></span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}</span>
-                    <span v-c-tooltip="event.reference"><span class="separator">|</span><b>Reference:</b> {{event.reference | truncate }}</span>                    
+                    <span class="separator">|</span><b>Reference:</b> {{event.reference}}
                   </small>
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -388,7 +388,7 @@ export default {
         rule_observables: [],
         columns: 1,
         card_page_num: 1,
-        card_per_page: 10,
+        card_per_page: this.settings ? this.settings.events_per_page : 10,
         page_data: {},
         current_page: 1
       }

@@ -73,7 +73,7 @@
                 pagination
             >
                 <template #value="{item}">
-                    <td v-bind:class="observableAccent(item.tlp)">
+                    <td>
                         {{item.value | defang}}
                     </td>
                 </template>
@@ -289,9 +289,9 @@ export default {
                 return {'danger-accent': true}
             }
             switch (tlp) {
-                case 1: return {"success-accent":true};
-                case 2: return {"warning-accent":true};
-                case 3: return {"danger-accent":true};
+                case 0: return {"success-accent":true};
+                case 1: return {"warning-accent":true};
+                case 2: return {"danger-accent":true};
                 default: return {"success-accent":true};
             }
         },
