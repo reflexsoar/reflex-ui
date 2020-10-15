@@ -12,7 +12,6 @@
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
-    {{case_data}}
     <CCard class="shadow-sm bg-white rounded" >
         <CCardHeader>
             <CRow>
