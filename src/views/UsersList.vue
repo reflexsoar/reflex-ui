@@ -61,7 +61,7 @@
           </CCol>
         </CRow>
         <CInput v-model="user.email" label="Email" placeholder="user@reflexsoar.com" required/>
-        <CSelect :options="roles" required label="Role" :value.sync="user.role_uuid" placeholder="Select a role"/>
+        <CSelect :options="roles" required label="Role" :value.sync="user.role_uuid" placeholder="Select a role" required/>
         <CInput v-if="modal_mode == 'new'" v-model="user.password" type="password" label="Password" placeholder="Enter your desired password..." required/>
         <CInput v-if="modal_mode == 'new'" v-model="user.confirm_password"  type="password" label="Confirm Password" placeholder="Confirm password" required/>
         <label>User Locked?</label><br>
