@@ -25,7 +25,7 @@
                         </small>  
                     <span v-if="case_data.status && case_data.status.closed"> - Closed</span>
                     </span><span v-else><CInput v-model="case_data.title"><template #append>
-                        <CButton color="danger" @click="edit_title = !edit_title" size="sm"><CIcon name="cilXCircle"/></CButton>
+                    <CButton color="danger" @click="edit_title = !edit_title" size="sm"><CIcon name="cilXCircle"/></CButton>
                     <CButton color="primary" @click="updateTitle()"  size="sm"><CIcon name="cilSave"/></CButton>
                   </template></CInput></span></h3>
                 </CCol>

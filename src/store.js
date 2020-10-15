@@ -331,6 +331,10 @@ const mutations = {
   save_input(state, input) {
     state.input = input
   },
+  update_input(state, input) {
+    state.input = input
+    state.inputs = state.inputs.map(i => i.uuid == input.uuid ? input : i)
+  },
   save_pairing_token(state, token) {
     state.pairing_token = token
   },
@@ -477,6 +481,7 @@ const getters = {
   case_data: state => { return state.case },
   cases: state => { return state.cases },
   users: state => { return state.users },
+  input: state => { return state.input },
   observables: state => { return state.observables },
   case_files: state => { return state.case_files },
   related_cases: state => { return state.related_cases },
@@ -744,6 +749,18 @@ const actions = {
       Axios({url: `${BASE_URL}/input/${uuid}`, method: 'GET'})
       .then(resp => {
         commit('save_input', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateInput({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/input/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_input', resp.data)
         resolve(resp)
       })
       .catch(err => {
