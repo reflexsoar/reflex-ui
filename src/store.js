@@ -246,6 +246,10 @@ const mutations = {
   save_case(state, c) {
     state.case = c
   },
+  update_case(state, c) {
+    state.case = c
+    state.cases = state.cases.map(x => x.uuid == c.uuid ? c : x )
+  },
   save_related_cases(state, data) {
     state.related_cases = data
   },
@@ -1233,7 +1237,7 @@ const actions = {
       })
     })
   },
-  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], my_cases=false, my_tasks=false, page=1, page_size=25}) {
+  getCases({commit}, {status:[], search=[], severity=[], tag=[], owner=[], my_cases=false, my_tasks=false, page=1, page_size=25}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}`
@@ -1577,7 +1581,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
-        commit('save_case', resp.data)
+        commit('update_case', resp.data)
         resolve(resp)
       })
       .catch(err => {

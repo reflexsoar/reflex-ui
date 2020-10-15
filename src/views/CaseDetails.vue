@@ -12,6 +12,7 @@
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
+    {{case_data}}
     <CCard class="shadow-sm bg-white rounded" >
         <CCardHeader>
             <CRow>
@@ -90,14 +91,15 @@
                                 <multiselect 
                                     v-model="assignee" 
                                     label="username" 
-                                    :options="users" 
+                                    :options="[...users, {username:'Unassigned'}]" 
                                     track-by="username" 
                                     :searchable="true"
                                     :internal-search="false"
                                     :options-limit="25"
                                     :show-no-results="false"
                                     v-bind:disabled="case_data.status.closed" 
-                                    @search-change="usersFind">
+                                    @search-change="usersFind"
+                                    @select="updateAssignee($event)">
                                 </multiselect>
                             </div>
                             <CSelect label="Severity" :value.sync="case_data.severity" :options="severities" @change="updateSeverity()" v-bind:disabled="case_data.status && case_data.status.closed"></CSelect>
@@ -508,20 +510,6 @@ export default {
         $route: function() {
             this.buildPage()
         },
-        assignee: function() {
-            if(this.case_data.owner.uuid == null && this.assignee.uuid == null) {
-                return
-            }
-            if(this.assignee && this.assignee.uuid) {
-                if(this.assignee.uuid != this.case_data.owner.uuid) {
-                    this.updateAssignee(this.assignee.uuid)
-                }
-            } else {
-                this.assignee = ""
-                this.updateAssignee('')
-                
-            }
-        },
         current_events_page: function(){
             this.filterEvents(this.uuid)
         },
@@ -678,9 +666,13 @@ export default {
         },
         loadData() {
             this.$store.dispatch('getCase', this.$route.params.uuid).then(resp => {
-                this.case_data = resp.data
+                this.case_data = this.$store.getters.case_data
                 this.case_data.status_uuid = this.case_data.status.uuid
-                this.assignee = this.case_data.owner
+                if(this.case_data.owner.username != null) {
+                    this.assignee = this.case_data.owner
+                } else{
+                    this.assignee = {username: 'Unassigned'}
+                }
                 this.loading = false
             })
         },
@@ -792,14 +784,14 @@ export default {
             let uuid = this.uuid
             let severity = {"severity": this.case_data.severity}
             this.$store.dispatch('updateCase', {uuid, data: severity}).then(resp => {
-                this.case_data = resp.data
+                this.case_data = this.$store.getters.case_data
             })
         },
         updateTLP() {
             let uuid = this.uuid
             let tlp = {"tlp": this.case_data.tlp}
             this.$store.dispatch('updateCase', {uuid, data: tlp}).then(resp => {
-                this.case_data = resp.data
+                this.case_data = this.$store.getters.case_data
             })
         },
         updateStatus() {
@@ -812,7 +804,7 @@ export default {
                 this.closeCaseModal = true
             } else {
                 this.$store.dispatch('updateCase', {uuid, data: status}).then(resp => {
-                    this.case_data = resp.data
+                    this.case_data = this.$store.getters.case_data
                 })
             }
         },
@@ -820,15 +812,20 @@ export default {
             let uuid = this.uuid
             let description = {"description": this.case_data.description}
             this.$store.dispatch('updateCase', {uuid, data: description}).then(resp => {
-                this.case_data = resp.data
+                this.case_data = this.$store.getters.case_data
             })
             this.edit_description = false
         },
-        updateAssignee(assignee_uuid) {
+        updateAssignee(a) {
             let uuid = this.uuid
-            let assignee = {"owner_uuid": assignee_uuid}
+            let assignee = {owner_uuid: null}
+            if(a.username == 'Unassigned') {
+                assignee.owner_uuid = ''
+            } else {
+                assignee.owner_uuid = a.uuid
+            }
             this.$store.dispatch('updateCase', {uuid, data: assignee}).then(resp => {
-                this.case_data = resp.data
+                this.case_data = this.$store.getters.case_data
             })
             this.edit_description = false
         },

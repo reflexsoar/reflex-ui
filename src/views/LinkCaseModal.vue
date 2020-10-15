@@ -78,7 +78,7 @@ export default {
             })
         },
         loadData() {
-            this.$store.dispatch('getCases').then(resp => {
+            this.$store.dispatch('getCases', {status: []}).then(resp => {
                 this.cases = this.$store.getters.cases.filter(x => !this.related_cases.map(c => { return c.uuid }).includes(x.uuid) && x.uuid != this.case_uuid)
             })
         },
