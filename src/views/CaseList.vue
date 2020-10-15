@@ -222,7 +222,7 @@ export default {
       deleteCase() {
           let uuid = this.target_case
           this.$store.dispatch('deleteCase', uuid).then(resp => {
-              this.cases = this.$store.getters.cases
+              this.filtered_cases = this.$store.getters.cases
               this.target_case = ""
               this.deleteCaseModal = !this.deleteCaseModal
           })
