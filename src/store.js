@@ -887,10 +887,10 @@ const actions = {
       })
     })
   },
-  getEvents({commit}, {signature=null, case_uuid, status=[], search, severity=[], page, tags=[], title=[], observables=[], page_size=25, grouped=true, fields=''}) {
+  getEvents({commit}, {signature=null, case_uuid, status=[], search, severity=[], page, tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields=''}) {
     return new Promise((resolve, reject) => {
 
-      let url = `${BASE_URL}/event?grouped=${grouped}`
+      let url = `${BASE_URL}/event?grouped=${grouped}&sort_by=${sort_by}`
 
       if(signature) {
         url = url+`&signature=${signature}`

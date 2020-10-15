@@ -80,7 +80,7 @@
       <CRow>
         <CCol col="3">
             <div>
-              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAll()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="['Severity','Status','Date Created','Name','TLP','Observable Count']" placeholder="Sort by" class="d-inline-block"/>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
+              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAll()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
             </div>
         </CCol>
         <CCol col="3">
@@ -390,7 +390,15 @@ export default {
         card_page_num: 1,
         card_per_page: this.settings ? this.settings.events_per_page : 10,
         page_data: {},
-        current_page: 1
+        current_page: 1,
+        sort_by: 'created_at',
+        sort_options: [
+          {'label': 'Severity','value':'severity'},
+          {'label': 'Date Created', 'value': 'created_at'},
+          {'label': 'Date Modified', 'value': 'modified_at'},
+          {'label': 'Name', 'value': 'title'},
+          {'label': 'TLP', 'value': 'tlp'}
+        ]
       }
     },
     methods: {
@@ -568,7 +576,8 @@ export default {
           search: search,
           fields: '',
           page: this.current_page,
-          page_size: this.card_per_page
+          page_size: this.card_per_page,
+          sort_by: this.sort_by
         }).then(resp => {
           this.filtered_events = this.$store.getters.events
           this.page_data = resp.data.pagination
