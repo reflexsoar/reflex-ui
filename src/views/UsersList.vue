@@ -299,8 +299,10 @@ export default {
       this.error = false
       this.error_message = ""
     },
-    dismiss() {
+    dismiss(modal) {
       this.reset()
+      this.modal_status = false
+      this.unlock_modal = false
       this.delete_modal = false
     },
     loadRoles: function () {
