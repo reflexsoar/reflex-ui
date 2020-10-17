@@ -1254,7 +1254,7 @@ const actions = {
       })
     })
   },
-  getCases({commit}, {status:[], search=[], severity=[], tag=[], owner=[], my_cases=false, my_tasks=false, page=1, page_size=25}) {
+  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], my_cases=false, my_tasks=false, page=1, page_size=25}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}`

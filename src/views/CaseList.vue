@@ -296,7 +296,7 @@ export default {
           owner: owner,
           fields: ['title','status','tlp','severity','owner','uuid','id','event_count'],
           my_cases: my_cases,
-          my_tasks: my_tasks,          
+          my_tasks: my_tasks,
           page: this.current_page,
           page_size: this.card_per_page
         }).then(resp => {
