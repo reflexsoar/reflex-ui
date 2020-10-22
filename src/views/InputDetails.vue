@@ -44,20 +44,28 @@
     </CCard>
     <CRow>
         <CCol>
-        <CCard class="shadow-sm bg-white rounded" >
+        <CCard class="shadow-sm bg-white rounded" @mouseover="config_hover = true" @mouseleave="config_hover = false">
             <CCardHeader>
                 <CRow>
                     <CCol col="12" lg="6" sm="12" class="text-left">
-                        <b>Configuration</b>
+                        <b>Configuration</b>&nbsp;<a v-if="config_hover && !edit_config" @click="edit_config = !edit_config"><CIcon name="cilPencil" size="sm"/></a>
                     </CCol>
                 </CRow>
             </CCardHeader>
-            <CCardBody class="bg-dark" style="overflow:scroll; min-height:300px; max-height:300px;">
-                <CRow class="bg-dark" >
+            <CCardBody class="bg-dark" v-if="!edit_config" style="overflow:scroll; min-height:300px; max-height:300px;">
+                <CRow class="bg-dark">
                     <CCol col="12" class="bg-dark pre-formatted raw_log">
                         {{input.config}}
                     </CCol>
                 </CRow>
+            </CCardBody>
+            <CCardBody v-if="edit_config">
+                <CAlert :show.sync="config_json_error" color="danger" closeButton class="text-left">
+                    Invalid JSON. Please check your config before submitting.
+                </CAlert>
+                <CTextarea :value="jsonToString(input.config)" @change="convertConfig($event)" rows="10"/>
+                <CButton color="danger" @click="edit_config = !edit_config; config_json_error = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;
+                <CButton color="primary" @click="updateConfig()"  size="sm" v-bind:disabled="config_json_error"><CIcon name="cilSave"/></CButton>
             </CCardBody>
         </CCard>
         </CCol>
@@ -82,8 +90,8 @@
                     Invalid JSON. Please check your config before submitting.
                 </CAlert>
                 
-                <CTextarea :value="configToString()" @change="convertFieldMapping($event)" rows="10"/>
-                <CButton color="danger" @click="edit_field_mapping = !edit_field_mapping" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;
+                <CTextarea :value="jsonToString(input.field_mapping)" @change="convertFieldMapping($event)" rows="10"/>
+                <CButton color="danger" @click="edit_field_mapping = !edit_field_mapping; json_error = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;
                 <CButton color="primary" @click="updateFieldMapping()"  size="sm" v-bind:disabled="json_error"><CIcon name="cilSave"/></CButton>
             </CCardBody>
         </CCard>
@@ -107,7 +115,8 @@ export default {
             field_mapping_hover: false,
             edit_config: false,
             config_hover: false,
-            json_error: false
+            json_error: false,
+            config_json_error: false
         }
     },
     computed: mapState(['input']),
@@ -117,8 +126,8 @@ export default {
         })        
     },
     methods: {
-        configToString() {
-            return JSON.stringify(this.input.field_mapping, undefined, 4)
+        jsonToString(data) {
+            return JSON.stringify(data, undefined, 4)
         },
         convertFieldMapping(event) {
             try {
@@ -127,6 +136,31 @@ export default {
             } catch {
                 this.input.field_mapping = this.input.field_mapping
                 this.json_error = true
+            }
+        },
+        convertConfig(event) {
+            try {
+                this.input.config = JSON.parse(event)
+                this.config_json_error = false
+            } catch {
+                this.input.config = this.input.config
+                this.config_json_error = true
+            }
+        },
+        updateConfig() {
+            let uuid = this.uuid
+            let config = null
+            try {
+                config = JSON.parse(JSON.stringify(this.input.config))
+                this.config_json_error = false
+            } catch {
+                config = null
+                this.config_json_error = true
+            }
+            if(config) {
+                this.$store.dispatch('updateInput', {uuid: uuid, data: { config: config }}).then(resp => {
+                    this.edit_config = false
+                })
             }
         },
         updateFieldMapping() {
