@@ -62,8 +62,8 @@
         </CRow>
         <CInput v-model="user.email" label="Email" placeholder="user@reflexsoar.com" required/>
         <CSelect :options="roles" required label="Role" :value.sync="user.role_uuid" placeholder="Select a role" required/>
-        <CInput v-if="modal_mode == 'new'" v-model="user.password" type="password" label="Password" placeholder="Enter your desired password..." required/>
-        <CInput v-if="modal_mode == 'new'" v-model="user.confirm_password"  type="password" label="Confirm Password" placeholder="Confirm password" required/>
+        <CInput v-model="user.password" type="password" label="Password" placeholder="Enter your desired password..." v-bind:requred="modal_mode == 'new'"/>
+        <CInput v-model="user.confirm_password"  type="password" label="Confirm Password" placeholder="Confirm password" v-bind:requred="modal_mode == 'new'"/>
         <label>User Locked?</label><br>
         <CSwitch color="danger" label-on="Yes" label-off="No" v-bind:checked.sync="user.locked"/>
       </CForm>
@@ -254,6 +254,11 @@ export default {
         role_uuid: this.user.role_uuid,
         locked: this.user.locked
       }
+      if(this.user.password != '' && this.user.confirm_password == this.user.password) {
+        user['password'] = this.user.password
+        console.log(user)
+      }     
+
       let uuid = this.user.uuid
       this.$store.dispatch('updateUser', {uuid, user}).then(resp => {
         let userIndex = this.users.findIndex((user => user.uuid == uuid))

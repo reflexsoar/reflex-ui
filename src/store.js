@@ -528,6 +528,28 @@ const actions = {
       })
     })
   },
+  forgotPassword({commit}, username) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/auth/forgot_password`, data: username, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  resetPassword({commit}, {token, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/auth/reset_password/${token}`, data, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   refresh_token({commit}) {
     data = {'refresh_token': this.$store.refresh_token}
     commit('refresh_request')

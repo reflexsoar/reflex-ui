@@ -45,6 +45,8 @@ const Page401 = () => import('@/views/pages/Page401')
 const Page404 = () => import('@/views/pages/Page404')
 const Page500 = () => import('@/views/pages/Page500')
 const Login = () => import('@/views/Login')
+const ForgotPassword = () => import('@/views/ForgotPassword')
+const ResetPassword = () => import('@/views/ResetPassword')
 const Register = () => import('@/views/pages/Register')
 
 Vue.use(Router)
@@ -64,20 +66,21 @@ router.beforeEach((to, from, next) => {
   store.commit('clear_alert')
 
   // Before each request refresh the users permissions
-  store.dispatch('getMe').then(() => {
-    if(to.matched.some(record => {
-      let current_user = store.getters.current_user
-      if(record.meta.requiresPermission && !current_user.permissions.includes(record.meta.requiresPermission)) {
-        next('/401')
-      } else {
-        next()
-        return
-      }
-    })) {}
-  })  
-
+  if(to.matched.some(record => record.path != '/forgot_password' && !record.path.startsWith('/reset_password') && record.path != '/login' && record.path != '/')) {
+    store.dispatch('getMe').then(() => {
+      if(to.matched.some(record => {
+        let current_user = store.getters.current_user
+        if(record.meta.requiresPermission && !current_user.permissions.includes(record.meta.requiresPermission)) {
+          next('/401')
+        } else {
+          next()
+          return
+        }
+      })) {}
+    })  
+  }
+  
   // Fetch the settings before each route in the event that they have changed
-
   if(to.matched.some(record => record.meta.fetchSettings)) {
     store.dispatch('getSettings')
   }  
@@ -434,6 +437,16 @@ function configRoutes () {
       path: '/login',
       name: 'Login',
       component: Login
+    },
+    {
+      path: '/forgot_password',
+      name: 'ForgotPassword',
+      component: ForgotPassword
+    },
+    {
+      path: '/reset_password/:token',
+      name: 'ResetPassword',
+      component: ResetPassword
     },
     {
       path: '/',

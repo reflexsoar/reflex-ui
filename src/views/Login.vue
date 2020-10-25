@@ -38,7 +38,7 @@
                     <CButton color="primary" class="px-4" type="submit">Login</CButton>
                   </CCol>
                   <CCol col="6" class="text-right">
-                    <CButton color="secondary">Forgot password?</CButton>
+                    <CButton color="secondary" to="/forgot_password">Forgot password?</CButton>
                   </CCol>
                 </CRow>
               </CForm>
