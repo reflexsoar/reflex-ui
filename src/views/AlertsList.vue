@@ -87,7 +87,7 @@
           <center><CPagination :activePage.sync="current_page" :pages="page_data.pages"/></center>
         </CCol>
         <CCol col="3" class="text-right">
-          <CInput placeholder="Search" v-model="search_filter"><template #append>
+          <CInput placeholder="Search" v-model="search_filter" v-on:keydown.enter="toggleObservableFilter({'filter_type':'search','dataType':'search','value':search_filter})" ><template #append>
             <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','dataType':'search','value':search_filter})">Search</CButton>
           </template></CInput>
         </CCol>
