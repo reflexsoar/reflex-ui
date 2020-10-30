@@ -280,6 +280,10 @@ const mutations = {
     state.agent_group = agent_group
     state.agent_groups = state.agent_groups.map(ag => ag.uuid == agent_group.uuid ? agent_group : ag)
   },
+  update_agent(state, agent) {
+    state.agent = agent
+    state.agents = state.agents.map(a => a.uuid == agent.uuid ? agent : a )
+  },
   save_settings(state, settings) {
     state.settings = settings
   },
@@ -382,6 +386,19 @@ const mutations = {
     state.cases = state.cases.filter(c => c.uuid != uuid)
     state.case = {}
   },
+  remove_agent(state, uuid) {
+    state.agents = state.agents.filter(a => a.uuid != uuid)
+    state.agent = {}
+  },
+  remove_event(state, uuid) {
+    state.events = state.events.filter(e => e.uuid != uuid)
+    state.event = {}
+  },
+  remove_events(state, events) {
+    for(let event in events) {
+      state.events = state.events.filter(e => e.uuid != event)
+    }
+  },
   add_case_task(state, task) {
     state.case_tasks.push(task)
     state.status = 'success'
@@ -469,6 +486,8 @@ const getters = {
   status: state => state.status,
   current_user: state => state.current_user,
   alert: state => state.alert,
+  agents: state => { return state.agents },
+  agent: state => { return state.agent },
   case_templates: state => state.case_templates,
   case_template_list: state => { return state.case_template_list },
   date_types: state => state.data_types,
@@ -711,6 +730,18 @@ const actions = {
       Axios({url: `${BASE_URL}/agent_group/${uuid}`, method: 'GET'})
       .then(resp => {
         commit('save_agent_group', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateAgent({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_agent', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -1633,6 +1664,45 @@ const actions = {
       Axios({url: `${BASE_URL}/case_comment`, data: data, method: 'POST'})
       .then(resp => {
         commit('add_case_comment', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteAgent({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_agent', uuid)
+        commit('show_alert', {message: 'Successfully deleted the agent.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteEvent({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_event', uuid)
+        commit('show_alert', {message: 'Successfully deleted the event.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteEvents({commit}, events) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/bulk_delete`, data: {events: events}, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_events', events)
+        commit('show_alert', {message: 'Successfully deleted the events.', 'type': 'success'})
         resolve(resp)
       })
       .catch(err => {

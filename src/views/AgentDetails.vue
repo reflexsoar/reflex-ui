@@ -16,10 +16,22 @@
     <CCard class="shadow-sm bg-white rounded" >
         <CCardHeader>
             <CRow>
-                <CCol col="12" lg="6" sm="12" class="text-left">
-                    <h1>{{agent.name}}</h1>
+                <CCol col="12" lg="4" sm="12" class="text-left" @mouseover="name_hover = true" @mouseleave="name_hover = false">
+                    <h1>
+                        <span v-if="!name_edit">
+                            {{agent.name}}&nbsp;<a v-if="name_hover" @click="name_edit = !name_edit"><CIcon name="cilPencil" size="sm"/></a>
+                        </span>
+                        <span v-if="name_edit">
+                            <CInput v-model="agent.name" size="lg">
+                            <template #append>
+                                <CButton color="danger" @click="name_edit = !name_edit" size="sm"  class="no-shadow"><CIcon name="cilXCircle"/></CButton>
+                                <CButton color="primary" @click="updateAgentName()" class="no-shadow" size="sm"><CIcon name="cilSave"/></CButton>
+                            </template>
+                            </CInput>
+                        </span>
+                    </h1>                   
                 </CCol>
-                <CCol col="12" lg="6" sm="12" class="text-right">
+                <CCol col="12" lg="8" sm="12" class="text-right">
                     <template #tags='{tag}'>
                         {{tag.name}}
                     </template>
@@ -35,10 +47,10 @@
         <CCardBody>
             <CRow>
                 <CCol col="6">
-                    <b>Name: </b> {{agent.name}}<br>
-                    <b>Enabled: </b> True<br>
-                    <b>Plugin: </b> Elasticsearch<br>
-                    <b>Last Heartbeat: </b>{{agent.last_heartbeat | moment('from', 'now')}}
+                    <label>Active</label><br>
+                    <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="agent.active"/><br>
+                    <label>Last Heartbeat</label><br>
+                    {{agent.last_heartbeat | moment('LLLL')}}
                 </CCol>
             </CRow>
             <CRow>
@@ -58,6 +70,13 @@
                 </CCol>
             </CRow>
         </CCardBody>
+        <CCardFooter>
+            <CRow>
+                <CCol col="12" class='text-right'>
+                    <CButton color='danger' @click='delete_confirm_modal = true'><CIcon name='cil-trash'/></CButton>
+                </CCol>
+            </CRow>
+        </CCardFooter>
     </CCard>
   </CCol>
   </CRow>
@@ -82,7 +101,12 @@ export default {
             toggleCollapse: true,
             alert:false,
             alert_message:"",
-            animate: true
+            animate: true,
+            name_hover: false,
+            name_edit: false,
+            tags_hover: false,
+            tags_edit: false,
+            delete_confirm_modal: false
         }
     },
     created() {
@@ -158,6 +182,16 @@ export default {
             }
             let uuid = this.uuid
             this.$store.dispatch('setAgentGroups', {uuid, groups})
+        },
+        updateAgentName() {
+            let uuid = this.uuid;
+            let data = {
+                name: this.agent.name
+            }
+            this.$store.dispatch('updateAgent', {uuid, data}).then(resp => {
+                this.agent = this.$store.getters.agent
+            })
+            this.name_edit = false
         }
     },
     filters: {

@@ -15,7 +15,7 @@
             <CCardHeader>
               <CRow>
                 <CCol col="10">
-                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length}} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events.length}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
+                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="2" class="text-right">
                   <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>
@@ -272,7 +272,7 @@
       </div>
       <template #footer>
           <CButton @click="deleteEventModal = !deleteEventModal" color="secondary">Dismiss</CButton>
-        <CButton @click="deleteEvent()" color="danger">Delete</CButton>
+        <CButton @click="deleteEvent" color="danger">Delete</CButton>
       </template>
     </CModal>
   </CRow>
@@ -411,6 +411,21 @@ export default {
         this.selected = [uuid]
         this.dismissEventModal = true
       },
+      deleteEvent() {
+        if(this.selected.length == 1) {
+          this.$store.dispatch('deleteEvent', this.selected[0]).then(resp => {
+            this.filtered_events = this.filterEvents()
+          })
+        } 
+        if (this.selected.length > 1) {
+          this.$store.dispatch('deleteEvents', this.selected).then(resp => {
+            this.filtered_events = this.filterEvents()
+            
+          })
+        }
+        this.selected = []
+        this.deleteEventModal = false
+      },
       dismissEvent() {
         
         if(this.selected.length == 1) {
@@ -421,7 +436,7 @@ export default {
           this.$store.dispatch('updateEvent', {uuid: this.selected[0], data}).then(resp => {
             this.filtered_events = this.filterEvents()
           })
-         } else if (this.selected.length > 1) {
+         }else if (this.selected.length > 1) {
           let data = {          
             dismiss_reason_uuid: this.dismissalReason,
             dismiss_comment: this.dismissalComment,
@@ -459,18 +474,26 @@ export default {
         }
       },
       eventCountByStatus(status) {
-        return this.filtered_events.reduce(function(n, event) {
-          if(event) {
-            return n + (event.status.name == status)
-          }          
-        }, 0)
+        if (this.filtered_events) {
+          return this.filtered_events.reduce(function(n, event) {
+            if(event) {
+              return n + (event.status.name == status)
+            }          
+          }, 0)
+        } else {
+          return 0
+        }
       },
       eventCountBySeverity(severity) {
-        return this.filtered_events.reduce(function(n, event) {
-          if(event) {
-            return n + (event.severity == severity)
-          }          
-        }, 0)
+        if (this.filtered_events) {
+          return this.filtered_events.reduce(function(n, event) {
+            if(event) {
+              return n + (event.severity == severity)
+            }          
+          }, 0)
+        } else {
+          return 0
+        }
       },
       selectEvents(event) {
         
