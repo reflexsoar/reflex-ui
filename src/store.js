@@ -284,6 +284,9 @@ const mutations = {
     state.agent = agent
     state.agents = state.agents.map(a => a.uuid == agent.uuid ? agent : a )
   },
+  remove_agent(state, uuid) {
+    state.agents = state.agents.filter(a => a.uuid !== uuid)
+  },
   save_settings(state, settings) {
     state.settings = settings
   },
@@ -488,6 +491,7 @@ const getters = {
   alert: state => state.alert,
   agents: state => { return state.agents },
   agent: state => { return state.agent },
+  agent_groups: state => { return state.agent_groups },
   case_templates: state => state.case_templates,
   case_template_list: state => { return state.case_template_list },
   date_types: state => state.data_types,
@@ -730,6 +734,19 @@ const actions = {
       Axios({url: `${BASE_URL}/agent_group/${uuid}`, method: 'GET'})
       .then(resp => {
         commit('save_agent_group', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteAgent({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_agent', uuid)
+        commit('show_alert', {message: `Successfully deleted agent.`, 'type': 'success'})
         resolve(resp)
       })
       .catch(err => {

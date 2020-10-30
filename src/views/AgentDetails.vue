@@ -31,11 +31,14 @@
                         </span>
                     </h1>                   
                 </CCol>
-                <CCol col="12" lg="8" sm="12" class="text-right">
+                <CCol col="12" lg="7" sm="12" class="text-right">
                     <template #tags='{tag}'>
                         {{tag.name}}
                     </template>
                     <li style="display: inline; margin-right: 2px;" v-for="tag in agent.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
+                </CCol>
+                <CCol col="12" lg="1" sm="12" class="text-right">
+                    <h1><CSwitch color="success" size="lg" label-on="On" label-off="Off" :checked.sync="agent.active" v-c-tooltip="'Agent Status'"/></h1>
                 </CCol>
             </CRow>
             <CRow>
@@ -46,25 +49,17 @@
         </CCardHeader>
         <CCardBody>
             <CRow>
-                <CCol col="6">
-                    <label>Active</label><br>
-                    <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="agent.active"/><br>
-                    <label>Last Heartbeat</label><br>
-                    {{agent.last_heartbeat | moment('LLLL')}}
-                </CCol>
-            </CRow>
-            <CRow>
-                <CCol><hr>
+                <CCol>
                   <h3>Inputs</h3>
                   Inputs selected here will be polled by the agent at the period defined in the input configuration.<br><br>
                   <multiselect v-model="selected" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list" :multiple="true" @input="updateInputs()">
                   </multiselect>
                 </div>
                 </CCol>
-                <CCol><hr>
+                <CCol>
                   <h3>Groups</h3>
                   Groups selected here can be targeted by plugins to run plugins on select agents.<br><br>
-                  <multiselect v-model="selected_groups" placeholder="Select the groups this agent belongs to" track-by="uuid" label="name" :options="group_list" :multiple="true" @input="updateGroups()">
+                  <multiselect v-model="selected_groups" placeholder="Select the groups this agent belongs to" track-by="name " label="name" :options="group_list" :multiple="true" @input="updateGroups()">
                   </multiselect>
                 </div>
                 </CCol>
@@ -72,12 +67,32 @@
         </CCardBody>
         <CCardFooter>
             <CRow>
-                <CCol col="12" class='text-right'>
-                    <CButton color='danger' @click='delete_confirm_modal = true'><CIcon name='cil-trash'/></CButton>
+                <CCol col="6">
+                    <label>Last Heartbeat: </label>&nbsp;{{agent.last_heartbeat | moment('LLLL')}}
+                </CCol>
+                <CCol col="6" class='text-right'>
+                    <CButton color='danger' @click="delete_modal = true"><CIcon name='cil-trash'/></CButton>
                 </CCol>
             </CRow>
         </CCardFooter>
     </CCard>
+    <CModal title="Delete Agent" :closeOnBackdrop="false" color="danger" :centered="true" :show.sync="delete_modal">
+      <CForm id="deleteForm" @submit.prevent="deleteAgent()">
+        Are you sure you want to delete the agent <b>{{agent.name}}</b>?
+        <CForm id="delete-agent-confirm">
+          <CInput
+            v-model="delete_confirm"
+            label="Agent Name"
+            v-bind:description="delete_error"
+            required
+          ></CInput>
+        </CForm>
+      </CForm>
+      <template #footer>
+        <CButton @click="dismiss()" color="secondary">No</CButton>
+        <CButton type="submit" form="deleteForm" color="danger">Yes</CButton>
+      </template>
+    </CModal>
   </CCol>
   </CRow>
 </template>
@@ -106,7 +121,9 @@ export default {
             name_edit: false,
             tags_hover: false,
             tags_edit: false,
-            delete_confirm_modal: false
+            delete_modal: false,
+            delete_confirm: "",
+            delete_error: ""
         }
     },
     created() {
@@ -116,9 +133,7 @@ export default {
             }
         })
         this.$store.dispatch('getAgentGroups').then(resp => {
-            for(let i in resp.data){ 
-                this.group_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
-            }
+            this.group_list = this.$store.getters.agent_groups
         })
         this.$store.dispatch('getAgent', this.$route.params.uuid).then(resp => {
             this.agent = resp.data
@@ -192,6 +207,20 @@ export default {
                 this.agent = this.$store.getters.agent
             })
             this.name_edit = false
+        },
+        deleteAgent() {
+            if(this.delete_confirm == this.agent.name) {
+                this.$store.dispatch('deleteAgent', this.uuid).then(resp => {
+                    this.$router.push({path: '/agents'})
+                })                
+            } else {
+                this.delete_error = "Error: Entered name does not match agent name."
+            }
+        },
+        dismiss() {
+            this.delete_error = ""
+            this.delete_confirm = ""
+            this.delete_modal = false
         }
     },
     filters: {
