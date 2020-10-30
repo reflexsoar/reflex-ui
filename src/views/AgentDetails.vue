@@ -16,7 +16,7 @@
     <CCard class="shadow-sm bg-white rounded" >
         <CCardHeader>
             <CRow>
-                <CCol col="12" lg="4" sm="12" class="text-left" @mouseover="name_hover = true" @mouseleave="name_hover = false">
+                <CCol col="12" lg="11" sm="12" class="text-left" @mouseover="name_hover = true" @mouseleave="name_hover = false">
                     <h1>
                         <span v-if="!name_edit">
                             {{agent.name}}&nbsp;<a v-if="name_hover" @click="name_edit = !name_edit"><CIcon name="cilPencil" size="sm"/></a>
@@ -31,14 +31,8 @@
                         </span>
                     </h1>                   
                 </CCol>
-                <CCol col="12" lg="7" sm="12" class="text-right">
-                    <template #tags='{tag}'>
-                        {{tag.name}}
-                    </template>
-                    <li style="display: inline; margin-right: 2px;" v-for="tag in agent.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
-                </CCol>
                 <CCol col="12" lg="1" sm="12" class="text-right">
-                    <h1><CSwitch color="success" size="lg" label-on="On" label-off="Off" :checked.sync="agent.active" v-c-tooltip="'Agent Status'"/></h1>
+                    <h1><CSwitch color="success" size="lg" label-on="On" label-off="Off" :checked.sync="agent.active" v-c-tooltip="'Agent Status'" v-on:change.native="toggleAgentActive()"/></h1>
                 </CCol>
             </CRow>
             <CRow>
@@ -119,11 +113,10 @@ export default {
             animate: true,
             name_hover: false,
             name_edit: false,
-            tags_hover: false,
-            tags_edit: false,
             delete_modal: false,
             delete_confirm: "",
-            delete_error: ""
+            delete_error: "",
+            current_tags: []
         }
     },
     created() {
@@ -140,10 +133,15 @@ export default {
             this.selectedInputs()
             this.selectedGroups()
             this.loading = false
-        })
-        
+        }) 
     },
     methods: {
+        
+        toggleAgentActive() {
+            this.$store.dispatch('updateAgent', {uuid: this.uuid, data: {'active':this.agent.active}}).then(resp => {
+                this.agent = this.$store.getters.agent
+            })
+        },
         expandAll() {
             for(const c in this.collapse) {
                 if(!this.collapse[c]) {
