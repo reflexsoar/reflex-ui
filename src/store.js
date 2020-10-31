@@ -317,6 +317,13 @@ const mutations = {
   save_credential(state, credential) {
     state.credential = credential
   },
+  update_credential(state, cred) {
+    state.credential = cred
+    state.credentials = state.credentials.map(c => c.uuid == cred.uuid ? cred : c)
+  },
+  remove_credential(state, uuid) {
+    state.credentials = state.credentials.filter(c => c.uuid != uuid)
+  },
   save_playbook(state, playbook) {
     state.playbook = playbook
   },
@@ -506,6 +513,8 @@ const getters = {
   users: state => { return state.users },
   input: state => { return state.input },
   observables: state => { return state.observables },
+  credentials: state => { return state.credentials },
+  credential: state => { return state.credential },
   case_files: state => { return state.case_files },
   related_cases: state => { return state.related_cases },
   events: state => { return state.events },
@@ -937,11 +946,37 @@ const actions = {
       })
     })
   },
+  deleteCredential({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/credential/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_credential', uuid)
+        commit('show_alert', {'message':'Successfully deleted credential', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateCredential({commit}, {uuid, credential}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/credential/${uuid}`, data: credential, method: 'PUT'})
+      .then(resp => {
+        commit('update_credential', resp.data)
+        commit('show_alert', {'message':'Successfully updated credential', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   createCredential({commit}, credential) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/credential/encrypt`, data: credential, method: 'POST'})
       .then(resp => {
-        commit('add_credential', credential)
+        commit('add_credential', resp.data)
         resolve(resp)
       })
       .catch(err => {

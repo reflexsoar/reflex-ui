@@ -26,16 +26,19 @@
                 <CCol col="12" lg="6" sm="12">
                     {{input.description}}
                 </CCol>
+                <CCol col="12" lg="6" sm="12" class='text-right'>
+                    <CButton color='danger' @click="delete_modal = true"><CIcon name='cil-trash'/></CButton>
+                </CCol>
             </CRow>
         </CCardHeader>
         <CCardBody>
             <CRow>
                 <CCol col="6">
-                    <b>Name: </b> {{input.name}}<br>
-                    <b>Enabled: </b> True
+                    <b>Enabled: </b> True<br>
+                    <b>Plugin: </b> Elasticsearch<br>
                 </CCol>
                 <CCol col="6">
-                    <b>Plugin: </b> Elasticsearch<br>
+                    
                     <b>Date Created: </b>{{input.created_at | moment('LLLL')}}<br>
                     <b>Last Updated: </b>{{input.modified_at | moment('from', 'now')}}
                 </CCol>
@@ -95,7 +98,25 @@
                 <CButton color="primary" @click="updateFieldMapping()"  size="sm" v-bind:disabled="json_error"><CIcon name="cilSave"/></CButton>
             </CCardBody>
         </CCard>
-        </CCol></CRow>
+        </CCol>
+        <CModal title="Delete Input" :closeOnBackdrop="false" color="danger" :centered="true" :show.sync="delete_modal">
+      <CForm id="deleteForm" @submit.prevent="deleteInput()">
+        Are you sure you want to delete the input <b>{{input.name}}</b>?  Agents using this input will stop working.
+        <CForm id="delete-input-confirm">
+          <CInput
+            v-model="delete_confirm"
+            label="Input Name"
+            v-bind:description="delete_error"
+            required
+          ></CInput>
+        </CForm>
+      </CForm>
+      <template #footer>
+        <CButton @click="dismiss()" color="secondary">No</CButton>
+        <CButton type="submit" form="deleteForm" color="danger">Yes</CButton>
+      </template>
+    </CModal>
+    </CRow>
   </CCol>
   </CRow>
 </template>
@@ -116,7 +137,10 @@ export default {
             edit_config: false,
             config_hover: false,
             json_error: false,
-            config_json_error: false
+            config_json_error: false,
+            delete_modal: false,
+            delete_confirm: "",
+            delete_error: ""
         }
     },
     computed: mapState(['input']),
@@ -126,6 +150,14 @@ export default {
         })        
     },
     methods: {
+        dismiss() {
+            this.delete_modal = false
+            this.delete_confirm = ""
+            this.delete_error = ""
+        },
+        deleteInput() {
+            alert("DELETE")
+        },
         jsonToString(data) {
             return JSON.stringify(data, undefined, 4)
         },
