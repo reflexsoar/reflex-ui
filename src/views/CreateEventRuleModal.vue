@@ -7,10 +7,10 @@
                 <div name="create-event-rule-step-1" v-if="step == 1">
                 <h4>Rule Details</h4>
                 <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
-                <p>This rule will apply <b>immediately</b> to <b>{{events.length}}</b> Events and any future events matching the below Rule Signature.</p>
+                <p>This rule will apply <b>immediately</b> to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
 
                 <p>
-                    <b>Event Signature: </b>{{event_signature}}
+                    <b>Base Event Signature: </b>{{event_signature}}
                 </p>
                 <CInput label="Rule Name" v-model="name" required></CInput>
                 <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
@@ -170,7 +170,7 @@ export default {
                 merge_into_case: this.merge_into_case,
                 target_case_uuid: this.target_case.uuid,
                 expire: this.expire,
-                expire_days: this.expire_days,
+                expire_days: parseInt(this.expire_days),
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
                 observables: this.observables
