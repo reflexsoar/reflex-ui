@@ -173,7 +173,7 @@
               <template #actions="{item}">
                 <td align="right">
                   <CButtonGroup>
-                    <CButton v-if="(item.new_related_events && item.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && item.status.name == 'New')" size="sm" color="info" @click="createEventRule(item.signature)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
+                    <CButton v-if="(item.new_related_events && item.new_related_events > 0 && !filteredBySignature()) || (filteredBySignature() && item.status.name == 'New')" size="sm" color="info" @click="createEventRule(item.signature)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(item.uuid)" v-if="!item.case_uuid" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton :to="`/alerts/${item.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="item.status.closed" @click="reopenEvent(item.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
@@ -201,12 +201,12 @@
                   <h4>
                     <input type="checkbox" v-if="!(event.status.closed || event.case_uuid)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':event.title})">{{event.title}}</a></h4>
-                  {{event.description | truncate_description}}<br>
+                  {{event.description | truncate_description}}<br>{{event.uuid}}
                   <CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in event.observables" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton v-if="(event.new_related_events && event.new_related_events.length > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
+                    <CButton v-if="(event.new_related_events && event.new_related_events > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(event.uuid)" v-if="!event.case_uuid" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton :to="`/alerts/${event.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
@@ -221,10 +221,11 @@
                 <CCol col="9">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events.length > 0"> | {{event.new_related_events.length}} new</span></span></CButton>
+                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events > 0"> | {{event.new_related_events}} new</span></span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span></span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}</span>
+                    <span class="separator">|</span>Modified {{event.modified_at | moment('from','now') }}</span>
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
                   </small>
                 </CCol>
@@ -392,6 +393,7 @@ export default {
         sort_by: 'date',
         event_signature: "",
         rule_observables: [],
+        related_events: [],
         columns: 1,
         card_page_num: 1,
         card_per_page: this.settings ? this.settings.events_per_page : 10,
@@ -499,24 +501,6 @@ export default {
           }, 0)
         } else {
           return 0
-        }
-      },
-      selectEvents(event) {
-        
-        if(this.selected.some((item) => { return item === event.target.value })) {
-
-          if(!this.filteredBySignature()) {
-            this.selected = this.selected.filter(x => !this.selectedRelated(event.target.value).includes(x))
-          } else {
-            this.selected = this.selected.filter(item => item !== event.target.value)
-          }
-
-        } else {
-          if(!this.filteredBySignature()) {
-            this.selected = [...this.selected, ...this.selectedRelated(event.target.value)]
-          } else {
-            this.selected.push(event.target.value)
-          }          
         }
       },
       createEventRule(signature) {
@@ -662,26 +646,48 @@ export default {
         this.createCaseModal = true
       },
       selectAll() {
-        //this.selected = [];
         if(!this.select_all) {
           for (let i in this.filtered_events) {
             let event = this.filtered_events[i]
-            if(!this.filteredBySignature() && event.related_events_count > 1) {
-              if(event.signature) {
-                this.selected = [...this.selected, ...this.selectedRelated(event.uuid)]
-              } else if (event.signature == null) {
-                this.selected = [...this.selected, ...this.selectedRelated(event.uuid)]
-              }
+            if(event.new_related_events > 1) {
+              console.log("SA ALL: "+event.uuid)
+              this.$store.dispatch('getRelatedEvents', event.uuid).then(resp => {
+                this.selected = [...this.selected, ...resp.data.events]
+              })
             } else {
-              if(!event.case_uuid) {
-                if(!this.selected.includes(event.uuid)) {
-                  this.selected.push(event.uuid)
-                }
+              if(!this.selected.includes(event.uuid)  && event.status.name == 'New') {
+                console.log("SA ONE: "+event.uuid)
+                this.selected.push(event.uuid)
+              }
+            }            
+          }
+        }
+        console.log(this.selected)
+        console.log(this.filtered_events)
+      },
+      selectEvents(event) {
+        let e = this.filtered_events.find(x => x.uuid == event.target.value)
+        if(e) {
+          if(this.selected.some((item) => { return item === e.uuid})) {
+            if(e.new_related_events > 1) {
+              this.$store.dispatch('getRelatedEvents', e.uuid).then(resp => {
+                this.selected = this.selected.filter(item => !resp.data.events.includes(item))
+              })
+            } else {
+              this.selected = this.selected.filter(item => item != e.uuid)
+            }            
+          } else {       
+            if(e.new_related_events > 1) {
+              console.log("CARD ALL: "+e.uuid)
+              this.$store.dispatch('getRelatedEvents', e.uuid).then(resp => {
+                this.selected = [...this.selected, ...resp.data.events]
+              })
+            } else {
+              if(!this.selected.includes(event.uuid) && e.status.name == 'New') {
+                console.log("CARD ONE: "+e.uuid)
+                this.selected.push(e.uuid)
               }
             }
-          }
-          if(!this.filteredBySignature()) {
-            this.select_all = true
           }
         }
       },

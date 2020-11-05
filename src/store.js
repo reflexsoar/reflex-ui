@@ -48,6 +48,7 @@ const state = {
   pairing_token: "",
   users: [],
   user: {},
+  related_events: [],
   user_groups: [],
   user_group: {},
   roles: [],
@@ -412,6 +413,9 @@ const mutations = {
       state.events = state.events.filter(e => e.uuid != event)
     }
   },
+  save_related_events(state, events) {
+    state.related_events = events
+  },
   add_case_task(state, task) {
     state.case_tasks.push(task)
     state.status = 'success'
@@ -525,6 +529,7 @@ const getters = {
   agent_group : state => { return state.agent_group },
   event: state => { return state.event },
   events: state =>  { return state.events },
+  related_events: state => {return state.related_events },
   data_types_list: function() {
     return state.data_types.map(function(data_type) {
       var newDataType = {};
@@ -1020,6 +1025,19 @@ const actions = {
         resolve(resp)
       })
       .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getRelatedEvents({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}/new_related_events`, method:'GET'})
+      .then(resp => {
+        commit('save_related_events', resp.data.events)
+        resolve(resp)
+      })
+      .catch(err => {
+        console.log(err)
         reject(err)
       })
     })
