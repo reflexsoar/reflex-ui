@@ -131,9 +131,9 @@
               <template #actions='{item}'>
                 <td>
                   <CDropdown toggler-text="Actions" color="secondary" size="sm">
-                    <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Close</CDropdownItem>
-                    <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Execute Playbook</CDropdownItem>
-                    <CDropdownDivider />
+                    <CDropdownItem v-if="!item.closed" @click="toggleCloseCase(item.uuid)">Close</CDropdownItem>
+                    <CDropdownItem v-if="!item.closed" @click="runPlaybookModal = !runPlaybookModal">Execute Playbook</CDropdownItem>
+                    <CDropdownDivider v-if="!item.closed" />
                     <CDropdownItem @click="showDeleteCaseModal(item.uuid)">Delete</CDropdownItem>
                   </CDropdown>
                 </td>
@@ -141,6 +141,20 @@
               </CDataTable>
     </CCol>
     <CreateCaseModal :show.sync='newCaseModal'></CreateCaseModal>
+    <CModal title="Close Case" :centered="true" size="lg" :show="close_case_modal">
+      <CAlert :show.sync="error" color="danger" closeButton>
+        {{error_message}}
+      </CAlert>
+      <CForm id="closeCaseForm" @submit.prevent="closeCase" >
+          <p>You are about to close this case, select a reason for doing so.  Providing additional context where necessary is recommended.  Note, all open Events attached to this case will also be closed.</p>
+          <CSelect :options="close_reasons" label="Reason" placeholder="Select a reason for closing this case" :value.sync="closure_reason_uuid" required></CSelect>
+          <CTextarea :value="close_comment" @change="close_comment = $event" v-bind:required="settings.require_case_close_comment" v-bind:disabled="closure_reason_uuid == ''" label="Additional information" rows="5" placeholder="Enter additional information related to the closure reason."></CTextarea>
+      </CForm>
+      <template #footer>
+        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton type="submit" form="closeCaseForm" color="primary">Close</CButton>
+      </template>
+    </CModal>
     <CModal title="Delete Case" color="danger" :centered="true" size="lg" :show.sync="deleteCaseModal">
         <div>
             <p>Deleting a case is a permanent action, all work on the event will be removed and any associated events will be set to <b>New</b> status, are you sure you want to continue?</p>
@@ -184,8 +198,10 @@ export default {
     dark: Boolean,
     alert: false
     },
+    computed: mapState(['settings']),
     created: function () {
         this.filterCases()
+        this.loadClosureReasons()
         this.refresh = setInterval(function() {
           this.filterCases()
         }.bind(this), 60000)
@@ -204,10 +220,58 @@ export default {
         quick_filters: false,
         caseFilters: [{'filter_type':'status','dataType':'status','value':'New'}],
         filtered_cases: [],
-        page_data: {}
+        page_data: {},
+        close_reasons: [],
+        case_closed: false,
+        status_uuid: "",
+        target_case_uuid: "",
+        close_comment: "",
+        error: false,
+        error_message: "",
+        closure_reason_uuid: "",
+        close_case_modal: false
       }
     },
     methods: {
+      dismiss() {
+        this.closure_reason_uuid = undefined
+        this.error = false
+        this.error_message = ""
+        this.status_uuid = undefined
+        this.target_case = ""
+        this.close_comment = ""
+        this.close_case_modal = false
+      },
+      closeCase(){
+          // Leave the closure comment
+          let data = {
+              message: this.close_comment,
+              case_uuid: this.target_case,
+              is_closure_comment: true,
+              closure_reason_uuid: this.closure_reason_uuid
+          }
+          this.$store.dispatch('createCaseComment', data)
+
+          // Call the update case API endpoint
+          let status = {"status_uuid": this.status_uuid, "close_reason_uuid": this.closure_reason_uuid}
+          let uuid = this.target_case
+          this.$store.dispatch('updateCase', {uuid, data: status}).then(resp => {
+              this.filterCases()
+          })
+          this.dismiss()
+      },
+      toggleCloseCase(uuid) {
+        this.target_case = uuid
+        this.loadClosureReasons()
+        this.loadCaseStatuses()
+        this.close_case_modal = !this.close_case_modal        
+      },
+      loadClosureReasons() {
+          // Call the closure reasons API endpoint
+          this.$store.dispatch('getCloseReasons').then(resp => {
+              this.close_reasons = resp.data.map((reason) => { return {'label': reason.title, 'value': reason.uuid }})
+          })            
+      },
       addSuccess: function() {
         if (this.$store.getters.addSuccess == 'success') {
           return true
@@ -218,6 +282,11 @@ export default {
       showDeleteCaseModal(uuid) {
         this.target_case = uuid
         this.deleteCaseModal = !this.deleteCaseModal
+      },
+      loadCaseStatuses() {
+        this.$store.dispatch('getCaseStatus').then(resp => {
+          this.status_uuid = resp.data.find(s => s.name === 'Closed').uuid
+        })
       },
       deleteCase() {
           let uuid = this.target_case
