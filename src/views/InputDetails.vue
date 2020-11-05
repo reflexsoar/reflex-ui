@@ -156,7 +156,10 @@ export default {
             this.delete_error = ""
         },
         deleteInput() {
-            alert("DELETE")
+            let uuid = this.uuid
+            this.$store.dispatch('deleteInput', uuid).then(resp => {
+                this.$router.push({path:'/inputs'})    
+            })
         },
         jsonToString(data) {
             return JSON.stringify(data, undefined, 4)

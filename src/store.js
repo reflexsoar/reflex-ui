@@ -345,6 +345,9 @@ const mutations = {
   save_input(state, input) {
     state.input = input
   },
+  remove_input(state, uuid) {
+    state.inputs = state.inputs.filter(a => a.uuid !== uuid)
+  },
   update_input(state, input) {
     state.input = input
     state.inputs = state.inputs.map(i => i.uuid == input.uuid ? input : i)
@@ -816,6 +819,18 @@ const actions = {
       Axios({url: `${BASE_URL}/agent_group`, data: agent_group, method: 'POST'})
       .then(resp => {
         commit('add_agent_group', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteInput({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/input/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_input', uuid)
         resolve(resp)
       })
       .catch(err => {
