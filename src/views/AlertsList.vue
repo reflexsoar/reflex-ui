@@ -192,7 +192,7 @@
         </CCard>
         </CCol>
       </CRow>
-      <CRow v-else style="overflow-y:scroll; max-height:650px">
+      <CRow v-else>
         <CCol :col="12/columns" v-for="event in filtered_events" :key="event.uuid">
           <CCard :accent-color="getSeverityColor(event.severity)">
             <CCardBody @mouseenter="pauseRefresh = true" @mouseleave="pauseRefresh = false">
@@ -221,7 +221,7 @@
                 <CCol col="9">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events.length > 0"> | {{event.new_related_events.length}} open</span></span></CButton>
+                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events.length > 0"> | {{event.new_related_events.length}} new</span></span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span></span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}</span>
@@ -279,6 +279,12 @@
 </template>
 
 <style scoped>
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
 
 .nav-item:not(:last-child) {
   border-right:1px solid #cfcfcf !important;
