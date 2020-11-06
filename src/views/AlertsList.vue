@@ -221,11 +221,11 @@
                 <CCol col="9">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events > 0"> | {{event.new_related_events}} new</span></span></CButton>
+                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events > 0"> | {{event.new_related_events}} new</span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
-                    <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span></span>
-                    <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}</span>
-                    <span class="separator">|</span>Modified {{event.modified_at | moment('from','now') }}</span>
+                    <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
+                    <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
+                    <span class="separator">|</span>Modified {{event.modified_at | moment('from','now') }}
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
                   </small>
                 </CCol>
@@ -545,7 +545,7 @@ export default {
         let signature_filter = ""
         let title_filter = []
         let grouped = !this.filteredBySignature()
-        let search = ""
+        let search = []
         for(let f in this.observableFilters) {
           let filter = this.observableFilters[f]
 
@@ -566,7 +566,7 @@ export default {
           }
 
           if(filter.filter_type == 'search') {
-            search = filter.value
+            search.push(filter.value)
           }
 
           if(filter.filter_type == 'severity') {
