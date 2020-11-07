@@ -7,7 +7,7 @@
                 <div name="create-event-rule-step-1" v-if="step == 1">
                 <h4>Rule Details</h4>
                 <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
-                <p>This rule will apply <b>immediately</b> to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
+                <p>This rule will apply to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
 
                 <p>
                     <b>Base Event Signature: </b>{{event_signature}}
@@ -186,7 +186,7 @@ export default {
             this.step -= 1;
         },
         loadData() {
-            this.$store.dispatch('getCases', 'uuid,title,id,event_count,owner,severity').then(resp => {
+            this.$store.dispatch('getCases', {}).then(resp => {
                 this.cases = this.$store.getters.cases
             })
         },

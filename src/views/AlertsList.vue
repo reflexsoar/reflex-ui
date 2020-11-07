@@ -173,7 +173,7 @@
               <template #actions="{item}">
                 <td align="right">
                   <CButtonGroup>
-                    <CButton v-if="(item.new_related_events && item.new_related_events > 0 && !filteredBySignature()) || (filteredBySignature() && item.status.name == 'New')" size="sm" color="info" @click="createEventRule(item.signature)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
+                    <CButton v-if="(item.related_events_count && item.related_events_count > 0 && !filteredBySignature()) || (filteredBySignature() && item.status.name == 'New')" size="sm" color="info" @click="createEventRule(item.title)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(item.uuid)" v-if="!item.case_uuid" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton :to="`/alerts/${item.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="item.status.closed" @click="reopenEvent(item.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
@@ -206,7 +206,7 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton v-if="(event.new_related_events && event.new_related_events > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
+                    <CButton v-if="(event.related_events_count && event.related_events_count > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.title)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(event.uuid)" v-if="!event.case_uuid" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton :to="`/alerts/${event.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
@@ -221,7 +221,7 @@
                 <CCol col="9">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.new_related_events && event.new_related_events > 0"> | {{event.new_related_events}} new</span></CButton>
+                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.related_events_count && event.related_events_count > 0"> | {{event.related_events_count}} new</span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
@@ -506,26 +506,27 @@ export default {
       createEventRule(signature) {
         this.selected = []
         this.event_signature = signature
-        let source_event = this.filtered_events.filter((event) => event.signature == signature)
-        this.selected = this.selectedRelated(source_event[0].uuid)
-        this.rule_observables = this.filtered_events.filter((event) => 
-            this.selected.includes(event.uuid)
-          ).map(event => event.observables).flat().map( function(obs) { 
-            return {'dataType':obs.dataType.name, 'value': obs.value
-            }
+        let source_event = this.filtered_events.find((event) => event.title == signature)
+        this.$store.dispatch('getRelatedEvents', source_event.uuid).then(resp => {
+            this.selected = [...resp.data.events]
+            this.rule_observables = source_event.observables.flat().map( function(obs) { 
+              return {'dataType':obs.dataType.name, 'value': obs.value
+              }
+            })
+          let unique_observables = Array.from(new Set(this.rule_observables.map(a => a.value)))
+          .map(value => {
+            return this.rule_observables.find(a => a.value === value)
           })
-        let unique_observables = Array.from(new Set(this.rule_observables.map(a => a.value)))
-        .map(value => {
-          return this.rule_observables.find(a => a.value === value)
-        })
-        this.rule_observables = unique_observables
-        this.createEventRuleModal = true
+          this.rule_observables = unique_observables
+          this.createEventRuleModal = true
+        })          
+        
       },
       selectedRelated(uuid) {
         let source_event = this.filtered_events.filter((event) => { 
           return event.uuid == uuid 
         })
-        return source_event[0].new_related_events
+        return source_event[0].related_events_count
       },
       filteredBySignature() {
         if(this.observableFilters.some((filter) => filter.filter_type == 'eventsig')) {
@@ -649,14 +650,12 @@ export default {
         if(!this.select_all) {
           for (let i in this.filtered_events) {
             let event = this.filtered_events[i]
-            if(event.new_related_events > 1) {
-              console.log("SA ALL: "+event.uuid)
+            if(event.related_events_count > 1) {
               this.$store.dispatch('getRelatedEvents', event.uuid).then(resp => {
                 this.selected = [...this.selected, ...resp.data.events]
               })
             } else {
               if(!this.selected.includes(event.uuid)  && event.status.name == 'New') {
-                console.log("SA ONE: "+event.uuid)
                 this.selected.push(event.uuid)
               }
             }            
@@ -669,7 +668,7 @@ export default {
         let e = this.filtered_events.find(x => x.uuid == event.target.value)
         if(e) {
           if(this.selected.some((item) => { return item === e.uuid})) {
-            if(e.new_related_events > 1) {
+            if(e.related_events_count > 1) {
               this.$store.dispatch('getRelatedEvents', e.uuid).then(resp => {
                 this.selected = this.selected.filter(item => !resp.data.events.includes(item))
               })
@@ -677,14 +676,12 @@ export default {
               this.selected = this.selected.filter(item => item != e.uuid)
             }            
           } else {       
-            if(e.new_related_events > 1) {
-              console.log("CARD ALL: "+e.uuid)
+            if(e.related_events_count > 1) {
               this.$store.dispatch('getRelatedEvents', e.uuid).then(resp => {
                 this.selected = [...this.selected, ...resp.data.events]
               })
             } else {
               if(!this.selected.includes(event.uuid) && e.status.name == 'New') {
-                console.log("CARD ONE: "+e.uuid)
                 this.selected.push(e.uuid)
               }
             }
