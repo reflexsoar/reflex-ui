@@ -211,7 +211,7 @@ export default {
         }
     },
     created() {
-        this.loadTags()
+        //this.loadTags()
         this.reset()
     },
     methods: {

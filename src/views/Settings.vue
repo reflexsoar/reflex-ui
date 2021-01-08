@@ -11,7 +11,7 @@
           </CCardHeader>
           <CCardBody class="tabbed">
             <CTabs>
-              <CTab active v-if="current_user.permissions.includes('update_settings')">
+              <CTab active v-if="current_user && current_user.role.permissions['update_settings']">
                 <template slot="title">
                   <CIcon name="cil-globe-alt"/> {{tabs[0]}}
                 </template>
@@ -23,17 +23,16 @@
                 </template>
                 <UsersList/>
               </CTab>
-              <CTab>
+              <!--<CTab>
                 <template slot="title">
                   <CIcon name="cil-people"/> {{tabs[2]}}
                 </template>
                 <GroupList/>
-              </CTab>
+              </CTab>-->
               <CTab>
                 <template slot="title">
                   <CIcon name="cil-people"/> {{tabs[3]}}
                 </template>
-                
               </CTab>
               <CTab>
                 <template slot="title">

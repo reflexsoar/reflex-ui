@@ -190,14 +190,10 @@ export default {
       }
     }
   },
-  computed: {
-    current_user: function () { 
-      return this.$store.getters.current_user
-    }
-  },
+  computed: mapState(['current_user']),
   methods: {
     userHas(permission) {
-      return this.current_user.permissions.includes(permission);
+      return this.current_user.role.permissions[permission];
     },
     createUserModal() {
       this.modal_title = "Create User"
@@ -256,7 +252,6 @@ export default {
       }
       if(this.user.password != '' && this.user.confirm_password == this.user.password) {
         user['password'] = this.user.password
-        console.log(user)
       }     
 
       let uuid = this.user.uuid

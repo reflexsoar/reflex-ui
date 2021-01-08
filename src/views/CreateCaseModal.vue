@@ -133,7 +133,7 @@ export default {
         },
         modalStatus: function(){
             if(this.modalStatus) {
-                this.loadTags()
+                //this.loadTags()
                 this.loadData()
                 this.loadUsers()
             }

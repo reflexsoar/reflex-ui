@@ -7,7 +7,7 @@
     </CCol>
     <CCol col v-else>
       <div style="padding: 10px;">
-        <CButton color="primary" @click="generateToken()">New Agent</CButton>
+        <CButton color="primary" @click="generateToken()">New Role</CButton>
       </div>
       <CDataTable
         :hover="hover"

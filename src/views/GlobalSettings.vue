@@ -4,7 +4,7 @@
       <CRow>
         <CCol col="6">
           <h4>Basic Settings</h4>
-          <CInput v-model="settings.base_url" label="Base URL" v-bind:disabled="!current_user.permissions['set_baseurl']"/>
+          <CInput v-model="settings.base_url" label="Base URL" v-bind:disabled="!current_user.role.permissions['set_baseurl']"/>
           <CInput v-model="settings.logon_password_attempts" label="Max Logon Attempts"/>
           <h4>Playbook Settings</h4>
           <CRow>
@@ -122,7 +122,7 @@ export default {
       })
     },
     loadData() {
-      this.$store.dispatch('getSettings')
+      //this.$store.dispatch('getSettings')
       this.$store.dispatch('getCredentialList')
     },
     dismiss(){

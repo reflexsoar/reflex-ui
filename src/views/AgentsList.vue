@@ -9,7 +9,7 @@
         </div>
     </CCol>
     <CCol col v-else>
-          <div style="padding: 10px;"><CButton color="primary" @click="generateToken()" v-bind:disabled="!current_user.permissions.includes('pair_agent')">New Agent</CButton></div>
+          <div style="padding: 10px;"><CButton color="primary" @click="generateToken()" >New Agent</CButton></div>
               <CDataTable
                   :hover="hover"
                   :striped="striped"

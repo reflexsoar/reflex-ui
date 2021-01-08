@@ -70,7 +70,7 @@ router.beforeEach((to, from, next) => {
     store.dispatch('getMe').then(() => {
       if(to.matched.some(record => {
         let current_user = store.getters.current_user
-        if(record.meta.requiresPermission && !current_user.permissions.includes(record.meta.requiresPermission)) {
+        if(record.meta.requiresPermission && !current_user.role.permissions[record.meta.requiresPermission]) {
           next('/401')
         } else {
           next()

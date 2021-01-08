@@ -501,7 +501,7 @@ const getters = {
   authStatus: state => state.status,
   addStatus: state => state.status,
   status: state => state.status,
-  current_user: state => state.current_user,
+  current_user: state => { return state.current_user },
   alert: state => state.alert,
   agents: state => { return state.agents },
   agent: state => { return state.agent },
@@ -538,13 +538,13 @@ const getters = {
       return newDataType;
     })
   },
-  user_has: function(permission) {
-    return state => state.current_user.permissions.includes(permission)
+  user_has: state => function(permission) {
+    return Object.keys(state.current_user.permissions).includes(permission)
   },
   tags: state => state.tags
 }
 
-const BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v1.0'
+const BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v2.0'
 
 const actions = {
   login({commit}, user) {
