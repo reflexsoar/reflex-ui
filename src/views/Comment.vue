@@ -29,7 +29,7 @@
                 current_user.uuid == comment.created_by.uuid &&
                 settings.allow_comment_deletion &&
                 !comment.is_closure_comment &&
-                current_user.permissions.includes('delete_case_comment')
+                current_user.role.permissions['delete_case_comment']
               "
               @click="deleteAction(comment.uuid)"
               >Delete</CButton

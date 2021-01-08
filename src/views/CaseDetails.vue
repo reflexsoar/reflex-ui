@@ -84,7 +84,7 @@
                   <CCardBody>
                     <CRow>
                         <CCol col="3" style="border-right: 1px dotted #cfcfcf;">
-                            <!--<CSelect label="Status" v-bind:description="case_data.close_reason.title" :options="case_statuses" :value.sync="case_data.status.uuid" @change="updateStatus()"></CSelect>-->
+                            <CSelect label="Status" :options="case_statuses" :value.sync="case_data.status.uuid" @change="updateStatus()"></CSelect>
                             <label>Assignee</label>
                             <div role="group" class="form-group">
                                 <multiselect 
@@ -109,14 +109,14 @@
                             <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description"><CIcon name="cilPencil" size="sm"/></a></small></h5>
                             <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
                             <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event"></CTextarea><CButton color="danger" @click="edit_description = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;<CButton color="primary" @click="saveDescription()" size="sm"><CIcon name="cilSave"/></CButton></span>
-                            <!--<span v-if="closureComments().length > 0 && case_data.status.closed">
+                            <span v-if="closureComments().length > 0 && case_data.status.closed">
                                 <br><h5>Closure Details</h5><hr style="border-top: 1px dotted #cfcfcf;">
                                 <span v-for="comment in closureComments()" :key="comment.uuid">
                                     <b>Closed as: {{comment.closure_reason.title}} by {{comment.created_by.username}}</b><br>
                                     <small>{{comment.created_at | moment('LLLL')}}</small>
                                     <br>{{comment.message}}<br><br>
                                 </span>
-                            </span>-->
+                            </span>
                         </CCol>
                     </CRow>
                     <CRow style="border-top: 1px dotted #cfcfcf; padding-top:10px; margin-top: 10px;">
@@ -617,7 +617,10 @@ export default {
             })
         },
         closureComments() {
-            return this.comments.filter(comment => comment.is_closure_comment == true && comment.message != '')
+            if (this.comments != undefined) {
+                return this.comments.filter(comment => comment.is_closure_comment == true && comment.message != '')
+            }
+            
         },
         loadRelatedCases() {
             let uuid = this.uuid
