@@ -530,6 +530,7 @@ const getters = {
   event: state => { return state.event },
   events: state =>  { return state.events },
   related_events: state => {return state.related_events },
+  related_cases: state => { return state.related_cases },
   data_types_list: function() {
     return state.data_types.map(function(data_type) {
       var newDataType = {};

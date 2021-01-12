@@ -19,7 +19,7 @@
                     <h3 style="margin-bottom:0px;">
                     <span v-if="!edit_title">
                     <CButton :color="getSeverityColor(case_data.severity)">{{getSeverityText(case_data.severity)}}</CButton>
-                    &nbsp;#{{case_data.id}} - {{case_data.title | truncate}}
+                    &nbsp;{{case_data.title | truncate}}
                         <small>
                             <a v-if="edit_title_hint && case_data.status && !case_data.status.closed" @click="edit_title = !edit_title"><CIcon name="cilPencil" size="sm"/></a>
                         </small>  
@@ -523,7 +523,8 @@ export default {
         },
         linkCaseModal: function() {
             if(!this.linkCaseModal) {
-                this.loadRelatedCases()
+                this.related_cases = this.$store.getters.related_cases
+                //this.loadRelatedCases()
             }
         },
         caseTemplateModal: function() {
@@ -669,7 +670,6 @@ export default {
         loadData() {
             this.$store.dispatch('getCase', this.$route.params.uuid).then(resp => {
                 this.case_data = this.$store.getters.case_data
-                console.log(this.case_data)
                 this.case_data.status.uuid = this.case_data.status.uuid
                 if(this.case_data.owner && this.case_data.owner.username != null) {
                     this.assignee = this.case_data.owner
