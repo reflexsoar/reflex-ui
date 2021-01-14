@@ -823,11 +823,11 @@ export default {
             let uuid = this.uuid
             let assignee = {uuid: null}
             if(a.username == 'Unassigned') {
-                assignee.uuid = ''
+                assignee = null
             } else {
                 assignee.uuid = a.uuid
             }
-            this.$store.dispatch('updateCase', {uuid, data: assignee}).then(resp => {
+            this.$store.dispatch('updateCase', {uuid, data: {'owner': assignee}}).then(resp => {
                 this.case_data = this.$store.getters.case_data
             })
             this.edit_description = false

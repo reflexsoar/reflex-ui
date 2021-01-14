@@ -1734,6 +1734,7 @@ const actions = {
     })
   },
   updateCase({commit}, {uuid, data}) {
+    console.log(data)
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
