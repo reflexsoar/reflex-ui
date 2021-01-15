@@ -32,7 +32,7 @@
     "@coreui/utils": "^1.2.4",
     "@coreui/vue": "^3.0.6",
     "@coreui/vue-chartjs": "^1.0.5",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "jwt-decode": "^3.0.0-beta.2",
     "moment-timezone": "^0.5.28",
     "v-markdown-editor": "^1.2.6",
