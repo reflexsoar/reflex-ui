@@ -21,14 +21,14 @@
                         toggler-text="Actions" 
                         color="secondary"
                         >
-                        <CDropdownItem v-if="!event.case_uuid" @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
+                        <CDropdownItem v-if="!event.case" @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
-                        <CDropdownItem v-if="!event.case_uuid" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
-                        <CDropdownItem v-if="!event.case_uuid" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
+                        <CDropdownItem v-if="!event.case" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
+                        <CDropdownItem v-if="!event.case" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
                         <CDropdownDivider/>
                         <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
                         </CDropdown>
-                        <CButton v-if="event.case_uuid" :to="`/cases/${event.case_uuid}`" color="success">ViewCase</CButton>
+                        <CButton v-if="event.case" :to="`/cases/${event.case}`" color="success">ViewCase</CButton>
                     </CButtonGroup>
                 </CCol>
                 
@@ -37,7 +37,7 @@
                 <CCol col="12" lg="10" sm="12">{{event.description}}<br><br></CCol>
             </CRow>
             <CRow>
-                <CCol col="12" lg="6" sm="12" style="margin-top:5px;"><li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li></CCol>
+                <CCol col="12" lg="6" sm="12" style="margin-top:5px;"><li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag"><CButton color="primary" size="sm" disabled="">{{ tag }}</CButton></li></CCol>
             </CRow>
         </CCardHeader>
         <CCardBody>
@@ -94,12 +94,12 @@
                 </template>
                 <template #dataType="{item}">
                     <td>
-                        {{item.dataType.name | defang}}
+                        {{item.data_type | defang}}
                     </td>
                 </template>                
                 <template #tags="{item}">
                     <td>
-                        <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
+                        <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
                     </td>
               </template>
             </CDataTable>

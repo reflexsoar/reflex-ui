@@ -15,7 +15,7 @@
             <CCardHeader>
               <CRow>
                 <CCol col="10">
-                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
+                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="2" class="text-right">
                   <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>
@@ -25,49 +25,49 @@
             <CCollapse :show="quick_filters">
               <CNav variant="tabs" :justified="true">
                 <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'status', 'dataType':'status','value':'New'})">
+                  <div @click="toggleObservableFilter({'filter_type': 'status', 'data_type':'status','value':'New'})">
                     <h1>{{eventCountByStatus('New')}}</h1>
                     New
                   </div>
                 </CNavItem>
                 <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'status', 'dataType':'status','value':'Open'})">
+                  <div @click="toggleObservableFilter({'filter_type': 'status', 'data_type':'status','value':'Open'})">
                     <h1>{{eventCountByStatus('Open')}}</h1>
                     Open
                   </div>
                 </CNavItem>
                 <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'status', 'dataType':'status','value':'Closed'})">
+                  <div @click="toggleObservableFilter({'filter_type': 'status', 'data_type':'status','value':'Closed'})">
                     <h1>{{eventCountByStatus('Closed')}}</h1>
                     Closed
                   </div>
                 </CNavItem>
                 <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'status', 'dataType':'status','value':'Dismissed'})">
+                  <div @click="toggleObservableFilter({'filter_type': 'status', 'data_type':'status','value':'Dismissed'})">
                     <h1>{{eventCountByStatus('Dismissed')}}</h1>
                     Dismissed
                   </div>
                 </CNavItem>
                 <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'dataType':'severity','value':3})">
+                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'data_type':'severity','value':3})">
                     <h1>{{eventCountBySeverity(3)}}</h1>
                     Critical
                   </div>
                 </CNavItem>
                 <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'dataType':'severity','value':2})">
+                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'data_type':'severity','value':2})">
                     <h1>{{eventCountBySeverity(2)}}</h1>
                     High
                   </div>
                 </CNavItem>
                 <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'dataType':'severity','value':1})">
+                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'data_type':'severity','value':1})">
                     <h1>{{eventCountBySeverity(1)}}</h1>
                     Medium
                   </div>
                 </CNavItem>
                 <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'dataType':'severity','value':0})">
+                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'data_type':'severity','value':0})">
                     <h1>{{eventCountBySeverity(0)}}</h1>
                     Low
                   </div>
@@ -87,8 +87,8 @@
           <center><CPagination :activePage.sync="current_page" :pages="page_data.pages"/></center>
         </CCol>
         <CCol col="3" class="text-right">
-          <CInput placeholder="Search" v-model="search_filter" v-on:keydown.enter="toggleObservableFilter({'filter_type':'search','dataType':'search','value':search_filter})" ><template #append>
-            <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','dataType':'search','value':search_filter})">Search</CButton>
+          <CInput placeholder="Search" v-model="search_filter" v-on:keydown.enter="toggleObservableFilter({'filter_type':'search','data_type':'search','value':search_filter})" ><template #append>
+            <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','data_type':'search','value':search_filter})">Search</CButton>
           </template></CInput>
         </CCol>
         <CCol col="3" class="text-right">
@@ -139,9 +139,9 @@
               >
               <template #name="{item}">
                   <td>
-                      <input v-if="!(item.case_uuid || item.status.closed)" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':item.title})">{{item.title}}</a><br>
-                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,2)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 2" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(2))}"><small>&nbsp;+{{ item.observables.length - 2}}</small></span><br>
-                      <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag.name})" color="dark" class="tag" size="sm">{{ tag.name }}</CButton></li>
+                      <input v-if="!(item.case || item.status.closed)" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':item.title})">{{item.title}}</a><br>
+                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,2)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 2" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(2))}"><small>&nbsp;+{{ item.observables.length - 2}}</small></span><br>
+                      <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'data_type':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
                   </td>
               </template>
               <template #reference="{item}">
@@ -157,7 +157,7 @@
               </template>
               <template #events="{item}">
                 <td>
-                  <CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':item.signature})" v-if="!(filteredBySignature() || item.related_events_count < 1)" color="dark" size="sm">{{item.related_events_count}}</CButton>
+                  <CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','data_type':'signature','value':item.signature})" v-if="!(filteredBySignature() || item.related_events_count < 1)" color="dark" size="sm">{{item.related_events_count}}</CButton>
                 </td>
               </template>
               <template #status="{item}">
@@ -167,17 +167,17 @@
               </template>
               <template #severity="{item}">
                 <td>
-                  <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':item.severity})" class="tag" :color="getSeverityColor(item.severity)" size="sm">{{getSeverityText(item.severity)}}</CButton>
+                  <CButton @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':item.severity})" class="tag" :color="getSeverityColor(item.severity)" size="sm">{{getSeverityText(item.severity)}}</CButton>
                 </td>
               </template>
               <template #actions="{item}">
                 <td align="right">
                   <CButtonGroup>
                     <CButton v-if="(item.related_events_count && item.related_events_count > 0 && !filteredBySignature()) || (filteredBySignature() && item.status.name == 'New')" size="sm" color="info" @click="createEventRule(item.title)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
-                    <CButton @click="caseFromCard(item.uuid)" v-if="!item.case_uuid" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
+                    <CButton @click="caseFromCard(item.uuid)" v-if="!item.case" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton :to="`/alerts/${item.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="item.status.closed" @click="reopenEvent(item.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
-                    <CButton v-if="item.case_uuid" size="sm" color="secondary" :to="`/cases/${item.case_uuid}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
+                    <CButton v-if="item.case" size="sm" color="secondary" :to="`/cases/${item.case}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton v-if="!item.status.closed" color="danger" size="sm" @click="dismissEventFromCard(item.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
                   </CButtonGroup>
                 </td>
@@ -199,18 +199,18 @@
               <CRow>
                 <CCol col="9">
                   <h4>
-                    <input type="checkbox" v-if="!(event.status.closed || event.case_uuid)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
-                    &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':event.title})">{{event.title}}</a></h4>
+                    <input type="checkbox" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
+                    &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
-                  <CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in event.observables" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
+                  <CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in event.observables" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
                     <CButton v-if="(event.related_events_count && event.related_events_count > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.title)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
-                    <CButton @click="caseFromCard(event.uuid)" v-if="!event.case_uuid" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
+                    <CButton @click="caseFromCard(event.uuid)" v-if="!event.case" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton :to="`/alerts/${event.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
-                    <CButton v-if="event.case_uuid" size="sm" color="secondary" :to="`/cases/${event.case_uuid}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
+                    <CButton v-if="event.case" size="sm" color="secondary" :to="`/cases/${event.case}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
                   </CButtonGroup>
                 </CCol>
@@ -220,9 +220,9 @@
               <CRow>
                 <CCol col="9">
                   <small>
-                    <CButton @click="toggleObservableFilter({'filter_type':'severity', 'dataType':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','dataType':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.related_events_count && event.related_events_count > 0"> | {{event.related_events_count}} new</span></CButton>
-                    <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'dataType':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
+                    <CButton @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
+                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.related_events_count && event.related_events_count > 0"> | {{event.related_events_count}} new</span></CButton>
+                    <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'data_type':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
                     <span class="separator">|</span>Modified {{event.modified_at | moment('from','now') }}
@@ -230,7 +230,7 @@
                   </small>
                 </CCol>
                 <CCol col="3" class="text-right">
-                  <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag.name})" color="dark" class="tag" size="sm">{{ tag.name }}</CButton></li>
+                  <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'data_type':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
                 </CCol>
               </CRow>
             </CCardFooter>
@@ -350,12 +350,12 @@ export default {
     computed: mapState(['status','alert','settings']),
     created: function () {
         this.loadData()
-        this.loadCloseReasons()
-        this.refresh = setInterval(function() {
-          if(!this.pauseRefresh) {
-            this.loadData()
-          }         
-        }.bind(this), this.settings.events_page_refresh*1000 || 60000)
+        //this.loadCloseReasons()
+        //this.refresh = setInterval(function() {
+        //  if(!this.pauseRefresh) {
+        //    this.loadData()
+        //  }         
+        //}.bind(this), this.settings.events_page_refresh*1000 || 60000)
     },
     data(){
       return {
@@ -383,7 +383,7 @@ export default {
         dismissalReason: null,
         close_reasons: [],
         collapse: {},
-        observableFilters: [{'filter_type':'status','dataType':'status','value':'New'}],
+        observableFilters: [{'filter_type':'status','data_type':'status','value':'New'}],
         filtered_events: [],
         quick_filters: false,
         search_filter: '',
@@ -510,7 +510,7 @@ export default {
         this.$store.dispatch('getRelatedEvents', source_event.uuid).then(resp => {
             this.selected = [...resp.data.events]
             this.rule_observables = source_event.observables.flat().map( function(obs) { 
-              return {'dataType':obs.dataType.name, 'value': obs.value
+              return {'data_type':obs.data_type, 'value': obs.value
               }
             })
           let unique_observables = Array.from(new Set(this.rule_observables.map(a => a.value)))
@@ -607,7 +607,7 @@ export default {
         let content = "<ul style='list-style-type: none; padding:0; margin: 0;'>"
         for(let o in observables) {
           let obs = observables[o]
-          content += `<li><b>${obs.dataType.name}</b>: ${this.sanitizeHTML(obs.value)}</li>`
+          content += `<li><b>${obs.data_type}</b>: ${this.sanitizeHTML(obs.value)}</li>`
         }
         content += "</ul>"
         return content

@@ -4,7 +4,7 @@
         <CCol col="8">
         <b>{{task_data.title}}</b>
         <br />
-        {{task_data.description}}
+        {{task_data.description}}<br>
         </CCol>
         <CCol col="2">
             <div @mouseenter="owner_hover = true" @mouseleave="owner_hover = false">
@@ -31,6 +31,8 @@
                         >
                     </multiselect>
                 </span>
+                <span v-if="task_data.start_date" v-c-tooltip="task_data.start_date"><br><small><b>Started:</b> {{task_data.start_date | moment('from','now')}}</small><br></span>
+                <span v-if="task_data.finish_date" v-c-tooltip="task_data.finish_date"><small><b>Finished:</b> {{task_data.finish_date | moment('from','now')}}</small></span>
             </div>
         </CCol>
         <CCol col="1"><CButton color="primary" size="sm" disabled>{{task_data.status | statusIcon}}</CButton></CCol>
