@@ -266,12 +266,12 @@ const mutations = {
   },
   update_observable(state, observable) {
     state.observable = observable
-    state.observables = state.observables.map(o => o.uuid == observable.uuid ? observable : o)
+    state.observables = state.observables.map(o => o.value == observable.value ? observable : o)
   },
   update_observables(state, observables) {
     for(let obs in observables) {
       let observable = observables[obs]
-      state.observables = state.observables.map(o => o.uuid == observable.uuid ? observable : o)
+      state.observables = state.observables.map(o => o.value == observable.value ? observable : o)
     }    
   },
   save_agent_group(state, agent_group) {
@@ -1505,9 +1505,9 @@ const actions = {
       })
     })
   },
-  updateObservable({commit}, {uuid, data}) {
+  updateObservable({commit}, {uuid, observable_value, data}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/observable/${uuid}`, data: data, method: 'PUT'})
+      Axios({url: `${BASE_URL}/case/${uuid}/observables/${observable_value}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_observable', resp.data)
         resolve(resp)

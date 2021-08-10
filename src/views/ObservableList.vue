@@ -46,7 +46,7 @@
         <td style="min-width:200px; max-width:300px;">
           <span
             v-c-tooltip="{content: `${item.value}`, placement:'bottom', appendToBody:'true'}"
-          >{{item.value | defang | truncate}}</span><br><CIcon v-if="item.tags.length > 0" name="cilTags"/>&nbsp;
+          >{{item.value | defang | truncate}}</span><br><CIcon v-if="item.tags.length > 0" name="cilTags"/>&nbsp;{{item.ioc}}
           <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
             <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
           </li>
@@ -68,7 +68,7 @@
             label-off="No"
             :checked.sync="item.ioc"
             v-bind:disabled="item.safe"
-            v-on:change.native="toggleISS(item.uuid, 'ioc', item.ioc)"
+            v-on:change.native="toggleISS(item.case, item.value, 'ioc', item.ioc)"
           />
         </td>
       </template>
@@ -83,7 +83,7 @@
             label-on="Yes"
             label-off="No"
             :checked.sync="item.spotted"
-            v-on:change.native="toggleISS(item.uuid, 'spotted', item.spotted)"
+            v-on:change.native="toggleISS(item.case, item.value, 'spotted', item.spotted)"
           />
         </td>
       </template>
@@ -99,7 +99,7 @@
             label-off="No"
             :checked.sync="item.safe"
             v-bind:disabled="item.ioc"
-            v-on:change.native="toggleISS(item.uuid, 'safe', item.safe)"
+            v-on:change.native="toggleISS(item.case, item.value, 'safe', item.safe)"
           />
         </td>
       </template>
@@ -190,10 +190,10 @@ export default {
       }
       return observables[uuid];
     },
-    toggleISS(uuid, field, value) {
+    toggleISS(uuid, observable_value, field, value) {
       let data = {};
       data[field] = value
-      this.$store.dispatch('updateObservable', {uuid, data}).then(resp => {
+      this.$store.dispatch('updateObservable', {uuid, observable_value, data}).then(resp => {
         this.observables = this.$store.getters.observables
       })
     },
