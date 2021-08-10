@@ -15,12 +15,12 @@
         <CCardBody style="border-bottom: 1px solid #cfcfcf; padding-bottom:0px;">
             <CRow>
                 <CCol col="6">
-                    <li style="display: inline; margin-right: 2px;" v-for="obs in filters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span class="separator" v-if="filters.length">|</span>Showing {{observables.length}} observables.</span>
+                    <li style="display: inline; margin-right: 2px;" v-for="obs in filters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span class="separator" v-if="filters.length">|</span>Showing {{observables.length}} observables.</span>
                 </CCol>
                 <CCol col="3">
                     
-                    <CInput placeholder="Search" :value="search_filter" @change="search_filter = $event" v-on:keydown.enter.native="toggleObservableFilter({'filter_type':'search','dataType':'search','value':$event.target.value})"><template #append>
-                    <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','dataType':'search','value':search_filter})">Search</CButton></template></CInput>
+                    <CInput placeholder="Search" :value="search_filter" @change="search_filter = $event" v-on:keydown.enter.native="toggleObservableFilter({'filter_type':'search','data_type':'search','value':$event.target.value})"><template #append>
+                    <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','data_type':'search','value':search_filter})">Search</CButton></template></CInput>
                     </CCol>
                 <CCol col="3">
                     <CPagination :activePage.sync="current_page" :pages="page_data.pages"/>
@@ -47,14 +47,14 @@
           <span
             v-c-tooltip="{content: `${item.value}`, placement:'bottom', appendToBody:'true'}"
           >{{item.value | defang | truncate}}</span><br><CIcon v-if="item.tags.length > 0" name="cilTags"/>&nbsp;
-          <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
-            <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag.name }}</CBadge>
+          <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
+            <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
           </li>
           
         </td>
       </template>
       <template #type="{item}">
-        <td style="width:8%;">{{item.dataType.name}}</td>
+        <td style="width:8%;">{{item.data_type}}</td>
       </template>
       <template #ioc-header>
         IOC <CIcon name='cilFlagAlt' size='sm' style="cursor: pointer" v-on:click.native="toggleAllIocWarning('ioc')"/>

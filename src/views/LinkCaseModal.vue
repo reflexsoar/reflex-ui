@@ -65,9 +65,6 @@ export default {
             }
         }
     },
-    created() {
-        this.loadData()        
-    },
     methods: {
         linkCase() {
             let uuid = this.case_uuid
