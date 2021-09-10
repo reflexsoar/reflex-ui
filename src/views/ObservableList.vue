@@ -46,7 +46,7 @@
         <td style="min-width:200px; max-width:300px;">
           <span
             v-c-tooltip="{content: `${item.value}`, placement:'bottom', appendToBody:'true'}"
-          >{{item.value | defang | truncate}}</span><br><CIcon v-if="item.tags.length > 0" name="cilTags"/>&nbsp;{{item.ioc}}
+          >{{item.value | defang | truncate}}</span><br><CIcon v-if="item.tags > 0" name="cilTags"/>&nbsp;
           <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
             <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
           </li>
@@ -297,10 +297,15 @@ export default {
       }
     },
     defang: function (value) {
-      return value
+      if(value != null) {
+        return value
         .replace(":", "[:]")
         .replace("http", "hxxp")
         .replace(".", "[.]");
+      } else {
+        return value
+      }
+      
     },
   },
 };

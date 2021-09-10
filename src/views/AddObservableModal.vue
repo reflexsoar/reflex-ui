@@ -25,9 +25,9 @@
                         <span v-c-tooltip="{content: `${item.value}`, placement:'bottom', appendToBody:'true'}">{{item.value | truncate}}</span>
                     </td>
                 </template>
-                <template #dataType="{item}">
+                <template #data_type="{item}">
                     <td style="padding-bottom:0px">
-                        <CSelect :options="dataTypes" :value.sync="item.dataType.name" style="margin-bottom:0px;"/>
+                        <CSelect :options="data_types" :value.sync="item.data_type.name" style="margin-bottom:0px;"/>
                     </td>
                 </template>
                 <template #tlp="{item}">
@@ -82,7 +82,7 @@ export default {
     data(){
         return {
             value: "",
-            dataType: "",
+            data_type: "",
             selected_tags: Array(),
             case_uuid: this.uuid,
             ioc: false,
@@ -95,8 +95,8 @@ export default {
             step: 1,
             observables: "",
             new_observables: Array(),
-            observable_fields: ['value','dataType','tlp','ioc','spotted','safe'],
-            dataTypes: ['hash','url','domain','host','email','ip'],
+            observable_fields: ['value','data_type','tlp','ioc','spotted','safe'],
+            data_types: ['hash','url','domain','host','email','ip'],
             tlps: [
                 {'label': 'WHITE', 'value':1},
                 {'label': 'GREEN', 'value':2},
@@ -140,7 +140,7 @@ export default {
                 for(let o in observable_list) {
                     this.new_observables.push({
                         value: observable_list[o], 
-                        dataType: {
+                        data_type: {
                             name: this.matchObservable(observable_list[o])
                         }, 
                         tlp:2, 
@@ -186,7 +186,7 @@ export default {
                     }
                 }
                 if(!exists) {
-                    obs.dataType = obs.dataType.name
+                    obs.data_type = obs.data_type.name
                     data['observables'].push(obs)
                 }
             }
