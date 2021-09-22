@@ -305,6 +305,11 @@ html, body {
 }
 
 .card-body {
+  padding-top: 5px;
+  padding-bottom: 10px;
+}
+
+.card-footer {
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -397,13 +402,12 @@ export default {
         columns: 1,
         card_page_num: 1,
         card_per_page: this.settings ? this.settings.events_per_page : 10,
-        page_data: {},
+        page_data: {'total_results': 0, 'pages': 0, 'page': 0, 'page_size': 0},
         current_page: 1,
         sort_by: 'created_at',
         sort_options: [
           {'label': 'Severity','value':'severity'},
           {'label': 'Date Created', 'value': 'created_at'},
-          {'label': 'Date Modified', 'value': 'modified_at'},
           {'label': 'Name', 'value': 'title'},
           {'label': 'TLP', 'value': 'tlp'}
         ]
