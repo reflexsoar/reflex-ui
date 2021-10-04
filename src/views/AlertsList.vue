@@ -206,7 +206,7 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton v-if="(event.related_events_count && event.related_events_count > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.title)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
+                    <CButton v-if="(event.related_events_count && event.related_events_count > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(event.uuid)" v-if="!event.case" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton :to="`/alerts/${event.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
@@ -509,10 +509,11 @@ export default {
       },
       createEventRule(signature) {
         this.selected = []
-        this.event_signature = signature
-        let source_event = this.filtered_events.find((event) => event.title == signature)
+        let source_event = this.filtered_events.find((event) => event.signature == signature)
+        this.event_signature = source_event.title
         this.$store.dispatch('getRelatedEvents', source_event.uuid).then(resp => {
             this.selected = [...resp.data.events]
+            console.log(source_event.observables)
             this.rule_observables = source_event.observables.flat().map( function(obs) { 
               return {'data_type':obs.data_type, 'value': obs.value
               }

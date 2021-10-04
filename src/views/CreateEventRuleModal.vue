@@ -32,7 +32,7 @@
                     <p>The observables selected here must match for the Rule to apply.  A signature of the observables is calculated to make sure only specific combinations are acted on.</p>
                     <multiselect style="z-index:50" :options="rule_observables" v-model="observables" :custom-label='observableLabel' multiple track-by="value" label="value">
                         <template slot="option" slot-scope="props">
-                            <b>{{props.option.dataType}}</b>: {{props.option.value}}
+                            <b>{{props.option.data_type}}</b>: {{props.option.value}}
                         </template>
                     </multiselect>
                 </div>
@@ -86,7 +86,7 @@
                         </ul>
                     <b>Observables: </b><br><br>
                     <ul>
-                        <li v-for="obs in observables" :key="obs.value"><b>{{obs.dataType}}</b>: {{obs.value}}</li>
+                        <li v-for="obs in observables" :key="obs.value"><b>{{obs.data_type}}</b>: {{obs.value}}</li>
                     </ul>
                 </div>
             </CForm>
@@ -199,8 +199,8 @@ export default {
         toggleMergeToCase() {
             this.merge_into_case = !this.merge_into_case
         },
-        observableLabel({dataType, value}) {
-            return `${dataType}: ${value}`
+        observableLabel({data_type, value}) {
+            return `${data_type}: ${value}`
         },
         caseLabel({id, title}) {
             if(id && title) {
