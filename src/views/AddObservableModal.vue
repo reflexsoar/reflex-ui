@@ -96,7 +96,7 @@ export default {
             observables: "",
             new_observables: Array(),
             observable_fields: ['value','data_type','tlp','ioc','spotted','safe'],
-            data_types: ['hash','url','domain','host','email','ip','sid','mac'],
+            data_types: ['hash','url','domain','host','email','ip','sid','mac','user','process','imphash','fqdn','command'],
             tlps: [
                 {'label': 'WHITE', 'value':1},
                 {'label': 'GREEN', 'value':2},
@@ -160,7 +160,7 @@ export default {
             let md5hash = new RegExp(/[a-f0-9A-F]{32}/)
             let sha1hash = new RegExp(/[a-f0-9A-F]{40}/)
             let sha256hash = new RegExp(/[a-f0-9A-F]{64}/)
-            let mac = new RegExp(/([A-Za-z0-9]{2}\:?){6}/)
+            let mac = new RegExp(/^([A-Za-z0-9]{2}\:?\-?){6}$/)
             let sid = new RegExp(/^S(\-\d{1,10}){4,7}$/)
             if(ip.test(value)) {
                 return 'ip';
