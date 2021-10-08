@@ -367,7 +367,6 @@ const mutations = {
     state.state = 'success'
   },
   add_agent_group(state, agent_group) {
-    console.log(agent_group)
     state.agent_groups.push(agent_group)
     state.agent_group = agent_group
     state.status = 'success'
@@ -1589,9 +1588,9 @@ const actions = {
       })
     })
   },
-  addTaskNote({commit}, data) {
+  addTaskNote({commit}, {uuid, data}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/task_note`, data: data, method: 'POST'})
+      Axios({url: `${BASE_URL}/case_task/${uuid}/add_note`, data: data, method: 'POST'})
       .then(resp => {
         commit('add_case_task_note', resp.data)
         resolve(resp)
@@ -1734,7 +1733,6 @@ const actions = {
     })
   },
   updateCase({commit}, {uuid, data}) {
-    console.log(data)
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {

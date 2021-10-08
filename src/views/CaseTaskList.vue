@@ -56,7 +56,6 @@ export default {
             this.tasks = this.$store.getters.case_tasks
             for(let t in this.tasks) {
                 let task = this.tasks[t]
-                this.tasks[t]['notes'] = []
                 this.$set(this.collapse, task.uuid, false)
                 this.$set(this.owner_hover, task.uuid, false)
                 this.$set(this.edit_owner, task.uuid, false)

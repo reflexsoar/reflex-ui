@@ -47,12 +47,9 @@
     </CRow>
     <CCollapse :show.sync="collapse">
         <br>
-        <div v-if="loading">
-            Loading notes...
-        </div>
-        <div v-else-if="notes.length > 0">
+        <div v-if="task_data.notes.length > 0">
             <timeline>
-                <timeline-item v-for="note in notes" :key="note.uuid" >
+                <timeline-item v-for="note in task_data.notes" :key="note.uuid" >
                     <CCard>
                         <CCardHeader class="bg-light">Note from <b>{{note.created_by.username}}</b> <i v-if="note.after_complete">after task was complete</i> on {{note.created_at | moment('LLLL')}} </CCardHeader>
                         <CCardBody><vue-markdown>{{note.note}}</vue-markdown></CCardBody>
@@ -158,20 +155,17 @@ export default {
     toggleNotes(uuid) {
         
         this.loading = true
-        if(!this.collapse) {
-            this.$store.dispatch('getTaskNotes', uuid).then(resp => {
-                this.notes = this.$store.getters.task_notes
-                this.loading = false
-                this.collapse = !this.collapse
-            })
-        } else {
-            this.collapse = !this.collapse
-        }
+        this.collapse = !this.collapse
         
     },
-    createNote(uuid) {
-        this.$store.dispatch('addTaskNote', {'note': this.note, 'task_uuid': this.task_data.uuid}).then(resp => {
-            this.notes = this.$store.getters.task_notes
+    createNote() {
+        
+        let data = {
+            'note': this.note
+        }
+        let uuid = this.task.uuid
+        this.$store.dispatch('addTaskNote', {uuid, data}).then(resp => {
+            this.task.notes.push(resp.data)
         })
     }
   },
