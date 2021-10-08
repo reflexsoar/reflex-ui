@@ -166,6 +166,7 @@ export default {
         let uuid = this.task.uuid
         this.$store.dispatch('addTaskNote', {uuid, data}).then(resp => {
             this.task.notes.push(resp.data)
+            this.note = ""
         })
     }
   },

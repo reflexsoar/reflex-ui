@@ -12,6 +12,7 @@ const state = {
   current_user: {
     'permissions': []
   },
+  dashboard_metrics: {},
   credentials: [],
   credential: {},
   events: [],
@@ -253,6 +254,9 @@ const mutations = {
   },
   save_related_cases(state, data) {
     state.related_cases = data
+  },
+  save_dashboard_metrics(state, metrics) {
+    state.dashboard_metrics = metrics
   },
   save_observables(state, observables) {
     state.observables = observables
@@ -935,6 +939,18 @@ const actions = {
         let credentials = []
         resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name}))
         commit('creds_success', credentials)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getDashboardMetrics({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/dashboard`, method: 'GET'})
+      .then(resp => {
+        commit('save_dashboard_metrics', resp.data)
         resolve(resp)
       })
       .catch(err => {

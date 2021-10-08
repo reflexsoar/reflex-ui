@@ -191,7 +191,7 @@
               <template #name="{item}">
                   <td>
                       <input v-if="!(item.case_uuid || item.status.closed)" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':item.title})">{{item.title}}</a><br>
-                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,2)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 2" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(2))}"><small>&nbsp;+{{ item.observables.length - 2}}</small></span><br>
+                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,3)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 3" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(3))}"><small>&nbsp;+{{ item.observables.length - 3}}</small></span><br>
                       <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
                   </td>
               </template>
@@ -712,7 +712,7 @@ export default {
             let content = "<ul style='list-style-type: none; padding:0; margin: 0;'>"
             for(let o in observables) {
             let obs = observables[o]
-            content += `<li><b>${obs.dataType.name}</b>: ${this.sanitizeHTML(obs.value)}</li>`
+            content += `<li><b>${obs.data_type}</b>: ${this.sanitizeHTML(obs.value)}</li>`
             }
             content += "</ul>"
             return content
