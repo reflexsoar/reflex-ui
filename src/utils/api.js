@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = location.protocol+'//'+window.location.hostname+':5000/api/v2.0'
+const BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v2.0'
 
 export {doLogin, doLogoff};
 

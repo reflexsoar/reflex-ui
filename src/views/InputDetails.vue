@@ -19,7 +19,7 @@
                     <template #tags='{tag}'>
                         {{tag.name}}
                     </template>
-                    <li style="display: inline; margin-right: 2px;" v-for="tag in input.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
+                    <li style="display: inline; margin-right: 2px;" v-for="tag in input.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
                 </CCol>
             </CRow>
             <CRow>

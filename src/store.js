@@ -548,7 +548,7 @@ const getters = {
   tags: state => state.tags
 }
 
-const BASE_URL = location.protocol+'//'+window.location.hostname+':5000/api/v2.0'
+const BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v2.0'
 
 
 const actions = {

@@ -30,13 +30,16 @@
                   </td>
               </template>
               <template #inputs="{item}">
-                  <td>
+                  <td v-if="item.inputs">
                     {{item.inputs.length}}
+                  </td>
+                  <td v-else>
+                    0
                   </td>
               </template>
               <template #roles="{item}">
                   <td>
-                    <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role.name"><CButton color="primary" size="sm" disabled>{{ role.name }}</CButton></li>
+                    <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role"><CButton color="primary" size="sm" disabled>{{ role }}</CButton></li>
                   </td>
               </template>
               <template #active="{item}">

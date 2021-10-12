@@ -191,7 +191,7 @@
               <template #name="{item}">
                   <td>
                       <input v-if="!(item.case_uuid || item.status.closed)" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':item.title})">{{item.title}}</a><br>
-                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,3)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 3" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(3))}"><small>&nbsp;+{{ item.observables.length - 3}}</small></span><br>
+                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(item.uuid).slice(0,3)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="getEventObservables(item.uuid).length > 3" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(item.uuid).slice(3))}"><small>&nbsp;+{{ getEventObservables(item.uuid).length - 3}}</small></span><br>
                       <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
                   </td>
               </template>
@@ -451,6 +451,7 @@ export default {
             tab_loading: false,
             search_filter: '',
             filtered_events: [],
+            event_observables: {},
             related_cases: [],
             case_files: [],
             observableFilters: [{'filter_type':'status','dataType':'status','value':'Open'}],
@@ -769,6 +770,7 @@ export default {
                 page_size: 25
             }).then(resp => {
                 this.filtered_events = resp.data.events
+                this.event_observables = resp.data.observables
                 this.events_page_data = resp.data.pagination
                 this.$store.commit('add_success')
                 this.tab_loading = false
@@ -871,6 +873,9 @@ export default {
             case 4: return 'Critical';
             default: return 'Low';
             }
+        },
+        getEventObservables(uuid) {
+            return this.event_observables[uuid]
         }
     },
     filters: {

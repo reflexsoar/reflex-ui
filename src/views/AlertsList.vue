@@ -140,7 +140,7 @@
               <template #name="{item}">
                   <td>
                       <input v-if="!(item.case || item.status.closed)" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':item.title})">{{item.title}}</a><br>
-                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,2)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 2" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(2))}"><small>&nbsp;+{{ item.observables.length - 2}}</small></span><br>
+                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(item.uuid).slice(0,2)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="getEventObservables(item.uuid).length > 2" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(item.uuid).slice(2))}"><small>&nbsp;+{{ getEventObservables(item.uuid).length - 2}}</small></span><br>
                       <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'data_type':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
                   </td>
               </template>
@@ -202,7 +202,7 @@
                     <input type="checkbox" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
-                  <CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in event.observables" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
+                  <CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid)" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
@@ -390,6 +390,7 @@ export default {
         collapse: {},
         observableFilters: [{'filter_type':'status','data_type':'status','value':'New'}],
         filtered_events: [],
+        event_observables: {},
         quick_filters: false,
         search_filter: '',
         table_view: false,
@@ -513,8 +514,7 @@ export default {
         this.event_signature = source_event.title
         this.$store.dispatch('getRelatedEvents', source_event.uuid).then(resp => {
             this.selected = [...resp.data.events]
-            console.log(source_event.observables)
-            this.rule_observables = source_event.observables.flat().map( function(obs) { 
+            this.rule_observables = this.getEventObservables(source_event.uuid).flat().map( function(obs) { 
               return {'data_type':obs.data_type, 'value': obs.value
               }
             })
@@ -599,6 +599,7 @@ export default {
           sort_by: this.sort_by
         }).then(resp => {
           this.filtered_events = this.$store.getters.events
+          this.event_observables = resp.data.observables
           this.page_data = resp.data.pagination
           this.$store.commit('add_success')
         })
@@ -714,6 +715,9 @@ export default {
           case 3: return 'Critical';
           default: return 'Low';
         }
+      },
+      getEventObservables(uuid) {
+        return this.event_observables[uuid]
       }
     },
     beforeDestroy: function() {
