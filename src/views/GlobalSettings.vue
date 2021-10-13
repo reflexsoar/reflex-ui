@@ -52,6 +52,12 @@
           </CRow>
         </CCol>
         <CCol col="6">
+          <h4>Authentication Settings</h4>
+          <label v-c-tooltip="{
+            content: 'Only requests from IPs in the Approve IPs list will be allowed to communicate with the platform.',
+            placement: 'right'}">Restrict Access to Approved IPs</label><i> - Warning: This setting can lock you out of your console</i><br>
+            <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_approved_ips"/><br><br>
+          <CTextarea v-model="settings.approved_ips" label="Approved IPs" rows="5"/>
           <h4>Mail Settings</h4>
           <CInput v-model="settings.email_from" label="Email From" placeholder="admin@reflexsoar.com"/>
           <CInput v-model="settings.email_server" label="Email Server" placeholder="127.0.0.1:25"/>
