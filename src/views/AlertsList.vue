@@ -355,7 +355,7 @@ export default {
     computed: mapState(['status','alert','settings']),
     created: function () {
         this.loadData()
-        //this.loadCloseReasons()
+        this.loadCloseReasons()
         //this.refresh = setInterval(function() {
         //  if(!this.pauseRefresh) {
         //    this.loadData()
