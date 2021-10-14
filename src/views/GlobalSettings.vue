@@ -52,7 +52,7 @@
           </CRow>
         </CCol>
         <CCol col="6">
-          <h4>Authentication Settings</h4>
+          <h4>Advanced Settings</h4>
           <label v-c-tooltip="{
             content: 'Only requests from IPs in the Approve IPs list will be allowed to communicate with the platform.',
             placement: 'right'}">Restrict Access to Approved IPs</label><i> - Warning: This setting can lock you out of your console</i><br>
