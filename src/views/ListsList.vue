@@ -37,9 +37,19 @@
           {{item.data_type.name}}
         </td>
       </template>
+      <template #value_count="{item}">
+        <td>
+          <span v-if="item.value_count > 0">{{item.value_count}}</span><span v-else>0</span>
+        </td>
+      </template>
       <template #tag_on_match="{item}">
         <td>
           <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="item.tag_on_match"/>
+        </td>
+      </template>
+      <template #active="{item}">
+        <td>
+          <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="item.active" disabled/>
         </td>
       </template>
       <template #actions="{item}">
@@ -56,14 +66,36 @@
       </CAlert>
       <CForm @submit.prevent="modal_action()" id="listForm">
         <CInput v-model="list_data.name" label="Name" placeholder="A friendly name for the list" v-bind:required="modal_submit_text == 'Create'"/>
-        <CSelect :options="list_types" :value.sync="list_data.list_type" label="List Type" placeholder="Select a list type" v-bind:required="modal_submit_text == 'Create'"/>
-        <CSelect :options="data_type_list" :value.sync="list_data.data_type.uuid" label="Data Type" placeholder="Select the data type this list contains" v-bind:required="modal_submit_text == 'Create'"/>
-        <CTextarea label="Values" v-model="list_data.values" placeholder="Enter values separated by new lines" rows="10" cols="50" wrap="off" v-bind:required="modal_submit_text == 'Create'"/>
-        <div class="form-input">  
-          <label>Tag Observables on list match?</label><br>
-          <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.tag_on_match"/><br>
-          <span v-if="list_data.tag_on_match">Observables that match this list will be tagged with <code>list:{{list_data.name.replace(' ','-').toLowerCase()}}</code></span>
-        </div>
+        <CRow>
+          <CCol col="12" lg="6">
+            <CSelect :options="list_types" :value.sync="list_data.list_type" label="List Type" placeholder="Select a list type" v-bind:required="modal_submit_text == 'Create'"/>
+          </CCol>
+          <CCol col="12" lg="6">
+            <CSelect :options="data_type_list" :value.sync="list_data.data_type.uuid" label="Data Type" placeholder="Select the data type this list contains" v-bind:required="modal_submit_text == 'Create'"/>
+          </CCol>
+        </CRow>
+        <CInput v-model="list_data.url" label="URL" placeholder="A URL to poll values from on a periodic basis"/>
+        <CRow>
+          <CCol col="12" lg="6">
+            <CInput v-model="list_data.poll_interval" label="Polling Interval" placeholder="60" description="How often to poll the URL for new data (minutes)"/>
+          </CCol>
+        </CRow>
+        <CTextarea label="Values" v-model="list_data.values" placeholder="Enter values separated by new lines" rows="10" cols="50" wrap="off" :disabled="list_data.url"/>
+        <CRow>
+          <CCol col="12" lg="6">
+            <div class="form-input">  
+              <label>Tag Observables on list match?</label><br>
+              <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.tag_on_match"/><br>
+              <span v-if="list_data.tag_on_match">Observables that match this list will be tagged with <code>list:{{list_data.name.replace(' ','-').toLowerCase()}}</code></span>
+            </div>
+          </CCol>
+          <CCol col="12" lg="6">
+            <div class="form-input">  
+              <label>List Active</label><br>
+              <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.active"/>
+            </div>
+          </CCol>
+        </CRow>
       </CForm>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
@@ -98,7 +130,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['name', 'list_type', 'data_type', 'value_count', 'tag_on_match', 'actions']
+        return ['name', 'list_type', 'data_type', 'value_count', 'tag_on_match', 'active', 'actions']
       }
     },
     caption: {
@@ -128,7 +160,8 @@ export default {
         list_data: {
           values: "",
           data_type: { uuid: ''},
-          tag_on_match: false
+          tag_on_match: false,
+          active: true
         },
         modal_action: null,
         modal_status: false,
@@ -144,6 +177,14 @@ export default {
       }
     },
     methods: {
+      fieldPopulated(field) {
+        if (field) {
+          return field.length > 0;
+        } else {
+          return false
+        }
+        
+      },
       createListModal() {
         this.modal_action = this.createList
         this.modal_title = 'Create List'
@@ -155,6 +196,7 @@ export default {
         Object.assign(ld,this.list_data)
         ld.data_type_uuid = ld.data_type.uuid
         delete ld['data_type']
+        ld.active = true
         this.$store.dispatch('createList', ld).then(resp => {
           this.modal_status = false
         }).catch(err => {
@@ -176,7 +218,10 @@ export default {
           list_type: this.list_data.list_type,
           data_type_uuid: this.list_data.data_type.uuid,
           values: this.list_data.values,
-          tag_on_match: this.list_data.tag_on_match
+          tag_on_match: this.list_data.tag_on_match,
+          url: this.list_data.url,
+          poll_interval: this.list_data.poll_interval,
+          active: this.list_data.active
         }
 
         let uuid = this.list_data.uuid
@@ -189,6 +234,7 @@ export default {
       },
       deleteListModal(uuid) {
         this.list_data = this.lists.find(list => list.uuid === uuid)
+        this.delete_confirm = ""
         this.delete_modal = true
       },
       deleteList(uuid) {
@@ -215,9 +261,7 @@ export default {
         this.modal_status = false
       },
       loadData: function() {
-        this.$store.dispatch('getLists').then(resp => {
-          this.$store.commit('save_lists', resp.data)
-        })
+        this.$store.dispatch('getLists')
         this.$store.dispatch('getDataTypes').then(resp => {
            this.data_type_list = this.$store.getters.data_types_list
         })

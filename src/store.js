@@ -150,7 +150,12 @@ const mutations = {
     state.list = list
   },
   add_list(state, list) {
-    state.lists.push(list)
+    if (state.lists.length == 0) {
+      state.lists = [list]
+    }
+    else {
+      state.lists.push(list)
+    }
     state.list = list
   },
   save_case_task_notes(state, notes) {
@@ -307,8 +312,9 @@ const mutations = {
   save_user(state, user) {
     state.user = user
   },
-  remove_list(state, list) {
+  remove_list(state, uuid) {
     state.list = {}
+    state.lists = state.lists.filter(a => a.uuid !== uuid)
   },
   remove_user(state, user) {
     state.user = {}
@@ -376,7 +382,11 @@ const mutations = {
     state.status = 'success'
   },
   add_credential(state, credential){
-    state.credentials.push(credential)
+    if (state.credentials.length == 0) {
+      state.credentials = [credential]
+    } else {
+      state.credentials.push(credential)
+    }    
     state.credential = credential
     state.status = 'success'
   },
@@ -706,7 +716,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/list/${uuid}`, method: 'DELETE'})
       .then(resp => {
-        commit('remove_list')
+        commit('remove_list', uuid)
         commit('show_alert', {message: 'Successfully deleted list.', 'type': 'success'})
         resolve(resp)
       })
