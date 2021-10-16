@@ -259,7 +259,7 @@
                         <CaseTaskList :uuid="uuid" :key="reloadTasks"></CaseTaskList>
                     </div>                
               </CTab>
-              <CTab title="Attachments">
+              <CTab title="Attachments" disabled v-c-tooltip="{ content: 'Coming Soon', placement: 'top' }">
                     <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
                         <CSpinner color="dark" style="width:6rem;height:6rem;"/>
                     </div>
@@ -315,7 +315,7 @@
                       </CDataTable>
                   </div>
               </CTab>
-              <CTab title="Playbook/Action Output" disabled>
+              <CTab title="Playbook/Action Output" disabled v-c-tooltip="{ content: 'Coming Soon', placement: 'top' }">
                  <div class="bg-dark console-output">
                      <code class="bg-dark pre-formatted raw_log">2020-09-13 20:33:50,591 - Extracting ZIP file<br>2020-09-13 20:33:50,593 - Running test plugin!<br>2020-09-13 20:33:54,716 - Running agent<br>2020-09-13 20:34:28,846 - Running agent<br>2020-09-13 20:34:28,847 - Running input ES_PROD<br>2020-09-13 20:34:28,847 - Fetching credentials for ES_PROD<br>2020-09-13 20:34:33,124 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:34:33,150 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.025s]<br>2020-09-13 20:34:33,154 - Pushing 26 events to bulk ingest...<br>2020-09-13 20:35:12,878 - Running agent<br>2020-09-13 20:35:12,879 - Running input ES_PROD<br>2020-09-13 20:35:12,879 - Fetching credentials for ES_PROD<br>2020-09-13 20:35:17,060 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:35:17,085 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.024s]<br>2020-09-13 20:35:17,089 - Pushing 26 events to bulk ingest...</code>
                  </div>
