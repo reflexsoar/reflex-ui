@@ -98,7 +98,7 @@
         </CRow>
       </CForm>
       <template #footer>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton type="submit" form="listForm" color="primary">{{modal_submit_text}}</CButton>
       </template>
     </CModal>

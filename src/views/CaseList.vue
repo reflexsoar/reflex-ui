@@ -151,7 +151,7 @@
           <CTextarea :value="close_comment" @change="close_comment = $event" v-bind:required="settings.require_case_close_comment" v-bind:disabled="closure_reason_uuid == ''" label="Additional information" rows="5" placeholder="Enter additional information related to the closure reason."></CTextarea>
       </CForm>
       <template #footer>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton type="submit" form="closeCaseForm" color="primary">Close</CButton>
       </template>
     </CModal>
@@ -160,7 +160,7 @@
             <p>Deleting a case is a permanent action, all work on the event will be removed and any associated events will be set to <b>New</b> status, are you sure you want to continue?</p>
         </div>
         <template #footer>
-            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Dismiss</CButton>
+            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Cancel</CButton>
             <CButton @click="deleteCase()" color="danger">Delete</CButton>
         </template>
     </CModal>

@@ -61,7 +61,7 @@
         </div>
       <template #footer>
         <CButton @click="restart()" color="danger">Restart</CButton>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton v-if="step != 1" @click="previousStep()" color="info">Previous</CButton>
         <CButton v-if="step != final_step" @click="nextStep()" v-bind:disabled="observables == ''" color="primary">Next</CButton>
         <CButton v-if="step == final_step" @click="createObservables()" color="primary">Save</CButton>

@@ -24,7 +24,7 @@
             </multiselect>
         </CForm>
       <template #footer>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton type="submit" form="linkCaseForm" color="primary">Link</CButton>
       </template>
     </CModal>

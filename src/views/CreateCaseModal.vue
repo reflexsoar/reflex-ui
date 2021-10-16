@@ -78,7 +78,7 @@
         </CForm>
       </div>
       <template #footer>
-          <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+          <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton @click="createCase()" color="primary">Create</CButton>
       </template>
     </CModal>

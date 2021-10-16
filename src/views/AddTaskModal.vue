@@ -50,7 +50,7 @@
             </div>
         </CForm>
       <template #footer>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton type="submit" form="createTaskForm" color="primary">Create</CButton>
       </template>
     </CModal>

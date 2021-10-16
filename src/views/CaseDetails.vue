@@ -328,7 +328,7 @@
             <p>Deleting a case is a permanent action, all work on the event will be removed and any associated events will be set to <b>New</b> status, are you sure you want to continue?</p>
         </div>
         <template #footer>
-            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Dismiss</CButton>
+            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Cancel</CButton>
             <CButton @click="deleteCase()" color="danger">Delete</CButton>
         </template>
     </CModal>

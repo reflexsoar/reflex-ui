@@ -24,7 +24,7 @@
             </multiselect>
       </div>
       <template #footer>
-          <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+          <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton @click="mergeEventIntoCase()" v-bind:disabled="!case_data" color="primary">Merge</CButton>
       </template>
     </CModal>
