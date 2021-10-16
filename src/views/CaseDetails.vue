@@ -136,8 +136,9 @@
                                     </CWidgetSimple>
                                 </CCol>
                                 <CCol col="2">
-                                    <CWidgetSimple header="Total Events" :text="String(case_data.event_count)">
-                                    </CWidgetSimple>
+                                    <span v-if="case_data.event_count"><CWidgetSimple header="Total Events" :text="String(case_data.event_count)"></CWidgetSimple></span>
+                                    <span v-else><CWidgetSimple header="Total Events" text="0"></CWidgetSimple></span>
+                                    
                                 </CCol>
                                 <CCol col="2">
                                     <CWidgetSimple header="Time Open" :text="daysOpen()">
