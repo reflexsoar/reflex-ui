@@ -1,12 +1,17 @@
 <template>
+<div>
   <CRow>
     <CCol col v-if="loading">
+      <CCardBody>
+      </CCardBody>
         <div style="margin: auto; text-align:center; verticle-align:middle;">
            <CSpinner
                 color="dark"
                 style="width:6rem;height:6rem;"
             />
         </div>
+        <CCardBody>
+      </CCardBody>
     </CCol>
     <CCol col v-else>
       <CRow>
@@ -165,6 +170,14 @@
         </template>
     </CModal>
   </CRow>
+  <CRow>
+    <CCol lg="12" sm="12">
+      <CCardBody v-if="pagination.pages > 0">
+        <CPagination :activePage.sync="current_page" :pages="pagination.pages"/>
+      </CCardBody>
+    </CCol>
+  </CRow>
+  </div>
 </template>
 
 <style scoped>
@@ -220,7 +233,7 @@ export default {
         quick_filters: false,
         caseFilters: [{'filter_type':'status','dataType':'status','value':'New'}],
         filtered_cases: [],
-        page_data: {},
+        pagination: {},
         close_reasons: [],
         case_closed: false,
         status_uuid: "",
@@ -229,7 +242,13 @@ export default {
         error: false,
         error_message: "",
         closure_reason_uuid: "",
-        close_case_modal: false
+        close_case_modal: false,
+        current_page: 1
+      }
+    },
+    watch: {
+      current_page: function () {
+        this.filterCases()
       }
     },
     methods: {
@@ -318,6 +337,7 @@ export default {
 
         // Build the filters based on what is currently selected
         this.$store.commit('add_start')
+        this.loading = true
         let status_filters = []
         let tag_filters = []
         let severity_filter = []
@@ -370,7 +390,7 @@ export default {
           page_size: this.card_per_page
         }).then(resp => {
           this.filtered_cases = this.$store.getters.cases
-          this.page_data = resp.data.pagination
+          this.pagination = resp.data.pagination
           this.$store.commit('add_success')
           this.loading = false
         })
