@@ -272,7 +272,7 @@ export default {
           page_size: 25,
         })
         .then((resp) => {
-          this.observables = resp.data.observables;
+          this.observables = this.$store.getters.observables;
           this.page_data = resp.data.pagination;
           this.$store.commit("add_success");
           this.loading = false;

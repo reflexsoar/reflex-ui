@@ -12,6 +12,7 @@
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
+
     <CCard class="shadow-sm bg-white rounded" >
         <CCardHeader>
             <CRow>
@@ -381,7 +382,7 @@ export default {
         Comments,
         CaseFileList
     },
-    computed: mapState(['alert','current_user','settings','tags']),
+    computed: mapState(['alert','current_user','settings','tags','case_observables']),
     props: {
         caption: {
             type: String,
@@ -902,7 +903,12 @@ export default {
             
         },
         defang: function(value) {
-            return value.replace(':','[:]').replace('http','hxxp').replace('.','[.]')
+            if (this.settings.defang_observables) {
+                return value.replace(':','[:]').replace('http','hxxp').replace('.','[.]')
+            } else {
+                return value
+            }
+            
         }
     }
 }

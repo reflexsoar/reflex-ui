@@ -10,8 +10,8 @@
             <b>Settings</b>
           </CCardHeader>
           <CCardBody class="tabbed">
-            <CTabs>
-              <CTab active v-if="current_user && current_user.role.permissions['update_settings']">
+            <CTabs :activeTab.sync="activeTab">
+              <CTab active v-if="current_user && current_user.role && current_user.role.permissions['update_settings']">
                 <template slot="title">
                   <CIcon name="cil-globe-alt"/> {{tabs[0]}}
                 </template>
@@ -38,11 +38,7 @@
                 <template slot="title">
                   <CIcon name="cil-graph"/> {{tabs[4]}}
                 </template>
-                3. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
-                et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-                dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-                officia deserunt mollit anim id est laborum.
+                <AuditLogs :key="reloadLogs"/>
               </CTab>
             </CTabs>
           </CCardBody>
@@ -56,6 +52,7 @@
 import UsersList from './UsersList'
 import RolesList from './RolesList'
 import GroupList from './GroupList'
+import AuditLogs from './AuditLogs'
 import GlobalSettings from './GlobalSettings'
 import { mapState, mapGetters } from 'vuex'
 export default {
@@ -64,7 +61,15 @@ export default {
   components: {
     UsersList,
     GlobalSettings,
-    GroupList
+    GroupList,
+    AuditLogs
+  },
+  watch: {
+    activeTab: function () {
+      if(this.activeTab == 3) {
+        this.reloadLogs = Math.random()
+      }
+    }
   },
   created() {
   },  
@@ -75,9 +80,10 @@ export default {
         'Users',
         'Groups',
         'Roles',
-        'Integrations'
+        'Audit Logs'
       ],
-      activeTab: 1
+      activeTab: 0,
+      reloadLogs: 0
     }
   }
 }

@@ -12,6 +12,7 @@ const state = {
   current_user: {
     'permissions': []
   },
+  audit_logs: [],
   dashboard_metrics: {},
   credentials: [],
   credential: {},
@@ -143,6 +144,9 @@ const mutations = {
     state.event = event
     state.events = [...state.events.filter(e => e.uuid != event.uuid), event]
   },
+  save_audit_logs(state, logs) {
+    state.audit_logs = logs
+  },
   save_lists(state, lists) {
     state.lists = lists
   },
@@ -265,6 +269,7 @@ const mutations = {
   },
   save_observables(state, observables) {
     state.observables = observables
+    console.log(state.observables)
   },
   save_observable(state, observable) {
     state.observable = observable
@@ -544,6 +549,7 @@ const getters = {
   events: state =>  { return state.events },
   related_events: state => {return state.related_events },
   related_cases: state => { return state.related_cases },
+  audit_logs: state => { return state.audit_logs },
   data_types_list: function() {
     return state.data_types.map(function(data_type) {
       var newDataType = {};
@@ -1852,7 +1858,8 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case/${uuid}/add_observables/_bulk`, data: data, method: 'POST'})
       .then(resp => {
-        commit('add_case_observables', resp.data.observables)
+        //commit('add_case_observables', resp.data.observables)
+        commit('save_observables', resp.data.observables)
         resolve(resp)
       })
       .catch(err => {
@@ -1891,6 +1898,18 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/settings/generate_persistent_pairing_token`, method: 'GET'})
       .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getAuditLogs({commit}, {selected_status,selected_event_type, page}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/audit_log?status=${selected_status}&event_type=${selected_event_type}&page=${page}`, method: 'GET'})
+      .then(resp => {
+        commit('save_audit_logs', resp.data.logs)
         resolve(resp)
       })
       .catch(err => {
