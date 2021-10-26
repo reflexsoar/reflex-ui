@@ -93,10 +93,9 @@
                   :fixed="fixed"
                   :items="filtered_cases"
                   :fields="fields"
-                  :items-per-page="small ? 25 : 10"
+                  :items-per-page="25"
                   :dark="dark"
                   :sorter='{external: true, resetable: true}'
-                  pagination
                   :responsive="false"
                   style="border-top: 1px solid #cfcfcf;"
               >

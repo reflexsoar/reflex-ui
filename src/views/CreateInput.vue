@@ -139,7 +139,7 @@ export default {
         this.plugin = event.target.value
         if (value == "Elasticsearch") {
           conf = '{"hosts":["https://localhost:9200"],"index":".siem-signals-*","cafile":"","scheme":"https","rule_name":"signal.rule.name","auth_method":"http_auth","search_size":200,"search_period":"15m","check_hostname":false,"severity_field":"signal.rule.severity","source_reference":"signal.parent.id","cert_verification":"none","description_field":"signal.rule.description"}'
-          map = '[{"field": "host.name", "dataType": "host", "tlp": 3, "tags": ["workstation"]}]'
+          map = '{"fields":[{"field": "host.name", "data_type": "host", "tlp": 3, "tags": ["workstation"]}]}'
         }
         if (value == "Exchange Mailbox") {
           conf = '{"hosts": ["https://ews.mydomain.com"], "mailbox_name": "phishing@reflexsoar.com", "poll_interval": "30m"}'
