@@ -39,6 +39,7 @@ const CaseDetails = () => import('@/views/CaseDetails')
 const Lists = () => import('@/views/Lists')
 const ListsList = () => import('@/views/ListsList')
 const Settings = () => import('@/views/Settings')
+const ObservableHistory = () => import('@/views/ObservableHistory')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -119,6 +120,14 @@ function configRoutes () {
           component: Dashboard,
           meta: {
             fetchSettings: true,
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'observables',
+          name: 'Observables',
+          component: ObservableHistory,
+          meta: {
             requiresAuth: true
           }
         },

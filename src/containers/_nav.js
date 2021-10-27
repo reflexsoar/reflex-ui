@@ -22,6 +22,12 @@ export default [
       },
       {
         _name: 'CSidebarNavItem',
+        name: 'Observables',
+        to: '/observables',
+        icon: 'cil-center-focus'
+      },
+      {
+        _name: 'CSidebarNavItem',
         name: 'Playbooks',
         to: '/playbooks',
         icon: 'cil-book'

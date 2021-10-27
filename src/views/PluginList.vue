@@ -32,7 +32,7 @@
             <CCardFooter>
               <CRow>
                 <CCol class="text-left">
-                  <span style="font-size: .85em;"><b>Last Updated:</b> {{plugin.modified_at | moment('from', 'now')}}<br><b>Configured:</b> {{plugin.configs.length}}</span>
+                  <span style="font-size: .85em;"><b>Last Updated:</b> {{plugin.modified_at | moment('from', 'now')}}<br><b>Configured:</b> {{plugin.configs ? plugin.configs.length : 0}}</span>
                 </CCol>
                 <CCol class="text-right">
                   <CButton color="primary" :to="plugin.uuid" size="sm">Configure</CButton>

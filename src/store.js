@@ -1916,6 +1916,17 @@ const actions = {
         reject(err)
       })
     })
+  },
+  fetchObservableHistory({commit}, value) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/observable/history/${value}`, method: 'GET'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
   
 
