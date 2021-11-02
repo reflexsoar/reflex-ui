@@ -40,6 +40,7 @@ const Lists = () => import('@/views/Lists')
 const ListsList = () => import('@/views/ListsList')
 const Settings = () => import('@/views/Settings')
 const ObservableHistory = () => import('@/views/ObservableHistory')
+const UserProfile = () => import('@/views/UserProfile')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -424,6 +425,14 @@ function configRoutes () {
               }
             }
           ]
+        },
+        {
+          path: 'my_profile',
+          name: 'My Profile',
+          component: UserProfile,
+          meta: {
+            requiresAuth: true
+          }
         },
         {
           path: 'settings',

@@ -47,13 +47,14 @@
                             <timeline-item v-for="item in history.timeline" :key="item.uuid"><b>{{ item.created_at | moment('LLLL') }}</b>
                             <CCard>
                                 <CCardHeader>
-                                    <b><CIcon v-if="item.type == 'case'" name="cilBook"/><CIcon v-else name="cilBell"/>&nbsp;{{item.title}}</b>
+                                    <b><CIcon v-if="item.type == 'case'" name="cilBriefcase"/><CIcon v-else name="cilBell"/>&nbsp;{{item.title}}</b>
                                 </CCardHeader>
                                 <CCardBody>
+                                    
                                     <vue-markdown style="margin-bottom:0px;">{{item.description}}</vue-markdown>
                                     <CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;"><CButton color="secondary" class="tag" size="sm" style="margin-top:5px; margin-bottom:0px;" @click="search('tester')">Tester</CButton></li>
                                 </CCardBody>
-                                <CCardFooter>
+                                <CCardFooter style="background-color:#f0f0f0;">
                                     <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
                                 </CCardFooter>
                             </CCard>
@@ -87,10 +88,18 @@ export default {
         return {
             observable_value: "",
             history: {},
-            history_loaded: false
+            history_loaded: false,
         }
     },
     methods: {
+        getMoreHistory() {
+            window.onscroll = () => {
+                let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+                if (bottomOfWindow) {
+                    console.log(bottomOfWindow)
+                }
+            }
+        },
         search: function (value) {
             this.$store.dispatch('fetchObservableHistory', value).then(resp => {
                 this.history_loaded = false
@@ -101,6 +110,9 @@ export default {
                 }
             })
         }
+    },
+    mounted() {
+        this.getMoreHistory()
     }
 }
 </script>

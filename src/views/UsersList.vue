@@ -61,14 +61,14 @@
           </CCol>
         </CRow>
         <CInput v-model="user.email" label="Email" placeholder="user@reflexsoar.com" required/>
-        <CSelect :options="roles" required label="Role" :value.sync="user.role_uuid" placeholder="Select a role" required/>
-        <CInput v-model="user.password" type="password" label="Password" placeholder="Enter your desired password..." v-bind:requred="modal_mode == 'new'"/>
-        <CInput v-model="user.confirm_password"  type="password" label="Confirm Password" placeholder="Confirm password" v-bind:requred="modal_mode == 'new'"/>
+        <CSelect :options="roles" required label="Role" :value.sync="user.role_uuid" placeholder="Select a role"/>
+        <CInput v-model="user.password" type="password" label="Password" placeholder="Enter your desired password..." v-bind:required="modal_mode == 'new'"/>
+        <CInput v-model="user.confirm_password"  type="password" label="Confirm Password" placeholder="Confirm password" v-bind:required="modal_mode == 'new'"/>
         <label>User Locked?</label><br>
         <CSwitch color="danger" label-on="Yes" label-off="No" v-bind:checked.sync="user.locked"/>
       </CForm>
       <template #footer>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton type="submit" form="userForm" color="primary">{{modal_submit_text}}</CButton>
       </template>
     </CModal>

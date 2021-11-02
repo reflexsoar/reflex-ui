@@ -41,15 +41,12 @@
     >
       <strong>Settings</strong>
     </CDropdownHeader>
-    <CDropdownItem>
-      <CIcon name="cil-user" /> Profile
-    </CDropdownItem>
-    <CDropdownItem>
-      <CIcon name="cil-settings" /> Settings
+    <CDropdownItem @click="profile">
+      <CIcon name="cil-user" />Profile
     </CDropdownItem>
     <CDropdownDivider/>
-    <CDropdownItem>
-      <CIcon name="cil-lock-locked" /> <a @click="logout">Logout</a>
+    <CDropdownItem click="logout">
+      <CIcon name="cil-lock-locked" />Logout
     </CDropdownItem>
   </CDropdown>
 </template>
@@ -66,6 +63,9 @@ export default {
     isLoggedIn: function() {return this.$store.getters.isLoggedIn}
   },
   methods: {
+    profile: function() {
+      this.$router.push('/my_profile')
+    },
     logout: function() {
       this.$store.dispatch('logout')
       .then(() => {

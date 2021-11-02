@@ -12,6 +12,7 @@ const state = {
   current_user: {
     'permissions': []
   },
+  mfa_enabled: false,
   audit_logs: [],
   dashboard_metrics: {},
   credentials: [],
@@ -511,10 +512,14 @@ const mutations = {
   logout(state){
     state.status = ''
     state.access_token = ''
+  },
+  mfa_enabled(state, status){
+    state.mfa_enabled = status
   }
 }
 
 const getters = {
+  mfa_enabled: state => { return state.mfa_enabled },
   isLoggedIn: state => !!state.access_token,
   authStatus: state => state.status,
   addStatus: state => state.status,
@@ -1927,9 +1932,54 @@ const actions = {
         reject(err)
       })
     })
+  },
+  fetchMFAQRCode({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/generate_mfa_qr`, method: 'GET'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  enableMFA({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/enable_mfa`, method: 'GET'})
+      .then(resp => {
+        if (resp.status == 200) {
+          console.log(true)
+          commit('mfa_enabled', true)
+          resolve(resp)
+        } else {
+          commit('mfa_enabled', false)
+          resolve(resp)
+        }                
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  disableMFA({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/disable_mfa`, method: 'GET'})
+      .then(resp => {
+        if (resp.status == 200) {
+          console.log(true)
+          commit('mfa_enabled', false)
+          resolve(resp)
+        } else {
+          commit('mfa_enabled', true)
+          resolve(resp)
+        }                
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
-  
-
 }
 
 export default new Vuex.Store({
