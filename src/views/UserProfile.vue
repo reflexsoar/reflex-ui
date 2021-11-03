@@ -4,7 +4,7 @@
       <CCol>
         <CRow>
           <CCol xs="12" lg="12">
-            <CAlert :show.sync="this.success_message" color="success" closeButton>
+            <CAlert :show.sync="success_message" color="success" closeButton>
               {{this.success_message}}
             </CAlert>
             <img width="150px" height="150px" src="#" style="float:left; margin-right: 25px"/>
@@ -31,7 +31,7 @@
         </CRow>
       </CCol>
       <CModal title="Change Password" :centered="true" size="lg" :show.sync="edit_password_modal">
-      <CAlert :show.sync="this.error" color="danger" closeButton>
+      <CAlert :show.sync="error" color="danger" closeButton>
             {{error_message}}
       </CAlert>
       <CForm @submit.prevent="updatePassword" id="userForm">
@@ -44,7 +44,7 @@
       </template>
     </CModal>
     <CModal title="Enable MFA" :centered="true" size="lg" :show.sync="enable_mfa_modal">
-      <CAlert :show.sync="this.error" color="danger" closeButton>
+      <CAlert :show.sync="error" color="danger" closeButton>
             {{error_message}}
       </CAlert>
       <div v-if="mfa_wizard_step == 1">
@@ -56,9 +56,20 @@
           <li>Setup complete!</li>
         </ol>
       </div>
-      <div v-if="mfa_wizard_step == 2"><center><div v-html="qr_code"></div></center></div>
+      <div v-if="mfa_wizard_step == 2">
+        <center>
+          <div v-if="qr_code === null" style="margin: auto; text-align:center; verticle-align:middle;">
+           <p>Generating QR Code</p>
+           <CSpinner
+                color="dark"
+                style="width:6rem;height:6rem;"
+            />
+          </div>
+          <div v-else v-html="qr_code"></div>
+        </center>
+      </div>
       <div v-if="mfa_wizard_step == 3">
-        Confirm MFA Code
+        <CInput v-model="mfa_token" label="Confirm MFA Code"/>
       </div><center></center>
       <template #footer>
         <CButton @click="enable_mfa_modal = !enable_mfa_modal" color="secondary">Cancel</CButton>
@@ -84,20 +95,25 @@ export default {
       error_message: "",
       edit_password_modal: false,
       enable_mfa_modal: false,
-      qr_code: "",
+      qr_code: null,
       mfa_wizard_step: 0,
       mfa_enable_success: false,
-      success_message: null
+      success_message: null,
+      mfa_token: "",
+      loading_code: false
     }
   },
   methods: {
     nextStep () {
 
       if (this.mfa_wizard_step == 1) {
-        this.enable_mfa()
         if (this.mfa_enable_success) {
           this.mfa_wizard_step += 1
+          this.loading_code = true
           this.fetch_qr_code()
+          this.loading_code = false
+          this.error = false
+          this.error_message = ""
           return 0
         } else {
           this.error = true
@@ -106,14 +122,30 @@ export default {
       }
 
       if (this.mfa_wizard_step == 2) {
+        this.error = false
+        this.error_message = ""
         this.mfa_wizard_step += 1
       }
     },
     finishMFASetup() {
-      this.current_user.mfa_enabled = true
-      this.enable_mfa_modal = false
+      console.log('finish')
+      let token = {
+        token: this.mfa_token
+      }
+      this.$store.dispatch('validateMFASetup', token).then(() => {
+          this.current_user.mfa_enabled = true
+          this.enable_mfa_modal = false
+          this.success_message = "Multi-factor authentication added successfully."
+      }).catch(() => {
+        this.error = true
+        this.error_message = "Invalid MFA Code. Try again"
+      })     
     },
     previousStep () {
+      if(this.mfa_wizard_step == 2) {
+        this.qr_code = null
+        this.mfa_wizard_step == 1
+      }
       if(this.mfa_wizard_step == 1) {
         this.mfa_wizard_step = 1
       } else {
@@ -126,14 +158,20 @@ export default {
       })
     },
     enable_mfa() {
-      this.$store.dispatch('enableMFA')
-      this.mfa_enable_success = this.$store.getters.mfa_enabled      
+      this.$store.dispatch('enableMFA').then(resp => {
+        this.mfa_enable_success = true
+        console.log(this.mfa_enable_success)
+      }, err => {
+        console.log('err')
+        this.mfa_enable_success = false
+      })
     },
     disable_mfa() {
       this.$store.dispatch('disableMFA')
       this.current_user.mfa_enabled = false
     },
     start_mfa_wizard() {
+      this.enable_mfa()
       this.enable_mfa_modal = true
       this.mfa_enable_success = false
       this.mfa_wizard_step = 1    

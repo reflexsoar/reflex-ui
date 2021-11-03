@@ -1975,20 +1975,28 @@ const actions = {
       })
     })
   },
+  validateMFASetup({commit}, token) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/validate_mfa_setup`, data: token, method: 'POST'})
+      .then(resp => {
+        commit('mfa_enabled', true)
+        resolve(resp)
+      })
+      .catch(err => {
+        commit('mfa_enabled', false)
+        reject(err)
+      })
+    })
+  },
   enableMFA({commit}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/user/enable_mfa`, method: 'GET'})
       .then(resp => {
-        if (resp.status == 200) {
-          console.log(true)
-          commit('mfa_enabled', true)
-          resolve(resp)
-        } else {
-          commit('mfa_enabled', false)
-          resolve(resp)
-        }                
+        commit('mfa_enabled', true)
+        resolve(resp)
       })
       .catch(err => {
+        commit('mfa_enabled', false)
         reject(err)
       })
     })
