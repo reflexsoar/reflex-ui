@@ -45,7 +45,7 @@
       <CIcon name="cil-user" />Profile
     </CDropdownItem>
     <CDropdownDivider/>
-    <CDropdownItem click="logout">
+    <CDropdownItem @click="logout">
       <CIcon name="cil-lock-locked" />Logout
     </CDropdownItem>
   </CDropdown>

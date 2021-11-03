@@ -52,11 +52,17 @@
           </CRow>
         </CCol>
         <CCol col="6">
+          <h4>User Account Settings</h4>
+          <CInput v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" label="Minimum Password Length" v-model="settings.minimum_password_length" placeholder="8" disabled/>
+          <label>Enforce Password Complexity</label><br><CSwitch v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.enforce_password_complexity"/><br>
+          <small class="form-text text-muted w-100">Requires passwords to contain special characters</small><br>
+          <CTextarea v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" label="Disallowed Keywords" rows="5" description="Blocks keywords from being used in new passwords." disabled/>
           <h4>Advanced Settings</h4>
           <label v-c-tooltip="{
             content: 'Only requests from IPs in the Approve IPs list will be allowed to communicate with the platform.',
-            placement: 'right'}">Restrict Access to Approved IPs</label><i> - Warning: This setting can lock you out of your console</i><br>
-            <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_approved_ips"/><br><br>
+            placement: 'right'}">Restrict Access to Approved IPs</label><br>
+            <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_approved_ips"/><br>
+            <small class="form-text text-danger w-100"><b>WARNING - This setting can prevent access to your console.</b></small><br>
           <CTextarea v-model="settings.approved_ips" label="Approved IPs" rows="5"/>
           <h4>Mail Settings</h4>
           <CInput v-model="settings.email_from" label="Email From" placeholder="admin@reflexsoar.com"/>

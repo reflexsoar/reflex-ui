@@ -4,6 +4,9 @@
       <CCol>
         <CRow>
           <CCol xs="12" lg="12">
+            <CAlert :show.sync="this.success_message" color="success" closeButton>
+              {{this.success_message}}
+            </CAlert>
             <img width="150px" height="150px" src="#" style="float:left; margin-right: 25px"/>
             <h1>{{current_user.first_name}} {{current_user.last_name}}</h1>
             <h4>Username: {{current_user.username}}</h4>
@@ -31,12 +34,12 @@
       <CAlert :show.sync="this.error" color="danger" closeButton>
             {{error_message}}
       </CAlert>
-      <CForm @submit.prevent="update_password" id="userForm">
+      <CForm @submit.prevent="updatePassword" id="userForm">
         <CInput v-model="password" type="password" label="Password" placeholder="Enter your desired password..." required/>
         <CInput v-model="confirm_password"  type="password" label="Confirm Password" placeholder="Confirm password" required/>
       </CForm>
       <template #footer>
-        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
+        <CButton @click="dismissPasswordModal()" color="secondary">Cancel</CButton>
         <CButton type="submit" form="userForm" color="primary">Update Password</CButton>
       </template>
     </CModal>
@@ -83,7 +86,8 @@ export default {
       enable_mfa_modal: false,
       qr_code: "",
       mfa_wizard_step: 0,
-      mfa_enable_success: false
+      mfa_enable_success: false,
+      success_message: null
     }
   },
   methods: {
@@ -135,7 +139,34 @@ export default {
       this.mfa_wizard_step = 1    
 
     },
-    dismiss() {
+    changePasswordModal() {
+      this.password = ""
+      this.confirm_password = ""
+      this.error = false
+      this.error_message = ""
+      this.edit_password_modal = true      
+    },
+    updatePassword() {
+      if(this.password != this.confirm_password) {
+        this.error = true
+        this.error_message = "Passwords do not match"
+      } else {
+        this.error = false
+        this.error_message = ""
+        let user = {
+          password: this.confirm_password
+        }
+        let uuid = this.current_user.uuid
+        this.$store.dispatch('updateUser', {uuid, user}).then(resp => {
+          this.edit_password_modal = false
+          this.success_message = "Successfully changed password."
+          this.password = ""
+          this.confirm_password = ""
+        })
+        
+      }
+    },
+    dismissPaswordModal() {
       this.edit_password_modal = false,
       this.password = "",
       this.confirm_password = ""
