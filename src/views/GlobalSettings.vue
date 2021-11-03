@@ -53,10 +53,12 @@
         </CCol>
         <CCol col="6">
           <h4>User Account Settings</h4>
+          <label>Require MFA</label><br><CSwitch v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_mfa"/><br>
+          <small class="form-text text-muted w-100">When enabled all users must configure MFA at first login.</small><br>
           <CInput v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" label="Minimum Password Length" v-model="settings.minimum_password_length" placeholder="8" disabled/>
           <label>Enforce Password Complexity</label><br><CSwitch v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.enforce_password_complexity"/><br>
-          <small class="form-text text-muted w-100">Requires passwords to contain special characters</small><br>
-          <CTextarea v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" label="Disallowed Keywords" rows="5" description="Blocks keywords from being used in new passwords." disabled/>
+          <small class="form-text text-muted w-100">Requires passwords to contain special characters.</small><br>
+          <CTextarea v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled label="Disallowed Keywords" rows="5" v-model="settings.disallowed_password_keywords" description="Blocks keywords from being used in new passwords.  Each keyword should be on it's own line."/>          
           <h4>Advanced Settings</h4>
           <label v-c-tooltip="{
             content: 'Only requests from IPs in the Approve IPs list will be allowed to communicate with the platform.',

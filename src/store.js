@@ -106,6 +106,9 @@ const mutations = {
     state.access_token = data['access_token']
     state.refresh_token = data['refresh_token']
   },
+  auth_mfa_check(state) {
+    state.status = 'mfa_check'
+  },
   auth_error(state){
     state.status = 'error'
   },
@@ -578,13 +581,40 @@ const actions = {
       commit('auth_request')
       Axios({url: `${BASE_URL}/auth/login`, data: user, method: 'POST'})
       .then(resp => {
-        const access_token = resp.data['access_token']
-        const refresh_token = resp.data['refresh_token']
-        localStorage.setItem('access_token', access_token)
-        localStorage.setItem('refresh_token', refresh_token)
-        Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
-        commit('auth_success', {access_token, refresh_token})
-        resolve(resp)
+        if(resp.data['mfa_challenge_token'] !== undefined) {
+          const mfa_challenge_token = resp.data['mfa_challenge_token']
+          localStorage.setItem('mfa_challenge_token', mfa_challenge_token)
+          commit('auth_mfa_check')
+          resolve(resp)
+        } else {
+          const access_token = resp.data['access_token']
+          const refresh_token = resp.data['refresh_token']
+          localStorage.setItem('access_token', access_token)
+          localStorage.setItem('refresh_token', refresh_token)
+          Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+          commit('auth_success', {access_token, refresh_token})
+          resolve(resp)
+        }
+      })
+      .catch(err => {
+        commit('auth_error')
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')        
+        reject(err)
+      })
+    })
+  },
+  checkMFA({commit}, user) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/auth/mfa`, data: user, method: 'POST'})
+      .then(resp => {
+          const access_token = resp.data['access_token']
+          const refresh_token = resp.data['refresh_token']
+          localStorage.setItem('access_token', access_token)
+          localStorage.setItem('refresh_token', refresh_token)
+          Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+          commit('auth_success', {access_token, refresh_token})
+          resolve(resp)
       })
       .catch(err => {
         commit('auth_error')
@@ -641,6 +671,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit('logout')
       localStorage.removeItem('access_token')
+      localStorage.removeItem('mfa_challenge_token')
       delete Axios.defaults.headers.common['Authorization']
       resolve()      
     })

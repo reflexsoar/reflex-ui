@@ -76,7 +76,14 @@ export default {
       let username = this.username
       let password = this.password
       this.$store.dispatch('login', { username, password })
-      .then(() => this.$router.push('/'))
+      .then(() => {
+        if(this.$store.getters.authStatus == "mfa_check") {
+          console.log('MFA@')
+          this.$router.push('/mfa')
+        } else if (this.$store.getters.authStatus == "success") {
+          this.$router.push('/')
+        }
+      })
       .catch(err => console.log(err))
     },
     authStatus: function() {

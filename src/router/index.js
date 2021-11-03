@@ -47,6 +47,7 @@ const Page401 = () => import('@/views/pages/Page401')
 const Page404 = () => import('@/views/pages/Page404')
 const Page500 = () => import('@/views/pages/Page500')
 const Login = () => import('@/views/Login')
+const MFAPrompt = () => import('@/views/MFAPrompt')
 const ForgotPassword = () => import('@/views/ForgotPassword')
 const ResetPassword = () => import('@/views/ResetPassword')
 const Register = () => import('@/views/pages/Register')
@@ -68,7 +69,7 @@ router.beforeEach((to, from, next) => {
   store.commit('clear_alert')
 
   // Before each request refresh the users permissions
-  if(to.matched.some(record => record.path != '/forgot_password' && !record.path.startsWith('/reset_password') && record.path != '/login' && record.path != '/')) {
+  if(to.matched.some(record => record.path != '/forgot_password' && !record.path.startsWith('/reset_password') && record.path != '/login' && record.path != '/mfa' && record.path != '/')) {
     store.dispatch('getMe').then(() => {
       if(to.matched.some(record => {
         let current_user = store.getters.current_user
@@ -86,6 +87,15 @@ router.beforeEach((to, from, next) => {
   if(to.matched.some(record => record.meta.fetchSettings)) {
     store.dispatch('getSettings')
   }  
+
+  if(to.matched.some(record => record.meta.requiresMFAChallenge)) {
+    if (localStorage.getItem('mfa_challenge_token') === null) {
+      next('/login')
+      return
+    } else {
+      next()
+    }
+  }
 
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isLoggedIn) {
@@ -455,6 +465,14 @@ function configRoutes () {
       path: '/login',
       name: 'Login',
       component: Login
+    },
+    { 
+      path: '/mfa',
+      name: 'MFA',
+      component: MFAPrompt,
+      meta: {
+        requiresMFAChallenge: true
+      }
     },
     {
       path: '/forgot_password',
