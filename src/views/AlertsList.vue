@@ -565,15 +565,15 @@ export default {
           }
 
           if(filter.filter_type == 'tag') {
-            tag_filters.push(filter.value)
+            tag_filters.push(encodeURIComponent(filter.value))
           }
 
           if(filter.filter_type == 'observable') {
-            observables_filters.push(filter.value)
+            observables_filters.push(encodeURIComponent(filter.value))
           }
 
           if(filter.filter_type == 'search') {
-            search.push(filter.value)
+            search.push(encodeURIComponent(filter.value))
           }
 
           if(filter.filter_type == 'severity') {
@@ -581,7 +581,7 @@ export default {
           }
 
           if(filter.filter_type == 'title') {
-            title_filter = [filter.value]
+            title_filter = [encodeURIComponent(filter.value)]
           }
         }
 
