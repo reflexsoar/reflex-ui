@@ -128,7 +128,6 @@ export default {
       }
     },
     finishMFASetup() {
-      console.log('finish')
       let token = {
         token: this.mfa_token
       }
@@ -160,9 +159,7 @@ export default {
     enable_mfa() {
       this.$store.dispatch('enableMFA').then(resp => {
         this.mfa_enable_success = true
-        console.log(this.mfa_enable_success)
       }, err => {
-        console.log('err')
         this.mfa_enable_success = false
       })
     },

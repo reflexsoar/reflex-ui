@@ -213,7 +213,6 @@ export default {
         'observables': targets,
       }
       data[field] = value
-      console.log(data)
       this.$store.dispatch('bulkUpdateObservables', data).then(resp => {
         this.observables = this.$store.getters.observables
         this.show_bulk_toggle_modal = false
@@ -279,7 +278,6 @@ export default {
         });
     },
     uncheckSafe(item) {
-      console.log("TEST");
       if (item.ioc) {
         item.safe = false;
       }

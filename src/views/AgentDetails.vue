@@ -70,6 +70,16 @@
             </CRow>
         </CCardFooter>
     </CCard>
+    <CCard class="shadow-sm bg-white">
+        <CCardHeader><b>Agent Logs</b></CCardHeader>
+        <CCardBody>
+            <CRow>
+                <CCol>
+                A
+                </CCol>
+            </CRow>
+        </CCardBody>
+    </CCard>
     <CModal title="Delete Agent" :closeOnBackdrop="false" color="danger" :centered="true" :show.sync="delete_modal">
       <CForm id="deleteForm" @submit.prevent="deleteAgent()">
         Are you sure you want to delete the agent <b>{{agent.name}}</b>?

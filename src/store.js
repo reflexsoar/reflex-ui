@@ -273,7 +273,6 @@ const mutations = {
   },
   save_observables(state, observables) {
     state.observables = observables
-    console.log(state.observables)
   },
   save_observable(state, observable) {
     state.observable = observable
@@ -1106,7 +1105,6 @@ const actions = {
         resolve(resp)
       })
       .catch(err => {
-        console.log(err)
         reject(err)
       })
     })
@@ -1241,7 +1239,6 @@ const actions = {
         resolve(resp)
       })
       .catch(err => {
-        console.log(err)
         reject(err)
       })
     })
@@ -2006,7 +2003,6 @@ const actions = {
       Axios({url: `${BASE_URL}/user/disable_mfa`, method: 'GET'})
       .then(resp => {
         if (resp.status == 200) {
-          console.log(true)
           commit('mfa_enabled', false)
           resolve(resp)
         } else {

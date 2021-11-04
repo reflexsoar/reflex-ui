@@ -6,6 +6,26 @@ input {
     color: #768192;
 }
 
+.table {
+    margin-bottom: 0px !important;
+}
+
+.card {
+    border-radius: 0px !important;
+}
+
+.card-header {
+    border-left: 3px solid rgb(60, 75, 100);
+    border-radius: 0px !important;
+}
+.card-body {
+    border-radius: 0px !important;
+}
+
+.card-footer {
+    border-radius: 0px !important;
+}
+
 .dropbox {
     outline: 2px dashed grey; /* the dash box */
     outline-offset: -10px;

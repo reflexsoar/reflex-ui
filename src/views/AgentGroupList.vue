@@ -136,7 +136,6 @@ export default {
         })
       },
       updateAgentGroup() {
-        console.log(this.name, this.description, this.target_agent_group)
         let uuid = this.target_agent_group
         let data = {
           name: this.name,

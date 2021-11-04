@@ -78,7 +78,6 @@ export default {
       this.$store.dispatch('login', { username, password })
       .then(() => {
         if(this.$store.getters.authStatus == "mfa_check") {
-          console.log('MFA@')
           this.$router.push('/mfa')
         } else if (this.$store.getters.authStatus == "success") {
           this.$router.push('/')
