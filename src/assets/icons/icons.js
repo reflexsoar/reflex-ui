@@ -101,7 +101,8 @@ import {
   cilMediaPlay,
   cilTrash,
   cilCenterFocus,
-  cilFlagAlt
+  cilFlagAlt,
+  cilExitToApp
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -179,7 +180,8 @@ export const iconsSet = Object.assign(
     cilMediaPlay,
     cilTrash,
     cilCenterFocus,
-    cilFlagAlt
+    cilFlagAlt,
+    cilExitToApp
   },
   {
     cifUs,
