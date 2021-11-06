@@ -138,8 +138,8 @@ export default {
         let value = event.target.value
         this.plugin = event.target.value
         if (value == "Elasticsearch") {
-          conf = '{"hosts":["https://localhost:9200"],"index":".siem-signals-*","cafile":"","scheme":"https","rule_name":"signal.rule.name","auth_method":"http_auth","search_size":200,"search_period":"15m","check_hostname":false,"severity_field":"signal.rule.severity","source_reference":"signal.parent.id","cert_verification":"none","description_field":"signal.rule.description"}'
-          map = '{"fields":[{"field": "host.name", "data_type": "host", "tlp": 3, "tags": ["workstation"]}]}'
+          conf = '{"hosts":["https://localhost:9200"],"index":".siem-signals-*","cafile":"","scheme":"https","rule_name":"signal.rule.name","auth_method":"http_auth","search_size":200,"search_period":"15m","check_hostname":false,"severity_field":"signal.rule.severity","source_reference":"signal.parent.id","cert_verification":"none","description_field":"signal.rule.description","tag_fields":[], "signature_fields": []}'
+          map = '{"fields":[{"field": "host.name", "alias":"hostname", "data_type": "host", "tlp": 3, "tags": ["workstation"]}]}'
         }
         if (value == "Exchange Mailbox") {
           conf = '{"hosts": ["https://ews.mydomain.com"], "mailbox_name": "phishing@reflexsoar.com", "poll_interval": "30m"}'

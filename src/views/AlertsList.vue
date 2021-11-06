@@ -2,6 +2,7 @@
   <CRow>
     <CCol col="12">
       <h2>Events</h2>
+      {{selected}}
       <CRow>
         <CCol col="12">
           <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
@@ -80,7 +81,7 @@
       <CRow>
         <CCol col="3">
             <div>
-              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAll()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
+              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAllNew()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
             </div>
         </CCol>
         <CCol col="3">
@@ -222,7 +223,7 @@
                 <CCol col="9">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.related_events_count && event.related_events_count > 0"> | {{event.related_events_count}} new</span></CButton>
+                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.related_events_count && event.related_events_count > 0"></span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'data_type':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
@@ -380,6 +381,7 @@ export default {
         use_case_template: false,
         dismissCountDown: 10,
         selected: Array(),
+        selected_events: [],
         mergeIntoCaseModal: false,
         dismissEventModal:false,
         deleteEventModal: false,
@@ -513,7 +515,7 @@ export default {
         this.selected = []
         let source_event = this.filtered_events.find((event) => event.signature == signature)
         this.event_signature = source_event.title
-        this.$store.dispatch('getRelatedEvents', source_event.uuid).then(resp => {
+        this.$store.dispatch('getRelatedEvents', source_event.signature).then(resp => {
             this.selected = [...resp.data.events]
             this.rule_observables = this.getEventObservables(source_event.uuid).flat().map( function(obs) { 
               return {'data_type':obs.data_type, 'value': obs.value
@@ -638,6 +640,7 @@ export default {
         } else {
           this.observableFilters = this.observableFilters.filter(item => item.value !== obs.value)
         }
+        this.current_page = 1
         this.filterEvents()
       },
       relatedEvents(signature) {
@@ -652,6 +655,22 @@ export default {
       caseFromCard(uuid){
         this.selected = [uuid]
         this.createCaseModal = true
+      },
+      selectAllNew() {
+        if(!this.select_all) {
+          this.selected = []
+          console.log('SELECT ALL')
+          for (let i in this.filtered_events) {
+            let event = this.filtered_events[i]
+            console.log(event.uuid)
+            this.$store.dispatch('getRelatedEvents', event.signature).then(resp => {
+              this.selected = [...this.selected, ...resp.data.events]
+            })
+            
+          }
+          
+        }
+        console.log(this.selected_events)
       },
       selectAll() {
         if(!this.select_all) {
@@ -676,7 +695,7 @@ export default {
         if(e) {
           if(this.selected.some((item) => { return item === e.uuid})) {
             if(e.related_events_count > 1) {
-              this.$store.dispatch('getRelatedEvents', e.uuid).then(resp => {
+              this.$store.dispatch('getRelatedEvents', e.signature).then(resp => {
                 this.selected = this.selected.filter(item => !resp.data.events.includes(item))
               })
             } else {
@@ -684,7 +703,7 @@ export default {
             }            
           } else {       
             if(e.related_events_count > 1) {
-              this.$store.dispatch('getRelatedEvents', e.uuid).then(resp => {
+              this.$store.dispatch('getRelatedEvents', e.signature).then(resp => {
                 this.selected = [...this.selected, ...resp.data.events]
               })
             } else {
