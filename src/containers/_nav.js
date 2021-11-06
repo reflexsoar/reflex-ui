@@ -10,6 +10,18 @@ export default [
       },
       {
         _name: 'CSidebarNavItem',
+        name: 'Hunting',
+        to: '/hunter',
+        icon: 'cil-magnifying-glass'
+      },
+      {
+        _name: 'CSidebarNavItem',
+        name: 'Detections',
+        to: '/detections',
+        icon: 'cil-shield-alt'
+      },
+      {
+        _name: 'CSidebarNavItem',
         name: 'Cases',
         to: '/cases',
         icon: 'cil-briefcase'

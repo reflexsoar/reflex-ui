@@ -109,9 +109,9 @@
             </CRow>
         </CCardHeader>
         <CCollapse :show="collapse_raw_log">
-        <CCardBody class="bg-dark" style="overflow:scroll">
-            <CRow class="bg-dark" >
-                <CCol col="12" class="bg-dark pre-formatted raw_log">{{jsonify(event.raw_log)}}</CCol>
+        <CCardBody  style="overflow:scroll">
+            <CRow >
+                <CCol col="12"><vue-json-pretty :path="'res'" :data="jsonify(event.raw_log)"></vue-json-pretty></CCol>
             </CRow>
         </CCardBody></CCollapse>
     </CCard>
@@ -179,12 +179,15 @@ import {mapState} from "vuex";
 import hoverselect from './HoverSelect'
 import CreateCaseModal from './CreateCaseModal'
 import MergeEventIntoCaseModal from './MergeEventIntoCaseModal'
+import VueJsonPretty from 'vue-json-pretty';
+import 'vue-json-pretty/lib/styles.css';
 export default {
     name: 'EventDetails',
     components: {
         hoverselect,
         CreateCaseModal,
-        MergeEventIntoCaseModal
+        MergeEventIntoCaseModal,
+        VueJsonPretty
     },
     computed: mapState(['settings']),
     props: {

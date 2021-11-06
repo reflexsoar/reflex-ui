@@ -41,6 +41,8 @@ const ListsList = () => import('@/views/ListsList')
 const Settings = () => import('@/views/Settings')
 const ObservableHistory = () => import('@/views/ObservableHistory')
 const UserProfile = () => import('@/views/UserProfile')
+const Hunter = () => import('@/views/Hunter')
+const DetectionManagement = () => import('@/views/DetectionManagement')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -131,6 +133,22 @@ function configRoutes () {
           component: Dashboard,
           meta: {
             fetchSettings: true,
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'detections',
+          name: 'Detections',
+          component: DetectionManagement,
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'hunter',
+          name: 'Threat Hunting',
+          component: Hunter,
+          meta: {
             requiresAuth: true
           }
         },

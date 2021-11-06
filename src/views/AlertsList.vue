@@ -2,7 +2,6 @@
   <CRow>
     <CCol col="12">
       <h2>Events</h2>
-      {{selected}}
       <CRow>
         <CCol col="12">
           <CAlert :show.sync="alert.show" :color="alert.type" closeButton>

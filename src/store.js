@@ -2014,6 +2014,21 @@ const actions = {
         reject(err)
       })
     })
+  },
+  runThreatHunt({commit}, query) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/hunting/query`, data: query, method: 'POST'})
+      .then(resp => {
+        if (resp.status == 200) {
+          resolve(resp)
+        } else {
+          resolve(resp)
+        }                
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 }
 

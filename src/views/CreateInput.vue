@@ -138,7 +138,7 @@ export default {
         let value = event.target.value
         this.plugin = event.target.value
         if (value == "Elasticsearch") {
-          conf = '{"hosts":["https://localhost:9200"],"index":".siem-signals-*","cafile":"","scheme":"https","rule_name":"signal.rule.name","auth_method":"http_auth","search_size":200,"search_period":"15m","check_hostname":false,"severity_field":"signal.rule.severity","source_reference":"signal.parent.id","cert_verification":"none","description_field":"signal.rule.description","tag_fields":[], "signature_fields": []}'
+          conf = '{"hosts":["https://localhost:9200"],"index":".siem-signals-*","lucene_filter":"", "cafile":"","scheme":"https","rule_name":"signal.rule.name","auth_method":"http_auth","search_size":200,"search_period":"15m","check_hostname":false,"severity_field":"signal.rule.severity","source_reference":"signal.parent.id","cert_verification":"none","description_field":"signal.rule.description","tag_fields":[], "signature_fields": []}'
           map = '{"fields":[{"field": "host.name", "alias":"hostname", "data_type": "host", "tlp": 3, "tags": ["workstation"]}]}'
         }
         if (value == "Exchange Mailbox") {
