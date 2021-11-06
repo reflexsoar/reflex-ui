@@ -203,7 +203,7 @@
                     <input type="checkbox" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
-                  <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid).slice(0,5)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip.hover.click="`${obs.tags}`" size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="getEventObservables(event.uuid).length > 5" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(event.uuid).slice(5))}"><small>&nbsp;+{{ getEventObservables(event.uuid).length - 5}}</small></span><br>
+                  <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid).slice(0,5)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip.hover.click="`${obs.tags}`" size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="getEventObservables(event.uuid).length > 5" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(event.uuid).slice(5))}"><small>&nbsp;+{{ getEventObservables(event.uuid).length - 5}}</small></span><br>
                   <!--<CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid)" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>-->
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -616,7 +616,7 @@ export default {
         let content = "<ul style='list-style-type: none; padding:0; margin: 0;'>"
         for(let o in observables) {
           let obs = observables[o]
-          content += `<li><b>${obs.data_type}</b>: ${this.sanitizeHTML(obs.value)}</li>`
+          content += `<li><b>${obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }</b>: ${this.sanitizeHTML(obs.value)}</li>`
         }
         content += "</ul>"
         return content

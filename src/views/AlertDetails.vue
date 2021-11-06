@@ -74,7 +74,7 @@
             >
                 <template #value="{item}">
                     <td>
-                        {{item.value | defang}}
+                        <b>{{item.value | defang}}</b><br><small>{{item.source_field.toLowerCase()}} | {{item.data_type}}</small>
                     </td>
                 </template>
                 <template #ioc="{item}">
@@ -92,11 +92,6 @@
                         <CSwitch style="padding-top:3px" color="success" label-on="Yes" label-off="No" :checked.sync="item.safe"/>
                     </td>
                 </template>
-                <template #dataType="{item}">
-                    <td>
-                        {{item.data_type | defang}}
-                    </td>
-                </template>                
                 <template #tags="{item}">
                     <td>
                         <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
@@ -196,7 +191,7 @@ export default {
         observable_fields: {
             type: Array,
             default () {
-            return ['value', 'ioc', 'spotted', 'safe', 'dataType', 'tags']
+            return ['value', 'ioc', 'spotted', 'safe', 'tags']
             }
         },
         caption: {
