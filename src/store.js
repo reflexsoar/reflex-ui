@@ -2026,6 +2026,18 @@ const actions = {
         }                
       })
       .catch(err => {
+        console.log(err)
+        reject(err)
+      })
+    })
+  },
+  testEventRuleQuery({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_rule/test_rule_rql`, data: data, method: 'POST'})
+      .then(resp => {
+          resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })

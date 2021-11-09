@@ -28,13 +28,10 @@
                 
                 </div>
                 <div name="create-case-template-step-3" v-if="step == 3">
-                    <h4>Observable Matching</h4>
-                    <p>The observables selected here must match for the Rule to apply.  A signature of the observables is calculated to make sure only specific combinations are acted on.</p>
-                    <multiselect style="z-index:50" :options="rule_observables" v-model="observables" :custom-label='observableLabel' multiple track-by="value" label="value">
-                        <template slot="option" slot-scope="props">
-                            <b>{{props.option.data_type}}</b>: {{props.option.value}}
-                        </template>
-                    </multiselect>
+                    <h4>Event Query</h4>
+                    <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://github.com/reflexsoar/reflex-docs/blob/main/rql.md" target="_new">here</a> for a syntax reference.</p>
+                    <CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>
+                    <CButton color="primary" size="sm" @click="test_query()">Test Query</CButton><i><span v-if="test_running">&nbsp;Running test...</span><span v-if="test_result">&nbsp;{{test_result}}</span></i>
                 </div>
                 <div name="create-case-template-step-4" v-if="step == 4">
                     <h4>Actions</h4>
@@ -94,13 +91,12 @@
       <template #footer>
           <CButton @click="dismiss()" color="secondary">Cancel</CButton>
           <CButton v-if="step != 1" @click="previousStep()" color="info">Previous</CButton>
-          <CButton v-if="step != final_step" @click="nextStep()" color="primary">Next</CButton>
+          <CButton v-if="step != final_step" @click="nextStep()" color="primary" :disabled="test_failed">Next</CButton>
           <CButton v-if="step == final_step" @click="createEventRule()" color="primary">Create</CButton>
       </template>
     </CModal>
 </div>
 </template>
-
 
 <script>
 import {vSelect} from "vue-select";
@@ -111,6 +107,7 @@ export default {
         show: Boolean,
         events: Array,
         event_signature: String,
+        source_event_uuid: String,
         rule_observables: Array
     },
     computed: mapState(['settings']),
@@ -127,6 +124,9 @@ export default {
             expire: true,
             step: 1,
             final_step: 5,
+            test_running: false,
+            test_result: "",
+            test_failed: false,
             target_case: []
         }
     },
@@ -138,9 +138,9 @@ export default {
         },
         modalStatus: function(){
             if(this.modalStatus) {
+                this.test_failed = false
                 this.loadData()
                 this.name = "Rule for event signature "+this.event_signature
-                this.observables = this.rule_observables
             }
             this.$emit('update:show', this.modalStatus)
             if(!this.modalStatus) {
@@ -163,6 +163,27 @@ export default {
         //this.$store.dispatch('getSettings')
     },
     methods: {
+        test_query() {
+            let data = {
+                'uuid': this.source_event_uuid,
+                'query': this.query
+            }
+            this.test_result = ""
+            this.test_running = true
+            this.$store.dispatch('testEventRuleQuery', data).then(resp => {
+                if (resp.data.success == true) {
+                    this.test_failed = false
+                } else {
+                    this.test_failed = true
+                }
+                this.test_result = resp.data.message
+                this.test_running = false
+            }).catch(err => {
+                this.test_running = false
+                this.test_failed = true                
+                this.test_result = err.response.data.message
+            })
+        },
         createEventRule() {
             let rule = {
                 name: this.name,
@@ -173,7 +194,7 @@ export default {
                 expire_days: parseInt(this.expire_days),
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
-                observables: this.observables
+                query: this.query
             }
             this.$store.dispatch('createEventRule', rule).then(resp => {
                 this.modalStatus = false
@@ -198,9 +219,6 @@ export default {
         },
         toggleMergeToCase() {
             this.merge_into_case = !this.merge_into_case
-        },
-        observableLabel({data_type, value}) {
-            return `${data_type}: ${value}`
         },
         caseLabel({id, title}) {
             if(id && title) {
