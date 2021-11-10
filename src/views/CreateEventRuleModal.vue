@@ -103,7 +103,8 @@
   /* required class */
   .my-editor {
     /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
-    background: #fdfdfd;
+    /*background: #fdfdfd;*/
+    background: #0e0e0e;
     color: #ccc !important;
     font-weight: bold;
     border: 1px solid rgb(216, 219, 224);
@@ -128,6 +129,7 @@ import { PrismEditor } from 'vue-prism-editor'
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhere
 import 'prismjs/components/prism-python';
+import '../assets/js/prism-rql';
 import 'prismjs/themes/prism-tomorrow.css'; // import syntax highlighting styles
 
 import { mapState} from 'vuex';
@@ -199,7 +201,7 @@ export default {
     },
     methods: {
         highlighter(code) {
-            return highlight(code, languages.py);
+            return highlight(code, languages.rql);
         },
         test_query() {
             let data = {

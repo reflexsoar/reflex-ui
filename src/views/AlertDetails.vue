@@ -111,7 +111,7 @@
         <CCollapse :show="collapse_raw_log">
         <CCardBody  style="overflow:scroll">
             <CRow >
-                <CCol col="12"><vue-json-pretty :path="'res'" :data="jsonify(event.raw_log)"></vue-json-pretty></CCol>
+                <CCol col="12"><vue-json-pretty :showLength="true" selectableType="multiple" :deepCollapseChildren="true" :deep="1" :path="'res'" :data="jsonify(event.raw_log)"></vue-json-pretty></CCol>
             </CRow>
         </CCardBody></CCollapse>
     </CCard>
