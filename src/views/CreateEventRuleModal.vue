@@ -176,6 +176,8 @@ export default {
             if(this.modalStatus) {
                 this.test_failed = false
                 this.loadData()
+                this.query = this.generateRule()
+                console.log(this.observables)
                 this.name = "Rule for event signature "+this.event_signature
             }
             this.$emit('update:show', this.modalStatus)
@@ -199,6 +201,21 @@ export default {
         //this.$store.dispatch('getSettings')
     },
     methods: {
+        generateRule() {
+            /* Generates a basic rule for the selected Event that an analyst
+            can use as their base */
+            let rule_text = "# System generated base query that includes all observables and the event title\n"
+            rule_text += "# Pin this rule to this event by it's title\n"
+            rule_text += `title = "${this.event_signature}"\n`
+            rule_text += "\n# Default matching on all present observables\n"
+            rule_text += '# Consider fine tuning this with the expands function\n'
+
+            let observable_values = this.rule_observables.map(obs => obs.value.replace('\\','\\\\'))
+            console.log(observable_values)
+            rule_text += `and observables.value|all In ["${observable_values.join('","')}"]`
+            
+            return rule_text
+        },
         highlighter(code) {
             return highlight(code, languages.rql);
         },
