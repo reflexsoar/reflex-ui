@@ -30,7 +30,8 @@
                 <div name="create-case-template-step-3" v-if="step == 3">
                     <h4>Event Query</h4>
                     <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://github.com/reflexsoar/reflex-docs/blob/main/rql.md" target="_new">here</a> for a syntax reference.</p>
-                    <CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>
+                    <prism-editor class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
+                    <!--<CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>-->
                     <CButton color="primary" size="sm" @click="test_query()">Test Query</CButton><i><span v-if="test_running">&nbsp;Running test...</span><span v-if="test_result">&nbsp;{{test_result}}</span></i>
                 </div>
                 <div name="create-case-template-step-4" v-if="step == 4">
@@ -98,10 +99,43 @@
 </div>
 </template>
 
+<style>
+  /* required class */
+  .my-editor {
+    /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
+    background: #fdfdfd;
+    color: #ccc !important;
+    font-weight: bold;
+    border: 1px solid rgb(216, 219, 224);
+    border-radius: 0.25rem;
+    box-shadow: inset 0 1px 1px rgb(0 0 21 / 8%);
+
+    /* you must provide font-family font-size line-height. Example: */
+    font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 5px;
+  }
+
+  /* optional class for removing the outline */
+  .prism-editor__textarea:focus {
+    outline: none;
+  }
+</style>
 <script>
 import {vSelect} from "vue-select";
+import { PrismEditor } from 'vue-prism-editor'
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhere
+import 'prismjs/components/prism-python';
+import 'prismjs/themes/prism-tomorrow.css'; // import syntax highlighting styles
+
 import { mapState} from 'vuex';
+
 export default {
+    components: {
+        PrismEditor,
+    },
     name: 'CreateEventRuleModal',
     props: {
         show: Boolean,
@@ -127,7 +161,8 @@ export default {
             test_running: false,
             test_result: "",
             test_failed: false,
-            target_case: []
+            target_case: [],
+            query: ""
         }
     },
     watch: {
@@ -163,6 +198,9 @@ export default {
         //this.$store.dispatch('getSettings')
     },
     methods: {
+        highlighter(code) {
+            return highlight(code, languages.py);
+        },
         test_query() {
             let data = {
                 'uuid': this.source_event_uuid,

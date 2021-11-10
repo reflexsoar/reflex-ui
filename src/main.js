@@ -13,6 +13,7 @@ import VueMoment from 'vue-moment'
 import moment from 'moment-timezone'
 import VueMarkdown from 'vue-markdown'
 import VueClipboard from 'vue-clipboard2'
+import Prism from 'prismjs';
 
 Vue.config.performance = true
 Vue.use(CoreuiVue)
