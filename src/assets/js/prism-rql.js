@@ -8,15 +8,8 @@ Prism.languages.rql = {
 		greedy: true
 	},
 
-	//'verb': {
-	//	pattern: /(\|\s*)[a-z][\w-]*/i,
-	//	lookbehind: true,
-	//	alias: 'keyword'
-	//},
-
-
 	'class-name': /\b(?:[Ii]n|eq|EQ|Eq|[Rr]eg[Ee]xp|RE|re|[Ee]xpand|[Ee]xists|[Cc]ontains|(?:[Ss]tarts|[Ee]nds)[Ww]ith|not|Not|NOT|ContainsCIS|containscis|GT|gt|Gt|LT|lt|Lt|LTE|lte|Lte|Gte|GTE|gte)\b/,
-	'keyword': /\b(?:and|or|(?:has(?:perfix|suffix)?|(?:starts|ends)with)(?:_cs)?|(?:left|right)(?:anti(?:semi)?|inner|outer|semi)?|matches\s+regex|nulls\s+(?:first|last))(?![\w-])/,
+	'keyword': /\b(?:and|or)/,
 	'boolean': /\b(?:true|false|null)\b/,
 
 	'function': /\b(?:\|length|count|lowercase|refang|b64decode|b64extract|urldecode|any|all|avg|max|min|sum|split)\b/,
@@ -36,10 +29,22 @@ Prism.languages.rql = {
 	'number': /\b(?:0x[0-9A-Fa-f]+|\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)(?:(?:min|sec|[mnµ]s|tick|microsecond|[dhms])\b)?|[+-]?\binf\b/,
 
 	'operator': /=>|[!=]~|[!=<>]=?|[-+*/%|]|\.\./,
-	'punctuation': /[()\[\]{},;.:]/,
+	
+
+	'verb': {
+		pattern: /.*(\|\s*)[a-z][\w-]*/i,
+		lookbehind: true,
+		alias: 'constant'
+	},
     
+	'constant': {
+		pattern: /(?:observables|value|tlp|tags|spotted|safe|source_field|data_type|ioc|original_source_field|title|description|tlp|severity|status|reference|source|signature|tags|raw_log[\.]?.*)/
+	},
+
 	'command': {
 		pattern: /\.[a-z][a-z\d-]*\b/,
 		alias: 'keyword'
 	},
+
+	'punctuation': /[()\[\]{},;.:]/,
 };
