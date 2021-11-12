@@ -18,7 +18,7 @@
                   <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="2" class="text-right">
-                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>
+                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>&nbsp;<CButton size="sm" color="info" to="/event_rules" style='color:#fff'>Manage Event Rules</CButton>
                 </CCol>
               </CRow>
             </CCardHeader>

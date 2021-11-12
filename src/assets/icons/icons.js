@@ -102,7 +102,10 @@ import {
   cilTrash,
   cilCenterFocus,
   cilFlagAlt,
-  cilExitToApp
+  cilExitToApp,
+  cilEye,
+  cilPlus,
+  cil3d
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -181,7 +184,10 @@ export const iconsSet = Object.assign(
     cilTrash,
     cilCenterFocus,
     cilFlagAlt,
-    cilExitToApp
+    cilExitToApp,
+    cilEye,
+    cilPlus,
+    cil3d
   },
   {
     cifUs,

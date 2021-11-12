@@ -43,6 +43,7 @@ const ObservableHistory = () => import('@/views/ObservableHistory')
 const UserProfile = () => import('@/views/UserProfile')
 const Hunter = () => import('@/views/Hunter')
 const DetectionManagement = () => import('@/views/DetectionManagement')
+const EventRuleManagement = () => import('@/views/EventRuleManagement')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -332,6 +333,14 @@ function configRoutes () {
               }
             }
           ]
+        },
+        {
+          path:'event_rules',
+          name:'Event Rules',
+          component: EventRuleManagement,
+          meta: {
+            requiresAuth: true
+          }
         },
         {
           path: 'plugins',

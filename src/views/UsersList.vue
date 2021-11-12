@@ -64,8 +64,16 @@
         <CSelect :options="roles" required label="Role" :value.sync="user.role_uuid" placeholder="Select a role"/>
         <CInput v-model="user.password" type="password" label="Password" placeholder="Enter your desired password..." v-bind:required="modal_mode == 'new'"/>
         <CInput v-model="user.confirm_password"  type="password" label="Confirm Password" placeholder="Confirm password" v-bind:required="modal_mode == 'new'"/>
-        <label>User Locked?</label><br>
-        <CSwitch color="danger" label-on="Yes" label-off="No" v-bind:checked.sync="user.locked"/>
+        <CRow>
+          <CCol col="6">
+            <label>User Locked?</label><br>
+            <CSwitch color="danger" label-on="Yes" label-off="No" v-bind:checked.sync="user.locked"/>
+          </CCol>
+          <CCol col="6">
+            <label>Multi-Factor</label><br>
+            <CSwitch color="success" label-on="On" label-off="Off" @update:checked="toggleMFA(user.mfa_enabled, user.uuid)" v-bind:checked.sync="user.mfa_enabled"></CSwitch>
+          </CCol>
+        </CRow>
       </CForm>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Cancel</CButton>
@@ -192,6 +200,23 @@ export default {
   },
   computed: mapState(['current_user']),
   methods: {
+    toggleMFA(mfa_status, user_uuid) {
+      let data = {}
+      if(mfa_status == true) {
+        console.log(`Turning off MFA for ${user_uuid}`)
+        data = {
+          users: [user_uuid],
+          mfa_enabled: false
+        }
+      } else {
+        console.log(`Turning on MFA for ${user_uuid}`)
+        data = {
+          users: [user_uuid],
+          mfa_enabled: true
+        }        
+      }
+      this.$store.dispatch('toggleMFA', data)
+    },
     userHas(permission) {
       return this.current_user.role.permissions[permission];
     },

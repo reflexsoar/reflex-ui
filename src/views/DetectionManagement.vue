@@ -43,38 +43,7 @@
                 </template>
                 <h3>Sigma Rule</h3>
                 <p>Enter your Sigma rule below, it will be automatically converted to the desired output format.</p>
-                <CTextarea rows="15" placeholder="title: Renamed PowerShell
-id: d178a2d7-129a-4ba4-8ee6-d6e1fecd5d20
-status: experimental
-description: Detects the execution of a renamed PowerShell often used by attackers or malware
-references:
-    - https://twitter.com/christophetd/status/1164506034720952320
-author: Florian Roth, frack113
-date: 2019/08/22
-modified: 2021/07/03
-tags:
-    - car.2013-05-009
-    - attack.defense_evasion
-    - attack.t1036 # an old one
-    - attack.t1036.003    
-logsource:
-    product: windows
-    category: process_creation
-detection:
-    selection:
-        Description|startswith: 
-            - 'Windows PowerShell'
-            - 'pwsh'
-        Company: 'Microsoft Corporation'
-    filter:
-        Image|endswith: 
-            - '\powershell.exe'
-            - '\powershell_ise.exe'
-            - '\pwsh.exe'
-    condition: selection and not filter
-falsepositives:
-    - Unknown
-level: critical"></CTextarea>
+                <prism-editor class="my-editor" v-model="detection.sigma" :highlight="highlighter" line-numbers></prism-editor>
               <CSelect label="Target Backend" :options="backends"></CSelect>
               </CTab>
               <CTab>
@@ -122,14 +91,48 @@ level: critical"></CTextarea>
   </div>
 </template>
 
+<style>
+  /* required class */
+  .my-editor {
+    /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
+    /*background: #fdfdfd;*/
+    background: #0e0e0e;
+    color: #ccc !important;
+    border: 1px solid rgb(216, 219, 224);
+    border-radius: 0.25rem;
+    box-shadow: inset 0 1px 1px rgb(0 0 21 / 8%);
+
+    /* you must provide font-family font-size line-height. Example: */
+    font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 5px;
+    max-height: 400px;
+    overflow: scroll;
+    overflow-x: hidden;
+  }
+
+  /* optional class for removing the outline */
+  .prism-editor__textarea:focus {
+    outline: none;
+    
+  }
+</style>
 <script>
 import {mapState} from 'vuex';
+import { PrismEditor } from 'vue-prism-editor'
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhere
+import 'prismjs/components/prism-yaml';
+import '../assets/js/prism-rql';
+import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 //const DetectionRules = () => import('@/views/DetectionRuleList')
 export default {
     name: 'DetectionManagement',
-    /*components: {
-      'DetectionRules': DetectionRules
-    },*/
+    components: {
+      //'DetectionRules': DetectionRules
+      PrismEditor
+    },
     data () {
       return {
         tabs: [
@@ -164,10 +167,47 @@ export default {
           {'name':'attack.t1036'},
           {'name':'attack.t1036.003'}],
         tag_list: [],
+        detection: {
+          sigma: `title: "Renamed PowerShell"
+id: "d178a2d7-129a-4ba4-8ee6-d6e1fecd5d20"
+status: "experimental"
+description: "Detects the execution of a renamed PowerShell often used by attackers or malware"
+references:
+    - "https://twitter.com/christophetd/status/1164506034720952320"
+author: "Florian Roth", "frack113"
+date: "2019/08/22"
+modified: "2021/07/03"
+tags:
+    - "car.2013-05-009"
+    - "attack.defense_evasion"
+    - "attack.t1036" # an old one
+    - "attack.t1036.003"
+logsource:
+    product: "windows"
+    category: "process_creation"
+detection:
+    selection:
+        Description|startswith: 
+            - "Windows PowerShell"
+            - 'pwsh'
+        Company: "Microsoft Corporation"
+    filter:
+        Image|endswith: 
+            - "powershell.exe"
+            - "powershell_ise.exe"
+            - 'pwsh.exe'
+    condition: "selection and not filter"
+falsepositives:
+    - "Unknown"
+level: "critical"`
+        },
         createDetection: false
       }
     },
     methods: {
+      highlighter(code) {
+        return highlight(code, languages.yaml);
+      },
       addTag (newTag) {
         const tag = {
           name: newTag

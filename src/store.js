@@ -62,6 +62,7 @@ const state = {
   plugin: {},
   comments: [],
   comment: {},
+  event_rules: [],
   plugin_configs: [],
   plugin_config: {},
   inputs:[],
@@ -216,8 +217,9 @@ const mutations = {
   save_event_rules(state, data) {
     state.event_rules = data
   },
-  save_event_rule(state ,data) {
-    state.event_rule = data
+  save_event_rule(state, event_rule) {
+    state.event_rule = event_rule
+    state.event_rules = [...state.event_rules.filter(e => e.uuid != event_rule.uuid), event_rule]
   },
   add_event_rule(state, data) {
     state.event_rules.push(data)
@@ -554,6 +556,8 @@ const getters = {
   agent_group : state => { return state.agent_group },
   event: state => { return state.event },
   events: state =>  { return state.events },
+  event_rule: state => { return state.event_rule },
+  event_rules: state => { return state.event_rules },
   related_events: state => {return state.related_events },
   related_cases: state => { return state.related_cases },
   audit_logs: state => { return state.audit_logs },
@@ -2015,6 +2019,21 @@ const actions = {
       })
     })
   },
+  toggleMFA({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/toggle_mfa`, data: data, method: 'PUT'})
+      .then(resp => {
+        if (resp.status == 200) {
+          resolve(resp)
+        } else {
+          resolve(resp)
+        }                
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   runThreatHunt({commit}, query) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/hunting/query`, data: query, method: 'POST'})
@@ -2035,6 +2054,18 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event_rule/test_rule_rql`, data: data, method: 'POST'})
       .then(resp => {
+          resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  loadEventRules({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_rule`, method: 'GET'})
+      .then(resp => {
+        commit('save_event_rules', resp.data)
           resolve(resp)
       })
       .catch(err => {
