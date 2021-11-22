@@ -15,7 +15,7 @@ input {
 }
 
 .card-header {
-    border-left: 3px solid rgb(60, 75, 100);
+    border-left: 3px solid rgb(60, 75, 100) !important;
     border-radius: 0px !important;
 }
 .card-body {
@@ -321,3 +321,16 @@ label {
     bottom:0px;
     left:0px;
   }
+
+.card-header {
+    background-color: white !important;
+}
+
+.vue-simple-context-menu__item {
+    font-size: 14px !important;
+    padding: 2px 10px !important;
+}
+
+.vue-simple-context-menu {
+    background-color: white !important;
+}

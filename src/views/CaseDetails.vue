@@ -14,7 +14,7 @@
     </CAlert>
 
     <CCard class="shadow-sm bg-white rounded" >
-        <CCardHeader>
+        <CCardHeader class='bg-white'>
             <CRow>
                 <CCol col="12" lg="6" sm="12" class="text-left" @mouseover="edit_title_hint = true" @mouseleave="edit_title_hint = false">
                     <h3 style="margin-bottom:0px;">

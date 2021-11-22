@@ -103,7 +103,6 @@ import {
   cilCenterFocus,
   cilFlagAlt,
   cilExitToApp,
-  cilEye,
   cilPlus,
   cil3d
 
@@ -185,7 +184,6 @@ export const iconsSet = Object.assign(
     cilCenterFocus,
     cilFlagAlt,
     cilExitToApp,
-    cilEye,
     cilPlus,
     cil3d
   },

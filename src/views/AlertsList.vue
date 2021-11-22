@@ -202,7 +202,7 @@
                     <input type="checkbox" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
-                  <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid).slice(0,5)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip.hover.click="`${obs.tags}`" size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="getEventObservables(event.uuid).length > 5" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(event.uuid).slice(5))}"><small>&nbsp;+{{ getEventObservables(event.uuid).length - 5}}</small></span><br>
+                  <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid).slice(0,5)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip.hover.click="`${obs.tags}`" size="sm" style="margin-top:5px; margin-bottom:5px;" @click.prevent.stop="showActionMenu($event, obs)"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="getEventObservables(event.uuid).length > 5" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(event.uuid).slice(5))}"><small>&nbsp;+{{ getEventObservables(event.uuid).length - 5}}</small></span><br>
                   <!--<CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid)" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>-->
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -277,6 +277,12 @@
         <CButton @click="deleteEvent" color="danger">Delete</CButton>
       </template>
     </CModal>
+    <vue-simple-context-menu
+      :elementId="'observableContextMenu'"
+      :options="actions"
+      :ref="'vueSimpleContextMenu'"
+      @option-clicked="actionMenuClicked"
+    />
   </CRow>
 </template>
 
@@ -328,10 +334,11 @@ a {
 
 <script>
 import {mapState} from "vuex";
-import {vSelect} from "vue-select";
 import CreateCaseModal from './CreateCaseModal'
 import MergeEventIntoCaseModal from './MergeEventIntoCaseModal'
 import CreateEventRuleModal from './CreateEventRuleModal'
+import "vue-simple-context-menu/dist/vue-simple-context-menu.css";
+
 export default {
     name: 'Events',
     components: {
@@ -365,6 +372,12 @@ export default {
     },
     data(){
       return {
+        actions: [
+          {"name": "Filter"},
+          {"name": "VT Lookup"},
+          {"name": "Google Search"},
+          {"name": "Copy"}
+        ],
         name: "",
         description: "",
         severity: 0,
@@ -418,6 +431,37 @@ export default {
       }
     },
     methods: {
+      showActionMenu(event, item) {
+        this.$refs.vueSimpleContextMenu.showMenu(event, item)
+      },
+      actionMenuClicked(event) {
+        let action = event.option.name
+        switch (action) {
+          case "Filter":
+            this.toggleObservableFilter({'filter_type':'observable', 'data_type': event.item.data_type, 'value': event.item.value})
+            break
+          case "Copy":
+            navigator.clipboard.writeText(event.item.value)
+            break
+          case "VT Lookup":
+            if (["md5hash","sha1hash","sha256hash","imphash","domain","ip"].includes(event.item.data_type)) {
+              if (event.item.data_type == "ip") {
+                window.open(`https://www.virustotal.com/gui/ip-address/${event.item.value}`, '_blank').focus()
+              } else if (["sha1hash","sha256hash","imphash","md5hash"].includes(event.item.data_type)) {
+                window.open(`https://www.virustotal.com/gui/file/${event.item.value}`, '_blank').focus()
+              } else if (event.item.data_type == "domain") {
+                window.open(`https://www.virustotal.com/gui/domain/${event.item.value}`, '_blank').focus()
+              }
+              console.log("DO THE THING")
+            } else {
+              alert("Unsupported data type")
+            }
+            break
+          case "Google Search":
+            window.open(`https://www.google.com/search?q=${event.item.value}`, '_blank').focus()
+
+        }        
+      },
       reopenEvent(uuid) {
         this.$store.dispatch('updateEvent', {uuid: uuid, data: {'status': 0}}).then(resp => {
           this.filtered_events = this.filterEvents()

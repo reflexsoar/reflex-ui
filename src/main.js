@@ -14,6 +14,8 @@ import moment from 'moment-timezone'
 import VueMarkdown from 'vue-markdown'
 import VueClipboard from 'vue-clipboard2'
 import Prism from 'prismjs';
+import VueSimpleContextMenu from "vue-simple-context-menu";
+
 
 Vue.config.performance = true
 Vue.use(CoreuiVue)
@@ -22,6 +24,7 @@ Vue.component('multiselect', Multiselect)
 Vue.use(VueMoment, {moment})
 Vue.use(VueClipboard)
 Vue.component('vue-markdown', VueMarkdown)
+Vue.component("vue-simple-context-menu", VueSimpleContextMenu);
 
 Vue.prototype.$log = console.log.bind(console)
 Vue.prototype.$http = Axios;

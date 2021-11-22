@@ -50,18 +50,38 @@
     <p><b>Description</b><br>{{rule.description}}</p>
     <prism-editor :readonly="modal_mode != 'edit'" class="my-editor" v-model="rule.query" :highlight="highlighter" line-numbers></prism-editor><br>
     <CRow v-if="modal_mode == 'edit'">
-      <CCol lg="12">
+      <CCol lg="6">
         <label>Merge into Case</label><br>
         <CSwitch label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.merge_into_case"></CSwitch>
-        <CInput label="Case" v-if="rule.merge_into_case" v-model="rule.case_uuid"></CInput>
+        <multiselect
+            style="z-index: 5"
+            v-if="rule.merge_into_case"
+            v-bind:required="rule.merge_into_case"
+            v-model="rule.case_uuid" 
+            label="title" 
+            :options="cases" 
+            track-by="uuid" 
+            :searchable="true"
+            :internal-search="false"
+            :options-limit="10"
+            :show-no-results="false" 
+            @search-change="findCase">
+            <template slot="option" slot-scope="props">
+                {{props.option.title}}<br><small>{{props.option.event_count ? props.option.event_count : 0}} events.</small>
+            </template>
+        </multiselect><br>
       </CCol>
-      <CCol lg="12">
+      <CCol lg="6">
+        <label>Add Tags</label><br>
+        <CSwitch label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.add_tags"></CSwitch>
+      </CCol>
+      <CCol lg="6">
         <label>Dismiss</label><br>
         <CSwitch label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.dismiss"></CSwitch>
       </CCol>
-    </CRow><br>
+    </CRow>
     <CRow v-if="modal_mode == 'edit'">
-      <CCol lg="12">
+      <CCol lg="12">  
         <h5>Rule Testing</h5>
         <CInput description="Reflex will fetch the last N events and compare this rule to them" label="Number of test events" v-model="event_count"><template #append><CButton color="primary" @click="testRule()"><span v-if="!test_running">Test Rule</span><span v-else>Testing...</span></CButton></template></CInput>
       </CCol>
@@ -94,8 +114,7 @@
     font-size: 14px;
     line-height: 1.5;
     padding: 5px;
-    min-height: 250px;
-    max-height: 400px;
+    
     overflow: scroll;
     overflow-x: hidden;
   }
@@ -103,15 +122,6 @@
   /* optional class for removing the outline */
   .prism-editor__textarea:focus {
     outline: none;
-  }
-
-  .modal-lg {
-    max-width: 80%;    
-  }
-
-  .modal-body {
-    overflow-y: scroll;
-    max-height: 600px;
   }
 </style>
 <script>
@@ -141,10 +151,17 @@ export default {
         test_result_color: "success",
         event_count: 100, // How many events to test a rule against
         return_events: false,
-        backdrop_close: false
+        backdrop_close: false,
+        cases: []
       }
     },
     methods: {
+      findCase(query) {
+          let fields = 'uuid,title,id,event_count,owner,severity'
+          this.$store.dispatch('getCasesByTitle', {title: query, fields}).then(resp => {
+              this.cases = this.$store.getters.cases
+          })
+      },
       testRule() {
         let data = {
           'uuid': '',
@@ -178,19 +195,21 @@ export default {
         return highlight(code, languages.rql);
       },
       viewRule(uuid) {
-        this.rule = this.rules.find(r => r.uuid === uuid)
+        this.rule = Object.assign({}, this.rules.find(r => r.uuid === uuid))
         this.modal_mode = 'view'
         this.show_modal = true
         this.backdrop_close = true
       },
       editRule(uuid) {
-        this.rule = this.rules.find(r => r.uuid === uuid)
+        this.rule = Object.assign({}, this.rules.find(r => r.uuid === uuid))
         this.modal_mode = 'edit'
         this.show_modal = true
         this.test_result = ""
         this.event_count = 100
         this.test_complete = false
         this.backdrop_close = false
+        this.$store.dispatch('getCases', {})
+        this.cases = this.$store.getters.cases
       },
       loadRules() {
         this.$store.dispatch('loadEventRules').then(resp => {
