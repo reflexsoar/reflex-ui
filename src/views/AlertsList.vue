@@ -15,7 +15,7 @@
             <CCardHeader>
               <CRow>
                 <CCol col="10">
-                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
+                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="2" class="text-right">
                   <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>&nbsp;<CButton size="sm" color="info" to="/event_rules" style='color:#fff'>Manage Event Rules</CButton>
@@ -226,7 +226,6 @@
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'data_type':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
-                    <span class="separator">|</span>Modified {{event.modified_at | moment('from','now') }}
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
                   </small>
                 </CCol>
@@ -671,6 +670,7 @@ export default {
         return {'field':filter['filter_type'],'value':filter['value']}
       },
       toggleObservableFilter(obs) {
+        this.selected = []
         let exists = this.observableFilters.some((item) => {
           return item.value === obs.value
         })
@@ -704,10 +704,8 @@ export default {
       selectAllNew() {
         if(!this.select_all) {
           this.selected = []
-          console.log('SELECT ALL')
           for (let i in this.filtered_events) {
             let event = this.filtered_events[i]
-            console.log(event.uuid)
             this.$store.dispatch('getRelatedEvents', event.signature).then(resp => {
               this.selected = [...this.selected, ...resp.data.events]
             })
@@ -715,9 +713,9 @@ export default {
           }
           
         }
-        console.log(this.selected_events)
       },
       selectAll() {
+        
         if(!this.select_all) {
           for (let i in this.filtered_events) {
             let event = this.filtered_events[i]
@@ -732,10 +730,20 @@ export default {
             }            
           }
         }
-        console.log(this.selected)
-        console.log(this.filtered_events)
       },
       selectEvents(event) {
+        if(this.observableFilters.some(e => e.filter_type === 'eventsig')) {
+          let event_uuid = event.target.value
+          console.log(event_uuid)
+          if(this.selected.includes(event_uuid)) {
+            console.log('ehh')
+            this.selected = this.selected.filter(item => item !== event_uuid)
+          } else {
+            console.log('yo')
+            this.selected.push(event_uuid)
+          }
+          return
+        }
         let e = this.filtered_events.find(x => x.uuid == event.target.value)
         if(e) {
           if(this.selected.some((item) => { return item === e.uuid})) {
