@@ -32,6 +32,7 @@
 <script>
 import { vSelect } from "vue-select";
 import { Timeline, TimelineItem, TimelineTitle } from "vue-cute-timeline";
+import 'vue-cute-timeline/dist/index.css'
 import { mapState } from 'vuex';
 import { loadOptions } from '@babel/core';
 import Comment from './Comment'

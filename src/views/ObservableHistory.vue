@@ -76,6 +76,7 @@
 <script>
 
 import { Timeline, TimelineItem, TimelineTitle } from 'vue-cute-timeline'
+import 'vue-cute-timeline/dist/index.css'
 
 export default {
     name: 'ObservableHistory',

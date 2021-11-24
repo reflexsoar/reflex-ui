@@ -117,10 +117,6 @@
     padding: 5px;
   }
 
-  .modal-content {
-      min-height: 600px;
-  }
-
   /* optional class for removing the outline */
   .prism-editor__textarea:focus {
     outline: none;

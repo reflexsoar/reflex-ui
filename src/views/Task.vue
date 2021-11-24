@@ -92,6 +92,7 @@
 <script>
 import { mapState } from "vuex";
 import { Timeline, TimelineItem, TimelineTitle } from "vue-cute-timeline";
+import 'vue-cute-timeline/dist/index.css'
 export default {
   name: "Task",
   computed: mapState(["current_user", "settings", "users"]),
