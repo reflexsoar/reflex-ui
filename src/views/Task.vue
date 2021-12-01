@@ -159,14 +159,17 @@ export default {
         this.collapse = !this.collapse
         
     },
-    createNote() {
+    createNote(uuid) {
         
         let data = {
             'note': this.note
         }
-        let uuid = this.task.uuid
         this.$store.dispatch('addTaskNote', {uuid, data}).then(resp => {
-            this.task.notes.push(resp.data)
+            if(this.task_data.notes.length >= 1) {
+                this.task_data.notes.push(resp.data)
+            } else {
+                this.task_data.notes = [resp.data]
+            }
             this.note = ""
         })
     }
