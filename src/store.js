@@ -1118,7 +1118,7 @@ const actions = {
       })
     })
   },
-  getEvents({commit}, {signature=null, case_uuid, status=[], search, severity=[], page, tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields=''}) {
+  getEvents({commit}, {signature=null, case_uuid, status=[], search, rql, severity=[], page, tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields=''}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event?grouped=${grouped}&sort_by=${sort_by}`
@@ -1134,7 +1134,10 @@ const actions = {
       } 
       if(search) {
         url = url+`&search=${search}`
-      } 
+      }
+      if(rql) {
+        url = url+`&rql=${rql}`
+      }
       if(severity.length > 0) {
         url = url+`&severity=${severity}`
       } 

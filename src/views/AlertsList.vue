@@ -14,11 +14,11 @@
           <CCard>
             <CCardHeader>
               <CRow>
-                <CCol col="10">
+                <CCol col="9">
                   <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
-                <CCol col="2" class="text-right">
-                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>&nbsp;<CButton size="sm" color="info" to="/event_rules" style='color:#fff'>Manage Event Rules</CButton>
+                <CCol col="3" class="text-right">
+                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>&nbsp;<CButton @click="advanced_filter = !advanced_filter" color="info" size="sm">Advanced Filter</CButton>&nbsp;<CButton size="sm" color="info" to="/event_rules" style='color:#fff'>Manage Event Rules</CButton>
                 </CCol>
               </CRow>
             </CCardHeader>
@@ -73,6 +73,14 @@
                   </div>
                 </CNavItem>
               </CNav>
+            </CCollapse>
+            <CCollapse :show="advanced_filter">
+                <CCardBody>
+                  <b>Advanced Filtering</b>
+                  <p>Apply an RQL rule to create additional filtering on returned events.</p>
+                  <prism-editor class="my-editor" v-model="advanced_query" :highlight="highlighter" line-numbers></prism-editor><br>
+                  <CButton @click="toggleObservableFilter({'filter_type': 'rql', 'data_type':'rql', 'value': advanced_query})" color="primary" size="sm">Filter</CButton>
+                </CCardBody>
             </CCollapse>
           </CCard>
         </CCol>
@@ -266,6 +274,7 @@
     <CreateCaseModal :show.sync="createCaseModal" :events="selected"></CreateCaseModal>
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
+    <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
@@ -329,6 +338,30 @@ a {
   margin-right: 10px;
 }
 
+/* required class */
+.my-editor {
+  /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
+  /*background: #fdfdfd;*/
+  background: #0e0e0e;
+  color: #ccc !important;
+  border: 1px solid rgb(216, 219, 224);
+  border-radius: 0.25rem;
+  box-shadow: inset 0 1px 1px rgb(0 0 21 / 8%);
+
+  /* you must provide font-family font-size line-height. Example: */
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 5px;
+  
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+/* optional class for removing the outline */
+.prism-editor__textarea:focus {
+  outline: none;
+}
 </style>
 
 <script>
@@ -336,14 +369,23 @@ import {mapState} from "vuex";
 import CreateCaseModal from './CreateCaseModal'
 import MergeEventIntoCaseModal from './MergeEventIntoCaseModal'
 import CreateEventRuleModal from './CreateEventRuleModal'
+import RunActionModal from './RunActionModal'
 import "vue-simple-context-menu/dist/vue-simple-context-menu.css";
+import { PrismEditor } from 'vue-prism-editor'
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhere
+import 'prismjs/components/prism-python';
+import '../assets/js/prism-rql';
+import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 
 export default {
     name: 'Events',
     components: {
       CreateCaseModal,
       MergeEventIntoCaseModal,
-      CreateEventRuleModal
+      CreateEventRuleModal,
+      RunActionModal,
+      PrismEditor
     },
     props: {
     items: Array,
@@ -375,7 +417,8 @@ export default {
           {"name": "Filter"},
           {"name": "VT Lookup"},
           {"name": "Google Search"},
-          {"name": "Copy"}
+          {"name": "Copy"},
+          {"name": "Run Action"}
         ],
         name: "",
         description: "",
@@ -393,11 +436,13 @@ export default {
         dismissCountDown: 10,
         selected: Array(),
         selected_events: [],
+        selected_observable: {},
         mergeIntoCaseModal: false,
         dismissEventModal:false,
         deleteEventModal: false,
         createCaseModal: false,
         createEventRuleModal: false,
+        runActionModal: false,
         sourceRuleEventUUID: "",
         dismissalComment: "",
         dismissalReason: null,
@@ -407,6 +452,8 @@ export default {
         filtered_events: [],
         event_observables: {},
         quick_filters: false,
+        advanced_filter: false,
+        advanced_query: "",
         search_filter: '',
         table_view: false,
         select_all: false,
@@ -430,6 +477,9 @@ export default {
       }
     },
     methods: {
+      highlighter(code) {
+        return highlight(code, languages.rql);
+      },
       showActionMenu(event, item) {
         this.$refs.vueSimpleContextMenu.showMenu(event, item)
       },
@@ -458,8 +508,16 @@ export default {
             break
           case "Google Search":
             window.open(`https://www.google.com/search?q=${event.item.value}`, '_blank').focus()
+            break
+          case "Run Action":
+            this.showRunActionModal(event.item)
+            break
 
         }        
+      },
+      showRunActionModal(observable) {
+        this.selected_observable = observable
+        this.runActionModal = true
       },
       reopenEvent(uuid) {
         this.$store.dispatch('updateEvent', {uuid: uuid, data: {'status': 0}}).then(resp => {
@@ -597,6 +655,7 @@ export default {
         let severity_filter = []
         let signature_filter = ""
         let title_filter = []
+        let rql = ""
         let grouped = !this.filteredBySignature()
         let search = []
         for(let f in this.observableFilters) {
@@ -604,6 +663,10 @@ export default {
 
           if(filter.filter_type == 'eventsig') {
             signature_filter = filter.value
+          }
+
+          if(filter.filter_type == 'rql') {
+            rql = encodeURIComponent(filter.value)
           }
 
           if(filter.filter_type == 'status') {
@@ -640,6 +703,7 @@ export default {
           severity: severity_filter,
           title: title_filter,
           search: search,
+          rql: rql,
           fields: '',
           page: this.current_page,
           page_size: this.card_per_page,
@@ -677,6 +741,11 @@ export default {
 
         // Can only have one status filter at a time
         if(obs.filter_type == 'status') {
+          this.observableFilters = this.observableFilters.filter(item => item.filter_type !== obs.filter_type)
+        }
+
+        // Can only have one RQL filter at a time
+        if(obs.filter_type == 'rql') {
           this.observableFilters = this.observableFilters.filter(item => item.filter_type !== obs.filter_type)
         }
 

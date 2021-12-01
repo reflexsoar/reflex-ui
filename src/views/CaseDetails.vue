@@ -456,7 +456,7 @@ export default {
             event_observables: {},
             related_cases: [],
             case_files: [],
-            observableFilters: [{'filter_type':'status','dataType':'status','value':'Open'}],
+            observableFilters: [{'filter_type':'status','data_type':'status','value':'Open'}],
             collapse_tasks: Array(),
             events_per_page: 10,
             current_events_page: 1,

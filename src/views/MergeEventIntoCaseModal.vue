@@ -4,6 +4,7 @@
     <CModal title="Merge Event Into Case" :centered="true" size="lg" :show.sync="modalStatus">
       <div>
           <p>Merging <b>{{events.length}}</b> event<span v-if="events.length > 1">s</span>.</p>
+            {{case_data}}
            <multiselect 
                 v-model="case_data"
                 label="title" 
@@ -17,8 +18,8 @@
                 @search-change="caseFind"
                 placeholder="Select a case">
                 <template slot="option" slot-scope="props">
-                    #{{props.option.id}} - {{props.option.title}}<br>
-                    <small><b>Severity: </b>{{getSeverity(props.option.severity)}} | <b>Owner:</b> {{props.option.owner.username || "Unassigned" }} | Contains {{props.option.event_count}} events.</small><br>
+                    {{props.option.title}}<br>
+                    <small><b>Severity: </b>{{getSeverity(props.option.severity)}} | <b>Owner:</b> {{props.option.owner ? props.option.owner.username : "Unassigned" }} | Contains {{props.option.event_count}} events.</small><br>
                     <small>{{props.option.description | truncate}}</small>
                 </template>
             </multiselect>
