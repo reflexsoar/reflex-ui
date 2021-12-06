@@ -18,7 +18,7 @@
                   <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="3" class="text-right">
-                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>&nbsp;<CButton @click="advanced_filter = !advanced_filter" color="info" size="sm">Advanced Filter</CButton>&nbsp;<CButton size="sm" color="info" to="/event_rules" style='color:#fff'>Manage Event Rules</CButton>
+                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>&nbsp;<CButton size="sm" color="info" to="/event_rules" style='color:#fff'>Manage Event Rules</CButton>
                 </CCol>
               </CRow>
             </CCardHeader>
@@ -74,14 +74,14 @@
                 </CNavItem>
               </CNav>
             </CCollapse>
-            <CCollapse :show="advanced_filter">
+            <!--<CCollapse :show="advanced_filter">
                 <CCardBody>
                   <b>Advanced Filtering</b>
                   <p>Apply an RQL rule to create additional filtering on returned events.</p>
                   <prism-editor class="my-editor" v-model="advanced_query" :highlight="highlighter" line-numbers></prism-editor><br>
                   <CButton @click="toggleObservableFilter({'filter_type': 'rql', 'data_type':'rql', 'value': advanced_query})" color="primary" size="sm">Filter</CButton>
                 </CCardBody>
-            </CCollapse>
+            </CCollapse>-->
           </CCard>
         </CCol>
       </CRow>
@@ -95,8 +95,8 @@
           <center><CPagination :activePage.sync="current_page" :pages="page_data.pages"/></center>
         </CCol>
         <CCol col="3" class="text-right">
-          <CInput placeholder="Search" v-model="search_filter" v-on:keydown.enter="toggleObservableFilter({'filter_type':'search','data_type':'search','value':search_filter})" ><template #append>
-            <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','data_type':'search','value':search_filter})">Search</CButton>
+          <CInput placeholder="Search" v-model="search_filter" v-on:keydown.enter="add_filter()" ><template #append>
+            <CButton color="secondary" @click="add_filter()">Add Filter</CButton>
           </template></CInput>
         </CCol>
         <CCol col="3" class="text-right">
@@ -477,6 +477,21 @@ export default {
       }
     },
     methods: {
+      add_filter() {
+        let fields =  this.search_filter.split(':')
+        if(fields.length > 1) {
+          let key = fields[0]
+          let value = fields[1].trim()
+          let event_fields = ['title','description','status','tags']
+          if (event_fields.includes(key)) {
+            console.log(key, value)
+          } else {
+            this.toggleObservableFilter({'filter_type': 'observable', 'data_type': key, 'value': value})
+            this.search_filter = ""
+          }
+        }
+        //toggleObservableFilter({'filter_type':'search','data_type':'search','value':search_filter})
+      },
       highlighter(code) {
         return highlight(code, languages.rql);
       },
