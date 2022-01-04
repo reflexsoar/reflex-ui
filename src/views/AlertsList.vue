@@ -20,6 +20,7 @@
                 <CCol col="3" class="text-right">
                   <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>&nbsp;<CButton size="sm" color="info" to="/event_rules" style='color:#fff'>Manage Event Rules</CButton>
                 </CCol>
+                
               </CRow>
             </CCardHeader>
             <CCollapse :show="quick_filters">
@@ -88,7 +89,7 @@
       <CRow>
         <CCol col="3">
             <div>
-              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAllNew()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
+              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAllNew()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CButton style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
             </div>
         </CCol>
         <CCol col="3">
@@ -473,7 +474,8 @@ export default {
           {'label': 'Date Created', 'value': 'created_at'},
           {'label': 'Name', 'value': 'title'},
           {'label': 'TLP', 'value': 'tlp'}
-        ]
+        ],
+        sort_direction: 'desc'
       }
     },
     methods: {
@@ -722,7 +724,8 @@ export default {
           fields: '',
           page: this.current_page,
           page_size: this.card_per_page,
-          sort_by: this.sort_by
+          sort_by: this.sort_by,
+          sort_direction: this.sort_direction
         }).then(resp => {
           this.filtered_events = this.$store.getters.events
           this.event_observables = resp.data.observables
@@ -885,6 +888,23 @@ export default {
       },
       getEventObservables(uuid) {
         return this.event_observables[uuid]
+      },
+      toggleSortDirection() {
+
+        if(this.sort_direction == "asc") {
+          this.sort_direction = "desc"
+          this.filterEvents()
+          return
+        }
+
+        if(this.sort_direction == "desc") {
+          this.sort_direction = "asc"
+          this.filterEvents()
+          return
+        }
+
+        //console.log(this.sort_direction)
+        
       }
     },
     beforeDestroy: function() {
