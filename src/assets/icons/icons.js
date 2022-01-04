@@ -104,7 +104,9 @@ import {
   cilFlagAlt,
   cilExitToApp,
   cilPlus,
-  cil3d
+  cil3d,
+  cilSortAscending,
+  cilSortDescending
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -185,7 +187,9 @@ export const iconsSet = Object.assign(
     cilFlagAlt,
     cilExitToApp,
     cilPlus,
-    cil3d
+    cil3d,
+    cilSortAscending,
+    cilSortDescending
   },
   {
     cifUs,

@@ -727,7 +727,7 @@ export default {
             let observables_filters = []
             let severity_filter = []
             let signature_filter = ""
-            let grouped = !this.filteredBySignature()
+            let grouped = false
             let search = ""
 
             for(let f in this.observableFilters) {
