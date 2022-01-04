@@ -146,7 +146,7 @@ export default {
     observable_fields: {
       type: Array,
       default() {
-        return ["value", "ioc", "spotted", "safe", "count", "type", "actions"];
+        return ["value", "ioc", "spotted", "safe", "type", "actions"];
       },
     },
   },
