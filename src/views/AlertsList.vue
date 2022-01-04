@@ -782,8 +782,21 @@ export default {
         this.filterEvents()
       },
       caseFromCard(uuid){
-        this.selected = [uuid]
-        this.createCaseModal = true
+        this.selected = []
+        let event = this.filtered_events.filter(event => event.uuid === uuid)
+        if(event.length > 0) {
+          event = event[0]
+        }
+        console.log(event)
+        if(event.related_events_count > 1) {
+          this.$store.dispatch('getRelatedEvents', event.signature).then(resp => {
+            this.selected = [...this.selected, ...resp.data.events]
+            this.createCaseModal = true
+          })
+        } else {
+          this.selected = [uuid]
+          this.createCaseModal = true
+        }        
       },
       selectAllNew() {
         if(!this.select_all) {
