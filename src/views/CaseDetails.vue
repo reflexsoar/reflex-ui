@@ -1,5 +1,6 @@
 <template>
   <CRow>
+    <event-drawer :event_data="event_data"></event-drawer>
     <CCol col v-if="loading"><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
         <div style="margin: auto; text-align:center; verticle-align:middle;">
            <CSpinner
@@ -232,7 +233,7 @@
                         size="sm"
                         right
                         >
-                        <CDropdownItem :to="`/alerts/${item.uuid}`">View Event</CDropdownItem>
+                        <CDropdownItem @click="showDrawer(item.uuid)">View Event</CDropdownItem>
                         <CDropdownItem v-if="item.status != 2">Close</CDropdownItem>
                         <CDropdownItem v-if="item.status == 2">Reopen</CDropdownItem>
                         <CDropdownItem>Remove from Case</CDropdownItem>
@@ -364,6 +365,8 @@ import LinkCaseModal from './LinkCaseModal'
 import Comments from './Comments'
 import CaseHistoryTimeline from './CaseHistoryTimeline'
 import CaseFileList from './CaseFileList'
+import EventDrawer from './EventDrawer.vue';
+import CRightDrawer from './CRightDrawer.vue';
 
 import { Mentionable } from 'vue-mention'
 import moment from 'moment';
@@ -380,7 +383,8 @@ export default {
         CaseHistoryTimeline,
         ApplyCaseTemplateModal,
         Comments,
-        CaseFileList
+        CaseFileList,
+        EventDrawer
     },
     computed: mapState(['alert','current_user','settings','tags','case_observables']),
     props: {
@@ -502,7 +506,8 @@ export default {
                     'label':'Red',
                     'value': 4,
                 }
-            ]
+            ],
+            event_data: {}
         }
     },
     created() {
@@ -878,6 +883,17 @@ export default {
         },
         getEventObservables(uuid) {
             return this.event_observables[uuid]
+        },
+        showDrawer(event_uuid) {
+            let uuid = event_uuid
+            if(this.$store.getters.eventDrawerMinimize) {
+            this.$store.dispatch('getEvent', uuid).then(resp => {
+                this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
+                this.event_data = resp.data
+            })
+            } else {
+                this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
+            }   
         }
     },
     filters: {
