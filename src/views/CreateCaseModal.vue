@@ -80,7 +80,7 @@
       </div>
       <template #footer>
           <CButton @click="dismiss()" color="secondary">Cancel</CButton>
-        <CButton @click="createCase()" color="primary">Create</CButton>
+        <CButton @click="createCase()" color="primary" v-bind:disabled.sync="submitted"><CSpinner color="success" size="sm" v-if="submitted"/><span v-else>Create</span></CButton>
       </template>
     </CModal>
 </div>
@@ -110,6 +110,7 @@ export default {
             users:[],
             owner: null,
             severity: 2,
+            submitted: false,
             modalStatus: this.show,
             generate_event_rule: false,
             severities: [
@@ -208,6 +209,7 @@ export default {
             })
         },
         createCase() {
+            this.submitted = true
             let title = this.title;
             let description = this.description;
             let events = [];
