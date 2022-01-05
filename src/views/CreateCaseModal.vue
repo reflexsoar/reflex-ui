@@ -3,7 +3,7 @@
     <CModal title="Create Case" :centered="true" size="xl" :show.sync="modalStatus">
       <div>
         <p v-if="related_events_count > 1">This case will be associated with <b>{{related_events_count}}</b> events.</p>
-        <CForm @submit.prevent="createCase" >
+        <CForm @submit.prevent="createCase()" id="create_case_form">
             <CInput
               placeholder="Case Title"
               required
@@ -80,7 +80,7 @@
       </div>
       <template #footer>
           <CButton @click="dismiss()" color="secondary">Cancel</CButton>
-        <CButton @click="createCase()" color="primary" v-bind:disabled.sync="submitted"><CSpinner color="success" size="sm" v-if="submitted"/><span v-else>Create</span></CButton>
+        <CButton type="submit" form="create_case_form" color="primary" v-bind:disabled.sync="submitted"><CSpinner color="success" size="sm" v-if="submitted"/><span v-else>Create</span></CButton>
       </template>
     </CModal>
 </div>
