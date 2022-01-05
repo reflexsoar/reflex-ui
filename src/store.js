@@ -525,6 +525,8 @@ const mutations = {
 }
 
 const getters = {
+  eventDrawerShow: state => { return state.eventDrawerShow},
+  eventDrawerMinimize: state => { return state.eventDrawerMinimize},
   mfa_enabled: state => { return state.mfa_enabled },
   isLoggedIn: state => !!state.access_token,
   authStatus: state => state.status,

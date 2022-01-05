@@ -2,7 +2,8 @@
   <CRow>
     <CCol col="12">
       <h2>Events</h2>
-      <!--<event-drawer></event-drawer>-->
+      <event-drawer :event_data="event_data"></event-drawer>
+      
       <CRow>
         <CCol col="12">
           <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
@@ -219,7 +220,7 @@
                   <CButtonGroup>
                     <CButton v-if="(event.related_events_count && event.related_events_count > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(event.uuid)" v-if="!event.case" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
-                    <CButton :to="`/alerts/${event.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
+                    <CButton @click="showDrawer(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
                     <CButton v-if="event.case" size="sm" color="secondary" :to="`/cases/${event.case}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
@@ -409,6 +410,7 @@ export default {
     created: function () {
         this.loadData()
         this.loadCloseReasons()
+        this.$store.commit('set', ['eventDrawerMinimize', true])
         //this.refresh = setInterval(function() {
         //  if(!this.pauseRefresh) {
         //    this.loadData()
@@ -480,7 +482,9 @@ export default {
           {'label': 'Name', 'value': 'title'},
           {'label': 'TLP', 'value': 'tlp'}
         ],
-        sort_direction: 'desc'
+        sort_direction: 'desc',
+        drawer_open: false,
+        event_data: {}
       }
     },
     methods: {
@@ -523,7 +527,6 @@ export default {
               } else if (event.item.data_type == "domain") {
                 window.open(`https://www.virustotal.com/gui/domain/${event.item.value}`, '_blank').focus()
               }
-              console.log("DO THE THING")
             } else {
               alert("Unsupported data type")
             }
@@ -886,9 +889,17 @@ export default {
           this.filterEvents()
           return
         }
-
-        //console.log(this.sort_direction)
-        
+      },
+      showDrawer(event_uuid) {
+        let uuid = event_uuid
+        if(this.$store.getters.eventDrawerMinimize) {
+          this.$store.dispatch('getEvent', uuid).then(resp => {
+            this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
+            this.event_data = resp.data
+          })
+        } else {
+          this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
+        }   
       }
     },
     beforeDestroy: function() {
