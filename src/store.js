@@ -4,6 +4,8 @@ import Axios from 'axios'
 Vue.use(Vuex)
 
 const state = {
+  eventDrawerShow: 'responsive',
+  eventDrawerMinimize: true,
   sidebarShow: 'responsive',
   sidebarMinimize: false,
   status: '',
@@ -577,7 +579,6 @@ const getters = {
 
 let BASE_URL = ""
 if (process.env.NODE_ENV == 'development') {
-  console.log("YO")
   BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v2.0'
 } else {
   BASE_URL = location.protocol+'//'+window.location.host+'/api/v2.0'

@@ -2,6 +2,7 @@
   <CRow>
     <CCol col="12">
       <h2>Events</h2>
+      <!--<event-drawer></event-drawer>-->
       <CRow>
         <CCol col="12">
           <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
@@ -272,7 +273,7 @@
         <CButton type="submit" form="dismissEventForm" color="danger">Dismiss Event</CButton>
       </template>
     </CModal>
-    <CreateCaseModal :show.sync="createCaseModal" :events="selected"></CreateCaseModal>
+    <CreateCaseModal :show.sync="createCaseModal" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>
@@ -378,6 +379,7 @@ import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhe
 import 'prismjs/components/prism-python';
 import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
+import EventDrawer from './EventDrawer.vue';
 
 export default {
     name: 'Events',
@@ -386,7 +388,8 @@ export default {
       MergeEventIntoCaseModal,
       CreateEventRuleModal,
       RunActionModal,
-      PrismEditor
+      PrismEditor,
+      EventDrawer
     },
     props: {
     items: Array,
@@ -463,6 +466,8 @@ export default {
         event_signature: "",
         rule_observables: [],
         related_events: [],
+        related_events_count: 0,
+        case_from_card: false,
         columns: 1,
         card_page_num: 1,
         card_per_page: this.settings ? this.settings.events_per_page : 10,
@@ -790,8 +795,7 @@ export default {
         if(event.length > 0) {
           event = event[0]
         }
-        console.log(event)
-        if(event.related_events_count > 1) {
+        /*if(event.related_events_count > 1) {
           this.$store.dispatch('getRelatedEvents', event.signature).then(resp => {
             this.selected = [...this.selected, ...resp.data.events]
             this.createCaseModal = true
@@ -799,7 +803,11 @@ export default {
         } else {
           this.selected = [uuid]
           this.createCaseModal = true
-        }        
+        }*/
+        this.selected = [uuid]
+        this.related_events_count = event.related_events_count
+        this.case_from_card = true
+        this.createCaseModal = true
       },
       selectAllNew() {
         if(!this.select_all) {

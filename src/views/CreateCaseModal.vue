@@ -1,8 +1,8 @@
 <template>
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
-    <CModal title="Create Case" :centered="true" size="lg" :show.sync="modalStatus">
+    <CModal title="Create Case" :centered="true" size="xl" :show.sync="modalStatus">
       <div>
-        <p v-if="events && events.length > 1">This case will be associated with <b>{{events.length}}</b> events.</p>
+        <p v-if="related_events_count > 1">This case will be associated with <b>{{related_events_count}}</b> events.</p>
         <CForm @submit.prevent="createCase" >
             <CInput
               placeholder="Case Title"
@@ -28,9 +28,8 @@
                         <small>{{props.option.description}}<br>Contains {{props.option.task_count}} tasks.</small>
                     </template>
                 </multiselect>
-            </div>
-            <span v-if="case_template && case_template.task_count > 0"><label>Tasks</label><br><b>{{case_template.task_count}}</b> tasks will be added automatically to this case.<br><br></span>
-            <label>Case Owner</label>
+            </div><br v-else>
+            <span v-if="case_template && case_template.task_count > 0"><label>Tasks</label><br><b>{{case_template.task_count}}</b> tasks will be added automatically to this case.<br><br></span><label>Case Owner</label>
             <multiselect 
                 v-model="owner" 
                 label="username" 
@@ -75,6 +74,8 @@
                 <multiselect v-model="selected_tags" placeholder="Select tags to apply to this input" :taggable="true" tag-placeholder="Add new tag" track-by="name" label="name" :options="tag_list" :multiple="true" @tag="addTag" :close-on-select="false">
                 </multiselect>
             </div>
+            <label>Generate Event Rule</label><br><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule"/><br>
+            <small class="form-text text-muted w-100">When enabled all future events will be merged into this case.</small><br>
         </CForm>
       </div>
       <template #footer>
@@ -93,6 +94,8 @@ export default {
     props: {
         show: Boolean,
         events: Array,
+        related_events_count: Number,
+        case_from_card: Boolean
     },
     computed: mapState(['settings']),
     data(){
@@ -108,6 +111,7 @@ export default {
             owner: null,
             severity: 2,
             modalStatus: this.show,
+            generate_event_rule: false,
             severities: [
                 {'label':'Low', 'value':1},
                 {'label':'Medium', 'value':2},
@@ -179,9 +183,9 @@ export default {
             if(this.case_template) {
                 for(let tag in this.case_template.tags) {
                     if(this.selected_tags.filter(t => t.uuid === this.case_template.tags[tag].uuid).length < 1) {
-                        this.case_template.tags[tag]['from_template'] = true
-                        this.selected_tags.push(this.case_template.tags[tag])
-                    }                    
+                        console.log(this.case_template.tags[tag])
+                        this.selected_tags.push({'name': this.case_template.tags[tag]})
+                    }
                 }
             }
         },
@@ -210,6 +214,8 @@ export default {
             let severity = this.severity;
             let tlp = this.tlp;
             let tags = Array();
+            let include_related_events = this.case_from_card
+            let generate_event_rule = this.generate_event_rule
 
             if(this.events) {
                 for(let evt in this.events) {
@@ -221,14 +227,14 @@ export default {
                 tags.push(this.selected_tags[tag].name)
             }
 
-            let request_data = {title,description,events,tlp,severity,tags}
+            let request_data = {title,description,events,tlp,severity,tags,generate_event_rule, include_related_events}
             if(this.owner) {
                 request_data['owner_uuid'] = this.owner.uuid
             }
 
             if(this.case_template) {
                 let case_template_uuid = this.case_template.uuid;
-                request_data = {title,description,case_template_uuid, events,tlp,severity,tags}
+                request_data['case_template_uuid'] = case_template_uuid
             }
 
             this.$store.dispatch('createCase', request_data)
