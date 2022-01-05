@@ -484,7 +484,7 @@ export default {
           {'label': 'Name', 'value': 'title'},
           {'label': 'TLP', 'value': 'tlp'}
         ],
-        sort_direction: 'desc',
+        sort_direction: 'asc',
         drawer_open: false,
         event_data: {},
         dismiss_submitted: false

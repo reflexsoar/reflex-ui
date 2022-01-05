@@ -68,12 +68,12 @@
 }
 
 .c-sidebar.c-sidebar-fixed {
-  z-index: 1302;
+  z-index: 1052;
 }
 
 .c-sidebar-minimized.c-sidebar-fixed {
     width: 0px !important;
-    z-index: 1302;
+    z-index: 1052;
 }
 </style>
 

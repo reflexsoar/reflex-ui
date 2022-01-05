@@ -32,7 +32,14 @@
                     <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://github.com/reflexsoar/reflex-docs/blob/main/rql.md" target="_new">here</a> for a syntax reference.</p>
                     <prism-editor class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
                     <!--<CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>-->
-                    <CButton color="primary" size="sm" @click="test_query()">Test Query</CButton><i><span v-if="test_running">&nbsp;Running test...</span><span v-if="test_result">&nbsp;{{test_result}}</span></i>
+                    <CRow>
+                        <CCol>
+                            <CButton color="primary" size="sm" @click="test_query()">Test Query</CButton><i><span v-if="test_running">&nbsp;Running test...</span><span v-if="test_result">&nbsp;{{test_result}}</span></i>
+                        </CCol>
+                        <CCol class="text-right">
+                            <CButton color="secondary" size="sm" @click="showDrawer()">View Base Event</CButton>
+                        </CCol>
+                    </CRow>
                 </div>
                 <div name="create-case-template-step-4" v-if="step == 4">
                     <h4>Actions</h4>
@@ -210,7 +217,7 @@ export default {
             rule_text += "\n# Default matching on all present observables\n"
             rule_text += '# Consider fine tuning this with the expands function\n'
 
-            let observable_values = this.rule_observables.map(obs => obs.value.replace('\\','\\\\'))
+            let observable_values = this.rule_observables.map(obs => obs.value.replace('\\','\\\\').replace(/\"/g,'\\"'))
             console.log(observable_values)
             rule_text += `and observables.value|all In ["${observable_values.join('","')}"]`
             
@@ -302,6 +309,17 @@ export default {
             }
             this.tag_list.push(t)
             this.selected_tags.push(t)
+        },
+        showDrawer() {
+            let uuid = this.source_event_uuid
+            if(this.$store.getters.eventDrawerMinimize) {
+            this.$store.dispatch('getEvent', uuid).then(resp => {
+                this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
+                this.event_data = resp.data
+            })
+            } else {
+            this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
+            }   
         }
     }
 }
