@@ -15,7 +15,7 @@
         @click="$store.commit('set', ['eventDrawerMinimize', true])"
       >Close</CButton></CCol>
     </CRow></h1>
-    <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags" :key="tag.name"><CButton color="dark" class="tag" size="sm">{{ tag }}</CButton></li><br><br>
+    <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags" :key="tag"><CButton color="dark" class="tag" size="sm">{{ tag }}</CButton></li><br><br>
     <p><b>Description:</b><br>{{event_data.description}}</p>
     <h2>Raw Log</h2>
     <vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'" :data="jsonify(event_data.raw_log)"></vue-json-pretty><br>
