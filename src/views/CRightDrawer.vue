@@ -4,19 +4,6 @@
   </div>
 </template>
 
-<style scoped>
-.c-right-drawer {
-  position: relative;
-  display: flex;
-  flex: 0 0 256px;
-  flex-direction: column;
-  order: -1;
-  width: 256px;
-  padding: 0;
-  box-shadow: none;
-}
-</style>
-
 <script>
 export default {
   name: 'CRightDrawer',
@@ -79,6 +66,13 @@ export default {
     show (val) {
       this.open = val
     },
+    minimize (val) {
+      if(val === false) {
+        this.createBackdrop()
+      } else {
+        this.removeBackdrop()
+      }
+    },
     open: {
       immediate: true,
       handler (val) {
@@ -86,11 +80,11 @@ export default {
       }
     }
   },
-  // mounted () {
-  //   if (this.open === true) {
-  //     this.createBackdrop()
-  //   }
-  // },
+  mounted () {
+    if (this.show === true) {
+      this.createBackdrop()
+    } 
+  },
   beforeDestroy () {
     this.removeBackdrop()
   },
@@ -98,17 +92,17 @@ export default {
     rightDrawerClasses () {
       const haveResponsiveClass = this.breakpoint && this.open === 'responsive'
       return [
-        'c-right-drawer',
-        `c-right-drawer-${this.colorScheme}`,
+        'c-sidebar',
+        `c-sidebar-${this.colorScheme}`,
         {
-          'c-right-drawer-show': this.open === true,
-          [`c-right-drawer-${this.breakpoint}-show`]: haveResponsiveClass,
-          'c-right-drawer-fixed': this.fixed && !this.overlaid,
-          'c-right-drawer-right': this.aside,
-          'c-right-drawer-minimized': this.minimize && !this.unfoldable,
-          'c-right-drawer-unfoldable': this.minimize && this.unfoldable,
-          'c-right-drawer-overlaid': this.overlaid,
-          [`c-right-drawer-${this.size}`]: this.size
+          'c-sidebar-show': this.open === true,
+          [`c-sidebar-${this.breakpoint}-show`]: haveResponsiveClass,
+          'c-sidebar-fixed': this.fixed && !this.overlaid,
+          'c-sidebar-right': this.aside,
+          'c-sidebar-minimized': this.minimize && !this.unfoldable,
+          'c-sidebar-unfoldable': this.minimize && this.unfoldable,
+          'c-sidebar-overlaid': this.overlaid,
+          [`c-sidebar-${this.size}`]: this.size
         }
       ]
     }
@@ -116,10 +110,11 @@ export default {
   methods: {
     rightDrawerClick (e) {
       if (this.hideOnMobileClick && this.isOnMobile()) {
-        e.target.closest('a.c-right-drawer-nav-link') ? this.closeRightDrawer() : null
+        e.target.closest('a.c-sidebar-nav-link') ? this.closeRightDrawer() : null
       }
     },
     closeRightDrawer () {
+      this.$store.commit('set', ['eventDrawerMinimize', true])
       this.open = this.overlaid ? false : 'responsive'
       this.$emit('update:show', this.open)
     },
@@ -136,19 +131,21 @@ export default {
     },
     createBackdrop () {
       const backdrop = document.createElement('div')
-      if (this.overlaid) {
-        document.addEventListener('click', this.rightDrawerCloseListener, true)
+      if (!this.minimize) {
+        backdrop.addEventListener('click', this.closeRightDrawer)
+        //document.addEventListener('click', this.rightDrawerCloseListener, true)
       } else {
         backdrop.addEventListener('click', this.closeRightDrawer)
       }
-      backdrop.className = 'c-right-drawer-backdrop c-show'
+      backdrop.className = 'c-sidebar-backdrop c-show'
       backdrop.id = this._uid + 'backdrop'
       document.body.appendChild(backdrop)
     },
     removeBackdrop () {
       const backdrop = document.getElementById(this._uid + 'backdrop')
-      if (backdrop) {
-        document.removeEventListener('click', this.rightDrawerCloseListener)
+      
+      if (backdrop) { 
+        //document.removeEventListener('click', this.rightDrawerCloseListener)
         backdrop.removeEventListener('click', this.closeRightDrawer)
         document.body.removeChild(backdrop)
       }

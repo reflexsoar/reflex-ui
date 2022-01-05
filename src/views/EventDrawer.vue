@@ -1,5 +1,5 @@
 <template>
-  <CSidebar 
+  <CRightDrawer 
     fixed 
     :minimize="minimize"
     :show="show"
@@ -57,7 +57,7 @@
     </CDataTable>
   </CCardBody>
   
-  </CSidebar>
+  </CRightDrawer>
 </template>
 
 <style scoped>
@@ -67,17 +67,21 @@
   overflow-y: scroll;
 }
 
-.c-sidebar-minimized.c-sidebar-fixed {
-    width: 0px !important;
+.c-sidebar.c-sidebar-fixed {
+  z-index: 1302;
 }
 
-
+.c-sidebar-minimized.c-sidebar-fixed {
+    width: 0px !important;
+    z-index: 1302;
+}
 </style>
 
 <script>
 import nav from '../containers/_nav'
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
+import CRightDrawer from './CRightDrawer'
 
 export default {
   name: 'EventDrawer',
@@ -86,7 +90,8 @@ export default {
       event_data: {}
   },
   components: {
-    VueJsonPretty
+    VueJsonPretty,
+    CRightDrawer
   },
   created: function() {
     if (this.$store.state.unread_alert_count > 0) {

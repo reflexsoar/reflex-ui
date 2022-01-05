@@ -271,7 +271,7 @@
         </CForm>
       </div>
       <template #footer>
-        <CButton type="submit" form="dismissEventForm" color="danger">Dismiss Event</CButton>
+        <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismis Event</span></CButton>
       </template>
     </CModal>
     <CreateCaseModal :show.sync="createCaseModal" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
@@ -285,7 +285,7 @@
       </div>
       <template #footer>
           <CButton @click="deleteEventModal = !deleteEventModal" color="secondary">Dismiss</CButton>
-        <CButton @click="deleteEvent" color="danger">Delete</CButton>
+        <CButton @click="deleteEvent" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Delete</span></CButton>
       </template>
     </CModal>
     <vue-simple-context-menu
@@ -381,6 +381,7 @@ import 'prismjs/components/prism-python';
 import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import EventDrawer from './EventDrawer.vue';
+import CRightDrawer from './CRightDrawer.vue';
 
 export default {
     name: 'Events',
@@ -390,7 +391,8 @@ export default {
       CreateEventRuleModal,
       RunActionModal,
       PrismEditor,
-      EventDrawer
+      EventDrawer,
+        CRightDrawer
     },
     props: {
     items: Array,
@@ -484,7 +486,8 @@ export default {
         ],
         sort_direction: 'desc',
         drawer_open: false,
-        event_data: {}
+        event_data: {},
+        dismiss_submitted: false
       }
     },
     methods: {
@@ -559,31 +562,37 @@ export default {
         this.dismissEventModal = true
       },
       deleteEvent() {
+        this.dismiss_submitted = true
         if(this.selected.length == 1) {
           this.$store.dispatch('deleteEvent', this.selected[0]).then(resp => {
             this.filtered_events = this.filterEvents()
+            this.dismiss_submitted = false
+            this.deleteEventModal = false
           })
         } 
         if (this.selected.length > 1) {
           this.$store.dispatch('deleteEvents', this.selected).then(resp => {
             this.filtered_events = this.filterEvents()
-            
+            this.dismiss_submitted = false
+            this.deleteEventModal = false            
           })
         }
-        this.selected = []
-        this.deleteEventModal = false
+        this.selected = []        
       },
       dismissEvent() {
+        this.dismiss_submitted = true
           let data = {          
             dismiss_reason_uuid: this.dismissalReason,
             dismiss_comment: this.dismissalComment,
             events: this.selected
           }
           this.$store.dispatch('dismissEvents', data).then(resp => {
-            this.filtered_events = this.filterEvents()            
+            this.filtered_events = this.filterEvents()
+            this.dismissEventModal = false
+            this.dismiss_submitted = false
           })
          this.selected = []
-         this.dismissEventModal = false
+         
          this.dismissalComment = ""
       },
       loadCloseReasons() {
