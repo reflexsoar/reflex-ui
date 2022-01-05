@@ -251,7 +251,7 @@
     <CModal title="Dismiss Event" color="danger" :centered="true" size="lg" :show.sync="dismissEventModal">
       <div>
         <p>Dismissing an event indicates that no action is required.  For transparency purposes, it is best to leave a comment as to why this event is being dismissed.  Fill out the comment field below.</p>
-        <p>This comment will apply to <b>{{selected.length}}</b> events.</p>
+        <p>This action will apply to all related events with the same signature.</p>
         <CForm id="dismissEventForm" @submit.prevent="dismissEvent()">
             <CRow>
                 <CCol><br>
@@ -547,7 +547,12 @@ export default {
         })
       },
       dismissEventFromCard(uuid) {
+        let event = this.filtered_events.filter(event => event.uuid === uuid)
+        if(event.length > 0) {
+          event = event[0]
+        }
         this.selected = [uuid]
+        this.related_events_count = event.related_events_count
         this.dismissEventModal = true
       },
       deleteEvent() {
@@ -566,26 +571,14 @@ export default {
         this.deleteEventModal = false
       },
       dismissEvent() {
-        
-        if(this.selected.length == 1) {
-          let data = {          
-            dismiss_reason_uuid: this.dismissalReason,
-            dismiss_comment: this.dismissalComment
-          }
-          this.$store.dispatch('updateEvent', {uuid: this.selected[0], data}).then(resp => {
-            this.filtered_events = this.filterEvents()
-          })
-         }else if (this.selected.length > 1) {
           let data = {          
             dismiss_reason_uuid: this.dismissalReason,
             dismiss_comment: this.dismissalComment,
             events: this.selected
           }
           this.$store.dispatch('dismissEvents', data).then(resp => {
-            this.filtered_events = this.filterEvents()
-            
+            this.filtered_events = this.filterEvents()            
           })
-         }
          this.selected = []
          this.dismissEventModal = false
          this.dismissalComment = ""
@@ -814,12 +807,8 @@ export default {
           this.selected = []
           for (let i in this.filtered_events) {
             let event = this.filtered_events[i]
-            this.$store.dispatch('getRelatedEvents', event.signature).then(resp => {
-              this.selected = [...this.selected, ...resp.data.events]
-            })
-            
-          }
-          
+            this.selected = [...this.selected, event.uuid]            
+          }          
         }
       },
       selectAll() {
@@ -852,23 +841,10 @@ export default {
         let e = this.filtered_events.find(x => x.uuid == event.target.value)
         if(e) {
           if(this.selected.some((item) => { return item === e.uuid})) {
-            if(e.related_events_count > 1) {
-              this.$store.dispatch('getRelatedEvents', e.signature).then(resp => {
-                this.selected = this.selected.filter(item => !resp.data.events.includes(item))
-              })
-            } else {
               this.selected = this.selected.filter(item => item != e.uuid)
-            }            
           } else {       
-            if(e.related_events_count > 1) {
-              this.$store.dispatch('getRelatedEvents', e.signature).then(resp => {
-                this.selected = [...this.selected, ...resp.data.events]
-              })
-            } else {
-              if(!this.selected.includes(event.uuid) && e.status.name == 'New') {
-                this.selected.push(e.uuid)
-              }
-            }
+              this.selected.push(e.uuid)
+ 
           }
         }
       },
