@@ -4,6 +4,9 @@
 
         <div>
             <CForm @submit.prevent="createEventRule" id="event_rule_form">
+                <!--<CAlert :show="step == 3 && !test_failed" color="danger" closeButton>
+                    Your query matches more than <b>1000</b> events, tuning of source system is recommended.
+                </CAlert>-->
                 <div name="create-event-rule-step-1" v-if="step == 1">
                 <h4>Rule Details</h4>
                 <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
@@ -217,7 +220,7 @@ export default {
             rule_text += "\n# Default matching on all present observables\n"
             rule_text += '# Consider fine tuning this with the expands function\n'
 
-            let observable_values = this.rule_observables.map(obs => obs.value.replace('\\','\\\\').replace(/\"/g,'\\"'))
+            let observable_values = this.rule_observables.map(obs => obs.value.replace(/\\/g,'\\\\').replace(/\"/g,'\\"'))
             console.log(observable_values)
             rule_text += `and observables.value|all In ["${observable_values.join('","')}"]`
             
