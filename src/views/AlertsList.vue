@@ -41,7 +41,8 @@
                 </div>
                 <div v-else style="padding-left: 20px; padding-right:20px; padding-top: 5px; margin-top:5px; font-size: 13px; padding-bottom: 10px; min-height:150px; max-height:150px; overflow-y: scroll">
                   <CRow v-for="k,v in event_stats[title]" :key="v">
-                    <CCol v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
+                    <CCol v-if="title === 'severity'" v-c-tooltip="{ content: `${getSeverityText(parseInt(v))}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':parseInt(v)})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getSeverityText(parseInt(v))}}</span></CCol>
+                    <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol class="text-right" col="3">{{k}}</CCol>
                   </CRow>                
                 </div>
@@ -796,6 +797,7 @@ export default {
       },
       toggleObservableFilter(obs) {
         this.selected = []
+        console.log(obs)
         let exists = this.observableFilters.some((item) => {
           return item.value === obs.value
         })
