@@ -16,6 +16,48 @@ input {
     z-index: 1051;
 }
 
+.event-stats-div {
+    padding-right:20px;
+    padding-top: 5px;
+    font-size: 13px;
+    padding-bottom: 10px;
+    min-height:150px;
+    max-height:150px; 
+}
+
+.event-stats-container {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.event-stats-container > .event-stats-picker {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.event-stats-container > .event-stats-picker ~ .event-stats-picker {
+    padding-left: 10px;
+    padding-right: 0px;
+}
+
+.event-stats-row {
+    display: -webkit-box;
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+}
+
+.event-stats-picker {
+    
+    min-width: 0px;
+    width: 20%;
+    padding-top: 10px;
+    border-right: 1px solid rgb(216, 219, 224);
+}
+
+.event-stats-title {
+    text-transform: capitalize;
+}
+
 .table {
     margin-bottom: 0px !important;
 }

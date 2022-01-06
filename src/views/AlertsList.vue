@@ -29,24 +29,43 @@
             
             <CCollapse :show="quick_filters">
               <!-- MOVE THIS TO ITS OWN COMPONENT -->
-            <CRow>
-              <CCol v-for="bucket, title in event_stats" :key="title" style="padding-top: 10px">
-                <b style="padding-left: 20px; text-transform: capitalize;">{{title}}</b>
-                <div v-if="status == 'loading'" style="padding-left: 20px; padding-right:20px; padding-top: 5px; margin:auto; font-size: 13px; padding-bottom: 10px; min-height:150px; max-height:150px; overflow-y: scroll; text-align:center; verticle-align:middle;">
+            <CRow class='event-stats-container event-stats-row' style="overflow-x:scroll">
+              <div class='event-stats-picker'>
+                <CRow>
+                  <CCol>
+                    <b>Search</b><br>
+                    <p>Select a term to free search on </p>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CSelect :options="free_search_options"></CSelect>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput></CInput>
+                  </CCol>
+                </CRow>
+              </div>
+              <div class='event-stats-picker' v-for="bucket, title in event_stats" :key="title">
+                <b class='event-stats-title'>{{title}}</b>
+                <div v-if="status == 'loading'" class='event-stats-div' style="overflow-y: scroll; margin:auto; text-align:center; verticle-align:middle;">
                   <CSpinner
                         color="dark"
                         style="width:3rem;height:3rem;"
                         size="sm"
                     />
                 </div>
-                <div v-else style="padding-left: 20px; padding-right:20px; padding-top: 5px; margin-top:5px; font-size: 13px; padding-bottom: 10px; min-height:150px; max-height:150px; overflow-y: scroll">
+                <div v-else class="event-stats-div" style="margin-top:5px; overflow-y: scroll">
                   <CRow v-for="k,v in event_stats[title]" :key="v">
                     <CCol v-if="title === 'severity'" v-c-tooltip="{ content: `${getSeverityText(parseInt(v))}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':parseInt(v)})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getSeverityText(parseInt(v))}}</span></CCol>
+                    <CCol v-else-if="title === 'observable value'" v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'observable', 'data_type':'observable','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
-                    <CCol class="text-right" col="3">{{k}}</CCol>
+                    <CCol class="text-right" col="3">{{k.toLocaleString('en-US')}}</CCol>
                   </CRow>                
                 </div>
-              </CCol>
+              </div>
             </CRow>
             <!-- END EVENT STATS COMPONENT -->
               <!--<CNav variant="tabs" :justified="true">
@@ -511,7 +530,8 @@ export default {
         drawer_open: false,
         event_data: {},
         dismiss_submitted: false,
-        event_stats: {}
+        event_stats: {},
+        free_search_options: ['Title','Status','Tag','Severity','Signature']
       }
     },
     methods: {
@@ -772,7 +792,8 @@ export default {
           tags: tag_filters,
           severity: severity_filter,
           title: title_filter,
-          status: status_filters
+          status: status_filters,
+          observables: observables_filters,
         }).then(resp => {
           this.event_stats = this.$store.getters.event_stats
         })

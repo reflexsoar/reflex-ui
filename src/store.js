@@ -1126,7 +1126,7 @@ const actions = {
       })
     })
   },
-  getEventStats({commit}, {signature=null, status=[], severity=[], tags=[], title=[]}) {
+  getEventStats({commit}, {signature=null, status=[], severity=[], tags=[], title=[], observables=[]}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/stats?q=`
@@ -1145,6 +1145,9 @@ const actions = {
       }
       if(title.length > 0) {
         url = url+`&title=${title}`
+      }
+      if(observables.length > 0) {
+        url = url+`&observables=${observables}`
       }
       Axios({url: url, method: 'GET'})
       .then(resp => {
