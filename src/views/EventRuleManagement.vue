@@ -25,8 +25,9 @@
             <template #name="{item}">
               <td><span onmouseover="" style="cursor: pointer;" @click="viewRule(item.uuid)"><b >{{item.name}}</b><br>{{item.description}}</span></td>
             </template>
-            <template #hits="{item}">
-              <td>{{item.hits ? item.hits : 0}} hits</td>
+            <template #last_matched_date="{item}">
+              <td v-if="item.last_matched_date">{{item.last_matched_date | moment('from', 'now') }}</td>
+              <td v-else>Never</td>
             </template>
             <template #merge_into_case="{item}">
               <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.merge_into_case" disabled></CSwitch></td>
@@ -141,7 +142,7 @@ export default {
       return {
         rules: [],
         rule: {},
-        fields: ['name','hits','merge_into_case','dismiss','admin'],
+        fields: ['name','last_matched_date','merge_into_case','dismiss','admin'],
         modal_mode: 'new',
         show_modal: false,
         test_result: "",
