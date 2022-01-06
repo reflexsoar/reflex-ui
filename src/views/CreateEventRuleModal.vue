@@ -30,7 +30,7 @@
                 <div name="create-case-template-step-3" v-if="step == 3">
                     <h4>Event Query</h4>
                     <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://github.com/reflexsoar/reflex-docs/blob/main/rql.md" target="_new">here</a> for a syntax reference.</p>
-                    <prism-editor class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
+                    <prism-editor @keydown="test_failed=true" class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
                     <!--<CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>-->
                     <CRow>
                         <CCol>
@@ -99,7 +99,7 @@
       <template #footer>
           <CButton @click="dismiss()" color="secondary">Cancel</CButton>
           <CButton v-if="step != 1" @click="previousStep()" color="info">Previous</CButton>
-          <CButton v-if="step != final_step" @click="nextStep()" color="primary" :disabled="test_failed">Next</CButton>
+          <CButton v-if="step != final_step" @click="nextStep()" color="primary" :disabled="(test_failed && step == 3)">Next</CButton>
           <CButton v-if="step == final_step" @click="createEventRule()" color="primary">Create</CButton>
       </template>
     </CModal>
@@ -168,7 +168,7 @@ export default {
             final_step: 5,
             test_running: false,
             test_result: "",
-            test_failed: false,
+            test_failed: true,
             target_case: [],
             query: ""
         }
@@ -181,7 +181,7 @@ export default {
         },
         modalStatus: function(){
             if(this.modalStatus) {
-                this.test_failed = false
+                this.test_failed = true
                 this.loadData()
                 this.query = this.generateRule()
                 console.log(this.observables)
