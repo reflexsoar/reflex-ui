@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-if="loading">
-            <CRow >
+            <CRow>
                 <CCol col="12">
                 <div style="margin: auto; text-align:center; verticle-align:middle;">
                     <CSpinner color="dark" style="width:6rem;height:6rem;"/>
@@ -10,7 +10,7 @@
             </CRow>
         </div>
         <div v-else>
-        <CListGroup flush v-if="tasks && tasks.length > 0">
+        <CListGroup  style="border-top: 1px solid rgb(216, 219, 224);" flush v-if="tasks && tasks.length > 0">
             <CListGroupItem v-for="task in tasks" :key="task.uuid">
                 <Task :task="task" :deleteAction="deleteTask"/>
             </CListGroupItem>

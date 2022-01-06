@@ -38,7 +38,6 @@
                         v-bind:disabled="case_data.status && case_data.status.closed"
                         >
                         <CDropdownItem @click="caseTemplateModal = !caseTemplateModal">Add Case Template</CDropdownItem>
-                        <CDropdownItem @click="caseTaskModal = !caseTaskModal">Add Task</CDropdownItem>
                         <CDropdownItem @click="addObservableModal = !addObservableModal">Add Observables</CDropdownItem>
                         <CDropdownItem @click="linkCaseModal = !linkCaseModal">Link Cases</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Run Playbook</CDropdownItem>
@@ -255,10 +254,16 @@
                     </div>
               </CTab>
               <CTab title="Tasks">
+                    
                     <div v-if="tab_loading" style="margin: auto; padding:10px; text-align:center; verticle-align:middle;">
                         <CSpinner color="dark" style="width:6rem;height:6rem;"/>
                     </div>
                     <div v-else>
+                        <CRow style="padding:10px">
+                            <CCol>
+                                <CButton color="primary" @click="caseTaskModal = !caseTaskModal" size="sm">Add Task</CButton>
+                            </CCol>
+                        </CRow>
                         <CaseTaskList :uuid="uuid" :key="reloadTasks"></CaseTaskList>
                     </div>                
               </CTab>
