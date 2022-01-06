@@ -25,8 +25,30 @@
                 
               </CRow>
             </CCardHeader>
+            
+            
             <CCollapse :show="quick_filters">
-              <CNav variant="tabs" :justified="true">
+              <!-- MOVE THIS TO ITS OWN COMPONENT -->
+            <CRow>
+              <CCol v-for="bucket, title in event_stats" :key="title" style="padding-top: 10px">
+                <b style="padding-left: 20px; text-transform: capitalize;">{{title}}</b>
+                <div v-if="status == 'loading'" style="padding-left: 20px; padding-right:20px; padding-top: 5px; margin:auto; font-size: 13px; padding-bottom: 10px; min-height:150px; max-height:150px; overflow-y: scroll; text-align:center; verticle-align:middle;">
+                  <CSpinner
+                        color="dark"
+                        style="width:3rem;height:3rem;"
+                        size="sm"
+                    />
+                </div>
+                <div v-else style="padding-left: 20px; padding-right:20px; padding-top: 5px; margin-top:5px; font-size: 13px; padding-bottom: 10px; min-height:150px; max-height:150px; overflow-y: scroll">
+                  <CRow v-for="k,v in event_stats[title]" :key="v">
+                    <CCol v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
+                    <CCol class="text-right" col="3">{{k}}</CCol>
+                  </CRow>                
+                </div>
+              </CCol>
+            </CRow>
+            <!-- END EVENT STATS COMPONENT -->
+              <!--<CNav variant="tabs" :justified="true">
                 <CNavItem>
                   <div @click="toggleObservableFilter({'filter_type': 'status', 'data_type':'status','value':'New'})">
                     <h1>{{eventCountByStatus('New')}}</h1>
@@ -75,7 +97,7 @@
                     Low
                   </div>
                 </CNavItem>
-              </CNav>
+              </CNav>-->
             </CCollapse>
             <!--<CCollapse :show="advanced_filter">
                 <CCardBody>
@@ -168,7 +190,7 @@
               </template>
               <template #events="{item}">
                 <td>
-                  <CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','data_type':'signature','value':item.signature})" v-if="!(filteredBySignature() || item.related_events_count < 1)" color="dark" size="sm">{{item.related_events_count}}</CButton>
+                  <CButton class="tag" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':item.signature})" v-if="!(filteredBySignature() || item.related_events_count < 1)" color="dark" size="sm">{{item.related_events_count}}</CButton>
                 </td>
               </template>
               <template #status="{item}">
@@ -233,7 +255,7 @@
                 <CCol col="9">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'eventsig','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.related_events_count && event.related_events_count > 0"></span></CButton>
+                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.related_events_count && event.related_events_count > 0"></span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'data_type':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
@@ -487,7 +509,8 @@ export default {
         sort_direction: 'asc',
         drawer_open: false,
         event_data: {},
-        dismiss_submitted: false
+        dismiss_submitted: false,
+        event_stats: {}
       }
     },
     methods: {
@@ -666,7 +689,7 @@ export default {
         return source_event[0].related_events_count
       },
       filteredBySignature() {
-        if(this.observableFilters.some((filter) => filter.filter_type == 'eventsig')) {
+        if(this.observableFilters.some((filter) => filter.filter_type == 'signature')) {
           return true
         } else {
           return false
@@ -688,7 +711,7 @@ export default {
         for(let f in this.observableFilters) {
           let filter = this.observableFilters[f]
 
-          if(filter.filter_type == 'eventsig') {
+          if(filter.filter_type == 'signature') {
             signature_filter = filter.value
           }
 
@@ -741,6 +764,16 @@ export default {
           this.event_observables = resp.data.observables
           this.page_data = resp.data.pagination
           this.$store.commit('add_success')
+        })
+
+        this.$store.dispatch('getEventStats', {
+          signature: signature_filter,
+          tags: tag_filters,
+          severity: severity_filter,
+          title: title_filter,
+          status: status_filters
+        }).then(resp => {
+          this.event_stats = this.$store.getters.event_stats
         })
       },
       sanitizeHTML(str) {
@@ -841,7 +874,7 @@ export default {
         }
       },
       selectEvents(event) {
-        if(this.observableFilters.some(e => e.filter_type === 'eventsig')) {
+        if(this.observableFilters.some(e => e.filter_type === 'signature')) {
           let event_uuid = event.target.value
           if(this.selected.includes(event_uuid)) {
             this.selected = this.selected.filter(item => item !== event_uuid)

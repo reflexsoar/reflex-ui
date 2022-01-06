@@ -86,7 +86,8 @@ const state = {
       'description': ''
     },
     'require_case_templates': false
-  }
+  },
+  event_stats: {}
 }
 
 const mutations = {
@@ -150,6 +151,9 @@ const mutations = {
   save_event(state, event) {
     state.event = event
     state.events = [...state.events.filter(e => e.uuid != event.uuid), event]
+  },
+  save_event_stats(state, stats) {
+    state.event_stats = stats
   },
   save_audit_logs(state, logs) {
     state.audit_logs = logs
@@ -525,6 +529,7 @@ const mutations = {
 }
 
 const getters = {
+  event_stats: state => { return state.event_stats },
   eventDrawerShow: state => { return state.eventDrawerShow},
   eventDrawerMinimize: state => { return state.eventDrawerMinimize},
   mfa_enabled: state => { return state.mfa_enabled },
@@ -1114,6 +1119,36 @@ const actions = {
       Axios({url: `${BASE_URL}/event/${uuid}/new_related_events`, method:'GET'})
       .then(resp => {
         commit('save_related_events', resp.data.events)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getEventStats({commit}, {signature=null, status=[], severity=[], tags=[], title=[]}) {
+    return new Promise((resolve, reject) => {
+
+      let url = `${BASE_URL}/event/stats?q=`
+
+      if(signature) {
+        url = url+`&signature=${signature}`
+      } 
+      if(status) {
+        url = url+`&status=${status}`
+      }
+      if(severity.length > 0) {
+        url = url+`&severity=${severity}`
+      } 
+      if(tags.length > 0) {
+        url = url+`&tags=${tags}`
+      }
+      if(title.length > 0) {
+        url = url+`&title=${title}`
+      }
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_event_stats', resp.data)
         resolve(resp)
       })
       .catch(err => {
