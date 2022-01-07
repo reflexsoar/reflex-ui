@@ -29,7 +29,7 @@
             
             <CCollapse :show="quick_filters">
               <!-- MOVE THIS TO ITS OWN COMPONENT -->
-            <CRow class='event-stats-container event-stats-row' style="overflow-x:scroll">
+            <CRow class='event-stats-container event-stats-row'>
               <div class='event-stats-picker'>
                 <CRow>
                   <CCol>
@@ -818,7 +818,6 @@ export default {
       },
       toggleObservableFilter(obs) {
         this.selected = []
-        console.log(obs)
         let exists = this.observableFilters.some((item) => {
           return item.value === obs.value
         })
