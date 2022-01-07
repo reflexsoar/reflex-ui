@@ -51,7 +51,7 @@
             body-wrapper
           >
             
-            <h1 style="font-size: 5em">re<span class="text-info">flex</span></h1>
+            <img v-bind:src="logo_path" width="80%"/>
             <p>Welcome to Reflex, your Security Orchestration, Automation and Response Platform.  To get started, log in to the left. </p>
             
           </CCard>
@@ -68,7 +68,8 @@ export default {
   data(){
     return {
       username: "",
-      password: ""
+      password: "",
+      logo_path: require("../assets/img/color-logo.png")
     }
   },
   methods: {
