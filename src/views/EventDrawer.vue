@@ -8,54 +8,80 @@
     colorScheme="light"
     @update:show="(value) => $store.commit('set', ['eventDrawerShow', value])"
   >
-  <CCardBody>
-    <h1><CRow>
+  <CRow>
+    <CCol>
+    <h1><CRow style="padding: 10px 10px 0px 10px">
       <CCol>{{event_data.title}}</CCol>
       <CCol col="3" class="text-right"><CButton color="secondary"
         @click="$store.commit('set', ['eventDrawerMinimize', true])"
       >Close</CButton></CCol>
     </CRow></h1>
-    <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags" :key="tag"><CButton color="dark" class="tag" size="sm">{{ tag }}</CButton></li><br><br>
-    <p><b>Description:</b><br>{{event_data.description}}</p>
-    <h2>Raw Log</h2>
-    <vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'" :data="jsonify(event_data.raw_log)"></vue-json-pretty><br>
-    <h2>Observables</h2>
-    <CDataTable
-        :hover="true"
-        :items="event_data.observables"
-        :fields="observable_fields"
-        :items-per-page="10"
-        bordered
-        striped
-        pagination
-    >
-        <template #value="{item}">
-            <td>
-                <b>{{item.value}}</b><br><small>{{item.source_field.toLowerCase()}} | {{item.data_type}}</small>
-            </td>
-        </template>
-        <template #ioc="{item}">
-            <td>
-                <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.ioc" disabled/>
-            </td>
-        </template>
-        <template #spotted="{item}">
-            <td>
-                <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.spotted"/>
-            </td>
-        </template>
-        <template #safe="{item}">
-            <td>
-                <CSwitch style="padding-top:3px" color="success" label-on="Yes" label-off="No" :checked.sync="item.safe"/>
-            </td>
-        </template>
-        <template #tags="{item}">
-            <td>
-                <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
-            </td>
-      </template>
-    </CDataTable>
-  </CCardBody>
+    <CRow style="padding: 10px 10px 0px 10px">
+      <CCol>
+        <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags" :key="tag"><CButton color="dark" class="tag" size="sm">{{ tag }}</CButton></li><br><br>
+      </CCol>
+    </CRow>
+    <CTabs :activeTab.sync="activeTab" class="tabbed">
+      <CTab title="Overview" active>
+        <CRow style="padding: 10px 10px 0px 10px">
+          <CCol>
+            <h3>Description</h3>
+            {{event_data.description}}
+          </CCol>
+        </CRow>
+        <hr>
+        <CRow style="padding: 10px 10px 0px 10px">
+          <CCol>
+              <h3>Observables</h3>
+          <CDataTable
+              :hover="true"
+              :items="event_data.observables"
+              :fields="observable_fields"
+              :items-per-page="10"
+              bordered
+              striped
+              pagination
+          >
+              <template #value="{item}">
+                  <td>
+                      <b>{{item.value}}</b><br><small>{{item.source_field.toLowerCase()}} | {{item.data_type}}</small>
+                  </td>
+              </template>
+              <template #ioc="{item}">
+                  <td>
+                      <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.ioc" disabled/>
+                  </td>
+              </template>
+              <template #spotted="{item}">
+                  <td>
+                      <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.spotted"/>
+                  </td>
+              </template>
+              <template #safe="{item}">
+                  <td>
+                      <CSwitch style="padding-top:3px" color="success" label-on="Yes" label-off="No" :checked.sync="item.safe"/>
+                  </td>
+              </template>
+              <template #tags="{item}">
+                  <td>
+                      <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
+                  </td>
+            </template>
+          </CDataTable>
+          </CCol>
+        </CRow>
+      </CTab>
+      <CTab title="Raw Log">
+        <CRow style="padding: 10px 10px 0px 10px">
+          <CCol>
+            <h3>Raw Log</h3>
+            <vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'" :data="jsonify(event_data.raw_log)"></vue-json-pretty><br>
+          </CCol>
+        </CRow>
+      </CTab>
+    </CTabs>
+    </CCol>
+  </CRow>
   
   </CRightDrawer>
 </template>

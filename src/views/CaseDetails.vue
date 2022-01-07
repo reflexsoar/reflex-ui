@@ -80,7 +80,7 @@
     </CCard>
     <CCard>
           <CCardBody class="tabbed">
-            <CTabs :activeTab.sync="activeTab">
+            <CTabs :activeTab.sync="activeTab" style="height: 35px">
               <CTab title="Case Details" active>
                   <CCardBody>
                     <CRow>
