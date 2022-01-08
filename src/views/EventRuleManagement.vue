@@ -14,7 +14,7 @@
             
             <CRow style="padding: 10px;">
               <CCol>
-                <CButton color="primary" @click="newRuleModal = !newRuleModal" >New Event Rule</CButton>
+                <CButton color="primary" @click="show_modal = !show_modal" >New Event Rule</CButton>
               </CCol>
             </CRow>
             <hr style="margin-bottom:0px; margin-top:0px;">
