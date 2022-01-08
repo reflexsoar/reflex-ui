@@ -228,6 +228,10 @@ const mutations = {
     state.event_rule = event_rule
     state.event_rules = [...state.event_rules.filter(e => e.uuid != event_rule.uuid), event_rule]
   },
+  update_event_rule(state, data) {
+    state.event_rule = data
+    state.event_rules = state.event_rules.map(r => r.uuid == data.uuid ? data : r)
+  },
   add_event_rule(state, data) {
     state.event_rules.push(data)
     state.event_rule = data
@@ -2127,12 +2131,38 @@ const actions = {
       })
     })
   },
-  loadEventRules({commit}, data) {
+  loadEventRules({commit}, {page=1, page_size=25}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event_rule`, method: 'GET'})
+
+      let base_url = `${BASE_URL}/event_rule?page=${page}&page_size=${page_size}`
+
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
-        commit('save_event_rules', resp.data)
+        commit('save_event_rules', resp.data.event_rules)
           resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateEventRule({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_rule/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_event_rule', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteEventRule({commit}, {uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_rule/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        resolve(resp)
       })
       .catch(err => {
         reject(err)

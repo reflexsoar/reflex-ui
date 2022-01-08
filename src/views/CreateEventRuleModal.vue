@@ -187,7 +187,6 @@ export default {
                 this.test_failed = true
                 this.loadData()
                 this.query = this.generateRule()
-                console.log(this.observables)
                 this.name = "Rule for event signature "+this.event_signature
             }
             this.$emit('update:show', this.modalStatus)
@@ -221,7 +220,6 @@ export default {
             rule_text += '# Consider fine tuning this with the expands function\n'
 
             let observable_values = this.rule_observables.map(obs => obs.value.replace(/\\/g,'\\\\').replace(/\"/g,'\\"'))
-            console.log(observable_values)
             rule_text += `and observables.value|all In ["${observable_values.join('","')}"]`
             
             return rule_text

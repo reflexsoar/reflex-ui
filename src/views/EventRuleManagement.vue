@@ -36,11 +36,18 @@
               <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
             </template>
             <template #admin="{item}"> 
-              <td class="text-right"><CButton size="sm" color="info" @click="editRule(item.uuid)">Edit Rule</CButton>&nbsp;<CButton v-if="item.active" size="sm" color="danger" @click="disableRule(item.uuid)">Disable</CButton><CButton v-else size="sm" color="success" @click="enableRule(item.uuid)">Activate</CButton>&nbsp;<CButton v-if="!item.active" color='danger' @click="delete_modal = true" size="sm">Delete</CButton></td>
+              <td class="text-right"><CButton size="sm" color="info" @click="editRule(item.uuid)">Edit Rule</CButton>&nbsp;<CButton v-if="item.active" size="sm" color="danger" @click="disableRule(item.uuid)">Disable</CButton><CButton v-else size="sm" color="success" @click="enableRule(item.uuid)">Activate</CButton>&nbsp;<CButton v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm">Delete</CButton></td>
             </template>
             </CDataTable>
           </CTab>
         </CTabs>
+        <CRow>
+        <CCol lg="12" sm="12">
+          <CCardBody v-if="pagination.pages > 0">
+            <CPagination :activePage.sync="current_page" :pages="pagination.pages"/>
+          </CCardBody>
+        </CCol>
+      </CRow>
       </CCardBody>
     </CCard>
   </CCol>
@@ -96,6 +103,15 @@
       <CButton color="primary" v-if="modal_mode == 'edit'" :disabled="test_failed || (!test_complete && !test_failed)">Edit</CButton>
     </template>
   </CModal>
+  <CModal title="Delete Event Rule" color="danger" :centered="true" size="lg" :show.sync="delete_modal">
+      <div>
+        <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
+      </div>
+      <template #footer>
+          <CButton @click="delete_modal = !delete_modal" color="secondary">Dismiss</CButton>
+        <CButton @click="deleteRule(target_event_rule_uuid)" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Delete</span></CButton>
+      </template>
+    </CModal>
   </div>
 </template>
 
@@ -153,7 +169,14 @@ export default {
         event_count: 100, // How many events to test a rule against
         return_events: false,
         backdrop_close: false,
-        cases: []
+        cases: [],
+        page: 1,
+        page_size: 10,
+        pagination: {},
+        current_page: 1,
+        delete_modal: false,
+        dismiss_submitted: false,
+        target_event_rule_uuid: ''
       }
     },
     methods: {
@@ -213,9 +236,39 @@ export default {
         this.cases = this.$store.getters.cases
       },
       loadRules() {
-        this.$store.dispatch('loadEventRules').then(resp => {
-          this.rules = resp.data
+        let page = this.page
+        let page_size = this.page_size
+        this.$store.dispatch('loadEventRules', {page, page_size}).then(resp => {
+          this.rules = this.$store.getters.event_rules
+          this.pagination = resp.data.pagination
         })
+      },
+      disableRule(uuid) {
+        let data = {
+          active: false
+        }
+        this.$store.dispatch('updateEventRule', {uuid, data}).then(resp => {
+          this.rules = this.$store.getters.event_rules
+        })
+      },
+      enableRule(uuid) {
+        let data = {
+          active: true
+        }
+        this.$store.dispatch('updateEventRule', {uuid, data}).then(resp => {
+          this.rules = this.$store.getters.event_rules
+        })
+      },
+      deleteRule(uuid) {
+        this.dismiss_submitted = true
+        let data = {
+          active: true
+        }
+        this.$store.dispatch('deleteEventRule', {uuid, data}).then(resp => {
+          this.dismiss_submitted = false
+          this.delete_modal = false
+        })
+        this.loadRules()
       },
       addTag (newTag) {
         const tag = {
