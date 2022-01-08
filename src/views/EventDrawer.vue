@@ -126,7 +126,8 @@ export default {
   },
   data() {
     return {
-      observable_fields: ['value', 'ioc', 'spotted', 'safe', 'tags']
+      observable_fields: ['value', 'ioc', 'spotted', 'safe', 'tags'],
+      activeTab: 0
     }
   },
   computed: {

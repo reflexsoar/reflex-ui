@@ -87,7 +87,8 @@ const state = {
     },
     'require_case_templates': false
   },
-  event_stats: {}
+  event_stats: {},
+  network_data: {}
 }
 
 const mutations = {
@@ -525,10 +526,14 @@ const mutations = {
   },
   mfa_enabled(state, status){
     state.mfa_enabled = status
+  },
+  save_network_data(state, data) {
+    state.network_data = data
   }
 }
 
 const getters = {
+  network_data: state => { return state.network_data },
   event_stats: state => { return state.event_stats },
   eventDrawerShow: state => { return state.eventDrawerShow},
   eventDrawerMinimize: state => { return state.eventDrawerMinimize},
@@ -1119,6 +1124,18 @@ const actions = {
       Axios({url: `${BASE_URL}/event/${uuid}/new_related_events`, method:'GET'})
       .then(resp => {
         commit('save_related_events', resp.data.events)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getObservableNetwork({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/observable/network`, method: 'GET'})
+      .then(resp => {
+        commit('save_network_data', resp.data)
         resolve(resp)
       })
       .catch(err => {
