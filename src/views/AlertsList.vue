@@ -726,6 +726,7 @@ export default {
         let severity_filter = []
         let signature_filter = ""
         let title_filter = []
+        let source_filters = []
         let rql = ""
         let grouped = !this.filteredBySignature()
         let search = []
@@ -734,6 +735,10 @@ export default {
 
           if(filter.filter_type == 'signature') {
             signature_filter = filter.value
+          }
+
+          if(filter.filter_type == 'source') {
+            source_filters.push(filter.value)
           }
 
           if(filter.filter_type == 'rql') {
@@ -774,6 +779,7 @@ export default {
           severity: severity_filter,
           title: title_filter,
           search: search,
+          source: source_filters,
           rql: rql,
           fields: '',
           page: this.current_page,
@@ -793,6 +799,7 @@ export default {
           severity: severity_filter,
           title: title_filter,
           status: status_filters,
+          source: source_filters,
           observables: observables_filters,
         }).then(resp => {
           this.event_stats = this.$store.getters.event_stats
