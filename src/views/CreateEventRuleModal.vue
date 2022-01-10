@@ -174,7 +174,26 @@ export default {
             test_result: "",
             test_failed: true,
             target_case: [],
-            query: ""
+            query: "",
+            actions: [
+                {
+                    name:'Merge into Case',
+                    id: 'merge'
+                },
+                {
+                    name: 'Dismiss Event',
+                    id: 'dismiss'
+                },
+                {
+                    name: 'Update Event description',
+                    id: 'update_description'
+                },
+                {
+                    name: 'Add Event Tags',
+                    id: 'tag'
+                }
+            ],
+            selected_actions: []
         }
     },
     watch: {

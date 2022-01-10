@@ -85,11 +85,11 @@
       </CCol>
       <CCol lg="6">
         <label>Dismiss</label><br>
-        <CSwitch label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.dismiss"></CSwitch>
+        <CSwitch label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.dismiss"></CSwitch><br><br>
       </CCol>
     </CRow>
     <CRow v-if="modal_mode == 'edit'">
-      <CCol lg="12">  
+      <CCol lg="12">
         <h5>Rule Testing</h5>
         <CInput description="Reflex will fetch the last N events and compare this rule to them" label="Number of test events" v-model="event_count"><template #append><CButton color="primary" @click="testRule()"><span v-if="!test_running">Test Rule</span><span v-else>Testing...</span></CButton></template></CInput>
       </CCol>
@@ -179,6 +179,11 @@ export default {
         target_event_rule_uuid: ''
       }
     },
+    watch: {
+      current_page: function () {
+        this.loadRules()
+      }
+    },
     methods: {
       findCase(query) {
           let fields = 'uuid,title,id,event_count,owner,severity'
@@ -236,7 +241,7 @@ export default {
         this.cases = this.$store.getters.cases
       },
       loadRules() {
-        let page = this.page
+        let page = this.current_page
         let page_size = this.page_size
         this.$store.dispatch('loadEventRules', {page, page_size}).then(resp => {
           this.rules = this.$store.getters.event_rules
