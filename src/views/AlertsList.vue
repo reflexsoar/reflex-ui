@@ -133,7 +133,15 @@
       <CRow>
         <CCol col="3">
             <div>
-              <CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAllNew()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>&nbsp;&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CButton style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
+              <CDropdown
+                toggler-text=""
+                class="float-left"
+                color="secondary"
+              ><CDropdownItem  @click="selectAllNew()">Select visible</CDropdownItem>
+              <CDropdownItem @click="selectAcrossPages()">Select all&nbsp;<b>{{page_data.total_results}}</b>&nbsp;events</CDropdownItem>
+              <CDropdownItem @click="clearSelected()">Clear Selection</CDropdownItem>
+              </CDropdown>
+              <!--<CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAllNew()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>-->&nbsp;&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CButton style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
             </div>
         </CCol>
         <CCol col="3">
@@ -148,7 +156,7 @@
           <div>
             <CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;
             <CDropdown 
-                :toggler-text="`${selected.length} events`" 
+                :toggler-text="`${selected_count} events`" 
                 color="secondary"
                 v-bind:disabled="selected.length == 0"
                 class='d-inline-block'
@@ -531,7 +539,8 @@ export default {
         event_data: {},
         dismiss_submitted: false,
         event_stats: {},
-        free_search_options: ['Title','Status','Tag','Severity','Signature']
+        free_search_options: ['Title','Status','Tag','Severity','Signature'],
+        selected_count: 0
       }
     },
     methods: {
@@ -878,12 +887,76 @@ export default {
       },
       selectAllNew() {
         if(!this.select_all) {
-          this.selected = []
+          this.selected_count = 0
+          //this.selected = []
           for (let i in this.filtered_events) {
             let event = this.filtered_events[i]
-            this.selected = [...this.selected, event.uuid]            
+            this.selected = [...this.selected, event.uuid]
+            this.selected_count += event.related_events_count
           }          
         }
+      },
+      selectAcrossPages() {
+        this.selected = []
+        let status_filters = []
+        let tag_filters = []
+        let observables_filters = []
+        let severity_filter = []
+        let signature_filter = ""
+        let title_filter = []
+        let source_filters = []
+        this.selected_count = this.page_data.total_results
+        for(let f in this.observableFilters) {
+          let filter = this.observableFilters[f]
+
+          if(filter.filter_type == 'signature') {
+            signature_filter = filter.value
+          }
+
+          if(filter.filter_type == 'source') {
+            source_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'rql') {
+            rql = encodeURIComponent(filter.value)
+          }
+
+          if(filter.filter_type == 'status') {
+            status_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'tag') {
+            tag_filters.push(encodeURIComponent(filter.value))
+          }
+
+          if(filter.filter_type == 'observable') {
+            observables_filters.push(encodeURIComponent(filter.value))
+          }
+
+          if(filter.filter_type == 'search') {
+            search.push(encodeURIComponent(filter.value))
+          }
+
+          if(filter.filter_type == 'severity') {
+            severity_filter.push(filter.value)
+          }
+
+          if(filter.filter_type == 'title') {
+            title_filter = [encodeURIComponent(filter.value)]
+          }
+        }
+        this.$store.dispatch('getBulkEvents', {
+          signature: signature_filter,
+          tags: tag_filters,
+          severity: severity_filter,
+          title: title_filter,
+          status: status_filters,
+          source: source_filters,
+          observables: observables_filters,
+        }).then(resp => {
+          this.selected = [...resp.data.events]
+          
+        })
       },
       selectAll() {
         
@@ -901,6 +974,7 @@ export default {
             }            
           }
         }
+        this.selected_count = this.selected.length
       },
       selectEvents(event) {
         if(this.observableFilters.some(e => e.filter_type === 'signature')) {
@@ -914,17 +988,21 @@ export default {
         }
         let e = this.filtered_events.find(x => x.uuid == event.target.value)
         if(e) {
+          
           if(this.selected.some((item) => { return item === e.uuid})) {
               this.selected = this.selected.filter(item => item != e.uuid)
+              this.selected_count -= e.related_events_count
           } else {       
-              this.selected.push(e.uuid)
- 
+              this.selected.push(e.uuid) 
+              this.selected_count += e.related_events_count
           }
         }
+        
       },
       clearSelected() {
         this.selected = []
         this.select_all = false
+        this.selected_count = 0
       },
       getSeverityColor(severity) {
         switch(severity) {

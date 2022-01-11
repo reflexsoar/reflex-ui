@@ -1147,6 +1147,41 @@ const actions = {
       })
     })
   },
+  getBulkEvents({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[]}) {
+    return new Promise((resolve, reject) => {
+
+      let url = `${BASE_URL}/event/bulk_select_all?q=`
+
+      if(signature) {
+        url = url+`&signature=${signature}`
+      } 
+      if(status) {
+        url = url+`&status=${status}`
+      }
+      if(severity.length > 0) {
+        url = url+`&severity=${severity}`
+      } 
+      if(tags.length > 0) {
+        url = url+`&tags=${tags}`
+      }
+      if(title.length > 0) {
+        url = url+`&title=${title}`
+      }
+      if(source.length >0) {
+        url = url+`&source=${source}`
+      }
+      if(observables.length > 0) {
+        url = url+`&observables=${observables}`
+      }
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getEventStats({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[]}) {
     return new Promise((resolve, reject) => {
 
@@ -1225,7 +1260,7 @@ const actions = {
       if(source.length >0) {
         url = url+`&source=${source}`
       }
-      
+
       Axios({url: url, method: 'GET', headers:{'X-Fields': fields}})
       .then(resp => {
         commit('add_start')
