@@ -979,10 +979,13 @@ export default {
       selectEvents(event) {
         if(this.observableFilters.some(e => e.filter_type === 'signature')) {
           let event_uuid = event.target.value
+          
           if(this.selected.includes(event_uuid)) {
+            this.selected_count -= 1
             this.selected = this.selected.filter(item => item !== event_uuid)
           } else {
             this.selected.push(event_uuid)
+            this.selected_count += 1
           }
           return
         }
