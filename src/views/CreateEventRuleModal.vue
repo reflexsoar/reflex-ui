@@ -289,7 +289,7 @@ export default {
                 expire: this.expire,
                 expire_days: parseInt(this.expire_days),
                 dismiss_comment: this.dismiss_comment,
-                dismiss_reason: this.close_reasons.filter(c => c.value === close_reason)[0].label,
+                dismiss_reason: this.close_reasons.filter(c => c.value === this.close_reason)[0].label,
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
                 query: this.query
