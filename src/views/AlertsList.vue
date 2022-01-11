@@ -887,13 +887,23 @@ export default {
       },
       selectAllNew() {
         if(!this.select_all) {
-          this.selected_count = 0
-          //this.selected = []
-          for (let i in this.filtered_events) {
-            let event = this.filtered_events[i]
-            this.selected = [...this.selected, event.uuid]
-            this.selected_count += event.related_events_count
-          }          
+          if(this.observableFilters.some(e => e.filter_type === 'signature')) {
+            this.selected_count = 0 
+            for (let i in this.filtered_events) {
+              let event = this.filtered_events[i]
+              this.selected = [...this.selected, event.uuid]
+              this.selected_count += 1
+            }
+          }
+          else {
+            this.selected_count = 0
+            //this.selected = []
+            for (let i in this.filtered_events) {
+              let event = this.filtered_events[i]
+              this.selected = [...this.selected, event.uuid]
+              this.selected_count += event.related_events_count
+            }
+          }
         }
       },
       selectAcrossPages() {
