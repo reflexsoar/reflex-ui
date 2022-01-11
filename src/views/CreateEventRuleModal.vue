@@ -47,6 +47,7 @@
                 </div>
                 <div name="create-case-template-step-4" v-if="step == 4">
                     <h4>Actions</h4>
+                                    
                     <label>Merge into Case</label>
                     <CRow>                    
                         <CCol col="1">
@@ -68,9 +69,9 @@
                                 placeholder="Select a case"
                             >
                             <template slot="option" slot-scope="props">
-                                #{{props.option.id}} - {{props.option.title}}<br><small>{{props.option.event_count}} events.</small>
+                                {{props.option.title}} ({{props.option.uuid}}<br><small>{{props.option.event_count ? props.option.event_count : 0 }} events.</small>
                             </template>
-                            </multiselect>
+                            </multiselect><br>
                         </CCol>
                     </CRow>
                     <label>Dismiss Event</label>
@@ -79,9 +80,11 @@
                             <CSwitch v-bind:disabled="merge_into_case" color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
                         </CCol>
                         <CCol col="11">
-                            
+                            <CSelect v-bind:disabled="!dismiss_event || merge_into_case" :options="close_reasons" v-model="close_reason" placeholder="Select a reason for dismissing the event..."/>
+                            <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event || merge_into_case"></CTextarea>
                         </CCol>
                     </CRow>
+
                 </div>
                 <div name="create-case-template-step-5" v-if="step == 5">
                     <h4>Review</h4>
@@ -173,34 +176,41 @@ export default {
             test_running: false,
             test_result: "",
             test_failed: true,
-            target_case: [],
+            target_case: {},
             query: "",
+            close_reason: "",
+            close_reasons: [],
+            dismiss_comment: "",
+            add_action: false,
             actions: [
                 {
-                    name:'Merge into Case',
-                    id: 'merge'
+                    label:'Merge into Case',
+                    value: 'merge'
                 },
                 {
-                    name: 'Dismiss Event',
-                    id: 'dismiss'
+                    label: 'Dismiss Event',
+                    value: 'dismiss'
                 },
                 {
-                    name: 'Update Event description',
-                    id: 'update_description'
+                    label: 'Mute Event',
+                    value: 'mute_event'
                 },
                 {
-                    name: 'Add Event Tags',
-                    id: 'tag'
+                    label: 'Update Event description',
+                    value: 'update_description'
+                },
+                {
+                    label: 'Add Event Tags',
+                    value: 'tag'
                 }
             ],
+            current_action: "",
             selected_actions: []
         }
     },
     watch: {
-        
         show: function() {
-            this.modalStatus = this.show
-            
+            this.modalStatus = this.show            
         },
         modalStatus: function(){
             if(this.modalStatus) {
@@ -208,6 +218,8 @@ export default {
                 this.loadData()
                 this.query = this.generateRule()
                 this.name = "Rule for event signature "+this.event_signature
+                this.caseFind("*")
+                this.loadCloseReasons()
             }
             this.$emit('update:show', this.modalStatus)
             if(!this.modalStatus) {
@@ -276,6 +288,8 @@ export default {
                 target_case_uuid: this.target_case.uuid,
                 expire: this.expire,
                 expire_days: parseInt(this.expire_days),
+                dismiss_comment: this.dismiss_comment,
+                dismiss_reason: this.close_reasons.filter(c => c.value === close_reason)[0].label,
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
                 query: this.query
@@ -293,6 +307,7 @@ export default {
         loadData() {
             this.$store.dispatch('getCases', {}).then(resp => {
                 this.cases = this.$store.getters.cases
+                console.log(this.cases)
             })
         },
         caseFind(query) {
@@ -304,9 +319,9 @@ export default {
         toggleMergeToCase() {
             this.merge_into_case = !this.merge_into_case
         },
-        caseLabel({id, title}) {
-            if(id && title) {
-                return `#${id} - ${title}`
+        caseLabel({uuid, title}) {
+            if(uuid && title) {
+                return `${title} (${uuid})`
             }
         },
         reset () {
@@ -330,6 +345,11 @@ export default {
             }
             this.tag_list.push(t)
             this.selected_tags.push(t)
+        },
+        loadCloseReasons() {
+            this.$store.dispatch('getCloseReasons').then(resp => {
+            this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
+            })
         },
         showDrawer() {
             let uuid = this.source_event_uuid
