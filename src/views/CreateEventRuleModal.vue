@@ -167,7 +167,7 @@ export default {
             dismiss_event: false,
             expire_days: 1,
             observables: [],
-            expire: true,
+            expire: false,
             step: 1,
             final_step: 5,
             test_running: false,
