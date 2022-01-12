@@ -15,7 +15,7 @@ import VueMarkdown from 'vue-markdown'
 import VueClipboard from 'vue-clipboard2'
 import Prism from 'prismjs';
 import VueSimpleContextMenu from "vue-simple-context-menu";
-
+import VCalendar from 'v-calendar';
 
 Vue.config.performance = true
 Vue.use(CoreuiVue)
@@ -23,6 +23,7 @@ Vue.use(Vuelidate)
 Vue.component('multiselect', Multiselect)
 Vue.use(VueMoment, {moment})
 Vue.use(VueClipboard)
+Vue.use(VCalendar)
 Vue.component('vue-markdown', VueMarkdown)
 Vue.component("vue-simple-context-menu", VueSimpleContextMenu);
 

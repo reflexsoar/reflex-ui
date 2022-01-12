@@ -48,6 +48,41 @@
                   </CCol>
                 </CRow>
               </div>
+              <div class='event-stats-picker'>
+                <CRow>
+                  <CCol>
+                    <v-date-picker
+        v-model="range"
+        mode="dateTime"
+        :masks="masks"
+        is-range
+      >
+        <template v-slot="{ inputValue, inputEvents, isDragging }">
+          <div class="flex flex-col sm:flex-row justify-start items-center " >
+            <div class="relative flex-grow">
+              <input
+                class="flex-grow pl-8 pr-2 py-1 bg-gray-100 border rounded w-full"
+                :class="isDragging ? 'text-gray-600' : 'text-gray-900'"
+                :value="inputValue.start"
+                v-on="inputEvents.start"
+              />
+            </div>
+            <span class="flex-shrink-0 m-2">
+            </span>
+            <div class="relative flex-grow">
+              <input
+                class="flex-grow pl-8 pr-2 py-1 bg-gray-100 border rounded w-full"
+                :class="isDragging ? 'text-gray-600' : 'text-gray-900'"
+                :value="inputValue.end"
+                v-on="inputEvents.end"
+              />
+            </div>
+          </div>
+        </template>
+      </v-date-picker>
+                  </CCol>
+                </CRow>
+              </div>
               <div class='event-stats-picker' v-for="bucket, title in event_stats" :key="title">
                 <b class='event-stats-title'>{{title}}</b>
                 <div v-if="status == 'loading'" class='event-stats-div' style="overflow-y: scroll; margin:auto; text-align:center; verticle-align:middle;">
@@ -68,65 +103,7 @@
               </div>
             </CRow>
             <!-- END EVENT STATS COMPONENT -->
-              <!--<CNav variant="tabs" :justified="true">
-                <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'status', 'data_type':'status','value':'New'})">
-                    <h1>{{eventCountByStatus('New')}}</h1>
-                    New
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'status', 'data_type':'status','value':'Open'})">
-                    <h1>{{eventCountByStatus('Open')}}</h1>
-                    Open
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'status', 'data_type':'status','value':'Closed'})">
-                    <h1>{{eventCountByStatus('Closed')}}</h1>
-                    Closed
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'status', 'data_type':'status','value':'Dismissed'})">
-                    <h1>{{eventCountByStatus('Dismissed')}}</h1>
-                    Dismissed
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'data_type':'severity','value':3})">
-                    <h1>{{eventCountBySeverity(3)}}</h1>
-                    Critical
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'data_type':'severity','value':2})">
-                    <h1>{{eventCountBySeverity(2)}}</h1>
-                    High
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'data_type':'severity','value':1})">
-                    <h1>{{eventCountBySeverity(1)}}</h1>
-                    Medium
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleObservableFilter({'filter_type': 'severity', 'data_type':'severity','value':0})">
-                    <h1>{{eventCountBySeverity(0)}}</h1>
-                    Low
-                  </div>
-                </CNavItem>
-              </CNav>-->
             </CCollapse>
-            <!--<CCollapse :show="advanced_filter">
-                <CCardBody>
-                  <b>Advanced Filtering</b>
-                  <p>Apply an RQL rule to create additional filtering on returned events.</p>
-                  <prism-editor class="my-editor" v-model="advanced_query" :highlight="highlighter" line-numbers></prism-editor><br>
-                  <CButton @click="toggleObservableFilter({'filter_type': 'rql', 'data_type':'rql', 'value': advanced_query})" color="primary" size="sm">Filter</CButton>
-                </CCardBody>
-            </CCollapse>-->
           </CCard>
         </CCol>
       </CRow>
@@ -432,7 +409,6 @@ import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import EventDrawer from './EventDrawer.vue';
 import CRightDrawer from './CRightDrawer.vue';
-
 export default {
     name: 'Events',
     components: {
@@ -442,7 +418,7 @@ export default {
       RunActionModal,
       PrismEditor,
       EventDrawer,
-        CRightDrawer
+      CRightDrawer
     },
     props: {
     items: Array,
@@ -504,6 +480,7 @@ export default {
         sourceRuleEventUUID: "",
         dismissalComment: "",
         dismissalReason: null,
+        close_reason: "",
         close_reasons: [],
         collapse: {},
         observableFilters: [{'filter_type':'status','data_type':'status','value':'New'}],

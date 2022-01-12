@@ -16,7 +16,7 @@
                 <p>
                     <b>Base Event Signature: </b>{{event_signature}}
                 </p>
-                <CInput label="Rule Name" v-model="name" required></CInput>
+                <CInput label="Rule Name"  placeholder="Enter a friendly name for this rule" v-model="name" required></CInput>
                 <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
                 </div>
                 <div name="create-case-template-step-2" v-if="step == 2">
@@ -38,7 +38,7 @@
                     <!--<CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>-->
                     <CRow>
                         <CCol>
-                            <CButton color="primary" size="sm" @click="test_query()">Test Query</CButton><i><span v-if="test_running">&nbsp;Running test...</span><span v-if="test_result">&nbsp;{{test_result}}</span></i>
+                            <CButton color="primary" size="sm" @click="test_query()" v-bind:disabled="test_running"><CSpinner v-if="test_running" size="sm"/>&nbsp;Test Query</CButton><i><span v-if="test_running">&nbsp;Running test...</span><span v-if="test_result">&nbsp;{{test_result}}</span></i>
                         </CCol>
                         <CCol class="text-right">
                             <CButton color="secondary" size="sm" @click="showDrawer()">View Base Event</CButton>
@@ -102,9 +102,11 @@
                     </ul>
                 </div>
             </CForm>
+            }}
         </div>
       <template #footer>
-          <CButton @click="dismiss()" color="secondary">Cancel</CButton>
+          
+          <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
           <CButton v-if="step != 1" @click="previousStep()" color="info">Previous</CButton>
           <CButton v-if="step != final_step" @click="nextStep()" color="primary" :disabled="(test_failed && step == 3)">Next</CButton>
           <CButton v-if="step == final_step" @click="createEventRule()" color="primary">Create</CButton>
@@ -262,7 +264,7 @@ export default {
         test_query() {
             let data = {
                 'uuid': this.source_event_uuid,
-                'query': this.query
+                'query': this.query,
             }
             this.test_result = ""
             this.test_running = true
@@ -325,6 +327,8 @@ export default {
             }
         },
         reset () {
+            this.name = ""
+            this.query = ""
             this.description = ""
             this.expire = true
             this.expire_days = 1
@@ -333,6 +337,9 @@ export default {
             this.dismiss_event = false
             this.target_case = []
             this.step = 1
+            this.test_complete = false
+            this.test_failed = false
+            this.test_result = ""
         },
         dismiss() {
             this.reset()

@@ -228,9 +228,9 @@ const mutations = {
     state.event_rule = event_rule
     state.event_rules = [...state.event_rules.filter(e => e.uuid != event_rule.uuid), event_rule]
   },
-  update_event_rule(state, data) {
-    state.event_rule = data
-    state.event_rules = state.event_rules.map(r => r.uuid == data.uuid ? data : r)
+  update_event_rule(state, event_rule) {
+    state.event_rule = event_rule
+    state.event_rules = state.event_rules.map(e => e.uuid == event_rule.uuid ? event_rule : e)
   },
   add_event_rule(state, data) {
     state.event_rules.push(data)
@@ -1316,6 +1316,19 @@ const actions = {
       .then(resp => {
         commit('save_event_rule', resp.data)
         commit('show_alert', {message: 'Successfully created the Event Rule.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  editEventRule({commit}, {uuid, rule}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_rule/${uuid}`, data: rule, method: 'PUT'})
+      .then(resp => {
+        commit('update_event_rule', resp.data)
+        commit('show_alert', {message: 'Successfully updated the Event Rule.', 'type': 'success'})
         resolve(resp)
       })
       .catch(err => {
