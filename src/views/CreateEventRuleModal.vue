@@ -9,7 +9,6 @@
                 </CAlert>-->
                 <div name="create-event-rule-step-1" v-if="step == 1">
                 <h4>Rule Details</h4>
-                {{source_event_uuid}}
                 <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
                 <p>This rule will apply to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
 
@@ -92,17 +91,12 @@
                     <b>Description: </b><br>{{description}}<br><br>
                     <span v-if="expire"><b>Expire in: </b> {{expire_days}} day(s)<br></span>
                     <b>Actions: </b><br><br>
-                        <ul>
-                            <li v-if="merge_into_case">Merge in to case <b>#{{target_case.id}} - {{target_case.title}}</b></li>
-                            <li v-if="dismiss_event">Immediately dismiss event</li>
-                        </ul>
-                    <b>Observables: </b><br><br>
                     <ul>
-                        <li v-for="obs in observables" :key="obs.value"><b>{{obs.data_type}}</b>: {{obs.value}}</li>
+                        <li v-if="merge_into_case">Merge in to case <b>#{{target_case.id}} - {{target_case.title}}</b></li>
+                        <li v-if="dismiss_event">Immediately dismiss event</li>
                     </ul>
                 </div>
             </CForm>
-            }}
         </div>
       <template #footer>
           

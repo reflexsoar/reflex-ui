@@ -8,11 +8,11 @@ Prism.languages.rql = {
 		greedy: true
 	},
 
-	'class-name': /\b(?:[Ii]n|eq|EQ|Eq|[Rr]eg[Ee]xp|RE|re|[Ee]xpand|[Ee]xists|[Cc]ontains|(?:[Ss]tarts|[Ee]nds)[Ww]ith|not|Not|NOT|ContainsCIS|containscis|GT|gt|Gt|LT|lt|Lt|LTE|lte|Lte|Gte|GTE|gte)\b/,
+	'class-name': /\b(?:[Ii]n|eq|EQ|Eq|[Rr]eg[Ee]xp|RE|re|[Ee]xpand|[Ee]xists|[Cc]ontains|(?:[Ss]tarts|[Ee]nds)[Ww]ith|not|Not|NOT|ContainsCIS|containscis|GT|gt|Gt|LT|lt|Lt|LTE|lte|Lte|Gte|GTE|gte|intel|IntelLookup|threat|ThreatList|threatlist|threat_lookup|intel_lookup|intellookup)\b/,
 	'keyword': /\b(?:and|or)/,
 	'boolean': /\b(?:true|false|null)\b/,
 
-	'function': /\b(?:\|length|count|lowercase|refang|b64decode|b64extract|urldecode|any|all|avg|max|min|sum|split)\b/,
+	'function': /\b(?:\|length|count|lowercase|uppercase|refang|b64decode|b64extract|urldecode|any|all|avg|max|min|sum|split)\b/,
 
 	'datetime': [
 		{
