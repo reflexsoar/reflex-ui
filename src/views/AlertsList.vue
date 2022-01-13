@@ -48,41 +48,6 @@
                   </CCol>
                 </CRow>
               </div>
-              <div class='event-stats-picker'>
-                <CRow>
-                  <CCol>
-                    <v-date-picker
-        v-model="range"
-        mode="dateTime"
-        :masks="masks"
-        is-range
-      >
-        <template v-slot="{ inputValue, inputEvents, isDragging }">
-          <div class="flex flex-col sm:flex-row justify-start items-center " >
-            <div class="relative flex-grow">
-              <input
-                class="flex-grow pl-8 pr-2 py-1 bg-gray-100 border rounded w-full"
-                :class="isDragging ? 'text-gray-600' : 'text-gray-900'"
-                :value="inputValue.start"
-                v-on="inputEvents.start"
-              />
-            </div>
-            <span class="flex-shrink-0 m-2">
-            </span>
-            <div class="relative flex-grow">
-              <input
-                class="flex-grow pl-8 pr-2 py-1 bg-gray-100 border rounded w-full"
-                :class="isDragging ? 'text-gray-600' : 'text-gray-900'"
-                :value="inputValue.end"
-                v-on="inputEvents.end"
-              />
-            </div>
-          </div>
-        </template>
-      </v-date-picker>
-                  </CCol>
-                </CRow>
-              </div>
               <div class='event-stats-picker' v-for="bucket, title in event_stats" :key="title">
                 <b class='event-stats-title'>{{title}}</b>
                 <div v-if="status == 'loading'" class='event-stats-div' style="overflow-y: scroll; margin:auto; text-align:center; verticle-align:middle;">
@@ -305,6 +270,7 @@
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>
+    <ListAdderModal :show.sync="listAdderModal" :observable="selected_observable"></ListAdderModal>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
@@ -400,6 +366,7 @@ import CreateCaseModal from './CreateCaseModal'
 import MergeEventIntoCaseModal from './MergeEventIntoCaseModal'
 import CreateEventRuleModal from './CreateEventRuleModal'
 import RunActionModal from './RunActionModal'
+import ListAdderModal from './ListAdderModal'
 import "vue-simple-context-menu/dist/vue-simple-context-menu.css";
 import { PrismEditor } from 'vue-prism-editor'
 import { highlight, languages } from 'prismjs/components/prism-core';
@@ -416,6 +383,7 @@ export default {
       MergeEventIntoCaseModal,
       CreateEventRuleModal,
       RunActionModal,
+      ListAdderModal,
       PrismEditor,
       EventDrawer,
       CRightDrawer
@@ -452,7 +420,8 @@ export default {
           {"name": "VT Lookup"},
           {"name": "Google Search"},
           {"name": "Copy"},
-          {"name": "Run Action"}
+          {"name": "Run Action"},
+          {"name": "Add to List"}
         ],
         name: "",
         description: "",
@@ -477,6 +446,7 @@ export default {
         createCaseModal: false,
         createEventRuleModal: false,
         runActionModal: false,
+        listAdderModal: false,
         sourceRuleEventUUID: "",
         dismissalComment: "",
         dismissalReason: null,
@@ -570,12 +540,18 @@ export default {
           case "Run Action":
             this.showRunActionModal(event.item)
             break
-
+          case "Add to List":
+            this.showListAdder(event.item)
+            break
         }        
       },
       showRunActionModal(observable) {
         this.selected_observable = observable
         this.runActionModal = true
+      },
+      showListAdder(observbale) {
+        this.selected_observable = observbale
+        this.listAdderModal = true
       },
       reopenEvent(uuid) {
         this.$store.dispatch('updateEvent', {uuid: uuid, data: {'status': 0}}).then(resp => {

@@ -741,9 +741,16 @@ const actions = {
       })
     })
   },
-  getLists({commit}) {
+  getLists({commit}, data_type=[]) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/list`, method: 'GET'})
+
+      let base_url = `${BASE_URL}/list`
+
+      if (data_type.length > 0) {
+        base_url += `?data_type=${data_type}`
+      }
+
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_lists', resp.data)
         resolve(resp)
@@ -785,6 +792,18 @@ const actions = {
       .then(resp => {
         commit('remove_list', uuid)
         commit('show_alert', {message: 'Successfully deleted list.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  addItemToList({commit}, {uuid, value}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/list/${uuid}/add_value`, data: value, method: 'PUT'})
+      .then(resp => {
+        commit('show_alert', {message: 'Successfully add observable to list.', 'type': 'success'})
         resolve(resp)
       })
       .catch(err => {
