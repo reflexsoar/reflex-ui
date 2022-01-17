@@ -8,12 +8,12 @@ export default [
         to: '/dashboard',
         icon: 'cil-speedometer'
       },
-      {
+      /*{
         _name: 'CSidebarNavItem',
         name: 'Hunting',
         to: '/hunter',
         icon: 'cil-magnifying-glass'
-      },
+      },*/
       {
         _name: 'CSidebarNavItem',
         name: 'Cases',
@@ -29,11 +29,11 @@ export default [
             name: 'Queue',
             to: '/alerts/list'
           },     
-          {
+          /*{
             _name: 'CSidebarNavItem',
             name: 'Observables',
             to: '/observables'
-          },
+          },*/
           {
             _name: 'CSidebarNavItem',
             name: 'Event Rules',
@@ -41,7 +41,7 @@ export default [
           }
         ]
       },
-      { _name: 'CSidebarNavDropdown',
+      /*{ _name: 'CSidebarNavDropdown',
         name: 'Detection',
         icon: 'cil-shield-alt',
         items: [
@@ -51,13 +51,13 @@ export default [
             to: '/detections'
           }
         ]
-      },
+      },*/
       {
         _name: 'CSidebarNavDropdown',
         name: 'Automation',
         icon: 'cil-3d',
         items: [
-          {
+          /*{
             _name: 'CSidebarNavItem',
             name: 'Playbooks',
             to: '/playbooks'
@@ -66,7 +66,7 @@ export default [
             _name: 'CSidebarNavItem',
             name: 'Plugins',
             to: '/plugins'
-          },
+          },*/
           {
             _name: 'CSidebarNavItem',
             name: 'Intel Lists',
@@ -74,12 +74,12 @@ export default [
           }
         ]
       },
-      {
+      /*{
         _name: 'CSidebarNavItem',
         name: 'Reports',
         to: '/reports',
         icon: 'cil-chart'
-      },
+      },*/
       {
         _name: 'CSidebarNavDropdown',
         name: 'System',

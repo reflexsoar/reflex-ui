@@ -36,6 +36,11 @@
             {{item.last_logon  | moment('from', 'now')}}
           </td>
         </template>
+        <template #organization="{item}">
+          <td>
+            <CButton class="tag" size="lg" color="secondary">{{mapUserToOrg(item.organization)}}</CButton>
+          </td>
+        </template>
         <template #actions="{item}">
           <td style="max-width:150px" class="text-right">
             <CButton v-if="item.locked && item.uuid != current_user.uuid && userHas('unlock_user')" @click="unlockUserModal(item.uuid)" size="sm" color="warning" class="unlock">Unlock User</CButton>&nbsp;
@@ -51,6 +56,7 @@
             {{error_message}}
       </CAlert>
       <CForm @submit.prevent="modal_action()" id="userForm">
+        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" :options="organizations"/>
         <CInput v-model="user.username" label="Username" placeholder="Enter a unique username for the user" required/>
         <CRow>
           <CCol col="6">
@@ -161,7 +167,7 @@ export default {
       modal_title: "",
       modal_submit_text: 'Create',
       modal_mode: 'new',
-      delete_confirm: "",      
+      delete_confirm: "",
       user: {
         'username': '',
         'first_name': '',
@@ -188,7 +194,8 @@ export default {
       error: false,
       error_message: null,
       user_loading: false,
-      unlock_modal: false
+      unlock_modal: false,
+      organizations: []
     };
   },
   watch: {
@@ -286,6 +293,14 @@ export default {
         this.modal_status = false
       })
     },
+    mapUserToOrg(uuid) {
+      let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+      if (org.length > 0) {
+        return org[0].name
+      } else {
+        return "Unknown"
+      }
+    },
     unlockUser(uuid) {
       this.$store.dispatch('unlockUser', uuid).then(resp => {
         this.unlock_modal = false
@@ -314,6 +329,10 @@ export default {
     },
     loadData: function () {
       this.loading = true;
+      if(this.current_user.role.permissions.view_organizations) {
+        this.fields.splice(1,0,'organization')
+        this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+      }
       this.$store.dispatch("getUsers").then((resp) => {
         this.users = resp.data;
         this.loading = false;

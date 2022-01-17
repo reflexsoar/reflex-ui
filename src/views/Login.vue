@@ -20,7 +20,7 @@
                   placeholder="Email"
                   autocomplete="username email"
                   required
-                  v-model="username"
+                  v-model="email"
                 >
                   <template #prepend-content><CIcon name="cil-user"/></template>
                 </CInput>
@@ -67,16 +67,16 @@ export default {
   name: 'Login',
   data(){
     return {
-      username: "",
+      email: "",
       password: "",
       logo_path: require("../assets/img/color-logo.png")
     }
   },
   methods: {
     login: function () {
-      let username = this.username
+      let email = this.email
       let password = this.password
-      this.$store.dispatch('login', { username, password })
+      this.$store.dispatch('login', { email, password })
       .then(() => {
         if(this.$store.getters.authStatus == "mfa_check") {
           this.$router.push('/mfa')

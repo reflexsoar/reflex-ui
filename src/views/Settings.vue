@@ -7,7 +7,13 @@
       <CCol xs="12" lg="12">
         <CCard>
           <CCardHeader>
-            <b>Settings</b>
+            <CRow>
+              <CCol>
+                <b>Settings</b>
+              </CCol>
+              <CCol class="text-right">
+              </CCol>
+            </CRow>
           </CCardHeader>
           <CCardBody class="tabbed">
             <CTabs :activeTab.sync="activeTab">
@@ -17,29 +23,36 @@
                 </template>
                 <GlobalSettings/>
               </CTab>
+              <CTab v-if="current_user && current_user.role.permissions.view_organizations">
+                <template slot="title">
+                  <CIcon name="cil-people"/> {{tabs[1]}}
+                </template>
+                <OrganizationList/>
+              </CTab>
               <CTab>
                 <template slot="title">
-                  <CIcon name="cil-user"/> {{tabs[1]}}
+                  <CIcon name="cil-user"/> {{tabs[2]}}
                 </template>
                 <UsersList/>
               </CTab>
               <!--<CTab>
                 <template slot="title">
-                  <CIcon name="cil-people"/> {{tabs[2]}}
+                  <CIcon name="cil-people"/> {{tabs[3]}}
                 </template>
                 <GroupList/>
               </CTab>-->
               <CTab>
                 <template slot="title">
-                  <CIcon name="cil-people"/> {{tabs[3]}}
+                  <CIcon name="cil-people"/> {{tabs[4]}}
                 </template>
               </CTab>
               <CTab>
                 <template slot="title">
-                  <CIcon name="cil-graph"/> {{tabs[4]}}
+                  <CIcon name="cil-graph"/> {{tabs[5]}}
                 </template>
                 <AuditLogs :key="reloadLogs"/>
               </CTab>
+              
             </CTabs>
           </CCardBody>
         </CCard>
@@ -53,6 +66,7 @@ import UsersList from './UsersList'
 import RolesList from './RolesList'
 import GroupList from './GroupList'
 import AuditLogs from './AuditLogs'
+import OrganizationList from './OrganizationList'
 import GlobalSettings from './GlobalSettings'
 import { mapState, mapGetters } from 'vuex'
 export default {
@@ -62,7 +76,8 @@ export default {
     UsersList,
     GlobalSettings,
     GroupList,
-    AuditLogs
+    AuditLogs,
+    OrganizationList
   },
   watch: {
     activeTab: function () {
@@ -77,6 +92,7 @@ export default {
     return {
       tabs: [
         'Global',
+        'Organizations',
         'Users',
         'Groups',
         'Roles',

@@ -12,8 +12,11 @@ const state = {
   access_token: localStorage.getItem('access_token') || '',
   refresh_token: localStorage.getItem('refresh_token') || '',
   current_user: {
-    'permissions': []
+    'permissions': [],
+    'default_org': false
   },
+  global_tenant: false,
+  show_tenant_controls: false,
   mfa_enabled: false,
   audit_logs: [],
   dashboard_metrics: {},
@@ -51,6 +54,8 @@ const state = {
   close_reasons: [],
   close_reason: {},
   pairing_token: "",
+  organizations: [],
+  organization: {},
   users: [],
   user: {},
   related_events: [],
@@ -333,6 +338,15 @@ const mutations = {
   save_user(state, user) {
     state.user = user
   },
+  save_organizations(state, organizations) {
+    state.organizations = organizations
+  },
+  save_organization(state, organization) {
+    state.organization = organization
+  },
+  update_organization(state, org) {
+    state.organizations = state.organizations.map(x => x.uuid == org.uuid ? org : x )
+  },
   remove_list(state, uuid) {
     state.list = {}
     state.lists = state.lists.filter(a => a.uuid !== uuid)
@@ -537,6 +551,7 @@ const mutations = {
 }
 
 const getters = {
+  organizations: state => {return state.organizations},
   network_data: state => { return state.network_data },
   event_stats: state => { return state.event_stats },
   eventDrawerShow: state => { return state.eventDrawerShow},
@@ -1421,6 +1436,18 @@ const actions = {
       Axios({url: `${BASE_URL}/plugin_config`, data: config, method: 'POST'})
       .then(resp => {
         commit('add_plugin_config', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getOrganizations({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/organization`, method: 'GET'})
+      .then(resp => {
+        commit('save_organizations', resp.data.organizations)
         resolve(resp)
       })
       .catch(err => {

@@ -77,7 +77,7 @@ export default {
           "event_type",          
           "source_user",
           "message",
-          "status",
+          "status"
         ];
       },
     },
