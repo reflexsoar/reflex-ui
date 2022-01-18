@@ -33,6 +33,11 @@
                       <router-link :to="`${item.uuid}`">{{item.name}}</router-link>
                   </td>
               </template>
+              <template #organization="{item}">
+                <td>
+                  <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+                </td>
+              </template>
               <template #tags="{item}">
                 <td>
                   <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
@@ -70,9 +75,9 @@ export default {
     dark: Boolean,
     alert: false
     },
+    computed: mapState(['current_user']),
     created: function () {
         this.loadData()
-        //this.$store.dispatch('getInputs')
         this.refresh = setInterval(function() {
           this.loadData()
         }.bind(this), 60000)
@@ -82,12 +87,20 @@ export default {
         name: "",
         description: "",
         url: "",
-        orgs: Array,
+        organizations: Array,
         dismissCountDown: 10,
         loading: true
       }
     },
     methods: {
+      mapOrgToName(uuid) {
+        let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+        if (org.length > 0) {
+          return org[0].name
+        } else {
+          return "Unknown"
+        }
+      },
       addSuccess: function() {
         if (this.$store.getters.addSuccess == 'success') {
           return true
@@ -97,6 +110,13 @@ export default {
       },
       loadData: function() {
         this.loading = true
+        if(this.current_user.role.permissions.view_organizations) {
+          if (!this.fields.includes('organization')) {
+            this.fields.splice(1,0,'organization')
+            
+          }
+          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        }
         this.$store.dispatch('getInputs').then(resp => {
             this.inputs = resp.data
             this.loading = false

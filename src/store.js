@@ -338,6 +338,10 @@ const mutations = {
   save_user(state, user) {
     state.user = user
   },
+  add_organization(state, organization) {
+    state.organizations.push(organization)
+    state.organization = organization
+  },
   save_organizations(state, organizations) {
     state.organizations = organizations
   },
@@ -1030,9 +1034,16 @@ const actions = {
       })
     })
   },
-  getCredentialList({commit}) {
+  getCredentialList({commit}, organization) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/credential`, method: 'GET'})
+
+      let base_url = `${BASE_URL}/credential`
+
+      if (organization) {
+        base_url += `?organization=${organization}`
+      }
+
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
         let credentials = []
         resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name+" - "+cred.description}))
@@ -1436,6 +1447,18 @@ const actions = {
       Axios({url: `${BASE_URL}/plugin_config`, data: config, method: 'POST'})
       .then(resp => {
         commit('add_plugin_config', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createOrganization({commit}, organization) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/organization`, data: organization, method: 'POST'})
+      .then(resp => {
+        commit('add_organization', resp.data)
         resolve(resp)
       })
       .catch(err => {

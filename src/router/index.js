@@ -89,7 +89,13 @@ router.beforeEach((to, from, next) => {
   // Fetch the settings before each route in the event that they have changed
   if(to.matched.some(record => record.meta.fetchSettings)) {
     store.dispatch('getSettings')
-  }  
+  }
+
+  if(to.matched.some(record => record.meta.fetchOrganizations)) {
+    if(store.getters.current_user.default_org) {
+      store.dispatch('getOrganizations')
+    }    
+  }
 
   if(to.matched.some(record => record.meta.requiresMFAChallenge)) {
     if (localStorage.getItem('mfa_challenge_token') === null) {
@@ -162,44 +168,6 @@ function configRoutes () {
           }
         },
         {
-          path: 'organizations',
-          name: 'Organizations',
-          component: Organizations,
-          redirect: 'organizations/list',
-          meta: {
-            requiresAuth: true
-          },
-          children: [
-            {
-              path: 'create',
-              name: 'Create Organization',
-              component: CreateOrganization,
-              meta: {
-                fetchSettings: true,
-                requiresAuth: true
-              }
-            },
-            {
-              path: 'list',
-              name: '',
-              component: OrganizationsList,
-              meta: {
-                fetchSettings: true,
-                requiresAuth: true
-              }
-            },
-            {
-              path: ':uuid',
-              name: 'View Organization',
-              component: OrganizationDetails,
-              meta: {
-                fetchSettings: true,
-                requiresAuth: true
-              }
-            }
-          ]
-        },
-        {
           path: 'cases',
           name: 'Cases',
           component: Cases,
@@ -234,7 +202,8 @@ function configRoutes () {
           component: Inputs,
           redirect: 'inputs/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true
           },
           children: [
             {

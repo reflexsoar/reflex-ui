@@ -7,7 +7,7 @@
     </CCol>
     <CCol col v-else>
       <div style="padding: 10px;">
-        <CButton color="primary" @click="generateToken()">New Organization</CButton>
+        <CButton color="primary" @click="showOrganizationModal()">New Organization</CButton>
       </div>
       <CDataTable
         :hover="hover"
@@ -29,14 +29,20 @@
           </td>
         </template>
       </CDataTable>
+      <CreateOrganizationWizard :show.sync="organizationModal"/>
     </CCol>
   </CRow>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import CreateOrganizationWizard from './CreateOrganizationWizard'
+
 export default {
   name: "OrganizationList",
+  components: {
+    CreateOrganizationWizard
+  },
   props: {
     items: Array,
     fields: {
@@ -44,7 +50,8 @@ export default {
       default() {
         return [
           "name",
-          "description"
+          "description",
+          "url"
         ];
       },
     },
@@ -66,10 +73,14 @@ export default {
   data() {
     return {
       loading: true,
-      organizations: []
+      organizations: [],
+      organizationModal: false
     };
   },
   methods: {
+    showOrganizationModal() {
+      this.organizationModal = true
+    },
     addSuccess: function () {
       if (this.$store.getters.addSuccess == "success") {
         return true;

@@ -6,6 +6,15 @@
             <CForm @submit.prevent="createInput" >
                 <h1>Create Input</h1>
                 <p class="text-muted">Fill out the form below to create a new input.</p>
+                <CSelect
+                  v-if="current_user.role.permissions.view_organizations"
+                  placeholder="Select an Organization..."
+                  required
+                  v-model="organization"
+                  :options="formattedOrganizations()"
+                  @change="refreshCredentials($event)"
+                  label="Organization"
+                />
                 <CInput
                   placeholder="Input Name"
                   required
@@ -101,16 +110,20 @@ export default {
       createInput: function () {
         let name = this.name
         let description = this.description
+        let organization = this.organization != '' ? this.organization : null
         let credential = this.credential
         let config = btoa(this.config)
         let field_mapping = btoa(this.field_mapping)
         let plugin = this.plugin
         let tags = this.tags
         let credential_list = this.credential_list
-        this.$store.dispatch('createInput', { name, description, config, field_mapping, plugin, credential, tags })
+        this.$store.dispatch('createInput', { name, organization, description, config, field_mapping, plugin, credential, tags })
         .then(resp => {
           this.$router.go(-1)
         })
+      },
+      formattedOrganizations() {
+        return this.organizations.map((o) => { return {label: o.name, value: o.uuid}})
       },
       addTag(newTag) {
         const t = {
@@ -124,6 +137,12 @@ export default {
       },
       selectCredential(event) {
         this.credential = event.target.value        
+      },
+      refreshCredentials(event) {
+        let organization = event.target.value
+        this.$store.dispatch('getCredentialList', organization).then(resp => {
+          console.log(resp.data)
+        })
       },
       loadTags: function() {
           this.$store.dispatch('getTags').then(resp => {
@@ -159,7 +178,7 @@ export default {
         return
       }
     },
-    computed: mapState(['credential_list']),
+    computed: mapState(['current_user','credential_list','organizations']),
     data(){
       return {
         name: "",
@@ -173,6 +192,7 @@ export default {
         errorMessage: "",
         test: 0,
         tags: [],
+        organization: "",
         selected: [],
         tag_list: []
       }

@@ -28,12 +28,14 @@
       <template #source_user="{item}">
         <td>{{item.source_user}}</td>
       </template>
+      <template #organization="{item}">
+        <td>
+          <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+        </td>
+      </template>
       <template #status="{item}">
         <td><CBadge class="btn-sm" :color="getStatusColor(item.status)" disabled>{{item.status}}</CBadge></td>
       </template>
-      <tr>
-        <td>TEST</td>
-      </tr>
       </CDataTable>
     </CCol>
     <CCol v-else lg="12" sm="12">
@@ -96,6 +98,7 @@ export default {
   created: function () {
     this.loadData();
   },
+  computed: mapState(['current_user']),
   data() {
     return {
       loading: true,
@@ -143,6 +146,10 @@ export default {
       let selected_status = this.selected_status.map(e => e.name)
       let selected_event_type = this.selected_event_type.map(e => e.name)
       let page = this.current_page
+      if(this.current_user.role.permissions.view_organizations) {
+        this.fields.splice(1,0,'organization')
+        this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+      }
       this.$store.dispatch("getAuditLogs", {selected_status, selected_event_type, page}).then((resp) => {
         this.audit_logs = this.$store.getters.audit_logs;
         this.pagination = resp.data.pagination
@@ -156,6 +163,16 @@ export default {
           default: return 'success';
         }
     }
+    ,
+    mapOrgToName(uuid) {
+      let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+      if (org.length > 0) {
+        return org[0].name
+      } else {
+        return "Unknown"
+      }
+    }
+
   }
 };
 </script>
