@@ -241,7 +241,8 @@ function configRoutes () {
           component: Credentials,
           redirect: 'credentials/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true
           },
           children: [
             {

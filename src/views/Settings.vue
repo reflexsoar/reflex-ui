@@ -91,7 +91,7 @@ export default {
   data () {
     return {
       tabs: [
-        'Global',
+        'Current Tenant',
         'Organizations',
         'Users',
         'Groups',

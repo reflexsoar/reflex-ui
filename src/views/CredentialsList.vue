@@ -28,6 +28,11 @@
                 <b>{{ item.name }}</b>
               </td>
             </template>
+            <template #organization="{item}">
+              <td>
+                <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+              </td>
+            </template>
             <template #actions="{ item }">
               <td class="text-right" style="width:10%">
                 <CButton color="primary" size="sm" @click="getCredentialDetails(item.uuid)">Edit</CButton>&nbsp;
@@ -49,6 +54,7 @@
         {{ error_message }}
       </CAlert>
       <CForm name="credentialForm" id="credentialForm" @submit.prevent="modal_action">
+        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="credential_data.organization" :options="organizations"/>
         <CInput
           placeholder="Credential Name"
           required
@@ -140,8 +146,14 @@ export default {
   },
   created() {
     this.$store.dispatch("getCredentials");
+    if(this.current_user.role.permissions.view_organizations) {
+      if (!this.fields.includes('organization')) {
+        this.fields.splice(1,0,'organization')
+      }
+      this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+    }
   },
-  computed: mapState(["credentials", "alert"]),
+  computed: mapState(["credentials", "alert","current_user"]),
   data() {
     return {
       name: "",
@@ -156,17 +168,28 @@ export default {
         name: "",
         username: "",
         secret: "",
-        description: ""
+        description: "",
+        organization: ""
       },
       modal_title: "New Credential",
       modal_action: this.createCredential,
       modal_submit_text: "Create",
       modal_status: false,
       error: false,
-      error_message:""
+      error_message:"",
+      organization: "",
+      organizations: []
     };
   },
   methods: {
+    mapOrgToName(uuid) {
+      let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+      if (org.length > 0) {
+        return org[0].name
+      } else {
+        return "Unknown"
+      }
+    },
     dismiss() {
       this.modal_status = false
 
@@ -222,7 +245,8 @@ export default {
       let credential = {
         name: this.credential_data.name,
         description: this.credential_data.description,
-        username: this.credential_data.username
+        username: this.credential_data.username,
+        organization: this.credential_data.organization
       }
       if (this.credential_data.secret != "") {
         credential.secret = this.credential_data.secret
