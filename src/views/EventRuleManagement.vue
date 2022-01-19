@@ -25,6 +25,11 @@
             <template #name="{item}">
               <td><span onmouseover="" style="cursor: pointer;" @click="viewRule(item.uuid)"><b >{{item.name}}</b><br>{{item.description}}</span></td>
             </template>
+            <template #organization="{item}">
+              <td>
+                <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+              </td>
+            </template>
             <template #last_matched_date="{item}">
               <td v-if="item.last_matched_date">{{item.last_matched_date | moment('from', 'now') }}</td>
               <td v-else>Never</td>
@@ -64,7 +69,7 @@
                 <div name="create-event-rule-step-1" v-if="step == 1">
                 <h4>Rule Details</h4>
                 <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
-
+                <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="organization" :options="organizations"/>
                 <CInput label="Rule Name" placeholder="Enter a friendly name for this rule" v-model="name" required></CInput>
                 <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
                 </div>
@@ -401,7 +406,8 @@ export default {
         current_page: 1,
         delete_modal: false,
         dismiss_submitted: false,
-        target_event_rule_uuid: ''
+        target_event_rule_uuid: '',
+        organization: ""
       }
     },
     watch: {
@@ -437,6 +443,14 @@ export default {
       }
     },
     methods: {
+      mapOrgToName(uuid) {
+        let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+        if (org.length > 0) {
+          return org[0].name
+        } else {
+          return "Unknown"
+        }
+      },
       findCase(query) {
           let fields = 'uuid,title,id,event_count,owner,severity'
           this.$store.dispatch('getCasesByTitle', {title: query, fields}).then(resp => {
@@ -476,6 +490,7 @@ export default {
       testRule() {
         let data = {
           'uuid': '',
+          'organization': this.organization ? this.organization : null,
           'query': this.rule.query ? this.rule.query : this.query,
           'event_count': parseInt(this.event_count),
           'return_results': this.return_events,
@@ -531,6 +546,12 @@ export default {
         this.cases = this.$store.getters.cases
       },
       loadRules() {
+        if(this.current_user.role.permissions.view_organizations) {
+          if (!this.fields.includes('organization')) {
+            this.fields.splice(1,0,'organization')
+          }
+        }
+        this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         let page = this.current_page
         let page_size = this.page_size
         this.$store.dispatch('loadEventRules', {page, page_size}).then(resp => {
@@ -557,6 +578,7 @@ export default {
       createEventRule() {
         let rule = {
           name: this.name,
+          organization: this.rule.organization ? this.rule.organization : null,
           description: this.description,
           merge_into_case: this.merge_into_case,
           target_case_uuid: this.target_case.uuid,
@@ -577,6 +599,7 @@ export default {
       editEventRule(uuid) {
         let rule = {
           name: this.rule.name,
+          organization: this.rule.organization ? this.rule.organization : null,
           description: this.rule.description,
           merge_into_case: this.rule.merge_into_case,
           target_case_uuid: this.rule.case_uuid ? this.rule.case_uuid.uuid : '',
@@ -627,7 +650,7 @@ export default {
         })
       }
     },
-    computed: mapState(['alert']),
+    computed: mapState(['alert','current_user']),
     created() {
       this.loadRules()
     }

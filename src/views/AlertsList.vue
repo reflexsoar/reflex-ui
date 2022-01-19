@@ -228,6 +228,7 @@
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
+                    <span v-if="current_user.role.permissions.view_organizations"><span class="separator">|</span><b>Organization:</b> {{mapOrgToName(event.organization)}}</span>
                   </small>
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -400,7 +401,7 @@ export default {
     dark: Boolean,
     event: false
     },
-    computed: mapState(['status','alert','settings']),
+    computed: mapState(['status','alert','settings','current_user']),
     created: function () {
         this.loadData()
         this.loadCloseReasons()
@@ -677,6 +678,8 @@ export default {
         }
       },
       filterEvents: function () {
+
+        this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
 
         // Build the filters based on what is currently selected
         this.$store.commit('add_start')
@@ -1013,6 +1016,14 @@ export default {
         } else {
           this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
         }   
+      },
+      mapOrgToName(uuid) {
+        let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+        if (org.length > 0) {
+          return org[0].name
+        } else {
+          return "Unknown"
+        }
       }
     },
     beforeDestroy: function() {

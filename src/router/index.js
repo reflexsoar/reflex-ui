@@ -281,7 +281,8 @@ function configRoutes () {
           component: Alerts,
           redirect: 'alerts/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true
           },
           children: [
             {
@@ -309,7 +310,8 @@ function configRoutes () {
           name:'Event Rules',
           component: EventRuleManagement,
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true
           }
         },
         {
@@ -352,7 +354,8 @@ function configRoutes () {
           redirect: 'agents/list',
           meta: {
             requiresAuth: true,
-            requiresPermission: 'view_agents'
+            requiresPermission: 'view_agents',
+            fetchOrganizations: true
           },
           children: [
             {
@@ -419,7 +422,8 @@ function configRoutes () {
           component: Lists,
           redirect: 'lists/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true
           },
           children: [
             {

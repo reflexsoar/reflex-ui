@@ -5,7 +5,7 @@
       <CRow>
         <CCol xs="4" lg="4">
           <CWidgetIcon
-            :header="dashboard_metrics.total_cases.toString()"
+            :header="dashboard_metrics.total_cases ? dashboard_metrics.total_cases.toString() : '0'"
             text="Total Cases"
             color="primary"
           >
@@ -14,7 +14,7 @@
         </CCol>
         <CCol xs="4" lg="4">
           <CWidgetIcon
-            :header="dashboard_metrics.open_cases.toString()"
+            :header="dashboard_metrics.closed_cases ? dashboard_metrics.closed_cases.toString() : '0'"
             text="Closed Cases"
             color="warning"
           >
@@ -23,7 +23,7 @@
         </CCol>
         <CCol xs="4" lg="4">
           <CWidgetIcon
-            :header="dashboard_metrics.total_cases.toString()"
+            :header="dashboard_metrics.open_cases ? dashboard_metrics.open_cases.toString() : '0'"
             text="Open Cases"
             color="success"
           >
@@ -32,7 +32,7 @@
         </CCol>
         <CCol xs="4" lg="4">
           <CWidgetIcon
-            :header="dashboard_metrics.total_events.toString()"
+            :header="dashboard_metrics.total_events ? dashboard_metrics.total_events.toString() : '0'"
             text="Total Events"
             color="info"
           >
@@ -41,7 +41,7 @@
         </CCol>
         <CCol xs="4" lg="4">
           <CWidgetIcon
-            :header="dashboard_metrics.new_events.toString()"
+            :header="dashboard_metrics.new_events ? dashboard_metrics.new_events.toString() :'0'"
             text="New Events"
             color="danger"
           >
@@ -66,8 +66,8 @@
     {{current_user.uuid}}
 
     <h4>Perm Check</h4>
-    {{current_user.role.permissions}}
-    <b>Can edit users:</b> {{current_user.role.permissions['update_user']}}
+    {{current_user.role ? current_user.role.permissions : 'Error'}}<br>
+    <b>Can edit users:</b> {{current_user.role ? current_user.role.permissions['update_user'] : 'Error'}}
     </CCol>
 
 </template>

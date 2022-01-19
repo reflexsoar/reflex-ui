@@ -32,6 +32,11 @@
               {{item.name}}
           </td>
       </template>
+      <template #organization="{item}">
+        <td>
+          <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+        </td>
+      </template>
       <template #data_type="{item}">
         <td>
           {{item.data_type.name}}
@@ -65,6 +70,7 @@
             {{error_message}}
       </CAlert>
       <CForm @submit.prevent="modal_action()" id="listForm">
+        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="list_data.organization" :options="organizations"/>
         <CInput v-model="list_data.name" label="Name" placeholder="A friendly name for the list" v-bind:required="modal_submit_text == 'Create'"/>
         <CRow>
           <CCol col="12" lg="6">
@@ -144,9 +150,9 @@ export default {
     fixed: Boolean,
     dark: Boolean
     },
-    computed: mapState(['status','alert','lists','data_types']),
+    computed: mapState(['current_user','status','alert','lists','data_types']),
     created: function () {
-        this.loadData()
+      this.loadData()
     },
     watch: {
       modal_status: function () {
@@ -161,7 +167,8 @@ export default {
           values: "",
           data_type: { uuid: ''},
           tag_on_match: false,
-          active: true
+          active: true,
+          organization: ""
         },
         modal_action: null,
         modal_status: false,
@@ -173,23 +180,32 @@ export default {
         error_message: "",
         delete_confirm: "",
         list_types: ['values','patterns'],
-        data_type_list: []
+        data_type_list: [],
+        organizations: []
       }
     },
     methods: {
+      mapOrgToName(uuid) {
+        let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+        if (org.length > 0) {
+          return org[0].name
+        } else {
+          return "Unknown"
+        }
+      },
       fieldPopulated(field) {
         if (field) {
           return field.length > 0;
         } else {
           return false
-        }
-        
+        }        
       },
       createListModal() {
         this.modal_action = this.createList
         this.modal_title = 'Create List'
         this.modal_status = true
         this.modal_submit_text = 'Create'
+        this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
       },
       createList() {
         let ld = {}
@@ -210,11 +226,13 @@ export default {
         this.modal_mode = 'edit'
         this.modal_action = this.editList
         Object.assign(this.list_data, this.lists.find(list => list.uuid === uuid))
+        this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         this.modal_status = true
       },
       editList() {
         let list = {
           name: this.list_data.name,
+          organization: this.list_data.organization,
           list_type: this.list_data.list_type,
           data_type_uuid: this.list_data.data_type.uuid,
           values: this.list_data.values,
@@ -261,6 +279,11 @@ export default {
         this.modal_status = false
       },
       loadData: function() {
+        if(this.current_user.role.permissions.view_organizations) {
+          if (!this.fields.includes('organization')) {
+            this.fields.splice(1,0,'organization')
+          }
+        }
         this.$store.dispatch('getLists')
         this.$store.dispatch('getDataTypes').then(resp => {
            this.data_type_list = this.$store.getters.data_types_list

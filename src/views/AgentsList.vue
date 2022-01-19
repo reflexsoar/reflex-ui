@@ -29,6 +29,11 @@
                       <router-link :to="`${item.uuid}`">{{item.name}}</router-link>
                   </td>
               </template>
+              <template #organization="{item}">
+                <td>
+                  <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+                </td>
+              </template>
               <template #inputs="{item}">
                   <td v-if="item.inputs">
                     {{item.inputs.length}}
@@ -96,7 +101,7 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user']),
+    computed: mapState(['current_user','organizations']),
     created: function () {
       this.current_url = window.location.origin;
       this.loadData()
@@ -126,6 +131,13 @@ export default {
         }
       },
       loadData: function() {
+        if(this.current_user.role.permissions.view_organizations) {
+          if (!this.fields.includes('organization')) {
+            this.fields.splice(1,0,'organization')
+            
+          }
+          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        }
         this.loading = true
         this.$store.dispatch('getAgents').then(resp => {
             this.inputs = resp.data
@@ -144,6 +156,14 @@ export default {
         this.$store.dispatch('getPairingToken').then(resp => {
           this.pairingToken = resp.data
         })
+      },
+      mapOrgToName(uuid) {
+        let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+        if (org.length > 0) {
+          return org[0].name
+        } else {
+          return "Unknown"
+        }
       }
     },
     filters: {
