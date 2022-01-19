@@ -280,13 +280,14 @@ export default {
       },
       toggleCloseCase(uuid) {
         this.target_case = uuid
-        this.loadClosureReasons()
+        let organization = this.filtered_cases.filter(c => c.uuid === uuid)[0].organization
+        this.loadClosureReasons(organization)
         this.loadCaseStatuses()
         this.close_case_modal = !this.close_case_modal        
       },
-      loadClosureReasons() {
+      loadClosureReasons(organization=null) {
           // Call the closure reasons API endpoint
-          this.$store.dispatch('getCloseReasons').then(resp => {
+          this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
               this.close_reasons = resp.data.map((reason) => { return {'label': reason.title, 'value': reason.uuid }})
           })            
       },

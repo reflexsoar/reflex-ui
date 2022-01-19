@@ -1478,9 +1478,14 @@ const actions = {
       })
     })
   },
-  getUsers({commit}) {
+  getUsers({commit}, {organization=null}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user`, method: 'GET'})
+
+      let base_url = `${BASE_URL}/user`
+      if(organization) {
+        base_url += `?organization=${organization}`
+      }
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_users', resp.data)
         resolve(resp)
@@ -1645,9 +1650,16 @@ const actions = {
       })
     })
   },
-  getCaseTemplateList({commit}, title) {
+  getCaseTemplateList({commit}, {title, organization}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_template?title=${title}`, method: 'GET', headers: {'X-Fields': 'uuid,title,description,tlp,severity,tags,task_count'}})
+
+      let base_url = `${BASE_URL}/case_template?title=${title}`
+
+      if(organization) {
+        base_url += `&organization=${organization}`
+      }
+
+      Axios({url: base_url, method: 'GET', headers: {'X-Fields': 'uuid,title,description,tlp,severity,tags,task_count'}})
       .then(resp => {
         commit('save_case_template_list', resp.data)
         resolve(resp)
@@ -1793,9 +1805,16 @@ const actions = {
       })
     })
   },
-  getCloseReasons({commit}) {
+  getCloseReasons({commit}, {organization=null}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/close_reason`, method: 'GET'})
+
+      let base_url = `${BASE_URL}/close_reason`
+
+      if(organization) {        
+        base_url += `?organization=${organization}`
+      }
+
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_close_reasons', resp.data)
         resolve(resp)
@@ -1805,9 +1824,16 @@ const actions = {
       })
     })
   },
-  getCasesByTitle({commit}, {title, fields='uuid,title,id,event_count,owner,severity'}) {
+  getCasesByTitle({commit}, {title, organization=null, fields='uuid,title,id,event_count,owner,severity'}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case?title=${title}`, method: 'GET'})
+
+      let base_url = `${BASE_URL}/case?title=${title}`
+
+      if (organization) {
+        base_url += `&organization=${organization}`
+      }
+
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_cases', resp.data.cases)
         resolve(resp)
@@ -1889,9 +1915,16 @@ const actions = {
       })
     })
   },
-  getUsersByName({commit}, username) {
+  getUsersByName({commit}, {username, organization=null}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user?username=${username}`, method: 'GET'})
+
+      let base_url = `${BASE_URL}/user?username=${username}`
+
+      if (organization) {
+        base_url += `&organization=${organization}`
+      }
+
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_users', resp.data)
         resolve(resp)

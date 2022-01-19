@@ -4,11 +4,21 @@
       <div>
         <p v-if="related_events_count > 1">This case will be associated with <b>{{related_events_count}}</b> events.</p>
         <CForm @submit.prevent="createCase()" id="create_case_form">
+            <CSelect
+                  v-if="current_user.role.permissions.view_organizations"
+                  placeholder="Select an Organization..."
+                  required
+                  v-model="organization"
+                  :options="formattedOrganizations()"
+                  @change="refreshDropdowns($event)"
+                  label="Organization"
+                />
             <CInput
               placeholder="Case Title"
               required
               v-model="title"
               label="Case Title"
+              v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
             >
             </CInput>
             <label style="text-align:center; vertical-align:middle; padding-bottom:.8em">Assign Case Template?</label>&nbsp;&nbsp;&nbsp;<CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="use_case_template" v-bind:disabled="settings.require_case_templates"/>
@@ -22,7 +32,8 @@
                     :internal-search="false"
                     :options-limit="10"
                     :show-no-results="false" 
-                    @search-change="caseTemplateFind">
+                    @search-change="caseTemplateFind"
+                    v-bind:disabled="current_user.role.permissions.view_organizations && organization == null">
                     <template slot="option" slot-scope="props">
                         {{props.option.title}}</br>
                         <small>{{props.option.description}}<br>Contains {{props.option.task_count}} tasks.</small>
@@ -39,7 +50,8 @@
                 :internal-search="false"
                 :options-limit="25"
                 :show-no-results="false"
-                @search-change="usersFind">
+                @search-change="usersFind"
+                v-bind:disabled="current_user.role.permissions.view_organizations && organization == null">
             </multiselect><br>
             <CTextarea
               placeholder="Enter a description for the case.  The more detail the better."
@@ -47,6 +59,7 @@
               v-model="description"
               label="Description"
               rows=5
+              v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
             >
             </CTextarea>
             <CRow>
@@ -56,6 +69,7 @@
                     :options="tlps"
                     :value.sync="tlp"
                     placeholder="Select a TLP"
+                    v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
                   >
                   </CSelect>
               </CCol>
@@ -65,16 +79,29 @@
                     :options="severities"
                     :value.sync="severity"
                     placeholder="Select a Severity"
+                    v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
                   >
                   </CSelect>
               </CCol>
             </CRow>
             <div role="group" class="form-group">
                 <label class="typo__label">Tags</label>
-                <multiselect v-model="selected_tags" placeholder="Select tags to apply to this input" :taggable="true" tag-placeholder="Add new tag" track-by="name" label="name" :options="tag_list" :multiple="true" @tag="addTag" :close-on-select="false">
+                <multiselect 
+                    v-model="selected_tags" 
+                    placeholder="Select tags to apply to this input"
+                    :taggable="true"
+                    tag-placeholder="Add new tag"
+                    track-by="name"
+                    label="name"
+                    :options="tag_list"
+                    :multiple="true"
+                    @tag="addTag"
+                    :close-on-select="false"
+                    v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
+                >
                 </multiselect>
             </div>
-            <label>Generate Event Rule</label><br><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule"/><br>
+            <label>Generate Event Rule</label><br><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule" v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"/><br>
             <small class="form-text text-muted w-100">When enabled all future events will be merged into this case.</small><br>
         </CForm>
       </div>
@@ -97,7 +124,7 @@ export default {
         related_events_count: Number,
         case_from_card: Boolean
     },
-    computed: mapState(['settings']),
+    computed: mapState(['settings','current_user']),
     data(){
         return {
             title: "",
@@ -113,6 +140,7 @@ export default {
             submitted: false,
             modalStatus: this.show,
             generate_event_rule: false,
+            organization: null,
             severities: [
                 {'label':'Low', 'value':1},
                 {'label':'Medium', 'value':2},
@@ -161,10 +189,18 @@ export default {
     created() {
     },
     methods: {
+        formattedOrganizations() {
+            return this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        },
         usersFind(query) {
-            this.$store.dispatch('getUsersByName', query).then(resp => {
+            let organization = this.organization
+            this.$store.dispatch('getUsersByName', {username: query, organization: organization}).then(resp => {
                 this.users = this.$store.getters.users
             })
+        },
+        refreshDropdowns(event) {
+            this.loadUsers()
+            this.caseTemplateFind('')
         },
         applyCaseTemplate() {
             if(this.case_template) {
@@ -191,7 +227,8 @@ export default {
             }
         },
         loadUsers() {
-            this.$store.dispatch('getUsers').then(resp => {
+            let organization = this.organization
+            this.$store.dispatch('getUsers', {organization:organization}).then(resp => {
                 this.users = this.$store.getters.users
             })
         },
@@ -199,18 +236,21 @@ export default {
 
         },
         loadData() {
-            this.$store.dispatch('getCaseTemplateList', '').then(resp => {
+            let organization = this.organization
+            this.$store.dispatch('getCaseTemplateList', {title:'', organization: organization}).then(resp => {
                 this.case_templates = resp.data
             })
         },
         caseTemplateFind(query) {
-            this.$store.dispatch('getCaseTemplateList', query).then(resp => {
+            let organization = this.organization
+            this.$store.dispatch('getCaseTemplateList', {title: query, organization: this.organization}).then(resp => {
                 this.case_templates = resp.data
             })
         },
         createCase() {
             this.submitted = true
             let title = this.title;
+            let organization = this.organization;
             let description = this.description;
             let events = [];
             let severity = this.severity;
@@ -229,7 +269,7 @@ export default {
                 tags.push(this.selected_tags[tag].name)
             }
 
-            let request_data = {title,description,events,tlp,severity,tags,generate_event_rule, include_related_events}
+            let request_data = {title,organization,description,events,tlp,severity,tags,generate_event_rule, include_related_events}
             if(this.owner) {
                 request_data['owner_uuid'] = this.owner.uuid
             }

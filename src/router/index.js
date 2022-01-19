@@ -173,7 +173,8 @@ function configRoutes () {
           component: Cases,
           redirect: 'cases/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true
           },
           children: [
             {

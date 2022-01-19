@@ -266,7 +266,7 @@
       </template>
     </CModal>
     <CreateCaseModal :show.sync="createCaseModal" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
-    <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables"></CreateEventRuleModal>
+    <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :event_organization.sync="event_organization" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>
     <ListAdderModal :show.sync="listAdderModal" :observable="selected_observable"></ListAdderModal>
@@ -464,6 +464,7 @@ export default {
         fields: ['name', 'created', 'events', 'reference', 'status', 'severity', 'observables','actions'],
         sort_by: 'date',
         event_signature: "",
+        event_organization: "",
         rule_observables: [],
         related_events: [],
         related_events_count: 0,
@@ -649,6 +650,7 @@ export default {
         this.sourceRuleEventUUID = uuid
         let source_event = this.filtered_events.find((event) => event.signature == signature)
         this.event_signature = source_event.title
+        this.event_organization = source_event.organization
         this.$store.dispatch('getRelatedEvents', source_event.signature).then(resp => {
             this.selected = [...resp.data.events]
             this.rule_observables = this.getEventObservables(source_event.uuid).flat().map( function(obs) { 

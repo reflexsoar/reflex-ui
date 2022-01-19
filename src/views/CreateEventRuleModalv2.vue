@@ -1,7 +1,8 @@
 <template>
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
-    <CModal title="Create Event Rule" :centered="true" size="lg" :show.sync="modalStatus" :closeOnBackdrop="false">
-        <div>
+    <CModal title="Create Event Rule" :centered="true" size="xl" :show.sync="modalStatus" :closeOnBackdrop="false">
+        <CRow>
+            <CCol>
             <CForm @submit.prevent="createEventRule" id="event_rule_form">
                 <!--<CAlert :show="step == 3 && !test_failed" color="danger" closeButton>
                     Your query matches more than <b>1000</b> events, tuning of source system is recommended.
@@ -44,42 +45,61 @@
                     </CRow>
                 </div>
                 <div name="create-case-template-step-4" v-if="step == 4">
-                    <h4>Actions</h4>
-                                    
-                    <label>Merge into Case</label>
-                    <CRow>                    
-                        <CCol col="1">
-                            <CSwitch v-bind:disabled="dismiss_event" label="Merge into Case" color="success" label-on="Yes" label-off="No" :checked.sync="merge_into_case" style="padding-top:5px"></CSwitch>
+                    
+                    <CRow>
+                        <CCol col="3">
+                            <h4>Actions</h4>
+                            <CRow style="background-color: #cfcfcf; margin-left: 0px; margin-right: 0px; margin-top: 5px; margin-bottom:5px; padding:5px; border-radius: 5px" v-for="action in configured_actions" :key="action">
+                                    <CCol>
+                                        {{action.action}}
+                                    </CCol>
+                                    <CCol col="1" style="vertical-align: middle">
+                                        <div>
+                                            <CIcon name="cil-chevron-circle-right-alt"/>
+                                        </div>
+                                    </CCol>
+                                </CRow>
                         </CCol>
-                        <CCol col="11">
-                            <multiselect style="z-index:50"
-                                v-bind:disabled="!merge_into_case || dismiss_event"
-                                :options="cases" 
-                                v-model="target_case" 
-                                track-by="uuid" 
-                                label="title"
-                                :searchable="true"
-                                :internal-search="false"
-                                :options-limit="10"
-                                :show-no-results="false"
-                                @search-change="caseFind"
-                                :custom-label="caseLabel"
-                                placeholder="Select a case"
-                            >
-                            <template slot="option" slot-scope="props">
-                                {{props.option.title}} ({{props.option.uuid}}<br><small>{{props.option.event_count ? props.option.event_count : 0 }} events.</small>
-                            </template>
-                            </multiselect><br>
-                        </CCol>
-                    </CRow>
-                    <label>Dismiss Event</label>
-                    <CRow>                    
-                        <CCol col="1">
-                            <CSwitch v-bind:disabled="merge_into_case" color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
-                        </CCol>
-                        <CCol col="11">
-                            <CSelect v-bind:disabled="!dismiss_event || merge_into_case" :options="close_reasons" v-model="close_reason" placeholder="Select a reason for dismissing the event..."/>
-                            <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event || merge_into_case"></CTextarea>
+                        <CCol>
+                            <h4>Configuration</h4>
+                            <CSelect :options="actions"/>
+                            <!--<label>Merge into Case</label>
+                            <CRow>
+                                <CCol col="1">
+                                    <CSwitch v-bind:disabled="dismiss_event" label="Merge into Case" color="success" label-on="Yes" label-off="No" :checked.sync="merge_into_case" style="padding-top:5px"></CSwitch>
+                                </CCol>
+                                <CCol col="11">
+                                    <multiselect style="z-index:50"
+                                        v-bind:disabled="!merge_into_case || dismiss_event"
+                                        :options="cases" 
+                                        v-model="target_case" 
+                                        track-by="uuid" 
+                                        label="title"
+                                        :searchable="true"
+                                        :internal-search="false"
+                                        :options-limit="10"
+                                        :show-no-results="false"
+                                        @search-change="caseFind"
+                                        :custom-label="caseLabel"
+                                        placeholder="Select a case"
+                                    >
+                                    <template slot="option" slot-scope="props">
+                                        {{props.option.title}} ({{props.option.uuid}}<br><small>{{props.option.event_count ? props.option.event_count : 0 }} events.</small>
+                                    </template>
+                                    </multiselect><br>
+                                </CCol>
+                            </CRow>
+                            <label>Dismiss Event</label>
+                            <CRow>                    
+                                <CCol col="1">
+                                    <CSwitch v-bind:disabled="merge_into_case" color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
+                                </CCol>
+                                <CCol col="11">
+                                    <CSelect v-bind:disabled="!dismiss_event || merge_into_case" :options="close_reasons" v-model="close_reason" placeholder="Select a reason for dismissing the event..."/>
+                                    <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event || merge_into_case"></CTextarea>
+                                </CCol>
+                            </CRow>-->
+                             <CButton color="primary" size="sm">Save Action</CButton>
                         </CCol>
                     </CRow>
 
@@ -96,7 +116,8 @@
                     </ul>
                 </div>
             </CForm>
-        </div>
+            </CCol>
+        </CRow>
       <template #footer>
           
           <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
@@ -151,7 +172,6 @@ export default {
         show: Boolean,
         events: Array,
         event_signature: String,
-        event_organization: String,
         source_event_uuid: String,
         rule_observables: Array
     },
@@ -198,6 +218,17 @@ export default {
                 {
                     label: 'Add Event Tags',
                     value: 'tag'
+                }
+            ],
+            configured_actions: [
+                {
+                    action: 'Dismiss',
+                    reason: 'False Positive',
+                    comment: 'Something something dark side'
+                },
+                {
+                    action: 'Tag Event',
+                    tags: ['awesome','foo','bar']
                 }
             ],
             current_action: "",
@@ -279,7 +310,6 @@ export default {
         createEventRule() {
             let rule = {
                 name: this.name,
-                organization: this.event_organization,
                 description: this.description,
                 merge_into_case: this.merge_into_case,
                 target_case_uuid: this.target_case.uuid,
@@ -309,8 +339,7 @@ export default {
         },
         caseFind(query) {
             let fields = 'uuid,title,id,event_count,owner,severity'
-            let organization = this.event_organization
-            this.$store.dispatch('getCasesByTitle', {title: query, organization: organization, fields}).then(resp => {
+            this.$store.dispatch('getCasesByTitle', {title: query, fields}).then(resp => {
                 this.cases = this.$store.getters.cases
             })
         },
@@ -350,8 +379,7 @@ export default {
             this.selected_tags.push(t)
         },
         loadCloseReasons() {
-            let organization = this.event_organization
-            this.$store.dispatch('getCloseReasons', {organization}).then(resp => {
+            this.$store.dispatch('getCloseReasons').then(resp => {
             this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
             })
         },

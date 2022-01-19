@@ -21,7 +21,8 @@ import {
   cibStripe,
   cibPaypal,
   cibGooglePay, 
-  cibCcAmex
+  cibCcAmex,
+  cilChevronCircleRightAlt
 } from '@coreui/icons'
 import {
   cifUs,
@@ -189,7 +190,8 @@ export const iconsSet = Object.assign(
     cilPlus,
     cil3d,
     cilSortAscending,
-    cilSortDescending
+    cilSortDescending,
+    cilChevronCircleRightAlt
   },
   {
     cifUs,
