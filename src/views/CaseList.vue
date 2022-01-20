@@ -303,7 +303,8 @@ export default {
         this.deleteCaseModal = !this.deleteCaseModal
       },
       loadCaseStatuses() {
-        this.$store.dispatch('getCaseStatus').then(resp => {
+        let organization = this.filtered_cases.filter(c => c.uuid === this.target_case)[0].organization
+        this.$store.dispatch('getCaseStatus', {organization: organization}).then(resp => {
           this.status_uuid = resp.data.find(s => s.name === 'Closed').uuid
         })
       },

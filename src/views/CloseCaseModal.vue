@@ -25,6 +25,7 @@ export default {
     props: {
         show: Boolean,
         case_uuid: String,
+        organization: String,
         status_uuid: String,
         task_count: Number,
         closed: Boolean
@@ -87,8 +88,9 @@ export default {
 
         },
         loadClosureReasons() {
+            let organization = this.organization
             // Call the closure reasons API endpoint
-            this.$store.dispatch('getCloseReasons').then(resp => {
+            this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
                 this.close_reasons = resp.data.map((reason) => { return {'label': reason.title, 'value': reason.uuid }})
             })            
         },

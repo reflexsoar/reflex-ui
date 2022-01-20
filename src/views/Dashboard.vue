@@ -59,15 +59,38 @@
         </CCol>
         
       </CRow>
-      
-
-    <h3>DEBUG</h3>
-    <h4>Current User UUID</h4>
-    {{current_user.uuid}}
-
-    <h4>Perm Check</h4>
-    {{current_user.role ? current_user.role.permissions : 'Error'}}<br>
-    <b>Can edit users:</b> {{current_user.role ? current_user.role.permissions['update_user'] : 'Error'}}
+      <CRow>
+        <CCol xs="4" lg="4">
+          <CCard>
+            <CCardHeader>Events by Title</CCardHeader>
+              <CChartHorizontalBar
+                :datasets="computedValues('title')"
+                :labels="computedKeys('title')"
+                :options="barChart_options"
+              />
+          </CCard>
+        </CCol>
+        <CCol xs="4" lg="4">
+          <CCard>
+            <CCardHeader>Events by Status</CCardHeader>
+          <CChartHorizontalBar
+            :datasets="computedValues('status')"
+            :labels="computedKeys('status')"
+            :options="barChart_options"
+          />
+          </CCard>
+        </CCol>
+        <CCol xs="4" lg="4">
+          <CCard>
+            <CCardHeader>Events by Dismiss Reason</CCardHeader>
+            <CChartHorizontalBar
+              :datasets="computedValues('dismiss reason')"
+              :labels="computedKeys('dismiss reason')"
+              :options="barChart_options"
+            />
+          </CCard>
+        </CCol>
+      </CRow>
     </CCol>
 
 </template>
@@ -75,6 +98,7 @@
 import MainChartExample from './charts/MainChartExample'
 import WidgetsDropdown from './widgets/WidgetsDropdown'
 import WidgetsBrand from './widgets/WidgetsBrand'
+import { CChartHorizontalBar } from '@coreui/vue-chartjs'
 import { mapState } from 'vuex';
 
 export default {
@@ -82,16 +106,25 @@ export default {
   components: {
     MainChartExample,
     WidgetsDropdown,
-    WidgetsBrand
+    WidgetsBrand,
+    CChartHorizontalBar
   },
   data () {
     return {
+      barChart_options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+      }
     }
   },
   created() {
     this.$store.dispatch("getDashboardMetrics");
+    this.$store.dispatch("getEventStats", {top: 5})
   },
-  computed: mapState(['current_user','dashboard_metrics']),
+  computed: mapState(['current_user','dashboard_metrics','event_stats']),
   methods: {
     color (value) {
       let $color
@@ -105,6 +138,33 @@ export default {
         $color = 'danger'
       }
       return $color
+    },
+    computedKeys(field){
+      let keys = []
+      for(let key in this.event_stats[field]) {
+        keys.push(key)
+      }
+      return keys
+    },
+    computedValues(field){
+      let dataset = {
+        'label': 'Events',
+        'data': [],
+        'backgroundColor': []
+      }
+      for(let key in this.event_stats[field]) {
+        dataset.data.push(this.event_stats[field][key])
+        dataset.backgroundColor.push('#3c4b64')
+      }
+      return [dataset]
+    },
+    getRandomColor() {
+      var letters = '0123456789ABCDEF'.split('');
+      var color = '#';
+      for (var i = 0; i < 6; i++ ) {
+          color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
     }
   }
 }

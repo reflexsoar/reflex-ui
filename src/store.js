@@ -556,6 +556,7 @@ const mutations = {
 
 const getters = {
   organizations: state => {return state.organizations},
+  formatted_organizations: state => {return state.organizations.map((o) => { return {label: o.name, value: o.uuid}})},
   network_data: state => { return state.network_data },
   event_stats: state => { return state.event_stats },
   eventDrawerShow: state => { return state.eventDrawerShow},
@@ -1227,7 +1228,7 @@ const actions = {
       })
     })
   },
-  getEventStats({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[]}) {
+  getEventStats({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/stats?q=`
@@ -1253,6 +1254,10 @@ const actions = {
       if(observables.length > 0) {
         url = url+`&observables=${observables}`
       }
+      if(top) {
+        url = url+`&top=${top}`
+      }
+
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_event_stats', resp.data)
@@ -1903,9 +1908,16 @@ const actions = {
       })
     })
   },
-  getCaseStatus({commit}) {
+  getCaseStatus({commit}, {organization=null}) {
+
+    let base_url = `${BASE_URL}/case_status`
+
+    if (organization) {
+      base_url += `?organization=${organization}`
+    }
+
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_status`, method: 'GET'})
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_case_status', resp.data)
         resolve(resp)
@@ -1948,7 +1960,7 @@ const actions = {
   },
   getCase({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason,total_tasks,open_tasks'}})
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,organization,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason,total_tasks,open_tasks'}})
       .then(resp => {
         commit('save_case', resp.data)
         resolve(resp)

@@ -1,6 +1,6 @@
 <template>
   <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"><CCol xs="12" lg="12">
-    <h2>Event Rules</h2><br>
+    <h2>Event Rules</h2><br>{{organizations}}
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
@@ -56,7 +56,14 @@
       </CCardBody>
     </CCard>
   </CCol>
-  <CModal :show.sync="show_modal" :centered="true" :title="modal_title" size="lg" :closeOnBackdrop="backdrop_close" style="width: 80%">    
+  <CModal :show.sync="show_modal" :centered="true" :title="modal_title" size="lg" :closeOnBackdrop="backdrop_close" style="width: 80%">
+    <template #header>
+        <h5>{{modal_title}}</h5>
+        <span class='text-right'>
+            <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
+            <button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/rql.md')">?</button>
+        </span>            
+    </template>
     <CAlert :show.sync="test_complete" :color="test_result_color" closeButton>
       {{test_result}}
     </CAlert>
@@ -69,7 +76,7 @@
                 <div name="create-event-rule-step-1" v-if="step == 1">
                 <h4>Rule Details</h4>
                 <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
-                <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="organization" :options="organizations"/>
+                <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="organization" :options="organizations" @change="loadCloseReasons()"/>
                 <CInput label="Rule Name" placeholder="Enter a friendly name for this rule" v-model="name" required></CInput>
                 <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
                 </div>
@@ -645,7 +652,8 @@ export default {
         })
       },
       loadCloseReasons() {
-        this.$store.dispatch('getCloseReasons').then(resp => {
+        let organization = this.organization
+        this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
           this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
         })
       }

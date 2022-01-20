@@ -1,6 +1,13 @@
 <template>
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
     <CModal title="Create Event Rule" :centered="true" size="lg" :show.sync="modalStatus" :closeOnBackdrop="false">
+        <template #header>
+            <h5>Create Event Rule</h5>
+            <span class='text-right'>
+                <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
+                <button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/rql.md')">?</button>
+            </span>            
+        </template>
         <div>
             <CForm @submit.prevent="createEventRule" id="event_rule_form">
                 <!--<CAlert :show="step == 3 && !test_failed" color="danger" closeButton>

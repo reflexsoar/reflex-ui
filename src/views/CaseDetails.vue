@@ -342,7 +342,7 @@
     </CModal>
     <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" ></AddObservableModal>
     <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid"></AddTaskModal>
-    <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status.uuid" :closed.sync="case_closed"></CloseCaseModal>
+    <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status.uuid" :organization="this.case_data.organization" :closed.sync="case_closed"></CloseCaseModal>
     <ApplyCaseTemplateModal :show.sync="caseTemplateModal" :case_uuid="this.uuid" :current_case_template_uuid="case_data.case_template ? case_data.case_template.uuid : null"/>
     <LinkCaseModal :show.sync="linkCaseModal" :case_uuid="this.uuid" :related_cases="related_cases"/>
   </CCol>
@@ -584,15 +584,7 @@ export default {
             this.filterEvents()
             this.$store.dispatch('getSettings')
             //this.$store.dispatch('getTags')
-            this.$store.dispatch('getUsers').then(resp => {
-                this.users = this.$store.getters.users
-            })
-
-            this.$store.dispatch('getCaseStatus').then(resp => {
-                this.case_statuses = resp.data.map(function(status) {
-                    return {'value': status.uuid, 'label': status.name, 'closed': status.closed}
-                })
-            })
+            
 
             for(let task in this.tasks) {
                 this.collapse_tasks[this.tasks[task].order] = false;
@@ -691,6 +683,16 @@ export default {
                 }
                 this.loading = false
             })
+
+            this.$store.dispatch('getUsers', {organization: this.$store.getters.case_data.organization}).then(resp => {
+                this.users = this.$store.getters.users
+            })
+
+            this.$store.dispatch('getCaseStatus', {organization: this.$store.getters.case_data.organization}).then(resp => {
+                this.case_statuses = resp.data.map(function(status) {
+                    return {'value': status.uuid, 'label': status.name, 'closed': status.closed}
+                })
+            })
         },
         filteredBySignature() {
             if(this.observableFilters.some((filter) => filter.filter_type == 'eventsig')) {
@@ -732,7 +734,7 @@ export default {
         },
         filterEvents() {
             this.tab_loading = true
-            let status_filters = []
+            let status_filters = ['New','Open','Closed']
             let tag_filters = []
             let observables_filters = []
             let severity_filter = []
@@ -847,7 +849,7 @@ export default {
             this.edit_description = false
         },
         usersFind(query) {
-            this.$store.dispatch('getUsersByName', query).then(resp => {
+            this.$store.dispatch('getUsersByName', {username: query, organization: this.case_data.organization}).then(resp => {
                 this.users = resp.data
             })
         },

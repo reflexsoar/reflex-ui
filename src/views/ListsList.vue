@@ -88,20 +88,27 @@
         </CRow>
         <CTextarea label="Values" v-model="list_data.values" placeholder="Enter values separated by new lines" rows="10" cols="50" wrap="off" :disabled="list_data.url"/>
         <CRow>
-          <CCol col="12" lg="6">
+          <CCol>
             <div class="form-input">  
               <label>Tag Observables on list match?</label><br>
               <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.tag_on_match"/><br>
               <span v-if="list_data.tag_on_match">Observables that match this list will be tagged with <code>list:{{list_data.name.replace(' ','-').toLowerCase()}}</code></span>
             </div>
           </CCol>
-          <CCol col="12" lg="6">
+          <CCol>
             <div class="form-input">  
               <label>List Active</label><br>
               <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.active"/>
             </div>
           </CCol>
+          <CCol>
+            <div class="form-input">  
+              <label>To Memcached</label><br>
+              <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.to_memcached"/>
+            </div>
+          </CCol>
         </CRow>
+        
       </CForm>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Cancel</CButton>
@@ -239,6 +246,7 @@ export default {
           tag_on_match: this.list_data.tag_on_match,
           url: this.list_data.url,
           poll_interval: this.list_data.poll_interval,
+          to_memcached: this.list_data.to_memcached,
           active: this.list_data.active
         }
 

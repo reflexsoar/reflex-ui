@@ -88,11 +88,6 @@
           <center><CPagination :activePage.sync="current_page" :pages="page_data.pages"/></center>
         </CCol>
         <CCol col="3" class="text-right">
-          <CInput placeholder="Search" v-model="search_filter" v-on:keydown.enter="add_filter()" ><template #append>
-            <CButton color="secondary" @click="add_filter()">Add Filter</CButton>
-          </template></CInput>
-        </CCol>
-        <CCol col="3" class="text-right">
           <div>
             <CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;
             <CDropdown 
@@ -455,7 +450,7 @@ export default {
         observableFilters: [{'filter_type':'status','data_type':'status','value':'New'}],
         filtered_events: [],
         event_observables: {},
-        quick_filters: false,
+        quick_filters: true,
         advanced_filter: false,
         advanced_query: "",
         search_filter: '',
@@ -487,7 +482,8 @@ export default {
         dismiss_submitted: false,
         event_stats: {},
         free_search_options: ['Title','Status','Tag','Severity','Signature'],
-        selected_count: 0
+        selected_count: 0,
+        target_event: {}
       }
     },
     methods: {
@@ -560,9 +556,12 @@ export default {
       },
       dismissEventFromCard(uuid) {
         let event = this.filtered_events.filter(event => event.uuid === uuid)
+        
         if(event.length > 0) {
           event = event[0]
         }
+        this.target_event = event
+        this.loadCloseReasons()
         this.selected = [uuid]
         this.related_events_count = event.related_events_count
         this.dismissEventModal = true
@@ -602,7 +601,11 @@ export default {
          this.dismissalComment = ""
       },
       loadCloseReasons() {
-        this.$store.dispatch('getCloseReasons').then(resp => {
+
+        let organization = this.target_event ? this.target_event.organization : null
+        console.log(this.target_event)
+
+        this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
           this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
         })
       },

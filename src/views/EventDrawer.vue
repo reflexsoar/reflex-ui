@@ -134,7 +134,7 @@ export default {
   data() {
     return {
       observable_fields: ['value', 'ioc', 'spotted', 'safe', 'tags'],
-      activeTab: 0
+      activeTab: 1
     }
   },
   computed: {

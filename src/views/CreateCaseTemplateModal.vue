@@ -45,13 +45,13 @@
             </div>
         </CForm>
       </div>
-      <div name="create-case-template-step-2" v-if="step == 2">
+      <div name="create-case-template-step-2" v-if="step == 2"  style="overflow-y: scroll; max-height: 500px">
           <h5>Tasks</h5>
           <p>Adding tasks to a case template allows users to apply this template and immediately hit the ground running! Start by adding a few.</p>
           <CAlert :show.sync="taskError" color="danger" closeButton>
             {{taskError}}
           </CAlert>
-          <CButton color="primary" handle=".handle" @click="addTask()">Add Task</CButton><br><br> <CIcon name='cil-plus'/>
+          <CButton color="primary" handle=".handle" @click="addTask()">Add Task</CButton><br><br>
           <CListGroup>
           <draggable v-model="tasks" group="tasks" @start="drag=true" @end="drag=false">
               
@@ -61,18 +61,19 @@
                         <CCol col="1">
                             <CIcon style="margin-top:10px;" name='cil-menu'/>
                         </CCol>
-                        <CCol col="2">
-                            <CInput placeholder="Title" v-model="task.title"></CInput>
-                        </CCol>
                         <CCol col="3">
-                            <CInput placeholder="Description" v-model="task.description"></CInput>
+                            <CInput label="Task Title" placeholder="Title" v-model="task.title"></CInput><br>
+                            
                         </CCol>
-                        <CCol col="2">
+                        <CCol>
+                            <CTextarea label="Task Description" placeholder="Description" v-model="task.description"></CTextarea>
+                        </CCol>
+                        <!--<CCol col="2">
                             <CSelect placeholder="Default group"></CSelect>
                         </CCol>
                         <CCol col="2">
                             <CSelect placeholder="Default user"></CSelect>
-                        </CCol>
+                        </CCol>-->
                         <CCol col="2">
                             <CButton @click="task.saved = true" color="success" size="sm">Save</CButton>&nbsp;
                             <CButton @click="removeTask(task.id)" color="danger" size="sm">Remove</CButton>
