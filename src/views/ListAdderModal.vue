@@ -22,7 +22,7 @@ export default {
     name: 'RunActionModal',
     props: {
         show: Boolean,
-        observable: Object,
+        observable: Object
     },
     computed: mapState(['settings']),
     data(){
@@ -46,7 +46,7 @@ export default {
         },
         modalStatus: function(){
             if(this.modalStatus) {
-                this.getLists(this.observable.data_type)
+                this.getLists(this.observable.data_type, this.observable.organization)
             }
             this.$emit('update:show', this.modalStatus)
             if(!this.modalStatus) {
@@ -58,9 +58,13 @@ export default {
         
     },
     methods: {
-        getLists(dt) {
+        getLists(dt, organization=null) {
+            let data = {
+                data_type: dt,
+                organization: organization
+            }
             let data_type = [dt]
-            this.$store.dispatch('getLists', data_type).then(resp => {
+            this.$store.dispatch('getLists', data).then(resp => {
                 this.lists = resp.data
                 this.lists_formatted = this.lists.filter(l => l.url === null).map(l => ({'value':l.name, 'id': l.uuid}))
             })

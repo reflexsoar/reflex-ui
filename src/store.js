@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import Axios from 'axios'
+import createPersistedState from "vuex-persistedstate";
 Vue.use(Vuex)
 
 const state = {
@@ -79,6 +80,7 @@ const state = {
   list: {},
   lists: [],
   credential_list: [],
+  observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
     'show': false,
     'message': '',
@@ -198,6 +200,9 @@ const mutations = {
   add_comment(state, comment) {
     state.comments.push(comment)
     state.comment = comment
+  },
+  update_observable_filters(state, filters) {
+    state.observable_filters = filters
   },
   update_case_comment(state, comment) {
     state.comment = comment
@@ -555,6 +560,7 @@ const mutations = {
 }
 
 const getters = {
+  observable_filters: state => { return state.observable_filters },
   organizations: state => {return state.organizations},
   formatted_organizations: state => {return state.organizations.map((o) => { return {label: o.name, value: o.uuid}})},
   network_data: state => { return state.network_data },
@@ -761,13 +767,21 @@ const actions = {
       })
     })
   },
-  getLists({commit}, data_type=[]) {
+  getLists({commit}, {data_type=[], organization=null}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/list`
 
       if (data_type.length > 0) {
         base_url += `?data_type=${data_type}`
+      }
+
+      if(organization) {
+        if(base_url.includes('?')) {
+          base_url += `&organization=${organization}`
+        } else {
+          base_url += `?organization=${organization}`
+        }        
       }
 
       Axios({url: base_url, method: 'GET'})
@@ -1228,7 +1242,7 @@ const actions = {
       })
     })
   },
-  getEventStats({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type'],start=null, end=null}) {
+  getEventStats({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type','organization'],start=null, end=null, organization=[]}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/stats?q=`
@@ -1263,6 +1277,9 @@ const actions = {
       if(start && end) {
         url = url+`&start=${start}&end=${end}`
       }
+      if(organization && organization.length > 0) {
+        url = url+`&organization=${organization}`
+      }
 
       Axios({url: url, method: 'GET'})
       .then(resp => {
@@ -1274,7 +1291,7 @@ const actions = {
       })
     })
   },
-  getEvents({commit}, {signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null}) {
+  getEvents({commit}, {signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event?grouped=${grouped}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -1315,6 +1332,10 @@ const actions = {
       
       if(source.length >0) {
         url = url+`&start=${source}`
+      }
+
+      if(organization && organization.length > 0) {
+        url = url+`&organization=${organization}`
       }
 
       if(start && end) {
@@ -2355,5 +2376,9 @@ export default new Vuex.Store({
   state,
   mutations,
   actions,
-  getters
+  getters,
+  plugins: [createPersistedState({
+    key: 'reflex-state',
+    paths: ['observable_filters']
+  })]
 })

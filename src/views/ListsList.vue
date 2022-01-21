@@ -292,7 +292,7 @@ export default {
             this.fields.splice(1,0,'organization')
           }
         }
-        this.$store.dispatch('getLists')
+        this.$store.dispatch('getLists',{})
         this.$store.dispatch('getDataTypes').then(resp => {
            this.data_type_list = this.$store.getters.data_types_list
         })

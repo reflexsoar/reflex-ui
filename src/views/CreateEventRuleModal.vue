@@ -56,7 +56,7 @@
                     <label>Merge into Case</label>
                     <CRow>                    
                         <CCol col="1">
-                            <CSwitch v-bind:disabled="dismiss_event" label="Merge into Case" color="success" label-on="Yes" label-off="No" :checked.sync="merge_into_case" style="padding-top:5px"></CSwitch>
+                            <CSwitch v-bind:disabled="dismiss_event  || tag_event || update_severity" label="Merge into Case" color="success" label-on="Yes" label-off="No" :checked.sync="merge_into_case" style="padding-top:5px"></CSwitch>
                         </CCol>
                         <CCol col="11">
                             <multiselect style="z-index:50"
@@ -82,14 +82,46 @@
                     <label>Dismiss Event</label>
                     <CRow>                    
                         <CCol col="1">
-                            <CSwitch v-bind:disabled="merge_into_case" color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
+                            <CSwitch v-bind:disabled="merge_into_case || tag_event || update_severity" color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
                         </CCol>
                         <CCol col="11">
                             <CSelect v-bind:disabled="!dismiss_event || merge_into_case" :options="close_reasons" v-model="close_reason" placeholder="Select a reason for dismissing the event..."/>
                             <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event || merge_into_case"></CTextarea>
                         </CCol>
                     </CRow>
-
+                    <br>
+                    <label>Add Tags</label>
+                    <CRow>
+                        <CCol col="1">
+                            <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Tag Event" :checked.sync="tag_event"  style="padding-top:5px"></CSwitch>
+                        </CCol>
+                        <CCol>
+                            <multiselect
+                                v-bind:disabled="dismiss_event || !tag_event"
+                                v-model="selected_tags" 
+                                placeholder="Select tags to apply to this input"
+                                :taggable="true"
+                                tag-placeholder="Add new tag"
+                                track-by="name"
+                                label="name"
+                                :options="tag_list"
+                                :multiple="true"
+                                @tag="addTag"
+                                :close-on-select="false"
+                            >
+                            </multiselect>
+                        </CCol>
+                    </CRow>
+                    <br>
+                    <label>Update Severity</label>
+                    <CRow>
+                        <CCol col="1">
+                            <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Update Severity" :checked.sync="update_severity"  style="padding-top:5px"></CSwitch>
+                        </CCol>
+                        <CCol>
+                            <CSelect v-bind:disabled="dismiss_event || !update_severity" :options="severities" v-model="target_severity" placeholder="Select a new severity for matching events..."/>
+                        </CCol>
+                    </CRow>
                 </div>
                 <div name="create-case-template-step-5" v-if="step == 5">
                     <h4>Review</h4>
@@ -170,6 +202,10 @@ export default {
             description: "",
             modalStatus: this.show,
             merge_into_case: false,
+            tag_event: false,
+            update_severity: false,
+            target_severity: 0,
+            selected_tags: [],
             dismiss_event: false,
             expire_days: 1,
             observables: [],
@@ -184,7 +220,26 @@ export default {
             close_reason: "",
             close_reasons: [],
             dismiss_comment: "",
+            tag_list: [],
             add_action: false,
+            severities: [
+                {
+                    label: 'Low',
+                    value: 0
+                },
+                {
+                    label: 'Medium',
+                    value: 1
+                },
+                {
+                    label: 'High',
+                    value: 2
+                },
+                {
+                    label: 'Critical',
+                    value: 3
+                }
+            ],
             actions: [
                 {
                     label:'Merge into Case',
@@ -290,14 +345,23 @@ export default {
                 description: this.description,
                 merge_into_case: this.merge_into_case,
                 target_case_uuid: this.target_case.uuid,
+                update_severity: this.update_severity,
+                target_severity: this.target_severity,
+                add_tags: this.tag_event,
+                tags_to_add: Array(),
                 expire: this.expire,
                 expire_days: parseInt(this.expire_days),
                 dismiss_comment: this.dismiss_comment,
-                dismiss_reason: this.close_reasons.filter(c => c.value === this.close_reason)[0].label,
+                dismiss_reason: this.close_reasoon ? this.close_reasons.filter(c => c.value === this.close_reason)[0].label : null,
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
                 query: this.query
             }
+
+            for(let tag in this.selected_tags) {
+                rule.tags_to_add.push(this.selected_tags[tag].name)
+            }
+
             this.$store.dispatch('createEventRule', rule).then(resp => {
                 this.modalStatus = false
             })
@@ -311,7 +375,6 @@ export default {
         loadData() {
             this.$store.dispatch('getCases', {}).then(resp => {
                 this.cases = this.$store.getters.cases
-                console.log(this.cases)
             })
         },
         caseFind(query) {
@@ -349,6 +412,7 @@ export default {
             this.modalStatus = false            
         },
         addTag(newTag) {
+            console.log(newTag)
             const t = {
                 name: newTag,
                 uuid: ''
@@ -360,6 +424,14 @@ export default {
             let organization = this.event_organization
             this.$store.dispatch('getCloseReasons', {organization}).then(resp => {
             this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
+            })
+        },
+        loadTags: function() {
+            this.tag_list = Array()
+            this.$store.dispatch('getTags').then(resp => {
+                for(let i in resp.data) {
+                    this.tag_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
+                }
             })
         },
         showDrawer() {

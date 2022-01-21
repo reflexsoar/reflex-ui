@@ -224,7 +224,6 @@ export default {
             if(this.case_template) {
                 for(let tag in this.case_template.tags) {
                     if(this.selected_tags.filter(t => t.uuid === this.case_template.tags[tag].uuid).length < 1) {
-                        console.log(this.case_template.tags[tag])
                         this.selected_tags.push({'name': this.case_template.tags[tag]})
                     }
                 }

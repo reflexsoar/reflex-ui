@@ -237,8 +237,33 @@
             </multiselect><br>
           </CCol>
           <CCol lg="6">
+            <label>Update Severity</label><br>
+            <CSelect 
+              label="Severity"
+              :options="severities"
+              :value.sync="rule.target_severity"
+              placeholder="Select a Severity"
+              v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
+            >
+            </CSelect>
+          </CCol>
+          <CCol lg="6">
             <label>Add Tags</label><br>
             <CSwitch label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.add_tags"></CSwitch>
+            <multiselect
+                v-bind:disabled="rule.dismiss || !rule.add_tags"
+                v-model="rule.tags_to_add" 
+                placeholder="Select tags to apply to this input"
+                :taggable="true"
+                tag-placeholder="Add new tag"
+                track-by="name"
+                label="name"
+                :options="tag_list"
+                :multiple="true"
+                @tag="addTag"
+                :close-on-select="false"
+            >
+            </multiselect>
           </CCol>
           <CCol lg="6">
             <label>Dismiss</label><br>
@@ -415,7 +440,26 @@ export default {
         dismiss_submitted: false,
         target_event_rule_uuid: '',
         organization: "",
-        organizations: []
+        organizations: [],
+        tag_list: [],
+        severities: [
+                {
+                    label: 'Low',
+                    value: 0
+                },
+                {
+                    label: 'Medium',
+                    value: 1
+                },
+                {
+                    label: 'High',
+                    value: 2
+                },
+                {
+                    label: 'Critical',
+                    value: 3
+                }
+            ]
       }
     },
     watch: {
@@ -425,6 +469,7 @@ export default {
       show_modal (val) {
         if (val === true) {
           this.loadCloseReasons()
+          this.loadTags()
          
           this.findCase('*')
           if (this.modal_mode === 'create') {
@@ -553,6 +598,14 @@ export default {
         this.backdrop_close = false
         this.$store.dispatch('getCases', {})
         this.cases = this.$store.getters.cases
+      },
+      loadTags: function() {
+          this.tag_list = Array()
+          this.$store.dispatch('getTags').then(resp => {
+              for(let i in resp.data) {
+                  this.tag_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
+              }
+          })
       },
       loadRules() {
         if(this.current_user.role.permissions.view_organizations) {

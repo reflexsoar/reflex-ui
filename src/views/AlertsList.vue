@@ -16,10 +16,10 @@
             <CCardHeader>
               <CRow>
                 <CCol col="9">
-                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value.toString()"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
+                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value.toString()"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="3" class="text-right">
-                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>&nbsp;<CButton size="sm" color="info" to="/event_rules" style='color:#fff'>Manage Event Rules</CButton>
+                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
                 </CCol>
                 
               </CRow>
@@ -97,6 +97,7 @@
                 <div v-else class="event-stats-div" style="margin-top:5px; overflow-y: scroll">
                   <CRow v-for="k,v in event_stats[title]" :key="v">
                     <CCol v-if="title === 'severity'" v-c-tooltip="{ content: `${getSeverityText(parseInt(v))}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':parseInt(v)})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getSeverityText(parseInt(v))}}</span></CCol>
+                    <CCol v-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
                     <CCol v-else-if="title === 'observable value'" v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'observable', 'data_type':'observable','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol class="text-right" col="3">{{k.toLocaleString('en-US')}}</CCol>
@@ -123,10 +124,10 @@
               <!--<CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAllNew()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>-->&nbsp;&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CButton style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
             </div>
         </CCol>
-        <CCol col="3">
-          <center><CPagination :activePage.sync="current_page" :pages="page_data.pages"/></center>
+        <CCol class="text-right">
+          <CPagination :activePage.sync="current_page" :pages="page_data.pages"/>
         </CCol>
-        <CCol col="3" class="text-right">
+        <CCol class="text-right">
           <div>
             <CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;
             <CDropdown 
@@ -262,7 +263,7 @@
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
-                    <span v-if="current_user.role.permissions.view_organizations"><span class="separator">|</span><b>Organization:</b> {{mapOrgToName(event.organization)}}</span>
+                    <span v-if="current_user.role.permissions.view_organizations"><span class="separator">|</span><b>Organization:</b>&nbsp;<span style="cursor: pointer; " @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})">{{mapOrgToName(event.organization)}}</span></span>
                   </small>
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -437,14 +438,16 @@ export default {
     },
     computed: mapState(['status','alert','settings','current_user']),
     created: function () {
-        this.loadData()
-        this.loadCloseReasons()
-        this.$store.commit('set', ['eventDrawerMinimize', true])
-        //this.refresh = setInterval(function() {
-        //  if(!this.pauseRefresh) {
-        //    this.loadData()
-        //  }         
-        //}.bind(this), this.settings.events_page_refresh*1000 || 60000)
+      this.observableFilters = this.$store.getters.observable_filters
+      this.loadData()
+      this.loadCloseReasons()
+      this.$store.commit('set', ['eventDrawerMinimize', true])
+        
+      this.refresh = setInterval(function() {
+        if(!this.pauseRefresh) {
+          this.loadData()
+        }         
+      }.bind(this), this.settings.events_page_refresh*1000 || 60000)
     },
     data(){
       return {
@@ -551,7 +554,6 @@ export default {
           let value = fields[1].trim()
           let event_fields = ['title','description','status','tags']
           if (event_fields.includes(key)) {
-            console.log(key, value)
           } else {
             this.toggleObservableFilter({'filter_type': 'observable', 'data_type': key, 'value': value})
             this.search_filter = ""
@@ -602,8 +604,9 @@ export default {
         this.selected_observable = observable
         this.runActionModal = true
       },
-      showListAdder(observbale) {
-        this.selected_observable = observbale
+      showListAdder(observable) {
+        console.log(observable)
+        this.selected_observable = observable
         this.listAdderModal = true
       },
       reopenEvent(uuid) {
@@ -660,7 +663,6 @@ export default {
       loadCloseReasons() {
 
         let organization = this.target_event ? this.target_event.organization : null
-        console.log(this.target_event)
 
         this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
           this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
@@ -752,6 +754,7 @@ export default {
         let signature_filter = ""
         let title_filter = []
         let source_filters = []
+        let organization_filters = []
         let rql = ""
         let start_time = ""
         let end_time = ""
@@ -803,6 +806,10 @@ export default {
           if(filter.filter_type == 'end') {
             end_time = filter.value
           }
+
+          if(filter.filter_type == 'organization') {
+            organization_filters.push(filter.value)
+          }
         }
 
         this.$store.dispatch('getEvents', {
@@ -822,7 +829,8 @@ export default {
           sort_by: this.sort_by,
           sort_direction: this.sort_direction,
           start: start_time,
-          end: end_time
+          end: end_time,
+          organization: organization_filters
         }).then(resp => {
           this.filtered_events = this.$store.getters.events
           this.event_observables = resp.data.observables
@@ -839,7 +847,8 @@ export default {
           source: source_filters,
           observables: observables_filters,
           start: start_time,
-          end: end_time
+          end: end_time,          
+          organization: organization_filters
         }).then(resp => {
           this.event_stats = this.$store.getters.event_stats
         })
@@ -888,8 +897,11 @@ export default {
             this.observableFilters = this.observableFilters.filter(item => item.value !== obs.value)
           }
         }
+
+        this.$store.commit('update_observable_filters', this.observableFilters)
+
         this.current_page = 1
-        if(obs.filter_type !== 'end' && obs.filter_type !== 'start') {
+        if(!['end','start'].includes(obs.filter_type)) {
           this.filterEvents()
         }
       },
@@ -1090,15 +1102,17 @@ export default {
         }
       },
       applyTimeFilter() {
-        this.clearTimeFilter()
+        this.clearTimeFilter(false)
         this.toggleObservableFilter({'filter_type':'start','data_type':'start','value':this.range.start.toISOString()})
         this.toggleObservableFilter({'filter_type':'end','data_type':'end','value':this.range.end.toISOString()})
         this.filterEvents()
       },
-      clearTimeFilter() {
+      clearTimeFilter(refresh=true) {
         this.observableFilters = this.observableFilters.filter(f => f.filter_type !== 'start')
         this.observableFilters = this.observableFilters.filter(f => f.filter_type !== 'end')
-        this.filterEvents()
+        if(refresh) {
+          this.filterEvents()
+        }
       },
       showDrawer(event_uuid) {
         let uuid = event_uuid
