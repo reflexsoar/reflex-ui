@@ -60,6 +60,50 @@
         
       </CRow>
       <CRow>
+        <CCol>
+          <v-date-picker
+            v-model="range"
+            mode="dateTime"
+            :masks="masks"
+            is-range
+          >
+            <template v-slot="{ inputValue, inputEvents }">
+              <CRow>
+                <CCol>
+                  <b>Time Filter</b><p></p>
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol>
+                  <CInput label="Start" :value="inputValue.start" v-on="inputEvents.start">
+                    <template #prepend>
+                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                    </template>
+                  </CInput>
+                </CCol>
+                <CCol>
+                  <CInput label="End" :value="inputValue.end" v-on="inputEvents.end">
+                  <template #prepend>
+                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                    </template>
+                  </CInput>
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol class='text-right'>
+                  <CButtonGroup>
+                    <CButton size="sm" color="primary" @click="applyTimeFilter()">Apply</CButton>
+                  </CButtonGroup>
+                </CCol>
+              </CRow>
+            </template>
+          </v-date-picker>
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol col="12">
+          <h4>Event Charts</h4>
+        </CCol> 
         <CCol xs="4" lg="4">
           <CCard>
             <CCardHeader>Events by Title</CCardHeader>
@@ -91,14 +135,34 @@
           </CCard>
         </CCol>
       </CRow>
+      <CRow>
+        <CCol xs="4" lg="12">
+          <CCard>
+            <CCardHeader>Events over Time</CCardHeader>
+            <CCardBody>
+              <CChartBar 
+                :datasets="computedValues('events_over_time')"
+                :labels="computedKeys('events_over_time')"
+                :options="barChart_options"
+              />
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol col="12">
+          <h4>Case Charts</h4>
+        </CCol> 
+      </CRow>
     </CCol>
 
 </template>
+
 <script>
 import MainChartExample from './charts/MainChartExample'
 import WidgetsDropdown from './widgets/WidgetsDropdown'
 import WidgetsBrand from './widgets/WidgetsBrand'
-import { CChartHorizontalBar } from '@coreui/vue-chartjs'
+import { CChartHorizontalBar, CChartBar } from '@coreui/vue-chartjs'
 import { mapState } from 'vuex';
 
 export default {
@@ -107,7 +171,8 @@ export default {
     MainChartExample,
     WidgetsDropdown,
     WidgetsBrand,
-    CChartHorizontalBar
+    CChartHorizontalBar,
+    CChartBar
   },
   data () {
     return {
@@ -116,16 +181,38 @@ export default {
             y: {
                 beginAtZero: true
             }
+        },
+        maintainAspectRatio: false
+      },
+      range: {
+          start: this.days_ago(7),
+          end: this.today()
+        },
+        masks: {
+          input: 'YYYY-MM-DD h:mm A'
         }
-      }
     }
   },
   created() {
     this.$store.dispatch("getDashboardMetrics");
-    this.$store.dispatch("getEventStats", {top: 5})
+    this.$store.dispatch("getEventStats", {top: 5, metrics: ['events_over_time','title','status','dismiss_reason']})
   },
   computed: mapState(['current_user','dashboard_metrics','event_stats']),
   methods: {
+    applyTimeFilter() {
+      this.$store.dispatch("getEventStats", {top: 5, metrics: ['events_over_time','title','status','dismiss_reason'], start: this.range.start.toISOString(), end: this.range.end.toISOString()})
+    },
+    today() {
+      let d = new Date()
+      d.setHours(23,59,59,0)
+      return d
+    },
+    days_ago(offset) {
+      let d = new Date()
+      d.setDate(d.getDate() - offset)
+      d.setHours(0,0,0,0)
+      return d
+    },
     color (value) {
       let $color
       if (value <= 25) {

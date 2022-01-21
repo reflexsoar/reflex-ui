@@ -1228,7 +1228,7 @@ const actions = {
       })
     })
   },
-  getEventStats({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null}) {
+  getEventStats({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type'],start=null, end=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/stats?q=`
@@ -1257,6 +1257,12 @@ const actions = {
       if(top) {
         url = url+`&top=${top}`
       }
+      if(metrics) {
+        url = url+`&metrics=${metrics}`
+      }
+      if(start && end) {
+        url = url+`&start=${start}&end=${end}`
+      }
 
       Axios({url: url, method: 'GET'})
       .then(resp => {
@@ -1268,7 +1274,7 @@ const actions = {
       })
     })
   },
-  getEvents({commit}, {signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc'}) {
+  getEvents({commit}, {signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event?grouped=${grouped}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -1308,7 +1314,11 @@ const actions = {
       }
       
       if(source.length >0) {
-        url = url+`&source=${source}`
+        url = url+`&start=${source}`
+      }
+
+      if(start && end) {
+        url = url+`&start=${start}&end=${end}`
       }
 
       Axios({url: url, method: 'GET', headers:{'X-Fields': fields}})

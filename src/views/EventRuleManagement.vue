@@ -1,6 +1,6 @@
 <template>
   <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"><CCol xs="12" lg="12">
-    <h2>Event Rules</h2><br>{{organizations}}
+    <h2>Event Rules</h2><br>
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
@@ -414,7 +414,8 @@ export default {
         delete_modal: false,
         dismiss_submitted: false,
         target_event_rule_uuid: '',
-        organization: ""
+        organization: "",
+        organizations: []
       }
     },
     watch: {
@@ -424,6 +425,7 @@ export default {
       show_modal (val) {
         if (val === true) {
           this.loadCloseReasons()
+         
           this.findCase('*')
           if (this.modal_mode === 'create') {
             this.modal_title = 'Create Event'
@@ -558,7 +560,7 @@ export default {
             this.fields.splice(1,0,'organization')
           }
         }
-        this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        
         let page = this.current_page
         let page_size = this.page_size
         this.$store.dispatch('loadEventRules', {page, page_size}).then(resp => {
@@ -653,6 +655,10 @@ export default {
       },
       loadCloseReasons() {
         let organization = this.organization
+        this.$store.dispatch('getOrganizations').then(resp => {
+          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        })
+        
         this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
           this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
         })
@@ -661,6 +667,7 @@ export default {
     computed: mapState(['alert','current_user']),
     created() {
       this.loadRules()
+      
     }
 }
 </script>

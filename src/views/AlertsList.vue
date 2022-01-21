@@ -3,7 +3,6 @@
     <CCol col="12">
       <h2>Events</h2>
       <event-drawer :event_data="event_data"></event-drawer>
-      
       <CRow>
         <CCol col="12">
           <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
@@ -17,7 +16,7 @@
             <CCardHeader>
               <CRow>
                 <CCol col="9">
-                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
+                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value.toString()"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>&nbsp;<CButton size="sm" color="info" to="/event_rules" style='color:#fff'>Manage Event Rules</CButton>
@@ -45,6 +44,46 @@
                     <CInput></CInput>
                   </CCol>
                 </CRow>
+              </div>
+              <div class='event-stats-picker' style='padding-right: 10px'>
+                <v-date-picker
+                          v-model="range"
+                          mode="dateTime"
+                          :masks="masks"
+                          is-range
+                        >
+                          <template v-slot="{ inputValue, inputEvents }">
+                            <CRow>
+                              <CCol>
+                                <b>Time Filter</b><p>Select a date range</p>
+                              </CCol>
+                              <CCol class='text-right'>
+                                <CButtonGroup>
+                                  <CButton size="sm" color="secondary" @click="clearTimeFilter()">Reset</CButton>
+                                  <CButton size="sm" color="primary" @click="applyTimeFilter()">Apply</CButton>
+                                </CButtonGroup>
+                                
+                              </CCol>
+                            </CRow>
+                            <CRow>
+                              <CCol>
+                                <CInput :value="inputValue.start" v-on="inputEvents.start">
+                                  <template #prepend>
+                                    <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                                  </template>
+                                </CInput>
+                                <CInput :value="inputValue.end" v-on="inputEvents.end">
+                                <template #prepend>
+                                    <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                                  </template>
+                                </CInput>
+                              </CCol>
+                            </CRow>
+                            <CRow>
+                              
+                            </CRow>
+                          </template>
+                        </v-date-picker>
               </div>
               <div class='event-stats-picker' v-for="bucket, title in event_stats" :key="title">
                 <b class='event-stats-title'>{{title}}</b>
@@ -483,10 +522,28 @@ export default {
         event_stats: {},
         free_search_options: ['Title','Status','Tag','Severity','Signature'],
         selected_count: 0,
-        target_event: {}
+        target_event: {},
+        range: {
+          start: this.days_ago(7),
+          end: this.today()
+        },
+        masks: {
+          input: 'YYYY-MM-DD h:mm A'
+        }
       }
     },
     methods: {
+      today() {
+        let d = new Date()
+        d.setHours(23,59,59,0)
+        return d
+      },
+      days_ago(offset) {
+        let d = new Date()
+        d.setDate(d.getDate() - offset)
+        d.setHours(0,0,0,0)
+        return d
+      },
       add_filter() {
         let fields =  this.search_filter.split(':')
         if(fields.length > 1) {
@@ -696,6 +753,8 @@ export default {
         let title_filter = []
         let source_filters = []
         let rql = ""
+        let start_time = ""
+        let end_time = ""
         let grouped = !this.filteredBySignature()
         let search = []
         for(let f in this.observableFilters) {
@@ -736,6 +795,14 @@ export default {
           if(filter.filter_type == 'title') {
             title_filter = [encodeURIComponent(filter.value)]
           }
+
+          if(filter.filter_type == 'start') {
+            start_time = filter.value
+          }
+
+          if(filter.filter_type == 'end') {
+            end_time = filter.value
+          }
         }
 
         this.$store.dispatch('getEvents', {
@@ -753,7 +820,9 @@ export default {
           page: this.current_page,
           page_size: this.card_per_page,
           sort_by: this.sort_by,
-          sort_direction: this.sort_direction
+          sort_direction: this.sort_direction,
+          start: start_time,
+          end: end_time
         }).then(resp => {
           this.filtered_events = this.$store.getters.events
           this.event_observables = resp.data.observables
@@ -769,6 +838,8 @@ export default {
           status: status_filters,
           source: source_filters,
           observables: observables_filters,
+          start: start_time,
+          end: end_time
         }).then(resp => {
           this.event_stats = this.$store.getters.event_stats
         })
@@ -810,10 +881,17 @@ export default {
         if(!exists) {
           this.observableFilters.push(obs)
         } else {
-          this.observableFilters = this.observableFilters.filter(item => item.value !== obs.value)
+          if(obs.data_type == 'start' || obs.data_type == 'end') {
+            this.observableFilters = this.observableFilters.filter(item => item.filter_type !== 'start')
+            this.observableFilters = this.observableFilters.filter(item => item.filter_type !== 'end')
+          } else {
+            this.observableFilters = this.observableFilters.filter(item => item.value !== obs.value)
+          }
         }
         this.current_page = 1
-        this.filterEvents()
+        if(obs.filter_type !== 'end' && obs.filter_type !== 'start') {
+          this.filterEvents()
+        }
       },
       relatedEvents(signature) {
         return this.events.filter((event) => event.signature === signature).length
@@ -1010,6 +1088,17 @@ export default {
           this.filterEvents()
           return
         }
+      },
+      applyTimeFilter() {
+        this.clearTimeFilter()
+        this.toggleObservableFilter({'filter_type':'start','data_type':'start','value':this.range.start.toISOString()})
+        this.toggleObservableFilter({'filter_type':'end','data_type':'end','value':this.range.end.toISOString()})
+        this.filterEvents()
+      },
+      clearTimeFilter() {
+        this.observableFilters = this.observableFilters.filter(f => f.filter_type !== 'start')
+        this.observableFilters = this.observableFilters.filter(f => f.filter_type !== 'end')
+        this.filterEvents()
       },
       showDrawer(event_uuid) {
         let uuid = event_uuid

@@ -187,9 +187,13 @@ export default {
         }
     },
     created() {
+        this.$store.dispatch('getOrganizations').then(resp => {
+            this.organization = this.$store.getters.organizations[0].uuid
+        })        
     },
     methods: {
         formattedOrganizations() {
+            
             return this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         },
         usersFind(query) {
