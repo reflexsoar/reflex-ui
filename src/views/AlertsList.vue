@@ -10,7 +10,8 @@
           </CAlert>
         </CCol>
       </CRow>
-      <CRow>
+      <!-- START FILTER PICKERS TODO: Move this to it's own component-->
+      <CRow>        
         <CCol col="12">
           <CCard>
             <CCardHeader>
@@ -97,7 +98,7 @@
                 <div v-else class="event-stats-div" style="margin-top:5px; overflow-y: scroll">
                   <CRow v-for="k,v in event_stats[title]" :key="v">
                     <CCol v-if="title === 'severity'" v-c-tooltip="{ content: `${getSeverityText(parseInt(v))}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':parseInt(v)})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getSeverityText(parseInt(v))}}</span></CCol>
-                    <CCol v-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
+                    <CCol v-else-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
                     <CCol v-else-if="title === 'observable value'" v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'observable', 'data_type':'observable','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol class="text-right" col="3">{{k.toLocaleString('en-US')}}</CCol>
@@ -110,6 +111,7 @@
           </CCard>
         </CCol>
       </CRow>
+      <!-- END FILTER PICKERS -->
       <CRow>
         <CCol col="3">
             <div>
@@ -605,7 +607,6 @@ export default {
         this.runActionModal = true
       },
       showListAdder(observable) {
-        console.log(observable)
         this.selected_observable = observable
         this.listAdderModal = true
       },

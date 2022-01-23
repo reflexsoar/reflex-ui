@@ -108,8 +108,18 @@
           <CCard>
             <CCardHeader>Events by Title</CCardHeader>
               <CChartHorizontalBar
-                :datasets="computedValues('title')"
-                :labels="computedKeys('title')"
+                :datasets="computedValues(event_stats, 'title')"
+                :labels="computedKeys(event_stats, 'title')"
+                :options="barChart_options"
+              />
+          </CCard>
+        </CCol>
+        <CCol xs="4" lg="4">
+          <CCard>
+            <CCardHeader>Events by Severity</CCardHeader>
+              <CChartHorizontalBar
+                :datasets="computedValues(event_stats, 'severity')"
+                :labels="computedKeys(event_stats, 'severity')"
                 :options="barChart_options"
               />
           </CCard>
@@ -118,8 +128,8 @@
           <CCard>
             <CCardHeader>Events by Status</CCardHeader>
           <CChartHorizontalBar
-            :datasets="computedValues('status')"
-            :labels="computedKeys('status')"
+            :datasets="computedValues(event_stats, 'status')"
+            :labels="computedKeys(event_stats, 'status')"
             :options="barChart_options"
           />
           </CCard>
@@ -128,8 +138,8 @@
           <CCard>
             <CCardHeader>Events by Dismiss Reason</CCardHeader>
             <CChartHorizontalBar
-              :datasets="computedValues('dismiss reason')"
-              :labels="computedKeys('dismiss reason')"
+              :datasets="computedValues(event_stats, 'dismiss reason')"
+              :labels="computedKeys(event_stats, 'dismiss reason')"
               :options="barChart_options"
             />
           </CCard>
@@ -141,8 +151,8 @@
             <CCardHeader>Events over Time</CCardHeader>
             <CCardBody>
               <CChartBar 
-                :datasets="computedValues('events_over_time')"
-                :labels="computedKeys('events_over_time')"
+                :datasets="computedValues(event_stats, 'events_over_time')"
+                :labels="computedKeys(event_stats, 'events_over_time')"
                 :options="barChart_options"
               />
             </CCardBody>
@@ -153,6 +163,52 @@
         <CCol col="12">
           <h4>Case Charts</h4>
         </CCol> 
+      </CRow>
+      <CRow>
+        <CCol xs="4" lg="4">
+          <CCard>
+            <CCardHeader>Cases by Severity</CCardHeader>
+              <CChartHorizontalBar
+                :datasets="computedValues(case_stats, 'severity')"
+                :labels="computedKeys(case_stats, 'severity')"
+                :options="barChart_options"
+              />
+          </CCard>
+        </CCol>
+        <CCol xs="4" lg="4">
+          <CCard>
+            <CCardHeader>Cases by Status</CCardHeader>
+          <CChartHorizontalBar
+            :datasets="computedValues(case_stats, 'status')"
+            :labels="computedKeys(case_stats, 'status')"
+            :options="barChart_options"
+          />
+          </CCard>
+        </CCol>
+        <CCol xs="4" lg="4">
+          <CCard>
+            <CCardHeader>Cases by Closure Reason</CCardHeader>
+            <CChartHorizontalBar
+              :datasets="computedValues(case_stats, 'close reason')"
+              :labels="computedKeys(case_stats, 'close reason')"
+              :options="barChart_options"
+            />
+          </CCard>
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol xs="4" lg="12">
+          <CCard>
+            <CCardHeader>Cases over Time</CCardHeader>
+            <CCardBody>
+              <CChartBar 
+                :datasets="computedValues(case_stats, 'cases_over_time')"
+                :labels="computedKeys(case_stats, 'cases_over_time')"
+                :options="barChart_options"
+              />
+            </CCardBody>
+          </CCard>
+        </CCol>
       </CRow>
     </CCol>
 
@@ -195,12 +251,14 @@ export default {
   },
   created() {
     this.$store.dispatch("getDashboardMetrics");
-    this.$store.dispatch("getEventStats", {top: 5, metrics: ['events_over_time','title','status','dismiss_reason']})
+    this.$store.dispatch("getEventStats", {top: 5, metrics: ['events_over_time','title','status','dismiss_reason','severity']})
+    this.$store.dispatch("getCaseStats", {top: 5, metrics: ['cases_over_time','status','close_reason','severity']})
   },
-  computed: mapState(['current_user','dashboard_metrics','event_stats']),
+  computed: mapState(['current_user','dashboard_metrics','event_stats','case_stats']),
   methods: {
     applyTimeFilter() {
-      this.$store.dispatch("getEventStats", {top: 5, metrics: ['events_over_time','title','status','dismiss_reason'], start: this.range.start.toISOString(), end: this.range.end.toISOString()})
+      this.$store.dispatch("getEventStats", {top: 5, metrics: ['events_over_time','title','status','dismiss_reason', 'severity'], start: this.range.start.toISOString(), end: this.range.end.toISOString()})
+      this.$store.dispatch("getCaseStats", {top: 5, metrics: ['cases_over_time',,'status','close_reason','severity'], start: this.range.start.toISOString(), end: this.range.end.toISOString()})
     },
     today() {
       let d = new Date()
@@ -226,21 +284,27 @@ export default {
       }
       return $color
     },
-    computedKeys(field){
+    computedKeys(data, field){
       let keys = []
-      for(let key in this.event_stats[field]) {
-        keys.push(key)
+      for(let key in data[field]) {
+        if(field === 'severity') {
+          key = this.getSeverityText(parseInt(key))
+        }
+        if(!keys.includes(key)) {
+          keys.push(key)
+        }
+        
       }
       return keys
     },
-    computedValues(field){
+    computedValues(data, field){
       let dataset = {
         'label': 'Events',
         'data': [],
         'backgroundColor': []
       }
-      for(let key in this.event_stats[field]) {
-        dataset.data.push(this.event_stats[field][key])
+      for(let key in data[field]) {
+        dataset.data.push(data[field][key])
         dataset.backgroundColor.push('#3c4b64')
       }
       return [dataset]
@@ -252,6 +316,15 @@ export default {
           color += letters[Math.floor(Math.random() * 16)];
       }
       return color;
+    },
+    getSeverityText(severity) {
+        switch(severity) {
+        case 1: return 'Low';
+        case 2: return 'Medium';
+        case 3: return 'High';
+        case 4: return 'Critical';
+        default: return 'Low';
+        }
     }
   }
 }

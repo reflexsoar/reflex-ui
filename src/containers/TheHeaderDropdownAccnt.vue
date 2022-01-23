@@ -7,33 +7,12 @@
   >
     <template #toggler>
       <CHeaderNavLink>
-        <div class="c-avatar">
-          <img
-            src="img/avatars/6.jpg"
-            class="c-avatar-img "
-          />
-        </div>
+        
+        <CIcon name="cil-menu" size="xl"/>
+        
       </CHeaderNavLink>
     </template>
-    <CDropdownHeader tag="div" class="text-center" color="light">
-      <strong>Account</strong>
-    </CDropdownHeader>
-    <CDropdownItem>
-      <CIcon name="cil-bell"/> Updates
-      <CBadge color="info" class="ml-auto">{{ itemsCount }}</CBadge>
-    </CDropdownItem>
-    <CDropdownItem>
-      <CIcon name="cil-envelope-open" /> Messages
-      <CBadge color="success" class="ml-auto">{{ itemsCount }}</CBadge>
-    </CDropdownItem>
-    <CDropdownItem>
-      <CIcon name="cil-task" /> Tasks
-      <CBadge color="danger" class="ml-auto">{{ itemsCount }}</CBadge>
-    </CDropdownItem>
-    <CDropdownItem>
-      <CIcon name="cil-comment-square" /> Comments
-      <CBadge color="warning" class="ml-auto">{{ itemsCount }}</CBadge>
-    </CDropdownItem>
+    
     <CDropdownHeader
       tag="div"
       class="text-center"
@@ -43,6 +22,12 @@
     </CDropdownHeader>
     <CDropdownItem @click="profile">
       <CIcon name="cil-user" />Profile
+    </CDropdownItem>
+    <CDropdownItem onclick="window.open('https://github.com/reflexsoar/reflex-docs')">
+      <CIcon name="cil-book" />Documentation
+    </CDropdownItem>
+    <CDropdownItem onclick="window.open('https://support.reflexsoar.com')">
+      <CIcon name="cil-life-ring" />Support
     </CDropdownItem>
     <CDropdownDivider/>
     <CDropdownItem @click="logout">

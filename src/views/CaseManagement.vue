@@ -35,8 +35,11 @@ export default {
       'Cases': Cases,
       CaseTemplates
     },
-    computed: mapState(['alert']),
+    computed: mapState(['alert','current_user']),
     created() {
+      if(this.current_user.default_org) {
+        this.$store.dispatch("getOrganizations")
+      }
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages
     }
 }

@@ -5,7 +5,7 @@
         <p v-if="related_events_count > 1">This case will be associated with <b>{{related_events_count}}</b> events.</p>
         <CForm @submit.prevent="createCase()" id="create_case_form">
             <CSelect
-                  v-if="current_user.role.permissions.view_organizations"
+                  v-if="current_user.default_org"
                   placeholder="Select an Organization..."
                   required
                   v-model="organization"
@@ -101,8 +101,10 @@
                 >
                 </multiselect>
             </div>
-            <label>Generate Event Rule</label><br><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule" v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"/><br>
-            <small class="form-text text-muted w-100">When enabled all future events will be merged into this case.</small><br>
+            <span v-if="case_from_card">
+                <label>Generate Event Rule</label><br><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule" v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"/><br>
+                <small class="form-text text-muted w-100">When enabled all future events will be merged into this case.</small><br>
+            </span>
         </CForm>
       </div>
       <template #footer>
@@ -114,6 +116,7 @@
 </template>
 
 <script>
+import { PrismEditor } from 'vue-prism-editor';
 import {vSelect} from "vue-select";
 import { mapState} from 'vuex';
 export default {
@@ -154,12 +157,18 @@ export default {
                 {'label': 'RED', 'value':4}
             ],
             tag_list: [],
-            tags: Array
+            tags: Array,
+            default_tlp: 2,
+            default_severity: 2,
+            default_tags: Array()
         }
     },
     watch: {
         show: function() {
             this.modalStatus = this.show
+            if(this.current_user.default_org) {
+                this.organization = this.$store.getters.organizations[0].uuid
+            }
         },
         settings: function() {
             this.use_case_template = this.settings.require_case_templates
@@ -176,24 +185,25 @@ export default {
             }
         },
         case_template: function() {
-            this.applyCaseTemplate()
+            if(this.case_template === null) {
+                this.removeCaseTemplate()
+            } else {
+                this.applyCaseTemplate()
+            }            
         },
         use_case_template: function() {
             if(!this.use_case_template) {
                 this.case_template = null
-            }
-            
+                //this.removeCaseTemplate()
+            }            
             this.applyCaseTemplate()
         }
     },
     created() {
-        this.$store.dispatch('getOrganizations').then(resp => {
-            this.organization = this.$store.getters.organizations[0].uuid
-        })        
+        
     },
     methods: {
-        formattedOrganizations() {
-            
+        formattedOrganizations() {            
             return this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         },
         usersFind(query) {
@@ -206,26 +216,25 @@ export default {
             this.loadUsers()
             this.caseTemplateFind('')
         },
+        removeCaseTemplate() {
+            this.tlp = this.default_tlp
+            this.severity = this.default_severity
+            this.selected_tags = this.default_tags
+        },
         applyCaseTemplate() {
+
             if(this.case_template) {
+
+                this.default_severity = this.severity
                 this.severity = this.case_template.severity
+
+                this.default_tlp = this.tlp
                 this.tlp = this.case_template.tlp
-            }
 
-            // Remove tags when the template was changed
-            // removing only case template tags
-            for(let tag in this.selected_tags) {
-                if('from_template' in this.selected_tags[tag]) {
-                    this.selected_tags.splice(tag, 1)
-                }
-            }
-
-            // Add the tags from the new case template
-            if(this.case_template) {
-                for(let tag in this.case_template.tags) {
-                    if(this.selected_tags.filter(t => t.uuid === this.case_template.tags[tag].uuid).length < 1) {
-                        this.selected_tags.push({'name': this.case_template.tags[tag]})
-                    }
+                this.default_tags = this.selected_tags
+                this.selected_tags = this.case_template.tags
+                for(let tag in this.default_tags) {
+                    this.selected_tags.push(this.default_tags[tag])
                 }
             }
         },
@@ -234,9 +243,6 @@ export default {
             this.$store.dispatch('getUsers', {organization:organization}).then(resp => {
                 this.users = this.$store.getters.users
             })
-        },
-        loadCaseTemplates() {
-
         },
         loadData() {
             let organization = this.organization

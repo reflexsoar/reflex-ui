@@ -638,16 +638,18 @@ export default {
         })
       },
       createEventRule() {
+
+        console.log(this.rule)
         let rule = {
           name: this.name,
-          organization: this.rule.organization ? this.rule.organization : null,
+          organization: this.organization ? this.organization : null,
           description: this.description,
           merge_into_case: this.merge_into_case,
           target_case_uuid: this.target_case.uuid,
           expire: this.expire,
           expire_days: parseInt(this.expire_days),
           dismiss_comment: this.dismiss_comment,
-          dismiss_reason: this.close_reasons.filter(c => c.value === this.close_reason)[0].label,
+          dismiss_reason: this.close_reason ? this.close_reasons.filter(c => c.value === this.close_reason)[0].label : null,
           dismiss: this.dismiss_event,
           event_signature: this.event_signature,
           query: this.query

@@ -95,6 +95,7 @@ const state = {
     'require_case_templates': false
   },
   event_stats: {},
+  case_stats: {},
   network_data: {}
 }
 
@@ -162,6 +163,9 @@ const mutations = {
   },
   save_event_stats(state, stats) {
     state.event_stats = stats
+  },
+  save_case_stats(state, stats) {
+    state.case_stats = stats
   },
   save_audit_logs(state, logs) {
     state.audit_logs = logs
@@ -484,6 +488,10 @@ const mutations = {
     state.case_template_list.push({title:data.title, description:data.description, uuid:data.uuid, tags:data.tags, severity:data.severity, task_count: data.task_count, tlp:data.tlp})
     state.tags.concat(data.tags)
   },
+  update_case_template(state, data) {
+    state.case_template = data
+    state.case_templates = state.case_templates.map(t => t.uuid == data.uuid ? data : t)
+  },
   add_case_status(state, data) {
     state.case_statuses.push(data)
     state.case_status = data
@@ -564,6 +572,7 @@ const getters = {
   organizations: state => {return state.organizations},
   formatted_organizations: state => {return state.organizations.map((o) => { return {label: o.name, value: o.uuid}})},
   network_data: state => { return state.network_data },
+  case_stats: state => { return state.case_stats },
   event_stats: state => { return state.event_stats },
   eventDrawerShow: state => { return state.eventDrawerShow},
   eventDrawerMinimize: state => { return state.eventDrawerMinimize},
@@ -1686,6 +1695,18 @@ const actions = {
       })
     })
   },
+  updateCaseTemplate({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_template/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_case_template', data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCaseTemplateList({commit}, {title, organization}) {
     return new Promise((resolve, reject) => {
 
@@ -1705,7 +1726,7 @@ const actions = {
       })
     })
   },
-  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], my_cases=false, my_tasks=false, page=1, page_size=25}) {
+  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}`
@@ -1738,9 +1759,66 @@ const actions = {
         base_url += `&my_cases=${my_cases}`
       }
 
+      if(organization.length > 0) {
+        base_url += `&organization=${organization}`
+      }
+
+      if(close_reason.length > 0) {
+        base_url += `&close_reason=${close_reason}`
+      }
+
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_cases', resp.data.cases)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCaseStats({commit}, {status=[], severity=[], tags=[], title=[], close_reason=[], owner=[], top=null, my_cases=false, metrics=['title','tag','status','severity','close_reason','organization'], start=null, end=null, organization=[]}) {
+    return new Promise((resolve, reject) => {
+
+      let url = `${BASE_URL}/case/stats?q=`
+
+      if(status) {
+        url = url+`&status=${status}`
+      }
+      if(severity.length > 0) {
+        url = url+`&severity=${severity}`
+      } 
+      if(tags.length > 0) {
+        url = url+`&tags=${tags}`
+      }
+      if(title.length > 0) {
+        url = url+`&title=${title}`
+      }
+      if(top) {
+        url = url+`&top=${top}`
+      }
+      if(metrics) {
+        url = url+`&metrics=${metrics}`
+      }
+      if(start && end) {
+        url = url+`&start=${start}&end=${end}`
+      }
+      if(organization && organization.length > 0) {
+        url = url+`&organization=${organization}`
+      }
+      if(close_reason.length > 0) {
+        url = url+`&close_reason=${close_reason}`
+      }
+      if(owner.length > 0) {
+        url += `&owner=${owner}`
+      }
+      if(my_cases) {
+        url += `&my_cases=${my_cases}`
+      }
+
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_case_stats', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -2379,6 +2457,6 @@ export default new Vuex.Store({
   getters,
   plugins: [createPersistedState({
     key: 'reflex-state',
-    paths: ['observable_filters']
+    paths: ['observable_filters','current_user','case_templates']
   })]
 })
