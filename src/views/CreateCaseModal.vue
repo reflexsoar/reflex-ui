@@ -160,7 +160,9 @@ export default {
             tags: Array,
             default_tlp: 2,
             default_severity: 2,
-            default_tags: Array()
+            default_tags: Array(),
+            error: false,
+            error_message: ""
         }
     },
     watch: {

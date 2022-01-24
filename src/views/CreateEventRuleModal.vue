@@ -5,10 +5,13 @@
             <h5>Create Event Rule</h5>
             <span class='text-right'>
                 <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
-                <button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/rql.md')">?</button>
+                <button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/rql/index.md')"><CIcon name='cil-book' size="lg"/></button>
             </span>            
         </template>
         <div>
+            <CAlert :show.sync="error" color="danger" closeButton>
+                {{error_message}}
+            </CAlert>
             <CForm @submit.prevent="createEventRule" id="event_rule_form">
                 <!--<CAlert :show="step == 3 && !test_failed" color="danger" closeButton>
                     Your query matches more than <b>1000</b> events, tuning of source system is recommended.
@@ -263,12 +266,16 @@ export default {
                 }
             ],
             current_action: "",
-            selected_actions: []
+            selected_actions: [],
+            error: false,
+            error_message: ""
         }
     },
     watch: {
         show: function() {
-            this.modalStatus = this.show            
+            this.error = false
+            this.error_message = ""
+            this.modalStatus = this.show
         },
         modalStatus: function(){
             if(this.modalStatus) {
@@ -364,6 +371,12 @@ export default {
 
             this.$store.dispatch('createEventRule', rule).then(resp => {
                 this.modalStatus = false
+                this.error = false
+                this.error_message = ""
+            }).catch(err => {
+                this.error = true
+                this.step = 1
+                this.error_message = err.response.data.message
             })
         },
         nextStep() {

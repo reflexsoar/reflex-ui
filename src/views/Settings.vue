@@ -41,11 +41,11 @@
                 </template>
                 <GroupList/>
               </CTab>-->
-              <CTab>
+              <!--<CTab>
                 <template slot="title">
                   <CIcon name="cil-people"/> {{tabs[4]}}
                 </template>
-              </CTab>
+              </CTab>-->
               <CTab>
                 <template slot="title">
                   <CIcon name="cil-graph"/> {{tabs[5]}}

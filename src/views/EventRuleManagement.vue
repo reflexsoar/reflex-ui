@@ -1,6 +1,6 @@
 <template>
   <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"><CCol xs="12" lg="12">
-    <h2>Event Rules</h2><br>
+    <h2>Event Rules<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/event-rules/index.md')"><CIcon name='cil-book' size="lg"/></button></h2><br>
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
@@ -21,6 +21,7 @@
             <CDataTable
             :items="rules"
             :fields="fields"
+            :loading="loading"
             >
             <template #name="{item}">
               <td><span onmouseover="" style="cursor: pointer;" @click="viewRule(item.uuid)"><b >{{item.name}}</b><br>{{item.description}}</span></td>
@@ -61,8 +62,8 @@
         <h5>{{modal_title}}</h5>
         <span class='text-right'>
             <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
-            <button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/rql.md')">?</button>
-        </span>            
+            <button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/rql/index.md')"><CIcon name='cil-book' size="lg"/></button>
+        </span>                   
     </template>
     <CAlert :show.sync="test_complete" :color="test_result_color" closeButton>
       {{test_result}}
@@ -719,7 +720,7 @@ export default {
         })
       }
     },
-    computed: mapState(['alert','current_user']),
+    computed: mapState(['alert','current_user','loading']),
     created() {
       this.loadRules()
       

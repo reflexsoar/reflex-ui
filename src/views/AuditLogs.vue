@@ -97,6 +97,10 @@ export default {
   },
   created: function () {
     this.loadData();
+    if(this.current_user.default_org) {
+      this.fields.splice(1,0,'organization')
+      this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+    }
   },
   computed: mapState(['current_user']),
   data() {
@@ -146,10 +150,7 @@ export default {
       let selected_status = this.selected_status.map(e => e.name)
       let selected_event_type = this.selected_event_type.map(e => e.name)
       let page = this.current_page
-      if(this.current_user.role.permissions.view_organizations) {
-        this.fields.splice(1,0,'organization')
-        this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
-      }
+      
       this.$store.dispatch("getAuditLogs", {selected_status, selected_event_type, page}).then((resp) => {
         this.audit_logs = this.$store.getters.audit_logs;
         this.pagination = resp.data.pagination
@@ -162,8 +163,7 @@ export default {
           case 'Failed': return 'danger';
           default: return 'success';
         }
-    }
-    ,
+    },
     mapOrgToName(uuid) {
       let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
       if (org.length > 0) {

@@ -1,7 +1,6 @@
 <template>
 <div>
   <CRow>
-
     <CCol>
       <!-- START FILTER PICKERS TODO: Move this to it's own component-->
       <CRow>
@@ -111,17 +110,7 @@
 
         </CCol>
       </CRow>
-      <CRow v-if="loading == true" >
-        <CCol>
-          <div style="margin: auto; text-align:center; verticle-align:middle;">
-           <CSpinner
-                color="dark"
-                style="width:6rem;height:6rem;"
-            />
-          </div>
-        </CCol>
-      </CRow>
-             <CRow v-else><CCol> <CDataTable
+             <CRow><CCol> <CDataTable
                   :hover="hover"
                   :striped="striped"
                   :bordered="bordered"
@@ -131,6 +120,7 @@
                   :fields="fields"
                   :items-per-page="25"
                   :dark="dark"
+                  :loading = loading
                   :sorter='{external: true, resetable: true}'
                   :responsive="false"
                   style="border-top: 1px solid #cfcfcf;"
@@ -255,6 +245,7 @@ export default {
     },
     computed: mapState(['settings','current_user']),
     created: function () {
+      this.caseFilters = this.$store.getters.case_filters
       if(this.current_user.default_org) {
         
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
@@ -582,6 +573,9 @@ export default {
             this.caseFilters = this.caseFilters.filter(item => item.value !== filter.value)
           }
         }
+
+        this.$store.commit('update_case_filters', this.caseFilters)
+
         if(!['end','start'].includes(filter.filter_type)) {
           this.filterCases()
         }

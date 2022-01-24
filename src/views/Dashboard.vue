@@ -169,7 +169,7 @@
           <CCard>
             <CCardHeader>Cases by Severity</CCardHeader>
               <CChartHorizontalBar
-                :datasets="computedValues(case_stats, 'severity')"
+                :datasets="computedValues(case_stats, 'severity', label='Cases')"
                 :labels="computedKeys(case_stats, 'severity')"
                 :options="barChart_options"
               />
@@ -179,7 +179,7 @@
           <CCard>
             <CCardHeader>Cases by Status</CCardHeader>
           <CChartHorizontalBar
-            :datasets="computedValues(case_stats, 'status')"
+            :datasets="computedValues(case_stats, 'status', label='Cases')"
             :labels="computedKeys(case_stats, 'status')"
             :options="barChart_options"
           />
@@ -189,7 +189,7 @@
           <CCard>
             <CCardHeader>Cases by Closure Reason</CCardHeader>
             <CChartHorizontalBar
-              :datasets="computedValues(case_stats, 'close reason')"
+              :datasets="computedValues(case_stats, 'close reason', label='Cases')"
               :labels="computedKeys(case_stats, 'close reason')"
               :options="barChart_options"
             />
@@ -202,7 +202,7 @@
             <CCardHeader>Cases over Time</CCardHeader>
             <CCardBody>
               <CChartBar 
-                :datasets="computedValues(case_stats, 'cases_over_time')"
+                :datasets="computedValues(case_stats, 'cases_over_time', label='Cases')"
                 :labels="computedKeys(case_stats, 'cases_over_time')"
                 :options="barChart_options"
               />
@@ -234,9 +234,12 @@ export default {
     return {
       barChart_options: {
         scales: {
-            y: {
-                beginAtZero: true
-            }
+          yAxes: [{
+             ticks: {
+                precision:0,
+                beginAtZero: true,
+             }
+          }]
         },
         maintainAspectRatio: false
       },
@@ -292,14 +295,13 @@ export default {
         }
         if(!keys.includes(key)) {
           keys.push(key)
-        }
-        
+        }        
       }
       return keys
     },
-    computedValues(data, field){
+    computedValues(data, field, label='Events'){
       let dataset = {
-        'label': 'Events',
+        'label': label,
         'data': [],
         'backgroundColor': []
       }

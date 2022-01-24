@@ -1,11 +1,7 @@
 <template>
   <CRow>
-    <CCol col v-if="loading">
-      <div style="margin: auto; text-align: center; verticle-align: middle">
-        <CSpinner color="dark" style="width: 6rem; height: 6rem" />
-      </div>
-    </CCol>
-    <CCol col v-else>
+   
+    <CCol col>
       <div style="padding: 10px">
         <CButton
           color="primary"
@@ -21,6 +17,7 @@
         :fixed="fixed"
         :items="case_templates"
         :fields="fields"
+        :loading="loading"
         :items-per-page="small ? 25 : 10"
         :dark="dark"
         :sorter="{ external: true, resetable: true }"

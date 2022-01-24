@@ -1,7 +1,7 @@
 <template>
   <CRow>
     <CCol col="12">
-      <h2>Events</h2>
+      <h2>Events<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/events/index.md')"><CIcon name='cil-book' size="lg"/></button></h2>
       <event-drawer :event_data="event_data"></event-drawer>
       <CRow>
         <CCol col="12">
@@ -25,24 +25,28 @@
                 
               </CRow>
             </CCardHeader>
-            <CCollapse :show="quick_filters">
+            <CCollapse :show="quick_filters" >
               <!-- MOVE THIS TO ITS OWN COMPONENT -->
             <CRow class='event-stats-container event-stats-row'>
               <div class='event-stats-picker'>
                 <CRow>
                   <CCol>
-                    <b>Search</b><br>
-                    <p>Select a term to free search on </p>
+                    <b>Search</b><p>Free search by field</p>
+                  </CCol>
+                  <CCol class='text-right'>
+                    <CButtonGroup>
+                      <CButton size="sm" color="primary" @click="applyFreeSearch()">Search</CButton>
+                    </CButtonGroup>
                   </CCol>
                 </CRow>
                 <CRow>
                   <CCol>
-                    <CSelect :options="free_search_options"></CSelect>
+                    <CSelect :options="free_search_options" v-model="selected_search_option"></CSelect>
                   </CCol>
                 </CRow>
                 <CRow>
                   <CCol>
-                    <CInput></CInput>
+                    <CInput placeholder="Enter a search term..." v-model="search_text" @keydown.enter="applyFreeSearch()"></CInput>
                   </CCol>
                 </CRow>
               </div>
@@ -525,7 +529,7 @@ export default {
         event_data: {},
         dismiss_submitted: false,
         event_stats: {},
-        free_search_options: ['Title','Status','Tag','Severity','Signature'],
+        free_search_options: ['Title','Tag','Signature','Observable'],
         selected_count: 0,
         target_event: {},
         range: {
@@ -534,7 +538,9 @@ export default {
         },
         masks: {
           input: 'YYYY-MM-DD h:mm A'
-        }
+        },
+        selected_search_option: "Title",
+        search_text: ""
       }
     },
     methods: {
@@ -761,6 +767,7 @@ export default {
         let end_time = ""
         let grouped = !this.filteredBySignature()
         let search = []
+        let title__like_filter = null
         for(let f in this.observableFilters) {
           let filter = this.observableFilters[f]
 
@@ -810,7 +817,12 @@ export default {
 
           if(filter.filter_type == 'organization') {
             organization_filters.push(filter.value)
+          }          
+
+          if(filter.filter_type == 'title__like') {
+            title__like_filter = filter.value
           }
+
         }
 
         this.$store.dispatch('getEvents', {
@@ -831,7 +843,8 @@ export default {
           sort_direction: this.sort_direction,
           start: start_time,
           end: end_time,
-          organization: organization_filters
+          organization: organization_filters,
+          title__like: title__like_filter
         }).then(resp => {
           this.filtered_events = this.$store.getters.events
           this.event_observables = resp.data.observables
@@ -849,7 +862,8 @@ export default {
           observables: observables_filters,
           start: start_time,
           end: end_time,          
-          organization: organization_filters
+          organization: organization_filters,
+          title__like: title__like_filter
         }).then(resp => {
           this.event_stats = this.$store.getters.event_stats
         })
@@ -874,6 +888,7 @@ export default {
       },
       toggleObservableFilter(obs) {
         this.selected = []
+        this.selected_count = 0
         let exists = this.observableFilters.some((item) => {
           return item.value === obs.value
         })
@@ -965,6 +980,10 @@ export default {
         let signature_filter = ""
         let title_filter = []
         let source_filters = []
+        let organization_filters = []
+        let start_time = ""
+        let end_time = ""
+        let title__like_filter = null
         this.selected_count = this.page_data.total_results
         for(let f in this.observableFilters) {
           let filter = this.observableFilters[f]
@@ -1004,6 +1023,23 @@ export default {
           if(filter.filter_type == 'title') {
             title_filter = [encodeURIComponent(filter.value)]
           }
+
+          if(filter.filter_type == 'start') {
+            start_time = filter.value
+          }
+
+          if(filter.filter_type == 'end') {
+            end_time = filter.value
+          }
+
+          if(filter.filter_type == 'organization') {
+            organization_filters.push(filter.value)
+          }          
+
+          if(filter.filter_type == 'title__like') {
+            title__like_filter = filter.value
+          }
+
         }
         this.$store.dispatch('getBulkEvents', {
           signature: signature_filter,
@@ -1013,6 +1049,10 @@ export default {
           status: status_filters,
           source: source_filters,
           observables: observables_filters,
+          start: start_time,
+          end: end_time,
+          organization: organization_filters,
+          title__like: title__like_filter
         }).then(resp => {
           this.selected = [...resp.data.events]
           
@@ -1073,7 +1113,7 @@ export default {
           case 1: return 'info';
           case 2: return 'warning';
           case 3: return 'danger';
-          default: return 'dark';
+          default: return 'danger';
         }
       },
       getSeverityText(severity) {
@@ -1082,7 +1122,7 @@ export default {
           case 1: return 'Medium';
           case 2: return 'High';
           case 3: return 'Critical';
-          default: return 'Low';
+          default: return 'Unknown';
         }
       },
       getEventObservables(uuid) {
@@ -1100,6 +1140,16 @@ export default {
           this.sort_direction = "asc"
           this.filterEvents()
           return
+        }
+      },
+      applyFreeSearch() {
+        if(!['',null].includes(this.search_text)) {
+          if(this.selected_search_option.toLowerCase() == 'title') {
+            this.toggleObservableFilter({'filter_type':'title__like', 'data_type': 'title', 'value': this.search_text})
+          } else {
+            this.toggleObservableFilter({'filter_type':this.selected_search_option.toLowerCase(), 'data_type': this.selected_search_option.toLowerCase(), 'value': this.search_text})
+          }
+          this.search_text = ""
         }
       },
       applyTimeFilter() {

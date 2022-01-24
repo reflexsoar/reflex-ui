@@ -331,11 +331,11 @@ export default {
     },
     loadData: function () {
       this.loading = true;
-      if(this.current_user.role.permissions.view_organizations) {
+      if(this.current_user.default_org) {
         this.fields.splice(1,0,'organization')
         this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
       }
-      this.$store.dispatch("getUsers").then((resp) => {
+      this.$store.dispatch("getUsers", {}).then((resp) => {
         this.users = resp.data;
         this.loading = false;
       });

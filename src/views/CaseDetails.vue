@@ -584,8 +584,7 @@ export default {
             this.filterEvents()
             this.$store.dispatch('getSettings')
             //this.$store.dispatch('getTags')
-            
-
+        
             for(let task in this.tasks) {
                 this.collapse_tasks[this.tasks[task].order] = false;
             }

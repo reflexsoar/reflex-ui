@@ -1,14 +1,7 @@
 <template>
   <CRow>
-    <CCol col v-if="loading">
-        <div style="margin: auto; text-align:center; verticle-align:middle;">
-           <CSpinner
-                color="dark"
-                style="width:6rem;height:6rem;"
-            />
-        </div>
-    </CCol>
-    <CCol col v-else>
+    <CCol>
+      <h1>Inputs<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/inputs/index.md')"><CIcon name='cil-book' size="lg"/></button></h1><br>
       <CButton color="primary" to="create">New Input</CButton><br><br>
       <CCard>
           <CCardHeader>
@@ -23,6 +16,7 @@
                   :fixed="fixed"
                   :items="inputs"
                   :fields="fields"
+                  :loading="loading"
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
                   :sorter='{external: true, resetable: true}'

@@ -81,6 +81,7 @@ const state = {
   lists: [],
   credential_list: [],
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
+  case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
     'show': false,
     'message': '',
@@ -96,7 +97,8 @@ const state = {
   },
   event_stats: {},
   case_stats: {},
-  network_data: {}
+  network_data: {},
+  loading: false
 }
 
 const mutations = {
@@ -113,6 +115,9 @@ const mutations = {
   },
   auth_request(state){
     state.status = 'loading'
+  },
+  loading_status(state, status) {
+    state.loading = status
   },
   auth_success(state, data) {
     state.status = 'success'
@@ -207,6 +212,9 @@ const mutations = {
   },
   update_observable_filters(state, filters) {
     state.observable_filters = filters
+  },
+  update_case_filters(state, filters) {
+    state.case_filters = filters
   },
   update_case_comment(state, comment) {
     state.comment = comment
@@ -568,6 +576,8 @@ const mutations = {
 }
 
 const getters = {
+  loading: state => {return state.loading},
+  case_filters: state => { return state.case_filters },
   observable_filters: state => { return state.observable_filters },
   organizations: state => {return state.organizations},
   formatted_organizations: state => {return state.organizations.map((o) => { return {label: o.name, value: o.uuid}})},
@@ -1216,7 +1226,7 @@ const actions = {
       })
     })
   },
-  getBulkEvents({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[]}) {
+  getBulkEvents({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], start=null, end=null, organization=[], title__like=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/bulk_select_all?q=`
@@ -1242,6 +1252,15 @@ const actions = {
       if(observables.length > 0) {
         url = url+`&observables=${observables}`
       }
+      if(start && end) {
+        url = url+`&start=${start}&end=${end}`
+      }
+      if(organization && organization.length > 0) {
+        url = url+`&organization=${organization}`
+      }
+      if(title__like) {
+        url = url+`&title__like=${title__like}`
+      }
       Axios({url: url, method: 'GET'})
       .then(resp => {
         resolve(resp)
@@ -1251,7 +1270,8 @@ const actions = {
       })
     })
   },
-  getEventStats({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type','organization'],start=null, end=null, organization=[]}) {
+  getEventStats({commit}, {title__like=null, signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type','organization'],start=null, end=null, organization=[]}) {
+    commit('loading_status',true)
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/stats?q=`
@@ -1289,10 +1309,14 @@ const actions = {
       if(organization && organization.length > 0) {
         url = url+`&organization=${organization}`
       }
+      if(title__like) {
+        url = url+`&title__like=${title__like}`
+      }
 
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_event_stats', resp.data)
+        commit('loading_status',false)
         resolve(resp)
       })
       .catch(err => {
@@ -1300,7 +1324,7 @@ const actions = {
       })
     })
   },
-  getEvents({commit}, {signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null}) {
+  getEvents({commit}, {title__like=null, signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event?grouped=${grouped}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -1349,6 +1373,10 @@ const actions = {
 
       if(start && end) {
         url = url+`&start=${start}&end=${end}`
+      }
+
+      if(title__like) {
+        url = url+`&title__like=${title__like}`
       }
 
       Axios({url: url, method: 'GET', headers:{'X-Fields': fields}})
@@ -1414,11 +1442,13 @@ const actions = {
     })
   },
   editEventRule({commit}, {uuid, rule}) {
+    commit('loading_status',true)
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event_rule/${uuid}`, data: rule, method: 'PUT'})
       .then(resp => {
         commit('update_event_rule', resp.data)
         commit('show_alert', {message: 'Successfully updated the Event Rule.', 'type': 'success'})
+        commit('loading_status',false)
         resolve(resp)
       })
       .catch(err => {
@@ -2411,6 +2441,7 @@ const actions = {
     })
   },
   loadEventRules({commit}, {page=1, page_size=25}) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/event_rule?page=${page}&page_size=${page_size}`
@@ -2418,6 +2449,7 @@ const actions = {
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_event_rules', resp.data.event_rules)
+        commit('loading_status', false)
           resolve(resp)
       })
       .catch(err => {
@@ -2426,10 +2458,12 @@ const actions = {
     })
   },
   updateEventRule({commit}, {uuid, data}) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event_rule/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_event_rule', resp.data)
+        commit('loading_status', false)
         resolve(resp)
       })
       .catch(err => {
@@ -2438,9 +2472,11 @@ const actions = {
     })
   },
   deleteEventRule({commit}, {uuid}) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event_rule/${uuid}`, method: 'DELETE'})
       .then(resp => {
+        commit('loading_status', false)
         resolve(resp)
       })
       .catch(err => {
@@ -2457,6 +2493,6 @@ export default new Vuex.Store({
   getters,
   plugins: [createPersistedState({
     key: 'reflex-state',
-    paths: ['observable_filters','current_user','case_templates']
+    paths: ['observable_filters','case_filters','current_user','case_templates']
   })]
 })
