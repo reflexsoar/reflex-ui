@@ -3,6 +3,7 @@
     <CCol col="12">
       <h2>Events<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/events/index.md')"><CIcon name='cil-book' size="lg"/></button></h2>
       <event-drawer :event_data="event_data"></event-drawer>
+      {{selected_orgs}}
       <CRow>
         <CCol col="12">
           <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
@@ -143,11 +144,11 @@
                 class='d-inline-block'
             >
                 <CDropdownItem @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
-                <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
-                <CDropdownItem @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
+                <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
+                <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
                 <CDropdownItem @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
-                <CDropdownDivider/>
-                <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
+                <!--<CDropdownDivider/>
+                <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>-->
             </CDropdown>
           </div>
         </CCol>
@@ -285,22 +286,27 @@
       <div>
         <p>Dismissing an event indicates that no action is required.  For transparency purposes, it is best to leave a comment as to why this event is being dismissed.  Fill out the comment field below.</p>
         <p>This action will apply to all related events with the same signature.</p>
-        <CForm id="dismissEventForm" @submit.prevent="dismissEvent()">
-            <CRow>
-                <CCol><br>
-            <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value" label="Reason"/>
-            <CTextarea
-                placeholder="Enter a comment as to why this Event is being dismissed."
-                v-bind:required="settings.require_event_dismiss_comment"
-                :value="dismissalComment"
-                @change="dismissalComment = $event"
-                label="Comment"
-                rows=5
-            >
-            </CTextarea>            
-                </CCol>
-            </CRow>
-        </CForm>
+        <div v-if="selectedOrgLength() > 1">
+          MULTI DISMISS MODE
+        </div>
+        <div v-else>
+          <CForm id="dismissEventForm" @submit.prevent="dismissEvent()">
+              <CRow>
+                  <CCol><br>
+              <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value" label="Reason"/>
+              <CTextarea
+                  placeholder="Enter a comment as to why this Event is being dismissed."
+                  v-bind:required="settings.require_event_dismiss_comment"
+                  :value="dismissalComment"
+                  @change="dismissalComment = $event"
+                  label="Comment"
+                  rows=5
+              >
+              </CTextarea>            
+                  </CCol>
+              </CRow>
+          </CForm>
+        </div>
       </div>
       <template #footer>
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismis Event</span></CButton>
@@ -540,10 +546,14 @@ export default {
           input: 'YYYY-MM-DD h:mm A'
         },
         selected_search_option: "Title",
-        search_text: ""
+        search_text: "",
+        selected_orgs: {}
       }
     },
     methods: {
+      selectedOrgLength() {
+        return Object.keys(this.selected_orgs).length
+      },
       today() {
         let d = new Date()
         d.setHours(23,59,59,0)
@@ -630,6 +640,8 @@ export default {
         this.target_event = event
         this.loadCloseReasons()
         this.selected = [uuid]
+        this.selected_orgs = {}
+        this.selected_orgs[event.organization] = [uuid]
         this.related_events_count = event.related_events_count
         this.dismissEventModal = true
       },
@@ -661,6 +673,8 @@ export default {
           this.$store.dispatch('dismissEvents', data).then(resp => {
             this.filtered_events = this.filterEvents()
             this.dismissEventModal = false
+            this.dismiss_submitted = false
+          }).catch(err => {
             this.dismiss_submitted = false
           })
          this.selected = []
@@ -887,8 +901,7 @@ export default {
         return {'field':filter['filter_type'],'value':filter['value']}
       },
       toggleObservableFilter(obs) {
-        this.selected = []
-        this.selected_count = 0
+        this.clearSelected()
         let exists = this.observableFilters.some((item) => {
           return item.value === obs.value
         })
@@ -951,12 +964,21 @@ export default {
         this.createCaseModal = true
       },
       selectAllNew() {
+        this.selected_orgs = {}
         if(!this.select_all) {
           if(this.observableFilters.some(e => e.filter_type === 'signature')) {
             this.selected_count = 0 
             for (let i in this.filtered_events) {
               let event = this.filtered_events[i]
               this.selected = [...this.selected, event.uuid]
+              if(!(event.organization in this.selected_orgs)) {
+                this.selected_orgs[event.organization] = []
+              }
+              // If the event isn't selected in that org yet, push it
+              if(!this.selected_orgs[event.organization].includes(event.uuid)) {
+                  this.selected_orgs[event.organization].push(event.uuid)
+              }
+              
               this.selected_count += 1
             }
           }
@@ -966,6 +988,13 @@ export default {
             for (let i in this.filtered_events) {
               let event = this.filtered_events[i]
               this.selected = [...this.selected, event.uuid]
+              if(!(event.organization in this.selected_orgs)) {
+                this.selected_orgs[event.organization] = []
+              }
+              // If the event isn't selected in that org yet, push it
+              if(!this.selected_orgs[event.organization].includes(event.uuid)) {
+                  this.selected_orgs[event.organization].push(event.uuid)
+              }
               this.selected_count += event.related_events_count
             }
           }
@@ -1055,6 +1084,7 @@ export default {
           title__like: title__like_filter
         }).then(resp => {
           this.selected = [...resp.data.events]
+          this.selected_orgs = resp.data.organizations
           
         })
       },
@@ -1090,13 +1120,37 @@ export default {
           return
         }
         let e = this.filtered_events.find(x => x.uuid == event.target.value)
-        if(e) {
-          
+        if(e) {          
           if(this.selected.some((item) => { return item === e.uuid})) {
               this.selected = this.selected.filter(item => item != e.uuid)
+
+              // Go through each selected organization and remove the item
+              for(let o in this.selected_orgs) {
+                if(this.selected_orgs[o].includes(e.uuid)) {
+                  this.selected_orgs[o] = this.selected_orgs[o].filter(item => item != e.uuid)
+                }
+                
+                // If no more events are selected for that organization remove the organization UUID
+                if(this.selected_orgs[o].length == 0) {
+                  delete this.selected_orgs[o]
+                }
+              }
+              
               this.selected_count -= e.related_events_count
           } else {       
               this.selected.push(e.uuid) 
+
+              // If the org hasn't been selected yet, add it as an empty dictionary
+              
+              if(!(e.organization in this.selected_orgs)) {
+                this.selected_orgs[e.organization] = []
+              }
+              
+              // If the event isn't selected in that org yet, push it
+              if(!this.selected_orgs[e.organization].includes(e.uuid)) {
+                  this.selected_orgs[e.organization].push(e.uuid)
+              }
+
               this.selected_count += e.related_events_count
           }
         }
@@ -1104,6 +1158,7 @@ export default {
       },
       clearSelected() {
         this.selected = []
+        this.selected_orgs = {}
         this.select_all = false
         this.selected_count = 0
       },

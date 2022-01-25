@@ -293,7 +293,7 @@ export default {
           input: 'YYYY-MM-DD h:mm A'
         },
         free_search_options: [
-          'Title',
+          'Title', //'Commenter', 'Owner', 'Description', 'Comments', 'Task Note', 'Observable'
         ],
         case_stats: {},
         my_cases: false,

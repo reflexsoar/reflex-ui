@@ -152,7 +152,8 @@ export default {
       target_template: {},
       target_template_uuid: '',
       dismiss_submitted: false,
-      edit_case_modal: false
+      edit_case_modal: false,
+      case_templates: []
     };
   },
   methods: {

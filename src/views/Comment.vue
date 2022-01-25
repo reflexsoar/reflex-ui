@@ -4,11 +4,11 @@
       <CRow>
         <CCol col="6">
           <span v-if="!comment.is_closure_comment"
-            ><b>{{ comment.created_by.username }}</b> commented
+            ><b>{{ comment.created_by.username }}</b><span v-if="comment.other_organization_name">&nbsp;<CBadge class="tag" size="xs" color="secondary">{{comment.other_organization_name}}</CBadge></span> commented
             {{ comment.created_at | moment("from", "now") }}. <span v-if="comment.edited"><i>edited</i></span></span
           >
           <span v-else
-            ><b>{{ comment.created_by.username }}</b> closed the case with the
+            ><b>{{ comment.created_by.username }}</b><span v-if="comment.other_organization_name">&nbsp;<CBadge class="tag" size="xs" color="secondary">{{comment.other_organization_name}}</CBadge></span> closed the case with the
             following comment at
             {{ comment.created_at | moment("from", "now") }}.</span
           >

@@ -27,7 +27,7 @@
                   <CSelect 
                     label="Plugin"
                     placeholder="Select an input type"
-                    :options="['Elasticsearch','Exchange Mailbox','API','Webhook']"
+                    :options="['Elasticsearch']"
                     v-model="plugin"
                     @change="populateConfig($event)"
                   > 
