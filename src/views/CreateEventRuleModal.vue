@@ -26,6 +26,10 @@
                 </p>
                 <CInput label="Rule Name"  placeholder="Enter a friendly name for this rule" v-model="name" required></CInput>
                 <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
+                <span v-if="current_user.default_org">
+                    <label>Global Rule</label><br>
+                    <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
+                </span>
                 </div>
                 <div name="create-case-template-step-2" v-if="step == 2">
                     <h4>Expiration</h4>
@@ -144,7 +148,7 @@
           <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
           <CButton v-if="step != 1" @click="previousStep()" color="info">Previous</CButton>
           <CButton v-if="step != final_step" @click="nextStep()" color="primary" :disabled="(test_failed && step == 3)">Next</CButton>
-          <CButton v-if="step == final_step" @click="createEventRule()" color="primary">Create</CButton>
+          <CButton v-if="step == final_step" @click="createEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton>
       </template>
     </CModal>
 </div>
@@ -197,7 +201,7 @@ export default {
         source_event_uuid: String,
         rule_observables: Array
     },
-    computed: mapState(['settings']),
+    computed: mapState(['settings','current_user']),
     data(){
         return {
             name: "",
@@ -206,6 +210,7 @@ export default {
             modalStatus: this.show,
             merge_into_case: false,
             tag_event: false,
+            global_rule: false,
             update_severity: false,
             target_severity: 0,
             selected_tags: [],
@@ -268,7 +273,8 @@ export default {
             current_action: "",
             selected_actions: [],
             error: false,
-            error_message: ""
+            error_message: "",
+            submitted: false
         }
     },
     watch: {
@@ -346,6 +352,7 @@ export default {
             })
         },
         createEventRule() {
+            this.submitted = true
             let rule = {
                 name: this.name,
                 organization: this.event_organization,
@@ -365,6 +372,10 @@ export default {
                 query: this.query
             }
 
+            if(this.current_user.default_org) {
+                rule['global_rule'] = this.global_rule
+            }
+
             for(let tag in this.selected_tags) {
                 rule.tags_to_add.push(this.selected_tags[tag].name)
             }
@@ -373,7 +384,9 @@ export default {
                 this.modalStatus = false
                 this.error = false
                 this.error_message = ""
+                this.submitted = false
             }).catch(err => {
+                this.submitted = false
                 this.error = true
                 this.step = 1
                 this.error_message = err.response.data.message

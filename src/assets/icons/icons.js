@@ -108,7 +108,9 @@ import {
   cil3d,
   cilSortAscending,
   cilSortDescending,
-  cilLifeRing
+  cilLifeRing,
+  cilReload,
+  cilExclamationCircle
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -193,7 +195,9 @@ export const iconsSet = Object.assign(
     cilSortAscending,
     cilSortDescending,
     cilChevronCircleRightAlt,
-    cilLifeRing
+    cilLifeRing,
+    cilReload,
+    cilExclamationCircle
   },
   {
     cifUs,

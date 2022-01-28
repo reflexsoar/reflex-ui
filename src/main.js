@@ -2,7 +2,8 @@ import 'core-js/stable'
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import CoreuiVue from '@coreui/vue'
+//import CoreuiVue from '@coreui/vue'
+import CoreuiVue from '@coreui/vue-pro'
 import { iconsSet as icons } from './assets/icons/icons.js'
 import store from './store'
 import Axios from 'axios'
@@ -16,6 +17,7 @@ import VueClipboard from 'vue-clipboard2'
 import Prism from 'prismjs';
 import VueSimpleContextMenu from "vue-simple-context-menu";
 import VCalendar from 'v-calendar';
+import { CMultiSelect } from '@coreui/vue-pro';
 
 Vue.config.performance = true
 Vue.use(CoreuiVue)
@@ -26,6 +28,7 @@ Vue.use(VueClipboard)
 Vue.use(VCalendar)
 Vue.component('vue-markdown', VueMarkdown)
 Vue.component("vue-simple-context-menu", VueSimpleContextMenu);
+Vue.component(CMultiSelect)
 
 Vue.prototype.$log = console.log.bind(console)
 Vue.prototype.$http = Axios;
@@ -44,6 +47,9 @@ Vue.prototype.$http.interceptors.response.use(function(response) {
       if(status === 401) {
         store.dispatch('logout')
         window.location.href = '/#/login'
+      }
+      if(status === 404) {
+        window.location.href = '/#/404'
       }
       if(status === 403) {
         store.dispatch('logout')

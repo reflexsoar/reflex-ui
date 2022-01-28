@@ -44,6 +44,11 @@
             <template #admin="{item}"> 
               <td class="text-right"><CButton size="sm" color="info" @click="editRule(item.uuid)">Edit Rule</CButton>&nbsp;<CButton v-if="item.active" size="sm" color="danger" @click="disableRule(item.uuid)">Disable</CButton><CButton v-else size="sm" color="success" @click="enableRule(item.uuid)">Activate</CButton>&nbsp;<CButton v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm">Delete</CButton></td>
             </template>
+            <template #global_rule="{item}">
+              <td>
+                <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="item.global_rule"/>
+              </td>
+            </template>
             </CDataTable>
           </CTab>
         </CTabs>
@@ -80,6 +85,10 @@
                 <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="organization" :options="organizations" @change="loadCloseReasons()"/>
                 <CInput label="Rule Name" placeholder="Enter a friendly name for this rule" v-model="name" required></CInput>
                 <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
+                <span v-if="current_user.default_org">
+                    <label>Global Rule</label><br>
+                    <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
+                </span>
                 </div>
                 <div name="create-case-template-step-2" v-if="step == 2">
                     <h4>Expiration</h4>
@@ -203,6 +212,10 @@
       <CCol>
         <CInput label='Rule Name' v-model="rule.name"/>
         <CTextarea v-model="rule.description" placeholder="Give a brief description of what this rule will do and why." label="Description"/>
+        <span v-if="current_user.default_org">
+            <label>Global Rule</label><br>
+            <CSwitch :checked.sync="rule.global_rule" label-on="Yes" label-off="No" color="success"/>
+        </span>
       </CCol>
     </CRow>
     <div  v-if="modal_mode === 'view' || modal_mode === 'edit'">
@@ -397,9 +410,10 @@ export default {
         step: 1,
         rules: [],
         rule: {},
-        fields: ['name','last_matched_date','merge_into_case','dismiss','admin'],
+        fields: ['name','merge_into_case','dismiss','last_matched_date','admin'],
         modal_mode: 'create',
         show_test_results: false,
+        global_rule: false,
         show_modal: false,
         modal_title: "",
         test_results: [],
@@ -609,11 +623,6 @@ export default {
           })
       },
       loadRules() {
-        if(this.current_user.role.permissions.view_organizations) {
-          if (!this.fields.includes('organization')) {
-            this.fields.splice(1,0,'organization')
-          }
-        }
         
         let page = this.current_page
         let page_size = this.page_size
@@ -655,6 +664,11 @@ export default {
           event_signature: this.event_signature,
           query: this.query
         }
+
+        if(this.current_user.default_org) {
+          rule['global_rule'] = this.global_rule
+        }
+
         this.$store.dispatch('createEventRule', rule).then(resp => {
           this.show_modal = false
           console.log(resp.data)
@@ -675,6 +689,11 @@ export default {
           dismiss: this.rule.dismiss,
           query: this.rule.query
         }
+
+        if(this.current_user.default_org) {
+          rule['global_rule'] = this.rule.global_rule
+        }        
+
         this.$store.dispatch('editEventRule', {uuid, rule}).then(resp => {
           this.show_modal = false
           this.rules = this.$store.getters.event_rules
@@ -711,9 +730,11 @@ export default {
       },
       loadCloseReasons() {
         let organization = this.organization
-        this.$store.dispatch('getOrganizations').then(resp => {
-          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
-        })
+        if(this.current_user.default_org) {
+          this.$store.dispatch('getOrganizations').then(resp => {
+            this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+          })
+        }
         
         this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
           this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
@@ -723,6 +744,15 @@ export default {
     computed: mapState(['alert','current_user','loading']),
     created() {
       this.loadRules()
+      if(this.current_user.default_org) {
+        if (!this.fields.includes('organization')) {
+          this.fields.splice(1,0,'organization')
+        }
+        if (!this.fields.includes('global_rule')) {
+          this.fields.splice(2,0,'global_rule')
+        }
+        
+      }
       
     }
 }

@@ -2,6 +2,19 @@
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
     <CModal title="Create Event Rule" :centered="true" size="xl" :show.sync="modalStatus" :closeOnBackdrop="false">
         <CRow>
+            <CCol col="3">
+                            <h4>Steps</h4>
+                            <CRow style="background-color: #cfcfcf; margin-left: 0px; margin-right: 0px; margin-top: 5px; margin-bottom:5px; padding:5px; border-radius: 5px" v-for="action in configured_actions" :key="action">
+                                    <CCol>
+                                        {{action.action}}
+                                    </CCol>
+                                    <CCol col="1" style="vertical-align: middle">
+                                        <div>
+                                            <CIcon name="cil-chevron-circle-right-alt"/>
+                                        </div>
+                                    </CCol>
+                                </CRow>
+                        </CCol>
             <CCol>
             <CForm @submit.prevent="createEventRule" id="event_rule_form">
                 <!--<CAlert :show="step == 3 && !test_failed" color="danger" closeButton>
@@ -47,19 +60,7 @@
                 <div name="create-case-template-step-4" v-if="step == 4">
                     
                     <CRow>
-                        <CCol col="3">
-                            <h4>Actions</h4>
-                            <CRow style="background-color: #cfcfcf; margin-left: 0px; margin-right: 0px; margin-top: 5px; margin-bottom:5px; padding:5px; border-radius: 5px" v-for="action in configured_actions" :key="action">
-                                    <CCol>
-                                        {{action.action}}
-                                    </CCol>
-                                    <CCol col="1" style="vertical-align: middle">
-                                        <div>
-                                            <CIcon name="cil-chevron-circle-right-alt"/>
-                                        </div>
-                                    </CCol>
-                                </CRow>
-                        </CCol>
+                        
                         <CCol>
                             <h4>Configuration</h4>
                             <CSelect :options="actions"/>

@@ -37,7 +37,9 @@
                         color="secondary"
                         v-bind:disabled="case_data.status && case_data.status.closed"
                         >
-                        <CDropdownItem @click="caseTemplateModal = !caseTemplateModal">Add Case Template</CDropdownItem>
+                        <CDropdownItem @click="closeCaseModal = !closeCaseModal">Close Case</CDropdownItem>
+                        <CDropdownItem @click="caseTemplateModal = !caseTemplateModal">Apply Case Template</CDropdownItem>
+                        <CDropdownItem v-if="case_data.case_template_uuid" @click="removeCaseTemplate()">Remove Case Template</CDropdownItem>
                         <CDropdownItem @click="addObservableModal = !addObservableModal">Add Observables</CDropdownItem>
                         <CDropdownItem @click="linkCaseModal = !linkCaseModal">Link Cases</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Run Playbook</CDropdownItem>
@@ -68,7 +70,7 @@
                             :options="tags" 
                             :multiple="true"
                             :close-on-select="false"
-                            @tag="current_tags.push({'name':$event})"
+                            @tag="addTag"
                             style="z-index:50"
                         ></multiselect>
                         <CButton color="danger" @click="edit_tags = !edit_tags" size="sm"><CIcon name="cilXCircle"/></CButton>
@@ -82,8 +84,53 @@
           <CCardBody class="tabbed">
             <CTabs :activeTab.sync="activeTab">
               <CTab title="Case Details" active>
-                  <CCardBody>
-                    <CRow>
+                  <CCardBody style="padding-top: 5px">
+                      <CRow style="border-bottom: 1px dotted #cfcfcf; padding-top: 0px">
+                        <CCol col="12" style="border-right: 1px dotted #cfcfcf;">
+                            <CRow>
+                                 <CCol col="2">
+                                     <CCallout color="success">
+                                        <small class="text-muted">SLA Status</small><br>
+                                        <strong class="h1">Okay</strong>
+                                    </CCallout>
+                                </CCol>
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Total Events</small><br>
+                                        <strong class="h1">{{case_data.event_count ? case_data.event_count : 0}}</strong>
+                                    </CCallout>                                    
+                                </CCol>
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Related Cases</small><br>
+                                        <strong class="h1">{{related_cases.length}}</strong>
+                                    </CCallout>
+                                </CCol>
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Remaining Tasks</small><br>
+                                        <strong class="h1">{{case_data.open_tasks}} / {{case_data.total_tasks}}</strong>
+                                    </CCallout>
+                                    
+                                </CCol>
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Total Observables</small><br>
+                                        <strong class="h1">{{case_data.observable_count}}</strong>
+                                    </CCallout>
+                                </CCol>
+                                
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Days Open</small><br>
+                                        <strong class="h1">{{daysOpen()}}</strong>
+                                    </CCallout>
+                                </CCol>
+                                                                
+                            </CRow>
+                        </CCol>
+                    </CRow>
+                    <CRow style=" padding-top: 10px;">
                         <CCol col="3" style="border-right: 1px dotted #cfcfcf;">
                             <CSelect label="Status" :options="case_statuses" :value.sync="case_data.status.uuid" @change="updateStatus()"></CSelect>
                             <label>Assignee</label>
@@ -120,39 +167,7 @@
                             </span>
                         </CCol>
                     </CRow>
-                    <CRow style="border-top: 1px dotted #cfcfcf; padding-top:10px; margin-top: 10px;">
-                        <CCol col="12" style="border-right: 1px dotted #cfcfcf;">
-                            <h5>Metrics</h5>
-                            <CRow>
-                                <CCol col="2">
-                                    <CWidgetSimple header="Related Cases" :text="String(related_cases.length)" v-on:click.native="activeTab=7">
-                                    </CWidgetSimple>
-                                </CCol>
-                                <CCol col="2">
-                                    <CWidgetSimple header="Remaining Tasks" :text="String(case_data.open_tasks)+'/'+String(case_data.total_tasks)">
-                                    </CWidgetSimple>
-                                </CCol>
-                                <CCol col="2">
-                                    <CWidgetSimple header="Total Observables" :text="String(case_data.observable_count)">
-                                    </CWidgetSimple>
-                                </CCol>
-                                <CCol col="2">
-                                    <span v-if="case_data.event_count"><CWidgetSimple header="Total Events" :text="String(case_data.event_count)"></CWidgetSimple></span>
-                                    <span v-else><CWidgetSimple header="Total Events" text="0"></CWidgetSimple></span>
-                                    
-                                </CCol>
-                                <CCol col="2">
-                                    <CWidgetSimple header="Time Open" :text="daysOpen()">
-                                    </CWidgetSimple>
-                                </CCol>
-                                 <CCol col="2">
-                                    <CWidgetSimple header="SLA Status" text="Okay">
-                                    </CWidgetSimple>
-                                </CCol>
-                                
-                            </CRow>
-                        </CCol>
-                    </CRow>
+                    
                   </CCardBody>
               </CTab>
               <CTab title="Observables">
@@ -340,10 +355,10 @@
             <CButton @click="deleteCase()" color="danger">Delete</CButton>
         </template>
     </CModal>
-    <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" ></AddObservableModal>
+    <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" :organization="this.case_data.organization"></AddObservableModal>
     <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid"></AddTaskModal>
     <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status.uuid" :organization="this.case_data.organization" :closed.sync="case_closed"></CloseCaseModal>
-    <ApplyCaseTemplateModal :show.sync="caseTemplateModal" :case_uuid="this.uuid" :current_case_template_uuid="case_data.case_template ? case_data.case_template.uuid : null"/>
+    <ApplyCaseTemplateModal :show.sync="caseTemplateModal" :case_uuid="this.uuid" :current_case_template_uuid="case_data.case_template ? case_data.case_template.uuid : null" :organization="this.case_data.organization"/>
     <LinkCaseModal :show.sync="linkCaseModal" :case_uuid="this.uuid" :related_cases="related_cases"/>
   </CCol>
   </CRow>
@@ -590,7 +605,12 @@ export default {
             }
         },
         addTag(event) {
-            console.log(event)
+            const t = {
+                name: event,
+                uuid: ''
+            }
+            this.tags.push(t)
+            this.current_tags.push(t)
         },
         editTags() {
             this.current_tags = this.case_data.tags
@@ -900,6 +920,16 @@ export default {
             } else {
                 this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
             }   
+        },
+        removeCaseTemplate() {
+            let data = {'case_template_uuid': null}
+            let uuid = this.case_data.uuid
+            this.$store.dispatch('updateCase', {uuid, data}).then(resp => {
+                this.$store.commit('show_alert', {message: 'Successfully removed the case template', type:'success'})
+                this.loadData()
+                this.reloadTasks = Math.random()
+            })
+            
         }
     },
     filters: {

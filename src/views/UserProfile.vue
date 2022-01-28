@@ -7,7 +7,7 @@
             <CAlert :show.sync="success_message" color="success" closeButton>
               {{this.success_message}}
             </CAlert>
-            <img width="150px" height="150px" src="#" style="float:left; margin-right: 25px"/>
+            <!--<img width="150px" height="150px" src="#" style="float:left; margin-right: 25px"/>-->
             <h1>{{current_user.first_name}} {{current_user.last_name}}</h1>
             <h4>Username: {{current_user.username}}</h4>
             <h4>Role: {{current_user.role ? current_user.role.name : ""}}<br><small>{{ current_user.role ? current_user.role.description : ""}}</small></h4>

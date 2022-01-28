@@ -8,7 +8,7 @@
     <template #toggler>
       <CHeaderNavLink>
         
-        <CIcon name="cil-menu" size="xl"/>
+        {{current_user.username}}&nbsp;<CIcon name="cil-menu" size="xl"/>
         
       </CHeaderNavLink>
     </template>
@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import {mapState} from "vuex";
 export default {
   name: 'TheHeaderDropdownAccnt',
   data () {
@@ -45,7 +46,8 @@ export default {
     }
   },
   computed: {
-    isLoggedIn: function() {return this.$store.getters.isLoggedIn}
+    isLoggedIn: function() {return this.$store.getters.isLoggedIn},
+    ...mapState(['current_user'])
   },
   methods: {
     profile: function() {

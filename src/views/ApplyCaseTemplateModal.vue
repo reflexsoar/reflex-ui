@@ -38,7 +38,8 @@ export default {
     props: {
         show: Boolean,
         case_uuid: String,
-        current_case_template_uuid: String
+        current_case_template_uuid: String,
+        organization: String
     },
     data(){
         return {
@@ -83,12 +84,15 @@ export default {
             }            
         },
         loadData() {
-            this.$store.dispatch('getCaseTemplateList', '').then(resp => {
+            let organization = this.organization
+            this.$store.dispatch('getCaseTemplateList', {title: '', organization}).then(resp => {
                 this.templates = this.$store.getters.case_template_list.filter((template) => template.uuid != this.current_case_template_uuid)
             })
         },
         caseTemplateFind(query) {
-            this.$store.dispatch('getCaseTemplateList', query).then(resp => {
+            let organization = this.organization
+            console.log(query)
+            this.$store.dispatch('getCaseTemplateList', {title: query, organization: organization}).then(resp => {
                 this.templates = this.$store.getters.case_template_list.filter((template) => template.uuid != this.current_case_template_uuid)
             })
         },

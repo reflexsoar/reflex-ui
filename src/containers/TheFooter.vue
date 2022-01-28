@@ -1,12 +1,9 @@
 <template>
   <CFooter :fixed="false">
-    <div>
-      <a href="https://coreui.io" target="_blank">CoreUI</a>
-      <span class="ml-1">&copy; {{new Date().getFullYear()}} creativeLabs.</span>
-    </div>
     <div class="ml-auto">
-      <span class="mr-1">Powered by</span>
-      <a href="https://coreui.io/vue" target="_blank">CoreUI for Vue</a>
+      <a href="https://github.com/reflexsoar" target="_blank"><CIcon size="lg" name="cibGithub">ReflexSOAR</CIcon></a>&nbsp;
+      <a href="https://github.com/reflexsoar/reflex-docs" target="_blank"><CIcon size="lg" name="cilBook"></CIcon></a>
+      
     </div>
   </CFooter>
 </template>

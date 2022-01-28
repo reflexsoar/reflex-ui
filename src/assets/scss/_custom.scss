@@ -16,6 +16,14 @@ input {
     z-index: 1051;
 }
 
+.admonition {
+    border-right: 1px solid #cfcfcf;
+    border-top: 1px solid #cfcfcf;
+    border-bottom: 1px solid #cfcfcf;
+    padding-top:10px;
+    padding-bottom:10px;
+}
+
 .event-stats-div {
     padding-right:20px;
     padding-top: 5px;

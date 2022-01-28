@@ -77,7 +77,8 @@ export default {
     props: {
         show: false,
         case_data: Object,
-        uuid: ""
+        uuid: "",
+        organization: ""
     },
     data(){
         return {
@@ -185,6 +186,7 @@ export default {
         createObservables() {
             let uuid = this.uuid;
             let data = {'observables': []}
+            data['organization'] = this.organization
             for(let observable in this.new_observables) {
                 let exists = false;
                 let obs = this.new_observables[observable]

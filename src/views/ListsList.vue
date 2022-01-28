@@ -70,7 +70,7 @@
             {{error_message}}
       </CAlert>
       <CForm @submit.prevent="modal_action()" id="listForm">
-        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="list_data.organization" :options="organizations"/>
+        <CSelect @change="getDataTypes($event)" label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="list_data.organization" :options="organizations"/>
         <CInput v-model="list_data.name" label="Name" placeholder="A friendly name for the list" v-bind:required="modal_submit_text == 'Create'"/>
         <CRow>
           <CCol col="12" lg="6">
@@ -159,6 +159,12 @@ export default {
     },
     computed: mapState(['current_user','status','alert','lists','data_types']),
     created: function () {
+      if(this.current_user.default_org) {
+        if (!this.fields.includes('organization')) {
+          this.fields.splice(1,0,'organization')
+        }
+        
+      }
       this.loadData()
     },
     watch: {
@@ -286,16 +292,20 @@ export default {
         this.reset()
         this.modal_status = false
       },
-      loadData: function() {
-        if(this.current_user.role.permissions.view_organizations) {
-          if (!this.fields.includes('organization')) {
-            this.fields.splice(1,0,'organization')
-          }
+      getDataTypes(organization) {
+        let org = null
+        if (this.current_user.default_org && organization) {
+          org = organization.target.value
         }
-        this.$store.dispatch('getLists',{})
-        this.$store.dispatch('getDataTypes').then(resp => {
-           this.data_type_list = this.$store.getters.data_types_list
+         
+        this.$store.dispatch('getDataTypes', {organization: org}).then(resp => {
+           this.data_type_list = this.data_types.map(item => { return {'label': item.name, 'value': item.uuid}})
         })
+      },
+      loadData: function() {
+        
+        this.$store.dispatch('getLists',{})
+        this.getDataTypes()
       }
     }
 }

@@ -98,7 +98,8 @@ const state = {
   event_stats: {},
   case_stats: {},
   network_data: {},
-  loading: false
+  loading: false,
+  quick_filters: true
 }
 
 const mutations = {
@@ -572,10 +573,14 @@ const mutations = {
   },
   save_network_data(state, data) {
     state.network_data = data
+  },
+  set_quick_filter_state(state, data) {
+    state.quick_filters = data
   }
 }
 
 const getters = {
+  quick_filters: state => { return state.quick_filters },
   loading: state => {return state.loading},
   case_filters: state => { return state.case_filters },
   observable_filters: state => { return state.observable_filters },
@@ -624,14 +629,7 @@ const getters = {
   related_events: state => {return state.related_events },
   related_cases: state => { return state.related_cases },
   audit_logs: state => { return state.audit_logs },
-  data_types_list: function() {
-    return state.data_types.map(function(data_type) {
-      var newDataType = {};
-      newDataType['label'] = data_type.name;
-      newDataType['value'] = data_type.uuid;
-      return newDataType;
-    })
-  },
+  data_types_list: function() { console.log(state.data_types); return state.data_types.map(item => { console.log(item); return {'label': item.name, 'value': item.uuid}}) },
   user_has: state => function(permission) {
     return Object.keys(state.current_user.permissions).includes(permission)
   },
@@ -774,9 +772,14 @@ const actions = {
       })
     })
   },
-  getDataTypes({commit}) {
+  getDataTypes({commit}, {organization}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/data_type`, method: 'GET'})
+
+      let url = `${BASE_URL}/data_type`
+      if(organization){
+        url += `?organization=${organization}`
+      }
+      Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_data_types', resp.data)
         resolve(resp)
@@ -2099,7 +2102,7 @@ const actions = {
   },
   getCase({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,organization,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason,total_tasks,open_tasks'}})
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,organization,case_template_uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason,total_tasks,open_tasks'}})
       .then(resp => {
         commit('save_case', resp.data)
         resolve(resp)
@@ -2493,6 +2496,6 @@ export default new Vuex.Store({
   getters,
   plugins: [createPersistedState({
     key: 'reflex-state',
-    paths: ['observable_filters','case_filters','current_user','case_templates']
+    paths: ['observable_filters','case_filters','current_user','case_templates','quick_filters']
   })]
 })

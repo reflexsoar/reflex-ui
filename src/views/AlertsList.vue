@@ -3,11 +3,14 @@
     <CCol col="12">
       <h2>Events<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/events/index.md')"><CIcon name='cil-book' size="lg"/></button></h2>
       <event-drawer :event_data="event_data"></event-drawer>
-      {{selected_orgs}}
       <CRow>
         <CCol col="12">
           <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
             {{alert.message}}
+          </CAlert>
+          <CAlert :show="selectedOrgLength() > 1" color="warning" closeButton>
+            <h5>WARNING: Multiple Organizations Selected</h5>
+            You have selected events from more than one organization, bulk actions have been disabled.  In a future release you will be able to perform this action.
           </CAlert>
         </CCol>
       </CRow>
@@ -21,7 +24,7 @@
                   <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value.toString()"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="3" class="text-right">
-                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
+                  <CButton @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
                 </CCol>
                 
               </CRow>
@@ -106,7 +109,7 @@
                     <CCol v-else-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
                     <CCol v-else-if="title === 'observable value'" v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'observable', 'data_type':'observable','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
-                    <CCol class="text-right" col="3">{{k.toLocaleString('en-US')}}</CCol>
+                    <CCol class="text-right" col="3"><CBadge color="secondary">{{k.toLocaleString('en-US')}}</CBadge></CCol>
                   </CRow>                
                 </div>
               </div>
@@ -118,17 +121,17 @@
       </CRow>
       <!-- END FILTER PICKERS -->
       <CRow>
-        <CCol col="3">
+        <CCol col="4">
             <div>
-              <CDropdown
-                toggler-text=""
-                class="float-left"
-                color="secondary"
-              ><CDropdownItem  @click="selectAllNew()">Select visible</CDropdownItem>
-              <CDropdownItem @click="selectAcrossPages()">Select all&nbsp;<b>{{page_data.total_results}}</b>&nbsp;events</CDropdownItem>
-              <CDropdownItem @click="clearSelected()">Clear Selection</CDropdownItem>
-              </CDropdown>
-              <!--<CButton v-if="select_all || selected.length != 0 && !filteredBySignature()" @click="clearSelected()" style="margin-top: -5px" size="sm" color="secondary"><CIcon name="cilXCircle" size="sm"></CIcon></CButton><CButton style="margin-top: -5px" v-if="!select_all && selected.length == 0 || filteredBySignature()" @click="selectAllNew()" size="sm" color="secondary"><CIcon name="cilCheck"></CIcon></CButton>-->&nbsp;&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CButton style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
+                <CDropdown
+                  toggler-text=""
+                  class="float-left"
+                  color="secondary"
+                ><CDropdownItem  @click="selectAllNew()">Select visible</CDropdownItem>
+                <CDropdownItem @click="selectAcrossPages()">Select all&nbsp;<b>{{page_data.total_results}}</b>&nbsp;events</CDropdownItem>
+                <CDropdownItem @click="clearSelected()">Clear Selection</CDropdownItem>
+                </CDropdown>
+              &nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CButton style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
             </div>
         </CCol>
         <CCol class="text-right">
@@ -140,13 +143,13 @@
             <CDropdown 
                 :toggler-text="`${selected_count} events`" 
                 color="secondary"
-                v-bind:disabled="selected.length == 0"
+                v-bind:disabled="selected.length == 0 || selectedOrgLength() > 1"
                 class='d-inline-block'
             >
-                <CDropdownItem @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
+                <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
-                <CDropdownItem @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
+                <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
                 <!--<CDropdownDivider/>
                 <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>-->
             </CDropdown>
@@ -287,7 +290,33 @@
         <p>Dismissing an event indicates that no action is required.  For transparency purposes, it is best to leave a comment as to why this event is being dismissed.  Fill out the comment field below.</p>
         <p>This action will apply to all related events with the same signature.</p>
         <div v-if="selectedOrgLength() > 1">
-          MULTI DISMISS MODE
+          <CCallout color="warning" class="admonition">
+            <h5>Multiple Organization Warning</h5>
+            <p>You are dismissing events for multiple organizations at the same time.  Be sure to pick the correct reason and provide a description for each.</p>
+          </CCallout>
+          {{multiple_org_dismiss}}
+          <div v-for="events,org in selected_orgs" :key="org">
+            <CRow>
+              <CCol><hr></CCol></CRow>
+            <CRow >
+              <CCol>              
+                <h5>{{mapOrgToName(org)}} | <small class="text-muted">{{events.length}} events</small></h5>
+              </CCol>
+              <CCol>
+                <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..."/>
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol>
+                <CTextarea
+                  placeholder="Enter a comment as to why this Event is being dismissed."
+                  v-bind:required="settings.require_event_dismiss_comment"
+                  label="Comment"
+                  rows=3
+                />
+              </CCol>
+            </CRow>
+          </div>
         </div>
         <div v-else>
           <CForm id="dismissEventForm" @submit.prevent="dismissEvent()">
@@ -451,6 +480,7 @@ export default {
     computed: mapState(['status','alert','settings','current_user']),
     created: function () {
       this.observableFilters = this.$store.getters.observable_filters
+      this.quick_filters = this.$store.getters.quick_filters
       this.loadData()
       this.loadCloseReasons()
       this.$store.commit('set', ['eventDrawerMinimize', true])
@@ -547,7 +577,8 @@ export default {
         },
         selected_search_option: "Title",
         search_text: "",
-        selected_orgs: {}
+        selected_orgs: {},
+        multiple_org_dismiss: {}
       }
     },
     methods: {
@@ -1238,6 +1269,10 @@ export default {
         } else {
           return "Unknown"
         }
+      },
+      toggleFilters() {
+        this.quick_filters = !this.quick_filters
+        this.$store.commit('set_quick_filter_state', this.quick_filters)
       }
     },
     beforeDestroy: function() {
