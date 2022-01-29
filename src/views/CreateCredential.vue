@@ -4,7 +4,7 @@
     <CCard><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
         <CCardBody>
             <CForm @submit.prevent="createCredential" >
-                <h1>Create Credential</h1>awd
+                <h1>Create Credential</h1>
                 <p class="text-muted">Fill out the form below to create a new credential.</p>
                 <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations && modal_mode =='new'" v-model="user.organization" :options="organizations"/>
                 <CInput

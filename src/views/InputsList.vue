@@ -69,7 +69,7 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user']),
+    computed: mapState(['current_user','inputs']),
     created: function () {
         this.loadData()
         this.refresh = setInterval(function() {
@@ -104,7 +104,7 @@ export default {
       },
       loadData: function() {
         this.loading = true
-        if(this.current_user.role.permissions.view_organizations) {
+        if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
             this.fields.splice(1,0,'organization')
             
@@ -112,7 +112,6 @@ export default {
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         }
         this.$store.dispatch('getInputs').then(resp => {
-            this.inputs = resp.data
             this.loading = false
         })
       }

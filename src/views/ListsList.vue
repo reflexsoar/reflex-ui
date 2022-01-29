@@ -70,7 +70,7 @@
             {{error_message}}
       </CAlert>
       <CForm @submit.prevent="modal_action()" id="listForm">
-        <CSelect @change="getDataTypes($event)" label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="list_data.organization" :options="organizations"/>
+        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" :value.sync="list_data.organization" :options="organizations"/>
         <CInput v-model="list_data.name" label="Name" placeholder="A friendly name for the list" v-bind:required="modal_submit_text == 'Create'"/>
         <CRow>
           <CCol col="12" lg="6">
@@ -165,7 +165,9 @@ export default {
         }
         
       }
-      this.loadData()
+      this.$store.dispatch('getLists',{}).then(resp => {
+        this.getDataTypes()
+      })
     },
     watch: {
       modal_status: function () {
@@ -194,7 +196,8 @@ export default {
         delete_confirm: "",
         list_types: ['values','patterns'],
         data_type_list: [],
-        organizations: []
+        organizations: [],
+        organization: ''
       }
     },
     methods: {
@@ -223,6 +226,7 @@ export default {
       createList() {
         let ld = {}
         Object.assign(ld,this.list_data)
+        console.log(this.ld)
         ld.data_type_uuid = ld.data_type.uuid
         delete ld['data_type']
         ld.active = true
@@ -301,11 +305,6 @@ export default {
         this.$store.dispatch('getDataTypes', {organization: org}).then(resp => {
            this.data_type_list = this.data_types.map(item => { return {'label': item.name, 'value': item.uuid}})
         })
-      },
-      loadData: function() {
-        
-        this.$store.dispatch('getLists',{})
-        this.getDataTypes()
       }
     }
 }

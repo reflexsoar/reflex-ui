@@ -16,7 +16,7 @@
             v-if="current_user.default_org"
             placeholder="Select an Organization..."
             required
-            v-model="organization"
+            :value.sync="organization"
             :options="formattedOrganizations()"
             label="Organization"
           />

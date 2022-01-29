@@ -183,12 +183,7 @@ const mutations = {
     state.list = list
   },
   add_list(state, list) {
-    if (state.lists.length == 0) {
-      state.lists = [list]
-    }
-    else {
-      state.lists.push(list)
-    }
+    state.lists.push(list)
     state.list = list
   },
   save_case_task_notes(state, notes) {
@@ -616,6 +611,7 @@ const getters = {
   cases: state => { return state.cases },
   users: state => { return state.users },
   input: state => { return state.input },
+  inputs: state => { return state.inputs },
   observables: state => { return state.observables },
   credentials: state => { return state.credentials },
   credential: state => { return state.credential },

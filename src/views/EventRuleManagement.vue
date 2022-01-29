@@ -82,7 +82,7 @@
                 <div name="create-event-rule-step-1" v-if="step == 1">
                 <h4>Rule Details</h4>
                 <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
-                <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="organization" :options="organizations" @change="loadCloseReasons()"/>
+                <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" :value.sync="organization" :options="organizations" @change="loadCloseReasons()"/>
                 <CInput label="Rule Name" placeholder="Enter a friendly name for this rule" v-model="name" required></CInput>
                 <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
                 <span v-if="current_user.default_org">

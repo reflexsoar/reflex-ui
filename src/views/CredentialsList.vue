@@ -56,7 +56,7 @@
         {{ error_message }}
       </CAlert>
       <CForm name="credentialForm" id="credentialForm" @submit.prevent="modal_action">
-        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" v-model="credential_data.organization" :options="organizations"/>
+        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.default_org" :value.sync="credential_data.organization" :options="organizations"/>
         <CInput
           placeholder="Credential Name"
           required
@@ -148,11 +148,13 @@ export default {
   },
   created() {
     this.$store.dispatch("getCredentials");
-    if(this.current_user.role.permissions.view_organizations) {
+    if(this.current_user.default_org) {
       if (!this.fields.includes('organization')) {
         this.fields.splice(1,0,'organization')
-      }
-      this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        this.$store.dispatch('getOrganizations').then(resp => {
+          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        })
+      }      
     }
   },
   computed: mapState(["credentials", "alert","current_user"]),

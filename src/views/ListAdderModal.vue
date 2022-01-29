@@ -73,7 +73,6 @@ export default {
         addToList() {
             let value = {'values': [this.observable.value]}
             let uuid = this.lists.filter(l => l.name === this.selected_list)[0].uuid
-            console.log(uuid)
             this.$store.dispatch('addItemToList', {uuid, value}).then(resp => {
                 this.dismiss()
             })
