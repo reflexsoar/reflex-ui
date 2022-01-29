@@ -44,6 +44,8 @@ const UserProfile = () => import('@/views/UserProfile')
 const Hunter = () => import('@/views/Hunter')
 const DetectionManagement = () => import('@/views/DetectionManagement')
 const EventRuleManagement = () => import('@/views/EventRuleManagement')
+const Organization = () => import('@/views/Organization')
+const OrganizationSettings = () => import('@/views/OrganizationSettings')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -88,7 +90,7 @@ router.beforeEach((to, from, next) => {
   
   // Fetch the settings before each route in the event that they have changed
   if(to.matched.some(record => record.meta.fetchSettings)) {
-    store.dispatch('getSettings')
+    store.dispatch('getSettings', {})
   }
 
   if(to.matched.some(record => record.meta.fetchOrganizations)) {
@@ -444,6 +446,25 @@ function configRoutes () {
           meta: {
             requiresAuth: true
           }
+        },
+        {
+          path: 'organization',
+          name: 'Organization',
+          component: Organization,
+          redirect: '/settings',
+          meta: {
+            requiresAuth: true
+          },
+          children: [
+            {
+              path: ':uuid',
+              name: 'Organization Settings',
+              component: OrganizationSettings,
+              meta: {
+                requiresAuth: true
+              }
+            }
+          ]
         },
         {
           path: 'settings',

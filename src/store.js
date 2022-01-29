@@ -368,6 +368,7 @@ const mutations = {
   },
   update_organization(state, org) {
     state.organizations = state.organizations.map(x => x.uuid == org.uuid ? org : x )
+    state.organization = org
   },
   remove_list(state, uuid) {
     state.list = {}
@@ -584,6 +585,7 @@ const getters = {
   loading: state => {return state.loading},
   case_filters: state => { return state.case_filters },
   observable_filters: state => { return state.observable_filters },
+  organization: state => { return state.organization },
   organizations: state => {return state.organizations},
   formatted_organizations: state => {return state.organizations.map((o) => { return {label: o.name, value: o.uuid}})},
   network_data: state => { return state.network_data },
@@ -1532,6 +1534,30 @@ const actions = {
       })
     })
   },
+  getOrganization({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/organization/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_organization', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateOrganization({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/organization/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_organization', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   createOrganization({commit}, organization) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/organization`, data: organization, method: 'POST'})
@@ -2286,12 +2312,18 @@ const actions = {
       })
     })
   },
-  getSettings({commit}, uuid) {
+  getSettings({commit}, {uuid=null, store=true}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/settings`, method: 'GET'})
+      let url = `${BASE_URL}/settings`
+      if(uuid) {
+        url += `?organization=${uuid}`
+      }
+      Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('add_start')
-        commit('save_settings', resp.data)
+        if(store) {
+          commit('save_settings', resp.data)
+        }
         commit('add_success')
         resolve(resp)
       })

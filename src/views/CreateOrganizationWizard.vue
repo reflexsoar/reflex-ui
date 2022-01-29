@@ -35,6 +35,7 @@
                         v-model="organization.logon_domains"
                         label="Logon Domains"
                         required
+                        rows=5
                         description="Admins can only create users with emails at these domains"
                     />
                 </div>
@@ -111,8 +112,8 @@
       <template #footer>
           <CButton color="secondary" @click="dismiss()">Dismiss</CButton>
           <CButton color="secondary" v-if="step == 2 || step == 3" @click="prevStep()">Previous</CButton>
-          <CButton color="primary" v-if="step == 1 || step == 2" @click="nextStep()">Next</CButton>
-          <CButton color="success" type="submit" form="create_organization_form" v-bind:disabled="step != 3 || submitted"><CSpinner color="secondary" size="sm" v-if="submitted"/><span v-else>Create</span></CButton>
+          <CButton color="success" v-if="step == 1 || step == 2" @click="nextStep()">Next</CButton>
+          <CButton color="primary" type="submit" form="create_organization_form" v-bind:disabled="step != 3 || submitted"><CSpinner color="secondary" size="sm" v-if="submitted"/><span v-else>Create</span></CButton>
       </template>
   </CModal>
 </template>

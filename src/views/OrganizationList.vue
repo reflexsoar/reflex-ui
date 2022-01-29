@@ -28,8 +28,15 @@
             <router-link :to="`${item.uuid}`">{{item.name}}</router-link>
           </td>
         </template>
+        <template #actions="{item}">
+          <td style="max-width:150px" class="text-right">
+            <CButton @click="editOrganization(item.uuid)" size="sm" color="primary">Edit</CButton>
+            <CButton :to="`/organization/${item.uuid}`" size="sm" color="primary">Change Settings</CButton>
+          </td>
+        </template>
       </CDataTable>
       <CreateOrganizationWizard :show.sync="organizationModal"/>
+      <EditOrganizationWizard :show.sync="editOrganizationModal" :uuid="target_organization"/>
     </CCol>
   </CRow>
 </template>
@@ -37,11 +44,13 @@
 <script>
 import { mapState } from "vuex";
 import CreateOrganizationWizard from './CreateOrganizationWizard'
+import EditOrganizationWizard from './EditOrganizationWizard'
 
 export default {
   name: "OrganizationList",
   components: {
-    CreateOrganizationWizard
+    CreateOrganizationWizard,
+    EditOrganizationWizard
   },
   props: {
     items: Array,
@@ -51,7 +60,9 @@ export default {
         return [
           "name",
           "description",
-          "url"
+          "url",
+          "logon_domains",
+          "actions"
         ];
       },
     },
@@ -73,13 +84,19 @@ export default {
   data() {
     return {
       loading: true,
-      organizations: [],
-      organizationModal: false
+      organizationModal: false,
+      editOrganizationModal: false,
+      target_organization: ''
     };
   },
+  computed: mapState(['organizations']),
   methods: {
     showOrganizationModal() {
       this.organizationModal = true
+    },
+    editOrganization(uuid) {
+      this.target_organization = uuid
+      this.editOrganizationModal = true
     },
     addSuccess: function () {
       if (this.$store.getters.addSuccess == "success") {
@@ -91,7 +108,6 @@ export default {
     loadData: function () {
       this.loading = true;
       this.$store.dispatch("getOrganizations").then((resp) => {
-        this.organizations = this.$store.getters.organizations
         this.loading = false;
       });
     }
