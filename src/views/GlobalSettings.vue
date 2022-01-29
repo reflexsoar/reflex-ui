@@ -81,7 +81,7 @@
         <CCol col="12" class="text-right">
           <CButton color="primary" @click="updateSettings()">Save</CButton>
         </CCol>
-      </CRow>  
+      </CRow>
     </CForm>
     <CModal title="Persistent Pairing Token" color="danger" :centered="true" size="lg" :show.sync="generate_modal">
       <CForm id="confirmPairingConfirm" @submit.prevent="deleteUser(user.uuid)">

@@ -2,6 +2,7 @@
   <CRow>
     <CCol col="12">
       <h2>Events<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/events/index.md')"><CIcon name='cil-book' size="lg"/></button></h2>
+      
       <event-drawer :event_data="event_data"></event-drawer>
       <CRow>
         <CCol col="12">
@@ -338,7 +339,7 @@
         </div>
       </div>
       <template #footer>
-        <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismis Event</span></CButton>
+        <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
     </CModal>
     <CreateCaseModal :show.sync="createCaseModal" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
@@ -479,11 +480,17 @@ export default {
     },
     computed: mapState(['status','alert','settings','current_user']),
     created: function () {
+
+      /* Set the page size based on the global settings page */
+      if(this.settings) {
+        this.card_per_page = this.settings.events_per_page
+      }
+
       this.observableFilters = this.$store.getters.observable_filters
       this.quick_filters = this.$store.getters.quick_filters
       this.loadData()
       this.loadCloseReasons()
-      this.$store.commit('set', ['eventDrawerMinimize', true])
+      this.$store.commit('set', ['eventDrawerMinimize', true])      
         
       this.refresh = setInterval(function() {
         if(!this.pauseRefresh) {
@@ -550,7 +557,7 @@ export default {
         case_from_card: false,
         columns: 1,
         card_page_num: 1,
-        card_per_page: this.settings ? this.settings.events_per_page : 10,
+        card_per_page: 10,
         page_data: {'total_results': 0, 'pages': 0, 'page': 0, 'page_size': 0},
         current_page: 1,
         sort_by: 'created_at',
@@ -1002,12 +1009,18 @@ export default {
             for (let i in this.filtered_events) {
               let event = this.filtered_events[i]
               this.selected = [...this.selected, event.uuid]
+
+              // If this is the first time selecting the organization
               if(!(event.organization in this.selected_orgs)) {
-                this.selected_orgs[event.organization] = []
+                this.selected_orgs[event.organization] = {
+                  events: [],
+                  dismiss_reason: '',
+                  dismiss_comment: ''
+                }
               }
               // If the event isn't selected in that org yet, push it
               if(!this.selected_orgs[event.organization].includes(event.uuid)) {
-                  this.selected_orgs[event.organization].push(event.uuid)
+                  this.selected_orgs[event.organization].events.push(event.uuid)
               }
               
               this.selected_count += 1
@@ -1019,12 +1032,17 @@ export default {
             for (let i in this.filtered_events) {
               let event = this.filtered_events[i]
               this.selected = [...this.selected, event.uuid]
+              // If this is the first time selecting the organization
               if(!(event.organization in this.selected_orgs)) {
-                this.selected_orgs[event.organization] = []
+                this.selected_orgs[event.organization] = {
+                  events: [],
+                  dismiss_reason: '',
+                  dismiss_comment: ''
+                }
               }
               // If the event isn't selected in that org yet, push it
-              if(!this.selected_orgs[event.organization].includes(event.uuid)) {
-                  this.selected_orgs[event.organization].push(event.uuid)
+              if(!this.selected_orgs[event.organization].events.includes(event.uuid)) {
+                  this.selected_orgs[event.organization].events.push(event.uuid)
               }
               this.selected_count += event.related_events_count
             }
@@ -1117,6 +1135,7 @@ export default {
           this.selected = [...resp.data.events]
           this.selected_orgs = resp.data.organizations
           
+          
         })
       },
       selectAll() {
@@ -1173,13 +1192,17 @@ export default {
 
               // If the org hasn't been selected yet, add it as an empty dictionary
               
+              // If this is the first time selecting the organization
               if(!(e.organization in this.selected_orgs)) {
-                this.selected_orgs[e.organization] = []
+                this.selected_orgs[e.organization] = {
+                  events: [],
+                  dismiss_reason: '',
+                  dismiss_comment: ''
+                }
               }
-              
               // If the event isn't selected in that org yet, push it
-              if(!this.selected_orgs[e.organization].includes(e.uuid)) {
-                  this.selected_orgs[e.organization].push(e.uuid)
+              if(!this.selected_orgs[e.organization].events.includes(e.uuid)) {
+                  this.selected_orgs[e.organization].events.push(e.uuid)
               }
 
               this.selected_count += e.related_events_count
