@@ -217,7 +217,77 @@
                         <b>Plugin: </b>{{plugin}}<br>
                         <b>Credential: </b>{{credential_list.filter(item => item.value == credential)[0].label}}<br><br>
                         <h5>Plugin Config</h5>
-                        <pre>{{config}}</pre>
+                        <CRow>
+                          <CCol col=4>
+                            <b>Hosts</b><br>
+                            {{config['hosts']}}<br><br>
+                          </CCol>                          
+                          <CCol col=4>
+                            <b>Distro</b><br>
+                            {{ config['distro'] }}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Alert Index</b><br>
+                            {{config['index']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Lucene Filter</b><br>
+                            {{config['lucene_filter']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>HTTP scheme</b><br>
+                            {{config['scheme']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Auth Method</b><br>
+                            {{config['auth_method']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Verify Hostname</b><br>
+                            {{config['check_hostname'] ? 'Yes' : 'No'}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>TLS Verification Mode</b><br>
+                            {{ config['cert_verification']}}<br><br>
+                          </CCol>
+                        </CRow>  
+                        <CRow>
+                          <CCol col="12">
+                            <h5>Event Base Configuration</h5>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Event Title FIeld</b><br>
+                            {{config['rule_name']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Description Field Field</b><br>
+                            {{config['description_field']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Reference Field</b><br>
+                            {{config['source_reference']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Severity Field</b><br>
+                            {{config['severity_field']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Tag Fields</b><br>
+                            {{config['tag_fields']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Signature Fields</b><br>
+                            {{config['signature_fields']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Search Size</b><br>
+                            {{config['search_size']}}<br><br>
+                          </CCol>
+                          <CCol col=4>
+                            <b>Search Period</b><br>
+                            {{config['search_period']}}<br><br>
+                          </CCol>
+                        </CRow>                    
                         <h5>Field Mappings</h5>
                         <CDataTable
                           :responsive="true"
