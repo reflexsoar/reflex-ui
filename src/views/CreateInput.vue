@@ -175,8 +175,8 @@
                         <p>Field mappings control how source data is mapped to a data type in Reflex.  Assigning a source log field to a data type allows you to leverage
                           functionality in Reflex for that specific data type.  Mapping an IP address to the <b>IP</b> data type for example will allow you to do CIDR 
                           notation checks on it in RQL.</p>
-                        <CCard>
-                          <CCardBody>
+                        <CCard style="border-top: 0px;">
+                          <CCardBody style="padding:0px;">
                               <CRow style="padding-bottom:10px;">
                                 <CCol col="12">
                                   <CDataTable
@@ -220,7 +220,15 @@
                         <CRow>
                           <CCol col=4>
                             <b>Hosts</b><br>
-                            {{config['hosts']}}<br><br>
+                            <li
+                              style="display: inline; margin-right: 2px"
+                              v-for="host in config['hosts']"
+                              :key="host"
+                            >
+                              <CButton color="primary" size="sm" disabled>{{
+                                host
+                              }}</CButton>
+                            </li><br/><br/>
                           </CCol>                          
                           <CCol col=4>
                             <b>Distro</b><br>
@@ -271,13 +279,29 @@
                             <b>Severity Field</b><br>
                             {{config['severity_field']}}<br><br>
                           </CCol>
-                          <CCol col=4>
-                            <b>Tag Fields</b><br>
-                            {{config['tag_fields']}}<br><br>
+                          <CCol col="4">
+                            <b>Tag Fields</b><br />
+                            <li
+                                  style="display: inline; margin-right: 2px"
+                                  v-for="field in config['tag_fields']"
+                                  :key="field"
+                                >
+                                  <CButton color="primary" size="sm" disabled>{{
+                                    field
+                                  }}</CButton>
+                                </li><br /><br />
                           </CCol>
-                          <CCol col=4>
-                            <b>Signature Fields</b><br>
-                            {{config['signature_fields']}}<br><br>
+                          <CCol col="4">
+                            <b>Signature Fields</b><br />
+                            <li
+                                  style="display: inline; margin-right: 2px"
+                                  v-for="field in config['signature_fields']"
+                                  :key="field"
+                                >
+                                  <CButton color="primary" size="sm" disabled>{{
+                                    field
+                                  }}</CButton>
+                                </li><br /><br />
                           </CCol>
                           <CCol col=4>
                             <b>Search Size</b><br>
@@ -289,7 +313,9 @@
                           </CCol>
                         </CRow>                    
                         <h5>Field Mappings</h5>
-                        <CDataTable
+                        <CCard style="border-top: 0px;">
+                          <CCardBody style="padding:0px;">
+                            <CDataTable
                           :responsive="true"
                           :items="field_mapping['fields']"
                           :fields="['field','alias','data_type','tlp','tags']"
@@ -301,7 +327,8 @@
                             </td>
                           </template>
                         </CDataTable>
-                        
+                          </CCardBody>
+                        </CCard>
                       </CCol>
                       <CCol col="12" class="text-right">
                         <CButton color="primary" class="px-4" type="submit">Create</CButton>
