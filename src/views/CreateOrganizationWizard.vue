@@ -1,5 +1,5 @@
 <template>
-  <CModal title="Create Organization" :centered="true" size="lg" :show.sync="modalStatus">
+  <CModal title="Create Organization" :closeOnBackdrop="false" :centered="true" size="lg" :show.sync="modalStatus">
       <CRow>
           <CCol>
                 <CAlert :show="error" color="danger" closeButton>

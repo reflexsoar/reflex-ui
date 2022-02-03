@@ -6,18 +6,10 @@
     <CCard><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
         <CCardBody>
           <CRow>
-            <CCol col="2">
-              <CNav variant="pills" :vertical="true">
-                  <CNavItem v-bind:active="current_step == 1" @click.native="step(1)">1. Input Overview</CNavItem>
-                  <CNavItem v-if="current_user.default_org && !organization" disabled>2. Plugin Configuration</CNavItem><CNavItem v-else v-bind:active="current_step == 2" @click.native="step(2)">2. Plugin Configuration</CNavItem>
-                  <CNavItem v-if="!plugin" disabled>3. Field Mappings</CNavItem><CNavItem v-else v-bind:active="current_step == 3" @click.native="step(3)">3. Field Mappings</CNavItem>
-                  <CNavItem v-if="!plugin" disabled>4. Confirmation</CNavItem><CNavItem v-else v-bind:active="current_step == 4" @click.native="step(4)">4. Confirmation</CNavItem>
-                </CNav>
-            </CCol>
-            <CCol>              
-              <CForm @submit.prevent="createInput" >
-                  <div v-if="current_step == 1">                  
-                    <h3>Input Overview</h3>
+            <CCol>
+            <CTabs variant="pills" :active-tab="current_step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
+              <CTab title="1. Input Overview">
+                <h3>Input Overview</h3>
                     <CSelect
                       v-if="current_user.role.permissions.view_organizations"
                       placeholder="Select an Organization..."
@@ -54,9 +46,9 @@
                       </multiselect><br>
                       </CCol>
                     </CRow>
-                  </div>
-                  <div v-if="current_step == 2">
-                    <CRow>
+              </CTab>
+              <CTab title="2. Plugin Configuration">
+                <CRow>
                       <CCol>
                         <h3>Plugin Configuration</h3>
                         <p>The input requires specific configurations in order for it to work.  Enter them below.</p>
@@ -109,12 +101,15 @@
                           <CCol col=4>
                             <CSelect :options='["http_auth","api_key"]' :value.sync="config['auth_method']" label="Auth Method" description="api_key: Elastic API key | http_auth: Basic Auth"/>
                           </CCol>
+                          <CCol col=4>
+                            <CInput v-model="config['ca_cert']" placeholder="/etc/ssl/certs/cacert" label="CA Cert Path" description="The path to your clusters CA public certificate"/>
+                          </CCol>
                           <CCol col=2>
                             <label>Verify Hostname</label><br>
                             <CSwitch v-bind:checked.sync="config['check_hostname']"  color="success" label-on="Yes" label-off="No"/>
                           </CCol>
                           <CCol col=2>
-                            <CSelect :options='["full","none","certificate"]' :value.sync="config['cert_verification']" label="TLS Verification Mode"/>
+                            <CSelect :options='["required","none","certificate"]' :value.sync="config['cert_verification']" label="TLS Verification Mode"/>
                           </CCol>
                         </CRow>
                         <CRow>
@@ -148,6 +143,10 @@
                           <CCol col=4>
                             <CInput v-model="config['search_period']" label="Search Period" description="How far back in time to go in the source index"/>
                           </CCol>
+                          <CCol col=4>
+                            <label>Tags</label><br>
+                            <multiselect v-model="config['static_tags']" :close-on-select="false" :options="[]" placeholder="Select the static tags to apply to events" :taggable="true" tag-placeholder="Add new static tag" :multiple="true" @tag="addESHost(config['static_tags'], $event)"/><br>
+                          </CCol>
                         </CRow>
                       </CCol>
                     </CRow>
@@ -166,10 +165,9 @@
                     </CRow>
                       </CCol>
                     </CRow>
-                  </div>
-                  <div v-if="current_step == 3">
-                    
-                    <CRow>
+              </CTab>
+              <CTab title="3. Field Mappings">
+                <CRow>
                       <CCol>
                         <h3>Field Mappings <CButton size="sm" color="success" @click="addField()">+</CButton></h3>
                         <p>Field mappings control how source data is mapped to a data type in Reflex.  Assigning a source log field to a data type allows you to leverage
@@ -205,9 +203,9 @@
                         </CCard>
                       </CCol>
                     </CRow>
-                  </div>
-                  <div v-if="current_step == 4">
-                    <CRow>
+              </CTab>
+              <CTab title="4. Confirmation">
+                <CRow>
                       <CCol col="12">
                         <h3>Confirmation</h3>
                         <h5>{{name}}</h5>
@@ -215,7 +213,7 @@
                         <b>Description:</b><br>{{description}}<br>
                         <br>
                         <b>Plugin: </b>{{plugin}}<br>
-                        <b>Credential: </b>{{credential_list.filter(item => item.value == credential)[0].label}}<br><br>
+                        <!--<b>Credential: </b>{{credential_list ? credential_list.filter(item => item.value == credential)[0].label : ''}}<br><br>-->
                         <h5>Plugin Config</h5>
                         <CRow>
                           <CCol col=4>
@@ -331,13 +329,21 @@
                         </CCard>
                       </CCol>
                       <CCol col="12" class="text-right">
-                        <CButton color="primary" class="px-4" type="submit">Create</CButton>
+                        
                       </CCol>
                     </CRow>
-                  </div>
-                </CForm>
+              </CTab>
+            </CTabs>
             </CCol>
           </CRow>
+            
+          <CCardFooter>
+            <div class="text-right">
+              <CButton v-if="current_step > 0" color="secondary" @click="current_step -= 1">Back</CButton>&nbsp;
+              <CButton v-if="current_step < 3" color="primary" @click="current_step += 1">Next</CButton>
+              <CButton v-if="current_step == 3" color="primary" class="px-4" type="submit">Create</CButton>
+            </div>
+          </CCardFooter>
         </CCardBody>
     </CCard>
     <CModal title="Add Field Mapping" :closeOnBackdrop="false" :centered="true" size="lg" :show.sync="new_mapping">
@@ -368,8 +374,10 @@ import {mapState} from "vuex";
 import {vSelect} from "vue-select";
 import {required, minLength, between} from 'vuelidate/lib/validators'
 import { parse } from '@babel/core';
+import LinkCaseModal from './LinkCaseModal.vue';
 
 export default {
+  components: { LinkCaseModal },
     name: 'CreateInput',
     created() {
       this.loadTags()
@@ -414,6 +422,13 @@ export default {
         } else {
           field['tags'].push(tag)
         }        
+      },
+      addStaticTag(tag) {
+        if(this.config['static_tags'].includes(tag)) {
+          this.config['static_tags'] = this.config['static_tags'].filter(t => t != tag)
+        } else {
+          this.config['static_tags'].push(tag)
+        }
       },
       addESHost(field, host) {
         if (field.includes(host)) {
@@ -478,7 +493,7 @@ export default {
         let value = event.target.value
         this.plugin = event.target.value
         if (value == "Elasticsearch") {
-          conf = {"hosts":["https://localhost:9200"],"distro":"opensearch","index":".siem-signals-*","lucene_filter":"*", "cafile":"","scheme":"https","rule_name":"signal.rule.name","auth_method":"http_auth","search_size":200,"search_period":"15m","check_hostname":false,"severity_field":"signal.rule.severity","source_reference":"signal.parent.id","cert_verification":"none","description_field":"signal.rule.description","tag_fields":[], "signature_fields": []}
+          conf = {"hosts":["https://localhost:9200"],"distro":"opensearch","index":".siem-signals-*","lucene_filter":"*", "cafile":"","scheme":"https","rule_name":"signal.rule.name","auth_method":"http_auth","search_size":200,"search_period":"15m","check_hostname":false,"severity_field":"signal.rule.severity","source_reference":"signal.parent.id","cert_verification":"none","description_field":"signal.rule.description","static_tags": [], "tag_fields":[], "signature_fields": []}
           map = {"fields":[{"field": "host.name", "alias":"hostname", "data_type": "host", "tlp": 3, "tags": ["workstation"]}]}
         }
         if (value == "Exchange Mailbox") {
@@ -516,7 +531,7 @@ export default {
         organization: "",
         selected: [],
         tag_list: [],
-        current_step: 1,
+        current_step: 0,
         new_field_mapping: {'fields': []},
         new_mapping: false,
         current_field: {},

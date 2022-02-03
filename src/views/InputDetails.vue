@@ -477,6 +477,7 @@ export default {
         tags: [],
       };
       this.input.field_mapping["fields"].push(field);
+      console.log(this.input.field_mapping)
       this.editFieldMapping(field["field"]);
     },
     saveField(field) {
