@@ -3,10 +3,12 @@
   <CCol col>
     <h1>Create Input<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/inputs/index.md')"><CIcon name='cil-book' size="lg"/></button></h1>
     <p class="text-muted">Complete the wizard below to create a new input.</p>
+    <CForm @submit.prevent="createInput">
     <CCard><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
         <CCardBody>
           <CRow>
             <CCol>
+              
             <CTabs variant="pills" :active-tab="current_step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
               <CTab title="1. Input Overview">
                 <h3>Input Overview</h3>
@@ -334,18 +336,19 @@
                     </CRow>
               </CTab>
             </CTabs>
+              
             </CCol>
-          </CRow>
-            
+          </CRow>            
           <CCardFooter>
             <div class="text-right">
               <CButton v-if="current_step > 0" color="secondary" @click="current_step -= 1">Back</CButton>&nbsp;
               <CButton v-if="current_step < 3" color="primary" @click="current_step += 1">Next</CButton>
-              <CButton v-if="current_step == 3" color="primary" class="px-4" type="submit">Create</CButton>
+              <CButton v-if="current_step == 3" color="primary" @click="createInput()">Create</CButton>
             </div>
           </CCardFooter>
         </CCardBody>
     </CCard>
+    </CForm>
     <CModal title="Add Field Mapping" :closeOnBackdrop="false" :centered="true" size="lg" :show.sync="new_mapping">
       <CAlert color="warning" :show="fieldAlreadyMapped(current_field['field'])">
         <b>Duplicate Field Maps:</b> The entered field has already been mapped, check the existing field mappings.
