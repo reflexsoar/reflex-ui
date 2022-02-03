@@ -1046,6 +1046,18 @@ const actions = {
       })
     })
   },
+  setAgentGroupInputs({commit}, {uuid, inputs}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_group/${uuid}`, data: inputs, method: 'PUT'})
+      .then(resp => {
+        //commit('save_inputs', resp.data)
+        resolve(resp)
+      })
+      .catch(err => { 
+        reject(err)
+      })
+    })
+  },
   setAgentInputs({commit}, {uuid, inputs}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/agent/${uuid}`, data: inputs, method: 'PUT'})
@@ -1090,13 +1102,18 @@ const actions = {
       })
     })
   },
-  getInputList({commit}) {
+  getInputList({commit}, {organization=null}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/input`, method: 'GET'})
+
+      let url = `${BASE_URL}/input`
+      if(organization) {
+        url += `?organization=${organization}`
+      }
+      Axios({url: url, method: 'GET'})
       .then(resp => {
         let credentials = []
         resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name}))
-        commit('creds_success', credentials)
+        commit('save_inputs', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -2341,9 +2358,14 @@ const actions = {
       })
     })
   },
-  getPersistentPairingToken({commit}) {
+  getPersistentPairingToken({commit}, organization=null) {
+
+    let url = `${BASE_URL}/settings/generate_persistent_pairing_token`
+    if(organization) {
+      url += `?organization=${organization}`
+    }
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/settings/generate_persistent_pairing_token`, method: 'GET'})
+      Axios({url: url, method: 'GET'})
       .then(resp => {
         resolve(resp)
       })

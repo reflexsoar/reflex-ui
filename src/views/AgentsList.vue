@@ -101,7 +101,7 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user','organizations']),
+    computed: mapState(['current_user']),
     created: function () {
       this.current_url = window.location.origin;
       this.loadData()
@@ -119,7 +119,8 @@ export default {
         pairingToken: "Failed to load pairing token",
         orgs: Array,
         dismissCountDown: 10,
-        loading: true
+        loading: true,
+        organizations: []
       }
     },
     methods: {
@@ -131,7 +132,7 @@ export default {
         }
       },
       loadData: function() {
-        if(this.current_user.role.permissions.view_organizations) {
+        if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
             this.fields.splice(1,0,'organization')
             

@@ -130,7 +130,7 @@ export default {
         }
     },
     created() {
-        this.$store.dispatch('getInputList').then(resp => {
+        this.$store.dispatch('getInputList', {}).then(resp => {
             for(let i in resp.data) {
                 this.input_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
             }

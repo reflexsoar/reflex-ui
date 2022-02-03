@@ -148,7 +148,8 @@ export default {
       this.generate_modal = true
     },
     generateToken() {
-      this.$store.dispatch('getPersistentPairingToken').then(resp => {
+      console.log(this.uuid)
+      this.$store.dispatch('getPersistentPairingToken', this.uuid).then(resp => {
         this.persistent_pairing_token = resp.data.token
         this.confirm_generate = true
       })
