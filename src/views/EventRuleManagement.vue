@@ -210,6 +210,7 @@
     </CRow>
     <CRow v-if="modal_mode == 'edit'">
       <CCol>
+        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.default_org" :value.sync="rule.organization" :options="organizations" @change="loadCloseReasons()"/>
         <CInput label='Rule Name' v-model="rule.name"/>
         <CTextarea v-model="rule.description" placeholder="Give a brief description of what this rule will do and why." label="Description"/>
         <span v-if="current_user.default_org">
