@@ -9,145 +9,149 @@
             </span>            
         </template>
         <div>
-            <CAlert :show.sync="error" color="danger" closeButton>
-                {{error_message}}
-            </CAlert>
-            <CForm @submit.prevent="createEventRule" id="event_rule_form">
-                <!--<CAlert :show="step == 3 && !test_failed" color="danger" closeButton>
-                    Your query matches more than <b>1000</b> events, tuning of source system is recommended.
-                </CAlert>-->
-                <div name="create-event-rule-step-1" v-if="step == 1">
-                <h4>Rule Details</h4>
-                <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
-                <p>This rule will apply to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
+            <CRow>
+                <CCol>
+                    <CAlert :show.sync="error" color="danger" closeButton>
+                        {{error_message}}
+                    </CAlert>
+                    <CForm @submit.prevent="createEventRule" id="event_rule_form">
+                        <!--<CAlert :show="step == 3 && !test_failed" color="danger" closeButton>
+                            Your query matches more than <b>1000</b> events, tuning of source system is recommended.
+                        </CAlert>-->
+                        <div name="create-event-rule-step-1" v-if="step == 1">
+                        <h4>Rule Details</h4>
+                        <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
+                        <p>This rule will apply to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
 
-                <p>
-                    <b>Base Event Signature: </b>{{event_signature}}
-                </p>
-                <CInput label="Rule Name"  placeholder="Enter a friendly name for this rule" v-model="name" required></CInput>
-                <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
-                <span v-if="current_user.default_org">
-                    <label>Global Rule</label><br>
-                    <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
-                </span>
-                </div>
-                <div name="create-case-template-step-2" v-if="step == 2">
-                    <h4>Expiration</h4>
-                    <p>Setting an expiration on the rule is recommended to allow analysts to revisit Events at a future state. There may be use cases for non-expiration rules but we can't think of any...</p>
-                    <label>Expire</label>
-                    <CRow>
-                        <CCol col="12">
-                            <CSwitch color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="expire"></CSwitch>
-                        </CCol>
-                    </CRow><br>
-                    <CInput label="Expiration period (days)" v-bind:disabled="!expire" placeholder="Enter a period in number of days" v-model="expire_days"></CInput>
-                
-                </div>
-                <div name="create-case-template-step-3" v-if="step == 3">
-                    <h4>Event Query</h4>
-                    <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://github.com/reflexsoar/reflex-docs/blob/main/rql.md" target="_new">here</a> for a syntax reference.</p>
-                    <prism-editor @keydown="test_failed=true" class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
-                    <!--<CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>-->
-                    <CRow>
-                        <CCol>
-                            <CButton color="primary" size="sm" @click="test_query()" v-bind:disabled="test_running"><CSpinner v-if="test_running" size="sm"/>&nbsp;Test Query</CButton><i><span v-if="test_running">&nbsp;Running test...</span><span v-if="test_result">&nbsp;{{test_result}}</span></i>
-                        </CCol>
-                        <CCol class="text-right">
-                            <CButton color="secondary" size="sm" @click="showDrawer()">View Base Event</CButton>
-                        </CCol>
-                    </CRow>
-                </div>
-                <div name="create-case-template-step-4" v-if="step == 4">
-                    <h4>Actions</h4>
-                                    
-                    <label>Merge into Case</label>
-                    <CRow>                    
-                        <CCol col="1">
-                            <CSwitch v-bind:disabled="dismiss_event  || tag_event || update_severity" label="Merge into Case" color="success" label-on="Yes" label-off="No" :checked.sync="merge_into_case" style="padding-top:5px"></CSwitch>
-                        </CCol>
-                        <CCol col="11">
-                            <multiselect style="z-index:50"
-                                v-bind:disabled="!merge_into_case || dismiss_event"
-                                :options="cases" 
-                                v-model="target_case" 
-                                track-by="uuid" 
-                                label="title"
-                                :searchable="true"
-                                :internal-search="false"
-                                :options-limit="10"
-                                :show-no-results="false"
-                                @search-change="caseFind"
-                                :custom-label="caseLabel"
-                                placeholder="Select a case"
-                            >
-                            <template slot="option" slot-scope="props">
-                                {{props.option.title}} ({{props.option.uuid}}<br><small>{{props.option.event_count ? props.option.event_count : 0 }} events.</small>
-                            </template>
-                            </multiselect><br>
-                        </CCol>
-                    </CRow>
-                    <label>Dismiss Event</label>
-                    <CRow>                    
-                        <CCol col="1">
-                            <CSwitch v-bind:disabled="merge_into_case || tag_event || update_severity" color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
-                        </CCol>
-                        <CCol col="11">
-                            <CSelect v-bind:disabled="!dismiss_event || merge_into_case" :options="close_reasons" v-model="close_reason" placeholder="Select a reason for dismissing the event..."/>
-                            <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event || merge_into_case"></CTextarea>
-                        </CCol>
-                    </CRow>
-                    <br>
-                    <label>Add Tags</label>
-                    <CRow>
-                        <CCol col="1">
-                            <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Tag Event" :checked.sync="tag_event"  style="padding-top:5px"></CSwitch>
-                        </CCol>
-                        <CCol>
-                            <multiselect
-                                v-bind:disabled="dismiss_event || !tag_event"
-                                v-model="selected_tags" 
-                                placeholder="Select tags to apply to this input"
-                                :taggable="true"
-                                tag-placeholder="Add new tag"
-                                track-by="name"
-                                label="name"
-                                :options="tag_list"
-                                :multiple="true"
-                                @tag="addTag"
-                                :close-on-select="false"
-                            >
-                            </multiselect>
-                        </CCol>
-                    </CRow>
-                    <br>
-                    <label>Update Severity</label>
-                    <CRow>
-                        <CCol col="1">
-                            <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Update Severity" :checked.sync="update_severity"  style="padding-top:5px"></CSwitch>
-                        </CCol>
-                        <CCol>
-                            <CSelect v-bind:disabled="dismiss_event || !update_severity" :options="severities" v-model="target_severity" placeholder="Select a new severity for matching events..."/>
-                        </CCol>
-                    </CRow>
-                </div>
-                <div name="create-case-template-step-5" v-if="step == 5">
-                    <h4>Review</h4>
-                    <b>Rule Name: </b> {{name}}<br>
-                    <b>Description: </b><br>{{description}}<br><br>
-                    <span v-if="expire"><b>Expire in: </b> {{expire_days}} day(s)<br></span>
-                    <b>Actions: </b><br><br>
-                    <ul>
-                        <li v-if="merge_into_case">Merge in to case <b>#{{target_case.id}} - {{target_case.title}}</b></li>
-                        <li v-if="dismiss_event">Immediately dismiss event</li>
-                    </ul>
-                </div>
-            </CForm>
+                        <p>
+                            <b>Base Event Signature: </b>{{event_signature}}
+                        </p>
+                        <CInput label="Rule Name"  placeholder="Enter a friendly name for this rule" :value.sync="name" required></CInput>
+                        <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
+                        <span v-if="current_user.default_org">
+                            <label>Global Rule</label><br>
+                            <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
+                        </span>
+                        </div>
+                        <div name="create-case-template-step-2" v-if="step == 2">
+                            <h4>Expiration</h4>
+                            <p>Setting an expiration on the rule is recommended to allow analysts to revisit Events at a future state. There may be use cases for non-expiration rules but we can't think of any...</p>
+                            <label>Expire</label>
+                            <CRow>
+                                <CCol col="12">
+                                    <CSwitch color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="expire"></CSwitch>
+                                </CCol>
+                            </CRow><br>
+                            <CInput label="Expiration period (days)" v-bind:disabled="!expire" placeholder="Enter a period in number of days" v-model="expire_days"></CInput>
+                        
+                        </div>
+                        <div name="create-case-template-step-3" v-if="step == 3">
+                            <h4>Event Query</h4>
+                            <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://github.com/reflexsoar/reflex-docs/blob/main/rql.md" target="_new">here</a> for a syntax reference.</p>
+                            <prism-editor @keydown="test_failed=true" class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
+                            <!--<CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>-->
+                            <CRow>
+                                <CCol>
+                                    <CButton color="primary" size="sm" @click="test_query()" v-bind:disabled="test_running"><CSpinner v-if="test_running" size="sm"/>&nbsp;Test Query</CButton><i><span v-if="test_running">&nbsp;Running test...</span><span v-if="test_result">&nbsp;{{test_result}}</span></i>
+                                </CCol>
+                                <CCol class="text-right">
+                                    <CButton color="secondary" size="sm" @click="showDrawer()">View Base Event</CButton>
+                                </CCol>
+                            </CRow>
+                        </div>
+                        <div name="create-case-template-step-4" v-if="step == 4">
+                            <h4>Actions</h4>
+                                            
+                            <label>Merge into Case</label>
+                            <CRow>                    
+                                <CCol col="1">
+                                    <CSwitch v-bind:disabled="dismiss_event  || tag_event || update_severity" label="Merge into Case" color="success" label-on="Yes" label-off="No" :checked.sync="merge_into_case" style="padding-top:5px"></CSwitch>
+                                </CCol>
+                                <CCol col="11">
+                                    <multiselect style="z-index:50"
+                                        v-bind:disabled="!merge_into_case || dismiss_event"
+                                        :options="cases" 
+                                        v-model="target_case" 
+                                        track-by="uuid" 
+                                        label="title"
+                                        :searchable="true"
+                                        :internal-search="false"
+                                        :options-limit="10"
+                                        :show-no-results="false"
+                                        @search-change="caseFind"
+                                        :custom-label="caseLabel"
+                                        placeholder="Select a case"
+                                    >
+                                    <template slot="option" slot-scope="props">
+                                        {{props.option.title}} ({{props.option.uuid}}<br><small>{{props.option.event_count ? props.option.event_count : 0 }} events.</small>
+                                    </template>
+                                    </multiselect><br>
+                                </CCol>
+                            </CRow>
+                            <label>Dismiss Event</label>
+                            <CRow>                    
+                                <CCol col="1">
+                                    <CSwitch v-bind:disabled="merge_into_case || tag_event || update_severity" color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
+                                </CCol>
+                                <CCol col="11">
+                                    <CSelect v-bind:disabled="!dismiss_event || merge_into_case" :options="close_reasons" v-model="close_reason" placeholder="Select a reason for dismissing the event..."/>
+                                    <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event || merge_into_case"></CTextarea>
+                                </CCol>
+                            </CRow>
+                            <br>
+                            <label>Add Tags</label>
+                            <CRow>
+                                <CCol col="1">
+                                    <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Tag Event" :checked.sync="tag_event"  style="padding-top:5px"></CSwitch>
+                                </CCol>
+                                <CCol>
+                                    <multiselect
+                                        v-bind:disabled="dismiss_event || !tag_event"
+                                        v-model="selected_tags" 
+                                        placeholder="Select tags to apply to this input"
+                                        :taggable="true"
+                                        tag-placeholder="Add new tag"
+                                        track-by="name"
+                                        label="name"
+                                        :options="tag_list"
+                                        :multiple="true"
+                                        @tag="addTag"
+                                        :close-on-select="false"
+                                    >
+                                    </multiselect>
+                                </CCol>
+                            </CRow>
+                            <br>
+                            <label>Update Severity</label>
+                            <CRow>
+                                <CCol col="1">
+                                    <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Update Severity" :checked.sync="update_severity"  style="padding-top:5px"></CSwitch>
+                                </CCol>
+                                <CCol>
+                                    <CSelect v-bind:disabled="dismiss_event || !update_severity" :options="severities" v-model="target_severity" placeholder="Select a new severity for matching events..."/>
+                                </CCol>
+                            </CRow>
+                        </div>
+                        <div name="create-case-template-step-5" v-if="step == 5">
+                            <h4>Review</h4>
+                            <b>Rule Name: </b> {{name}}<br>
+                            <b>Description: </b><br>{{description}}<br><br>
+                            <span v-if="expire"><b>Expire in: </b> {{expire_days}} day(s)<br></span>
+                            <b>Actions: </b><br><br>
+                            <ul>
+                                <li v-if="merge_into_case">Merge in to case <b>#{{target_case.id}} - {{target_case.title}}</b></li>
+                                <li v-if="dismiss_event">Immediately dismiss event</li>
+                            </ul>
+                        </div>
+                    </CForm>
+                </CCol>
+            </CRow>
         </div>
       <template #footer>
           
           <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
-          <CButton v-if="step != 1" @click="previousStep()" color="info">Previous</CButton>
-          <CButton v-if="step != final_step" @click="nextStep()" color="primary" :disabled="(test_failed && step == 3)">Next</CButton>
+          <CButton v-if="step != 0" @click="previousStep()" color="info">Previous</CButton>
+          <CButton v-if="step != final_step" @click="nextStep()" :disabled="(test_failed && step == 3)" color="primary" >Next</CButton>
           <CButton v-if="step == final_step" @click="createEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton>
       </template>
     </CModal>

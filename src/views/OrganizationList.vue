@@ -25,7 +25,7 @@
       >
         <template #name="{item}">
           <td>
-            <router-link :to="`${item.uuid}`">{{item.name}}</router-link>
+            <b>{{item.name}}</b>
           </td>
         </template>
         <template #actions="{item}">
