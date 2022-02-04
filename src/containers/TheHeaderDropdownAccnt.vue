@@ -23,7 +23,7 @@
     <CDropdownItem @click="profile">
       <CIcon name="cil-user" />Profile
     </CDropdownItem>
-    <CDropdownItem onclick="window.open('https://github.com/reflexsoar/reflex-docs')">
+    <CDropdownItem onclick="window.open('https://docs.reflexsoar.com')">
       <CIcon name="cil-book" />Documentation
     </CDropdownItem>
     <CDropdownItem onclick="window.open('https://support.reflexsoar.com')">

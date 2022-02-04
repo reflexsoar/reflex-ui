@@ -1,7 +1,7 @@
 <template>
   <CRow>
     <CCol col="12">
-      <h2>Events<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/events/index.md')"><CIcon name='cil-book' size="lg"/></button></h2>
+      <h2>Events<button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
       
       <event-drawer :event_data="event_data"></event-drawer>
       <CRow>
@@ -249,7 +249,7 @@
                     <input type="checkbox" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})" style="cursor: pointer;">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
-                  <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid).slice(0,5)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip.hover.click="`${obs.tags}`" size="sm" style="margin-top:5px; margin-bottom:5px;" @click.prevent.stop="showActionMenu($event, obs)"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="getEventObservables(event.uuid).length > 5" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(event.uuid).slice(5))}"><small>&nbsp;+{{ getEventObservables(event.uuid).length - 5}}</small></span><br>
+                  <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid).slice(0,5)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip="{'content': encodeURI(obs.value)}" size="sm" style="margin-top:5px; margin-bottom:5px;" @click.prevent.stop="showActionMenu($event, obs)"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="getEventObservables(event.uuid).length > 5" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(event.uuid).slice(5))}"><small>&nbsp;+{{ getEventObservables(event.uuid).length - 5}}</small></span><br>
                   <!--<CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid)" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>-->
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -409,6 +409,8 @@ a {
   margin-left: 10px;
   margin-right: 10px;
 }
+
+
 
 /* required class */
 .my-editor {

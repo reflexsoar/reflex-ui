@@ -1,7 +1,7 @@
 <template>
 <CRow>
   <CCol col>
-    <h1>Create Input<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/inputs/index.md')"><CIcon name='cil-book' size="lg"/></button></h1>
+    <h1>Create Input<button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/inputs')"><CIcon name='cil-book' size="lg"/></button></h1>
     <p class="text-muted">Complete the wizard below to create a new input.</p>
     <CForm @submit.prevent="createInput">
     <CCard><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">

@@ -5,7 +5,7 @@
             <h5>Create Event Rule</h5>
             <span class='text-right'>
                 <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
-                <button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/rql/index.md')"><CIcon name='cil-book' size="lg"/></button>
+                <button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/rql')"><CIcon name='cil-book' size="lg"/></button>
             </span>            
         </template>
         <div>
@@ -28,10 +28,10 @@
                         </p>
                         <CInput label="Rule Name"  placeholder="Enter a friendly name for this rule" :value.sync="name" required></CInput>
                         <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
-                        <span v-if="current_user.default_org">
+                        <!--<span v-if="current_user.default_org">
                             <label>Global Rule</label><br>
                             <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
-                        </span>
+                        </span>-->
                         </div>
                         <div name="create-case-template-step-2" v-if="step == 2">
                             <h4>Expiration</h4>
@@ -47,7 +47,7 @@
                         </div>
                         <div name="create-case-template-step-3" v-if="step == 3">
                             <h4>Event Query</h4>
-                            <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://github.com/reflexsoar/reflex-docs/blob/main/rql.md" target="_new">here</a> for a syntax reference.</p>
+                            <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://docs.reflexsoar.com/en/latest/rql/" target="_new">here</a> for a syntax reference.</p>
                             <prism-editor @keydown="test_failed=true" class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
                             <!--<CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>-->
                             <CRow>
