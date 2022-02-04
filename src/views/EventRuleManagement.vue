@@ -42,11 +42,11 @@
               <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
             </template>
             <template #admin="{item}"> 
-              <td class="text-right"><CButton size="sm" color="info" @click="editRule(item.uuid)">Edit Rule</CButton>&nbsp;<CButton v-if="item.active" size="sm" color="danger" @click="disableRule(item.uuid)">Disable</CButton><CButton v-else size="sm" color="success" @click="enableRule(item.uuid)">Activate</CButton>&nbsp;<CButton v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm">Delete</CButton></td>
+              <td class="text-right"><CButton size="sm" color="info" @click="cloneRule(item.uuid)">Clone Rule</CButton>&nbsp;<CButton size="sm" color="info" @click="editRule(item.uuid)">Edit Rule</CButton>&nbsp;<CButton v-if="item.active" size="sm" color="danger" @click="disableRule(item.uuid)">Disable</CButton><CButton v-else size="sm" color="success" @click="enableRule(item.uuid)">Activate</CButton>&nbsp;<CButton v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm">Delete</CButton></td>
             </template>
             <template #global_rule="{item}">
               <td>
-                <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="item.global_rule"/>
+                <CSwitch color="success" label-on="Yes" label-off="No" disabled :checked.sync="item.global_rule"/>
               </td>
             </template>
             </CDataTable>
@@ -603,6 +603,10 @@ export default {
         this.modal_mode = 'view'
         this.show_modal = true
         this.backdrop_close = true
+      },
+      cloneRule(uuid) {
+        this.rule = Object.assign({}, this.rules.find(r => r.uuid === uuid))
+
       },
       editRule(uuid) {
         this.rule = Object.assign({}, this.rules.find(r => r.uuid === uuid))
