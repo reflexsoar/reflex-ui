@@ -260,6 +260,7 @@
             <CCardBody style="padding: 0px">
               <CDataTable
                 :items="input.field_mapping['fields']"
+                :key="input.field_mapping['fields']"
                 :fields="[
                   'field',
                   'alias',
@@ -272,6 +273,11 @@
                   noResults: 'No Fields Mapped',
                   noItems: 'No Fields Mapped',
                 }"
+                :itemsPerPage="10"
+                :pagination="true"
+                :sorter="true"
+                :columnFilter="true"
+                size="sm"
               >
                 <template #field="{ item }">
                   <td>
@@ -455,11 +461,13 @@ export default {
       return JSON.stringify(data, undefined, 4);
     },
     editFieldMapping(field) {
+      console.log(field)
       this.edit_field = this.input.field_mapping["fields"]
         .map((item) => {
           return item["field"];
         })
         .indexOf(field);
+      console.log(this.edit_field)
     },
     itemIndex(field) {
       return this.input.field_mapping["fields"]
@@ -477,7 +485,6 @@ export default {
         tags: [],
       };
       this.input.field_mapping["fields"].push(field);
-      console.log(this.input.field_mapping)
       this.editFieldMapping(field["field"]);
     },
     saveField(field) {
@@ -557,6 +564,7 @@ export default {
             data: { field_mapping: field_mapping },
           })
           .then((resp) => {
+            console.log(this.input)
             this.edit_field_mapping = false;
             this.changes_made = false;
           });

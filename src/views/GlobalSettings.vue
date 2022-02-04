@@ -146,7 +146,8 @@ export default {
     },
     updateSettings() {
       let settings = this.settings
-      if(this.settings.agent_pairing_token_valid_minutes > 365) {
+      if(this.settings.agent_pairing_token_valid_minutes > 525600) {
+        console.log(this.settings.agent_pairing_token_valid_minutes)
         this.$store.commit('show_alert', {'message': 'Pairing tokens can not exceed 1 year in validity.', 'type':'danger'})
         return
       }

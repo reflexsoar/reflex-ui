@@ -46,7 +46,7 @@
                 </CRow>
                 <CRow>
                   <CCol>
-                    <CSelect :options="free_search_options" v-model="selected_search_option"></CSelect>
+                    <CSelect :options="free_search_options" :value.sync="selected_search_option"></CSelect>
                   </CCol>
                 </CRow>
                 <CRow>

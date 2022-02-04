@@ -8,8 +8,7 @@
         <CCardBody>
           <CRow>
             <CCol>
-              
-            <CTabs variant="pills" :active-tab="current_step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
+            <CTabs variant="pills" :active-tab.sync="current_step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
               <CTab title="1. Input Overview">
                 <h3>Input Overview</h3>
                     <CSelect

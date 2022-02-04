@@ -181,9 +181,14 @@ const mutations = {
   },
   save_list(state, list) {
     state.list = list
+    state.lists = [...state.lists.filter(l => l.uuid != l.uuid), list]
   },
   add_list(state, list) {
-    state.lists.push(list)
+    if(state.lists.length == 0) {
+      state.lists = [list]
+    } else {
+      state.lists.push(list)
+    }    
     state.list = list
   },
   save_case_task_notes(state, notes) {
@@ -576,6 +581,7 @@ const mutations = {
 }
 
 const getters = {
+  lists: state => { return state.lists },
   quick_filters: state => { return state.quick_filters },
   loading: state => {return state.loading},
   case_filters: state => { return state.case_filters },

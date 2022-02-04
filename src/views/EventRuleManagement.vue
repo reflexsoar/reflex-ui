@@ -1,6 +1,6 @@
 <template>
   <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"><CCol xs="12" lg="12">
-    <h2>Event Rules<button type="button" aria-label="Close" class="close" onclick="window.open('https://github.com/reflexsoar/reflex-docs/blob/main/event-rules/index.md')"><CIcon name='cil-book' size="lg"/></button></h2><br>
+    <h2>Event Rules<button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/event-rules/')"><CIcon name='cil-book' size="lg"/></button></h2><br>
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
@@ -42,7 +42,7 @@
               <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
             </template>
             <template #admin="{item}"> 
-              <td class="text-right"><CButton size="sm" color="info" @click="cloneRule(item.uuid)">Clone Rule</CButton>&nbsp;<CButton size="sm" color="info" @click="editRule(item.uuid)">Edit Rule</CButton>&nbsp;<CButton v-if="item.active" size="sm" color="danger" @click="disableRule(item.uuid)">Disable</CButton><CButton v-else size="sm" color="success" @click="enableRule(item.uuid)">Activate</CButton>&nbsp;<CButton v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm">Delete</CButton></td>
+              <td class="text-right"><!--<CButton size="sm" color="info" @click="cloneRule(item.uuid)">Clone Rule</CButton>&nbsp;--><CButton size="sm" color="info" @click="editRule(item.uuid)">Edit Rule</CButton>&nbsp;<CButton v-if="item.active" size="sm" color="danger" @click="disableRule(item.uuid)">Disable</CButton><CButton v-else size="sm" color="success" @click="enableRule(item.uuid)">Activate</CButton>&nbsp;<CButton v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm">Delete</CButton></td>
             </template>
             <template #global_rule="{item}">
               <td>
@@ -605,8 +605,23 @@ export default {
         this.backdrop_close = true
       },
       cloneRule(uuid) {
-        this.rule = Object.assign({}, this.rules.find(r => r.uuid === uuid))
-
+        let source_rule = this.rules.find(r => r.uuid === uuid)
+        console.log(source_rule)
+        this.name = '[COPY] '+source_rule.name
+        this.organization = source_rule.organization
+        this.query = source_rule.query
+        this.description = source_rule.description
+        this.expire = source_rule.expire
+        this.expire_days = source_rule.expire_days
+        this.observables = source_rule.observables
+        this.merge_into_case = source_rule.merge_into_case
+        this.dismiss_event = source_rule.dismiss
+        this.dismiss_comment = source_rule.dismiss_comment
+        this.dismiss_reason = source_rule.dismiss_reason
+        this.target_case_uuid = source_rule.target_case_uuid
+        this.global_rule = source_rule.global_rule
+        this.step = 1
+        this.show_modal = true
       },
       editRule(uuid) {
         this.rule = Object.assign({}, this.rules.find(r => r.uuid === uuid))
@@ -653,8 +668,6 @@ export default {
         })
       },
       createEventRule() {
-
-        console.log(this.rule)
         let rule = {
           name: this.name,
           organization: this.organization ? this.organization : null,

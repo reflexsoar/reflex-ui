@@ -277,8 +277,8 @@ export default {
         let confirm = this.delete_confirm
         if (this.list_data.name == confirm) {
           this.$store.dispatch('deleteList', uuid).then(resp => {
-            let listIndex = this.lists.findIndex((list => list.uuid == uuid))
-            this.lists.splice(listIndex, 1)
+            //let listIndex = this.lists.findIndex((list => list.uuid == uuid))
+            //this.lists.splice(listIndex, 1)
             this.delete_modal = false
           })
         }
