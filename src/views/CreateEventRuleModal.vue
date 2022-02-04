@@ -128,7 +128,7 @@
                                     <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Update Severity" :checked.sync="update_severity"  style="padding-top:5px"></CSwitch>
                                 </CCol>
                                 <CCol>
-                                    <CSelect v-bind:disabled="dismiss_event || !update_severity" :options="severities" v-model="target_severity" placeholder="Select a new severity for matching events..."/>
+                                    <CSelect v-bind:disabled="dismiss_event || !update_severity" :options="severities" :value.sync="target_severity" placeholder="Select a new severity for matching events..."/>
                                 </CCol>
                             </CRow>
                         </div>

@@ -560,12 +560,16 @@ export default {
       testRule() {
         let data = {
           'uuid': '',
-          'organization': this.organization ? this.organization : null,
+          
           'query': this.rule.query ? this.rule.query : this.query,
           'event_count': parseInt(this.event_count),
           'return_results': this.return_events,
           'start_date': this.range.start,
           'end_date': this.range.end
+        }
+
+        if(!this.global_rule) {
+          data['organization'] = this.organization ? this.organization : null;
         }
         this.test_result = ""
         this.test_complete = false

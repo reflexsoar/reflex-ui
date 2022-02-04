@@ -174,6 +174,8 @@ export default {
           this.modal_button_text = "Create"
           this.name = ""
           this.description = ""
+          this.organization = null
+          this.inputs = []
           this.agentGroupModal = true
       },
       createAgentGroup: function () {
