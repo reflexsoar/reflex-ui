@@ -56,7 +56,7 @@
             {{error_message}}
       </CAlert>
       <CForm @submit.prevent="modal_action()" id="userForm">
-        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.default_org && modal_mode =='new'" :value.sync="user.organization" :options="organizations"/>
+        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.default_org && modal_mode =='new'" :value.sync="user.organization" :options="organizations" @change="loadRoles(user.organization)"/>
         <CInput v-model="user.username" label="Username" placeholder="Enter a unique username for the user" required/>
         <CRow>
           <CCol col="6">
@@ -155,7 +155,7 @@ export default {
   },
   created: function () {
     this.loadData();
-    this.loadRoles();
+    this.loadRoles(this.current_user.organization);
   },
   data() {
     return {
@@ -333,7 +333,10 @@ export default {
       this.loading = true;
       if(this.current_user.default_org) {
         this.fields.splice(1,0,'organization')
-        this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        this.$store.dispatch('getOrganizations').then(resp => {
+          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+          this.user.organization = this.current_user.organization
+        })        
       }
       this.$store.dispatch("getUsers", {}).then((resp) => {
         this.users = resp.data;
@@ -351,11 +354,9 @@ export default {
       this.unlock_modal = false
       this.delete_modal = false
     },
-    loadRoles: function () {
-      this.$store.dispatch("getRoles").then(resp => {
-        for(let role in resp.data) {
-          this.roles.push({'label': resp.data[role].name, 'value': resp.data[role].uuid})
-        }
+    loadRoles(organization=null) {
+      this.$store.dispatch("getRoles", organization=organization).then(resp => {
+        this.roles = this.$store.getters.roles.map(item => { return {'label': item.name, 'value': item.uuid}})
       })
     }
   }

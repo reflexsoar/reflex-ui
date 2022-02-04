@@ -616,6 +616,7 @@ const getters = {
   case_data: state => { return state.case },
   cases: state => { return state.cases },
   users: state => { return state.users },
+  roles: state => { return state.roles },
   input: state => { return state.input },
   inputs: state => { return state.inputs },
   observables: state => { return state.observables },
@@ -1727,9 +1728,14 @@ const actions = {
       })
     })
   },
-  getRoles({commit}) {
+  getRoles({commit}, organization=null) {
+
+    let url =`${BASE_URL}/role`
+    if (organization) {
+      url += `?organization=${organization}`
+    }
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/role`, method: 'GET'})
+      Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_roles', resp.data)
         resolve(resp)
