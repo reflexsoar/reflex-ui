@@ -23,7 +23,7 @@
                     <CButton :color="getSeverityColor(case_data.severity)">{{getSeverityText(case_data.severity)}}</CButton>
                     &nbsp;{{case_data.title | truncate}}
                         <small>
-                            <a v-if="edit_title_hint && case_data.status && !case_data.status.closed" @click="edit_title = !edit_title"><CIcon name="cilPencil" size="sm"/></a>
+                            <a v-if="edit_title_hint && case_data.status && !case_data.status.closed" @click="edit_title = !edit_title"><CIcon  style="cursor: pointer" name="cilPencil" size="sm"/></a>
                         </small>  
                     <span v-if="case_data.status && case_data.status.closed"> - Closed</span>
                     </span><span v-else><CInput v-model="case_data.title"><template #append>
@@ -58,7 +58,7 @@
                     <b>Created By: </b>{{case_data.created_by.username}}&nbsp;<br><b>Updated By: </b>{{case_data.updated_by.username}}
                 </CCol>
                 <CCol col="6" class="text-right" @mouseenter="edit_tags_hint = true" @mouseleave="edit_tags_hint = false">
-                    <span v-if="!edit_tags"><CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li><a v-if="edit_tags_hint" @click="editTags()"><CIcon name="cilPencil" size="sm"/></a></span>
+                    <span v-if="!edit_tags"><CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li><a v-if="edit_tags_hint" @click="editTags()"><CIcon  style="cursor: pointer"  name="cilPencil" size="sm"/></a></span>
                     <span v-if="edit_tags">
                         <multiselect 
                             v-model="current_tags" 
@@ -154,7 +154,7 @@
                             <span v-if="case_data.case_template && case_data.case_template.title != null"><b>Applied Case Template: </b> {{case_data.case_template.title}}</span>
                         </CCol>
                         <CCol col="9" @mouseover="edit_description_hint = true" @mouseleave="edit_description_hint = false" style="overflow-y:scroll; max-height:350px;">
-                            <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description"><CIcon name="cilPencil" size="sm"/></a></small></h5>
+                            <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description"><CIcon style="cursor: pointer" name="cilPencil" size="sm"/></a></small></h5>
                             <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
                             <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event"></CTextarea><CButton color="danger" @click="edit_description = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;<CButton color="primary" @click="saveDescription()" size="sm"><CIcon name="cilSave"/></CButton></span>
                             <span v-if="closureComments().length > 0 && case_data.status.closed">
