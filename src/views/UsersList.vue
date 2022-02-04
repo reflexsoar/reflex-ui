@@ -242,6 +242,7 @@ export default {
       this.modal_mode = 'edit'
       this.modal_action = this.editUser
       Object.assign(this.user, this.users.find(user => user.uuid === uuid))
+      this.loadRoles(this.user.organization)
       this.user.role_uuid = this.user.role.uuid
       this.modal_status = true
     },
