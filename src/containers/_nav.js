@@ -18,7 +18,8 @@ export default [
         _name: 'CSidebarNavItem',
         name: 'Cases',
         to: '/cases',
-        icon: 'cil-briefcase'
+        icon: 'cil-briefcase',
+        permission: 'view_cases'
       },
       { _name: 'CSidebarNavDropdown',
         name: 'Events',
@@ -27,7 +28,8 @@ export default [
           {
             _name: 'CSidebarNavItem',
             name: 'Queue',
-            to: '/alerts/list'
+            to: '/alerts/list',
+            permission: 'view_events'
           },     
           /*{
             _name: 'CSidebarNavItem',
@@ -37,7 +39,8 @@ export default [
           {
             _name: 'CSidebarNavItem',
             name: 'Event Rules',
-            to: '/event_rules'
+            to: '/event_rules',
+            permission: 'view_events'
           }
         ]
       },
@@ -70,7 +73,8 @@ export default [
           {
             _name: 'CSidebarNavItem',
             name: 'Intel Lists',
-            to: '/lists'
+            to: '/lists',
+            permission: 'view_lists'
           }
         ]
       },
@@ -88,22 +92,26 @@ export default [
           {
             _name: 'CSidebarNavItem',
             name: 'Settings',
-            to: '/settings'
+            to: '/settings',
+            permission: 'update_settings'
           },
           {
             _name: 'CSidebarNavItem',
             name: 'Agents',
-            to: '/agents'
+            to: '/agents',
+            permission: 'view_agents'
           },
           {
             _name: 'CSidebarNavItem',
             name: 'Credentials',
-            to: '/credentials'
+            to: '/credentials',
+            permission: 'view_credentials'
           },
           {
             _name: 'CSidebarNavItem',
             name: 'Inputs',
-            to: '/inputs'
+            to: '/inputs',
+            permission: 'view_inputs'
           }
         ]
       }

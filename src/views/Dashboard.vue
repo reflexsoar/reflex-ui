@@ -100,7 +100,7 @@
           </v-date-picker>
         </CCol>
       </CRow>
-      <CRow>
+      <CRow v-if="this.$store.getters.user_has_permission('view_events')">
         <CCol col="12">
           <h4>Event Charts</h4>
         </CCol> 
@@ -145,7 +145,7 @@
           </CCard>
         </CCol>
       </CRow>
-      <CRow>
+      <CRow v-if="this.$store.getters.user_has_permission('view_events')">
         <CCol xs="4" lg="12">
           <CCard>
             <CCardHeader>Events over Time</CCardHeader>
@@ -253,8 +253,11 @@ export default {
     }
   },
   created() {
-    this.$store.dispatch("getDashboardMetrics");
-    this.$store.dispatch("getEventStats", {top: 5, metrics: ['events_over_time','title','status','dismiss_reason','severity']})
+    if(this.$store.getters.user_has_permission('view_events')) { 
+      this.$store.dispatch("getDashboardMetrics");
+      this.$store.dispatch("getEventStats", {top: 5, metrics: ['events_over_time','title','status','dismiss_reason','severity']})
+    }
+    
     this.$store.dispatch("getCaseStats", {top: 5, metrics: ['cases_over_time','status','close_reason','severity']})
   },
   computed: mapState(['current_user','dashboard_metrics','event_stats','case_stats']),

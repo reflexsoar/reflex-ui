@@ -81,6 +81,7 @@ router.beforeEach((to, from, next) => {
         if(record.meta.requiresPermission && !current_user.role.permissions[record.meta.requiresPermission]) {
           next('/401')
         } else {
+          store.dispatch('getMe')
           next()
           return
         }
@@ -284,7 +285,8 @@ function configRoutes () {
           redirect: 'alerts/list',
           meta: {
             requiresAuth: true,
-            fetchOrganizations: true
+            fetchOrganizations: true,
+            requiresPermission: 'view_events'
           },
           children: [
             {
@@ -293,7 +295,8 @@ function configRoutes () {
               component: AlertsList,
               meta: {
                 fetchSettings: true,
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'view_events'
               }
             },
             {
@@ -302,7 +305,8 @@ function configRoutes () {
               component: AlertDetails,
               meta: {
                 fetchSettings: true,
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'view_events'
               }
             }
           ]
@@ -453,7 +457,8 @@ function configRoutes () {
           component: Organization,
           redirect: '/settings',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiresPermission: 'update_settings'
           },
           children: [
             {
@@ -461,7 +466,8 @@ function configRoutes () {
               name: 'Organization Settings',
               component: OrganizationSettings,
               meta: {
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'update_settings'
               }
             }
           ]

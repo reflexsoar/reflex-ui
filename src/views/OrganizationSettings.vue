@@ -1,6 +1,6 @@
 <template>
 <CCol>
-  <h2>Settings for {{mapOrgToName(uuid)}}<button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/organizations')"><CIcon name='cil-book' size="lg"/></button></h2><br>
+  <h2>Settings for {{mapOrgToName(uuid)}}<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/organizations')"><CIcon name='cil-book' size="lg"/></button></h2><br>
   <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
     {{alert.message}}
   </CAlert>

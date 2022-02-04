@@ -1,7 +1,7 @@
 <template>
 <CRow>
   <CCol col>
-    <h1>Create Input<button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/inputs')"><CIcon name='cil-book' size="lg"/></button></h1>
+    <h1>Create Input<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/inputs')"><CIcon name='cil-book' size="lg"/></button></h1>
     <p class="text-muted">Complete the wizard below to create a new input.</p>
     <CForm @submit.prevent="createInput">
     <CCard><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
@@ -103,7 +103,7 @@
                             <CSelect :options='["http_auth","api_key"]' :value.sync="config['auth_method']" label="Auth Method" description="api_key: Elastic API key | http_auth: Basic Auth"/>
                           </CCol>
                           <CCol col=4>
-                            <CInput v-model="config['ca_cert']" placeholder="/etc/ssl/certs/cacert" label="CA Cert Path" description="The path to your clusters CA public certificate"/>
+                            <CInput v-model="config['cafile']" placeholder="/etc/ssl/certs/cacert" label="CA Cert Path" description="The path to your clusters CA public certificate"/>
                           </CCol>
                           <CCol col=2>
                             <label>Verify Hostname</label><br>

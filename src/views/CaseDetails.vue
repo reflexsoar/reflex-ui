@@ -789,7 +789,8 @@ export default {
                 }
             }
 
-            this.$store.dispatch('getEvents', {
+            this.$store.dispatch('getCaseEvents', {
+                uuid: this.uuid,
                 signature: signature_filter,
                 grouped: grouped,
                 tags: tag_filters,
@@ -798,7 +799,6 @@ export default {
                 severity: severity_filter,
                 search: search,
                 fields: '',
-                case_uuid: this.uuid,
                 page: this.current_events_page,
                 page_size: 25
             }).then(resp => {

@@ -1,7 +1,7 @@
 <template>
   <CRow>
     <CCol col="12">
-      <h2>Events<button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
+      <h2>Events<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
       
       <event-drawer :event_data="event_data"></event-drawer>
       <CRow>

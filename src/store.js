@@ -634,6 +634,19 @@ const getters = {
   related_cases: state => { return state.related_cases },
   audit_logs: state => { return state.audit_logs },
   data_types_list: function() { console.log(state.data_types); return state.data_types.map(item => { console.log(item); return {'label': item.name, 'value': item.uuid}}) },
+  user_has_permission: state => function(permission) {
+    if(Object.keys(state.current_user.role.permissions).includes(permission)) {
+      
+      if(!state.current_user.role.permissions[permission] || state.current_user.role.permissions[permission] === null) {
+        return false
+      }
+      return true
+      
+    } else {
+      return false
+    }
+    
+  },
   user_has: state => function(permission) {
     return Object.keys(state.current_user.permissions).includes(permission)
   },
@@ -1341,6 +1354,18 @@ const actions = {
       .then(resp => {
         commit('save_event_stats', resp.data)
         commit('loading_status',false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getCaseEvents({commit}, {uuid, title__like=null, signature=null, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/case_events/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_events', resp.data)
         resolve(resp)
       })
       .catch(err => {

@@ -1,6 +1,6 @@
 <template>
   <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"><CCol xs="12" lg="12">
-    <h2>Event Rules<button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/event-rules/')"><CIcon name='cil-book' size="lg"/></button></h2><br>
+    <h2>Event Rules<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/event-rules/')"><CIcon name='cil-book' size="lg"/></button></h2><br>
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
@@ -67,7 +67,7 @@
         <h5>{{modal_title}}</h5>
         <span class='text-right'>
             <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
-            <button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/rql')"><CIcon name='cil-book' size="lg"/></button>
+            <button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/rql')"><CIcon name='cil-book' size="lg"/></button>
         </span>                   
     </template>
     <CAlert :show.sync="test_complete" :color="test_result_color" closeButton>

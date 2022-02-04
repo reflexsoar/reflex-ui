@@ -1,6 +1,6 @@
 <template>
   <CCol xs="12" lg="12">
-        <h2>Agent Management<button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/agents')"><CIcon name='cil-book' size="lg"/></button></h2><br>
+        <h2>Agent Management<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/agents')"><CIcon name='cil-book' size="lg"/></button></h2><br>
         <CCard>
           <CCardBody class="tabbed">
             <CTabs>

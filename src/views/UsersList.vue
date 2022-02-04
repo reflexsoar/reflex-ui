@@ -56,7 +56,7 @@
             {{error_message}}
       </CAlert>
       <CForm @submit.prevent="modal_action()" id="userForm">
-        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations && modal_mode =='new'" v-model="user.organization" :options="organizations"/>
+        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.default_org && modal_mode =='new'" :value.sync="user.organization" :options="organizations"/>
         <CInput v-model="user.username" label="Username" placeholder="Enter a unique username for the user" required/>
         <CRow>
           <CCol col="6">

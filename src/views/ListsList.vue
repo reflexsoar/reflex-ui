@@ -1,6 +1,6 @@
 <template>
   <CCol>
-    <h2>List Management<button type="button" aria-label="Close" class="close" onclick="window.open('https://docs.reflexsoar.com/en/latest/intel-lists')"><CIcon name='cil-book' size="lg"/></button></h2><br>
+    <h2>List Management<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/intel-lists')"><CIcon name='cil-book' size="lg"/></button></h2><br>
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>      
