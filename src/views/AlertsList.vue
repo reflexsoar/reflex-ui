@@ -2,7 +2,7 @@
   <CRow>
     <CCol col="12">
       <h2>Events<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
-      
+
       <event-drawer :event_data="event_data"></event-drawer>
       <CRow>
         <CCol col="12">
@@ -1135,7 +1135,12 @@ export default {
           title__like: title__like_filter
         }).then(resp => {
           this.selected = [...resp.data.events]
-          this.selected_orgs = resp.data.organizations
+          if (resp.data.organizations === null) {
+            this.selected_orgs = {'': []}
+          } else {
+            this.selected_orgs = resp.data.organizations
+          }
+          
           
           
         })

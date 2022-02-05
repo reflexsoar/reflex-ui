@@ -45,8 +45,8 @@ export default {
   nav,
   data() {
     return {
-      logo: require('../assets/img/squid-white-no-background.png'),
-      logo_slogan: require('../assets/img/reflexsoar-white-no-background.png'),
+      logo: require('../assets/img/symbol.png'),
+      logo_slogan: require('../assets/img/white-logo-color-symbol-no-background.png'),
       filtered_nav: []
     }
   },

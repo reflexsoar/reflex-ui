@@ -36,7 +36,7 @@
               </template>
               <template #inputs="{item}">
                   <td v-if="item.inputs">
-                    {{item.inputs.length}}
+                    {{totalInputs(item)}}
                   </td>
                   <td v-else>
                     0
@@ -144,6 +144,17 @@ export default {
             this.inputs = resp.data
             this.loading = false
         })
+      },
+      totalInputs(item) {
+
+        let inputs = item.inputs.map(item => { return item.uuid })
+        for(let g in item.groups) {
+          let group_inputs = item.groups[g].inputs.map(item => { return item.uuid })
+          inputs = [...inputs, ...group_inputs]
+        }
+        inputs = [...new Set(inputs)]
+        return inputs.length
+
       },
       getStatus(status) { 
         switch (status) {

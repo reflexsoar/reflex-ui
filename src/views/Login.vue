@@ -69,7 +69,7 @@ export default {
     return {
       email: "",
       password: "",
-      logo_path: require("../assets/img/color-logo.png")
+      logo_path: require("../assets/img/color-logo-dots.png")
     }
   },
   methods: {

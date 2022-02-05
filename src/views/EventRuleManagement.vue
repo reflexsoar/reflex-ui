@@ -186,6 +186,38 @@
                             <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event || merge_into_case"></CTextarea>
                         </CCol>
                     </CRow>
+                    <label>Add Tags</label>
+                            <CRow>
+                                <CCol col="1">
+                                    <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Tag Event" :checked.sync="tag_event"  style="padding-top:5px"></CSwitch>
+                                </CCol>
+                                <CCol>
+                                    <multiselect
+                                        v-bind:disabled="dismiss_event || !tag_event"
+                                        v-model="selected_tags" 
+                                        placeholder="Select tags to apply to this input"
+                                        :taggable="true"
+                                        tag-placeholder="Add new tag"
+                                        track-by="name"
+                                        label="name"
+                                        :options="tag_list"
+                                        :multiple="true"
+                                        @tag="addTag"
+                                        :close-on-select="false"
+                                    >
+                                    </multiselect>
+                                </CCol>
+                            </CRow>
+                            <br>
+                            <label>Update Severity</label>
+                            <CRow>
+                                <CCol col="1">
+                                    <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No" label="Update Severity" :checked.sync="update_severity"  style="padding-top:5px"></CSwitch>
+                                </CCol>
+                                <CCol>
+                                    <CSelect v-bind:disabled="dismiss_event || !update_severity" :options="severities" :value.sync="target_severity" placeholder="Select a new severity for matching events..."/>
+                                </CCol>
+                            </CRow>
 
                 </div>
                 <div name="create-case-template-step-5" v-if="step == 5">
@@ -253,8 +285,10 @@
           </CCol>
           <CCol lg="6">
             <label>Update Severity</label><br>
+            <CSwitch label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.update_severity"></CSwitch>
             <CSelect 
               label="Severity"
+              v-if="rule.update_severity"
               :options="severities"
               :value.sync="rule.target_severity"
               placeholder="Select a Severity"
@@ -294,7 +328,7 @@
 
     <CRow v-if="modal_mode == 'edit'">
       <CCol lg="12">
-        <h5 style="cursor: pointer" @click="show_testing_pane = !show_testing_pane"><CIcon style="margin-top: -5px" v-if="show_testing_pane" name="cil-chevron-bottom"/><CIcon style="margin-top: -5px" v-else name="cil-chevron-top"/>&nbsp; Rule Testing</h5>
+        <br><h5 style="cursor: pointer" @click="show_testing_pane = !show_testing_pane"><CIcon style="margin-top: -5px" v-if="show_testing_pane" name="cil-chevron-bottom"/><CIcon style="margin-top: -5px" v-else name="cil-chevron-top"/>&nbsp; Rule Testing</h5>
       </CCol>
     </CRow>
 
@@ -430,7 +464,7 @@ export default {
         expire: false,
         expire_days: 1,
         merge_into_case: false,
-        dismiss_event: true,
+        dismiss_event: false,
         dismiss_comment: "",
         close_reason: "",
         close_reasons: [],
@@ -458,6 +492,7 @@ export default {
         organization: "",
         organizations: [],
         tag_list: [],
+        tag_event: false,
         severities: [
                 {
                     label: 'Low',
@@ -475,8 +510,12 @@ export default {
                     label: 'Critical',
                     value: 3
                 }
-            ]
+            ],
+          target_severity: 0,
+          update_severity: false,
+          selected_tags: []
       }
+      
     },
     watch: {
       current_page: function () {
@@ -674,14 +713,18 @@ export default {
       createEventRule() {
         let rule = {
           name: this.name,
-          organization: this.organization ? this.organization : null,
+          organization: this.event_organization,
           description: this.description,
           merge_into_case: this.merge_into_case,
           target_case_uuid: this.target_case.uuid,
+          update_severity: this.update_severity,
+          target_severity: this.target_severity,
+          add_tags: this.tag_event,
+          tags_to_add: this.selected_tags.map(item => { return item.name}),
           expire: this.expire,
           expire_days: parseInt(this.expire_days),
           dismiss_comment: this.dismiss_comment,
-          dismiss_reason: this.close_reason ? this.close_reasons.filter(c => c.value === this.close_reason)[0].label : null,
+          dismiss_reason: this.close_reasoon ? this.close_reasons.filter(c => c.value === this.close_reason)[0].label : null,
           dismiss: this.dismiss_event,
           event_signature: this.event_signature,
           query: this.query
@@ -693,7 +736,6 @@ export default {
 
         this.$store.dispatch('createEventRule', rule).then(resp => {
           this.show_modal = false
-          console.log(resp.data)
           this.rules = this.$store.getters.event_rules
         })
       },
@@ -704,6 +746,10 @@ export default {
           description: this.rule.description,
           merge_into_case: this.rule.merge_into_case,
           target_case_uuid: this.rule.case_uuid ? this.rule.case_uuid.uuid : '',
+          update_severity: this.rule.update_severity,
+          target_severity: this.rule.target_severity,
+          add_tags: this.rule.tag_event,
+          tags_to_add: this.rule.selected_tags.map(item => { return item.name}),
           expire: this.rule.expire,
           expire_days: parseInt(this.rule.expire_days),
           dismiss_comment: this.rule.dismiss_comment,
@@ -732,13 +778,14 @@ export default {
         })
         this.loadRules()
       },
-      addTag (newTag) {
-        const tag = {
-          name: newTag
-        }
-        this.tag_list.push(tag)
-        this.tags.push(tag)
-      },
+      addTag(newTag) {
+            const t = {
+                name: newTag,
+                uuid: ''
+            }
+            this.tag_list.push(t)
+            this.selected_tags.push(t)
+        },
       caseLabel({uuid, title}) {
         if(uuid && title) {
            return `${title} (${uuid})`
