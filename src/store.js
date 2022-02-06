@@ -538,6 +538,10 @@ const mutations = {
     state.role = role
     state.status = 'success'
   },
+  update_role(state, role) {
+    state.role = role
+    state.roles = state.roles.map(r => r.uuid == role.uuid ? role : r)
+  },
   add_success(state) {
     state.status = 'success'
   },
@@ -581,6 +585,14 @@ const mutations = {
 }
 
 const getters = {
+  org_name: state => function(uuid) {
+    let org = state.organizations.filter(o => o.uuid === uuid)
+    if (org.length > 0) {
+      return org[0].name
+    } else {
+      return "Unknown"
+    }
+  },
   lists: state => { return state.lists },
   quick_filters: state => { return state.quick_filters },
   loading: state => {return state.loading},
@@ -2566,6 +2578,47 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event_rule/${uuid}`, method: 'DELETE'})
       .then(resp => {
+        commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createRole({commit}, data) {
+    commit('loading_status', true)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/role`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_role', resp.data)
+        commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateRole({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/role/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_role', resp.data)
+        commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteRole({commit}, {uuid}) {
+    commit('loading_status', true)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/role/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_role', uuid)
         commit('loading_status', false)
         resolve(resp)
       })

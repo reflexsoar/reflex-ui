@@ -41,11 +41,12 @@
                 </template>
                 <GroupList/>
               </CTab>-->
-              <!--<CTab>
+              <CTab v-if="current_user.role.permissions.view_roles">
                 <template slot="title">
                   <CIcon name="cil-people"/> {{tabs[4]}}
                 </template>
-              </CTab>-->
+                <RolesList/>
+              </CTab>
               <CTab>
                 <template slot="title">
                   <CIcon name="cil-graph"/> {{tabs[5]}}
@@ -74,6 +75,7 @@ export default {
   computed: mapState(['current_user', 'alert']),
   components: {
     UsersList,
+    RolesList,
     GlobalSettings,
     GroupList,
     AuditLogs,
@@ -81,7 +83,7 @@ export default {
   },
   watch: {
     activeTab: function () {
-      if(this.activeTab == 3) {
+      if(this.activeTab == 4) {
         this.reloadLogs = Math.random()
       }
     }
