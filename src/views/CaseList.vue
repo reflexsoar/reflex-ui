@@ -121,7 +121,7 @@
                   :items-per-page="25"
                   :dark="dark"
                   :loading = loading
-                  :sorter='{external: true, resetable: true}'
+                  :sorter='{external: false, resetable: true}'
                   :responsive="false"
                   style="border-top: 1px solid #cfcfcf;"
               >

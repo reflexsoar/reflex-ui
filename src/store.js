@@ -79,6 +79,7 @@ const state = {
   tag_list: [],
   list: {},
   lists: [],
+  pagination: {},
   credential_list: [],
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
@@ -581,10 +582,14 @@ const mutations = {
   },
   set_quick_filter_state(state, data) {
     state.quick_filters = data
+  },
+  save_pagination(state, pagination) {
+    state.pagination = pagination
   }
 }
 
 const getters = {
+  pagination: state => { return state.pagination },
   org_name: state => function(uuid) {
     let org = state.organizations.filter(o => o.uuid === uuid)
     if (org.length > 0) {
@@ -1740,16 +1745,19 @@ const actions = {
       })
     })
   },
-  getRoles({commit}, organization=null) {
+  getRoles({commit}, {organization=null, page=1, page_size=10}) {
 
-    let url =`${BASE_URL}/role`
+    let url =`${BASE_URL}/role?page=${page}&page_size=${page_size}`
+
     if (organization) {
-      url += `?organization=${organization}`
+      url += `&organization=${organization}`
     }
+
     return new Promise((resolve, reject) => {
       Axios({url: url, method: 'GET'})
       .then(resp => {
-        commit('save_roles', resp.data)
+        commit('save_roles', resp.data.roles)
+        commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })
       .catch(err => {

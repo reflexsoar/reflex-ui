@@ -1,7 +1,5 @@
 <template>
-    <div>
-        <CButton class="tag" :size="size" :color="color">{{orgName(uuid)}}</CButton>
-    </div>   
+    <span>&nbsp;<CBadge style="font-size: 90%; font-weight: 500" :shape="shape" :size="size" :color="color">{{orgName(uuid)}}</CBadge></span>
 </template>
 
 <script>
@@ -11,6 +9,10 @@ export default {
     name: 'OrganizationBadge',
     props: {
         uuid: String,
+        shape: {
+            type: String,
+            default: ""
+        },
         size: {
             type: String,
             default: "lg"

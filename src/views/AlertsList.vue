@@ -274,8 +274,8 @@
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
-                    <span v-if="current_user.default_org"><span class="separator">|</span><CButton class="tag" color="warning" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"><b>{{mapOrgToName(event.organization)}}</b></CButton></span>
-                  </small>
+                    <span v-if="current_user.default_org"><span class="separator">|</span></span></small><span><OrganizationBadge :uuid="event.organization" color="warning" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"/></span>
+                  
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'data_type':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
@@ -454,6 +454,7 @@ import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import EventDrawer from './EventDrawer.vue';
 import CRightDrawer from './CRightDrawer.vue';
+import OrganizationBadge from './OrganizationBadge'
 export default {
     name: 'Events',
     components: {
@@ -464,7 +465,8 @@ export default {
       ListAdderModal,
       PrismEditor,
       EventDrawer,
-      CRightDrawer
+      CRightDrawer,
+      OrganizationBadge
     },
     props: {
     items: Array,

@@ -16,20 +16,20 @@
           :hover="hover"
           :striped="striped"
           :bordered="bordered"
-          :small="small"
+          :small="true"
           :fixed="fixed"
           :items="roles"
           :fields="fields"
-          :items-per-page="small ? 25 : 10"
+          :items-per-page="small ? 25 : 5"
           :dark="dark"
           :sorter="{external: false, resetable: true}"
           :loading="loading"
-          pagination
           style="border-top: 1px solid #cfcfcf;"
         >
           <template #name="{item}">
             <td>
-              {{item.name}}
+              <b>{{item.name}}</b><br>
+              <p>{{item.description}}</p>
             </td>
           </template>
           <template #organization="{item}">
@@ -47,11 +47,6 @@
               {{item.created_by.username ? item.created_by.username : 'System'}}<OrganizationBadge v-if="current_user.default_org" :uuid="item.created_by.organization"/>
             </td>
           </template>
-          <template #created_at="{item}">
-            <td>
-              {{ item.created_at | moment('from','now')}}
-            </td>
-          </template>
           <template #actions="{item}">
             <td class="text-right">
               <CButton :disabled="!current_user.role.permissions.add_role" size="sm" color="secondary" @click="cloneRole(item.uuid)"><CIcon name="cil-copy"/></CButton>&nbsp;
@@ -60,6 +55,11 @@
             </td>
           </template>
         </CDataTable>
+        <CRow>
+          <CCol>
+            <CCardBody><CPagination :pages="pagination.pages" :activePage.sync="active_page"/></CCardBody>
+          </CCol>
+        </CRow>
       </CCol>
     </CRow>
     <CModal size="xl" :closeOnBackdrop="false" :centered="true" :title="modal_mode == 'create' ? 'Create Role' : 'Edit Role'" :show.sync="role_modal">
@@ -68,44 +68,25 @@
         <CInput label="Role Name" placeholder="Enter a name for this role" :value.sync="role.name"/>
         <CTextarea rows="3" label="Description" placeholder="Enter a description for the role so it is understood what it is used for" :value.sync="role.description"/>
         <h3>Role Permissions</h3>
-        <div v-if="role.permissions" >
+        <div v-if="role.permissions">
           <CRow v-for="permissions, category in filteredPermissionMap" :key="category">
-            <CCol col="12">
+            <CCol col="3">
               <h5>{{category}}</h5>
             </CCol>
-            <CCol col="3" v-for="permission in permissions" :key="permission">
+            <CCol >
               <CRow>
-                <CCol col="3">
-                  <CSwitch size="sm" :checked.sync="role.permissions[permission]" label-on="Yes" label-off="No" color="success"/>
-                </CCol>
-                <CCol>
-                  <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label>
+                <CCol col="3" v-for="permission in permissions" :key="permission">
+                  <CInputCheckbox :checked.sync="role.permissions[permission]">
+                    <template #label>
+                      <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label>
+                    </template>
+                  </CInputCheckbox>
                 </CCol>
               </CRow>
+              <br>
             </CCol>
-            <br><br>
           </CRow>
         </div>
-        <!--<CRow>
-          <CCol col="3" v-for="value, permission in role.permissions" :key="permission">
-            <CRow v-if="['add_organization','view_organizations','update_organization','delete_organization'].includes(permission) && role.organization === current_user.organization && current_user.default_org">
-              <CCol col=3>
-                <CSwitch size="sm" :checked.sync="role.permissions[permission]" label-on="Yes" label-off="No" color="success"/>
-              </CCol>
-              <CCol>
-                <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label>
-              </CCol>              
-            </CRow>
-            <CRow v-else-if="!['add_organization','view_organizations','update_organization','delete_organization'].includes(permission)">
-              <CCol col=3>
-                <CSwitch size="sm" :checked.sync="role.permissions[permission]" label-on="Yes" label-off="No" color="success"/>
-              </CCol>
-              <CCol>
-                <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label>
-              </CCol>              
-            </CRow>
-          </CCol>
-        </CRow>-->
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
         <CButton v-if="modal_mode === 'edit'" @click="updateRole()" color="primary">Edit</CButton>
@@ -130,10 +111,8 @@ export default {
       default() {
         return [
           "name",
-          "description",
           "user_count",
           "created_by",
-          "created_at",
           "actions"
         ];
       },
@@ -148,7 +127,7 @@ export default {
     small: Boolean,
     fixed: Boolean,
     dark: Boolean,
-    alert: false,
+    alert: false
   },
   created: function () {
     this.loading = true
@@ -158,10 +137,9 @@ export default {
         
       })
     }
-    this.$store.dispatch('getRoles').then(resp => {
+    this.$store.dispatch('getRoles', {}).then(resp => {
       this.loading = false
-    })
-    
+    })    
   },
   computed: {
     filteredPermissionMap() {
@@ -173,7 +151,12 @@ export default {
         //return this.permission_map.filter(category => category !== "Organizations")
       }
     },
-    ...mapState(['roles','organizations','current_user'])
+    ...mapState(['roles','organizations','current_user','pagination'])
+  },
+  watch: {
+    active_page: function() {
+      this.reloadRoles(this.activePage)
+    }
   },
   methods: {
     newRole() {
@@ -181,9 +164,16 @@ export default {
       this.modal_mode = 'create'
       this.role_modal = true
     },
-    filterByOrganization(event) {
+    reloadRoles() {
       this.loading = true
-      this.$store.dispatch('getRoles', event.target.value).then(() => {
+      this.$store.dispatch('getRoles', {organization: this.organization_filter, page: this.active_page}).then(() => {
+        this.loading = false
+      })
+    },
+    filterByOrganization(event, page=1) {
+      this.loading = true
+      this.organization_filter = event.target.value
+      this.$store.dispatch('getRoles', {organization: event.target.value, page: page}).then(() => {
         this.loading = false
       })
     },
@@ -213,7 +203,7 @@ export default {
     },
     updateRole() {
       let uuid = this.role.uuid
-      
+
       delete this.role.uuid
       delete this.role.members
       delete this.role.created_at
@@ -242,9 +232,11 @@ export default {
   data() {
     return {
       loading: true,
+      active_page: 1,
       role_modal: false,
       modal_mode: 'create',
       role: {},
+      organization_filter: null,
       empty_role: {
         name: '',
         description: '',
@@ -455,11 +447,11 @@ export default {
           'update_case_status',
           'delete_case_status',
         ],
-        "Closure Reasons": [
+        /*"Closure Reasons": [
           'create_close_reason',
           'update_close_reason',
           'delete_close_reason',
-        ],
+        ],*/
         /*"Plugins": [
           'view_plugins',
           'create_plugin',
