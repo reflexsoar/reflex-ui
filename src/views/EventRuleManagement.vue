@@ -603,6 +603,7 @@ export default {
       },
       dismiss() {
         this.reset()
+        this.show_testing_pane = false
         this.show_modal = false            
       },
       testRule() {
