@@ -4,13 +4,7 @@
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>      
-    <div v-if="status == 'loading'" style="margin: auto; text-align:center; verticle-align:middle;">
-      <CSpinner
-            color="dark"
-            style="width:6rem;height:6rem;"
-        />
-    </div>
-    <CCard v-else>
+    <CCard>
       <CCardHeader>
         <CButton color="primary" @click="createListModal()">New List</CButton>
       </CCardHeader>
@@ -25,6 +19,7 @@
           :items-per-page="small ? 25 : 10"
           :dark="dark"
           :sorter='{external: true, resetable: true}'
+          :loading="loading"
           pagination
       >
       <template #name="{item}">
@@ -64,6 +59,13 @@
           </td>
         </template>      
       </CDataTable>
+      <CRow>
+        <CCol>
+          <CCardBody>
+            <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
+          </CCardBody>
+        </CCol>
+      </CRow>
     </CCard>
     <CModal :title="modal_title" :centered="true" size="lg" :show.sync="modal_status" :closeOnBackdrop="false">
       <CAlert :show.sync="this.error" color="danger" closeButton>
@@ -108,7 +110,6 @@
             </div>
           </CCol>
         </CRow>
-        
       </CForm>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Cancel</CButton>
@@ -157,7 +158,7 @@ export default {
     fixed: Boolean,
     dark: Boolean
     },
-    computed: mapState(['current_user','status','alert','lists','data_types']),
+    computed: mapState(['current_user','status','alert','lists','data_types', 'pagination']),
     created: function () {
       if(this.current_user.default_org) {
         if (!this.fields.includes('organization')) {
@@ -165,8 +166,10 @@ export default {
         }
         
       }
+      this.loading = true
       this.$store.dispatch('getLists',{}).then(resp => {
         this.getDataTypes()
+        this.loading = false
       })
     },
     watch: {
@@ -178,6 +181,7 @@ export default {
     },
     data(){
       return {
+        loading: false,
         list_data: {
           values: "",
           data_type: { uuid: ''},
@@ -197,10 +201,22 @@ export default {
         list_types: ['values','patterns'],
         data_type_list: [],
         organizations: [],
-        organization: ''
+        organization: '',
+        active_page: 1
+      }
+    },
+    watch: {
+      active_page: function() {
+        this.reloadLists(this.active_page)
       }
     },
     methods: {
+      reloadLists(page) {
+        this.loading = true
+        this.$store.dispatch('getLists',{page: page}).then(() => {
+          this.loading = false
+        })
+      },
       mapOrgToName(uuid) {
         let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
         if (org.length > 0) {
