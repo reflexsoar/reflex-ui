@@ -1,6 +1,6 @@
 <template>
   <CRow><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
-    <CCol col>
+    <CCol col>{{inputs_list}}
       <div style="padding: 10px;"><CButton color="primary" @click="newAgentGroup()">New Agent Group</CButton></div>
       <CDataTable
           :hover="hover"
@@ -142,6 +142,7 @@ export default {
         modal_button_text: "Create",
         target_agent_group: "",
         input_list: [],
+        inputs_list: [],
         active_page: 1
       }
     },
@@ -172,8 +173,8 @@ export default {
           let organization = event.target.value
         }
           
-        this.$store.dispatch('getInputList', {organization: organization}).then(resp => {
-          this.input_list = this.$store.getters.inputs.map(item => { return {'name': item.name, 'uuid': item.uuid }})
+        this.$store.dispatch('getInputList', {organization: organization, page_size: 50}).then(resp => {
+          this.input_list = this.$store.getters.inputs_list
         })
       },
       formattedOrganizations() {

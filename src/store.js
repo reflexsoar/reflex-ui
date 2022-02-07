@@ -100,7 +100,8 @@ const state = {
   case_stats: {},
   network_data: {},
   loading: false,
-  quick_filters: true
+  quick_filters: true,
+  source_input: {}
 }
 
 const mutations = {
@@ -585,6 +586,9 @@ const mutations = {
   },
   save_pagination(state, pagination) {
     state.pagination = pagination
+  },
+  clone_input(state, input) {
+    state.source_input = input
   }
 }
 
@@ -598,6 +602,8 @@ const getters = {
       return "Unknown"
     }
   },
+  inputs_list: state => { return state.inputs.map(item => { return {'name': item.name, 'value': item.uuid }})},
+  source_input: state => { return state.source_input },
   lists: state => { return state.lists },
   quick_filters: state => { return state.quick_filters },
   loading: state => {return state.loading},
@@ -1135,7 +1141,7 @@ const actions = {
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
         let credentials = []
-        resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name+" - "+cred.description}))
+        resp.data.credentials.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name+" - "+cred.description}))
         commit('creds_success', credentials)
         resolve(resp)
       })
@@ -1154,8 +1160,8 @@ const actions = {
       Axios({url: url, method: 'GET'})
       .then(resp => {
         let credentials = []
-        resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name}))
-        commit('save_inputs', resp.data)
+        //resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name}))
+        commit('save_inputs', resp.data.inputs)
         resolve(resp)
       })
       .catch(err => {

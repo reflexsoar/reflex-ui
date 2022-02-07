@@ -24,7 +24,7 @@
       >
       <template #name="{item}">
           <td>
-              {{item.name}}
+              <b>{{item.name}}</b>
           </td>
       </template>
       <template #organization="{item}">

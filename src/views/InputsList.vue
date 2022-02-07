@@ -2,7 +2,7 @@
   <CRow>
     <CCol>
       <h1>Inputs<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/inputs')"><CIcon name='cil-book' size="lg"/></button></h1><br>
-      <CButton color="primary" to="create">New Input</CButton><br><br>
+      <CButton color="primary" @click="newInput()">New Input</CButton><br><br>{{source_input}}
       <CCard>
           <CCardHeader>
               <b>Inputs</b>
@@ -24,7 +24,7 @@
               >
               <template #name="{item}">
                   <td>
-                      <router-link :to="`${item.uuid}`">{{item.name}}</router-link>
+                      <b><router-link :to="`${item.uuid}`">{{item.name}}</router-link></b>
                   </td>
               </template>
               <template #organization="{item}">
@@ -37,7 +37,11 @@
                   <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
                 </td>
               </template>
-              
+              <template #actions="{item}">
+                <td class='text-right'>
+                  <CButton color="secondary" @click="cloneInput(item.uuid)"><CIcon name="cilCopy"/></CButton>
+                </td>
+              </template>
               </CDataTable>
               <CRow>
                 <CCol>
@@ -61,7 +65,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['name', 'description', 'tags']
+        return ['name', 'description', 'tags', 'actions']
       }
     },
     caption: {
@@ -76,7 +80,7 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user','inputs', 'pagination']),
+    computed: mapState(['current_user','inputs', 'pagination', 'source_input']),
     created: function () {
         this.loadData()
         this.refresh = setInterval(function() {
@@ -100,6 +104,14 @@ export default {
       }
     },
     methods: {
+      newInput() {
+        this.$store.commit('clone_input', null)
+        this.$router.push('/inputs/create')
+      },
+      cloneInput(uuid) {
+        this.$store.commit('clone_input', this.inputs.find(item => item.uuid === uuid))
+        this.$router.push('/inputs/create')
+      },
       mapOrgToName(uuid) {
         let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
         if (org.length > 0) {

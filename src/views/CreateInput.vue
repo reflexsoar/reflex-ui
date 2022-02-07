@@ -383,10 +383,21 @@ export default {
     name: 'CreateInput',
     created() {
       this.loadTags()
+      this.getSourceInput()
       this.$store.dispatch('getCredentialList')
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages     
     },
     methods: {
+      getSourceInput() {
+        if(this.source_input) {
+          this.name = "[COPY] "+this.source_input.name
+          this.description = this.source_input.description
+          this.credential = ''
+          this.config = this.source_input.config
+          this.plugin = this.source_input.plugin
+          this.field_mapping = this.source_input.field_mapping
+        }
+      },
       createInput: function () {
 
         let fm = JSON.stringify(this.field_mapping, null, 0)
@@ -516,7 +527,7 @@ export default {
         return
       }
     },
-    computed: mapState(['current_user','credential_list','organizations']),
+    computed: mapState(['current_user','credential_list','organizations','source_input']),
     data(){
       return {
         name: "",
