@@ -711,6 +711,7 @@ export default {
         })
       },
       createEventRule() {
+
         let rule = {
           name: this.name,
           organization: this.event_organization,
@@ -720,7 +721,7 @@ export default {
           update_severity: this.update_severity,
           target_severity: this.target_severity,
           add_tags: this.tag_event,
-          tags_to_add: this.selected_tags.map(item => { return item.name}),
+          tags_to_add: this.selected_tags ? this.selected_tags.map(item => { return item.name}) : [],
           expire: this.expire,
           expire_days: parseInt(this.expire_days),
           dismiss_comment: this.dismiss_comment,
@@ -749,7 +750,7 @@ export default {
           update_severity: this.rule.update_severity,
           target_severity: this.rule.target_severity,
           add_tags: this.rule.tag_event,
-          tags_to_add: this.rule.selected_tags.map(item => { return item.name}),
+          tags_to_add: this.selected_tags ? this.selected_tags.map(item => { return item.name}) : [],
           expire: this.rule.expire,
           expire_days: parseInt(this.rule.expire_days),
           dismiss_comment: this.rule.dismiss_comment,

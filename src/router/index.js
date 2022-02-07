@@ -75,18 +75,18 @@ router.beforeEach((to, from, next) => {
 
   // Before each request refresh the users permissions
   if(to.matched.some(record => record.path != '/forgot_password' && !record.path.startsWith('/reset_password') && record.path != '/login' && record.path != '/mfa' && record.path != '/')) {
-    store.dispatch('getMe').then(() => {
-      if(to.matched.some(record => {
+    //store.dispatch('getMe').then(() => {
+    if(to.matched.some(record => {
         let current_user = store.getters.current_user
         if(record.meta.requiresPermission && !current_user.role.permissions[record.meta.requiresPermission]) {
           next('/401')
         } else {
-          store.dispatch('getMe')
+          
           next()
           return
         }
-      })) {}
-    })  
+     })) {}
+    //})  
   }
   
   // Fetch the settings before each route in the event that they have changed
