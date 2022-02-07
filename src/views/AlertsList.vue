@@ -277,7 +277,7 @@
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
-                    <span v-if="current_user.default_org"><span class="separator">|</span></span></small><span><OrganizationBadge :uuid="event.organization" color="warning" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"/></span>
+                    <span v-if="current_user.default_org"><span class="separator">|</span></span></small><span style="cursor: pointer" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"><OrganizationBadge :uuid="event.organization" color="warning" /></span>
                   
                 </CCol>
                 <CCol col="3" class="text-right">

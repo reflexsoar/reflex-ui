@@ -1,14 +1,6 @@
 <template>
   <CRow><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
-    <CCol col v-if="loading">
-        <div style="margin: auto; text-align:center; verticle-align:middle;">
-           <CSpinner
-                color="dark"
-                style="width:6rem;height:6rem;"
-            />  
-        </div>
-    </CCol>
-    <CCol col v-else>
+    <CCol col>
       <div style="padding: 10px;"><CButton color="primary" @click="newAgentGroup()">New Agent Group</CButton></div>
       <CDataTable
           :hover="hover"
@@ -20,6 +12,7 @@
           :fields="fields"
           :items-per-page="small ? 25 : 10"
           :dark="dark"
+          :loading="loading"
           :sorter='{external: true, resetable: true}'
           style="border-top: 1px solid #cfcfcf;"
       >
@@ -39,6 +32,13 @@
         </td>
       </template>
     </CDataTable>
+    <CRow>
+      <CCol>
+        <CCardBody>
+          <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
+        </CCardBody>
+      </CCol>
+    </CRow>
     </CCol>
     <CModal
       :title="modal_title"
@@ -116,7 +116,7 @@ export default {
     dark: Boolean,
     alert: false  
     },
-    computed: mapState(['current_user','agent_group','agent_groups','organizations']),
+    computed: mapState(['current_user','agent_group','agent_groups','organizations', 'pagination']),
     created: function () {
         if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
@@ -141,11 +141,22 @@ export default {
         modal_action: this.createAgentGroup,
         modal_button_text: "Create",
         target_agent_group: "",
-        pagination: {},
         input_list: [],
+        active_page: 1
+      }
+    },
+    watch: {
+      active_page: function() {
+        this.reloadGroups(this.active_page)
       }
     },
     methods: {
+      reloadGroups(page){
+        this.loading = true
+        this.$store.dispatch('getAgentGroups', {page: page}).then(() => {
+          this.loading = false
+        })
+      },
       mapOrgToName(uuid) {
         let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
         if (org.length > 0) {
@@ -224,8 +235,7 @@ export default {
       },
       loadData: function() {
         this.loading = true
-        this.$store.dispatch('getAgentGroups').then(resp => {
-          this.pagination = resp.data.pagination
+        this.$store.dispatch('getAgentGroups', {}).then(resp => {
           this.loading = false
         })
       },

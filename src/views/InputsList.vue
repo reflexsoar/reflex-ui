@@ -39,6 +39,13 @@
               </template>
               
               </CDataTable>
+              <CRow>
+                <CCol>
+                  <CCardBody>
+                    <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
+                  </CCardBody>
+                </CCol>
+              </CRow>
           </CCardBody>
       </CCard>
     </CCol>
@@ -69,7 +76,7 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user','inputs']),
+    computed: mapState(['current_user','inputs', 'pagination']),
     created: function () {
         this.loadData()
         this.refresh = setInterval(function() {
@@ -83,7 +90,13 @@ export default {
         url: "",
         organizations: Array,
         dismissCountDown: 10,
-        loading: true
+        loading: true,
+        active_page: 1
+      }
+    },
+    watch: {
+      active_page: function() {
+        this.reloadInputs(this.active_page)
       }
     },
     methods: {
@@ -102,6 +115,12 @@ export default {
           return false
         }
       },
+      reloadInputs(page) {
+        this.loading = true
+          this.$store.dispatch('getInputs',{page: page}).then(() => {
+            this.loading = false
+        })
+      },
       loadData: function() {
         this.loading = true
         if(this.current_user.default_org) {
@@ -111,7 +130,7 @@ export default {
           }
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         }
-        this.$store.dispatch('getInputs').then(resp => {
+        this.$store.dispatch('getInputs', {}).then(resp => {
             this.loading = false
         })
       }

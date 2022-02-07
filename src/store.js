@@ -899,11 +899,13 @@ const actions = {
       })
     })
   },
-  getInputs({commit}) {
+  getInputs({commit}, {page=1, page_size=10}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/input`, method: 'GET'})
+      let url = `${BASE_URL}/input?page=${page}&page_size=${page_size}`
+      Axios({url: url, method: 'GET'})
       .then(resp => {
-        commit('save_inputs', resp.data)
+        commit('save_inputs', resp.data.inputs)
+        commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })
       .catch(err => {
@@ -923,11 +925,14 @@ const actions = {
       })
     })
   },
-  getAgentGroups({commit}) {
+  getAgentGroups({commit}, {page=1, page_size=10}) {
+
+    let url = `${BASE_URL}/agent_group?page=${page}&page_size=${page_size}`
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent_group`, method: 'GET'})
+      Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_agent_groups', resp.data.groups)
+        commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })
       .catch(err => {
