@@ -16,7 +16,7 @@
                   :bordered="bordered"
                   :small="small"
                   :fixed="fixed"
-                  :items="inputs"
+                  :items="agents"
                   :fields="fields"
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
@@ -59,6 +59,13 @@
               </template>
               
               </CDataTable>
+              <CRow>
+              <CCol>
+                <CCardBody>
+                  <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
+                </CCardBody>
+              </CCol>
+            </CRow>
 
     </CCol>
     <CModal
@@ -101,7 +108,7 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user']),
+    computed: mapState(['current_user','agents','pagination']),
     created: function () {
       this.current_url = window.location.origin;
       this.loadData()
@@ -120,10 +127,22 @@ export default {
         orgs: Array,
         dismissCountDown: 10,
         loading: true,
-        organizations: []
+        organizations: [],
+        active_page: 1
+      }
+    },
+    watch: {
+      active_page: function() {
+        this.reloadAgents(this.active_page)
       }
     },
     methods: {
+      reloadAgents(page) {
+        this.loading = true
+        this.$store.dispatch('getAgents', {page: page}).then(() => {
+          this.loading = false
+        })
+      },
       addSuccess: function() {
         if (this.$store.getters.addSuccess == 'success') {
           return true
@@ -140,8 +159,7 @@ export default {
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         }
         this.loading = true
-        this.$store.dispatch('getAgents').then(resp => {
-            this.inputs = resp.data
+        this.$store.dispatch('getAgents', {}).then(() => {
             this.loading = false
         })
       },

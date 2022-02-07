@@ -43,6 +43,13 @@
             </template>
           </CDataTable>
         </CCardBody>
+        <CRow>
+          <CCol>
+            <CCardBody>
+              <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
+            </CCardBody>
+          </CCol>
+        </CRow>
       </CCard>
     </CCol>
     <CModal
@@ -147,7 +154,7 @@ export default {
     dark: Boolean
   },
   created() {
-    this.$store.dispatch("getCredentials");
+    this.$store.dispatch("getCredentials", {});
     if(this.current_user.default_org) {
       if (!this.fields.includes('organization')) {
         this.fields.splice(1,0,'organization')
@@ -157,7 +164,7 @@ export default {
       }      
     }
   },
-  computed: mapState(["credentials", "alert","current_user"]),
+  computed: mapState(["credentials", "alert","current_user","pagination"]),
   data() {
     return {
       name: "",
@@ -182,10 +189,22 @@ export default {
       error: false,
       error_message:"",
       organization: "",
-      organizations: []
+      organizations: [],
+      active_page: 1
     };
   },
+  watch: {
+  active_page: function() {
+    this.reloadCredentials(this.active_page)
+  }
+},
   methods: {
+    reloadAgents(page) {
+    this.loading = true
+    this.$store.dispatch('getCredentials', {page: page}).then(() => {
+      this.loading = false
+    })
+  },
     mapOrgToName(uuid) {
       let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
       if (org.length > 0) {

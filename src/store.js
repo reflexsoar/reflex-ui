@@ -913,11 +913,14 @@ const actions = {
       })
     })
   },
-  getAgents({commit}) {
+  getAgents({commit}, {page=1, page_size=10}) {
+
+    let url = `${BASE_URL}/agent?page=${page}&page_size=${page_size}`
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent`, method: 'GET'})
+      Axios({url: url, method: 'GET'})
       .then(resp => {
-        commit('save_agents', resp.data)
+        commit('save_agents', resp.data.agents)
+        commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })
       .catch(err => {
@@ -1172,11 +1175,14 @@ const actions = {
       })
     })
   },
-  getCredentials({commit}, uuid) {
+  getCredentials({commit}, {page=1, page_size=10}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/credential`, method: 'GET'})
+
+      let url = `${BASE_URL}/credential?page=${page}&page_size=${page_size}`
+      Axios({url: url, method: 'GET'})
       .then(resp => {
-        commit('save_credentials', resp.data)
+        commit('save_credentials', resp.data.credentials)
+        commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })
       .catch(err => {
