@@ -62,7 +62,14 @@
         </CRow>
       </CCol>
     </CRow>
-    <CModal size="xl" :closeOnBackdrop="false" :centered="true" :title="modal_mode == 'create' ? 'Create Role' : 'Edit Role'" :show.sync="role_modal">
+    <CModal size="xl" :closeOnBackdrop="false" :centered="true" :show.sync="role_modal">
+        <template #header>
+            <h5>{{modal_mode == 'create' ? 'Create Role' : 'Edit Role'}}</h5>
+            <span class='text-right'>
+                <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
+                <button type="button" class="kb" onclick="window.open('http://docs.reflexsoar.com/en/latest/role-based-access/roles/')"><CIcon name='cil-book' size="lg"/></button>
+            </span>
+        </template>
         <h3>Role Details</h3>
         <CSelect v-if="current_user.default_org" label="Organization" :options="organizationList()" :value.sync="role.organization"/>
         <CInput label="Role Name" placeholder="Enter a name for this role" :value.sync="role.name"/>

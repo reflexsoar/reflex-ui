@@ -824,26 +824,23 @@ const actions = {
       })
     })
   },
-  getLists({commit}, {data_type=[], organization=null}) {
+  getLists({commit}, {data_type=[], organization=null, page=1, page_size=10}) {
     return new Promise((resolve, reject) => {
 
-      let base_url = `${BASE_URL}/list`
+      let base_url = `${BASE_URL}/list?page=${page}&page_size=${page_size}`
 
       if (data_type.length > 0) {
-        base_url += `?data_type=${data_type}`
+        base_url += `&data_type=${data_type}`
       }
 
       if(organization) {
-        if(base_url.includes('?')) {
-          base_url += `&organization=${organization}`
-        } else {
-          base_url += `?organization=${organization}`
-        }        
+        base_url += `&organization=${organization}`
       }
 
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
-        commit('save_lists', resp.data)
+        commit('save_lists', resp.data.lists)
+        commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })
       .catch(err => {
@@ -1431,7 +1428,7 @@ const actions = {
       }
       
       if(source.length >0) {
-        url = url+`&start=${source}`
+        url = url+`&source=${source}`
       }
 
       if(organization && organization.length > 0) {
