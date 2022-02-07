@@ -6,7 +6,7 @@
             <span class='text-right'>
                 <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
                 <button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/rql')"><CIcon name='cil-book' size="lg"/></button>
-            </span>            
+            </span>
         </template>
         <div>
             <CRow>
@@ -32,6 +32,12 @@
                             <label>Global Rule</label><br>
                             <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
                         </span>-->
+                        <CRow>
+                            <CCol>
+                                <label>Run rule retroactively after creation?</label><br>
+                                <CSwitch :checked.sync="run_retroactively" label-on="Yes" label-off="no" color="success"/>
+                            </CCol>
+                        </CRow>
                         </div>
                         <div name="create-case-template-step-2" v-if="step == 2">
                             <h4>Expiration</h4>
@@ -233,6 +239,7 @@ export default {
             close_reasons: [],
             dismiss_comment: "",
             tag_list: [],
+            run_retroactively: true,
             add_action: false,
             severities: [
                 {
@@ -373,6 +380,7 @@ export default {
                 dismiss_reason: this.close_reasoon ? this.close_reasons.filter(c => c.value === this.close_reason)[0].label : null,
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
+                run_retroactively: this.run_retroactively,
                 query: this.query
             }
 

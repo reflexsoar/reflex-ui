@@ -85,10 +85,16 @@
                 <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" :value.sync="organization" :options="organizations" @change="loadCloseReasons()"/>
                 <CInput label="Rule Name" placeholder="Enter a friendly name for this rule" v-model="name" required></CInput>
                 <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
-                <span v-if="current_user.default_org">
-                    <label>Global Rule</label><br>
-                    <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
-                </span>
+                <CRow>
+                    <CCol v-if="current_user.default_org">
+                      <label>Global Rule</label><br>
+                      <CSwitch :checked.sync="rule.global_rule" label-on="Yes" label-off="No" color="success"/>
+                    </CCol>
+                    <CCol>
+                        <label>Run rule retroactively after creation?</label><br>
+                        <CSwitch :checked.sync="run_retroactively" label-on="Yes" label-off="no" color="success"/>
+                    </CCol>
+                </CRow>
                 </div>
                 <div name="create-case-template-step-2" v-if="step == 2">
                     <h4>Expiration</h4>
@@ -245,10 +251,12 @@
         <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.default_org" :value.sync="rule.organization" :options="organizations" @change="loadCloseReasons()"/>
         <CInput label='Rule Name' v-model="rule.name"/>
         <CTextarea v-model="rule.description" placeholder="Give a brief description of what this rule will do and why." label="Description"/>
-        <span v-if="current_user.default_org">
-            <label>Global Rule</label><br>
-            <CSwitch :checked.sync="rule.global_rule" label-on="Yes" label-off="No" color="success"/>
-        </span>
+        <CRow>
+            <CCol v-if="current_user.default_org">
+              <label>Global Rule</label><br>
+              <CSwitch :checked.sync="rule.global_rule" label-on="Yes" label-off="No" color="success"/>
+            </CCol>
+        </CRow>
       </CCol>
     </CRow>
     <div  v-if="modal_mode === 'view' || modal_mode === 'edit'">
@@ -471,6 +479,7 @@ export default {
         target_case: "",
         show_testing_pane: false,
         show_actions: false,
+        run_retroactively: true,
         range: {
           start: new Date().setDate(new Date().getDate()-7),
           end: new Date()
@@ -728,6 +737,7 @@ export default {
           dismiss_reason: this.close_reasoon ? this.close_reasons.filter(c => c.value === this.close_reason)[0].label : null,
           dismiss: this.dismiss_event,
           event_signature: this.event_signature,
+          run_retroactively: this.run_retroactively,
           query: this.query
         }
 
