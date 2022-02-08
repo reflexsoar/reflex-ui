@@ -18,21 +18,26 @@
             </CRow>
             <CRow>
                 <CCol>
-                    <CTabs variant="pills" :activeTab.sync="step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
+                    <CTabs :fade="false" variant="pills" :activeTab="step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
                         <CTab title="1. Rule Details">
                             <h4>Rule Details</h4>
                             <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
                             <p v-if="from_card">This rule will apply to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
+                            <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations && !from_card" :value.sync="organization" :options="organizations" @change="loadCloseReasons()"/>
                             <CInput label="Rule Name"  placeholder="Enter a friendly name for this rule" :value.sync="name" required></CInput>
-                            <CTextarea rows="5" label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
-                            <span v-if="current_user.default_org && !from_card">
-                                <label>Global Rule</label><br>
-                                <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
-                            </span>
+                            <CTextarea rows="5" label="Rule description" v-model.lazy="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
                             <CRow>
-                                <CCol>
+                                <CCol col=6>
+                                    <span v-if="current_user.default_org && !from_card">
+                                        <label>Global Rule</label><br>
+                                        <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/><br>
+                                        <small class="text-muted">Global Rules exist in the Default Tenant and will apply to every tenant in the Reflex system.  Matches on Global rules do not stop further rule processing.</small>
+                                    </span>
+                                </CCol>
+                                <CCol col=6>
                                     <label>Run rule retroactively after creation?</label><br>
-                                    <CSwitch :checked.sync="run_retroactively" label-on="Yes" label-off="no" color="success"/>
+                                    <CSwitch :checked.sync="run_retroactively" label-on="Yes" label-off="no" color="success"/><br>
+                                    <small class="text-muted">When the rule is saved, Reflex will retroactively attempt to match this rule to any event that is currently in a New state</small>
                                 </CCol>
                             </CRow>
                         </CTab>
@@ -57,7 +62,12 @@
                             <prism-editor rows="10" @keydown="test_failed=true" class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
                             <CRow>
                                 <CCol lg="4">
-                                    <CInput description="Reflex will fetch the last N events and compare this rule to them" label="Number of test events" v-model="event_count"><template #append><CButton color="primary" v-bind:disabled="test_running" @click="testRule()"><span v-if="!test_running">Test Rule</span><span v-else><CSpinner size="sm"/>&nbsp;Testing...</span></CButton></template></CInput>
+                                    <CInput description="Reflex will fetch the last N events and compare this rule to them" label="Number of test events" v-model="event_count">
+                                        <template #append>
+                                            <CButton v-if="from_card" color="primary" v-bind:disabled="test_running" @click="test_query()"><span v-if="!test_running">Test Rule</span><span v-else><CSpinner size="sm"/>&nbsp;Testing...</span></CButton>
+                                            <CButton v-if="!from_card" color="primary" v-bind:disabled="test_running" @click="testRule()"><span v-if="!test_running">Test Rule</span><span v-else><CSpinner size="sm"/>&nbsp;Testing...</span></CButton>
+                                        </template>
+                                    </CInput>
                                 </CCol>
                                 <CCol lg="8">
                                 <v-date-picker
@@ -87,8 +97,9 @@
                             </v-date-picker>
                             </CCol>
                             <CCol col=6>
-                                <label>Include Results</label><br>test_query()
-                                <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="return_events"></CSwitch>&nbsp;<CButton style="margin-top: -20px" size="sm" color="success" v-if="return_events && test_complete && !test_failed" @click="show_test_results = !show_test_results">View Results</CButton>
+                                <label>Include Results</label><br>
+                                <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="return_events"></CSwitch>&nbsp;<CButton style="margin-top: -20px" size="sm" color="success" v-if="return_events && test_complete && !test_failed" @click="show_test_results = !show_test_results">View Results</CButton><br>
+                                <small class='text-muted'>Selecting this option will present all matched events in a new window.</small>
                             </CCol>
                             <CCol class='text-right' v-if="from_card">
                                 <label>&nbsp;</label><br>
@@ -272,7 +283,7 @@ export default {
         rule_observables: Array,
         from_card: {
             type: Boolean,
-            default: true
+            default: false
         }
     },
     computed: mapState(['settings','current_user']),
@@ -359,7 +370,10 @@ export default {
                 input: 'YYYY-MM-DD h:mm A'
             },
             return_events: false,
-            event_count: 1
+            event_count: 1,
+            organization: "",
+            organizations: [],
+            rule: {}
         }
     },
     watch: {
@@ -377,7 +391,9 @@ export default {
             if(this.modalStatus) {
                 this.test_failed = true
                 this.loadData()
-                this.query = this.generateRule()
+                if(this.from_card) {
+                    this.query = this.generateRule()
+                }                    
                 this.name = "Rule for event signature "+this.event_signature
                 this.caseFind("*")
                 this.loadCloseReasons()
@@ -439,6 +455,47 @@ export default {
                 this.test_running = false
                 this.test_failed = true                
                 this.test_result = err.response.data.message
+            })
+        },
+        testRule() {
+            let data = {
+            'uuid': '',            
+            'query': this.rule.query ? this.rule.query : this.query,
+            'event_count': parseInt(this.event_count),
+            'return_results': this.return_events,
+            'start_date': this.range.start,
+            'end_date': this.range.end
+            }
+
+            if(!this.global_rule) {
+                data['organization'] = this.organization ? this.organization : null;
+            }
+            this.test_result = ""
+            this.test_complete = false
+            this.test_running = true
+            this.$store.dispatch('testEventRuleQuery', data).then(resp => {
+            if (resp.data.success == true)
+            {
+                this.test_result = resp.data.message
+                if(this.return_events) {
+                this.test_results = resp.data.hits
+                }
+                this.test_result_color = "success"
+                this.test_failed = false
+
+            } else {
+                this.test_result = resp.data.message + ". Try increasing the number of test events or increasing your date range."
+                this.test_result_color = "warning"
+                this.test_failed = true
+            }
+            this.test_running = false
+            this.test_complete = true
+            }).catch(err => {
+            this.test_complete = true
+            this.test_running = false
+            this.test_failed = true
+            this.test_result = err.response.data.message
+            this.test_result_color = "danger"
             })
         },
         createEventRule() {
@@ -538,7 +595,18 @@ export default {
             this.selected_tags.push(t)
         },
         loadCloseReasons() {
-            let organization = this.event_organization
+            let organization = this.organization
+
+            if(this.from_card) {
+                organization = this.event_organization
+            }
+
+            if(this.current_user.default_org) {
+                this.$store.dispatch('getOrganizations').then(resp => {
+                    this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+                })
+            }
+            
             this.$store.dispatch('getCloseReasons', {organization}).then(resp => {
             this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
             })
