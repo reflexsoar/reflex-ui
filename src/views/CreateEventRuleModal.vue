@@ -1,6 +1,6 @@
 <template>
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
-    <CModal title="Create Event Rule" :centered="true" size="lg" :show.sync="modalStatus" :closeOnBackdrop="false">
+    <CModal title="Create Event Rule" :centered="false" size="xl" :show.sync="modalStatus" :closeOnBackdrop="false">
         <template #header>
             <h5>Create Event Rule</h5>
             <span class='text-right'>
@@ -14,58 +14,89 @@
                     <CAlert :show.sync="error" color="danger" closeButton>
                         {{error_message}}
                     </CAlert>
-                    <CForm @submit.prevent="createEventRule" id="event_rule_form">
-                        <!--<CAlert :show="step == 3 && !test_failed" color="danger" closeButton>
-                            Your query matches more than <b>1000</b> events, tuning of source system is recommended.
-                        </CAlert>-->
-                        <div name="create-event-rule-step-1" v-if="step == 1">
-                        <h4>Rule Details</h4>
-                        <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
-                        <p>This rule will apply to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
-
-                        <p>
-                            <b>Base Event Signature: </b>{{event_signature}}
-                        </p>
-                        <CInput label="Rule Name"  placeholder="Enter a friendly name for this rule" :value.sync="name" required></CInput>
-                        <CTextarea label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
-                        <!--<span v-if="current_user.default_org">
-                            <label>Global Rule</label><br>
-                            <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
-                        </span>-->
-                        <CRow>
-                            <CCol>
-                                <label>Run rule retroactively after creation?</label><br>
-                                <CSwitch :checked.sync="run_retroactively" label-on="Yes" label-off="no" color="success"/>
-                            </CCol>
-                        </CRow>
-                        </div>
-                        <div name="create-case-template-step-2" v-if="step == 2">
-                            <h4>Expiration</h4>
-                            <p>Setting an expiration on the rule is recommended to allow analysts to revisit Events at a future state. There may be use cases for non-expiration rules but we can't think of any...</p>
-                            <label>Expire</label>
-                            <CRow>
-                                <CCol col="12">
-                                    <CSwitch color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="expire"></CSwitch>
-                                </CCol>
-                            </CRow><br>
-                            <CInput label="Expiration period (days)" v-bind:disabled="!expire" placeholder="Enter a period in number of days" v-model="expire_days"></CInput>
-                        
-                        </div>
-                        <div name="create-case-template-step-3" v-if="step == 3">
-                            <h4>Event Query</h4>
-                            <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://docs.reflexsoar.com/en/latest/rql/" target="_new">here</a> for a syntax reference.</p>
-                            <prism-editor @keydown="test_failed=true" class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
-                            <!--<CTextarea v-model="query" rows="5" style="font-family: Consolas"></CTextarea>-->
+                </CCol>
+            </CRow>
+            <CRow>
+                <CCol>
+                    <CTabs variant="pills" :activeTab.sync="step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
+                        <CTab title="1. Rule Details">
+                            <h4>Rule Details</h4>
+                            <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
+                            <p v-if="from_card">This rule will apply to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
+                            <CInput label="Rule Name"  placeholder="Enter a friendly name for this rule" :value.sync="name" required></CInput>
+                            <CTextarea rows="5" label="Rule description" v-model="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
+                            <span v-if="current_user.default_org && !from_card">
+                                <label>Global Rule</label><br>
+                                <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/>
+                            </span>
                             <CRow>
                                 <CCol>
-                                    <CButton color="primary" size="sm" @click="test_query()" v-bind:disabled="test_running"><CSpinner v-if="test_running" size="sm"/>&nbsp;Test Query</CButton><i><span v-if="test_running">&nbsp;Running test...</span><span v-if="test_result">&nbsp;{{test_result}}</span></i>
-                                </CCol>
-                                <CCol class="text-right">
-                                    <CButton color="secondary" size="sm" @click="showDrawer()">View Base Event</CButton>
+                                    <label>Run rule retroactively after creation?</label><br>
+                                    <CSwitch :checked.sync="run_retroactively" label-on="Yes" label-off="no" color="success"/>
                                 </CCol>
                             </CRow>
-                        </div>
-                        <div name="create-case-template-step-4" v-if="step == 4">
+                        </CTab>
+                        <CTab title="2. Expiration">
+                            <h4>Expiration</h4>
+                            <p>Setting an expiration will cause this rule to disable itself at a future date and all new events will not be acted on by this rule.</p>
+                            
+                            <CRow>
+                                <CCol col="1">
+                                    <label>Expire</label><br>
+                                    <CSwitch color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="expire"></CSwitch>
+                                </CCol>
+                                <CCol>
+                                    <CInput label="Expiration period (days)" v-bind:disabled="!expire" placeholder="Enter a period in number of days" v-model="expire_days"></CInput>
+                                </CCol>
+                            </CRow>
+                            
+                        </CTab>
+                        <CTab title="3. Event Query">
+                            <h4>Event Query</h4>
+                            <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://docs.reflexsoar.com/en/latest/rql/" target="_new">here</a> for a syntax reference.</p>
+                            <prism-editor rows="10" @keydown="test_failed=true" class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
+                            <CRow>
+                                <CCol lg="4">
+                                    <CInput description="Reflex will fetch the last N events and compare this rule to them" label="Number of test events" v-model="event_count"><template #append><CButton color="primary" v-bind:disabled="test_running" @click="testRule()"><span v-if="!test_running">Test Rule</span><span v-else><CSpinner size="sm"/>&nbsp;Testing...</span></CButton></template></CInput>
+                                </CCol>
+                                <CCol lg="8">
+                                <v-date-picker
+                                    v-model="range"
+                                    mode="dateTime"
+                                    :masks="masks"
+                                    is-range
+                                >
+                                    <template v-slot="{ inputValue, inputEvents }">
+                                    <CRow>
+                                        <CCol>
+                                            <CInput description="Start of search period" label="Start Time" :value="inputValue.start" v-on="inputEvents.start">
+                                                <template #prepend>
+                                                    <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                                                </template>
+                                            </CInput>
+                                        </CCol>
+                                        <CCol>
+                                            <CInput label="End Time" :value="inputValue.end" v-on="inputEvents.end">
+                                                <template #prepend>
+                                                    <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                                                </template>
+                                            </CInput>
+                                        </CCol>
+                                    </CRow>
+                                </template>
+                            </v-date-picker>
+                            </CCol>
+                            <CCol col=6>
+                                <label>Include Results</label><br>test_query()
+                                <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="return_events"></CSwitch>&nbsp;<CButton style="margin-top: -20px" size="sm" color="success" v-if="return_events && test_complete && !test_failed" @click="show_test_results = !show_test_results">View Results</CButton>
+                            </CCol>
+                            <CCol class='text-right' v-if="from_card">
+                                <label>&nbsp;</label><br>
+                                <CButton color="secondary" size="sm" @click="showDrawer()">View Source Event</CButton>
+                            </CCol>
+                        </CRow>
+                        </CTab>
+                        <CTab title="4. Actions">
                             <h4>Actions</h4>
                                             
                             <label>Merge into Case</label>
@@ -137,8 +168,8 @@
                                     <CSelect v-bind:disabled="dismiss_event || !update_severity" :options="severities" :value.sync="target_severity" placeholder="Select a new severity for matching events..."/>
                                 </CCol>
                             </CRow>
-                        </div>
-                        <div name="create-case-template-step-5" v-if="step == 5">
+                        </CTab>
+                        <CTab title="5. Review">
                             <h4>Review</h4>
                             <b>Rule Name: </b> {{name}}<br>
                             <b>Description: </b><br>{{description}}<br><br>
@@ -148,6 +179,31 @@
                                 <li v-if="merge_into_case">Merge in to case <b>#{{target_case.id}} - {{target_case.title}}</b></li>
                                 <li v-if="dismiss_event">Immediately dismiss event</li>
                             </ul>
+                        </CTab>
+                    </CTabs>
+                </CCol>
+            </CRow>
+            <CRow>
+                <CCol>                    
+                    <CForm @submit.prevent="createEventRule" id="event_rule_form">
+                        <!--<CAlert :show="step == 3 && !test_failed" color="danger" closeButton>
+                            Your query matches more than <b>1000</b> events, tuning of source system is recommended.
+                        </CAlert>-->
+                        <div name="create-event-rule-step-1" v-if="step == 1">
+                        
+                        </div>
+                        <div name="create-case-template-step-2" v-if="step == 2">
+                            
+                        
+                        </div>
+                        <div name="create-case-template-step-3" v-if="step == 3">
+                            
+                        </div>
+                        <div name="create-case-template-step-4" v-if="step == 4">
+                            
+                        </div>
+                        <div name="create-case-template-step-5" v-if="step == 5">
+                            
                         </div>
                     </CForm>
                 </CCol>
@@ -164,7 +220,7 @@
 </div>
 </template>
 
-<style>
+<style scoped>
   /* required class */
   .my-editor {
     /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
@@ -185,6 +241,10 @@
   /* optional class for removing the outline */
   .prism-editor__textarea:focus {
     outline: none;
+  }
+
+  .modal-body {
+      padding-left: 0px;
   }
 </style>
 <script>
@@ -209,7 +269,11 @@ export default {
         event_signature: String,
         event_organization: String,
         source_event_uuid: String,
-        rule_observables: Array
+        rule_observables: Array,
+        from_card: {
+            type: Boolean,
+            default: true
+        }
     },
     computed: mapState(['settings','current_user']),
     data(){
@@ -285,11 +349,26 @@ export default {
             selected_actions: [],
             error: false,
             error_message: "",
-            submitted: false
+            submitted: false,
+            step: 0,
+            range: {
+                start: new Date().setDate(new Date().getDate()-7),
+                end: new Date()
+            },
+            masks: {
+                input: 'YYYY-MM-DD h:mm A'
+            },
+            return_events: false,
+            event_count: 1
         }
     },
     watch: {
         show: function() {
+            if(this.from_card) {
+                this.event_count = this.events.length
+            } else {
+                this.event_count = 1000
+            }
             this.error = false
             this.error_message = ""
             this.modalStatus = this.show
@@ -400,7 +479,7 @@ export default {
             }).catch(err => {
                 this.submitted = false
                 this.error = true
-                this.step = 1
+                this.step = 0
                 this.error_message = err.response.data.message
             })
         },
@@ -440,7 +519,7 @@ export default {
             this.merge_into_case = false
             this.dismiss_event = false
             this.target_case = []
-            this.step = 1
+            this.step =0
             this.test_complete = false
             this.test_failed = false
             this.test_result = ""
