@@ -199,12 +199,12 @@ export default {
   }
 },
   methods: {
-    reloadAgents(page) {
-    this.loading = true
-    this.$store.dispatch('getCredentials', {page: page}).then(() => {
-      this.loading = false
-    })
-  },
+    reloadCredentials(page) {
+      this.loading = true
+      this.$store.dispatch('getCredentials', {page: page}).then(() => {
+        this.loading = false
+      })
+    },
     mapOrgToName(uuid) {
       let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
       if (org.length > 0) {

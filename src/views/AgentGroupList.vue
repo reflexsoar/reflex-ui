@@ -1,6 +1,6 @@
 <template>
   <CRow><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
-    <CCol col>{{inputs_list}}
+    <CCol col>
       <div style="padding: 10px;"><CButton color="primary" @click="newAgentGroup()">New Agent Group</CButton></div>
       <CDataTable
           :hover="hover"
@@ -48,6 +48,9 @@
       :show.sync="agentGroupModal"
     >
       <div>
+        <CAlert :show.sync="error" color="danger" closeButton>
+            {{error_message}}
+        </CAlert>
         <CForm @submit.prevent="modal_action" >
             <p class="text-muted">Fill out the form below to create a new agent group. Agent Groups allow you to group agents into collections that plugins can use to target certain agents.</p>
             <CSelect
@@ -75,8 +78,8 @@
             >
             </CTextarea>
             
-            <div v-if="modal_button_text == 'Edit'"><multiselect :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list" :multiple="true"></multiselect></div>
-            <div v-else><multiselect :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list" :multiple="true"></multiselect></div>
+            <div v-if="modal_button_text == 'Edit'"><multiselect :disabled="organization == ''" :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" @search-change="searchInputs" :options="input_list" :multiple="true"></multiselect></div>
+            <div v-else><multiselect :disabled="organization == ''" :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" @search-change="searchInputs" :options="input_list" :multiple="true"></multiselect></div>
             <CRow>
               <CCol col="12" class="text-right">
                 
@@ -85,7 +88,7 @@
         </CForm>
       </div>
       <template #footer>
-        <CButton @click="agentGroupModal = false" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
         <CButton @click="modal_action" class="px-4" type="submit" color="primary">{{modal_button_text}}</CButton>
       </template>
     </CModal>
@@ -116,7 +119,7 @@ export default {
     dark: Boolean,
     alert: false  
     },
-    computed: mapState(['current_user','agent_group','agent_groups','organizations', 'pagination']),
+    computed: mapState(['current_user','agent_group','agent_groups','organizations','input_list','pagination']),
     created: function () {
         if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
@@ -141,9 +144,10 @@ export default {
         modal_action: this.createAgentGroup,
         modal_button_text: "Create",
         target_agent_group: "",
-        input_list: [],
-        inputs_list: [],
-        active_page: 1
+        active_page: 1,
+        pagination: {},
+        error: false,
+        error_message: ""
       }
     },
     watch: {
@@ -152,9 +156,18 @@ export default {
       }
     },
     methods: {
+      dismiss() {
+        this.name = ""
+        this.description = ""
+        this.inputs = []
+        this.agentGroupModal = false
+        this.error = false
+        this.error_message = ""
+      },
       reloadGroups(page){
         this.loading = true
-        this.$store.dispatch('getAgentGroups', {page: page}).then(() => {
+        this.$store.dispatch('getAgentGroups', {page: page}).then(resp => {
+          this.pagination = resp.data.pagination
           this.loading = false
         })
       },
@@ -166,6 +179,9 @@ export default {
           return "Unknown"
         }
       },
+      searchInputs(name) {
+        this.$store.dispatch('getInputList', {organization: this.organization, name: name})
+      },
       refreshInputs(event) {
         let organization = this.organization
         
@@ -173,9 +189,7 @@ export default {
           let organization = event.target.value
         }
           
-        this.$store.dispatch('getInputList', {organization: organization, page_size: 50}).then(resp => {
-          this.input_list = this.$store.getters.inputs_list
-        })
+        this.$store.dispatch('getInputList', {organization: organization, page_size: 5})
       },
       formattedOrganizations() {
         return this.organizations.map((o) => { return {label: o.name, value: o.uuid}})
@@ -197,7 +211,12 @@ export default {
         let inputs = this.inputs
         this.$store.dispatch('createAgentGroup', { name, description, organization, inputs })
         .then(resp => {
+          this.error = false
+          this.error_message = ""
           this.agentGroupModal = false
+        }).catch(err => {
+          this.error = true
+          this.error_message = err.response.data.message
         })
       },
       updateAgentGroup() {
@@ -210,7 +229,12 @@ export default {
 
         }
         this.$store.dispatch('updateAgentGroup', {uuid, data}).then(resp => {
+          this.error = false
+          this.error_message = ""
           this.agentGroupModal = false
+        }).catch(err => {
+          this.error = true
+          this.error_message = err.response.data.message
         })
       },
       editAgentGroup(uuid) {         
@@ -224,7 +248,12 @@ export default {
           this.inputs = this.agent_group.inputs
           this.target_agent_group = uuid
           this.refreshInputs()
+          this.error_message = ""
+          this.agentGroupModal = false
           this.agentGroupModal = true
+        }).catch(err => {
+          this.error = true
+          this.error_message = err.response.data.message
         })
       },
       addSuccess: function() {

@@ -101,7 +101,8 @@ const state = {
   network_data: {},
   loading: false,
   quick_filters: true,
-  source_input: {}
+  source_input: {},
+  input_list: []
 }
 
 const mutations = {
@@ -412,6 +413,7 @@ const mutations = {
   },
   save_inputs(state, inputs) {
     state.inputs = inputs
+    state.input_list = inputs.map(item => { return {'name': item.name, 'value': item.value}})
   },
   save_input(state, input) {
     state.input = input
@@ -941,7 +943,6 @@ const actions = {
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_agent_groups', resp.data.groups)
-        commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })
       .catch(err => {
@@ -1150,12 +1151,15 @@ const actions = {
       })
     })
   },
-  getInputList({commit}, {organization=null}) {
+  getInputList({commit}, {organization=null, name=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/input`
       if(organization) {
         url += `?organization=${organization}`
+      }
+      if(name) {
+        url += `&name=${name}`
       }
       Axios({url: url, method: 'GET'})
       .then(resp => {
