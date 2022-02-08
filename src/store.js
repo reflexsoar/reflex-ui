@@ -413,7 +413,9 @@ const mutations = {
   },
   save_inputs(state, inputs) {
     state.inputs = inputs
-    state.input_list = inputs.map(item => { return {'name': item.name, 'value': item.value}})
+  },
+  save_inputs_list(state, inputs) {
+    state.input_list = inputs.map(item => { return {'name': item.name, 'uuid': item.uuid}})
   },
   save_input(state, input) {
     state.input = input
@@ -604,7 +606,6 @@ const getters = {
       return "Unknown"
     }
   },
-  inputs_list: state => { return state.inputs.map(item => { return {'name': item.name, 'value': item.uuid }})},
   source_input: state => { return state.source_input },
   lists: state => { return state.lists },
   quick_filters: state => { return state.quick_filters },
@@ -1164,8 +1165,7 @@ const actions = {
       Axios({url: url, method: 'GET'})
       .then(resp => {
         let credentials = []
-        //resp.data.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name}))
-        commit('save_inputs', resp.data.inputs)
+        commit('save_inputs_list', resp.data.inputs)
         resolve(resp)
       })
       .catch(err => {

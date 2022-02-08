@@ -27,10 +27,16 @@
                 </td>
               </template>
       <template #actions="{item}">
+        
         <td>
           <CButton @click="editAgentGroup(item.uuid)" color="secondary" size="sm"><CIcon name='cilPencil'/></CButton>
         </td>
       </template>
+      <template #agent_count="{item}">
+          <td>
+            {{item.members? item.members.length : 0}}
+          </td>
+        </template>
     </CDataTable>
     <CRow>
       <CCol>
@@ -77,9 +83,8 @@
               rows=5
             >
             </CTextarea>
-            
-            <div v-if="modal_button_text == 'Edit'"><multiselect :disabled="organization == ''" :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" @search-change="searchInputs" :options="input_list" :multiple="true"></multiselect></div>
-            <div v-else><multiselect :disabled="organization == ''" :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" @search-change="searchInputs" :options="input_list" :multiple="true"></multiselect></div>
+            <div v-if="modal_button_text == 'Edit'"><multiselect :disabled="organization === null" :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" @search-change="searchInputs" :options="input_list" :multiple="true"></multiselect></div>
+            <div v-else><multiselect :disabled="organization === null" :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" @search-change="searchInputs" :options="input_list" :multiple="true"></multiselect></div>
             <CRow>
               <CCol col="12" class="text-right">
                 
@@ -119,7 +124,7 @@ export default {
     dark: Boolean,
     alert: false  
     },
-    computed: mapState(['current_user','agent_group','agent_groups','organizations','input_list','pagination']),
+    computed: mapState(['current_user','agent_group','agent_groups','organizations','input_list']),
     created: function () {
         if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
@@ -135,7 +140,7 @@ export default {
         name: "",
         description: "",
         url: "",
-        organization: "",
+        organization: null,
         inputs: [],
         agentGroupModal: false,
         dismissCountDown: 10,
@@ -145,9 +150,12 @@ export default {
         modal_button_text: "Create",
         target_agent_group: "",
         active_page: 1,
-        pagination: {},
         error: false,
-        error_message: ""
+        error_message: "",
+        pagination: {
+          'pages': 1,
+          'page_size': 10
+        }
       }
     },
     watch: {
@@ -168,6 +176,7 @@ export default {
         this.loading = true
         this.$store.dispatch('getAgentGroups', {page: page}).then(resp => {
           this.pagination = resp.data.pagination
+          console.log(resp.data.pagination)
           this.loading = false
         })
       },
@@ -245,12 +254,13 @@ export default {
           this.name = this.agent_group.name
           this.organization = this.agent_group.organization
           this.description = this.agent_group.description
-          this.inputs = this.agent_group.inputs
+          this.inputs = this.agent_group.inputs.map(item => { return {'name': item.name, 'uuid': item.uuid}})
           this.target_agent_group = uuid
           this.refreshInputs()
           this.error_message = ""
           this.agentGroupModal = false
           this.agentGroupModal = true
+          
         }).catch(err => {
           this.error = true
           this.error_message = err.response.data.message
@@ -266,6 +276,7 @@ export default {
       loadData: function() {
         this.loading = true
         this.$store.dispatch('getAgentGroups', {}).then(resp => {
+          this.pagination = resp.data.pagination
           this.loading = false
         })
       },
