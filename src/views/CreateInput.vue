@@ -152,7 +152,7 @@
                             <CInput v-model="config['search_period']" label="Search Period" description="How far back in time to go in the source index"/>
                           </CCol>
                           <CCol col=4>
-                            <label>Tags</label><br>
+                            <label>Static Tags</label><br>
                             <multiselect v-model="config['static_tags']" :close-on-select="false" :options="[]" placeholder="Select the static tags to apply to events" :taggable="true" tag-placeholder="Add new static tag" :multiple="true" @tag="addESHost(config['static_tags'], $event)"/><br>
                           </CCol>
                         </CRow>

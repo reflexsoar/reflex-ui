@@ -61,11 +61,12 @@ export default {
         getLists(dt, organization=null) {
             let data = {
                 data_type: dt,
-                organization: organization
+                organization: organization,
+                page_size: 50
             }
             let data_type = [dt]
             this.$store.dispatch('getLists', data).then(resp => {
-                this.lists = resp.data
+                this.lists = resp.data.lists
                 this.lists_formatted = this.lists.filter(l => l.url === null).map(l => ({'value':l.name, 'id': l.uuid}))
             })
             return this.lists

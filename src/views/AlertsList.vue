@@ -2,7 +2,6 @@
   <CRow>
     <CCol col="12">
       <h2>Events<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
-
       <event-drawer :event_data="event_data"></event-drawer>
       <CRow>
         <CCol col="12">
@@ -150,7 +149,7 @@
                 v-bind:disabled="selected.length == 0 || selectedOrgLength() > 1"
                 class='d-inline-block'
             >
-                <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
+                <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="startDismissEvent()">Dismiss Event</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
@@ -252,7 +251,7 @@
                     <input type="checkbox" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})" style="cursor: pointer;">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
-                  <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid).slice(0,5)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip="{'content': encodeURI(obs.value)}" size="sm" style="margin-top:5px; margin-bottom:5px;" @click.prevent.stop="showActionMenu($event, obs)"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="getEventObservables(event.uuid).length > 5" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(event.uuid).slice(5))}"><small>&nbsp;+{{ getEventObservables(event.uuid).length - 5}}</small></span><br>
+                  <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid).slice(0,5)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip="{'content': encodeURI(obs.value)}" size="sm" style="margin-top:5px; margin-bottom:5px;" @click.prevent.stop="showActionMenu($event, obs)"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="getEventObservables(event.uuid).length > max_observables" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(event.uuid).slice(5))}"><small>&nbsp;+{{ getEventObservables(event.uuid).length - 5}}</small></span><br>
                   <!--<CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid)" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>-->
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -592,10 +591,15 @@ export default {
         selected_search_option: "Title",
         search_text: "",
         selected_orgs: {},
-        multiple_org_dismiss: {}
+        multiple_org_dismiss: {},
+        max_observables: 15
       }
     },
     methods: {
+      startDismissEvent() {
+        this.loadCloseReasons()
+        this.dismissEventModal = true
+      },
       resetFilters() {
         this.observableFilters = [{'filter_type':'status','data_type':'status','value':'New'}]
         this.filterEvents()
@@ -732,7 +736,14 @@ export default {
       },
       loadCloseReasons() {
 
-        let organization = this.target_event ? this.target_event.organization : null
+        let organization = ""
+        if(this.target_event) {
+          organization = this.target_event.organization
+        }
+
+        if(this.selectedOrgLength() == 1) {
+          organization = Object.keys(this.selected_orgs)[0]
+        }
 
         this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
           this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
@@ -1192,8 +1203,8 @@ export default {
 
               // Go through each selected organization and remove the item
               for(let o in this.selected_orgs) {
-                if(this.selected_orgs[o].includes(e.uuid)) {
-                  this.selected_orgs[o] = this.selected_orgs[o].filter(item => item != e.uuid)
+                if(this.selected_orgs[o].events.includes(e.uuid)) {
+                  this.selected_orgs[o].events = this.selected_orgs[o].events.filter(item => item != e.uuid)
                 }
                 
                 // If no more events are selected for that organization remove the organization UUID
