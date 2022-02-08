@@ -3,6 +3,13 @@
   <CCol col>
     <h1>Create Input<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/inputs')"><CIcon name='cil-book' size="lg"/></button></h1>
     <p class="text-muted">Complete the wizard below to create a new input.</p>
+    <CAlert :show.sync="from_source_input" color="warning">
+      <b>WARNING: </b>This input has been cloned from another input.  Please verify all fields before submitting.  The following fields are not copied:<br>
+      <ul style="margin-bottom: 0px">
+        <li>Organization</li>
+        <li>Credential</li>
+      </ul>
+    </CAlert>
     <CForm @submit.prevent="createInput">
     <CCard><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
         <CCardBody>
@@ -174,7 +181,7 @@
                         <p>Field mappings control how source data is mapped to a data type in Reflex.  Assigning a source log field to a data type allows you to leverage
                           functionality in Reflex for that specific data type.  Mapping an IP address to the <b>IP</b> data type for example will allow you to do CIDR 
                           notation checks on it in RQL.</p>
-                        <CCard style="border-top: 0px;">
+                        <CCard>
                           <CCardBody style="padding:0px;">
                               <CRow style="padding-bottom:10px;">
                                 <CCol col="12">
@@ -312,7 +319,7 @@
                           </CCol>
                         </CRow>                    
                         <h5>Field Mappings</h5>
-                        <CCard style="border-top: 0px;">
+                        <CCard>
                           <CCardBody style="padding:0px;">
                             <CDataTable
                           :responsive="true"
@@ -395,6 +402,7 @@ export default {
           this.credential = ''
           this.config = this.source_input.config
           this.plugin = this.source_input.plugin
+          this.source_input.tags.forEach(tag => this.addTag(tag))
           this.field_mapping = this.source_input.field_mapping
         }
       },
@@ -527,7 +535,12 @@ export default {
         return
       }
     },
-    computed: mapState(['current_user','credential_list','organizations','source_input']),
+    computed: {
+      from_source_input: function() {
+        return this.source_input != null
+      },
+      ...mapState(['current_user','credential_list','organizations','source_input'])
+    },
     data(){
       return {
         name: "",

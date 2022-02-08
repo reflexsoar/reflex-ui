@@ -2,7 +2,7 @@
   <CRow>
     <CCol>
       <h1>Inputs<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/inputs')"><CIcon name='cil-book' size="lg"/></button></h1><br>
-      <CButton color="primary" @click="newInput()">New Input</CButton><br><br>{{source_input}}
+      <CButton color="primary" @click="newInput()">New Input</CButton><br><br>
       <CCard>
           <CCardHeader>
               <b>Inputs</b>
@@ -24,7 +24,7 @@
               >
               <template #name="{item}">
                   <td>
-                      <b><router-link :to="`${item.uuid}`">{{item.name}}</router-link></b>
+                      <b>{{item.name}}</b>
                   </td>
               </template>
               <template #organization="{item}">
@@ -39,7 +39,8 @@
               </template>
               <template #actions="{item}">
                 <td class='text-right'>
-                  <CButton color="secondary" @click="cloneInput(item.uuid)"><CIcon name="cilCopy"/></CButton>
+                  <CButton color="success" size="sm" :to="item.uuid"><CIcon name="cilPencil"/></CButton>&nbsp;
+                  <CButton color="secondary" size="sm" @click="cloneInput(item.uuid)"><CIcon name="cilCopy"/></CButton>
                 </td>
               </template>
               </CDataTable>

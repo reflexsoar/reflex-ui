@@ -29,7 +29,7 @@
       <template #actions="{item}">
         
         <td>
-          <CButton @click="editAgentGroup(item.uuid)" color="secondary" size="sm"><CIcon name='cilPencil'/></CButton>
+          <CButton @click="editAgentGroup(item.uuid)" color="success" size="sm"><CIcon name='cilPencil'/></CButton>
         </td>
       </template>
       <template #agent_count="{item}">
