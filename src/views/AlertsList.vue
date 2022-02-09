@@ -340,7 +340,7 @@
         </div>
       </div>
       <template #footer>
-        <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
+        <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
     </CModal>
     <CreateCaseModal :show.sync="createCaseModal" :organization="organization" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
@@ -355,7 +355,7 @@
       </div>
       <template #footer>
           <CButton @click="deleteEventModal = !deleteEventModal" color="secondary">Dismiss</CButton>
-        <CButton @click="deleteEvent" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Delete</span></CButton>
+        <CButton @click="deleteEvent" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Delete</span></CButton>
       </template>
     </CModal>
     <vue-simple-context-menu
@@ -714,7 +714,7 @@ export default {
             this.deleteEventModal = false            
           })
         }
-        this.selected = []        
+        this.selected = []          
       },
       dismissEvent() {
         this.dismiss_submitted = true
