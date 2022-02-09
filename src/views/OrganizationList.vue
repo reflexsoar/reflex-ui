@@ -30,8 +30,8 @@
         </template>
         <template #actions="{item}">
           <td style="max-width:150px" class="text-right">
-            <CButton @click="editOrganization(item.uuid)" size="sm" color="primary">Edit</CButton>
-            <CButton :to="`/organization/${item.uuid}`" size="sm" color="primary">Change Settings</CButton>
+            <CButton @click="editOrganization(item.uuid)" size="sm" color="info" v-c-tooltip="{content: 'Edit Organization', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+            <CButton :to="`/organization/${item.uuid}`" size="sm" color="primary" v-c-tooltip="{content: 'Edit Settings', placement:'left'}"><CIcon name='cilSettings'/></CButton>
           </td>
         </template>
       </CDataTable>

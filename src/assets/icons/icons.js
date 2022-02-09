@@ -22,7 +22,8 @@ import {
   cibPaypal,
   cibGooglePay, 
   cibCcAmex,
-  cilChevronCircleRightAlt
+  cilChevronCircleRightAlt,
+  cilLockUnlocked
 } from '@coreui/icons'
 import {
   cifUs,
@@ -41,6 +42,7 @@ import {
   cilCalculator,
   cilCalendar,
   cilCloudDownload,
+  cilCloudUpload,
   cilChartPie,
   cilCheck,
   cilChevronBottom,
@@ -128,6 +130,7 @@ export const iconsSet = Object.assign(
     cilCalculator,
     cilCalendar,
     cilCloudDownload,
+    cilCloudUpload,
     cilChartPie,
     cilCheck,
     cilChevronBottom,
@@ -199,7 +202,8 @@ export const iconsSet = Object.assign(
     cilLifeRing,
     cilReload,
     cilExclamationCircle,
-    cilCopy
+    cilCopy,
+    cilLockUnlocked
   },
   {
     cifUs,

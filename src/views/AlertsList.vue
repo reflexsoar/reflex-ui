@@ -101,9 +101,10 @@
                 <b class='event-stats-title'>{{title}}</b>
                 <div v-if="status == 'loading'" class='event-stats-div' style="overflow-y: scroll; margin:auto; text-align:center; verticle-align:middle;">
                   <CSpinner
-                        color="dark"
+                        color="primary"
                         style="width:3rem;height:3rem;"
                         size="sm"
+                        :grow="true"
                     />
                 </div>
                 <div v-else class="event-stats-div" style="margin-top:5px; overflow-y: scroll">
@@ -142,7 +143,7 @@
         </CCol>
         <CCol class="text-right">
           <div>
-            <CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;
+            <!--<CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;-->
             <CDropdown 
                 :toggler-text="`${selected_count} events`" 
                 color="secondary"
@@ -153,8 +154,10 @@
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
-                <!--<CDropdownDivider/>
-                <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>-->
+                <div v-if="this.$store.getters.user_has_permission('delete_event')">
+                  <CDropdownDivider/>
+                  <CDropdownItem  @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
+                </div>
             </CDropdown>
           </div>
         </CCol>
@@ -163,18 +166,14 @@
         <CCol col="12">
         <div style="margin: auto; text-align:center; verticle-align:middle;">
            <CSpinner
-                color="dark"
+                color="primary"
                 style="width:6rem;height:6rem;"
+                :grow="true"
             />
         </div>
         </CCol>
-      </CRow>           
-      <CRow v-else-if="filtered_events.length == 0">
-      <CCol col="12" class='text-center'>
-          <h1>No Events</h1>
-        </CCol>
       </CRow>
-      <CRow v-else-if="table_view">
+      <!--<CRow v-else-if="table_view">
         <CCol col="12">
         <CCard>
           <CCardBody style="overflow-y:scroll; max-height:600px">
@@ -240,11 +239,11 @@
           </CCardBody>
         </CCard>
         </CCol>
-      </CRow>
-      <CRow v-else>
+      </CRow>-->
+      <CRow v-else @mouseenter="pauseRefresh = true" @mouseleave="pauseRefresh = false">
         <CCol :col="12/columns" v-for="event in filtered_events" :key="event.uuid">
           <CCard :accent-color="getSeverityColor(event.severity)">
-            <CCardBody @mouseenter="pauseRefresh = true" @mouseleave="pauseRefresh = false">
+            <CCardBody>
               <CRow>
                 <CCol col="9">
                   <h4>
@@ -344,7 +343,7 @@
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
     </CModal>
-    <CreateCaseModal :show.sync="createCaseModal" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
+    <CreateCaseModal :show.sync="createCaseModal" :organization="organization" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :event_organization.sync="event_organization" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>
@@ -352,7 +351,7 @@
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
-        <p>This action will apply to <b>{{selected.length}}</b> events.</p>
+        <p>This action will apply to <b>{{selected_count}}</b> events.</p>
       </div>
       <template #footer>
           <CButton @click="deleteEventModal = !deleteEventModal" color="secondary">Dismiss</CButton>
@@ -498,11 +497,11 @@ export default {
       this.loadCloseReasons()
       this.$store.commit('set', ['eventDrawerMinimize', true])      
         
-      this.refresh = setInterval(function() {
-        if(!this.pauseRefresh) {
-          this.loadData()
-        }         
-      }.bind(this), this.settings.events_page_refresh*1000 || 60000)
+      //this.refresh = setInterval(function() {
+      //  if(!this.pauseRefresh) {
+      //    this.loadData()
+      //  }         
+      //}.bind(this), this.settings.events_page_refresh*1000 || 60000)
     },
     data(){
       return {
@@ -592,7 +591,8 @@ export default {
         search_text: "",
         selected_orgs: {},
         multiple_org_dismiss: {},
-        max_observables: 15
+        max_observables: 15,
+        organization: ""
       }
     },
     methods: {
@@ -701,7 +701,7 @@ export default {
       deleteEvent() {
         this.dismiss_submitted = true
         if(this.selected.length == 1) {
-          this.$store.dispatch('deleteEvent', this.selected[0]).then(resp => {
+          this.$store.dispatch('deleteEvents', this.selected).then(resp => {
             this.filtered_events = this.filterEvents()
             this.dismiss_submitted = false
             this.deleteEventModal = false
@@ -1021,6 +1021,7 @@ export default {
         this.selected = [uuid]
         this.related_events_count = event.related_events_count
         this.case_from_card = true
+        this.organization = event.organization
         this.createCaseModal = true
       },
       selectAllNew() {

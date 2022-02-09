@@ -58,7 +58,7 @@
                     <b>Created By: </b>{{case_data.created_by.username}}&nbsp;<br><b>Updated By: </b>{{case_data.updated_by.username}}
                 </CCol>
                 <CCol col="6" class="text-right" @mouseenter="edit_tags_hint = true" @mouseleave="edit_tags_hint = false">
-                    <span v-if="!edit_tags"><CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li><a v-if="edit_tags_hint" @click="editTags()"><CIcon  style="cursor: pointer"  name="cilPencil" size="sm"/></a></span>
+                    <span v-if="!edit_tags"><CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li><a v-if="edit_tags_hint" @click="editTags()"><CIcon  style="cursor: pointer"  name="cilPencil" size="sm"/></a></span>
                     <span v-if="edit_tags">
                         <multiselect 
                             v-model="current_tags" 
@@ -597,7 +597,7 @@ export default {
             this.loadComments()
             this.original_status = this.case_data.status.uuid
             this.filterEvents()
-            this.$store.dispatch('getSettings')
+            this.$store.dispatch('getSettings', {uuid: this.case_data.organization})
             //this.$store.dispatch('getTags')
         
             for(let task in this.tasks) {

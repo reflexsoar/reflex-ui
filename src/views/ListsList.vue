@@ -54,8 +54,8 @@
       </template>
       <template #actions="{item}">
           <td style="min-width:25px" class="text-right">
-            <CButton @click="editListModal(item.uuid)" size="sm" color="primary">Edit</CButton>&nbsp;
-            <CButton @click="deleteListModal(item.uuid)" size="sm" color="danger">Delete</CButton>&nbsp;
+            <CButton @click="editListModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit List', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+            <CButton @click="deleteListModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete List', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
           </td>
         </template>      
       </CDataTable>

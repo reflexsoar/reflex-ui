@@ -38,14 +38,14 @@
         </template>
         <template #organization="{item}">
           <td>
-            <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+            <CButton class="tag" size="lg" color="secondary"> {{mapOrgToName(item.organization)}}</CButton>
           </td>
         </template>
         <template #actions="{item}">
           <td style="max-width:150px" class="text-right">
-            <CButton v-if="item.locked && item.uuid != current_user.uuid && userHas('unlock_user')" @click="unlockUserModal(item.uuid)" size="sm" color="warning" class="unlock">Unlock User</CButton>&nbsp;
-            <CButton v-if="item.uuid != current_user.uuid && userHas('update_user')" @click="editUserModal(item.uuid)" size="sm" color="primary">Edit User</CButton>&nbsp;
-            <CButton v-if="item.uuid != current_user.uuid  && userHas('delete_user')" @click="deleteUserModal(item.uuid)" size="sm" color="danger">Delete User</CButton>&nbsp;
+            <CButton v-if="item.locked && item.uuid != current_user.uuid && userHas('unlock_user')" @click="unlockUserModal(item.uuid)" size="sm" color="warning" class="unlock" v-c-tooltip="{content: 'Unlock User', placement:'left'}"><CIcon name='cilLockUnlocked'/></CButton>&nbsp;
+            <CButton v-if="item.uuid != current_user.uuid && userHas('update_user')" @click="editUserModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content: 'Edit User', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+            <CButton v-if="item.uuid != current_user.uuid  && userHas('delete_user')" @click="deleteUserModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content: 'Delete User', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
           </td>
         </template>
       </CDataTable>
