@@ -414,7 +414,7 @@
   <CModal title="Export Rule" :centered="true" size="lg" :show.sync="showRuleDownloadModal">
     <pre style='max-height: 400px; overflow-x:scroll'>{{rule_json}}</pre>
   </CModal>
-  <CModal title="Export All Rules" :centered="true" size="lg" :show.sync="downloadAllRules">
+  <CModal title="Export All Rules" :centered="true" size="lg" :show.sync="downloadAllRulesModal">
     TEST
   </CModal>
   </div>
@@ -540,6 +540,7 @@ export default {
           update_severity: false,
           selected_tags: [],
           showRuleDownloadModal: false,
+          downloadAllRulesModal: false,
           rule_json: {}
       }
       
@@ -579,6 +580,9 @@ export default {
       }
     },
     methods: {
+      downloadAllRules() {
+
+      },
       downloadRuleAsJSON(uuid) {
         this.rule_json = this.rules.find(item => item.uuid === uuid)
         this.showRuleDownloadModal = true
