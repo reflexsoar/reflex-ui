@@ -20,6 +20,14 @@
                 <CCol>
                     <CTabs :fade="false" variant="pills" :activeTab.sync="step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
                         <CTab title="1. Rule Details">
+                            <CAlert :show="mode == 'clone'" color="warning">
+                            <b>WARNING: </b>This Event Rule has been cloned from another.  Please verify all fields before submitting.  The following fields are not copied:<br>
+                            <ul style="margin-bottom: 0px">
+                                <li>Organization</li>
+                                <li>Target Case</li>
+                                <li>Dismiss Reason</li>
+                            </ul>
+                            </CAlert>
                             <h4>Rule Details</h4>
                             <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
                             <p v-if="from_card">This rule will apply to <b>{{events.length}}</b> Events and any future events matching the title of this event and observables selected in this wizard.</p>
@@ -114,11 +122,11 @@
                             <label>Merge into Case</label>
                             <CRow>                    
                                 <CCol col="1">
-                                    <CSwitch v-bind:disabled="dismiss_event  || tag_event || update_severity" label="Merge into Case" color="success" label-on="Yes" label-off="No" :checked.sync="merge_into_case" style="padding-top:5px"></CSwitch>
+                                    <CSwitch label="Merge into Case" color="success" label-on="Yes" label-off="No" :checked.sync="merge_into_case" style="padding-top:5px"></CSwitch>
                                 </CCol>
                                 <CCol col="11">
                                     <multiselect style="z-index:50"
-                                        v-bind:disabled="!merge_into_case || dismiss_event"
+                                        v-bind:disabled="!merge_into_case"
                                         :options="cases" 
                                         v-model="target_case" 
                                         track-by="uuid" 
@@ -140,22 +148,22 @@
                             <label>Dismiss Event</label>
                             <CRow>                    
                                 <CCol col="1">
-                                    <CSwitch v-bind:disabled="merge_into_case || tag_event || update_severity" color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
+                                    <CSwitch color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
                                 </CCol>
                                 <CCol col="11">
-                                    <CSelect v-bind:disabled="!dismiss_event || merge_into_case" :options="close_reasons" v-model="close_reason" placeholder="Select a reason for dismissing the event..."/>
-                                    <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event || merge_into_case"></CTextarea>
+                                    <CSelect v-bind:disabled="!dismiss_event" :options="close_reasons" v-model="close_reason" placeholder="Select a reason for dismissing the event..."/>
+                                    <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event"></CTextarea>
                                 </CCol>
                             </CRow>
                             <br>
                             <label>Add Tags</label>
                             <CRow>
                                 <CCol col="1">
-                                    <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Tag Event" :checked.sync="tag_event"  style="padding-top:5px"></CSwitch>
+                                    <CSwitch color="success" label-on="Yes" label-off="No"  label="Tag Event" :checked.sync="tag_event"  style="padding-top:5px"></CSwitch>
                                 </CCol>
                                 <CCol>
                                     <multiselect
-                                        v-bind:disabled="dismiss_event || !tag_event"
+                                        v-bind:disabled="!tag_event"
                                         v-model="selected_tags" 
                                         placeholder="Select tags to apply to this input"
                                         :taggable="true"
@@ -174,10 +182,10 @@
                             <label>Update Severity</label>
                             <CRow>
                                 <CCol col="1">
-                                    <CSwitch v-bind:disabled="dismiss_event" color="success" label-on="Yes" label-off="No"  label="Update Severity" :checked.sync="update_severity"  style="padding-top:5px"></CSwitch>
+                                    <CSwitch color="success" label-on="Yes" label-off="No"  label="Update Severity" :checked.sync="update_severity"  style="padding-top:5px"></CSwitch>
                                 </CCol>
                                 <CCol>
-                                    <CSelect v-bind:disabled="dismiss_event || !update_severity" :options="severities" :value.sync="target_severity" placeholder="Select a new severity for matching events..."/>
+                                    <CSelect v-bind:disabled="!update_severity" :options="severities" :value.sync="target_severity" placeholder="Select a new severity for matching events..."/>
                                 </CCol>
                             </CRow>
                         </CTab>
@@ -226,7 +234,7 @@
           <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
           <CButton v-if="step != 0" @click="previousStep()" color="info">Previous</CButton>
           <CButton v-if="step != final_step" @click="nextStep()" :disabled="(test_failed && step == 2) && !from_card" color="primary" >Next</CButton>
-          <CButton v-if="step == final_step && mode == 'create'" @click="createEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton>
+          <CButton v-if="step == final_step && (mode == 'create' || mode =='clone')" @click="createEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton>
           <CButton v-if="step == final_step && mode == 'edit'" @click="editEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Edit</CButton>
       </template>
     </CModal>
@@ -459,7 +467,13 @@ export default {
             this.expire_days = this.event_rule.expire_days
             this.observables = this.event_rule.observables
             this.expire = this.event_rule.expire
-            this.target_case = this.event_rule.target_case ? this.event_rule.target_case : {}
+            if(this.event_rule.target_case_uuid) {
+                this.$store.dispatch('getCase', this.event_rule.target_case_uuid).then(resp => {
+                    this.target_case = resp.data
+                })
+            } else {
+                this.target_case = {}
+            }
             this.query = this.event_rule.query
             this.close_reason = this.event_rule.close_reason
             this.dismiss_comment = this.event_rule.dismiss_comment
@@ -661,6 +675,7 @@ export default {
         },
         reset () {
             this.name = ""
+            this.organization = ""
             this.query = ""
             this.description = ""
             this.expire = true
@@ -668,7 +683,7 @@ export default {
             this.observables = []
             this.merge_into_case = false
             this.dismiss_event = false
-            this.target_case = []
+            this.target_case = {}
             this.step =0
             this.test_complete = false
             this.test_failed = false
