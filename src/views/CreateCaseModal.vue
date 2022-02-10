@@ -125,7 +125,11 @@ export default {
         show: Boolean,
         events: Array,
         related_events_count: Number,
-        case_from_card: Boolean
+        case_from_card: Boolean,
+        organization: {
+            type: String,
+            default: null
+        }
     },
     computed: mapState(['settings','current_user']),
     data(){
@@ -143,7 +147,6 @@ export default {
             submitted: false,
             modalStatus: this.show,
             generate_event_rule: false,
-            organization: null,
             severities: [
                 {'label':'Low', 'value':1},
                 {'label':'Medium', 'value':2},
@@ -168,8 +171,10 @@ export default {
     watch: {
         show: function() {
             this.modalStatus = this.show
-            if(this.current_user.default_org) {
-                this.organization = this.$store.getters.organizations[0].uuid
+            if(!this.organization) {
+                if(this.current_user.default_org) {
+                    this.organization = this.$store.getters.organizations[0].uuid
+                }
             }
         },
         settings: function() {

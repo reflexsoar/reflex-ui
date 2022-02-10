@@ -101,9 +101,10 @@
                 <b class='event-stats-title'>{{title}}</b>
                 <div v-if="status == 'loading'" class='event-stats-div' style="overflow-y: scroll; margin:auto; text-align:center; verticle-align:middle;">
                   <CSpinner
-                        color="dark"
+                        color="primary"
                         style="width:3rem;height:3rem;"
                         size="sm"
+                        :grow="true"
                     />
                 </div>
                 <div v-else class="event-stats-div" style="margin-top:5px; overflow-y: scroll">
@@ -142,7 +143,7 @@
         </CCol>
         <CCol class="text-right">
           <div>
-            <CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;
+            <!--<CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;-->
             <CDropdown 
                 :toggler-text="`${selected_count} events`" 
                 color="secondary"
@@ -153,8 +154,10 @@
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
-                <!--<CDropdownDivider/>
-                <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>-->
+                <div v-if="this.$store.getters.user_has_permission('delete_event')">
+                  <CDropdownDivider/>
+                  <CDropdownItem  @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
+                </div>
             </CDropdown>
           </div>
         </CCol>
@@ -163,18 +166,14 @@
         <CCol col="12">
         <div style="margin: auto; text-align:center; verticle-align:middle;">
            <CSpinner
-                color="dark"
+                color="primary"
                 style="width:6rem;height:6rem;"
+                :grow="true"
             />
         </div>
         </CCol>
-      </CRow>           
-      <CRow v-else-if="filtered_events.length == 0">
-      <CCol col="12" class='text-center'>
-          <h1>No Events</h1>
-        </CCol>
       </CRow>
-      <CRow v-else-if="table_view">
+      <!--<CRow v-else-if="table_view">
         <CCol col="12">
         <CCard>
           <CCardBody style="overflow-y:scroll; max-height:600px">
@@ -240,18 +239,18 @@
           </CCardBody>
         </CCard>
         </CCol>
-      </CRow>
-      <CRow v-else>
+      </CRow>-->
+      <CRow v-else @mouseenter="pauseRefresh = true" @mouseleave="pauseRefresh = false">
         <CCol :col="12/columns" v-for="event in filtered_events" :key="event.uuid">
           <CCard :accent-color="getSeverityColor(event.severity)">
-            <CCardBody @mouseenter="pauseRefresh = true" @mouseleave="pauseRefresh = false">
+            <CCardBody>
               <CRow>
                 <CCol col="9">
                   <h4>
                     <input type="checkbox" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})" style="cursor: pointer;">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
-                  <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid).slice(0,5)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip="{'content': encodeURI(obs.value)}" size="sm" style="margin-top:5px; margin-bottom:5px;" @click.prevent.stop="showActionMenu($event, obs)"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="getEventObservables(event.uuid).length > max_observables" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(event.uuid).slice(5))}"><small>&nbsp;+{{ getEventObservables(event.uuid).length - 5}}</small></span><br>
+                  <CIcon name="cilCenterFocus"/>&nbsp;<li  style="display: inline; margin-right: 2px;" v-for="obs in event.observables.slice(0,max_observables)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip="{'content': encodeURI(obs.value)}" size="sm" style="margin-top:5px; margin-bottom:5px;" @click.prevent.stop="showActionMenu($event, obs)"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="event.observables.length > max_observables" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(event.observables.slice(max_observables))}"><small>&nbsp;+{{ event.observables.length - max_observables}}</small></span><br>
                   <!--<CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid)" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>-->
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -341,10 +340,10 @@
         </div>
       </div>
       <template #footer>
-        <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
+        <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
     </CModal>
-    <CreateCaseModal :show.sync="createCaseModal" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
+    <CreateCaseModal :show.sync="createCaseModal" :organization="organization" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :event_organization.sync="event_organization" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>
@@ -352,11 +351,11 @@
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
-        <p>This action will apply to <b>{{selected.length}}</b> events.</p>
+        <p>This action will apply to <b>{{selected_count}}</b> events.</p>
       </div>
       <template #footer>
           <CButton @click="deleteEventModal = !deleteEventModal" color="secondary">Dismiss</CButton>
-        <CButton @click="deleteEvent" color="danger" v-bind:disabled.sync="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Delete</span></CButton>
+        <CButton @click="deleteEvent" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Delete</span></CButton>
       </template>
     </CModal>
     <vue-simple-context-menu
@@ -498,11 +497,11 @@ export default {
       this.loadCloseReasons()
       this.$store.commit('set', ['eventDrawerMinimize', true])      
         
-      this.refresh = setInterval(function() {
-        if(!this.pauseRefresh) {
-          this.loadData()
-        }         
-      }.bind(this), this.settings.events_page_refresh*1000 || 60000)
+      //this.refresh = setInterval(function() {
+      //  if(!this.pauseRefresh) {
+      //    this.loadData()
+      //  }         
+      //}.bind(this), this.settings.events_page_refresh*1000 || 60000)
     },
     data(){
       return {
@@ -592,7 +591,8 @@ export default {
         search_text: "",
         selected_orgs: {},
         multiple_org_dismiss: {},
-        max_observables: 15
+        max_observables: 15,
+        organization: ""
       }
     },
     methods: {
@@ -701,7 +701,7 @@ export default {
       deleteEvent() {
         this.dismiss_submitted = true
         if(this.selected.length == 1) {
-          this.$store.dispatch('deleteEvent', this.selected[0]).then(resp => {
+          this.$store.dispatch('deleteEvents', this.selected).then(resp => {
             this.filtered_events = this.filterEvents()
             this.dismiss_submitted = false
             this.deleteEventModal = false
@@ -714,7 +714,7 @@ export default {
             this.deleteEventModal = false            
           })
         }
-        this.selected = []        
+        this.selected = []          
       },
       dismissEvent() {
         this.dismiss_submitted = true
@@ -1021,6 +1021,7 @@ export default {
         this.selected = [uuid]
         this.related_events_count = event.related_events_count
         this.case_from_card = true
+        this.organization = event.organization
         this.createCaseModal = true
       },
       selectAllNew() {

@@ -39,7 +39,7 @@
               </template>
               <template #actions="{item}">
                 <td class='text-right'>
-                  <CButton color="success" size="sm" :to="item.uuid"><CIcon name="cilPencil"/></CButton>&nbsp;
+                  <CButton color="info" size="sm" :to="item.uuid"><CIcon name="cilPencil"/></CButton>&nbsp;
                   <CButton color="secondary" size="sm" @click="cloneInput(item.uuid)"><CIcon name="cilCopy"/></CButton>
                 </td>
               </template>

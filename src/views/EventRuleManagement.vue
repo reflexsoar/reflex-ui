@@ -16,6 +16,9 @@
               <CCol>
                 <CButton color="primary" @click="show_modal = !show_modal" >New Event Rule</CButton>
               </CCol>
+              <CCol class='text-right'>
+                <CButton disabled color="secondary"><CIcon name='cilCloudDownload' size="sm"></CIcon>&nbsp; Export Rules</CButton>&nbsp;<CButton disabled color="secondary"><CIcon name='cilCloudUpload' size="sm"></CIcon>&nbsp; Import Rules</CButton>
+              </CCol>
             </CRow>
             <hr style="margin-bottom:0px; margin-top:0px;">
             <CDataTable
@@ -42,7 +45,14 @@
               <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
             </template>
             <template #admin="{item}"> 
-              <td class="text-right"><!--<CButton size="sm" color="info" @click="cloneRule(item.uuid)">Clone Rule</CButton>&nbsp;--><CButton size="sm" color="info" @click="editRule(item.uuid)">Edit Rule</CButton>&nbsp;<CButton v-if="item.active" size="sm" color="danger" @click="disableRule(item.uuid)">Disable</CButton><CButton v-else size="sm" color="success" @click="enableRule(item.uuid)">Activate</CButton>&nbsp;<CButton v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm">Delete</CButton></td>
+              <td class="text-right">
+                <!--<CButton size="sm" color="info" @click="cloneRule(item.uuid)">Clone Rule</CButton>&nbsp;-->
+                <CButton disabled @click="downloadRuleAsJSON(item.uuid)" size="sm" color="secondary" v-c-tooltip="{content: 'Export Rule - COMING SOON', placement:'left'}"><CIcon name='cilCloudDownload'/></CButton>&nbsp;
+                <CButton size="sm" color="info" @click="editRule(item.uuid)" v-c-tooltip="{content: 'Edit Rule', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+                <CButton v-if="item.active" size="sm" color="warning" @click="disableRule(item.uuid)" v-c-tooltip="{content: 'Disable Rule', placement:'left'}"><CIcon name="cilBan"/></CButton>
+                <CButton v-else size="sm" color="success" @click="enableRule(item.uuid)" v-c-tooltip="{content: 'Enable Rule', placement:'left'}"><CIcon name="cilCheck"/></CButton>&nbsp;
+                <CButton v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm" v-c-tooltip="{content:'Delete Rule', placement:'left'}"><CIcon name='cilTrash'/></CButton>
+              </td>
             </template>
             <template #global_rule="{item}">
               <td>
@@ -401,6 +411,12 @@
       {{test_results}}
     </div>
   </CModal>
+  <CModal title="Export Rule" :centered="true" size="lg" :show.sync="showRuleDownloadModal">
+    <pre style='max-height: 400px; overflow-x:scroll'>{{rule_json}}</pre>
+  </CModal>
+  <CModal title="Export All Rules" :centered="true" size="lg" :show.sync="downloadAllRulesModal">
+    TEST
+  </CModal>
   </div>
 </template>
 
@@ -522,7 +538,10 @@ export default {
             ],
           target_severity: 0,
           update_severity: false,
-          selected_tags: []
+          selected_tags: [],
+          showRuleDownloadModal: false,
+          downloadAllRulesModal: false,
+          rule_json: {}
       }
       
     },
@@ -561,6 +580,13 @@ export default {
       }
     },
     methods: {
+      downloadAllRules() {
+
+      },
+      downloadRuleAsJSON(uuid) {
+        this.rule_json = this.rules.find(item => item.uuid === uuid)
+        this.showRuleDownloadModal = true
+      },
       mapOrgToName(uuid) {
         let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
         if (org.length > 0) {
@@ -832,7 +858,7 @@ export default {
         if (!this.fields.includes('global_rule')) {
           this.fields.splice(2,0,'global_rule')
         }
-        
+        this.$store.dispatch('getOrganizations')        
       }
       
     }

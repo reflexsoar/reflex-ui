@@ -37,8 +37,8 @@
             </template>
             <template #actions="{ item }">
               <td class="text-right" style="width:10%">
-                <CButton color="primary" size="sm" @click="getCredentialDetails(item.uuid)">Edit</CButton>&nbsp;
-                <CButton color="danger" size="sm" @click="removeCredential(item.uuid)">Delete</CButton>
+                <CButton color="info" size="sm" @click="getCredentialDetails(item.uuid)"><CIcon name='cilPencil'/></CButton>&nbsp;
+                <CButton color="danger" size="sm" @click="removeCredential(item.uuid)"><CIcon name='cilTrash'/></CButton>
               </td>
             </template>
           </CDataTable>
