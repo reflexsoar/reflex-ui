@@ -116,7 +116,7 @@
                             </CCol>
                         </CRow>
                         </CTab>
-                        <CTab title="4. Actions">
+                        <CTab title="4. Actions" :disabled="(test_failed && from_card)">
                             <h4>Actions</h4>
                                             
                             <label>Merge into Case</label>
@@ -189,7 +189,7 @@
                                 </CCol>
                             </CRow>
                         </CTab>
-                        <CTab title="5. Review">
+                        <CTab title="5. Review" :disabled="(test_failed && from_card)">
                             <h4>Review</h4>
                             <b>Rule Name: </b> {{name}}<br>
                             <b>Description: </b><br>{{description}}<br><br>
@@ -233,7 +233,7 @@
           
           <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
           <CButton v-if="step != 0" @click="previousStep()" color="info">Previous</CButton>
-          <CButton v-if="step != final_step" @click="nextStep()" :disabled="(test_failed && step == 2) && !from_card" color="primary" >Next</CButton>
+          <CButton v-if="step != final_step" @click="nextStep()" :disabled="(test_failed && step == 2) && from_card" color="primary" >Next</CButton>
           <CButton v-if="step == final_step && (mode == 'create' || mode =='clone')" @click="createEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton>
           <CButton v-if="step == final_step && mode == 'edit'" @click="editEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Edit</CButton>
       </template>
@@ -533,6 +533,7 @@ export default {
             if(!this.global_rule) {
                 data['organization'] = this.organization ? this.organization : null;
             }
+
             this.test_result = ""
             this.test_complete = false
             this.test_running = true
@@ -565,7 +566,7 @@ export default {
             this.submitted = true
             let rule = {
                 name: this.name,
-                organization: this.event_organization,
+                organization: this.organization,
                 description: this.description,
                 merge_into_case: this.merge_into_case,
                 target_case_uuid: this.target_case.uuid,
@@ -609,7 +610,7 @@ export default {
 
             let rule = {
                 name: this.name,
-                organization: this.event_organization,
+                organization: this.organization,
                 description: this.description,
                 merge_into_case: this.merge_into_case,
                 target_case_uuid: this.target_case ? this.target_case.uuid : null,
@@ -628,7 +629,7 @@ export default {
             }
 
             if(this.current_user.default_org) {
-                rule['global_rule'] = this.rule.global_rule
+                rule['global_rule'] = this.global_rule
             }
 
             for(let tag in this.selected_tags) {

@@ -361,7 +361,9 @@ export default {
         this.$store.dispatch('updateEventRule', {uuid, data})
       },
       createEventRule() {
-        this.rule = {}
+        this.rule = {
+          expire_days: 1
+        }
         this.modal_mode = 'create'
         this.create_event_rule_modal = true
       },
