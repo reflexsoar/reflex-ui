@@ -2,7 +2,7 @@
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
     <CModal title="Create Event Rule" :centered="false" size="xl" :show.sync="modalStatus" :closeOnBackdrop="false">
         <template #header>
-            <h5>Create Event Rule</h5>
+            <h5 style="text-transform: capitalize">{{mode}} Event Rule</h5>
             <span class='text-right'>
                 <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
                 <button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/rql')"><CIcon name='cil-book' size="lg"/></button>
@@ -18,7 +18,7 @@
             </CRow>
             <CRow>
                 <CCol>
-                    <CTabs :fade="false" variant="pills" :activeTab="step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
+                    <CTabs :fade="false" variant="pills" :activeTab.sync="step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
                         <CTab title="1. Rule Details">
                             <h4>Rule Details</h4>
                             <p>An Event rule allows you to automatically handle Events over a period of time based on Event criteria.</p>
@@ -28,16 +28,14 @@
                             <CTextarea rows="5" label="Rule description" v-model.lazy="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
                             <CRow>
                                 <CCol col=6>
-                                    <span v-if="current_user.default_org && !from_card">
-                                        <label>Global Rule</label><br>
-                                        <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/><br>
-                                        <small class="text-muted">Global Rules exist in the Default Tenant and will apply to every tenant in the Reflex system.  Matches on Global rules do not stop further rule processing.</small>
-                                    </span>
-                                </CCol>
-                                <CCol col=6>
                                     <label>Run rule retroactively after creation?</label><br>
                                     <CSwitch :checked.sync="run_retroactively" label-on="Yes" label-off="no" color="success"/><br>
                                     <small class="text-muted">When the rule is saved, Reflex will retroactively attempt to match this rule to any event that is currently in a New state</small>
+                                </CCol>
+                                <CCol col=6 v-if="current_user.default_org && !from_card">                                    
+                                        <label>Global Rule</label><br>
+                                        <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/><br>
+                                        <small class="text-muted">Global Rules exist in the Default Tenant and will apply to every tenant in the Reflex system.  Matches on Global rules do not stop further rule processing.</small>
                                 </CCol>
                             </CRow>
                         </CTab>
@@ -57,15 +55,18 @@
                             
                         </CTab>
                         <CTab title="3. Event Query">
+                            <CAlert :show.sync="test_complete" :color="test_result_color" closeButton>
+                                {{test_result}}
+                            </CAlert>
                             <h4>Event Query</h4>
                             <p>Supply an RQL query to match events to this rule based on a certain criteria.  Click <a href="https://docs.reflexsoar.com/en/latest/rql/" target="_new">here</a> for a syntax reference.</p>
                             <prism-editor rows="10" @keydown="test_failed=true" class="my-editor" v-model="query" :highlight="highlighter" line-numbers></prism-editor><br>
+                            
                             <CRow>
                                 <CCol lg="4">
                                     <CInput description="Reflex will fetch the last N events and compare this rule to them" label="Number of test events" v-model="event_count">
                                         <template #append>
-                                            <CButton v-if="from_card" color="primary" v-bind:disabled="test_running" @click="test_query()"><span v-if="!test_running">Test Rule</span><span v-else><CSpinner size="sm"/>&nbsp;Testing...</span></CButton>
-                                            <CButton v-if="!from_card" color="primary" v-bind:disabled="test_running" @click="testRule()"><span v-if="!test_running">Test Rule</span><span v-else><CSpinner size="sm"/>&nbsp;Testing...</span></CButton>
+                                            <CButton color="primary" v-bind:disabled="test_running" @click="testRule()"><span v-if="!test_running">Test Rule</span><span v-else><CSpinner size="sm"/>&nbsp;Testing...</span></CButton>
                                         </template>
                                     </CInput>
                                 </CCol>
@@ -224,9 +225,16 @@
           
           <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
           <CButton v-if="step != 0" @click="previousStep()" color="info">Previous</CButton>
-          <CButton v-if="step != final_step" @click="nextStep()" :disabled="(test_failed && step == 3)" color="primary" >Next</CButton>
-          <CButton v-if="step == final_step" @click="createEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton>
+          <CButton v-if="step != final_step" @click="nextStep()" :disabled="(test_failed && step == 2) && !from_card" color="primary" >Next</CButton>
+          <CButton v-if="step == final_step && mode == 'create'" @click="createEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton>
+          <CButton v-if="step == final_step && mode == 'edit'" @click="editEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Edit</CButton>
       </template>
+    </CModal>
+    <CModal title="Rule Testing Results" size="xl" :show.sync="show_test_results">
+        <div style="overflow-y: scroll; max-height: 400px;">
+            <!--<vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'" :data="test_results"></vue-json-pretty>-->
+            {{test_results}}
+        </div>
     </CModal>
 </div>
 </template>
@@ -284,6 +292,14 @@ export default {
         from_card: {
             type: Boolean,
             default: false
+        },
+        mode: {
+            type: String,
+            default: 'create'
+        },
+        event_rule: {
+            type: Object,
+            default: null
         }
     },
     computed: mapState(['settings','current_user']),
@@ -303,8 +319,7 @@ export default {
             expire_days: 1,
             observables: [],
             expire: false,
-            step: 1,
-            final_step: 5,
+            final_step: 4,
             test_running: false,
             test_result: "",
             test_failed: true,
@@ -373,16 +388,15 @@ export default {
             event_count: 1,
             organization: "",
             organizations: [],
-            rule: {}
+            rule: {},
+            show_test_results: false,
+            test_result_color: "success",
+            test_results: '',
+            test_complete: false
         }
     },
     watch: {
-        show: function() {
-            if(this.from_card) {
-                this.event_count = this.events.length
-            } else {
-                this.event_count = 1000
-            }
+        show: function() {                
             this.error = false
             this.error_message = ""
             this.modalStatus = this.show
@@ -392,9 +406,20 @@ export default {
                 this.test_failed = true
                 this.loadData()
                 if(this.from_card) {
+                    this.event_count = this.events.length
                     this.query = this.generateRule()
-                }                    
-                this.name = "Rule for event signature "+this.event_signature
+                    if(this.event_signature) {
+                        this.name = "Rule for event signature "+this.event_signature
+                    } 
+                } else {
+                    if(this.event_rule) {
+                        this.populateEventRuleFields()
+                    } else {
+                        this.modalStatus = false
+                    }
+                    this.event_count = 1000
+                }
+                               
                 this.caseFind("*")
                 this.loadCloseReasons()
             }
@@ -419,6 +444,26 @@ export default {
         //this.$store.dispatch('getSettings')
     },
     methods: {
+        populateEventRuleFields() {
+            this.step = 0
+            this.name = this.event_rule.name
+            this.organization = this.event_rule.organization
+            this.description = this.event_rule.description
+            this.merge_into_case = this.event_rule.merge_into_case
+            this.tag_event = this.event_rule.add_tags
+            this.global_rule = this.event_rule.global_rule
+            this.update_severity = this.event_rule.update_severity
+            this.target_severity = this.event_rule.target_severity
+            this.selected_tags = this.event_rule.tags_to_add
+            this.dismiss_event = this.event_rule.dismiss_event
+            this.expire_days = this.event_rule.expire_days
+            this.observables = this.event_rule.observables
+            this.expire = this.event_rule.expire
+            this.target_case = this.event_rule.target_case ? this.event_rule.target_case : {}
+            this.query = this.event_rule.query
+            this.close_reason = this.event_rule.close_reason
+            this.dismiss_comment = this.event_rule.dismiss_comment
+        },
         generateRule() {
             /* Generates a basic rule for the selected Event that an analyst
             can use as their base */
@@ -458,13 +503,17 @@ export default {
             })
         },
         testRule() {
-            let data = {
-            'uuid': '',            
-            'query': this.rule.query ? this.rule.query : this.query,
-            'event_count': parseInt(this.event_count),
-            'return_results': this.return_events,
-            'start_date': this.range.start,
-            'end_date': this.range.end
+            let data = {       
+                'data': '',
+                'query': this.rule.query ? this.rule.query : this.query,
+                'event_count': parseInt(this.event_count),
+                'return_results': this.return_events,
+                'start_date': this.range.start,
+                'end_date': this.range.end
+            }
+
+            if(this.from_card && this.source_event_uuid) {
+                data['uuid'] = this.source_event_uuid
             }
 
             if(!this.global_rule) {
@@ -540,6 +589,50 @@ export default {
                 this.error_message = err.response.data.message
             })
         },
+        editEventRule() {
+
+            let uuid = this.event_rule.uuid
+
+            let rule = {
+                name: this.name,
+                organization: this.event_organization,
+                description: this.description,
+                merge_into_case: this.merge_into_case,
+                target_case_uuid: this.target_case ? this.target_case.uuid : null,
+                update_severity: this.update_severity,
+                target_severity: this.target_severity,
+                add_tags: this.tag_event,
+                tags_to_add: Array(),
+                expire: this.expire,
+                expire_days: parseInt(this.expire_days),
+                dismiss_comment: this.dismiss_comment,
+                dismiss_reason: this.close_reasoon ? this.close_reasons.filter(c => c.value === this.close_reason)[0].label : null,
+                dismiss: this.dismiss_event,
+                event_signature: this.event_signature,
+                run_retroactively: this.run_retroactively,
+                query: this.query
+            }
+
+            if(this.current_user.default_org) {
+                rule['global_rule'] = this.rule.global_rule
+            }
+
+            for(let tag in this.selected_tags) {
+                rule.tags_to_add.push(this.selected_tags[tag].name)
+            }
+
+            this.$store.dispatch('editEventRule', {uuid, rule}).then(() => {
+                this.modalStatus = false
+                this.error = false
+                this.error_message = ""
+                this.submitted = false
+            }).catch(err => {
+                this.submitted = false
+                this.error = true
+                this.step = 0
+                this.error_message = err.response.data.message
+            })
+        },
         nextStep() {
             this.step += 1
         },
@@ -586,7 +679,6 @@ export default {
             this.modalStatus = false            
         },
         addTag(newTag) {
-            console.log(newTag)
             const t = {
                 name: newTag,
                 uuid: ''

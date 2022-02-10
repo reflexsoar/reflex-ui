@@ -606,6 +606,7 @@ const getters = {
       return "Unknown"
     }
   },
+  event_rules: state => { return state.event_rules },
   source_input: state => { return state.source_input },
   lists: state => { return state.lists },
   quick_filters: state => { return state.quick_filters },

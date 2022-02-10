@@ -14,7 +14,7 @@
             
             <CRow style="padding: 10px;">
               <CCol>
-                <CButton color="primary" @click="show_modal = !show_modal" >New Event Rule</CButton>
+                <CButton color="primary" @click="create_event_rule_modal = !create_event_rule_modal" >New Event Rule</CButton>
               </CCol>
               <CCol class='text-right'>
                 <CButton disabled color="secondary"><CIcon name='cilCloudDownload' size="sm"></CIcon>&nbsp; Export Rules</CButton>&nbsp;<CButton disabled color="secondary"><CIcon name='cilCloudUpload' size="sm"></CIcon>&nbsp; Import Rules</CButton>
@@ -22,7 +22,7 @@
             </CRow>
             <hr style="margin-bottom:0px; margin-top:0px;">
             <CDataTable
-            :items="rules"
+            :items="event_rules"
             :fields="fields"
             :loading="loading"
             >
@@ -396,6 +396,7 @@
         <CButton color="primary" @click="editEventRule(rule.uuid)" v-if="modal_mode == 'edit'">Edit</CButton>
     </template>
   </CModal>
+  <CreateEventRuleModal :from_card="false" :show.sync="create_event_rule_modal" :event_rule="rule" :mode="modal_mode"/>
   <CModal title="Delete Event Rule" color="danger" :centered="true" size="lg" :show.sync="delete_modal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
@@ -458,14 +459,18 @@ import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
+import CreateEventRuleModal from './CreateEventRuleModal'
+
 export default {
     components: {
       PrismEditor,
-      VueJsonPretty
+      VueJsonPretty,
+      CreateEventRuleModal
     },
     name: 'EventRuleManagement',
     data () {
       return {
+        create_event_rule_modal: false,
         step: 1,
         rules: [],
         rule: {},
@@ -703,15 +708,9 @@ export default {
         this.show_modal = true
       },
       editRule(uuid) {
-        this.rule = Object.assign({}, this.rules.find(r => r.uuid === uuid))
+        this.rule = Object.assign({}, this.event_rules.find(r => r.uuid === uuid))
         this.modal_mode = 'edit'
-        this.show_modal = true
-        this.test_result = ""
-        this.event_count = 1000
-        this.test_complete = false
-        this.backdrop_close = false
-        this.$store.dispatch('getCases', {})
-        this.cases = this.$store.getters.cases
+        this.create_event_rule_modal = true
       },
       loadTags: function() {
           this.tag_list = Array()
@@ -726,7 +725,6 @@ export default {
         let page = this.current_page
         let page_size = this.page_size
         this.$store.dispatch('loadEventRules', {page, page_size}).then(resp => {
-          this.rules = this.$store.getters.event_rules
           this.pagination = resp.data.pagination
         })
       },
@@ -734,17 +732,13 @@ export default {
         let data = {
           active: false
         }
-        this.$store.dispatch('updateEventRule', {uuid, data}).then(resp => {
-          this.rules = this.$store.getters.event_rules
-        })
+        this.$store.dispatch('updateEventRule', {uuid, data})
       },
       enableRule(uuid) {
         let data = {
           active: true
         }
-        this.$store.dispatch('updateEventRule', {uuid, data}).then(resp => {
-          this.rules = this.$store.getters.event_rules
-        })
+        this.$store.dispatch('updateEventRule', {uuid, data})
       },
       createEventRule() {
 
@@ -772,9 +766,8 @@ export default {
           rule['global_rule'] = this.global_rule
         }
 
-        this.$store.dispatch('createEventRule', rule).then(resp => {
+        this.$store.dispatch('createEventRule', rule).then(() => {
           this.show_modal = false
-          this.rules = this.$store.getters.event_rules
         })
       },
       editEventRule(uuid) {
@@ -800,9 +793,8 @@ export default {
           rule['global_rule'] = this.rule.global_rule
         }        
 
-        this.$store.dispatch('editEventRule', {uuid, rule}).then(resp => {
+        this.$store.dispatch('editEventRule', {uuid, rule}).then(() => {
           this.show_modal = false
-          this.rules = this.$store.getters.event_rules
         })
       },
       deleteRule(uuid) {
@@ -848,7 +840,7 @@ export default {
         })
       }
     },
-    computed: mapState(['alert','current_user','loading']),
+    computed: mapState(['alert','current_user','loading','event_rules']),
     created() {
       this.loadRules()
       if(this.current_user.default_org) {
