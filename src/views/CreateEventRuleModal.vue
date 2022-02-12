@@ -151,7 +151,7 @@
                                     <CSwitch color="success" label-on="Yes" label-off="No"  label="Dismiss Event" :checked.sync="dismiss_event"  style="padding-top:5px"></CSwitch>
                                 </CCol>
                                 <CCol col="11">
-                                    <CSelect v-bind:disabled="!dismiss_event" :options="close_reasons" v-model="close_reason" placeholder="Select a reason for dismissing the event..."/>
+                                    <CSelect v-bind:disabled="!dismiss_event" :options="close_reasons" :value.sync="close_reason" placeholder="Select a reason for dismissing the event..."/>
                                     <CTextarea label="Dismiss Comment" rows="5" placeholder="Enter a comment as to why this Event is being dismissed." v-model="dismiss_comment" v-bind:disabled="!dismiss_event"></CTextarea>
                                 </CCol>
                             </CRow>
@@ -453,30 +453,36 @@ export default {
     },
     methods: {
         populateEventRuleFields() {
-            this.step = 0
-            this.name = this.event_rule.name
-            this.organization = this.event_rule.organization
-            this.description = this.event_rule.description
-            this.merge_into_case = this.event_rule.merge_into_case
-            this.tag_event = this.event_rule.add_tags
-            this.global_rule = this.event_rule.global_rule
-            this.update_severity = this.event_rule.update_severity
-            this.target_severity = this.event_rule.target_severity
-            this.selected_tags = this.event_rule.tags_to_add
-            this.dismiss_event = this.event_rule.dismiss_event
-            this.expire_days = this.event_rule.expire_days
-            this.observables = this.event_rule.observables
-            this.expire = this.event_rule.expire
-            if(this.event_rule.target_case_uuid) {
-                this.$store.dispatch('getCase', this.event_rule.target_case_uuid).then(resp => {
-                    this.target_case = resp.data
-                })
-            } else {
-                this.target_case = {}
-            }
-            this.query = this.event_rule.query
-            this.close_reason = this.event_rule.close_reason
-            this.dismiss_comment = this.event_rule.dismiss_comment
+            this.$store.dispatch('getCloseReasons', {organization: this.event_rule.organization}).then(resp => {
+                this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})                
+                this.step = 0
+                this.name = this.event_rule.name
+                this.organization = this.event_rule.organization
+                this.description = this.event_rule.description
+                this.merge_into_case = this.event_rule.merge_into_case
+                this.tag_event = this.event_rule.add_tags
+                this.global_rule = this.event_rule.global_rule
+                this.update_severity = this.event_rule.update_severity
+                this.target_severity = this.event_rule.target_severity
+                this.selected_tags = this.event_rule.tags_to_add
+                this.dismiss_event = this.event_rule.dismiss_event
+                this.expire_days = this.event_rule.expire_days
+                this.observables = this.event_rule.observables
+                this.expire = this.event_rule.expire
+                this.dismiss_event = this.event_rule.dismiss
+                if(this.event_rule.target_case_uuid) {
+                    this.$store.dispatch('getCase', this.event_rule.target_case_uuid).then(resp => {
+                        this.target_case = resp.data
+                    })
+                } else {
+                    this.target_case = {}
+                }
+                this.query = this.event_rule.query
+                console.log(this.close_reasons)
+                this.close_reason = this.event_rule.dismiss_reason ? this.close_reasons.filter(c => c.value === this.event_rule.dismiss_reason)[0].value : null
+                this.dismiss_comment = this.event_rule.dismiss_comment
+            })
+            
         },
         generateRule() {
             /* Generates a basic rule for the selected Event that an analyst
@@ -564,6 +570,7 @@ export default {
         },
         createEventRule() {
             this.submitted = true
+            
             let rule = {
                 name: this.name,
                 organization: this.organization,
@@ -577,7 +584,7 @@ export default {
                 expire: this.expire,
                 expire_days: parseInt(this.expire_days),
                 dismiss_comment: this.dismiss_comment,
-                dismiss_reason: this.close_reasoon ? this.close_reasons.filter(c => c.value === this.close_reason)[0].label : null,
+                dismiss_reason: this.close_reason,
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
                 run_retroactively: this.run_retroactively,
@@ -607,7 +614,7 @@ export default {
         editEventRule() {
 
             let uuid = this.event_rule.uuid
-
+            console.log(this.close_reason)
             let rule = {
                 name: this.name,
                 organization: this.organization,
@@ -621,7 +628,7 @@ export default {
                 expire: this.expire,
                 expire_days: parseInt(this.expire_days),
                 dismiss_comment: this.dismiss_comment,
-                dismiss_reason: this.close_reasoon ? this.close_reasons.filter(c => c.value === this.close_reason)[0].label : null,
+                dismiss_reason: this.close_reason,
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
                 run_retroactively: this.run_retroactively,

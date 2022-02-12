@@ -168,7 +168,12 @@ const mutations = {
   },
   save_event(state, event) {
     state.event = event
-    state.events = [...state.events.filter(e => e.uuid != event.uuid), event]
+    if(state.events.length > 0) {
+      state.events = [...state.events.filter(e => e.uuid != event.uuid), event]
+    } else {
+      state.events = [event]
+    }
+    
   },
   save_event_stats(state, stats) {
     state.event_stats = stats
