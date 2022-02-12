@@ -453,11 +453,19 @@ export default {
     },
     methods: {
         populateEventRuleFields() {
-            this.$store.dispatch('getCloseReasons', {organization: this.event_rule.organization}).then(resp => {
-                this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})                
+
+            this.organization = this.current_user.organization
+            console.log(this.organization)
+
+            if(this.event_rule.organization) {
+                this.organization = this.event_rule.organization
+            }
+
+            this.$store.dispatch('getCloseReasons', {organization: this.organization}).then(resp => {
+                this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})   
                 this.step = 0
                 this.name = this.event_rule.name
-                this.organization = this.event_rule.organization
+                //this.organization = this.event_rule.organization
                 this.description = this.event_rule.description
                 this.merge_into_case = this.event_rule.merge_into_case
                 this.tag_event = this.event_rule.add_tags
@@ -478,10 +486,11 @@ export default {
                     this.target_case = {}
                 }
                 this.query = this.event_rule.query
-                console.log(this.close_reasons)
                 this.close_reason = this.event_rule.dismiss_reason ? this.close_reasons.filter(c => c.value === this.event_rule.dismiss_reason)[0].value : null
-                this.dismiss_comment = this.event_rule.dismiss_comment
+                this.dismiss_comment = this.event_rule.dismiss_comment             
             })
+
+            
             
         },
         generateRule() {

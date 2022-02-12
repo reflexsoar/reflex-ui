@@ -34,7 +34,7 @@
                     label="Logon Domains"
                     required
                     rows=5
-                    description="Admins can only create users with emails at these domains"
+                    description="One per line. Admins can only create users with emails at these domains"
                 />
               </CForm>
             </CCol>
