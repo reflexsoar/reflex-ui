@@ -1349,7 +1349,7 @@ const actions = {
       })
     })
   },
-  getEventStats({commit}, {title__like=null, signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type','organization'],start=null, end=null, organization=[]}) {
+  getEventStats({commit}, {title__like=null, signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type','organization','event_rule'],start=null, end=null, organization=[], event_rules=[]}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
 
@@ -1388,6 +1388,9 @@ const actions = {
       if(organization && organization.length > 0) {
         url = url+`&organization=${organization}`
       }
+      if(event_rules && event_rules.length > 0) {
+        url = url+`&event_rule=${event_rules}`
+      }
       if(title__like) {
         url = url+`&title__like=${title__like}`
       }
@@ -1415,7 +1418,7 @@ const actions = {
       })
     })
   },
-  getEvents({commit}, {title__like=null, signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null}) {
+  getEvents({commit}, {title__like=null, signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null, event_rules=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event?grouped=${grouped}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -1460,6 +1463,10 @@ const actions = {
 
       if(organization && organization.length > 0) {
         url = url+`&organization=${organization}`
+      }
+
+      if(event_rules && event_rules.length > 0) {
+        url = url+`&event_rule=${event_rules}`
       }
 
       if(start && end) {
@@ -2574,15 +2581,21 @@ const actions = {
       })
     })
   },
-  loadEventRules({commit}, {page=1, page_size=25}) {
+  loadEventRules({commit}, {page=1, page_size=25, rules=null, save=true}) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/event_rule?page=${page}&page_size=${page_size}`
 
+      if(rules) {
+        base_url += `&rules=${rules}`
+      }
+
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
-        commit('save_event_rules', resp.data.event_rules)
+        if(save) {
+          commit('save_event_rules', resp.data.event_rules)
+        }
         commit('loading_status', false)
           resolve(resp)
       })

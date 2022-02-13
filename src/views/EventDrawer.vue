@@ -79,6 +79,22 @@
           </CCol>
         </CRow>
       </CTab>
+      <CTab title="Matched Event Rules" v-if="this.event_data.event_rules">
+        <CRow style="padding: 10px 10px 0px 10px">
+          <CCol>
+            <h3>Matched Event Rules</h3>
+            <p>The rules listed below have acted on this event at some point in time.</p>
+            <CRow v-for="rule in rules" :key="rule.uuid">
+              <CCol>
+                <CCardBody>
+                  <h5>{{rule.name}}</h5>
+                  <prism-editor rows="10" @keydown="test_failed=true" class="my-editor" v-model="rule.query" :highlight="highlighter" line-numbers></prism-editor>
+                </CCardBody>
+              </CCol>
+            </CRow>
+          </CCol>
+        </CRow>          
+      </CTab>
     </CTabs>
     </CCol>
   </CRow>
@@ -103,11 +119,45 @@
 }
 </style>
 
+<style scoped>
+  /* required class */
+  .my-editor {
+    /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
+    /*background: #fdfdfd;*/
+    background: #0e0e0e;
+    color: #ccc !important;
+    border: 1px solid rgb(216, 219, 224);
+    border-radius: 0.25rem;
+    box-shadow: inset 0 1px 1px rgb(0 0 21 / 8%);
+
+    /* you must provide font-family font-size line-height. Example: */
+    font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 5px;
+  }
+
+  /* optional class for removing the outline */
+  .prism-editor__textarea:focus {
+    outline: none;
+  }
+
+  .modal-body {
+      padding-left: 0px;
+  }
+</style>
+
 <script>
 import nav from '../containers/_nav'
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import CRightDrawer from './CRightDrawer'
+import { PrismEditor } from 'vue-prism-editor'
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhere
+import 'prismjs/components/prism-python';
+import '../assets/js/prism-rql';
+import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 
 export default {
   name: 'EventDrawer',
@@ -117,7 +167,8 @@ export default {
   },
   components: {
     VueJsonPretty,
-    CRightDrawer
+    CRightDrawer,
+    PrismEditor
   },
   created: function() {
     if (this.$store.state.unread_alert_count > 0) {
@@ -128,13 +179,20 @@ export default {
     minimize (val) {
       if (!val) {
         this.event_data = this.$store.getters.event
+        console.log(this.event_data.event_rules)
+        if(this.event_data.event_rules) {
+          this.$store.dispatch('loadEventRules', {rules: this.event_data.event_rules, save: false}).then(resp => {
+            this.rules = resp.data.event_rules
+          })
+        }
       }
     }
   },
   data() {
     return {
       observable_fields: ['value', 'ioc', 'spotted', 'safe', 'tags'],
-      activeTab: 1
+      activeTab: 1,
+      rules: []
     }
   },
   computed: {
@@ -146,6 +204,9 @@ export default {
     }
   },
   methods: {
+    highlighter(code) {
+        return highlight(code, languages.rql);
+    },
     jsonify(s) {
         try {
             return JSON.parse(s)

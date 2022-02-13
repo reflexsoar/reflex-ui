@@ -21,7 +21,7 @@
             <CCardHeader>
               <CRow>
                 <CCol col="9">
-                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value.toString()"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
+                  <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value.toString()"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else-if="obs.filter_type == 'event_rule'">{{getEventRuleName(obs.value)}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
@@ -112,6 +112,7 @@
                     <CCol v-if="title === 'severity'" v-c-tooltip="{ content: `${getSeverityText(parseInt(v))}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':parseInt(v)})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getSeverityText(parseInt(v))}}</span></CCol>
                     <CCol v-else-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
                     <CCol v-else-if="title === 'observable value'" v-c-tooltip="{ content: `${encodeURI(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'observable', 'data_type':'observable','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
+                    <CCol v-else-if="title === 'event rule'" v-c-tooltip="{ content: `${getEventRuleName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'event_rule', 'data_type':'event rule','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getEventRuleName(v)}}</span></CCol>
                     <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol class="text-right" col="3"><CBadge color="secondary">{{k.toLocaleString('en-US')}}</CBadge></CCol>
                   </CRow>                
@@ -592,10 +593,19 @@ export default {
         selected_orgs: {},
         multiple_org_dismiss: {},
         max_observables: 15,
-        organization: ""
+        organization: "",
+        event_rules: []
       }
     },
     methods: {
+      getEventRuleName(uuid) {
+        let rule = this.event_rules.find(r => r.uuid === uuid)
+        if(rule) {
+          return rule.name
+        } else {
+          return "Unknown"
+        }
+      },
       startDismissEvent() {
         this.loadCloseReasons()
         this.dismissEventModal = true
@@ -841,6 +851,7 @@ export default {
         let end_time = ""
         let grouped = !this.filteredBySignature()
         let search = []
+        let event_rule_filters = []
         let title__like_filter = null
         for(let f in this.observableFilters) {
           let filter = this.observableFilters[f]
@@ -889,6 +900,11 @@ export default {
             end_time = filter.value
           }
 
+          if(filter.filter_type == 'event_rule') {
+            console.log(filter.value)
+            event_rule_filters.push(filter.value)
+          }
+
           if(filter.filter_type == 'organization') {
             organization_filters.push(filter.value)
           }          
@@ -918,6 +934,7 @@ export default {
           start: start_time,
           end: end_time,
           organization: organization_filters,
+          event_rules: event_rule_filters,
           title__like: title__like_filter
         }).then(resp => {
           this.filtered_events = this.$store.getters.events
@@ -937,9 +954,14 @@ export default {
           start: start_time,
           end: end_time,          
           organization: organization_filters,
+          event_rules: event_rule_filters,
           title__like: title__like_filter
         }).then(resp => {
           this.event_stats = this.$store.getters.event_stats
+          let rule_ids = Object.keys(this.event_stats['event rule'])
+          this.$store.dispatch('loadEventRules', {rules: rule_ids, save: false}).then(resp => {
+            this.event_rules = resp.data.event_rules
+          })
         })
       },
       sanitizeHTML(str) {
