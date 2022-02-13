@@ -70,10 +70,10 @@ export default {
     methods: {
         getSeverity(severity) {
             switch(severity) {
-                case 0: return "Low";
-                case 1: return "Medium";
-                case 2: return "High";
-                case 3: return "Critical";
+                case 1: return "Low";
+                case 2: return "Medium";
+                case 3: return "High";
+                case 4: return "Critical";
                 default: return "Low"
             }
         },

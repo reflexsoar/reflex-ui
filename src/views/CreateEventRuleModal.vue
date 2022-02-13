@@ -342,19 +342,19 @@ export default {
             severities: [
                 {
                     label: 'Low',
-                    value: 0
-                },
-                {
-                    label: 'Medium',
                     value: 1
                 },
                 {
-                    label: 'High',
+                    label: 'Medium',
                     value: 2
                 },
                 {
-                    label: 'Critical',
+                    label: 'High',
                     value: 3
+                },
+                {
+                    label: 'Critical',
+                    value: 4
                 }
             ],
             actions: [

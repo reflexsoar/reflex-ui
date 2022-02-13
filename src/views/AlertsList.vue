@@ -1246,19 +1246,19 @@ export default {
       },
       getSeverityColor(severity) {
         switch(severity) {
-          case 0: return 'dark';
-          case 1: return 'info';
-          case 2: return 'warning';
-          case 3: return 'danger';
+          case 1: return 'dark';
+          case 2: return 'info';
+          case 3: return 'warning';
+          case 4: return 'danger';
           default: return 'danger';
         }
       },
       getSeverityText(severity) {
         switch(severity) {
-          case 0: return 'Low';
-          case 1: return 'Medium';
-          case 2: return 'High';
-          case 3: return 'Critical';
+          case 1: return 'Low';
+          case 2: return 'Medium';
+          case 3: return 'High';
+          case 4: return 'Critical';
           default: return 'Unknown';
         }
       },
