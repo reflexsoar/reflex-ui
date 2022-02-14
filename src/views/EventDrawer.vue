@@ -179,7 +179,6 @@ export default {
     minimize (val) {
       if (!val) {
         this.event_data = this.$store.getters.event
-        console.log(this.event_data.event_rules)
         if(this.event_data.event_rules) {
           this.$store.dispatch('loadEventRules', {rules: this.event_data.event_rules, save: false}).then(resp => {
             this.rules = resp.data.event_rules

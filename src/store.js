@@ -97,6 +97,7 @@ const state = {
     'require_case_templates': false
   },
   event_stats: {},
+  event_rule_stats: {},
   case_stats: {},
   network_data: {},
   loading: false,
@@ -177,6 +178,9 @@ const mutations = {
   },
   save_event_stats(state, stats) {
     state.event_stats = stats
+  },
+  save_event_rule_stats(state, stats) {
+    state.event_rule_stats = stats
   },
   save_case_stats(state, stats) {
     state.case_stats = stats
@@ -2574,6 +2578,29 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event_rule/test_rule_rql`, data: data, method: 'POST'})
       .then(resp => {
+          resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getEventRuleStats({commit}, {metrics=['hits'], rules=[], save=false}) {
+
+    return new Promise((resolve, reject) => {
+
+      let base_url = `${BASE_URL}/event_rule/stats?metrics=${metrics}`
+
+      if(rules) {
+        base_url += `&rules=${rules}`
+      }
+
+      Axios({url: base_url, method: 'GET'})
+      .then(resp => {
+        if(save) {
+          commit('save_event_rule_stats', resp.data)
+        }
+        commit('loading_status', false)
           resolve(resp)
       })
       .catch(err => {

@@ -28,7 +28,12 @@
             </template>
             <template #organization="{item}">
               <td>
-                <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+                <OrganizationBadge :uuid="item.organization"/>
+              </td>
+            </template>
+            <template #hits="{item}">
+              <td>
+                {{getHits(item.uuid)}}
               </td>
             </template>
             <template #last_matched_date="{item}">
@@ -41,6 +46,10 @@
             <template #dismiss="{item}">
               <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
             </template>
+            <template #expire="{item}">
+              <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
+            </template>
+            
             <template #admin="{item}"> 
               <td class="text-right">
                 <CButton disabled @click="downloadRuleAsJSON(item.uuid)" size="sm" color="secondary" v-c-tooltip="{content: 'Export Rule - COMING SOON', placement:'left'}"><CIcon name='cilCloudDownload'/></CButton>&nbsp;
@@ -130,12 +139,14 @@ import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import CreateEventRuleModal from './CreateEventRuleModal'
+import OrganizationBadge from './OrganizationBadge'
 
 export default {
     components: {
       PrismEditor,
       VueJsonPretty,
-      CreateEventRuleModal
+      CreateEventRuleModal,
+      OrganizationBadge
     },
     name: 'EventRuleManagement',
     data () {
@@ -144,7 +155,7 @@ export default {
         step: 1,
         rules: [],
         rule: {},
-        fields: ['name','merge_into_case','dismiss','last_matched_date','admin'],
+        fields: ['name','hits','merge_into_case','dismiss','expire','last_matched_date','admin'],
         modal_mode: 'create',
         show_test_results: false,
         global_rule: false,
@@ -341,11 +352,21 @@ export default {
               }
           })
       },
+      getHits(uuid) {
+        if(this.event_rule_stats['hits'][uuid]) {
+          return this.event_rule_stats['hits'][uuid]
+        } else {
+          return 0
+        }
+        
+      },
       loadRules() {        
         let page = this.current_page
         let page_size = this.page_size
         this.$store.dispatch('loadEventRules', {page, page_size}).then(resp => {
           this.pagination = resp.data.pagination
+          let rules = this.event_rules.map(r => { return r.uuid })
+          this.$store.dispatch('getEventRuleStats', {rules: rules, save: true})
         })
       },
       disableRule(uuid) {
@@ -410,7 +431,7 @@ export default {
         })
       }
     },
-    computed: mapState(['alert','current_user','loading','event_rules']),
+    computed: mapState(['alert','current_user','loading','event_rules','event_rule_stats']),
     created() {
       this.loadRules()
       if(this.current_user.default_org) {

@@ -29,7 +29,7 @@
       </template>
       <template #organization="{item}">
         <td>
-          <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+          <OrganizationBadge :uuid="item.organization"/>
         </td>
       </template>
       <template #data_type="{item}">
@@ -67,29 +67,25 @@
         </CCol>
       </CRow>
     </CCard>
-    <CModal :title="modal_title" :centered="true" size="lg" :show.sync="modal_status" :closeOnBackdrop="false">
+    <CModal :title="modal_title" size="xl" :show.sync="modal_status" :closeOnBackdrop="false">
       <CAlert :show.sync="this.error" color="danger" closeButton>
             {{error_message}}
       </CAlert>
-      <CForm @submit.prevent="modal_action()" id="listForm">
-        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" :value.sync="list_data.organization" :options="organizations"/>
-        <CInput v-model="list_data.name" label="Name" placeholder="A friendly name for the list" v-bind:required="modal_submit_text == 'Create'"/>
-        <CRow>
-          <CCol col="12" lg="6">
-            <CSelect :options="list_types" :value.sync="list_data.list_type" label="List Type" placeholder="Select a list type" v-bind:required="modal_submit_text == 'Create'"/>
-          </CCol>
-          <CCol col="12" lg="6">
-            <CSelect :options="data_type_list" :value.sync="list_data.data_type.uuid" label="Data Type" placeholder="Select the data type this list contains" v-bind:required="modal_submit_text == 'Create'"/>
-          </CCol>
-        </CRow>
-        <CInput v-model="list_data.url" label="URL" placeholder="A URL to poll values from on a periodic basis"/>
-        <CRow>
-          <CCol col="12" lg="6">
-            <CInput v-model="list_data.poll_interval" label="Polling Interval" placeholder="60" description="How often to poll the URL for new data (minutes)"/>
-          </CCol>
-        </CRow>
-        <CTextarea label="Values" v-model="list_data.values" placeholder="Enter values separated by new lines" rows="10" cols="50" wrap="off" :disabled="list_data.url"/>
-        <CRow>
+      
+        <CTabs :activeTab.sync="step" :fade="false" variant="pills" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
+          <CTab title="1. List Details">
+            <h3>List Details</h3>
+            <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" :value.sync="list_data.organization" :options="organizations"/>
+            <CInput v-model="list_data.name" label="Name" placeholder="A friendly name for the list" v-bind:required="modal_submit_text == 'Create'"/>
+            <CRow>
+              <CCol col="12" lg="6">
+                <CSelect :options="list_types" :value.sync="list_data.list_type" label="List Type" placeholder="Select a list type" v-bind:required="modal_submit_text == 'Create'"/>
+              </CCol>
+              <CCol col="12" lg="6">
+                <CSelect :options="data_type_list" :value.sync="list_data.data_type.uuid" label="Data Type" placeholder="Select the data type this list contains" v-bind:required="modal_submit_text == 'Create'"/>
+              </CCol>
+            </CRow>
+            <CRow>
           <CCol>
             <div class="form-input">  
               <label>Tag Observables on list match?</label><br>
@@ -110,10 +106,69 @@
             </div>
           </CCol>
         </CRow>
-      </CForm>
+          </CTab>
+          <CTab title="2. External Feed">
+            <h3>External Feed</h3>
+            <p>External polling allows the system to fetch Intelligence from external sources.  Once enabled, the values in this list will be automatically polled and can not be manually manipulated.</p>
+            <label>Enable External Polling</label><br>
+            <CSwitch :checked.sync="external_polling" label-on="Yes" label-off="No" color="success"/>
+            <CInput :disabled="!external_polling" v-model="list_data.url" label="URL" placeholder="A URL to poll values from on a periodic basis"/>
+            <CRow>
+              <CCol col="12" lg="6">
+                <CInput :disabled="!external_polling" v-model="list_data.poll_interval" label="Polling Interval" placeholder="60" description="How often to poll the URL for new data (minutes)"/>
+              </CCol>
+            </CRow>
+          </CTab>
+          <CTab title="3. Values">
+            <h3>List Values</h3>
+            <CAlert color="warning" :show.sync="external_polling">
+              While external polling is enabled the manual addition of values is disabled.  Return to the previous step if this was enabled in error.
+            </CAlert>
+            <CTextarea label="Values" v-model="list_data.values" placeholder="Enter values separated by new lines" rows="10" cols="50" wrap="off" :disabled="external_polling"/>
+          </CTab>
+          <CTab title="4. Review">
+            <h3>Review List Details</h3>
+            <CRow v-if="current_user.default_org"><br><br>
+              <CCol>
+                <label>Organization</label><br>
+                <OrganizationBadge :uuid="list_data.organization"/><br><br>
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol>
+                <label>List Name</label><br>
+                {{list_data.name}}<br><br>
+              </CCol>
+              <CCol>
+                <label>List Type</label><br>
+                {{list_data.list_type}}
+              </CCol>
+              <CCol>
+                <label>Data Type</label><br>
+                {{list_data.data_type.name}}<br><br>
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol>
+                <label>Tag Observables on Match</label><br>
+                <CBadge :color="list_data.tag_on_match ? 'success' : 'danger'">{{list_data.tag_on_match ? 'Yes' : 'No'}}</CBadge>
+              </CCol>
+              <CCol>
+                <label>To Memcached</label><br>
+                <CBadge :color="list_data.to_memcached ? 'success' : 'danger'">{{list_data.to_memcached ? 'Yes' : 'No'}}</CBadge>
+              </CCol>
+              <CCol>
+                <label>List Active</label><br>
+                <CBadge :color="list_data.active ? 'success' : 'danger'">{{list_data.active ? 'Yes' : 'No'}}</CBadge>
+              </CCol>
+            </CRow>
+          </CTab>
+        </CTabs>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Cancel</CButton>
-        <CButton type="submit" form="listForm" color="primary">{{modal_submit_text}}</CButton>
+        <CButton v-if="step > 0 && step <= last_step" @click="step -= 1" color="secondary">Previous</CButton>
+        <CButton v-if="step != last_step" @click="step += 1" color="primary">Next</CButton>
+        <CButton @click="modal_action()" v-if="step == last_step" type="submit" form="listForm" color="primary">{{modal_submit_text}}</CButton>
       </template>
     </CModal>
     <CModal title="Delete List" color="danger" :centered="true" :show.sync="delete_modal">
@@ -137,8 +192,12 @@
 
 <script>
 import {mapState} from "vuex";
+import OrganizationBadge from './OrganizationBadge'
 export default {
     name: 'ListsList',
+    components: {
+      OrganizationBadge
+    },
     props: {
     items: Array,
     fields: {
@@ -202,7 +261,10 @@ export default {
         data_type_list: [],
         organizations: [],
         organization: '',
-        active_page: 1
+        active_page: 1,
+        step: 0,
+        last_step: 3,
+        external_polling: false
       }
     },
     watch: {
@@ -254,6 +316,7 @@ export default {
         })
       },
       editListModal(uuid) {
+        this.step = 0
         this.modal_title = "Edit List"
         this.modal_submit_text = 'Edit'
         this.modal_mode = 'edit'
