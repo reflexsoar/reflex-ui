@@ -217,7 +217,7 @@ export default {
         let name = this.name
         let description = this.description
         let organization = this.organization
-        let inputs = this.inputs
+        let inputs = this.inputs.map(item => { return item.uuid })
         this.$store.dispatch('createAgentGroup', { name, description, organization, inputs })
         .then(resp => {
           this.error = false

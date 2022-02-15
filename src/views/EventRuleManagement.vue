@@ -33,7 +33,7 @@
             </template>
             <template #hits="{item}">
               <td>
-                {{getHits(item.uuid)}}
+                {{getHits(item.uuid).toLocaleString('en-US')}}
               </td>
             </template>
             <template #last_matched_date="{item}">
