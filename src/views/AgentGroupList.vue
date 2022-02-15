@@ -234,7 +234,7 @@ export default {
           name: this.name,
           description: this.description,
           organization: this.organization,
-          inputs: this.inputs
+          inputs: this.inputs.map(item => { return item.uuid })
 
         }
         this.$store.dispatch('updateAgentGroup', {uuid, data}).then(resp => {
