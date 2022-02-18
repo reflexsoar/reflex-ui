@@ -85,6 +85,14 @@
                 <CSelect :options="data_type_list" :value.sync="list_data.data_type.uuid" label="Data Type" placeholder="Select the data type this list contains" v-bind:required="modal_submit_text == 'Create'"/>
               </CCol>
             </CRow>
+            <CRow v-if="list_data.list_type === 'csv'">
+              <CCol col='12'>
+                <CInput v-model="list_data.csv_headers" label="Column Headers" placeholder="value,sha256,sha1,md5,ip,vthash,ssdeep,imphash,family,extension" description="A comma separated list of CSV fields"/>
+              </CCol>
+              <CCol col='12'>
+                <CInput v-model="list_data.csv_headers_data_types" label="Column Data Types" placeholder="generic,sha256,sha1,md5,ip,v5hash,user,hostname,url" description="A comma separated list of data types that match the above columns.  Use the value nomatch for fields to skip matching on"/>
+              </CCol>
+            </CRow>
             <CRow>
           <CCol>
             <div class="form-input">  
@@ -246,7 +254,9 @@ export default {
           data_type: { uuid: ''},
           tag_on_match: false,
           active: true,
-          organization: ""
+          organization: "",
+          csv_headers: '',
+          csv_headers_data_types: ''
         },
         modal_action: null,
         modal_status: false,
@@ -257,7 +267,7 @@ export default {
         error: false,
         error_message: "",
         delete_confirm: "",
-        list_types: ['values','patterns'],
+        list_types: ['values','patterns','csv'],
         data_type_list: [],
         organizations: [],
         organization: '',
@@ -295,6 +305,7 @@ export default {
         }        
       },
       createListModal() {
+        this.reset()
         this.modal_action = this.createList
         this.modal_title = 'Create List'
         this.modal_status = true
@@ -304,10 +315,13 @@ export default {
       createList() {
         let ld = {}
         Object.assign(ld,this.list_data)
-        console.log(this.ld)
         ld.data_type_uuid = ld.data_type.uuid
         delete ld['data_type']
         ld.active = true
+        if(!this.external_polling) {
+          delete ld['url']
+          delete ld['poll_interval']
+        }
         this.$store.dispatch('createList', ld).then(resp => {
           this.modal_status = false
         }).catch(err => {
@@ -322,6 +336,10 @@ export default {
         this.modal_mode = 'edit'
         this.modal_action = this.editList
         Object.assign(this.list_data, this.lists.find(list => list.uuid === uuid))
+        if(this.list_data.url) {
+          this.external_polling = true
+        }
+        
         this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         this.modal_status = true
       },
@@ -336,7 +354,9 @@ export default {
           url: this.list_data.url,
           poll_interval: this.list_data.poll_interval,
           to_memcached: this.list_data.to_memcached,
-          active: this.list_data.active
+          active: this.list_data.active,
+          csv_headers: this.list_data.csv_headers,
+          csv_headers_data_types: this.list_data.csv_headers_data_types
         }
 
         let uuid = this.list_data.uuid
@@ -366,8 +386,15 @@ export default {
         this.list_data = {
           values: "",
           data_type: { uuid: ''},
-          tag_on_match: false
+          tag_on_match: false,
+          url: null,
+          poll_interval: null,
+          to_memcached: false,
+          active: true,          
+          csv_headers: '',
+          csv_headers_data_types: ''
         }
+        this.external_polling = false
         this.error = false
         this.error_message = ""
       },

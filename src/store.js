@@ -601,6 +601,7 @@ const mutations = {
     state.pagination = pagination
   },
   clone_input(state, input) {
+    console.log(input)
     state.source_input = input
   }
 }

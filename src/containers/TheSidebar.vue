@@ -17,8 +17,9 @@
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_events')" name="Queue" to="/alerts/list"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_event_rules')" name="Event Rules" to="/event_rules"></CSidebarNavItem>
       </CSidebarNavDropdown>
-      <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='Automation' icon="cil-3d">
-        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="Intel Lists" to="/lists"></CSidebarNavItem>
+      <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='Intel' icon="cil-3d">
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="List Mananger" to="/lists"></CSidebarNavItem>
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="Intel Explorer" to="/lists/explore"></CSidebarNavItem>
       </CSidebarNavDropdown>
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='System' icon="cil-settings">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_settings')" name="Settings" to="/settings"></CSidebarNavItem>

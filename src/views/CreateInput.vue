@@ -402,7 +402,8 @@ export default {
           this.credential = ''
           this.config = this.source_input.config
           this.plugin = this.source_input.plugin
-          this.source_input.tags.forEach(tag => this.addTag(tag))
+          this.selected = this.source_input.tags.map(tag => { return {'name': tag, 'uuid':'', color: '#ffffff'}})
+          this.tags = this.source_input.tags
           this.field_mapping = this.source_input.field_mapping
         }
       },
@@ -417,7 +418,7 @@ export default {
         let config = btoa(conf)
         let field_mapping = btoa(fm)
         let plugin = this.plugin
-        let tags = this.tags
+        let tags = this.selected.map(tag => { return tag.name })
         let credential_list = this.credential_list
         this.$store.dispatch('createInput', { name, organization, description, config, field_mapping, plugin, credential, tags })
         .then(resp => {
