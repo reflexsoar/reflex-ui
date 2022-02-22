@@ -47,7 +47,7 @@
               <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
             </template>
             <template #expire="{item}">
-              <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
+              <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.expire" disabled></CSwitch></td>
             </template>
             
             <template #admin="{item}"> 
