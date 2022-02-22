@@ -81,6 +81,7 @@ const state = {
   lists: [],
   pagination: {},
   credential_list: [],
+  intel_filters: [],
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
@@ -98,12 +99,15 @@ const state = {
   },
   event_stats: {},
   event_rule_stats: {},
+  list_stats: {},
   case_stats: {},
   network_data: {},
   loading: false,
   quick_filters: true,
   source_input: {},
-  input_list: []
+  input_list: [],
+  list_values: [],
+  list_names: []
 }
 
 const mutations = {
@@ -176,6 +180,14 @@ const mutations = {
     }
     
   },
+  save_list_values(state, values) {
+    state.list_values = values
+  },
+  save_list_stats(state, stats) {
+    state.list_names = stats['lists']
+    delete stats['lists']
+    state.list_stats = stats
+  },
   save_event_stats(state, stats) {
     state.event_stats = stats
   },
@@ -228,6 +240,9 @@ const mutations = {
   },
   update_case_filters(state, filters) {
     state.case_filters = filters
+  },
+  update_intel_filters(state, filters) {
+    state.intel_filters = filters
   },
   update_case_comment(state, comment) {
     state.comment = comment
@@ -607,7 +622,11 @@ const mutations = {
 }
 
 const getters = {
+  list_values: state => { return state.list_values },
   pagination: state => { return state.pagination },
+  list_name: state => function(uuid) {
+    return state.list_names[uuid]
+  },
   org_name: state => function(uuid) {
     let org = state.organizations.filter(o => o.uuid === uuid)
     if (org.length > 0) {
@@ -621,6 +640,7 @@ const getters = {
   lists: state => { return state.lists },
   quick_filters: state => { return state.quick_filters },
   loading: state => {return state.loading},
+  intel_filters: state => { return state.intel_filters },
   case_filters: state => { return state.case_filters },
   observable_filters: state => { return state.observable_filters },
   organization: state => { return state.organization },
@@ -629,6 +649,7 @@ const getters = {
   network_data: state => { return state.network_data },
   case_stats: state => { return state.case_stats },
   event_stats: state => { return state.event_stats },
+  list_stats: state => { return state.list_stats },
   eventDrawerShow: state => { return state.eventDrawerShow},
   eventDrawerMinimize: state => { return state.eventDrawerMinimize},
   mfa_enabled: state => { return state.mfa_enabled },
@@ -911,7 +932,115 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/list/${uuid}/add_value`, data: value, method: 'PUT'})
       .then(resp => {
-        commit('show_alert', {message: 'Successfully add observable to list.', 'type': 'success'})
+        commit('show_alert', {message: 'Successfully added value to list.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  removeItemFromList({commit}, {uuid, value}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/list/${uuid}/remove_value`, data: value, method: 'PUT'})
+      .then(resp => {
+        commit('show_alert', {message: 'Successfully removed value from list.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getIntelListValues({commit}, {page=1, page_size=25, list=[], value=[], data_type=[], from_poll=null, sort_by='created_at', sort_direction='desc', start=null, end=null, organization=null}) {
+    return new Promise((resolve, reject) => {
+
+      let url = `${BASE_URL}/list/values?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+
+      if(list.length > 0) {
+        url = url+`&list=${list}`
+      }
+
+      if(value.length > 0) {
+        url = url+`&value=${value}`
+      }
+
+      if(data_type.length > 0) {
+        url = url+`&data_type=${data_type}`
+      }
+      
+      if(start && end) {
+        url = url+`&start=${start}&end=${end}`
+      }
+
+      if(organization) {
+        url = url+`organization=${organization}`
+      }
+
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_list_values', resp.data.values)
+        commit('save_pagination', resp.data.pagination)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getIntelListStats({commit}, {list_name__like=null, value__like=null, top=10, list=[], value=[], from_poll=null, data_type=[], metrics=['list','value','data_type','from_poll'],start=null, end=null, organization=[]}) {
+    commit('loading_status',true)
+    return new Promise((resolve, reject) => {
+
+      let url = `${BASE_URL}/list/stats?q=`
+
+      if(list.length > 0) {
+        url = url+`&list=${list}`
+      }
+
+      if(value.length > 0) {
+        url = url+`&value=${value}`
+      }
+
+      if(data_type.length > 0) {
+        url = url+`&data_type=${data_type}`
+      }
+
+      if(from_poll === true) {
+        url = url+`&from_poll=true`
+      }
+
+      if(from_poll === false) {
+        url = url+`&from_poll=false`
+      }
+
+      if(list_name__like) {
+        url = url+`&list_name__like=${list_name__like}`
+      }
+
+      if(value__like) {
+        url = url+`&value__like=${value__like}`
+      }
+
+      if(top) {
+        url = url+`&top=${top}`
+      }
+
+      if(metrics) {
+        url = url+`&metrics=${metrics}`
+      }
+
+      if(start && end) {
+        url = url+`&start=${start}&end=${end}`
+      }
+      if(organization && organization.length > 0) {
+        url = url+`&organization=${organization}`
+      }      
+
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_list_stats', resp.data)
+        commit('loading_status',false)
         resolve(resp)
       })
       .catch(err => {
@@ -2709,6 +2838,6 @@ export default new Vuex.Store({
   getters,
   plugins: [createPersistedState({
     key: 'reflex-state',
-    paths: ['observable_filters','case_filters','current_user','case_templates','quick_filters']
+    paths: ['observable_filters','case_filters','intel_filters','current_user','case_templates','quick_filters']
   })]
 })

@@ -360,7 +360,7 @@ export default {
       this.delete_modal = false
     },
     loadRoles(organization=null) {
-      this.$store.dispatch("getRoles", organization=organization).then(resp => {
+      this.$store.dispatch("getRoles", {organization: organization}).then(resp => {
         this.roles = this.$store.getters.roles.map(item => { return {'label': item.name, 'value': item.uuid}})
       })
     }

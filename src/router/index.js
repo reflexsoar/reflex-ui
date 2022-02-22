@@ -38,6 +38,7 @@ const CaseManagement = () => import('@/views/CaseManagement')
 const CaseDetails = () => import('@/views/CaseDetails')
 const Lists = () => import('@/views/Lists')
 const ListsList = () => import('@/views/ListsList')
+const ListExplorer = () => import('@/views/ListExplorer')
 const Settings = () => import('@/views/Settings')
 const ObservableHistory = () => import('@/views/ObservableHistory')
 const UserProfile = () => import('@/views/UserProfile')
@@ -434,8 +435,17 @@ function configRoutes () {
           children: [
             {
               path: 'list',
-              name: 'View Lists',
+              name: 'List Manager',
               component: ListsList,
+              meta: {
+                fetchSettings: true,
+                requiresAuth: true
+              }
+            },
+            {
+              path: 'explore',
+              name: 'List Explorer',
+              component: ListExplorer,
               meta: {
                 fetchSettings: true,
                 requiresAuth: true
