@@ -461,13 +461,11 @@ export default {
       return JSON.stringify(data, undefined, 4);
     },
     editFieldMapping(field) {
-      console.log(field)
       this.edit_field = this.input.field_mapping["fields"]
         .map((item) => {
           return item["field"];
         })
         .indexOf(field);
-      console.log(this.edit_field)
     },
     itemIndex(field) {
       return this.input.field_mapping["fields"]

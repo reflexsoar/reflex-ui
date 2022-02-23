@@ -320,8 +320,6 @@ export default {
           }
         }
 
-        console.log(list_filters)
-
         this.$store.dispatch('getIntelListValues', {
           page: page,
           page_size: page_size,

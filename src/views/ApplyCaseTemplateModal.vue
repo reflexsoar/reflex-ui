@@ -91,7 +91,6 @@ export default {
         },
         caseTemplateFind(query) {
             let organization = this.organization
-            console.log(query)
             this.$store.dispatch('getCaseTemplateList', {title: query, organization: organization}).then(resp => {
                 this.templates = this.$store.getters.case_template_list.filter((template) => template.uuid != this.current_case_template_uuid)
             })

@@ -616,7 +616,6 @@ const mutations = {
     state.pagination = pagination
   },
   clone_input(state, input) {
-    console.log(input)
     state.source_input = input
   }
 }
@@ -692,7 +691,7 @@ const getters = {
   related_events: state => {return state.related_events },
   related_cases: state => { return state.related_cases },
   audit_logs: state => { return state.audit_logs },
-  data_types_list: function() { console.log(state.data_types); return state.data_types.map(item => { console.log(item); return {'label': item.name, 'value': item.uuid}}) },
+  data_types_list: function() { return state.data_types.map(item => { return {'label': item.name, 'value': item.uuid}}) },
   user_has_permission: state => function(permission) {
     if(Object.keys(state.current_user.role.permissions).includes(permission)) {
       

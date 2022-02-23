@@ -455,7 +455,6 @@ export default {
         populateEventRuleFields() {
 
             this.organization = this.current_user.organization
-            console.log(this.organization)
 
             if(this.event_rule.organization) {
                 this.organization = this.event_rule.organization
@@ -623,7 +622,6 @@ export default {
         editEventRule() {
 
             let uuid = this.event_rule.uuid
-            console.log(this.close_reason)
             let rule = {
                 name: this.name,
                 organization: this.organization,

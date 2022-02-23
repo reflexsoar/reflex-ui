@@ -176,7 +176,6 @@ export default {
         this.loading = true
         this.$store.dispatch('getAgentGroups', {page: page}).then(resp => {
           this.pagination = resp.data.pagination
-          console.log(resp.data.pagination)
           this.loading = false
         })
       },
