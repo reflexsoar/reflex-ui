@@ -1483,7 +1483,7 @@ const actions = {
       })
     })
   },
-  getEventStats({commit}, {title__like=null, signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type','organization','event_rule'],start=null, end=null, organization=[], event_rules=[]}) {
+  getEventStats({commit}, {title__like=null, signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type','organization','event_rule','signature'],start=null, end=null, organization=[], event_rules=[]}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
 

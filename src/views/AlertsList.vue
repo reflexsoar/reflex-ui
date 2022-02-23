@@ -174,73 +174,11 @@
         </div>
         </CCol>
       </CRow>
-      <!--<CRow v-else-if="table_view">
-        <CCol col="12">
-        <CCard>
-          <CCardBody style="overflow-y:scroll; max-height:600px">
-            <CDataTable
-                  :items="filtered_events"
-                  :fields="fields"
-                  :striped="true"
-                  :sorter='{resetable:true}'
-                  :responsive="false"
-                  v-on:mouseenter.native="pauseRefresh = true" v-on:mouseleave.native="pauseRefresh = false"
-              >
-              <template #name="{item}">
-                  <td>
-                      <input v-if="!(item.case || item.status.closed)" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':item.title})">{{item.title}}</a><br>
-                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(item.uuid).slice(0,2)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="getEventObservables(item.uuid).length > 2" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(getEventObservables(item.uuid).slice(2))}"><small>&nbsp;+{{ getEventObservables(item.uuid).length - 2}}</small></span><br>
-                      <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'data_type':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
-                  </td>
-              </template>
-              <template #reference="{item}">
-                <td><span v-c-tooltip="{
-        content: `${item.reference}`,
-        placement: 'top'
-      }">{{item.reference | truncate}}</span></td>
-              </template>
-              <template #created="{item}">
-                  <td>
-                      <span v-c-tooltip="item.created_at">{{item.created_at | moment('from','now')}}</span>
-                  </td>
-              </template>
-              <template #events="{item}">
-                <td>
-                  <CButton class="tag" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':item.signature})" v-if="!(filteredBySignature() || item.related_events_count < 1)" color="dark" size="sm">{{item.related_events_count}}</CButton>
-                </td>
-              </template>
-              <template #status="{item}">
-                <td>
-                  {{item.status.name}}
-                </td>
-              </template>
-              <template #severity="{item}">
-                <td>
-                  <CButton @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':item.severity})" class="tag" :color="getSeverityColor(item.severity)" size="sm">{{getSeverityText(item.severity)}}</CButton>
-                </td>
-              </template>
-              <template #actions="{item}">
-                <td align="right">
-                  <CButtonGroup>
-                    <CButton v-if="(item.related_events_count && item.related_events_count > 0 && !filteredBySignature()) || (filteredBySignature() && item.status.name == 'New')" size="sm" color="info" @click="createEventRule(item.title, item.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
-                    <CButton @click="caseFromCard(item.uuid)" v-if="!item.case" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
-                    <CButton :to="`/alerts/${item.uuid}`" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
-                    <CButton v-if="item.status.closed" @click="reopenEvent(item.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
-                    <CButton v-if="item.case" size="sm" color="secondary" :to="`/cases/${item.case}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
-                    <CButton v-if="!item.status.closed" color="danger" size="sm" @click="dismissEventFromCard(item.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
-                  </CButtonGroup>
-                </td>
-              </template>
-              <template #observables="{item}">
-                <td>
-                  {{item.observable_count}}
-                </td>
-              </template>
-              </CDataTable>
-          </CCardBody>
-        </CCard>
+      <CRow v-else-if="filtered_events.length == 0">
+        <CCol class='text-center'>
+          <h3><br>No Events.</h3>
         </CCol>
-      </CRow>-->
+      </CRow>
       <CRow v-else @mouseenter="pauseRefresh = true" @mouseleave="pauseRefresh = false">
         <CCol :col="12/columns" v-for="event in filtered_events" :key="event.uuid">
           <CCard :accent-color="getSeverityColor(event.severity)">
@@ -256,7 +194,7 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton v-if="(event.related_events_count && event.related_events_count > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
+                    <CButton v-if="(getRelatedCount(event.signature) && getRelatedCount(event.signature) > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(event.uuid)" v-if="event.status.name === 'New'" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton @click="showDrawer(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
@@ -271,7 +209,7 @@
                 <CCol col="9">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.related_events_count && event.related_events_count > 0"></span></CButton>
+                    <span v-if="!filteredBySignature() && getRelatedCount(event.signature) > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && getRelatedCount(event.signature) > 1" color="dark" size="sm">{{getRelatedCount(event.signature)}} occurences <span v-if="getRelatedCount(event.signature) && getRelatedCount(event.signature) > 0"></span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'data_type':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
@@ -612,6 +550,7 @@ export default {
       },
       resetFilters() {
         this.observableFilters = [{'filter_type':'status','data_type':'status','value':'New'}]
+        this.$store.commit('update_observable_filters', this.observableFilters)
         this.filterEvents()
       },
       selectedOrgLength() {
@@ -705,7 +644,7 @@ export default {
         this.selected = [uuid]
         this.selected_orgs = {}
         this.selected_orgs[event.organization] = [uuid]
-        this.related_events_count = event.related_events_count
+        this.related_events_count = this.getRelatedCount(event.signature)
         this.dismissEventModal = true
       },
       deleteEvent() {
@@ -823,7 +762,7 @@ export default {
         let source_event = this.filtered_events.filter((event) => { 
           return event.uuid == uuid 
         })
-        return source_event[0].related_events_count
+        return this.getRelatedCount(source_event[0].signature)
       },
       filteredBySignature() {
         if(this.observableFilters.some((filter) => filter.filter_type == 'signature')) {
@@ -901,7 +840,6 @@ export default {
           }
 
           if(filter.filter_type == 'event_rule') {
-            console.log(filter.value)
             event_rule_filters.push(filter.value)
           }
 
@@ -1031,17 +969,8 @@ export default {
         if(event.length > 0) {
           event = event[0]
         }
-        /*if(event.related_events_count > 1) {
-          this.$store.dispatch('getRelatedEvents', event.signature).then(resp => {
-            this.selected = [...this.selected, ...resp.data.events]
-            this.createCaseModal = true
-          })
-        } else {
-          this.selected = [uuid]
-          this.createCaseModal = true
-        }*/
         this.selected = [uuid]
-        this.related_events_count = event.related_events_count
+        this.related_events_count = this.getRelatedCount(event.signature)
         this.case_from_card = true
         this.organization = event.organization
         this.createCaseModal = true
@@ -1088,8 +1017,8 @@ export default {
               // If the event isn't selected in that org yet, push it
               if(!this.selected_orgs[event.organization].events.includes(event.uuid)) {
                   this.selected_orgs[event.organization].events.push(event.uuid)
-              }
-              this.selected_count += event.related_events_count
+              }              
+              this.selected_count += this.getRelatedCount(event.signature)
             }
           }
         }
@@ -1193,7 +1122,8 @@ export default {
         if(!this.select_all) {
           for (let i in this.filtered_events) {
             let event = this.filtered_events[i]
-            if(event.related_events_count > 1) {
+            
+            if(this.getRelatedCount(event.signature) > 1) {
               this.$store.dispatch('getRelatedEvents', event.uuid).then(resp => {
                 this.selected = [...this.selected, ...resp.data.events]
               })
@@ -1236,7 +1166,7 @@ export default {
                 }
               }
               
-              this.selected_count -= e.related_events_count
+              this.selected_count -= this.getRelatedCount(e.signature)
           } else {       
               this.selected.push(e.uuid) 
 
@@ -1255,7 +1185,7 @@ export default {
                   this.selected_orgs[e.organization].events.push(e.uuid)
               }
 
-              this.selected_count += e.related_events_count
+              this.selected_count += this.getRelatedCount(e.signature)
           }
         }
         
@@ -1274,6 +1204,9 @@ export default {
           case 4: return 'danger';
           default: return 'danger';
         }
+      },
+      getRelatedCount(sig) {
+        return this.event_stats.signature[sig]
       },
       getSeverityText(severity) {
         switch(severity) {

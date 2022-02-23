@@ -114,7 +114,8 @@ import {
   cilReload,
   cilExclamationCircle,
   cilCopy,
-  cilFolderOpen
+  cilFolderOpen,
+  cilThumbUp
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -205,7 +206,8 @@ export const iconsSet = Object.assign(
     cilExclamationCircle,
     cilCopy,
     cilLockUnlocked,
-    cilFolderOpen
+    cilFolderOpen,
+    cilThumbUp
   },
   {
     cifUs,
