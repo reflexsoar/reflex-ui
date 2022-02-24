@@ -32,7 +32,7 @@
                     </h1>                   
                 </CCol>
                 <CCol col="12" lg="1" sm="12" class="text-right">
-                    <h1><CSwitch color="success" size="lg" label-on="On" label-off="Off" :checked.sync="agent.active" v-c-tooltip="'Agent Status'" v-on:change.native="toggleAgentActive()"/></h1>
+                    <!--<h1><CSwitch color="success" size="lg" label-on="On" label-off="Off" :checked.sync="agent.active" v-c-tooltip="'Agent Status'" v-on:change.native="toggleAgentActive()"/></h1>-->
                 </CCol>
             </CRow>
             <CRow>
@@ -70,7 +70,7 @@
             </CRow>
         </CCardFooter>
     </CCard>
-    <CCard class="shadow-sm bg-white">
+    <!--<CCard class="shadow-sm bg-white">
         <CCardHeader><b>Agent Logs</b></CCardHeader>
         <CCardBody>
             <CRow>
@@ -79,7 +79,7 @@
                 </CCol>
             </CRow>
         </CCardBody>
-    </CCard>
+    </CCard>-->
     <CModal title="Delete Agent" :closeOnBackdrop="false" color="danger" :centered="true" :show.sync="delete_modal">
       <CForm id="deleteForm" @submit.prevent="deleteAgent()">
         Are you sure you want to delete the agent <b>{{agent.name}}</b>?
@@ -135,7 +135,7 @@ export default {
                 this.input_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
             }
         })
-        this.$store.dispatch('getAgentGroups').then(resp => {
+        this.$store.dispatch('getAgentGroups', {}).then(resp => {
             this.group_list = this.$store.getters.agent_groups
         })
         this.$store.dispatch('getAgent', this.$route.params.uuid).then(resp => {
