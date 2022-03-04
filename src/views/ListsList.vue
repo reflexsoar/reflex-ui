@@ -75,14 +75,14 @@
         <CTabs :activeTab.sync="step" :fade="false" variant="pills" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
           <CTab title="1. List Details">
             <h3>List Details</h3>
-            <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" :value.sync="list_data.organization" :options="organizations"/>
+            <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" :value.sync="list_data.organization" :options="organizations" @change="reloadDataTypes"/>
             <CInput v-model="list_data.name" label="Name" placeholder="A friendly name for the list" v-bind:required="modal_submit_text == 'Create'"/>
             <CRow>
               <CCol col="12" lg="6">
                 <CSelect :options="list_types" :value.sync="list_data.list_type" label="List Type" placeholder="Select a list type" v-bind:required="modal_submit_text == 'Create'"/>
               </CCol>
               <CCol col="12" lg="6">
-                <CSelect :options="data_type_list" :value.sync="list_data.data_type.uuid" label="Data Type" placeholder="Select the data type this list contains" v-bind:required="modal_submit_text == 'Create'"/>
+                <CSelect :disabled="data_type_list.length == 0" :options="data_type_list" :value.sync="list_data.data_type.uuid" label="Data Type" placeholder="Select the data type this list contains" v-bind:required="modal_submit_text == 'Create'"/>
               </CCol>
             </CRow>
             <CRow v-if="list_data.list_type === 'csv'">
@@ -235,7 +235,7 @@ export default {
       }
       this.loading = true
       this.$store.dispatch('getLists',{}).then(resp => {
-        this.getDataTypes()
+        //this.getDataTypes()
         this.loading = false
       })
     },
@@ -283,6 +283,13 @@ export default {
       }
     },
     methods: {
+      reloadDataTypes(event) {
+        this.loading = true
+        this.$store.dispatch('getDataTypes', {organization: event.target.value}).then(() => {
+          this.data_type_list = this.data_types.map(item => { return {'label': item.name, 'value': item.uuid}})
+          this.loading = false
+        })
+      },
       reloadLists(page) {
         this.loading = true
         this.$store.dispatch('getLists',{page: page}).then(() => {

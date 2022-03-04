@@ -235,7 +235,7 @@
           <CButton v-if="step != 0" @click="previousStep()" color="info">Previous</CButton>
           <CButton v-if="step != final_step" @click="nextStep()" :disabled="(test_failed && step == 2) && from_card" color="primary" >Next</CButton>
           <CButton v-if="step == final_step && (mode == 'create' || mode =='clone')" @click="createEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton>
-          <CButton v-if="step == final_step && mode == 'edit'" @click="editEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Edit</CButton>
+          <CButton v-if="step == final_step && mode == 'edit'" @click="editEventRule()" color="primary" :disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Save</CButton>
       </template>
     </CModal>
     <CModal title="Rule Testing Results" size="xl" :show.sync="show_test_results">
@@ -415,6 +415,7 @@ export default {
                 this.loadData()
                 if(this.from_card) {
                     this.event_count = this.events.length
+                    this.organization = this.event_organization
                     this.query = this.generateRule()
                     if(this.event_signature) {
                         this.name = "Rule for event signature "+this.event_signature

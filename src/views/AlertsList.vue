@@ -194,7 +194,7 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton v-if="(getRelatedCount(event.signature) && getRelatedCount(event.signature) > 0 && !filteredBySignature()) || (filteredBySignature() && event.status.name == 'New')" size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
+                    <CButton size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(event.uuid)" v-if="event.status.name === 'New'" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton @click="showDrawer(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
@@ -227,6 +227,9 @@
       </CRow>
     </CCol>
     <CModal title="Dismiss Event" color="danger" :centered="true" size="lg" :show.sync="dismissEventModal">
+      <CAlert :show.sync="error" color="danger">
+        Failed to dismiss Event(s). {{error_message}}
+      </CAlert>
       <div>
         <p>Dismissing an event indicates that no action is required.  For transparency purposes, it is best to leave a comment as to why this event is being dismissed.  Fill out the comment field below.</p>
         <p>This action will apply to all related events with the same signature.</p>
@@ -532,7 +535,9 @@ export default {
         multiple_org_dismiss: {},
         max_observables: 15,
         organization: "",
-        event_rules: []
+        event_rules: [],
+        error: false,
+        error_message: ""
       }
     },
     methods: {
@@ -546,6 +551,8 @@ export default {
       },
       startDismissEvent() {
         this.loadCloseReasons()
+        this.error = false
+        this.error_message = ""
         this.dismissEventModal = true
       },
       resetFilters() {
@@ -676,7 +683,11 @@ export default {
             this.filtered_events = this.filterEvents()
             this.dismissEventModal = false
             this.dismiss_submitted = false
+            this.error = false
+            this.error_message = ""
           }).catch(err => {
+            this.error = true
+            this.error_message = err.response.data.message
             this.dismiss_submitted = false
           })
          this.selected = []
