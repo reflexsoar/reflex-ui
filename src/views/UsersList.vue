@@ -16,6 +16,7 @@
         :dark="dark"
         :loading="loading"
         :sorter="{external: true, resetable: true}"
+        @update:sorter-value="sort($event)"
         style="border-top: 1px solid #cfcfcf; overflow-x:auto;"
       >
         <template #username="{item}">
@@ -144,7 +145,7 @@ export default {
           "first_name",
           "last_name",
           "email",
-          "role",
+          {key: "role", sorter:false},
           "last_logon",
           "actions"
         ];
@@ -220,8 +221,13 @@ export default {
       this.loadUsers(this.active_page)
     }
   },
-  computed: mapState(['current_user','pagination','users']),
+  computed: mapState(['current_user','users']),
   methods: {
+    sort(event) {
+      let sort_direction = event.asc ? 'asc' : 'desc'
+      event.column = event.column ? event.column : 'created_at'
+      this.loadUsers(this.active_page, this.organization, event.column, sort_direction)
+    },
     toggleMFA(mfa_status, user_uuid) {
       let data = {}
       if(mfa_status == true) {
@@ -347,7 +353,7 @@ export default {
       this.loading = true;
       if(this.current_user.default_org) {
         this.fields.splice(1,0,'organization')
-        this.$store.dispatch('getOrganizations').then(resp => {
+        this.$store.dispatch('getOrganizations', {}).then(resp => {
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
           this.user.organization = this.current_user.organization
         })        
@@ -365,9 +371,9 @@ export default {
       this.unlock_modal = false
       this.delete_modal = false
     },
-    loadUsers(page=1, organization=null) {
+    loadUsers(page=1, organization=null, sort_by="created_at", sort_direction="asc") {
       this.loading = true
-      this.$store.dispatch('getUsers', {page:page, organization:organization}).then(resp => {
+      this.$store.dispatch('getUsers', {page:page, organization:organization, sort_by: sort_by, sort_direction: sort_direction}).then(resp => {
         this.pagination = resp.data.pagination
         this.loading = false
       })

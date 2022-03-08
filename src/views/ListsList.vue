@@ -20,7 +20,6 @@
           :dark="dark"
           :sorter='{external: true, resetable: true}'
           :loading="loading"
-          pagination
       >
       <template #name="{item}">
           <td>

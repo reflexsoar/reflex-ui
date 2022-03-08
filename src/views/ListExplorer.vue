@@ -122,7 +122,6 @@
           :dark="dark"
           :sorter='{external: true, resetable: true}'
           :loading="loading"
-          pagination
       >
       <template #from_poll="{item}">
         <td>

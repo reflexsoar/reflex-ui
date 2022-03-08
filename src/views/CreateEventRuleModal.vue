@@ -740,7 +740,7 @@ export default {
             }
 
             if(this.current_user.default_org) {
-                this.$store.dispatch('getOrganizations').then(resp => {
+                this.$store.dispatch('getOrganizations', {}).then(resp => {
                     this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
                 })
             }

@@ -22,7 +22,8 @@
           :fields="fields"
           :items-per-page="small ? 25 : 5"
           :dark="dark"
-          :sorter="{external: false, resetable: true}"
+          :sorter="{external: true, resetable: true}"
+          @update:sorter-value="sort($event)"
           :loading="loading"
           style="border-top: 1px solid #cfcfcf;"
         >
@@ -118,8 +119,8 @@ export default {
       default() {
         return [
           "name",
-          "user_count",
-          "created_by",
+          {key: "user_count", sorter:false},
+          {key: "created_by", sorter:false},
           "actions"
         ];
       },
@@ -139,8 +140,8 @@ export default {
   created: function () {
     this.loading = true
     if(this.current_user.default_org) {
-      this.fields.splice(1,0,'organization')
-      this.$store.dispatch('getOrganizations').then(resp => {
+      this.fields.splice(1,0,{key: 'organization', sorter: false})
+      this.$store.dispatch('getOrganizations', {}).then(resp => {
         
       })
     }
@@ -166,14 +167,19 @@ export default {
     }
   },
   methods: {
+    sort(event) {
+      let sort_direction = event.asc ? 'asc' : 'desc'
+      event.column = event.column ? event.column : 'created_at'
+      this.reloadRoles(this.active_page, this.organization_filter, event.column, sort_direction)
+    },
     newRole() {
       Object.assign(this.role, this.empty_role)
       this.modal_mode = 'create'
       this.role_modal = true
     },
-    reloadRoles() {
+    reloadRoles(page, organization, sort_by="created_at", sort_direction="asc") {
       this.loading = true
-      this.$store.dispatch('getRoles', {organization: this.organization_filter, page: this.active_page}).then(() => {
+      this.$store.dispatch('getRoles', {organization: this.organization_filter, page: this.active_page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
         this.loading = false
       })
     },

@@ -137,7 +137,7 @@ export default {
     },
     loadData() {
       //this.$store.dispatch('getSettings')
-      this.$store.dispatch('getCredentialList')
+      this.$store.dispatch('getCredentialList', {})
     },
     dismiss(){
       this.generate_modal = false;

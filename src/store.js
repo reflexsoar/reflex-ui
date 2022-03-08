@@ -1796,11 +1796,13 @@ const actions = {
       })
     })
   },
-  getOrganizations({commit}) {
+  getOrganizations({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/organization`, method: 'GET'})
+      let base_url = `${BASE_URL}/organization?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_organizations', resp.data.organizations)
+        commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })
       .catch(err => {
@@ -1808,12 +1810,12 @@ const actions = {
       })
     })
   },
-  getUsers({commit}, {page=1,page_size=10,organization=null}) {
+  getUsers({commit}, {page=1,page_size=10,organization=null,sort_by="created_at",sort_direction="asc"}) {
     return new Promise((resolve, reject) => {
 
-      let base_url = `${BASE_URL}/user?page=${page}&page_size=${page_size}`
+      let base_url = `${BASE_URL}/user?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       if(organization) {
-        base_url += `?organization=${organization}`
+        base_url += `&organization=${organization}`
       }
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
@@ -1909,9 +1911,9 @@ const actions = {
       })
     })
   },
-  getRoles({commit}, {organization=null, page=1, page_size=10}) {
+  getRoles({commit}, {organization=null, page=1, page_size=10, sort_by="created_at",sort_direction="asc"}) {
 
-    let url =`${BASE_URL}/role?page=${page}&page_size=${page_size}`
+    let url =`${BASE_URL}/role?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
     if (organization) {
       url += `&organization=${organization}`

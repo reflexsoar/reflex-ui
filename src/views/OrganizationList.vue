@@ -1,11 +1,6 @@
 <template>
   <CRow>
-    <CCol col v-if="loading">
-      <div style="margin: auto; text-align:center; verticle-align:middle;">
-        <CSpinner color="dark" style="width:6rem;height:6rem;" />
-      </div>
-    </CCol>
-    <CCol col v-else>
+    <CCol>
       <div style="padding: 10px;">
         <CButton color="primary" @click="showOrganizationModal()">New Organization</CButton>
       </div>
@@ -20,7 +15,8 @@
         :items-per-page="small ? 25 : 10"
         :dark="dark"
         :sorter="{external: true, resetable: true}"
-        pagination
+        :loading="loading"
+        @update:sorter-value="sort($event)"
         style="border-top: 1px solid #cfcfcf;"
       >
         <template #name="{item}">
@@ -35,6 +31,11 @@
           </td>
         </template>
       </CDataTable>
+      <CRow>
+          <CCol>
+            <CCardBody><CPagination :pages="pagination.pages" :activePage.sync="active_page"/></CCardBody>
+          </CCol>
+        </CRow>
       <CreateOrganizationWizard :show.sync="organizationModal"/>
       <EditOrganizationWizard :show.sync="editOrganizationModal" :uuid="target_organization"/>
     </CCol>
@@ -59,7 +60,7 @@ export default {
       default() {
         return [
           "name",
-          "description",
+          {key: "description", sorter:false},
           "url",
           "logon_domains",
           "actions"
@@ -86,11 +87,23 @@ export default {
       loading: true,
       organizationModal: false,
       editOrganizationModal: false,
-      target_organization: ''
+      target_organization: '',
+      active_page: 1
     };
   },
-  computed: mapState(['organizations']),
+  computed: mapState(['organizations','pagination']),
+   watch: {
+
+    active_page: function() {
+      this.loadOrganizations(this.active_page)
+    }
+  },
   methods: {
+    sort(event) {
+      let sort_direction = event.asc ? 'asc' : 'desc'
+      event.column = event.column ? event.column : 'created_at'
+      this.loadOrganizations(this.active_page, event.column, sort_direction)
+    },
     showOrganizationModal() {
       this.organizationModal = true
     },
@@ -105,11 +118,15 @@ export default {
         return false;
       }
     },
+    loadOrganizations(active_page, sort_by, sort_direction) {
+      this.loading=true
+      this.$store.dispatch("getOrganizations", {page: active_page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
+        this.loading = false
+      })
+    },
     loadData: function () {
       this.loading = true;
-      this.$store.dispatch("getOrganizations").then((resp) => {
-        this.loading = false;
-      });
+      this.loadOrganizations()
     }
   }
 };

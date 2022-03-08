@@ -97,7 +97,7 @@ router.beforeEach((to, from, next) => {
 
   if(to.matched.some(record => record.meta.fetchOrganizations)) {
     if(store.getters.current_user.default_org) {
-      store.dispatch('getOrganizations')
+      store.dispatch('getOrganizations', {})
     }    
   }
 

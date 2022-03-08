@@ -61,7 +61,7 @@ export default {
     name: 'CreatePlaybook',
     created() {
       this.$store.dispatch('getTags')
-      this.$store.dispatch('getOrganizations')
+      this.$store.dispatch('getOrganizations', {})
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages     
     },
     methods: {
