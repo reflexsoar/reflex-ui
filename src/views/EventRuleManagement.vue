@@ -37,7 +37,7 @@
               </td>
             </template>
             <template #last_matched_date="{item}">
-              <td v-if="item.last_matched_date">{{item.last_matched_date | moment('from', 'now') }}</td>
+              <td v-if="item.last_matched_date">{{getLastMatched(item.uuid) | moment('from', 'now') }}</td>
               <td v-else>Never</td>
             </template>
             <template #merge_into_case="{item}">
@@ -357,8 +357,14 @@ export default {
           return this.event_rule_stats['hits'][uuid]
         } else {
           return 0
-        }
-        
+        }        
+      },
+      getLastMatched(uuid) {
+        if(this.event_rule_stats['last_hit'][uuid]) {
+          return this.event_rule_stats['last_hit'][uuid]
+        } else {
+          return 0
+        }        
       },
       loadRules() {        
         let page = this.current_page
