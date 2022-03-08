@@ -22,8 +22,8 @@
             :fields="fields"
             :items-per-page="small ? 25 : 10"
             :dark="dark"
-            :sorter="{ external: true, resetable: true }"
-            pagination
+            :sorter='{external: true, resetable: true}'
+            @update:sorter-value="sort($event)"
           >
             <template #name="{ item }">
               <td>
@@ -139,7 +139,7 @@ export default {
     fields: {
       type: Array,
       default() {
-        return ["name", "description", "actions"];
+        return ["name", {key:"description", sorter: false}, "actions"];
       },
     },
     caption: {
@@ -157,7 +157,7 @@ export default {
     this.$store.dispatch("getCredentials", {});
     if(this.current_user.default_org) {
       if (!this.fields.includes('organization')) {
-        this.fields.splice(1,0,'organization')
+        this.fields.splice(1,0,{key:'organization', sorter: false})
         this.$store.dispatch('getOrganizations').then(resp => {
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         })
@@ -199,9 +199,14 @@ export default {
   }
 },
   methods: {
-    reloadCredentials(page) {
+    sort(event) {
+      let sort_direction = event.asc ? 'asc' : 'desc'
+      event.column = event.column ? event.column : 'created_at'
+      this.reloadCredentials(this.active_page, event.column, sort_direction)
+    },
+    reloadCredentials(page, sort_by, sort_direction) {
       this.loading = true
-      this.$store.dispatch('getCredentials', {page: page}).then(() => {
+      this.$store.dispatch('getCredentials', {page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
         this.loading = false
       })
     },

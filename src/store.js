@@ -1047,9 +1047,9 @@ const actions = {
       })
     })
   },
-  getInputs({commit}, {page=1, page_size=10}) {
+  getInputs({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
     return new Promise((resolve, reject) => {
-      let url = `${BASE_URL}/input?page=${page}&page_size=${page_size}`
+      let url = `${BASE_URL}/input?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_inputs', resp.data.inputs)
@@ -1061,9 +1061,9 @@ const actions = {
       })
     })
   },
-  getAgents({commit}, {page=1, page_size=10}) {
+  getAgents({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
 
-    let url = `${BASE_URL}/agent?page=${page}&page_size=${page_size}`
+    let url = `${BASE_URL}/agent?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
     return new Promise((resolve, reject) => {
       Axios({url: url, method: 'GET'})
       .then(resp => {
@@ -1270,7 +1270,7 @@ const actions = {
       })
     })
   },
-  getCredentialList({commit}, organization) {
+  getCredentialList({commit}, {organization}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/credential`
@@ -1324,10 +1324,10 @@ const actions = {
       })
     })
   },
-  getCredentials({commit}, {page=1, page_size=10}) {
+  getCredentials({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
     return new Promise((resolve, reject) => {
 
-      let url = `${BASE_URL}/credential?page=${page}&page_size=${page_size}`
+      let url = `${BASE_URL}/credential?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_credentials', resp.data.credentials)
@@ -1808,16 +1808,16 @@ const actions = {
       })
     })
   },
-  getUsers({commit}, {organization=null}) {
+  getUsers({commit}, {page=1,page_size=10,organization=null}) {
     return new Promise((resolve, reject) => {
 
-      let base_url = `${BASE_URL}/user`
+      let base_url = `${BASE_URL}/user?page=${page}&page_size=${page_size}`
       if(organization) {
         base_url += `?organization=${organization}`
       }
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
-        commit('save_users', resp.data)
+        commit('save_users', resp.data.users)
         resolve(resp)
       })
       .catch(err => {

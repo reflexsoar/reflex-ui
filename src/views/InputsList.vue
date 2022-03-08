@@ -20,7 +20,7 @@
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
                   :sorter='{external: true, resetable: true}'
-                  pagination
+                  @update:sorter-value="sort($event)"
               >
               <template #name="{item}">
                   <td>
@@ -66,7 +66,8 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['name', 'description', 'tags', 'actions']
+        return ['name', {
+          key:'description', sorter:false}, 'tags', 'actions']
       }
     },
     caption: {
@@ -105,6 +106,11 @@ export default {
       }
     },
     methods: {
+      sort(event) {
+        let sort_direction = event.asc ? 'asc' : 'desc'
+        event.column = event.column ? event.column : 'created_at'
+        this.reloadInputs(this.active_page, event.column, sort_direction)
+      },
       newInput() {
         this.$store.commit('clone_input', null)
         this.$router.push('/inputs/create')
@@ -128,9 +134,9 @@ export default {
           return false
         }
       },
-      reloadInputs(page) {
+      reloadInputs(page, sort_by, sort_direction) {
         this.loading = true
-          this.$store.dispatch('getInputs',{page: page}).then(() => {
+          this.$store.dispatch('getInputs',{page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
             this.loading = false
         })
       },
@@ -138,7 +144,7 @@ export default {
         this.loading = true
         if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
-            this.fields.splice(1,0,'organization')
+            this.fields.splice(1,0,{key:'organization', sorter: false})
             
           }
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})

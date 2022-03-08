@@ -14,12 +14,16 @@
                     <CAlert :show.sync="error" color="danger" closeButton>
                         {{error_message}}
                     </CAlert>
+                    <CAlert :show="disable_reason" color="danger" closeButton>
+                        <b>Rule Disabled by System: </b>{{disable_reason}}
+                    </CAlert>
                 </CCol>
             </CRow>
             <CRow>
                 <CCol>
                     <CTabs :fade="false" variant="pills" :activeTab.sync="step" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
                         <CTab title="1. Rule Details">
+                            
                             <CAlert :show="mode == 'clone'" color="warning">
                             <b>WARNING: </b>This Event Rule has been cloned from another.  Please verify all fields before submitting.  The following fields are not copied:<br>
                             <ul style="margin-bottom: 0px">
@@ -35,12 +39,16 @@
                             <CInput label="Rule Name"  placeholder="Enter a friendly name for this rule" :value.sync="name" required></CInput>
                             <CTextarea rows="5" label="Rule description" v-model.lazy="description" required placeholder="Give a brief description of what this rule will do and why."></CTextarea>                    
                             <CRow>
-                                <CCol col=6>
+                                <CCol col=2>
+                                    <label>Rule Active?</label><br>
+                                    <CSwitch :checked.sync="active" label-on="Yes" label-off="no" color="success"/><br>
+                                </CCol>
+                                <CCol col=5>
                                     <label>Run rule retroactively after creation?</label><br>
                                     <CSwitch :checked.sync="run_retroactively" label-on="Yes" label-off="no" color="success"/><br>
                                     <small class="text-muted">When the rule is saved, Reflex will retroactively attempt to match this rule to any event that is currently in a New state</small>
                                 </CCol>
-                                <CCol col=6 v-if="current_user.default_org && !from_card">                                    
+                                <CCol col=5 v-if="current_user.default_org && !from_card">                                    
                                         <label>Global Rule</label><br>
                                         <CSwitch :checked.sync="global_rule" label-on="Yes" label-off="No" color="success"/><br>
                                         <small class="text-muted">Global Rules exist in the Default Tenant and will apply to every tenant in the Reflex system.  Matches on Global rules do not stop further rule processing.</small>
@@ -400,7 +408,9 @@ export default {
             show_test_results: false,
             test_result_color: "success",
             test_results: '',
-            test_complete: false
+            test_complete: false,
+            disable_reason: null,
+            active: true
         }
     },
     watch: {
@@ -485,13 +495,14 @@ export default {
                 } else {
                     this.target_case = {}
                 }
+                if(this.event_rule.disable_reason) {
+                    this.disable_reason = this.event_rule.disable_reason
+                }
+                this.active = this.event_rule.active
                 this.query = this.event_rule.query
                 this.close_reason = this.event_rule.dismiss_reason ? this.close_reasons.filter(c => c.value === this.event_rule.dismiss_reason)[0].value : null
                 this.dismiss_comment = this.event_rule.dismiss_comment             
-            })
-
-            
-            
+            })            
         },
         generateRule() {
             /* Generates a basic rule for the selected Event that an analyst
@@ -597,7 +608,8 @@ export default {
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
                 run_retroactively: this.run_retroactively,
-                query: this.query
+                query: this.query,
+                active: this.active
             }
 
             if(this.current_user.default_org) {
@@ -640,7 +652,8 @@ export default {
                 dismiss: this.dismiss_event,
                 event_signature: this.event_signature,
                 run_retroactively: this.run_retroactively,
-                query: this.query
+                query: this.query,
+                active: this.active
             }
 
             if(this.current_user.default_org) {
@@ -704,6 +717,8 @@ export default {
             this.test_complete = false
             this.test_failed = false
             this.test_result = ""
+            this.disable_reason = null
+            this.active = true
         },
         dismiss() {
             this.reset()

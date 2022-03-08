@@ -402,7 +402,12 @@ export default {
           this.credential = ''
           this.config = this.source_input.config
           this.plugin = this.source_input.plugin
-          this.selected = this.source_input.tags.map(tag => { return {'name': tag, 'uuid':'', color: '#ffffff'}})
+          if(this.source_input.tags) {
+            this.selected = this.source_input.tags.map(tag => { return {'name': tag, 'uuid':'', color: '#ffffff'}})
+          } else{
+            this.selected = []
+          }
+          
           this.tags = this.source_input.tags
           this.field_mapping = this.source_input.field_mapping
         }
@@ -464,7 +469,7 @@ export default {
       },
       refreshCredentials(event) {
         let organization = event.target.value
-        this.$store.dispatch('getCredentialList', organization).then(resp => {
+        this.$store.dispatch('getCredentialList', {organization: organization, page_size: 100}).then(resp => {
         })
       },
       loadTags: function() {

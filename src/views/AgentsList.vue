@@ -1,14 +1,6 @@
 <template>
   <CRow>
-    <CCol col v-if="loading">
-        <div style="margin: auto; text-align:center; verticle-align:middle;">
-           <CSpinner
-                color="dark"
-                style="width:6rem;height:6rem;"
-            />  
-        </div>
-    </CCol>
-    <CCol col v-else>
+    <CCol col>
           <div style="padding: 10px;"><CButton color="primary" @click="generateToken()" >New Agent</CButton></div>
               <CDataTable
                   :hover="hover"
@@ -21,8 +13,9 @@
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
                   :sorter='{external: true, resetable: true}'
-                  pagination
+                  :loading="loading"
                   style="border-top: 1px solid #cfcfcf;"
+                  @update:sorter-value="sort($event)"
               >
               <template #name="{item}">
                   <td>
@@ -137,9 +130,14 @@ export default {
       }
     },
     methods: {
-      reloadAgents(page) {
+      sort(event) {
+        let sort_direction = event.asc ? 'asc' : 'desc'
+        event.column = event.column ? event.column : 'created_at'
+        this.reloadAgents(this.active_page, event.column, sort_direction)
+      },
+      reloadAgents(page, sort_by, sort_direction) {
         this.loading = true
-        this.$store.dispatch('getAgents', {page: page}).then(() => {
+        this.$store.dispatch('getAgents', {page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
           this.loading = false
         })
       },

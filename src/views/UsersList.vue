@@ -14,8 +14,8 @@
         :fields="fields"
         :items-per-page="small ? 25 : 10"
         :dark="dark"
+        :loading="loading"
         :sorter="{external: true, resetable: true}"
-        pagination
         style="border-top: 1px solid #cfcfcf; overflow-x:auto;"
       >
         <template #username="{item}">
@@ -49,6 +49,11 @@
           </td>
         </template>
       </CDataTable>
+      <CRow>
+          <CCol>
+            <CCardBody><CPagination :pages="pagination.pages" :activePage.sync="active_page"/></CCardBody>
+          </CCol>
+        </CRow>
     </CCol>
     
     <CModal :title="modal_title" :centered="true" size="lg" :show.sync="modal_status">
@@ -183,7 +188,6 @@ export default {
         'role_uuid': '',
         'confirm_password': ''
       },
-      users: [],
       roles: [],
       empty_user: {
         'username': '',
@@ -201,7 +205,9 @@ export default {
       user_loading: false,
       unlock_modal: false,
       organization: "",
-      organizations: []
+      organizations: [],
+      active_page: 1,
+      pagination: {}
     };
   },
   watch: {
@@ -209,9 +215,12 @@ export default {
       if(!this.modal_status) {
         this.reset()
       }
+    },
+    active_page: function() {
+      this.loadUsers(this.active_page)
     }
   },
-  computed: mapState(['current_user']),
+  computed: mapState(['current_user','pagination','users']),
   methods: {
     toggleMFA(mfa_status, user_uuid) {
       let data = {}
@@ -343,10 +352,7 @@ export default {
           this.user.organization = this.current_user.organization
         })        
       }
-      this.$store.dispatch("getUsers", {}).then((resp) => {
-        this.users = resp.data;
-        this.loading = false;
-      });
+      this.loadUsers()
     },
     reset() {
       this.user = {}
@@ -358,6 +364,13 @@ export default {
       this.modal_status = false
       this.unlock_modal = false
       this.delete_modal = false
+    },
+    loadUsers(page=1, organization=null) {
+      this.loading = true
+      this.$store.dispatch('getUsers', {page:page, organization:organization}).then(resp => {
+        this.pagination = resp.data.pagination
+        this.loading = false
+      })
     },
     loadRoles(organization=null) {
       this.$store.dispatch("getRoles", {organization: organization}).then(resp => {
