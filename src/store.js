@@ -2021,10 +2021,10 @@ const actions = {
       })
     })
   },
-  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25}) {
+  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25, sort_by="created_at", sort_direction="asc"}) {
     return new Promise((resolve, reject) => {
 
-      let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}`
+      let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
       if(status.length > 0 ) {
         base_url += `&status=${status}`

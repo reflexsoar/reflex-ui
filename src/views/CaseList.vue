@@ -121,8 +121,9 @@
                   :items-per-page="25"
                   :dark="dark"
                   :loading = loading
-                  :sorter='{external: false, resetable: true}'
+                  :sorter='{external: true, resetable: true}'
                   :responsive="false"
+                  @update:sorter-value="sort($event)"
                   style="border-top: 1px solid #cfcfcf;"
               >
               <template #title="{item}">
@@ -297,6 +298,8 @@ export default {
         ],
         case_stats: {},
         my_cases: false,
+        sort_by: "created_at",
+        sort_direction: "asc"
         
       }
     },
@@ -321,6 +324,11 @@ export default {
       }
     },
     methods: {
+      sort(event) {
+        this.sort_direction = event.asc ? 'asc' : 'desc'
+        this.sort_by = event.column ? event.column : 'created_at'
+        this.filterCases()
+      },
       today() {
         let d = new Date()
         d.setHours(23,59,59,0)
@@ -503,7 +511,9 @@ export default {
           my_cases: this.my_cases,
           my_tasks: my_tasks,
           page: this.current_page,
-          page_size: this.card_per_page,   
+          page_size: this.card_per_page,
+          sort_by: this.sort_by,
+          sort_direction: this.sort_direction,
           organization: organization_filters,
           close_reason: close_reasons_filters,
           owner: owner_filters
