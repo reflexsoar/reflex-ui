@@ -1076,9 +1076,9 @@ const actions = {
       })
     })
   },
-  getAgentGroups({commit}, {page=1, page_size=10}) {
+  getAgentGroups({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
 
-    let url = `${BASE_URL}/agent_group?page=${page}&page_size=${page_size}`
+    let url = `${BASE_URL}/agent_group?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
     return new Promise((resolve, reject) => {
       Axios({url: url, method: 'GET'})
       .then(resp => {

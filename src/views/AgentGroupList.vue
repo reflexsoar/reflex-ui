@@ -14,6 +14,7 @@
           :dark="dark"
           :loading="loading"
           :sorter='{external: true, resetable: true}'
+          @update:sorter-value="sort($event)"
           style="border-top: 1px solid #cfcfcf;"
       >
       <template #name="{item}">
@@ -109,7 +110,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['name', 'description', 'agent_count','actions']
+        return ['name', {key: 'description', sorter:false}, {key:'agent_count', sorter:false},'actions']
       }
     },
     caption: {
@@ -128,7 +129,7 @@ export default {
     created: function () {
         if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
-            this.fields.splice(1,0,'organization')
+            this.fields.splice(1,0,{key:'organization',sorter: false})
             
           }
           //this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
@@ -164,6 +165,11 @@ export default {
       }
     },
     methods: {
+      sort(event) {
+        let sort_direction = event.asc ? 'asc' : 'desc'
+        event.column = event.column ? event.column : 'created_at'
+        this.reloadGroups(this.active_page, event.column, sort_direction)
+      },
       dismiss() {
         this.name = ""
         this.description = ""
@@ -172,9 +178,9 @@ export default {
         this.error = false
         this.error_message = ""
       },
-      reloadGroups(page){
+      reloadGroups(page, sort_by="created_at", sort_direction="asc"){
         this.loading = true
-        this.$store.dispatch('getAgentGroups', {page: page}).then(resp => {
+        this.$store.dispatch('getAgentGroups', {page: page, sort_by: sort_by, sort_direction: sort_direction}).then(resp => {
           this.pagination = resp.data.pagination
           this.loading = false
         })
