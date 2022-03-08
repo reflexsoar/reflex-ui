@@ -18,10 +18,16 @@
           </CCol>
         </CRow>
       </CCardHeader>
+      <CCardBody>
             <CDataTable
             :items="event_rules"
             :fields="fields"
             :loading="loading"
+            :items-per-page="10"
+            items-per-page-select
+            table-filter
+            pagination
+            :sorter='{external: false, resetable: true}'
             >
             <template #name="{item}">
               <td><b >{{item.name}}</b><br>{{item.description}}</td>
@@ -31,11 +37,7 @@
                 <OrganizationBadge :uuid="item.organization"/>
               </td>
             </template>
-            <template #hits="{item}">
-              <td>
-                {{getHits(item.uuid).toLocaleString('en-US')}}
-              </td>
-            </template>
+            
             <template #last_matched_date="{item}">
               <td v-if="item.last_matched_date">{{getLastMatched(item.uuid) | moment('from', 'now') }}</td>
               <td v-else>Never</td>
@@ -49,7 +51,11 @@
             <template #expire="{item}">
               <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.expire" disabled></CSwitch></td>
             </template>
-            
+            <template #hits="{item}">
+              <td>
+                {{getHits(item.uuid).toLocaleString('en-US')}}
+              </td>
+            </template>
             <template #admin="{item}"> 
               <td class="text-right">
                 <CButton disabled @click="downloadRuleAsJSON(item.uuid)" size="sm" color="secondary" v-c-tooltip="{content: 'Export Rule - COMING SOON', placement:'left'}"><CIcon name='cilCloudDownload'/></CButton>&nbsp;
@@ -66,12 +72,13 @@
               </td>
             </template>
             </CDataTable>
+      </CCardBody>
         <CRow>
-        <CCol lg="12" sm="12">
+        <!--<CCol lg="12" sm="12">
           <CCardBody v-if="pagination.pages > 0">
             <CPagination :activePage.sync="current_page" :pages="pagination.pages"/>
           </CCardBody>
-        </CCol>
+        </CCol>-->
       </CRow>
     </CCard>
   </CCol>
@@ -155,7 +162,7 @@ export default {
         step: 1,
         rules: [],
         rule: {},
-        fields: ['name','hits','merge_into_case','dismiss','expire','last_matched_date','admin'],
+        fields: ['name','merge_into_case','dismiss','expire','hits','last_matched_date','admin'],
         modal_mode: 'create',
         show_test_results: false,
         global_rule: false,
@@ -227,7 +234,9 @@ export default {
           selected_tags: [],
           showRuleDownloadModal: false,
           downloadAllRulesModal: false,
-          rule_json: {}
+          rule_json: {},
+          sort_by: "created_at",
+          sort_direction: "asc"
       }
       
     },
@@ -266,6 +275,11 @@ export default {
       }
     },
     methods: {
+      sort(event) {
+        this.sort_direction = event.asc ? 'asc' : 'desc' 
+        this.sort_by = event.column ? event.column : 'created_at'
+        this.loadRules()
+      },
       downloadAllRules() {
 
       },
@@ -369,7 +383,7 @@ export default {
       loadRules() {        
         let page = this.current_page
         let page_size = this.page_size
-        this.$store.dispatch('loadEventRules', {page, page_size}).then(resp => {
+        this.$store.dispatch('loadEventRules', {page, page_size, sort_by: this.sort_by, sort_direction: this.sort_direction}).then(resp => {
           this.pagination = resp.data.pagination
           let rules = this.event_rules.map(r => { return r.uuid })
           this.$store.dispatch('getEventRuleStats', {rules: rules, save: true})

@@ -2739,11 +2739,11 @@ const actions = {
       })
     })
   },
-  loadEventRules({commit}, {page=1, page_size=25, rules=null, save=true}) {
+  loadEventRules({commit}, {page=1, page_size=25, sort_by="created_at", sort_direction="asc", rules=null, save=true}) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
 
-      let base_url = `${BASE_URL}/event_rule?page=${page}&page_size=${page_size}`
+      let base_url = `${BASE_URL}/event_rule?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
       if(rules) {
         base_url += `&rules=${rules}`
