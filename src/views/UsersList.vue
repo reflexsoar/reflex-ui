@@ -44,9 +44,9 @@
         </template>
         <template #actions="{item}">
           <td style="max-width:150px" class="text-right">
-            <CButton v-if="item.locked && item.uuid != current_user.uuid && userHas('unlock_user')" @click="unlockUserModal(item.uuid)" size="sm" color="warning" class="unlock" v-c-tooltip="{content: 'Unlock User', placement:'left'}"><CIcon name='cilLockUnlocked'/></CButton>&nbsp;
-            <CButton v-if="item.uuid != current_user.uuid && userHas('update_user')" @click="editUserModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content: 'Edit User', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
-            <CButton v-if="item.uuid != current_user.uuid  && userHas('delete_user')" @click="deleteUserModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content: 'Delete User', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
+            <CButton v-if="item.locked && userHas('unlock_user')" @click="unlockUserModal(item.uuid)" size="sm" color="warning" class="unlock" v-c-tooltip="{content: 'Unlock User', placement:'left'}"><CIcon name='cilLockUnlocked'/></CButton>&nbsp;
+            <CButton v-if="userHas('update_user')" @click="editUserModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content: 'Edit User', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+            <CButton v-if="userHas('delete_user')" @click="deleteUserModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content: 'Delete User', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
           </td>
         </template>
       </CDataTable>
@@ -63,7 +63,7 @@
       </CAlert>
       <CForm @submit.prevent="modal_action()" id="userForm">
         <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.default_org && modal_mode =='new'" :value.sync="user.organization" :options="organizations" @change="loadRoles(user.organization)"/>
-        <CInput v-model="user.username" label="Username" placeholder="Enter a unique username for the user" required/>
+        <CInput v-model="user.username" label="User Alias" placeholder="Enter a unique alias for the user" description="A user alias is used for quick referencing a user in comments, case assignment, and other places using @mentions." required/>
         <CRow>
           <CCol col="6">
             <CInput v-model="user.first_name" label="First Name" placeholder="John" required/>
@@ -141,7 +141,7 @@ export default {
       type: Array,
       default() {
         return [
-          "username",
+          {key:"username", label: "User Alias"},
           "first_name",
           "last_name",
           "email",
@@ -313,6 +313,9 @@ export default {
         let userIndex = this.users.findIndex((user => user.uuid == uuid))
         Object.assign(this.users[userIndex], resp.data)
         this.modal_status = false
+      }).catch(err => {
+        this.error = true
+        this.error_message = err.response.data.message
       })
     },
     mapOrgToName(uuid) {

@@ -9,7 +9,6 @@ const TheContainer = () => import('@/containers/TheContainer')
 // Views
 const Dashboard = () => import('@/views/Dashboard')
 const Organizations = () => import('@/views/Organizations')
-const OrganizationsList = () => import('@/views/OrganizationsList')
 const OrganizationDetails = () => import('@/views/OrganizationDetails')
 const CreateOrganization = () => import('@/views/CreateOrganization')
 const Playbooks = () => import('@/views/Playbooks')

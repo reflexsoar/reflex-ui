@@ -112,11 +112,11 @@ import {
   cilSortDescending,
   cilLifeRing,
   cilReload,
-  cilExclamationCircle,
   cilCopy,
   cilFolderOpen,
   cilThumbUp,
-  cilVector
+  cilVector,
+  cilWarning
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -204,12 +204,12 @@ export const iconsSet = Object.assign(
     cilChevronCircleRightAlt,
     cilLifeRing,
     cilReload,
-    cilExclamationCircle,
     cilCopy,
     cilLockUnlocked,
     cilFolderOpen,
     cilThumbUp,
-    cilVector
+    cilVector,
+    cilWarning
   },
   {
     cifUs,

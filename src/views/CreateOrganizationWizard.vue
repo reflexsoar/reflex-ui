@@ -43,9 +43,10 @@
                     <h5>Create Admin User</h5>
                     <p>Create the first user in the organization.  This user will be an admin by default.</p>
                     <CInput
-                        placeholder="Username"
                         v-model="organization.admin_user.username"
-                        label="Username"
+                        label="User Alias"
+                        placeholder="Enter a unique alias for the user"
+                        description="A user alias is used for quick referencing a user in comments, case assignment, and other places using @mentions." 
                         required
                     />
                     <CRow>

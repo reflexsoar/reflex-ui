@@ -20,13 +20,14 @@
       </CCardHeader>
       <CCardBody>
             <CDataTable
-            :items="event_rules"
+            :items="computed_event_rules"
             :fields="fields"
             :loading="loading"
             :items-per-page="10"
             items-per-page-select
             table-filter
             pagination
+            hover
             :sorter='{external: false, resetable: true}'
             >
             <template #name="{item}">
@@ -39,7 +40,7 @@
             </template>
             
             <template #last_matched_date="{item}">
-              <td v-if="item.last_matched_date">{{getLastMatched(item.uuid) | moment('from', 'now') }}</td>
+              <td v-if="item.last_matched_date"> {{ item.last_matched_date | moment('from','now') }} </td>
               <td v-else>Never</td>
             </template>
             <template #merge_into_case="{item}">
@@ -53,7 +54,7 @@
             </template>
             <template #hits="{item}">
               <td>
-                {{getHits(item.uuid).toLocaleString('en-US')}}
+                {{item.hits.toLocaleString('en-US')}}
               </td>
             </template>
             <template #admin="{item}"> 
@@ -374,10 +375,10 @@ export default {
         }        
       },
       getLastMatched(uuid) {
-        if(this.event_rule_stats['last_hit'][uuid]) {
+        if(this.event_rule_stats['last_hit'][uuid] !== undefined) {
           return this.event_rule_stats['last_hit'][uuid]
         } else {
-          return 0
+          return null
         }        
       },
       loadRules() {        
@@ -451,7 +452,18 @@ export default {
         })
       }
     },
-    computed: mapState(['alert','current_user','loading','event_rules','event_rule_stats']),
+    computed: {
+      computed_event_rules: function() {
+        return this.event_rules.map(item => {
+          return {
+            ...item,
+            hits: this.getHits(item.uuid),
+            last_matched_date: this.getLastMatched(item.uuid)
+          }
+        })
+      },
+      ...mapState(['alert','current_user','loading','event_rules','event_rule_stats']),
+    },
     created() {
       this.loadRules()
       if(this.current_user.default_org) {

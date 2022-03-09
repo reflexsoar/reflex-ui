@@ -2021,7 +2021,7 @@ const actions = {
       })
     })
   },
-  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25, sort_by="created_at", sort_direction="asc"}) {
+  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25, start=null, end=null, sort_by="created_at", sort_direction="asc", escalated=null}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -2062,6 +2062,14 @@ const actions = {
         base_url += `&close_reason=${close_reason}`
       }
 
+      if(start && end) {
+        base_url += `&start=${start}&end=${end}`
+      }
+
+      if(escalated != null) {
+        base_url += `&escalated=${escalated}`
+      }
+
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
         commit('save_cases', resp.data.cases)
@@ -2072,7 +2080,7 @@ const actions = {
       })
     })
   },
-  getCaseStats({commit}, {status=[], severity=[], tags=[], title=[], close_reason=[], owner=[], top=null, my_cases=false, metrics=['title','tag','status','severity','close_reason','organization'], start=null, end=null, organization=[]}) {
+  getCaseStats({commit}, {status=[], severity=[], tags=[], title=[], close_reason=[], owner=[], top=null, my_cases=false, metrics=['title','tag','status','severity','close_reason','organization','escalated'], start=null, end=null, organization=[], escalated=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/case/stats?q=`
@@ -2109,6 +2117,9 @@ const actions = {
       }
       if(my_cases) {
         url += `&my_cases=${my_cases}`
+      }
+      if(escalated != null) {
+        url += `&escalated=${escalated}`
       }
 
       Axios({url: url, method: 'GET'})
@@ -2364,7 +2375,7 @@ const actions = {
   },
   getCase({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,organization,case_template_uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason,total_tasks,open_tasks'}})
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,organization,case_template_uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason,total_tasks,open_tasks,escalated'}})
       .then(resp => {
         commit('save_case', resp.data)
         resolve(resp)

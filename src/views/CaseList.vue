@@ -8,7 +8,7 @@
           <CCard class="cases-picker-card">
               <CRow>
                 <CCol col="9">
-                  <li style="display: inline; margin-right: 2px;" v-for="obs in caseFilters" :key="obs.value+obs.data_type"><CButton color="secondary" class="tag"  size="sm" @click="toggleCaseFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="caseFilters.length > 0" class="separator">|</span>Showing {{filtered_cases ? filtered_cases.length : 0  }} cases.</span>
+                  <li style="display: inline; margin-right: 2px;" v-for="obs in caseFilters" :key="obs.value+obs.data_type"><CButton color="secondary" class="tag"  size="sm" @click="toggleCaseFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else-if="obs.filter_type == 'escalated'">{{ obs.value ? 'Yes' : 'No'}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="caseFilters.length > 0" class="separator">|</span>Showing {{filtered_cases ? filtered_cases.length : 0  }} cases.</span>
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButton @click="quick_filters = !quick_filters" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>&nbsp;
@@ -91,6 +91,7 @@
                   <CRow v-for="k,v in case_stats[title]" :key="v">
                     <CCol v-if="title === 'severity'" v-c-tooltip="{ content: `${getSeverityText(parseInt(v))}`, placement: 'left' }" @click="toggleCaseFilter({'filter_type': title, 'data_type':title,'value':parseInt(v)})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getSeverityText(parseInt(v))}}</span></CCol>
                     <CCol v-else-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleCaseFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
+                    <CCol v-else-if="title === 'escalated'" v-c-tooltip="{ content: `${v ? 'Yes' : 'No'}`, placement: 'left'}" @click="toggleCaseFilter({'filter_type': 'escalated', 'data_type':'escalated','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v ? 'Yes': 'No'}}</span></CCol>
                     <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleCaseFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol class="text-right" col="3"><CBadge color="secondary">{{k.toLocaleString('en-US')}}</CBadge></CCol>
                   </CRow>                
@@ -128,7 +129,7 @@
               >
               <template #title="{item}">
                   <td>
-                      <router-link :to="`${item.uuid}`">{{item.title}}</router-link><br>
+                      <router-link :to="`${item.uuid}`"><span v-if="item.escalated"><CIcon name='cilWarning' class='escalated'/>&nbsp;</span>{{item.title}}</router-link><br>
                       <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
                         <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;cursor: pointer;" @click="toggleCaseFilter({'filter_type': 'tag', 'data_type':'tag','value':tag.name})">{{ tag.name }}</CBadge>
                       </li>
@@ -449,6 +450,7 @@ export default {
         let organization_filters = []
         let close_reasons_filters = []
         let owner_filters = []
+        let escalated = false
         for(let f in this.caseFilters) {
           let filter = this.caseFilters[f]
 
@@ -499,6 +501,10 @@ export default {
           if(filter.filter_type == 'owner') {
             owner_filters.push(filter.value)
           }
+
+          if(filter.filter_type == 'escalated') {
+            escalated = filter.value
+          }
         }
 
         this.$store.dispatch('getCases', {
@@ -516,7 +522,10 @@ export default {
           sort_direction: this.sort_direction,
           organization: organization_filters,
           close_reason: close_reasons_filters,
-          owner: owner_filters
+          owner: owner_filters,
+          start: start_time,
+          end: end_time,
+          escalated: escalated
         }).then(resp => {
           this.filtered_cases = this.$store.getters.cases
           this.pagination = resp.data.pagination
@@ -535,7 +544,8 @@ export default {
           close_reason: close_reasons_filters,
           owner: owner_filters,
           my_cases: this.my_cases,
-          metrics: ['tag','status','severity','close_reason','organization','owner']
+          metrics: ['tag','status','severity','close_reason','organization','owner','escalated'],
+          escalated: escalated
         }).then(resp => {
           this.case_stats = this.$store.getters.case_stats
         })

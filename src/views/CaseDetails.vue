@@ -20,7 +20,7 @@
                 <CCol col="12" lg="6" sm="12" class="text-left" @mouseover="edit_title_hint = true" @mouseleave="edit_title_hint = false">
                     <h3 style="margin-bottom:0px;">
                     <span v-if="!edit_title">
-                    <CButton :color="getSeverityColor(case_data.severity)">{{getSeverityText(case_data.severity)}}</CButton>
+                    <CIcon v-if="case_data.escalated" name="cilWarning" class="escalated" size="xl"/>&nbsp;<CButton :color="getSeverityColor(case_data.severity)">{{getSeverityText(case_data.severity)}}</CButton>
                     &nbsp;{{case_data.title | truncate}}
                         <small>
                             <a v-if="edit_title_hint && case_data.status && !case_data.status.closed" @click="edit_title = !edit_title"><CIcon  style="cursor: pointer" name="cilPencil" size="sm"/></a>
@@ -38,6 +38,8 @@
                         v-bind:disabled="case_data.status && case_data.status.closed"
                         >
                         <CDropdownItem @click="closeCaseModal = !closeCaseModal">Close Case</CDropdownItem>
+                        <CDropdownItem v-if="case_data.escalated !== true" @click="escalateCase()">Escalate Case</CDropdownItem>
+                        <CDropdownItem v-if="case_data.escalated == true" @click="escalateCase(false)">De-Escalate Case</CDropdownItem>
                         <CDropdownItem @click="caseTemplateModal = !caseTemplateModal">Apply Case Template</CDropdownItem>
                         <CDropdownItem v-if="case_data.case_template_uuid" @click="removeCaseTemplate()">Remove Case Template</CDropdownItem>
                         <CDropdownItem @click="addObservableModal = !addObservableModal">Add Observables</CDropdownItem>
@@ -866,6 +868,12 @@ export default {
                 this.case_data = this.$store.getters.case_data
             })
             this.edit_description = false
+        },
+        escalateCase(escalated=true) {
+            let uuid = this.uuid
+            this.$store.dispatch('updateCase', {uuid, data: {'escalated': escalated}}).then(resp => {
+                this.case_data = this.$store.getters.case_data
+            })
         },
         usersFind(query) {
             this.$store.dispatch('getUsersByName', {username: query, organization: this.case_data.organization}).then(resp => {
