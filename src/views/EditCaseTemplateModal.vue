@@ -222,8 +222,8 @@ export default {
             this.taskError = null
             if (this.step == 2) {
                
-                for (let task in this.tasks) {
-                    if (this.tasks[task].saved == false) {
+                for (let task in this.template.tasks) {
+                    if (this.template.tasks[task].saved == false) {
                         error = true
                     }
                 }
@@ -241,12 +241,13 @@ export default {
             this.step -= 1;
         },
         addTask() {
-            this.tasks.push({title: "", description:"", group_uuid: null, owner_uuid: null, saved:false, id: this.task_id++})
+            this.template.tasks.push({title: "", description:"", group_uuid: null, owner_uuid: null, saved:false, id: this.task_id++})
         },
         updateCaseTemplate() {
 
             let data = {
                 title: this.template.title,
+                organization: this.organization,
                 description: this.template.description,
                 tasks: [],
                 severity: this.template.severity,
@@ -277,8 +278,6 @@ export default {
             for(let tag in this.template.tags) {
                 data.tags.push(this.template.tags[tag].name)
             }
-
-            console.log(data)
 
             this.$store.dispatch('updateCaseTemplate', {uuid: this.template.uuid, data: data})
             .then(resp => {

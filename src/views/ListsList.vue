@@ -8,6 +8,7 @@
       <CCardHeader>
         <CButton color="primary" @click="createListModal()">New List</CButton>
       </CCardHeader>
+      <CCardBody>
       <CDataTable
           :hover="hover"
           :striped="striped"
@@ -17,8 +18,11 @@
           :items="lists"
           :fields="fields"
           :items-per-page="small ? 25 : 10"
+          items-per-page-select
+          table-filter
           :dark="dark"
-          :sorter='{external: true, resetable: true}'
+          :sorter='{external: false, resetable: true}'
+          pagination
           :loading="loading"
       >
       <template #name="{item}">
@@ -58,13 +62,14 @@
           </td>
         </template>      
       </CDataTable>
-      <CRow>
+      </CCardBody>
+      <!--<CRow>
         <CCol>
           <CCardBody>
             <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
           </CCardBody>
         </CCol>
-      </CRow>
+      </CRow>-->
     </CCard>
     <CModal :title="modal_title" size="xl" :show.sync="modal_status" :closeOnBackdrop="false">
       <CAlert :show.sync="this.error" color="danger" closeButton>

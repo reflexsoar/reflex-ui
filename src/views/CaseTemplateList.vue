@@ -20,7 +20,7 @@
         :loading="loading"
         :items-per-page="small ? 25 : 10"
         :dark="dark"
-        :sorter="{ external: true, resetable: true }"
+        :sorter="{ external: false, resetable: true }"
         pagination
         style="border-top: 1px solid #cfcfcf"
       >
@@ -126,7 +126,7 @@ export default {
     dark: Boolean,
     alert: false,
   },
-  computed: mapState(['current_user']),
+  computed: mapState(['current_user','case_templates']),
   created: function () {
     if(this.current_user.default_org) {
       if (!this.fields.includes('organization')) {
@@ -134,12 +134,7 @@ export default {
       }
     }
     this.loadData();
-    this.refresh = setInterval(
-      function () {
-        this.loadData();
-      }.bind(this),
-      60000
-    );
+    
   },
   data() {
     return {
@@ -152,8 +147,7 @@ export default {
       target_template: {},
       target_template_uuid: '',
       dismiss_submitted: false,
-      edit_case_modal: false,
-      case_templates: []
+      edit_case_modal: false
     };
   },
   methods: {
@@ -161,16 +155,17 @@ export default {
       this.target_template = this.case_templates.filter(t => t.uuid === uuid)[0]
       this.edit_case_modal = true
     },
-    deleteTemplate() {
-
+    deleteTemplate(uuid) {
+      this.$store.dispatch('deleteCaseTemplate', uuid).then(() => {
+        this.delete_modal = false
+      })
     },
     loadData: function () {
       this.loading = true;
       if(this.current_user.default_org) {
         this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
       }
-      this.$store.dispatch("getCaseTemplates").then((resp) => {
-        this.case_templates = resp.data;
+      this.$store.dispatch("getCaseTemplates").then(() => {
         this.loading = false;
       });
     },
@@ -184,9 +179,6 @@ export default {
         return "Unknown";
       }
     },
-  },
-  beforeDestroy: function () {
-    clearInterval(this.refresh);
-  },
+  }
 };
 </script>

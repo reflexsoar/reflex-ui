@@ -10,6 +10,9 @@
       size="xl"
       :show.sync="modalStatus"
     >
+    <CAlert :show.sync="error" color="danger" close-button>
+      {{error_message}}
+    </CAlert>
       <div name="create-case-template-step-1" v-if="step == 1">
         <CForm @submit.prevent="createCase">
           <CSelect
@@ -262,6 +265,8 @@ export default {
       tlp: 2,
       severity: 2,
       tasks: [],
+      error: false,
+      error_message: '',
       organization: "",
       organizations: [],
       taskError: null,
@@ -346,6 +351,7 @@ export default {
     },
     createCaseTemplate() {
       let title = this.title;
+      let organization = this.organization;
       let description = this.description;
       let tasks = [];
       let severity = this.severity;
@@ -385,6 +391,7 @@ export default {
           tlp,
           severity,
           tags,
+          organization
         })
         .then((resp) => {
           if (resp.status == 200) {
@@ -392,7 +399,8 @@ export default {
           }
         })
         .catch((err) => {
-          console.log(err);
+          this.error = true
+          this.error_message = err.response.data.message
         });
     },
     loadTags: function () {

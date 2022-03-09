@@ -468,7 +468,11 @@ const mutations = {
     state.state = 'success'
   },
   add_agent_group(state, agent_group) {
-    state.agent_groups.push(agent_group)
+    if (state.agent_groups.length == 0) {
+      state.agent_groups = [agent_group]
+    } else {
+      state.agent_groups.push(agent_group)
+    }    
     state.agent_group = agent_group
     state.status = 'success'
   },
@@ -500,6 +504,10 @@ const mutations = {
     state.case_task = {}
     state.case_tasks = state.case_tasks.filter(t => t.uuid !== uuid)
   },
+  remove_case_template(state, uuid) {
+    state.case_template = {}
+    state.case_templates = state.case_templates.filter(t => t.uuid !== uuid)
+  },
   remove_case(state, uuid) {
     state.cases = state.cases.filter(c => c.uuid != uuid)
     state.case = {}
@@ -525,7 +533,11 @@ const mutations = {
     state.status = 'success'
   },
   add_case_template(state, data) {
-    state.case_templates.push(data)
+    if(state.case_templates.length == 0) {
+      state.case_templates = [data]
+    } else {
+      state.case_templates.push(data)
+    }
     state.case_template = data
     state.status = 'success'
     state.case_template_list.push({title:data.title, description:data.description, uuid:data.uuid, tags:data.tags, severity:data.severity, task_count: data.task_count, tlp:data.tlp})
@@ -2453,6 +2465,18 @@ const actions = {
       Axios({url: `${BASE_URL}/case_task/${uuid}`,method: 'DELETE'})
       .then(resp => {
         commit('remove_case_task', uuid)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteCaseTemplate({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/case_template/${uuid}`,method: 'DELETE'})
+      .then(resp => {
+        commit('remove_case_template', uuid)
         resolve(resp)
       })
       .catch(err => {

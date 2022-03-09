@@ -140,6 +140,11 @@
                 <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
               </td>
               </template>
+              <template #created_at="{item}">
+                <td>
+                  {{item.created_at | moment('from','now')}}
+                </td>
+              </template>
               <template #status="{item}">
                 <td>
                   <span v-if="item.status">{{item.status.name}}</span>
@@ -271,7 +276,7 @@ export default {
         newCaseModal: false,
         deleteCaseModal: false,
         target_case: "",
-        fields: ['title','status','events','tlp','severity','owner','actions'],
+        fields: ['title','created_at','status','events','tlp','severity','owner','actions'],
         available_fields: ['title','status','events','tlp','severity','owner','actions','created_at','modified_at'],
         quick_filters: false,
         caseFilters: [{'filter_type':'status','data_type':'status','value':'New'}],
