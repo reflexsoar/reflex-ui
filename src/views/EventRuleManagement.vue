@@ -368,7 +368,7 @@ export default {
           })
       },
       getHits(uuid) {
-        if(this.event_rule_stats['hits'][uuid]) {
+        if(this.event_rule_stats['hits'][uuid] !== undefined) {
           return this.event_rule_stats['hits'][uuid]
         } else {
           return 0
