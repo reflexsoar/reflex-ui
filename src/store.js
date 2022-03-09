@@ -368,6 +368,9 @@ const mutations = {
   remove_agent(state, uuid) {
     state.agents = state.agents.filter(a => a.uuid !== uuid)
   },
+  remove_agent_group(state, uuid) {
+    state.agent_groups = state.agent_groups.filter(a => a.uuid !== uuid)
+  },
   save_settings(state, settings) {
     state.settings = settings
   },
@@ -2487,6 +2490,19 @@ const actions = {
       .then(resp => {
         commit('remove_agent', uuid)
         commit('show_alert', {message: 'Successfully deleted the agent.', 'type': 'success'})
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteAgentGroup({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_group/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_agent_group', uuid)
+        commit('show_alert', {message: 'Successfully deleted the agent group.', 'type': 'success'})
         resolve(resp)
       })
       .catch(err => {

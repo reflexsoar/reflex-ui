@@ -174,6 +174,9 @@ export default {
       this.mfa_wizard_step = 1    
 
     },
+    dismissPasswordModal() {
+      this.edit_password_modal = false
+    },
     changePasswordModal() {
       this.password = ""
       this.confirm_password = ""

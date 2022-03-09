@@ -30,7 +30,8 @@
       <template #actions="{item}">
         
         <td class='text-right'>
-          <CButton @click="editAgentGroup(item.uuid)" color="info" size="sm"><CIcon name='cilPencil'/></CButton>
+          <CButton @click="editAgentGroup(item.uuid)" color="info" size="sm"><CIcon name='cilPencil'/></CButton>&nbsp;
+          <CButton @click="deleteGroupModal(item.uuid)" color="danger" size="sm"><CIcon name='cilTrash'/></CButton>
         </td>
       </template>
       <template #agent_count="{item}">
@@ -98,6 +99,22 @@
         <CButton @click="modal_action" class="px-4" type="submit" color="primary">{{modal_button_text}}</CButton>
       </template>
     </CModal>
+    <CModal title="Delete Group" color="danger" :centered="true" :show.sync="delete_modal">
+      <CForm id="deleteForm" @submit.prevent="deleteGroup(group.uuid)">
+        Are you sure you want to delete <b>{{group.name}}</b>?   Type the groups name in the box below to confirm your intent.<br><br>
+        <CForm id="delete-confirm">
+          <CInput
+            v-model="delete_confirm"
+            label="Group Name"
+            required
+          ></CInput>
+        </CForm>
+      </CForm>
+      <template #footer>
+        <CButton @click="dismissDelete()" color="secondary">No</CButton>
+        <CButton :disabled="delete_confirm != group.name" type="submit" form="deleteForm" color="danger">Yes</CButton>
+      </template>
+    </CModal>
   </CRow>  
 </template>
 
@@ -156,7 +173,10 @@ export default {
         pagination: {
           'pages': 1,
           'page_size': 10
-        }
+        },
+        group: {},
+        delete_modal: false,
+        delete_confirm: ''
       }
     },
     watch: {
@@ -165,6 +185,21 @@ export default {
       }
     },
     methods: {
+      deleteGroup(uuid) {
+        let group = this.agent_groups.find(user => user.uuid === uuid)
+        if(group.name == this.delete_confirm) {
+          this.$store.dispatch('deleteAgentGroup', group.uuid)
+          this.delete_modal = false
+        }        
+      },
+      dismissDelete() {
+        this.delete_confirm = ''
+        this.delete_modal = false
+      },
+      deleteGroupModal(uuid) {
+        this.group = this.agent_groups.find(user => user.uuid === uuid)
+        this.delete_modal = true
+      },
       sort(event) {
         let sort_direction = event.asc ? 'asc' : 'desc'
         event.column = event.column ? event.column : 'created_at'
