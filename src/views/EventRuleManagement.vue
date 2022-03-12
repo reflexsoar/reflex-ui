@@ -384,7 +384,7 @@ export default {
       loadRules() {        
         let page = this.current_page
         let page_size = this.page_size
-        this.$store.dispatch('getEventRuleStats', {save: true}).then(() => {
+        this.$store.dispatch('getEventRuleStats', {rules: null, save: true}).then(() => {
           this.$store.dispatch('loadEventRules', {page, page_size, sort_by: this.sort_by, sort_direction: this.sort_direction}).then(resp => {
             this.pagination = resp.data.pagination
             let rules = this.event_rules.map(r => { return r.uuid })          
