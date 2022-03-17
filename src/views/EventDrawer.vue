@@ -44,27 +44,27 @@
           >
               <template #value="{item}">
                   <td>
-                      <b>{{item.value}}</b><br><small>{{item.source_field.toLowerCase()}} | {{item.data_type}}</small>
+                      <b>{{item.value}}</b><br><small>{{item.source_field ? item.source_field.toLowerCase() : 'none'}} | {{item.data_type}}</small>
                   </td>
               </template>
               <template #ioc="{item}">
                   <td>
-                      <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.ioc" disabled/>
+                      <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.ioc" v-on:change.native="toggleISS(event_data.uuid, item.value, 'ioc', item.ioc)"/>
                   </td>
               </template>
               <template #spotted="{item}">
                   <td>
-                      <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.spotted"/>
+                      <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.spotted" v-on:change.native="toggleISS(event_data.uuid, item.value, 'spotted', item.spotted)"/>
                   </td>
               </template>
               <template #safe="{item}">
                   <td>
-                      <CSwitch style="padding-top:3px" color="success" label-on="Yes" label-off="No" :checked.sync="item.safe"/>
+                      <CSwitch style="padding-top:3px" color="success" label-on="Yes" label-off="No" :checked.sync="item.safe" v-on:change.native="toggleISS(event_data.uuid, item.value, 'safe', item.safe)"/>
                   </td>
               </template>
               <template #tags="{item}">
                   <td>
-                      <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
+                      <CIcon name='cilTags'/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
                   </td>
             </template>
           </CDataTable>
@@ -203,6 +203,13 @@ export default {
     }
   },
   methods: {
+     toggleISS(uuid, observable_value, field, value) {
+      let data = {};
+      data[field] = value
+      this.$store.dispatch('updateEventObservable', {uuid, observable_value, data}).then(resp => {
+        this.observables = this.$store.getters.observables
+      })
+    },
     highlighter(code) {
         return highlight(code, languages.rql);
     },

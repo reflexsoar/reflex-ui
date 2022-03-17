@@ -666,7 +666,7 @@ export default {
         },
         loadObservables() {
             this.tab_loading = true
-            this.$store.dispatch('getCaseObservables', {uuid: this.$route.params.uuid}).then(resp => {
+            this.$store.dispatch('getCaseObservablesFromEvents', {uuid: this.$route.params.uuid}).then(resp => {
                 this.observables = this.$store.getters.observables
                 this.tab_loading = false
             })

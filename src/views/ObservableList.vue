@@ -15,15 +15,7 @@
         <CCardBody style="border-bottom: 1px solid #cfcfcf; padding-bottom:0px;">
             <CRow>
                 <CCol col="6">
-                    <li style="display: inline; margin-right: 2px;" v-for="obs in filters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span class="separator" v-if="filters.length">|</span>Showing {{observables.length}} observables.</span>
-                </CCol>
-                <CCol col="3">
-                    
-                    <CInput placeholder="Search" :value="search_filter" @change="search_filter = $event" v-on:keydown.enter.native="toggleObservableFilter({'filter_type':'search','data_type':'search','value':$event.target.value})"><template #append>
-                    <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','data_type':'search','value':search_filter})">Search</CButton></template></CInput>
-                    </CCol>
-                <CCol col="3">
-                    <CPagination :activePage.sync="current_page" :pages="page_data.pages"/>
+                    <li style="display: inline; margin-right: 2px;" v-for="obs in filters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span class="separator" v-if="filters.length">|</span>Showing {{observables.length}} of {{total_count}} observables.</span><br><br>
                 </CCol>
             </CRow>
         </CCardBody>
@@ -32,29 +24,35 @@
       <CRow>
         
         <CCol col="12">
+          <CCardBody>
     <CDataTable
       :hover="hover"
       :items="observables"
       :fields="observable_fields"
-      :items-per-page="small ? 25 : 10"
+      :items-per-page="25"
       bordered
       striped
-      :pagination="false"
+      pagination
+      sorter
+      table-filter
       :responsive="false"
     >
       <template #value="{item}">
         <td style="min-width:200px; max-width:300px;">
           <span
             v-c-tooltip="{content: `${item.value}`, placement:'bottom', appendToBody:'true'}"
-          >{{item.value | defang | truncate}}</span><br><small>{{ item.source_field ? item.source_field.toLowerCase() : item.data_type }} | {{ item.data_type }}</small><br><CIcon v-if="item.tags > 0" name="cilTags"/>&nbsp;
-          <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
+          >{{item.value | defang | truncate}}</span><br><small>{{ item.source_field ? item.source_field.toLowerCase() : item.data_type }} | {{ item.data_type }}</small><br>
+        </td>
+      </template>
+      <template #tags="{item}">
+        <td>
+          <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
             <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
           </li>
-          
         </td>
       </template>
       <template #type="{item}">
-        <td style="width:8%;">{{item.data_type}}</td>
+        <td style="width:8%;"><CBadge color="secondary" style="padding: 5px; margin-top:10px; margin-right:3px;">{{item.data_type}}</CBadge></td>
       </template>
       <template #ioc-header>
         IOC <CIcon name='cilFlagAlt' size='sm' style="cursor: pointer" v-on:click.native="toggleAllIocWarning('ioc')"/>
@@ -68,7 +66,7 @@
             label-off="No"
             :checked.sync="item.ioc"
             v-bind:disabled="item.safe"
-            v-on:change.native="toggleISS(item.case, item.value, 'ioc', item.ioc)"
+            v-on:change.native="toggleISS(uuid, item.value, 'ioc', item.ioc)"
           />
         </td>
       </template>
@@ -83,7 +81,7 @@
             label-on="Yes"
             label-off="No"
             :checked.sync="item.spotted"
-            v-on:change.native="toggleISS(item.case, item.value, 'spotted', item.spotted)"
+            v-on:change.native="toggleISS(uuid, item.value, 'spotted', item.spotted)"
           />
         </td>
       </template>
@@ -99,7 +97,7 @@
             label-off="No"
             :checked.sync="item.safe"
             v-bind:disabled="item.ioc"
-            v-on:change.native="toggleISS(item.case, item.value, 'safe', item.safe)"
+            v-on:change.native="toggleISS(uuid, item.value, 'safe', item.safe)"
           />
         </td>
       </template>
@@ -116,7 +114,7 @@
           </CDropdown>
         </td>
       </template>
-    </CDataTable>
+    </CDataTable></CCardBody>
         </CCol>
       </CRow>
       <CModal title="Tag all Observables" color="danger" :centered="true" size="lg" :show.sync="show_bulk_toggle_modal">
@@ -146,7 +144,7 @@ export default {
     observable_fields: {
       type: Array,
       default() {
-        return ["value", "ioc", "spotted", "safe", "type", "actions"];
+        return ["value", "tags", "ioc", "spotted", "safe", "type", "actions"];
       },
     },
   },
@@ -164,7 +162,8 @@ export default {
       observables: [],
       loading: true,
       show_bulk_toggle_modal: false,
-      bulk_toggle_field: ""
+      bulk_toggle_field: "",
+      total_count: 0
     };
   },
   watch: {
@@ -261,7 +260,7 @@ export default {
       }
 
       this.$store
-        .dispatch("getCaseObservables", {
+        .dispatch("getCaseObservablesFromEvents", {
           uuid: this.uuid,
           observable: observables_filters,
           type: type_filters,
@@ -272,6 +271,7 @@ export default {
         })
         .then((resp) => {
           this.observables = this.$store.getters.observables;
+          this.total_count = resp.data.total_observables;
           this.page_data = resp.data.pagination;
           this.$store.commit("add_success");
           this.loading = false;

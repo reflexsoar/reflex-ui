@@ -286,7 +286,7 @@
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
     </CModal>
-    <CreateCaseModal :show.sync="createCaseModal" :organization="organization" :events="selected" :related_events_count="related_events_count" :case_from_card="case_from_card"></CreateCaseModal>
+    <CreateCaseModal :show.sync="createCaseModal" :organization="organization" :events="selected" :related_events_count="related_events_count" :case_from_card="true"></CreateCaseModal>
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :event_organization.sync="event_organization" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables" :from_card="true"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>

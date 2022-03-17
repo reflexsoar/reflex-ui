@@ -2185,6 +2185,18 @@ const actions = {
       })
     })
   },
+  getCaseObservablesFromEvents({commit}, {uuid, page=1, page_size=25}) {
+    return new Promise((resolve, reject) => {
+      let base_url = `${BASE_URL}/event/observables_by_case/${uuid}?page=${page}&page_size=${page_size}`
+
+      Axios({url: base_url, method: 'GET'}).then(resp => {
+        commit('save_observables', resp.data.observables)
+        resolve(resp)
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCaseObservables({commit}, {uuid, page=1, page_size=25, observable=[], dataType=[], search=[], tags=[]}) {
     return new Promise((resolve, reject) => {
       
@@ -2219,6 +2231,18 @@ const actions = {
   updateObservable({commit}, {uuid, observable_value, data}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/case/${uuid}/observables/${observable_value}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_observable', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateEventObservable({commit}, {uuid, observable_value, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}/observables/${observable_value}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_observable', resp.data)
         resolve(resp)
