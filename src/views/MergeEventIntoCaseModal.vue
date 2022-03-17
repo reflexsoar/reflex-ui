@@ -21,7 +21,10 @@
                     <small><b>Severity: </b>{{getSeverity(props.option.severity)}} | <b>Owner:</b> {{props.option.owner ? props.option.owner.username : "Unassigned" }} | Contains {{props.option.event_count ? props.option.event_count : 0}} events.</small><br>
                     <small>{{props.option.description | truncate}}</small>
                 </template>
-            </multiselect>
+            </multiselect><br>
+            <label>Include Related Events</label><br>
+            <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="include_related_events"></CSwitch><br>
+            <small class='text-muted'>Selecting this option will also merge any other event with the same signature that is in a <b>New</b> status</small>
       </div>
       <template #footer>
           <CButton @click="dismiss()" color="secondary">Cancel</CButton>
@@ -44,7 +47,8 @@ export default {
     data(){
         return {
             case_data: {},
-            modalStatus: false
+            modalStatus: false,
+            include_related_events: true
         }
     },
     watch: {
@@ -85,8 +89,9 @@ export default {
         },
         mergeEventIntoCase() {
             let uuid = this.case_data.uuid;
-            let events = {'events': this.events};
-            this.$store.dispatch('addEventsToCase', {uuid, events}).then(resp => {
+            let events = this.events;
+            let include_related_events = this.include_related_events
+            this.$store.dispatch('addEventsToCase', {uuid, include_related_events, events}).then(resp => {
                 this.modalStatus = false
                 this.$store.commit('show_alert', {'message':'Successfully merged events into Case.', 'type':'success'})
                 this.$router.push({path: '/cases/'+uuid})

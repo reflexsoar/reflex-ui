@@ -2448,9 +2448,15 @@ const actions = {
       })
     })
   },
-  addEventsToCase({commit}, {uuid, events}) {
+  addEventsToCase({commit}, {uuid, include_related_events=false, events}) {
+
+    let data = {
+      'events': events,
+      'include_related_events': include_related_events
+    }
+    
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}/add_events`, data: events, method: 'PUT'})
+      Axios({url: `${BASE_URL}/case/${uuid}/add_events`, data: data, method: 'PUT'})
       .then(resp => {
         commit('save_case', resp.data.case)
         resolve(resp)
