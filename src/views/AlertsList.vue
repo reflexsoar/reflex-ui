@@ -865,6 +865,27 @@ export default {
 
         }
 
+        this.$store.dispatch('getEventStats', {
+          signature: signature_filter,
+          tags: tag_filters,
+          severity: severity_filter,
+          title: title_filter,
+          status: status_filters,
+          source: source_filters,
+          observables: observables_filters,
+          start: start_time,
+          end: end_time,          
+          organization: organization_filters,
+          event_rules: event_rule_filters,
+          title__like: title__like_filter
+        }).then(resp => {
+          this.event_stats = this.$store.getters.event_stats
+          let rule_ids = Object.keys(this.event_stats['event rule'])
+          this.$store.dispatch('loadEventRules', {rules: rule_ids, save: false}).then(resp => {
+            this.event_rules = resp.data.event_rules
+          })
+        })
+
         this.$store.dispatch('getEvents', {
           signature: signature_filter,
           grouped: grouped,
@@ -893,26 +914,7 @@ export default {
           this.$store.commit('add_success')
         })
 
-        this.$store.dispatch('getEventStats', {
-          signature: signature_filter,
-          tags: tag_filters,
-          severity: severity_filter,
-          title: title_filter,
-          status: status_filters,
-          source: source_filters,
-          observables: observables_filters,
-          start: start_time,
-          end: end_time,          
-          organization: organization_filters,
-          event_rules: event_rule_filters,
-          title__like: title__like_filter
-        }).then(resp => {
-          this.event_stats = this.$store.getters.event_stats
-          let rule_ids = Object.keys(this.event_stats['event rule'])
-          this.$store.dispatch('loadEventRules', {rules: rule_ids, save: false}).then(resp => {
-            this.event_rules = resp.data.event_rules
-          })
-        })
+        
       },
       sanitizeHTML(str) {
         var temp = document.createElement('div');
@@ -1180,7 +1182,7 @@ export default {
               
               this.selected_count -= this.getRelatedCount(e.signature)
           } else {       
-              this.selected.push(e.uuid) 
+              this.selected.push(e.uuid)
 
               // If the org hasn't been selected yet, add it as an empty dictionary
               
@@ -1218,7 +1220,11 @@ export default {
         }
       },
       getRelatedCount(sig) {
-        return this.event_stats.signature[sig]
+        if(this.event_stats.signature[sig] !== undefined) {
+          return this.event_stats.signature[sig]
+        } else {
+          return 1
+        }        
       },
       getSeverityText(severity) {
         switch(severity) {

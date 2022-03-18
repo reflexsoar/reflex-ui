@@ -49,7 +49,7 @@
               </template>
               <template #ioc="{item}">
                   <td>
-                      <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.ioc" v-on:change.native="toggleISS(event_data.uuid, item.value, 'ioc', item.ioc)"/>
+                      <CSwitch style="padding-top:3px" color="danger" label-on="Yes" label-off="No" :checked.sync="item.ioc" :disabled.sync="item.safe" v-on:change.native="toggleISS(event_data.uuid, item.value, 'ioc', item.ioc)"/>
                   </td>
               </template>
               <template #spotted="{item}">
@@ -59,7 +59,7 @@
               </template>
               <template #safe="{item}">
                   <td>
-                      <CSwitch style="padding-top:3px" color="success" label-on="Yes" label-off="No" :checked.sync="item.safe" v-on:change.native="toggleISS(event_data.uuid, item.value, 'safe', item.safe)"/>
+                      <CSwitch style="padding-top:3px" color="success" label-on="Yes" label-off="No" :checked.sync="item.safe" :disabled.sync="item.ioc" v-on:change.native="toggleISS(event_data.uuid, item.value, 'safe', item.safe)"/>
                   </td>
               </template>
               <template #tags="{item}">

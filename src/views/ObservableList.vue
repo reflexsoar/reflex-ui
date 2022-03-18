@@ -105,19 +105,19 @@
         <td style="width:8%" v-if="observableStats(item.value) > 1">{{observableStats(item.value)}}</td>
         <td style="width:8%" v-else>1</td>
       </template>
-      <template #actions="{item}">
+      <template #actions>
         <td style="width:10%;">
           <CDropdown toggler-text="Actions" color="secondary" size="sm">
             <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Execute Action</CDropdownItem>
             <CDropdownDivider />
-            <CDropdownItem @click="deleteObservableModal = !deleteObservableModal">Delete</CDropdownItem>
+            <CDropdownItem @click="deleteObservableModal = !deleteObservableModal" disabled>Delete</CDropdownItem>
           </CDropdown>
         </td>
       </template>
     </CDataTable></CCardBody>
         </CCol>
       </CRow>
-      <CModal title="Tag all Observables" color="danger" :centered="true" size="lg" :show.sync="show_bulk_toggle_modal">
+      <CModal title="Flag all Observables" color="danger" :centered="true" size="lg" :show.sync="show_bulk_toggle_modal">
         <p>Are you sure you want to toggle all observables as <b>{{bulk_toggle_field}}</b>?</p>
         <p>This will skip any that are already tagged. In the case of IOC flagging, observables already marked as safe will be skipped.</p>
         <template #footer>
