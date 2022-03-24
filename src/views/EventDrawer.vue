@@ -72,8 +72,8 @@
         </CRow>
       </CTab>
       <CTab title="Raw Log">
-        <CRow style="padding: 10px 10px 0px 10px">
-          <CCol>
+        <CRow style="padding: 10px 10px 0px 10px;">
+          <CCol >
             <h3>Raw Log</h3>
             <vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'" :data="jsonify(event_data.raw_log)"></vue-json-pretty><br>
           </CCol>
@@ -106,7 +106,7 @@
 
 .c-sidebar {
   width: 60% !important;
-  
+   overflow-y: scroll;
 }
 
 .c-sidebar.c-sidebar-fixed {
