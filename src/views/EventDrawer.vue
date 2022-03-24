@@ -21,7 +21,7 @@
         <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags" :key="tag"><CButton color="dark" class="tag" size="sm">{{ tag }}</CButton></li><br><br>
       </CCol>
     </CRow>
-    <CTabs :activeTab.sync="activeTab" class="tabbed">
+    <CTabs :activeTab.sync="activeTab" class="tabbed" style='overflow-y: scroll; overflow-x: scroll'>
       <CTab title="Overview" active>
         <CRow style="padding: 10px 10px 0px 10px">
           <CCol>
@@ -79,7 +79,7 @@
           </CCol>
         </CRow>
       </CTab>
-      <CTab title="Matched Event Rules" v-if="this.event_data.event_rules">
+      <CTab :title="`Matched Event Rules - ${this.event_data.event_rules.length}`" v-if="this.event_data.event_rules">
         <CRow style="padding: 10px 10px 0px 10px">
           <CCol>
             <h3>Matched Event Rules</h3>
@@ -106,7 +106,7 @@
 
 .c-sidebar {
   width: 60% !important;
-  overflow-y: scroll;
+  
 }
 
 .c-sidebar.c-sidebar-fixed {

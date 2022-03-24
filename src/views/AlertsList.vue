@@ -180,7 +180,7 @@
         </CCol>
       </CRow>
       <CRow v-else @mouseenter="pauseRefresh = true" @mouseleave="pauseRefresh = false">
-        <CCol :col="12/columns" v-for="event in filtered_events" :key="event.uuid">
+        <CCol :col="12" v-for="event in filtered_events" :key="event.uuid">
           <CCard :accent-color="getSeverityColor(event.severity)">
             <CCardBody>
               <CRow>
@@ -312,11 +312,6 @@
 
 <style scoped>
 
-html, body {
-  margin: 0;
-  height: 100%;
-  overflow: hidden;
-}
 
 .nav-item:not(:last-child) {
   border-right:1px solid #cfcfcf !important;
@@ -353,8 +348,6 @@ a {
   margin-left: 10px;
   margin-right: 10px;
 }
-
-
 
 /* required class */
 .my-editor {
