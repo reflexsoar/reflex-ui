@@ -107,10 +107,21 @@ const state = {
   source_input: {},
   input_list: [],
   list_values: [],
-  list_names: []
+  list_names: [],
+  toasts: [],
+  running_tasks: []
 }
 
 const mutations = {
+  add_task (state, task) {
+    state.running_tasks.push(task)
+  },
+  delete_task (state, task) {
+    state.running_tasks = state.running_tasks.filter(item => item != task)
+  },
+  add_toast (state, toast) {
+    state.toasts.push(toast)
+  },
   toggleSidebarDesktop (state) {
     const sidebarOpened = [true, 'responsive'].includes(state.sidebarShow)
     state.sidebarShow = sidebarOpened ? false : 'responsive'
@@ -636,6 +647,7 @@ const mutations = {
 }
 
 const getters = {
+  running_tasks: state => { return state.running_tasks },
   list_values: state => { return state.list_values },
   pagination: state => { return state.pagination },
   list_name: state => function(uuid) {
@@ -1666,10 +1678,13 @@ const actions = {
       Axios({url: `${BASE_URL}/event/bulk_dismiss`, data: data, method: 'PUT'})
       .then(resp => {
         commit('save_multiple_events', resp.data)
-        commit('show_alert', {message: `Successfully updated ${data.events.length} Events.`, 'type': 'success'})
+        //commit('show_alert', {message: `Successfully updated ${data.events.length} Events.`, 'type': 'success'})
+        commit('add_toast', {message:`Dismiss task submitted.`, header:'Bulk Dismiss', color: 'success', key: resp.data.task_id, refresh: false})
+        commit('add_task', resp.data.task_id)
         resolve(resp)
       })
       .catch(err => {
+        console.log(err)
         reject(err)
       })
     })
@@ -2904,6 +2919,18 @@ const actions = {
       .then(resp => {
         commit('remove_role', uuid)
         commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  checkTaskStatus({commit}, {uuid, complete=true}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/task?uuid=${uuid}&complete=${complete}`, method: 'GET'})
+      .then(resp => {
+        console.log(resp)
         resolve(resp)
       })
       .catch(err => {

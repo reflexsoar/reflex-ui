@@ -643,9 +643,16 @@ export default {
         this.target_event = event
         this.loadCloseReasons()
         this.selected = [uuid]
+        this.selected_count = this.selected.length
+        
         this.selected_orgs = {}
-        this.selected_orgs[event.organization] = [uuid]
+        this.selected_orgs[event.organization] = {
+          'events': [uuid]
+        }
         this.related_events_count = this.getRelatedCount(event.signature)
+        if(this.related_events_count > 0) {
+          this.selected_count = this.related_events_count
+        }
         this.dismissEventModal = true
       },
       deleteEvent() {
@@ -679,12 +686,17 @@ export default {
             this.dismiss_submitted = false
             this.error = false
             this.error_message = ""
+            this.selected = []
+            this.selected_count = 0
           }).catch(err => {
             this.error = true
             this.error_message = err.response.data.message
+            this.selected = []
+            this.selected_count = 0
             this.dismiss_submitted = false
           })
          this.selected = []
+         this.selected_count = 0
          
          this.dismissalComment = ""
       },
@@ -1163,7 +1175,7 @@ export default {
 
               // Go through each selected organization and remove the item
               for(let o in this.selected_orgs) {
-                if(this.selected_orgs[o].events.includes(e.uuid)) {
+                if(e.uuid in this.selected_orgs[o].events) {
                   this.selected_orgs[o].events = this.selected_orgs[o].events.filter(item => item != e.uuid)
                 }
                 
@@ -1187,8 +1199,10 @@ export default {
                   dismiss_comment: ''
                 }
               }
+
               // If the event isn't selected in that org yet, push it
-              if(!this.selected_orgs[e.organization].events.includes(e.uuid)) {
+              console.log(this.selected_orgs[e.organization])
+              if(!(e.uuid in this.selected_orgs[e.organization].events)) {
                   this.selected_orgs[e.organization].events.push(e.uuid)
               }
 
