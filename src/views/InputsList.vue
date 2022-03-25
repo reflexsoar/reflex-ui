@@ -84,6 +84,13 @@ export default {
     },
     computed: mapState(['current_user','inputs', 'pagination', 'source_input']),
     created: function () {
+        if(this.current_user.default_org) {
+          if (!this.fields.includes('organization')) {
+            this.fields.splice(1,0,{key:'organization', sorter: false})
+            
+          }
+          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        }
         this.loadData()
         this.refresh = setInterval(function() {
           this.loadData()
@@ -142,13 +149,7 @@ export default {
       },
       loadData: function() {
         this.loading = true
-        if(this.current_user.default_org) {
-          if (!this.fields.includes('organization')) {
-            this.fields.splice(1,0,{key:'organization', sorter: false})
-            
-          }
-          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
-        }
+        
         this.$store.dispatch('getInputs', {}).then(resp => {
             this.loading = false
         })
