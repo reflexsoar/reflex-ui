@@ -45,12 +45,13 @@ export default {
   created: function() {
     this.refresh = setInterval(function() {
 
+      // Look for non-broadcast messages
       if(this.running_tasks !== undefined) {
         for(let t in this.running_tasks) {
-          this.$store.dispatch('checkTaskStatus', {uuid: this.running_tasks[t]}).then(resp => {
+          this.$store.dispatch('checkTaskStatus', {uuid: this.running_tasks[t], broadcast: false}).then(resp => {
             if(resp.data.tasks.length > 0) {
               let task = resp.data.tasks[0]
-              let key = task.uuid
+              let key = task.uuid+task.complete
               let message = ''
               let header = ''
               let refresh = false
@@ -65,7 +66,27 @@ export default {
             }
           })
         }
-      }     
+      }
+
+      // Look for broadcast messages
+      this.$store.dispatch('checkTaskStatus', {complete: true, broadcast: true}).then(resp => {
+        if(resp.data.tasks.length > 0) {
+          for(let t in resp.data.tasks) {
+            let task = resp.data.tasks[t]
+            let key = task.uuid+task.complete
+            let message = ''
+            let header = ''
+            let refresh = false
+            if(task.task_type == 'bulk_dismiss_events') {
+              message = 'Bulk dismiss task complete.'
+              header = 'Bulk Dismiss Complete'
+              refresh = true
+            }
+
+            this.$store.commit('add_toast', {message: message, header: header, key: key, refresh: refresh})
+          }
+        }
+      })
 
     }.bind(this), 10000)
   },

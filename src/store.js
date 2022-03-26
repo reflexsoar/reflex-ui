@@ -120,7 +120,9 @@ const mutations = {
     state.running_tasks = state.running_tasks.filter(item => item != task)
   },
   add_toast (state, toast) {
-    state.toasts.push(toast)
+    if(!state.toasts.find(o => o.key === toast.key))  {
+      state.toasts.push(toast)
+    }
   },
   toggleSidebarDesktop (state) {
     const sidebarOpened = [true, 'responsive'].includes(state.sidebarShow)
@@ -2926,11 +2928,21 @@ const actions = {
       })
     })
   },
-  checkTaskStatus({commit}, {uuid, complete=true}) {
+  checkTaskStatus({commit}, {uuid=null, complete=true, broadcast=false}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/task?uuid=${uuid}&complete=${complete}`, method: 'GET'})
+
+      let base_url = `${BASE_URL}/task?complete=${complete}`
+
+      if(uuid) {
+        base_url += `&uuid=${uuid}`
+      }
+
+      if(broadcast) {
+        base_url += `&broadcast=${broadcast}`
+      }
+
+      Axios({url: base_url, method: 'GET'})
       .then(resp => {
-        console.log(resp)
         resolve(resp)
       })
       .catch(err => {
