@@ -109,6 +109,7 @@ const state = {
   list_values: [],
   list_names: [],
   toasts: [],
+  toasted: [],
   running_tasks: []
 }
 
@@ -190,8 +191,7 @@ const mutations = {
       state.events = [...state.events.filter(e => e.uuid != event.uuid), event]
     } else {
       state.events = [event]
-    }
-    
+    }    
   },
   save_list_values(state, values) {
     state.list_values = values
@@ -1828,7 +1828,7 @@ const actions = {
       })
     })
   },
-  getOrganizations({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+  getOrganizations({commit}, {page=1, page_size=50, sort_by="created_at", sort_direction="asc"}) {
     return new Promise((resolve, reject) => {
       let base_url = `${BASE_URL}/organization?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       Axios({url: base_url, method: 'GET'})

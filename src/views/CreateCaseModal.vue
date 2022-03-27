@@ -2,7 +2,7 @@
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
     <CModal title="Create Case" :centered="true" size="xl" :show.sync="modalStatus">
       <div>
-        <p v-if="related_events_count > 1">This case will be associated with <b>{{related_events_count}}</b> events.</p>
+        <p v-if="related_events_count > 1">This case will be associated with <b>{{related_events_count}}</b> events.</p>{{selected_org}}
         <CForm @submit.prevent="createCase()" id="create_case_form">
             <CSelect
                   v-if="current_user.default_org"
@@ -119,8 +119,12 @@
 import { PrismEditor } from 'vue-prism-editor';
 import {vSelect} from "vue-select";
 import { mapState} from 'vuex';
+import OrganizationMultiSelect from './inputs/OrganizationMultiSelect'
 export default {
     name: 'CreateCaseModal',
+    components: {
+        OrganizationMultiSelect
+    },
     props: {
         show: Boolean,
         events: Array,
@@ -165,12 +169,18 @@ export default {
             default_severity: 2,
             default_tags: Array(),
             error: false,
-            error_message: ""
+            error_message: "",
+            selected_org: null
         }
     },
     watch: {
         show: function() {
             this.modalStatus = this.show
+
+            if(this.organization) {
+                this.selected_org = this.organization
+            }
+            
             if(!this.organization) {
                 if(this.current_user.default_org) {
                     this.organization = this.$store.getters.organizations[0].uuid
@@ -210,6 +220,9 @@ export default {
         
     },
     methods: {
+        selectOrg(org) {
+            this.selected_org = org
+        },
         formattedOrganizations() {            
             return this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         },
