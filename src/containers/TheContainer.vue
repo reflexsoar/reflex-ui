@@ -60,7 +60,13 @@ export default {
                 header = 'Bulk Dismiss Complete'
                 refresh = true
               }
-
+              if(task.task_type == 'event_rule_lookbehind') {
+                if(task.message) {
+                  message = task.message
+                }
+                header = 'Event Rule Lookbehind Complete'
+                refresh = false
+              }
               this.$store.commit('add_toast', {message: message, header: header, key: key, refresh: refresh})
               this.$store.commit('delete_task', this.running_tasks[t])
             }
@@ -82,7 +88,13 @@ export default {
               header = 'Bulk Dismiss Complete'
               refresh = true
             }
-
+            if(task.task_type == 'event_rule_lookbehind') {
+              if(task.message) {
+                  message = task.message
+                }
+                header = 'Event Rule Lookbehind Complete'
+                refresh = false
+            }
             this.$store.commit('add_toast', {message: message, header: header, key: key, refresh: refresh})
           }
         }
