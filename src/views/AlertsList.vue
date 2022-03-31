@@ -136,16 +136,7 @@
                 <CDropdownItem @click="selectAcrossPages()">Select all&nbsp;<b>{{page_data.total_results}}</b>&nbsp;events</CDropdownItem>
                 <CDropdownItem @click="clearSelected()">Clear Selection</CDropdownItem>
                 </CDropdown>
-              &nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>&nbsp;<CButton style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
-            </div>
-        </CCol>
-        <CCol class="text-right">
-          <CPagination :activePage.sync="current_page" :pages="page_data.pages"/>
-        </CCol>
-        <CCol class="text-right">
-          <div>
-            <!--<CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;-->
-            <CDropdown 
+                &nbsp; <CDropdown 
                 :toggler-text="`${selected_count} events`" 
                 color="secondary"
                 v-bind:disabled="selected.length == 0 || selectedOrgLength() > 1"
@@ -160,6 +151,17 @@
                   <CDropdownItem  @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
                 </div>
             </CDropdown>
+              <!--&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>-->&nbsp;<CButton style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
+            </div>
+            
+        </CCol>
+        <CCol class="text-right">
+          <CPagination :activePage.sync="current_page" :pages="page_data.pages"/>
+        </CCol>
+        <CCol class="text-right">
+          <div>
+            <!--<CButton v-if="!table_view" @click="setColumns()" color="secondary" class="d-inline-block"><small><CIcon name='cilColumns' size="sm"></CIcon></small></CButton>&nbsp;<CButton color="secondary" @click="table_view = !table_view"  class="d-inline-block"><span v-if="table_view">Card</span><span v-else>Table</span> View</CButton>&nbsp;-->
+            
           </div>
         </CCol>
       </CRow>
@@ -185,7 +187,7 @@
             <CCardBody>
               <CRow>
                 <CCol col="9">
-                  <h4>
+                  <h4>                    
                     <input type="checkbox" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})" style="cursor: pointer;">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
@@ -193,6 +195,13 @@
                   <!--<CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid)" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>-->
                 </CCol>
                 <CCol col="3" class="text-right">
+                 <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'data_type':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
+                </CCol>
+              </CRow>
+            </CCardBody>
+            <CCardFooter style="background-color:#f0f0f0;">
+              <CRow>
+                <CCol col="3">
                   <CButtonGroup>
                     <CButton size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton @click="caseFromCard(event.uuid)" v-if="event.status.name === 'New'" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
@@ -202,11 +211,7 @@
                     <CButton v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
                   </CButtonGroup>
                 </CCol>
-              </CRow>
-            </CCardBody>
-            <CCardFooter style="background-color:#f0f0f0;">
-              <CRow>
-                <CCol col="9">
+                <CCol col="9" class="text-right">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
                     <span v-if="!filteredBySignature() && getRelatedCount(event.signature) > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && getRelatedCount(event.signature) > 1" color="dark" size="sm">{{getRelatedCount(event.signature)}} occurences <span v-if="getRelatedCount(event.signature) && getRelatedCount(event.signature) > 0"></span></CButton>
@@ -216,10 +221,6 @@
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
                     <span class="separator">|</span><CIcon name='cilVector' v-c-tooltip="{content: 'Event Rules Matched'}"></CIcon> {{event.event_rules ? event.event_rules.length : 0 }}
                     <span v-if="current_user.default_org"><span class="separator">|</span></span></small><span style="cursor: pointer" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"><OrganizationBadge :uuid="event.organization" color="warning" /></span>
-                  
-                </CCol>
-                <CCol col="3" class="text-right">
-                  <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'data_type':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
                 </CCol>
               </CRow>
             </CCardFooter>
