@@ -88,7 +88,7 @@
               <CCol>
                 <CCardBody>
                   <h5>{{rule.name}}</h5>
-                  <prism-editor rows="10" @keydown="test_failed=true" class="my-editor" v-model="rule.query" :highlight="highlighter" line-numbers></prism-editor>
+                  <prism-editor rows="10" class="my-editor" v-model="rule.query" :highlight="highlighter" line-numbers></prism-editor>
                 </CCardBody>
               </CCol>
             </CRow>

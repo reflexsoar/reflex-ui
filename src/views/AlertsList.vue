@@ -503,10 +503,10 @@ export default {
         current_page: 1,
         sort_by: 'created_at',
         sort_options: [
-          {'label': 'Severity','value':'severity'},
+        //  {'label': 'Severity','value':'severity'},
           {'label': 'Date Created', 'value': 'created_at'},
-          {'label': 'Name', 'value': 'title'},
-          {'label': 'TLP', 'value': 'tlp'}
+        //  {'label': 'Name', 'value': 'title'},
+        //  {'label': 'TLP', 'value': 'tlp'}
         ],
         sort_direction: 'desc',
         drawer_open: false,
