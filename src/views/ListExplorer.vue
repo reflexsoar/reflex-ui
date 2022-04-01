@@ -120,12 +120,16 @@
           :fields="fields"
           :items-per-page="page_size"
           :dark="dark"
-          :sorter='{external: true, resetable: true}'
           :loading="loading"
       >
       <template #from_poll="{item}">
         <td>
           {{item.from_poll ? 'Yes' : 'No'}}
+        </td>
+      </template>
+      <template #organization="{item}">
+        <td>
+          <OrganizationBadge :uuid="item.organization"/>
         </td>
       </template>
       <template #created_at="{item}">
@@ -158,7 +162,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['value', 'list_uuid', 'list_name', 'data_type', {key: 'created_at', label: 'Date Added'}, {key: 'from_poll', label: 'External Source'}]
+        return ['value', 'list_name', 'data_type', {key: 'created_at', label: 'Date Added'}, {key: 'from_poll', label: 'External Source'}]
       }
     },
     caption: {
@@ -174,12 +178,11 @@ export default {
     },
     computed: mapState(['current_user','status','alert','list_values','pagination','list_stats']),
     created: function () {
-    /*#if(this.current_user.default_org) {
+      if(this.current_user.default_org) {
         if (!this.fields.includes('organization')) {
           this.fields.splice(1,0,'organization')
-        }
-        
-      }*/
+        } 
+      }
       this.loading = true
       this.loadIntelValues()
       this.$store.dispatch('getIntelListStats', {}).then(resp => {
@@ -205,7 +208,7 @@ export default {
         error_message: "",
         delete_confirm: "",
         active_page: 1,
-        page_size: 10,
+        page_size: 100,
         quick_filters: true,
         intelFilters: [],
         filtered_values: [],

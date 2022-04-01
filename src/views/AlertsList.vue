@@ -763,6 +763,7 @@ export default {
         this.event_organization = source_event.organization
         this.$store.dispatch('getRelatedEvents', source_event.signature).then(resp => {
             this.selected = [...resp.data.events]
+            this.selected_count = 1
             this.rule_observables = source_event.observables.flat().map( function(obs) { 
               return {'data_type':obs.data_type, 'value': obs.value
               }

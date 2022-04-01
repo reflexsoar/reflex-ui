@@ -531,6 +531,7 @@ export default {
   props: {
     show: Boolean,
     events: Array,
+    selected_count: Number,
     event_signature: String,
     event_organization: String,
     source_event_uuid: String,
