@@ -116,7 +116,8 @@ import {
   cilFolderOpen,
   cilThumbUp,
   cilVector,
-  cilWarning
+  cilWarning,
+  cilFilter
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -209,7 +210,8 @@ export const iconsSet = Object.assign(
     cilFolderOpen,
     cilThumbUp,
     cilVector,
-    cilWarning
+    cilWarning,
+    cilFilter
   },
   {
     cifUs,

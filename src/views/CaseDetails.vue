@@ -157,8 +157,8 @@
                         </CCol>
                         <CCol col="9" @mouseover="edit_description_hint = true" @mouseleave="edit_description_hint = false" style="overflow-y:scroll; max-height:350px;">
                             <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description"><CIcon style="cursor: pointer" name="cilPencil" size="sm"/></a></small></h5>
-                            <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
-                            <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event"></CTextarea><CButton color="danger" @click="edit_description = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;<CButton color="primary" @click="saveDescription()" size="sm"><CIcon name="cilSave"/></CButton></span>
+                                                        <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
+                            <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event" description="HINT: Use markdown to create a beautiful description."></CTextarea><CButton color="danger" @click="edit_description = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;<CButton color="primary" @click="saveDescription()" size="sm"><CIcon name="cilSave"/></CButton></span>
                             <span v-if="closureComments().length > 0 && case_data.status.closed">
                                 <br><h5>Closure Details</h5><hr style="border-top: 1px dotted #cfcfcf;">
                                 <span v-for="comment in closureComments()" :key="comment.uuid">
@@ -936,6 +936,8 @@ export default {
                 this.$store.commit('show_alert', {message: 'Successfully removed the case template', type:'success'})
                 this.loadData()
                 this.reloadTasks = Math.random()
+                this.activeTab = 0
+                this.activeTab = 3
             })
             
         }

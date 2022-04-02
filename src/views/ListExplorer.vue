@@ -15,7 +15,7 @@
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
                     <CButton @click="quick_filters = !quick_filters" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
-                    <CButton v-if="quick_filters" @click="intelFilters = []" color="secondary" size="sm">Reset Filter</CButton>
+                    <CButton v-if="quick_filters" @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
                   </CButtonGroup>                  
                 </CCol>
               </CRow>
@@ -122,6 +122,11 @@
           :dark="dark"
           :loading="loading"
       >
+      <template #value="{item}">
+        <td>
+          <a style="cursor: pointer" @click="toggleIntelFilter({'filter_type': 'value', 'data_type': 'value','value':item.value})" >{{ item.value }}</a>
+        </td>
+      </template>
       <template #from_poll="{item}">
         <td>
           {{item.from_poll ? 'Yes' : 'No'}}
@@ -135,6 +140,11 @@
       <template #created_at="{item}">
         <td>
           {{item.created_at | moment('from','now')}}
+        </td>
+      </template>
+      <template #record="{item}">
+        <td>
+          <CButton v-if="item.record_id != null" color="secondary" size="sm" @click="filterByRelated(item.record_id)">View Record</CButton>
         </td>
       </template>
       </CDataTable>
@@ -162,7 +172,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['value', 'list_name', 'data_type', {key: 'created_at', label: 'Date Added'}, {key: 'from_poll', label: 'External Source'}]
+        return ['value', 'list_name', 'data_type', {key: 'created_at', label: 'Date Added'}, {key: 'from_poll', label: 'External Source'}, 'record']
       }
     },
     caption: {
@@ -233,6 +243,10 @@ export default {
       }
     },
     methods: {
+      resetFilters() {
+        this.intelFilters = []
+        this.loadIntelValues()
+      },
       applyFreeSearch() {
         if(!['',null].includes(this.search_text)) {
           if(this.selected_search_option.toLowerCase() == 'list name') {
@@ -276,6 +290,7 @@ export default {
         this.$store.commit('add_start')
         let value_filters = []
         let data_type_filters = []
+        let record_id_filter = null
         let from_poll = null
         let list_filters = []
         let list_name__like = null
@@ -291,6 +306,10 @@ export default {
 
           if(filter.filter_type == 'value') {
             value_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'record_id') {
+            record_id_filter = filter.value
           }
 
           if(filter.filter_type == 'data_type') {
@@ -332,7 +351,8 @@ export default {
           data_type: data_type_filters,
           from_poll: from_poll,
           list_name__like: list_name__like,
-          value__like: value__like
+          value__like: value__like,
+          record_id: record_id_filter
         }).then(() => {
           this.loading = false
         })
@@ -344,8 +364,13 @@ export default {
           data_type: data_type_filters,
           from_poll: from_poll,
           list_name__like: list_name__like,
-          value__like: value__like
+          value__like: value__like,
+          record_id: record_id_filter
         })
+      },
+      filterByRelated(id) {
+        this.intelFilters = [{'filter_type': 'record_id', 'data_type': 'record_id','value': id}]
+        this.loadIntelValues()
       },
       toggleIntelFilter(filter) {
         let exists = this.intelFilters.some((item) => {
@@ -354,6 +379,10 @@ export default {
 
         // Can only have one from_poll filter at a time
         if(filter.filter_type == 'from_poll') {
+          this.intelFilters = this.intelFilters.filter(item => item.filter_type !== filter.filter_type)
+        }
+
+        if(filter.filter_type == 'record_id') {
           this.intelFilters = this.intelFilters.filter(item => item.filter_type !== filter.filter_type)
         }
 

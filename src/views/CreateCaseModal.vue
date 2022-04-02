@@ -58,6 +58,7 @@
               required
               v-model="description"
               label="Description"
+              description="HINT: Use markdown to create a beautiful description."
               rows=5
               v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
             >

@@ -26,7 +26,7 @@
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
                     <CButton @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
-                    <CButton v-if="quick_filters" @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
+                    <CButton @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
                   </CButtonGroup>
                 </CCol>
                 
@@ -447,7 +447,7 @@ export default {
           {"name": "VT Lookup"},
           {"name": "Google Search"},
           {"name": "Copy"},
-          {"name": "Run Action"},
+          //{"name": "Run Action"},
           {"name": "Add to List"}
         ],
         name: "",

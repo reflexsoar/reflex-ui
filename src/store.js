@@ -980,7 +980,7 @@ const actions = {
       })
     })
   },
-  getIntelListValues({commit}, {page=1, page_size=25, list=[], value=[], data_type=[], from_poll=null, sort_by='created_at', sort_direction='desc', start=null, end=null, organization=null}) {
+  getIntelListValues({commit}, {page=1, page_size=25, list=[], value=[], data_type=[], from_poll=null, record_id=null, sort_by='created_at', sort_direction='desc', start=null, end=null, organization=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/list/values?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -1002,7 +1002,11 @@ const actions = {
       }
 
       if(organization) {
-        url = url+`organization=${organization}`
+        url = url+`&organization=${organization}`
+      }
+
+      if(record_id) {
+        url = url+`&record_id=${record_id}`
       }
 
       Axios({url: url, method: 'GET'})
@@ -1016,7 +1020,7 @@ const actions = {
       })
     })
   },
-  getIntelListStats({commit}, {list_name__like=null, value__like=null, top=10, list=[], value=[], from_poll=null, data_type=[], metrics=['list','value','data_type','from_poll'],start=null, end=null, organization=[]}) {
+  getIntelListStats({commit}, {list_name__like=null, value__like=null, top=10, list=[], value=[], from_poll=null, record_id=null, data_type=[], metrics=['list','value','data_type','from_poll'],start=null, end=null, organization=[]}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
 
@@ -1040,6 +1044,10 @@ const actions = {
 
       if(from_poll === false) {
         url = url+`&from_poll=false`
+      }
+
+      if(record_id) {
+        url = url+`&record_id=${record_id}`
       }
 
       if(list_name__like) {

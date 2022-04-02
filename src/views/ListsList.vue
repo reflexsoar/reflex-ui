@@ -111,12 +111,12 @@
               <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.active"/>
             </div>
           </CCol>
-          <CCol>
+          <!--<CCol>
             <div class="form-input">  
               <label>To Memcached</label><br>
               <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.to_memcached"/>
             </div>
-          </CCol>
+          </CCol>-->
         </CRow>
           </CTab>
           <CTab title="2. External Feed">
