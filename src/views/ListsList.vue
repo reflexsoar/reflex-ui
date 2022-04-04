@@ -127,7 +127,7 @@
             <CInput :disabled="!external_polling" v-model="list_data.url" label="URL" placeholder="A URL to poll values from on a periodic basis"/>
             <CRow>
               <CCol col="12" lg="6">
-                <CInput :disabled="!external_polling" v-model="list_data.poll_interval" label="Polling Interval" placeholder="60" description="How often to poll the URL for new data (minutes)"/>
+                <CInput :disabled="!external_polling" v-model="list_data.poll_interval" label="Polling Interval" placeholder="Enter a value in minutes e.g. 60" description="How often to poll the URL for new data (minutes)"/>
               </CCol>
             </CRow>
           </CTab>
@@ -405,6 +405,7 @@ export default {
           csv_headers: '',
           csv_headers_data_types: ''
         }
+        this.step = 0
         this.external_polling = false
         this.error = false
         this.error_message = ""

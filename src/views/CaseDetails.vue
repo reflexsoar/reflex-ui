@@ -936,8 +936,6 @@ export default {
                 this.$store.commit('show_alert', {message: 'Successfully removed the case template', type:'success'})
                 this.loadData()
                 this.reloadTasks = Math.random()
-                this.activeTab = 0
-                this.activeTab = 3
             })
             
         }

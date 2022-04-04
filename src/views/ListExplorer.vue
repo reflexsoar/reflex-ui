@@ -97,7 +97,7 @@
                 </div>
                 <div v-else class="event-stats-div" style="margin-top:5px; overflow-y: scroll">
                   <CRow v-for="k,v in list_stats[title]" :key="v">
-                    <CCol v-if="title == 'from_poll'" v-c-tooltip="{ content: `${v ? 'Yes': 'No'}`, placement: 'left' }" @click="toggleIntelFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v ? 'Yes': 'No'}}</span></CCol>
+                    <CCol v-if="title == 'from_poll'" v-c-tooltip="{ content: `${v == 'true' ? 'Yes': 'No'}`, placement: 'left' }" @click="toggleIntelFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v == 'true' ? 'Yes': 'No'}}</span></CCol>
                     <CCol v-else-if="title == 'list'" v-c-tooltip="{ content: `${v ? 'Yes': 'No'}`, placement: 'left' }" @click="toggleIntelFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{$store.getters.list_name(v)}}</span></CCol>
                     <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleIntelFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol class="text-right" col="3"><CBadge color="secondary">{{k.toLocaleString('en-US')}}</CBadge></CCol>
