@@ -178,11 +178,11 @@
                   <h5>Event Base Configuration</h5>
                 </CCol>
                 <CCol col="4">
-                  <b>Event Title FIeld</b><br />
+                  <b>Event Title Field</b><br />
                   {{ input.config["rule_name"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <b>Description Field Field</b><br />
+                  <b>Description Field</b><br />
                   {{ input.config["description_field"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
@@ -192,6 +192,10 @@
                 <CCol col="4">
                   <b>Severity Field</b><br />
                   {{ input.config["severity_field"] }}<br /><br />
+                </CCol>
+                <CCol col="4">
+                  <b>Original Date Field</b><br />
+                  {{ input.config["original_date_field"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
                   <b>Tag Fields</b><br />

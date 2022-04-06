@@ -22,7 +22,7 @@
           table-filter
           :dark="dark"
           :sorter='{external: false, resetable: true}'
-          pagination
+          
           :loading="loading"
       >
       <template #name="{item}">
@@ -63,13 +63,13 @@
         </template>      
       </CDataTable>
       </CCardBody>
-      <!--<CRow>
+      <CRow>
         <CCol>
           <CCardBody>
             <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
           </CCardBody>
         </CCol>
-      </CRow>-->
+      </CRow>
     </CCard>
     <CModal :title="modal_title" size="xl" :show.sync="modal_status" :closeOnBackdrop="false">
       <CAlert :show.sync="this.error" color="danger" closeButton>
