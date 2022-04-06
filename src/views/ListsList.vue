@@ -22,7 +22,7 @@
           table-filter
           :dark="dark"
           :sorter='{external: false, resetable: true}'
-          
+          :sorterValue='{column: "name", asc: true}'
           :loading="loading"
       >
       <template #name="{item}">
