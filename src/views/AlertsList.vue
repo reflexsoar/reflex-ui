@@ -217,7 +217,7 @@
                     <span v-if="!filteredBySignature() && getRelatedCount(event.signature) > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && getRelatedCount(event.signature) > 1" color="dark" size="sm">{{getRelatedCount(event.signature)}} occurences <span v-if="getRelatedCount(event.signature) && getRelatedCount(event.signature) > 0"></span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'data_type':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
-                    <span class="separator">|</span>Created {{event.created_at | moment('LLLL') }}
+                    <span class="separator">|</span>Created {{event.original_date | moment('LLLL') }}
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
                     <span class="separator">|</span><CIcon name='cilVector' v-c-tooltip="{content: 'Event Rules Matched'}"></CIcon> {{event.event_rules ? event.event_rules.length : 0 }}
                     <span v-if="current_user.default_org"><span class="separator">|</span></span></small><span style="cursor: pointer" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"><OrganizationBadge :uuid="event.organization" color="warning" /></span>

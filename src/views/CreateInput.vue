@@ -138,6 +138,9 @@
                             <CInput v-model="config['severity_field']" label="Severity Field" description="This should be a field that provides a numeric severity between 1-4"/>
                           </CCol>
                           <CCol col=4>
+                            <CInput v-model="config['original_date_field']" label="Original Date Field" description="This field is used to pull the original log events datetime. .e.g @timestamp"/>
+                          </CCol>
+                          <CCol col=4>
                             <label>Tag Fields</label><br>
                             <multiselect v-model="config['tag_fields']" :close-on-select="false" :options="[]" placeholder="Select the fields from which tags will be derived" :taggable="true" tag-placeholder="Add new field" :multiple="true" @tag="addESHost(config['tag_fields'], $event)"/><br>
                           </CCol>
@@ -520,7 +523,7 @@ export default {
         let value = event.target.value
         this.plugin = event.target.value
         if (value == "Elasticsearch") {
-          conf = {"hosts":["https://localhost:9200"],"distro":"opensearch","index":".siem-signals-*","lucene_filter":"*", "cafile":"","scheme":"https","rule_name":"signal.rule.name","auth_method":"http_auth","search_size":200,"search_period":"15m","check_hostname":false,"severity_field":"signal.rule.severity","source_reference":"signal.parent.id","cert_verification":"none","description_field":"signal.rule.description","static_tags": [], "tag_fields":[], "signature_fields": []}
+          conf = {"hosts":["https://localhost:9200"],"distro":"opensearch","index":".siem-signals-*","lucene_filter":"*", "cafile":"","scheme":"https","rule_name":"signal.rule.name","auth_method":"http_auth","search_size":200,"search_period":"15m","check_hostname":false,"severity_field":"signal.rule.severity","source_reference":"signal.parent.id","cert_verification":"none","original_date_field":"@timestamp","description_field":"signal.rule.description","static_tags": [], "tag_fields":[], "signature_fields": []}
           map = {"fields":[{"field": "host.name", "alias":"hostname", "data_type": "host", "tlp": 3, "tags": ["workstation"]}]}
         }
         if (value == "Exchange Mailbox") {
