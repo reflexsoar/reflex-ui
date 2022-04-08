@@ -394,7 +394,7 @@ export default {
     created() {
       this.loadTags()
       this.getSourceInput()
-      this.$store.dispatch('getCredentialList')
+      this.$store.dispatch('getCredentialList', {})
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages     
     },
     methods: {
