@@ -71,7 +71,7 @@
         </CCol>
       </CRow>
     </CCard>
-    <CModal :title="modal_title" size="xl" :show.sync="modal_status" :closeOnBackdrop="false">
+    <CModal :title="modal_title" size="xl" :show.sync="modal_status" :closeOnBackdrop="false">{{organization}}
       <CAlert :show.sync="this.error" color="danger" closeButton>
             {{error_message}}
       </CAlert>
@@ -239,7 +239,9 @@ export default {
       }
       this.loading = true
       this.$store.dispatch('getLists',{}).then(resp => {
-        //this.getDataTypes()
+        if(!this.current_user.default_org) {
+          this.getDataTypes()
+        }
         this.loading = false
       })
     },
@@ -274,7 +276,7 @@ export default {
         list_types: ['values','patterns','csv'],
         data_type_list: [],
         organizations: [],
-        organization: '',
+        organization: null,
         active_page: 1,
         step: 0,
         last_step: 3,
@@ -416,8 +418,8 @@ export default {
       },
       getDataTypes(organization) {
         let org = null
-        if (this.current_user.default_org && organization) {
-          org = organization.target.value
+        if (this.current_user.default_org && organization != '') {
+          org = organization
         }
          
         this.$store.dispatch('getDataTypes', {organization: org}).then(resp => {
