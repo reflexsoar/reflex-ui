@@ -53,7 +53,9 @@ export default {
       }
       this.$store.dispatch('checkMFA', token).then(() => {
         localStorage.removeItem('mfa_challenge_token')
-        this.$router.push('/')
+        this.$store.dispatch('getMe').then(resp => {
+            this.$router.push('/')
+          })
       })
       return false
     }
