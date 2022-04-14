@@ -55,7 +55,7 @@ export default {
         localStorage.removeItem('mfa_challenge_token')
         this.$router.push('/')
       })
-      return False
+      return false
     }
   }
 }
