@@ -3,8 +3,8 @@
     <CModal title="Add Item to List" :centered="true" size="lg" :show.sync="modalStatus">
       <div>
         <CForm @submit.prevent="addToList()" id="add_to_list" >
-            <p>Select a list to add <b>{{observable.data_type}}: {{observable.value}}</b> to.</p>
-            <CSelect v-bind:disabled="lists.length == 0" placeholder="Select one" :value.sync="selected_list" :options="lists_formatted" label="List" description="Be sure to pick the correct list."/>
+            <p>Select a list to add <b>{{observable.data_type}}: {{observable.value}}</b> to.</p>{{lists_formatted}}
+            <CSelect v-bind:disabled="lists_formatted.length == 0" placeholder="Select one" :value.sync="selected_list" :options="lists_formatted" label="List" description="Be sure to pick the correct list."/>
         </CForm>
       </div>
       <template #footer>
