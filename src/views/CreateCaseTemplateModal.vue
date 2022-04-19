@@ -6,207 +6,198 @@
     />
     <CModal
       title="Create Case Template"
-      :centered="true"
+      :centered="false"
       size="xl"
       :show.sync="modalStatus"
+      :close-on-backdrop="false"
     >
-    <CAlert :show.sync="error" color="danger" close-button>
-      {{error_message}}
-    </CAlert>
-      <div name="create-case-template-step-1" v-if="step == 1">
-        <CForm @submit.prevent="createCase">
-          <CSelect
-            v-if="current_user.default_org"
-            placeholder="Select an Organization..."
-            required
-            :value.sync="organization"
-            :options="formattedOrganizations()"
-            label="Organization"
-          />
-          <CInput
-            placeholder="Case Template Title"
-            required
-            v-model="title"
-            label="Case Title"
-          >
-          </CInput>
-          <CTextarea
-            placeholder="Enter a description for the case template.  The more detail the better."
-            required
-            v-model="description"
-            label="Description"
-            rows="5"
-          >
-          </CTextarea>
-          <CRow>
-            <CCol col="12" lg="6">
-              <CSelect
-                label="TLP"
-                :options="tlps"
-                :value.sync="tlp"
-                placeholder="Select a TLP"
-              >
-              </CSelect>
-            </CCol>
-            <CCol col="12" lg="6">
-              <CSelect
-                label="Severity"
-                :options="severities"
-                :value.sync="severity"
-                placeholder="Select a Severity"
-              >
-              </CSelect>
-            </CCol>
-          </CRow>
-          <div role="group" class="form-group">
-            <label class="typo__label">Tags</label>
-            <multiselect
-              v-model="selected_tags"
-              placeholder="Select tags to apply to this input"
-              :taggable="true"
-              tag-placeholder="Add new tag"
-              track-by="name"
-              label="name"
-              :options="tag_list"
-              :multiple="true"
-              @tag="addTag"
-              :close-on-select="false"
-            >
-            </multiselect>
-          </div>
-        </CForm>
-      </div>
-      <div
-        name="create-case-template-step-2"
-        v-if="step == 2"
-        style="overflow-y: scroll; max-height: 500px"
+      <CAlert :show.sync="error" color="danger" close-button>
+        {{ error_message }}
+      </CAlert>
+      <CTabs
+        :fade="false"
+        variant="pills"
+        :activeTab.sync="step"
+        :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
       >
-        <h5>Tasks</h5>
-        <p>
-          Adding tasks to a case template allows users to apply this template
-          and immediately hit the ground running! Start by adding a few.
-        </p>
-        <CAlert :show.sync="taskError" color="danger" closeButton>
-          {{ taskError }}
-        </CAlert>
-        <CButton color="primary" handle=".handle" @click="addTask()"
-          >Add Task</CButton
-        ><br /><br />
-        <CListGroup>
-          <draggable
-            v-model="tasks"
-            group="tasks"
-            @start="drag = true"
-            @end="drag = false"
-          >
-            <CListGroupItem v-for="task in tasks" :key="task.order">
-              <div v-if="!task.saved">
-                <CRow>
-                  <CCol col="1">
-                    <CIcon style="margin-top: 10px" name="cil-menu" />
-                  </CCol>
-                  <CCol col="3">
-                    <CInput
-                      label="Task Title"
-                      placeholder="Title"
-                      v-model="task.title"
-                    ></CInput
-                    ><br />
-                  </CCol>
-                  <CCol>
-                    <CTextarea
-                      label="Task Description"
-                      placeholder="Description"
-                      v-model="task.description"
-                    ></CTextarea>
-                  </CCol>
-                  <!--<CCol col="2">
-                            <CSelect placeholder="Default group"></CSelect>
-                        </CCol>
-                        <CCol col="2">
-                            <CSelect placeholder="Default user"></CSelect>
-                        </CCol>-->
-                  <CCol col="2">
-                    <CButton
-                      @click="task.saved = true"
-                      color="success"
-                      size="sm"
-                      >Save</CButton
-                    >&nbsp;
-                    <CButton
-                      @click="removeTask(task.id)"
-                      color="danger"
-                      size="sm"
-                      >Remove</CButton
-                    >
-                  </CCol>
-                </CRow>
-              </div>
-              <div v-if="task.saved">
-                <CRow>
-                  <CCol col="1">
-                    <CIcon name="cil-menu" />
-                  </CCol>
-                  <CCol col="4">
-                    <b>{{ task.title }}</b
-                    ><br />
-                    {{ task.description }}
-                  </CCol>
-                  <CCol col="2">
-                    {{ task.group_uuid }}
-                  </CCol>
-                  <CCol col="2">
-                    {{ task.owner_uuid }}
-                  </CCol>
-                  <CCol col="2">
-                    <CButton @click="task.saved = false" color="info" size="sm"
-                      >Edit</CButton
-                    >&nbsp;
-                    <CButton
-                      @click="removeTask(task.id)"
-                      color="danger"
-                      size="sm"
-                      >Remove</CButton
-                    >
-                  </CCol>
-                </CRow>
-              </div>
-            </CListGroupItem>
-          </draggable>
-        </CListGroup>
-      </div>
-      <div name="create-case-template-step-3" v-if="step == final_step">
-        <h5>Review</h5>
-        <b>Title:</b> {{ title }}<br />
-        <b>Description:</b><br /><br />{{ description }}<br />
+        <CTab title="1. Template Details">
+          <h5>Template Details</h5>
+          <p>A case template is a quick and easy method for making sure a case conforms to a pattern/configuration each time it is opened</p>
+          <CForm @submit.prevent="createCase">
+            <CSelect
+              v-if="current_user.default_org"
+              placeholder="Select an Organization..."
+              required
+              :value.sync="organization"
+              :options="formattedOrganizations()"
+              label="Organization"
+            />
+            <CInput
+              placeholder="Case Template Title"
+              required
+              v-model="title"
+              label="Case Title"
+            >
+            </CInput>
+            <CTextarea
+              placeholder="Enter a description for the case template.  The more detail the better."
+              required
+              v-model="description"
+              label="Description"
+              rows="5"
+            >
+            </CTextarea>
+            <CRow>
+              <CCol col="12" lg="6">
+                <CSelect
+                  label="TLP"
+                  :options="tlps"
+                  :value.sync="tlp"
+                  placeholder="Select a TLP"
+                >
+                </CSelect>
+              </CCol>
+              <CCol col="12" lg="6">
+                <CSelect
+                  label="Severity"
+                  :options="severities"
+                  :value.sync="severity"
+                  placeholder="Select a Severity"
+                >
+                </CSelect>
+              </CCol>
+            </CRow>
+            <div role="group" class="form-group">
+              <label class="typo__label">Tags</label>
+              <multiselect
+                v-model="selected_tags"
+                placeholder="Select tags to apply to this input"
+                :taggable="true"
+                tag-placeholder="Add new tag"
+                track-by="name"
+                label="name"
+                :options="tag_list"
+                :multiple="true"
+                @tag="addTag"
+                :close-on-select="false"
+              >
+              </multiselect>
+            </div>
+          </CForm>
+        </CTab>
+        <CTab title="2. Tasks">
+          <h5>Tasks <CButton color="success" size="sm" handle=".handle" @click="addTask()"
+            >+</CButton></h5>
+          <p>
+            Adding tasks to a case template allows users to apply this template
+            and immediately hit the ground running! Start by adding a few.
+          </p>
+          <CAlert :show.sync="taskError" color="danger" closeButton>
+            {{ taskError }}
+          </CAlert>
+          <CListGroup>
+            <draggable
+              v-model="tasks"
+              group="tasks"
+              @start="drag = true"
+              @end="drag = false"
+            >
+              <CListGroupItem v-for="task in tasks" :key="task.order">
+                <div v-if="!task.saved">
+                  <CRow>
+                    <CCol col="1">
+                      <CIcon style="margin-top: 10px" name="cil-menu" />
+                    </CCol>
+                    <CCol col="3">
+                      <CInput
+                        placeholder="Title"
+                        v-model="task.title"
+                      ></CInput
+                      ><br />
+                    </CCol>
+                    <CCol>
+                      <CInput
+                        placeholder="Description"
+                        v-model="task.description"
+                      ></CInput>
+                    </CCol>
+                    <CCol col="2">
+                      <CButton
+                        @click="task.saved = true"
+                        color="success"
+                        size="sm"
+                        >Save</CButton
+                      >&nbsp;
+                      <CButton
+                        @click="removeTask(task.id)"
+                        color="danger"
+                        size="sm"
+                        >Remove</CButton
+                      >
+                    </CCol>
+                  </CRow>
+                </div>
+                <div v-if="task.saved">
+                  <CRow>
+                    <CCol col="1">
+                      <CIcon name="cil-menu" />
+                    </CCol>
+                    <CCol>
+                      <b>{{ task.title }}</b
+                      ><br />
+                      {{ task.description }}
+                    </CCol>
+                    <CCol col="2">
+                      <CButton
+                        @click="task.saved = false"
+                        color="info"
+                        size="sm"
+                        >Edit</CButton
+                      >&nbsp;
+                      <CButton
+                        @click="removeTask(task.id)"
+                        color="danger"
+                        size="sm"
+                        >Remove</CButton
+                      >
+                    </CCol>
+                  </CRow>
+                </div>
+              </CListGroupItem>
+            </draggable>
+          </CListGroup>
+        </CTab>
+        <CTab title="3. Review">
+          <h5>Review</h5>
+          <b>Title:</b> {{ title }}<br />
+          <b>Description:</b><br /><br />{{ description }}<br />
 
-        <br /><b>Tasks</b><br /><br />
-        <CListGroup>
-          <CListGroupItem v-for="task in tasks" :key="task.id">
-            <b>{{ task.title }}</b
-            ><br /><br />{{ task.description }}<br /><br />
-            <b>Default Group: </b> {{ task.group_uuid }}<br />
-            <b>Default Owner: </b> {{ task.owner_uuid }}
-          </CListGroupItem>
-        </CListGroup>
-        <br /><br />
-        <b>Default Tags</b><br />
-        <li
-          style="display: inline; margin-right: 2px"
-          v-for="tag in selected_tags"
-          :key="tag.name"
-        >
-          <CBadge
-            color="info"
-            size="sm"
-            style="padding: 5px; margin-top: 10px; margin-right: 3px"
-            >{{ tag.name }}</CBadge
+          <br /><b>Tasks</b><br /><br />
+          <CListGroup>
+            <CListGroupItem v-for="task in tasks" :key="task.id">
+              <b>{{tasks.indexOf(task)+1}}. {{ task.title }}</b><br>{{ task.description }}
+            </CListGroupItem>
+          </CListGroup>
+          <br /><br />
+          <b>Default Tags</b><br />
+          <li
+            style="display: inline; margin-right: 2px"
+            v-for="tag in selected_tags"
+            :key="tag.name"
           >
-        </li>
-      </div>
+            <CBadge
+              color="info"
+              size="sm"
+              style="padding: 5px; margin-top: 10px; margin-right: 3px"
+              >{{ tag.name }}</CBadge
+            >
+          </li>
+        </CTab>
+      </CTabs>
+
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Cancel</CButton>
-        <CButton v-if="step != 1" @click="previousStep()" color="info"
+        <CButton v-if="step != 0" @click="previousStep()" color="info"
           >Previous</CButton
         >
         <CButton v-if="step != final_step" @click="nextStep()" color="primary"
@@ -254,9 +245,9 @@ export default {
   },
   data() {
     return {
-      step: 1,
+      step: 0,
       task_id: 0,
-      final_step: 3,
+      final_step: 2,
       title: "",
       description: "",
       selected_tags: Array(),
@@ -266,7 +257,7 @@ export default {
       severity: 2,
       tasks: [],
       error: false,
-      error_message: '',
+      error_message: "",
       organization: "",
       organizations: [],
       taskError: null,
@@ -349,6 +340,9 @@ export default {
         id: this.task_id++,
       });
     },
+    removeTask(id) {
+      this.tasks = this.tasks.filter(t => t.id !== id)
+    },
     createCaseTemplate() {
       let title = this.title;
       let organization = this.organization;
@@ -391,7 +385,7 @@ export default {
           tlp,
           severity,
           tags,
-          organization
+          organization,
         })
         .then((resp) => {
           if (resp.status == 200) {
@@ -399,8 +393,8 @@ export default {
           }
         })
         .catch((err) => {
-          this.error = true
-          this.error_message = err.response.data.message
+          this.error = true;
+          this.error_message = err.response.data.message;
         });
     },
     loadTags: function () {
@@ -418,7 +412,7 @@ export default {
       this.tasks = [];
       this.title = "";
       this.description = "";
-      this.step = 1;
+      this.step = 0;
       this.selected_tags = Array();
       this.taskError = null;
     },
