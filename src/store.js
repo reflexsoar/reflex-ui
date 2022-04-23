@@ -577,7 +577,11 @@ const mutations = {
     state.status = 'success'
   },
   add_input(state, input){
-    state.inputs.push(input)
+    if(state.inputs.lenght == 0) {
+      state.inputs = [input]
+    } else {
+      state.inputs.push(input)
+    }    
     state.input = input
     state.status = 'success'
   },
@@ -1679,6 +1683,22 @@ const actions = {
         resolve(resp)
       })
       .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  dismissEventsByFilter({commit}, data) {
+    return new Promise((resolve, reject) => {
+      console.log(data)
+      Axios({url: `${BASE_URL}/event/dismiss_by_filter`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_multiple_events', resp.data)
+        //commit('add_toast', {message:`Dismiss task submitted.`, header:'Bulk Dismiss', color: 'success', key: resp.data.task_id, refresh: false})
+        //commit('add_task', resp.data.task_id)
+        resolve(resp)
+      })
+      .catch(err => {
+        console.log(err)
         reject(err)
       })
     })

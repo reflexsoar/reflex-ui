@@ -13,7 +13,7 @@
             You have selected events from more than one organization, bulk actions have been disabled.  In a future release you will be able to perform this action.
           </CAlert>
         </CCol>
-      </CRow>
+      </CRow><!--<CButton @click="dismissEventByFilter()">TEST</CButton>-->
       <!-- START FILTER PICKERS TODO: Move this to it's own component-->
       <CRow>        
         <CCol col="12">
@@ -214,13 +214,13 @@
                 <CCol col="9" class="text-right">
                   <small>
                     <CButton @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':event.severity})" class="tag" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CButton>
-                    <span v-if="!filteredBySignature() && getRelatedCount(event.signature) > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && getRelatedCount(event.signature) > 1" color="dark" size="sm">{{getRelatedCount(event.signature)}} occurences <span v-if="getRelatedCount(event.signature) && getRelatedCount(event.signature) > 0"></span></CButton>
+                    <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurences <span v-if="event.related_events_count > 0"></span></CButton>
                     <span class="separator">|</span><CButton class="tag" @click="toggleObservableFilter({'filter_type':'status', 'data_type':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CButton>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
                     <span class="separator">|</span>Created {{event.original_date | moment('LLLL') }}
                     <span class="separator">|</span><b>Reference:</b> {{event.reference}}
                     <span class="separator">|</span><CIcon name='cilVector' v-c-tooltip="{content: 'Event Rules Matched'}"></CIcon> {{event.event_rules ? event.event_rules.length : 0 }}
-                    <span v-if="current_user.default_org"><span class="separator">|</span></span></small><span style="cursor: pointer" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"><OrganizationBadge :uuid="event.organization" color="warning" /></span>
+                    <span v-if="current_user.default_org"><span class="separator">|</span></span></small><span style="cursor: pointer" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"><OrganizationBadge v-if="current_user.default_org" :uuid="event.organization" color="warning" /></span>
                 </CCol>
               </CRow>
             </CCardFooter>
@@ -673,6 +673,17 @@ export default {
           })
         }
         this.selected = []          
+      },
+      dismissEventByFilter() {
+        let data = {
+          filter: JSON.stringify(this.observableFilters),
+          dismiss_reason_uuid: this.dismissalReason,
+          dismiss_comment: this.dismissalComment,
+          uuids: this.selected
+        }
+        this.$store.dispatch('dismissEventsByFilter', data).then(resp => {
+          console.log(resp)
+        })
       },
       dismissEvent() {
         this.dismiss_submitted = true
