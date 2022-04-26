@@ -13,7 +13,7 @@
             You have selected events from more than one organization, bulk actions have been disabled.  In a future release you will be able to perform this action.
           </CAlert>
         </CCol>
-      </CRow><!--<CButton @click="dismissEventByFilter()">TEST</CButton>-->
+      </CRow>
       <!-- START FILTER PICKERS TODO: Move this to it's own component-->
       <CRow>        
         <CCol col="12">
@@ -241,6 +241,7 @@
             <p>You are dismissing events for multiple organizations at the same time.  Be sure to pick the correct reason and provide a description for each.</p>
           </CCallout>
           {{multiple_org_dismiss}}
+          {{observable_filters}}
           <div v-for="events,org in selected_orgs" :key="org">
             <CRow>
               <CCol><hr></CCol></CRow>
@@ -284,6 +285,7 @@
         </div>
       </div>
       <template #footer>
+        <CButton color="warning" @click="dismissEventByFilter()" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>TEST Dismiss Event</span></CButton>
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
     </CModal>
@@ -675,6 +677,7 @@ export default {
         this.selected = []          
       },
       dismissEventByFilter() {
+        this.dismiss_submitted = true
         let data = {
           filter: JSON.stringify(this.observableFilters),
           dismiss_reason_uuid: this.dismissalReason,
@@ -682,8 +685,20 @@ export default {
           uuids: this.selected
         }
         this.$store.dispatch('dismissEventsByFilter', data).then(resp => {
-          console.log(resp)
-        })
+          this.filtered_events = this.filterEvents()
+            this.dismissEventModal = false
+            this.dismiss_submitted = false
+            this.error = false
+            this.error_message = ""
+            this.selected = []
+            this.selected_count = 0
+        }).catch(err => {
+            this.error = true
+            this.error_message = err.response.data.message
+            this.selected = []
+            this.selected_count = 0
+            this.dismiss_submitted = false
+          })
       },
       dismissEvent() {
         this.dismiss_submitted = true
