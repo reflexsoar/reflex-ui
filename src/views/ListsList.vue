@@ -1,6 +1,6 @@
 <template>
   <CCol>
-    <h2>List Management<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/intel-lists')"><CIcon name='cil-book' size="lg"/></button></h2><br>
+    <h1>List Management<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/intel-lists')"><CIcon name='cil-book' size="lg"/></button></h1><br>
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>      
@@ -57,8 +57,8 @@
       </template>
       <template #actions="{item}">
           <td style="min-width:25px" class="text-right">
-            <CButton @click="editListModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit List', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
-            <CButton @click="deleteListModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete List', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
+            <CButton aria-label="Edit List" @click="editListModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit List', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+            <CButton aria-label="Delete List" @click="deleteListModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete List', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
           </td>
         </template>      
       </CDataTable>

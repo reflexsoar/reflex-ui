@@ -448,3 +448,52 @@ label {
 .escalated {
     color: red;
 }
+
+/* WCAF OVERRIDES */
+
+.breadcrumb-item.active {
+    color: #6B7485;
+}
+
+.text-muted {
+    color: #6B7485 !important;
+}
+
+.text-warning {
+    color: #966703 !important;
+}
+
+.text-success {
+    color: #228743 !important;
+}
+
+.text-danger {
+    color: #DF2A2A !important;
+}
+
+.text-info {
+    color: #0073E6 !important;
+}
+.form-control {
+    color: #6B7785 !important;
+}
+
+.btn-secondary, .badge-secondary {
+    color: #445964 !important;
+}
+
+.btn-info {
+    background-color: #0073E6 !important;
+}
+
+.btn-danger {
+    background-color: #EB0000 !important;
+}
+
+.badge-warning, .btn-warning {
+    color: #404F5E !important;
+}
+
+.page-item .disabled {
+    color: #6B7785 !important;
+}

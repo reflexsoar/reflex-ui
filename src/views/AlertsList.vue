@@ -1,7 +1,7 @@
 <template>
   <CRow>
     <CCol col="12">
-      <h2>Events<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
+      <h2>Events<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
       <event-drawer :event_data="event_data"></event-drawer>
       <CRow>
         <CCol col="12">
@@ -48,12 +48,12 @@
                 </CRow>
                 <CRow>
                   <CCol>
-                    <CSelect :options="free_search_options" :value.sync="selected_search_option"></CSelect>
+                    <CSelect :options="free_search_options" aria-label="Search Field" :value.sync="selected_search_option"></CSelect>
                   </CCol>
                 </CRow>
                 <CRow>
                   <CCol>
-                    <CInput placeholder="Enter a search term..." v-model="search_text" @keydown.enter="applyFreeSearch()"></CInput>
+                    <CInput placeholder="Enter a search term..." aria-label="Free search" v-model="search_text" @keydown.enter="applyFreeSearch()"></CInput>
                   </CCol>
                 </CRow>
               </div>
@@ -73,20 +73,19 @@
                                 <CButtonGroup>
                                   <CButton size="sm" color="secondary" @click="clearTimeFilter()">Reset</CButton>
                                   <CButton size="sm" color="primary" @click="applyTimeFilter()">Apply</CButton>
-                                </CButtonGroup>
-                                
+                                </CButtonGroup>                                
                               </CCol>
                             </CRow>
                             <CRow>
                               <CCol>
-                                <CInput :value="inputValue.start" v-on="inputEvents.start">
+                                <CInput aria-label="Start Date" :value="inputValue.start" v-on="inputEvents.start">
                                   <template #prepend>
-                                    <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                                    <CButton aria-label="Start Date" disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
                                   </template>
                                 </CInput>
-                                <CInput :value="inputValue.end" v-on="inputEvents.end">
+                                <CInput aria-label="End Date" :value="inputValue.end" v-on="inputEvents.end">
                                 <template #prepend>
-                                    <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                                    <CButton aria-label="End Date" disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
                                   </template>
                                 </CInput>
                               </CCol>
@@ -132,6 +131,7 @@
                   toggler-text=""
                   class="float-left"
                   color="secondary"
+                  aria-label="Bulk Select"
                 ><CDropdownItem  @click="selectAllNew()">Select visible</CDropdownItem>
                 <CDropdownItem @click="selectAcrossPages()">Select all&nbsp;<b>{{page_data.total_results}}</b>&nbsp;events</CDropdownItem>
                 <CDropdownItem @click="clearSelected()">Clear Selection</CDropdownItem>
@@ -141,6 +141,7 @@
                 color="secondary"
                 v-bind:disabled="selected.length == 0 || selectedOrgLength() > 1"
                 class='d-inline-block'
+                aria-label="Bulk Actions"
             >
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="startDismissEvent()">Dismiss Event</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
@@ -151,7 +152,7 @@
                   <CDropdownItem  @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
                 </div>
             </CDropdown>
-              <!--&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>-->&nbsp;<CButton style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
+              <!--&nbsp;<CSelect :options="sort_options" placeholder="Sort by" :value="sort_by" @change="sort_by = $event.target.value; filterEvents()" class="d-inline-block"/>-->&nbsp;<CButton aria-label="Sorting" style="margin-top: -5px" size="sm" color="secondary" @click="toggleSortDirection()"><CIcon v-if="sort_direction === 'asc'" name="cilSortAscending"/><CIcon v-if="sort_direction === 'desc'" name="cilSortDescending"/></CButton>&nbsp;<CSelect class="d-inline-block" placeholder="Events per Page" :options="[10,25,50,100]" @change="card_per_page = $event.target.value; filterEvents()"/>
             </div>
             
         </CCol>
@@ -188,7 +189,7 @@
               <CRow>
                 <CCol col="9">
                   <h4>                    
-                    <input type="checkbox" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
+                    <input type="checkbox" aria-label="Select Card" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})" style="cursor: pointer;">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
                   <CIcon name="cilCenterFocus"/>&nbsp;<li  style="display: inline; margin-right: 2px;" v-for="obs in event.observables.slice(0,max_observables)" :key="obs.uuid"><CButton color="secondary" class="tag" v-c-tooltip="{'content': encodeURI(obs.value)}" size="sm" style="margin-top:5px; margin-bottom:5px;" @click.prevent.stop="showActionMenu($event, obs)"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="event.observables.length > max_observables" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(event.observables.slice(max_observables))}"><small>&nbsp;+{{ event.observables.length - max_observables}}</small></span><br>
@@ -203,12 +204,12 @@
               <CRow>
                 <CCol col="3">
                   <CButtonGroup>
-                    <CButton size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
-                    <CButton @click="caseFromCard(event.uuid)" v-if="event.status.name === 'New'" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
-                    <CButton @click="showDrawer(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
-                    <CButton v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
-                    <CButton v-if="event.case" size="sm" color="secondary" :to="`/cases/${event.case}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cil-folder-open"/></CButton>
-                    <CButton v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
+                    <CButton aria-label="Create Event Rule" size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
+                    <CButton aria-label="Create Case" @click="caseFromCard(event.uuid)" v-if="event.status.name === 'New'" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
+                    <CButton aria-label="View Event" @click="showDrawer(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
+                    <CButton aria-label="Reopen Event" v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
+                    <CButton aria-label="View Case" v-if="event.case" size="sm" color="secondary" :to="`/cases/${event.case}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cil-folder-open"/></CButton>
+                    <CButton aria-label="Dismiss Event" v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
                   </CButtonGroup>
                 </CCol>
                 <CCol col="9" class="text-right">

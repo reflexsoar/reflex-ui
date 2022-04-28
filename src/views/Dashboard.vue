@@ -77,14 +77,14 @@
                 <CCol>
                   <CInput label="Start" :value="inputValue.start" v-on="inputEvents.start">
                     <template #prepend>
-                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar' aria-label="Start Date"/></CButton>
                     </template>
                   </CInput>
                 </CCol>
                 <CCol>
                   <CInput label="End" :value="inputValue.end" v-on="inputEvents.end">
                   <template #prepend>
-                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar' aria-label="End Date"/></CButton>
                     </template>
                   </CInput>
                 </CCol>

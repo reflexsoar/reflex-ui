@@ -44,13 +44,13 @@
               <td v-else>Never</td>
             </template>
             <template #merge_into_case="{item}">
-              <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.merge_into_case" disabled></CSwitch></td>
+              <td><CSwitch label="Rule Will Merge Into Case" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.merge_into_case" disabled></CSwitch></td>
             </template>
             <template #dismiss="{item}">
-              <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
+              <td><CSwitch label="Rule Will Dismiss" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
             </template>
             <template #expire="{item}">
-              <td><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.expire" disabled></CSwitch></td>
+              <td><CSwitch aria-label="Rule Will Expire" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.expire" disabled></CSwitch></td>
             </template>
             <template #hits="{item}">
               <td>
@@ -59,17 +59,17 @@
             </template>
             <template #admin="{item}"> 
               <td class="text-right">
-                <CButton disabled @click="downloadRuleAsJSON(item.uuid)" size="sm" color="secondary" v-c-tooltip="{content: 'Export Rule - COMING SOON', placement:'left'}"><CIcon name='cilCloudDownload'/></CButton>&nbsp;
-                <CButton size="sm" color="secondary" @click="cloneRule(item.uuid)"><CIcon name='cilCopy'/></CButton>&nbsp;
-                <CButton size="sm" color="info" @click="editRule(item.uuid)" v-c-tooltip="{content: 'Edit Rule', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
-                <CButton v-if="item.active" size="sm" color="warning" @click="disableRule(item.uuid)" v-c-tooltip="{content: 'Disable Rule', placement:'left'}"><CIcon name="cilBan"/></CButton>
-                <CButton v-else size="sm" color="success" @click="enableRule(item.uuid)" v-c-tooltip="{content: 'Enable Rule', placement:'left'}"><CIcon name="cilCheck"/></CButton>&nbsp;
-                <CButton v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm" v-c-tooltip="{content:'Delete Rule', placement:'left'}"><CIcon name='cilTrash'/></CButton>
+                <CButton aria-label="Export Rule" disabled @click="downloadRuleAsJSON(item.uuid)" size="sm" color="secondary" v-c-tooltip="{content: 'Export Rule - COMING SOON', placement:'left'}"><CIcon name='cilCloudDownload'/></CButton>&nbsp;
+                <CButton aria-label="Clone Rule" size="sm" color="secondary" @click="cloneRule(item.uuid)"><CIcon name='cilCopy'/></CButton>&nbsp;
+                <CButton aria-label="Edit Rule" size="sm" color="info" @click="editRule(item.uuid)" v-c-tooltip="{content: 'Edit Rule', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+                <CButton aria-label="Disable Rule" v-if="item.active" size="sm" color="warning" @click="disableRule(item.uuid)" v-c-tooltip="{content: 'Disable Rule', placement:'left'}"><CIcon name="cilBan"/></CButton>
+                <CButton aria-label="Enable Rule" v-else size="sm" color="success" @click="enableRule(item.uuid)" v-c-tooltip="{content: 'Enable Rule', placement:'left'}"><CIcon name="cilCheck"/></CButton>&nbsp;
+                <CButton aria-label="Delete Rule" v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm" v-c-tooltip="{content:'Delete Rule', placement:'left'}"><CIcon name='cilTrash'/></CButton>
               </td>
             </template>
             <template #global_rule="{item}">
               <td>
-                <CSwitch color="success" label-on="Yes" label-off="No" disabled :checked.sync="item.global_rule"/>
+                <CSwitch label="Rule is Global" color="success" label-on="Yes" label-off="No" disabled :checked.sync="item.global_rule"/>
               </td>
             </template>
             </CDataTable>

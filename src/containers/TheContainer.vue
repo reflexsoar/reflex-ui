@@ -18,7 +18,6 @@
                 </CToast>
               
             </CToaster>
-
             <router-view></router-view>
           </CContainer>
         </main>

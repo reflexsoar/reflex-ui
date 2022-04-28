@@ -6,8 +6,8 @@
     @update:show="(value) => $store.commit('set', ['sidebarShow', value])"
   >
     <CSidebarBrand class="d-md-down-none" to="/">
-      <img class="c-sidebar-brand-full" style="margin-bottom:0px; width: 80%" v-bind:src="logo_slogan"/>
-      <img class="c-sidebar-brand-minimized" style="margin-bottom:0px; width: 80%" v-bind:src="logo"/>
+      <img aria-label="logo with slogan" class="c-sidebar-brand-full" style="margin-bottom:0px; width: 80%" v-bind:src="logo_slogan"/>
+      <img aria-label="logo" class="c-sidebar-brand-minimized" style="margin-bottom:0px; width: 80%" v-bind:src="logo"/>
     </CSidebarBrand>
 
     <CSidebarNav>
@@ -33,6 +33,7 @@
     <CSidebarMinimizer
       class="d-md-down-none"
       @click.native="$store.commit('set', ['sidebarMinimize', !minimize])"
+      aria-label="Sidebar Minimizer"
     />
   </CSidebar>
 </template>

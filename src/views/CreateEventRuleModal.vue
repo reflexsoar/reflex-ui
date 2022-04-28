@@ -25,6 +25,7 @@
           <button
             type="button"
             class="kb"
+            aria-label="Documentation"
             onclick="window.open('https://docs.reflexsoar.com/en/latest/rql')"
           >
             <CIcon name="cil-book" size="lg" />
@@ -103,6 +104,7 @@
                       label-on="Yes"
                       label-off="no"
                       color="success"
+                      aria-label="Rule Active"
                     /><br />
                   </CCol>
                   <CCol col="5">
@@ -112,6 +114,7 @@
                       label-on="Yes"
                       label-off="no"
                       color="success"
+                      aria-label="Run Rule Retroactively"
                     /><br />
                     <small class="text-muted"
                       >When the rule is saved, Reflex will retroactively attempt
@@ -152,6 +155,7 @@
                       label-off="No"
                       label="Dismiss Event"
                       :checked.sync="expire"
+                      aria-label="Expire Rule"
                     ></CSwitch>
                   </CCol>
                   <CCol>
@@ -190,6 +194,7 @@
                   v-model="query"
                   :highlight="highlighter"
                   line-numbers
+                  aria-label="Reflex Query"
                 ></prism-editor
                 ><br />
 

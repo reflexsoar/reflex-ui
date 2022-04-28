@@ -21,7 +21,7 @@
               v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
             >
             </CInput>
-            <label style="text-align:center; vertical-align:middle; padding-bottom:.8em">Assign Case Template?</label>&nbsp;&nbsp;&nbsp;<CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="use_case_template" v-bind:disabled="settings.require_case_templates"/>
+            <label style="text-align:center; vertical-align:middle; padding-bottom:.8em">Assign Case Template?</label>&nbsp;&nbsp;&nbsp;<CSwitch aria-label="Assign Case Template" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="use_case_template" v-bind:disabled="settings.require_case_templates"/>
             <div role="group" class="form-group" v-if="use_case_template">
                 <multiselect 
                     v-model="case_template" 
@@ -51,6 +51,7 @@
                 :options-limit="25"
                 :show-no-results="false"
                 @search-change="usersFind"
+                aria-label="Case Owner"
                 v-bind:disabled="current_user.role.permissions.view_organizations && organization == null">
             </multiselect><br>
             <CTextarea
@@ -98,12 +99,13 @@
                     :multiple="true"
                     @tag="addTag"
                     :close-on-select="false"
+                    aria-label="Tags"
                     v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
                 >
                 </multiselect>
             </div>
             <span v-if="case_from_card">
-                <label>Generate Event Rule</label><br><CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule" v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"/><br>
+                <label>Generate Event Rule</label><br><CSwitch aria-label="Generate Event Rule" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule" v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"/><br>
                 <small class="form-text text-muted w-100">When enabled all future events will be merged into this case.</small><br>
             </span>
         </CForm>
