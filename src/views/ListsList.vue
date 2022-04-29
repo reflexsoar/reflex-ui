@@ -374,9 +374,12 @@ export default {
 
         let uuid = this.list_data.uuid
         this.$store.dispatch('updateList', {uuid, data: list}).then(resp => {
-          let listIndex = this.lists.findIndex((list => list.uuid == uuid))
-          Object.assign(this.lists[listIndex], resp.data)
+          //let listIndex = this.lists.findIndex((list => list.uuid == uuid))
+          //Object.assign(this.lists[listIndex], resp.data)
           this.modal_status = false
+        }).catch(err => {
+          this.error = true
+          this.error_message = err.response.data.message
         })
 
       },
