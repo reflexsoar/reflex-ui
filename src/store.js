@@ -218,7 +218,11 @@ const mutations = {
   },
   save_list(state, list) {
     state.list = list
-    state.lists = [...state.lists.filter(l => l.uuid != l.uuid), list]
+    if(state.lists.length > 0 ){
+      state.lists = [...state.lists.filter(l => l.uuid != list.uuid), list]
+    } else {
+      state.lists = [list]
+    }    
   },
   add_list(state, list) {
     if(state.lists.length == 0) {
