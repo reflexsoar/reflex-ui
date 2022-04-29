@@ -24,7 +24,7 @@
             </multiselect>
         </CForm>
       <template #footer>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton type="submit" form="applyCaseTemplateForm" color="primary">Apply</CButton>
       </template>
     </CModal>
@@ -38,7 +38,8 @@ export default {
     props: {
         show: Boolean,
         case_uuid: String,
-        current_case_template_uuid: String
+        current_case_template_uuid: String,
+        organization: String
     },
     data(){
         return {
@@ -83,12 +84,14 @@ export default {
             }            
         },
         loadData() {
-            this.$store.dispatch('getCaseTemplateList', '').then(resp => {
+            let organization = this.organization
+            this.$store.dispatch('getCaseTemplateList', {title: '', organization}).then(resp => {
                 this.templates = this.$store.getters.case_template_list.filter((template) => template.uuid != this.current_case_template_uuid)
             })
         },
         caseTemplateFind(query) {
-            this.$store.dispatch('getCaseTemplateList', query).then(resp => {
+            let organization = this.organization
+            this.$store.dispatch('getCaseTemplateList', {title: query, organization: organization}).then(resp => {
                 this.templates = this.$store.getters.case_template_list.filter((template) => template.uuid != this.current_case_template_uuid)
             })
         },

@@ -57,21 +57,17 @@ export default {
         const selection = window.getSelection()
         const startNode = selection.getRangeAt(0).startContainer.parentNode
         const endNode = selection.getRangeAt(0).endContainer.parentNode
-        console.log(!startNode.isSameNode(this.highlightableEl))
         if (!startNode.isSameNode(this.highlightableEl) || !startNode.isSameNode(endNode)) {
-          console.log('nope1')
           this.showTools = false
           return
         }
         const { x, y, width } = selection.getRangeAt(0).getBoundingClientRect()
         if (!width) {
-          console.log('nope2')
           this.showTools = false
           return
         }
         this.x = x + (width / 2)
         this.y = y + window.scrollY - 10
-        console.log('show the tools')
         this.showTools = true
         this.selectedText = selection.toString()
       },

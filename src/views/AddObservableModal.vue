@@ -25,9 +25,9 @@
                         <span v-c-tooltip="{content: `${item.value}`, placement:'bottom', appendToBody:'true'}">{{item.value | truncate}}</span>
                     </td>
                 </template>
-                <template #dataType="{item}">
+                <template #data_type="{item}">
                     <td style="padding-bottom:0px">
-                        <CSelect :options="dataTypes" :value.sync="item.dataType.name" style="margin-bottom:0px;"/>
+                        <CSelect :options="data_types" :value.sync="item.data_type.name" style="margin-bottom:0px;"/>
                     </td>
                 </template>
                 <template #tlp="{item}">
@@ -61,7 +61,7 @@
         </div>
       <template #footer>
         <CButton @click="restart()" color="danger">Restart</CButton>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton v-if="step != 1" @click="previousStep()" color="info">Previous</CButton>
         <CButton v-if="step != final_step" @click="nextStep()" v-bind:disabled="observables == ''" color="primary">Next</CButton>
         <CButton v-if="step == final_step" @click="createObservables()" color="primary">Save</CButton>
@@ -77,12 +77,13 @@ export default {
     props: {
         show: false,
         case_data: Object,
-        uuid: ""
+        uuid: "",
+        organization: ""
     },
     data(){
         return {
             value: "",
-            dataType: "",
+            data_type: "",
             selected_tags: Array(),
             case_uuid: this.uuid,
             ioc: false,
@@ -95,8 +96,8 @@ export default {
             step: 1,
             observables: "",
             new_observables: Array(),
-            observable_fields: ['value','dataType','tlp','ioc','spotted','safe'],
-            dataTypes: ['hash','url','domain','host','email','ip'],
+            observable_fields: ['value','data_type','tlp','ioc','spotted','safe'],
+            data_types: ['hash','url','domain','host','email','ip','sid','mac','user','process','imphash','fqdn','command'],
             tlps: [
                 {'label': 'WHITE', 'value':1},
                 {'label': 'GREEN', 'value':2},
@@ -140,7 +141,7 @@ export default {
                 for(let o in observable_list) {
                     this.new_observables.push({
                         value: observable_list[o], 
-                        dataType: {
+                        data_type: {
                             name: this.matchObservable(observable_list[o])
                         }, 
                         tlp:2, 
@@ -160,6 +161,8 @@ export default {
             let md5hash = new RegExp(/[a-f0-9A-F]{32}/)
             let sha1hash = new RegExp(/[a-f0-9A-F]{40}/)
             let sha256hash = new RegExp(/[a-f0-9A-F]{64}/)
+            let mac = new RegExp(/^([A-Za-z0-9]{2}\:?\-?){6}$/)
+            let sid = new RegExp(/^S(\-\d{1,10}){4,7}$/)
             if(ip.test(value)) {
                 return 'ip';
             }
@@ -172,11 +175,18 @@ export default {
             if(md5hash.test(value) || sha1hash.test(value) || sha256hash.test(value)) {
                 return 'hash'
             }
+            if(mac.test(value)) {
+                return 'mac'
+            }
+            if(sid.test(value)) {
+                return 'sid'
+            }
             return 'host'
         },
         createObservables() {
             let uuid = this.uuid;
             let data = {'observables': []}
+            data['organization'] = this.organization
             for(let observable in this.new_observables) {
                 let exists = false;
                 let obs = this.new_observables[observable]
@@ -186,7 +196,7 @@ export default {
                     }
                 }
                 if(!exists) {
-                    obs.dataType = obs.dataType.name
+                    obs.data_type = obs.data_type.name
                     data['observables'].push(obs)
                 }
             }

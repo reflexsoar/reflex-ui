@@ -7,33 +7,12 @@
   >
     <template #toggler>
       <CHeaderNavLink>
-        <div class="c-avatar">
-          <img
-            src="img/avatars/6.jpg"
-            class="c-avatar-img "
-          />
-        </div>
+        
+        {{current_user.username}}&nbsp;<CIcon name="cil-menu" size="xl"/>
+        
       </CHeaderNavLink>
     </template>
-    <CDropdownHeader tag="div" class="text-center" color="light">
-      <strong>Account</strong>
-    </CDropdownHeader>
-    <CDropdownItem>
-      <CIcon name="cil-bell"/> Updates
-      <CBadge color="info" class="ml-auto">{{ itemsCount }}</CBadge>
-    </CDropdownItem>
-    <CDropdownItem>
-      <CIcon name="cil-envelope-open" /> Messages
-      <CBadge color="success" class="ml-auto">{{ itemsCount }}</CBadge>
-    </CDropdownItem>
-    <CDropdownItem>
-      <CIcon name="cil-task" /> Tasks
-      <CBadge color="danger" class="ml-auto">{{ itemsCount }}</CBadge>
-    </CDropdownItem>
-    <CDropdownItem>
-      <CIcon name="cil-comment-square" /> Comments
-      <CBadge color="warning" class="ml-auto">{{ itemsCount }}</CBadge>
-    </CDropdownItem>
+    
     <CDropdownHeader
       tag="div"
       class="text-center"
@@ -41,20 +20,24 @@
     >
       <strong>Settings</strong>
     </CDropdownHeader>
-    <CDropdownItem>
-      <CIcon name="cil-user" /> Profile
+    <CDropdownItem @click="profile">
+      <CIcon name="cil-user" />Profile
     </CDropdownItem>
-    <CDropdownItem>
-      <CIcon name="cil-settings" /> Settings
+    <CDropdownItem onclick="window.open('https://docs.reflexsoar.com')">
+      <CIcon name="cil-book" />Documentation
+    </CDropdownItem>
+    <CDropdownItem onclick="window.open('https://support.reflexsoar.com')">
+      <CIcon name="cil-life-ring" />Support
     </CDropdownItem>
     <CDropdownDivider/>
-    <CDropdownItem>
-      <CIcon name="cil-lock-locked" /> <a @click="logout">Logout</a>
+    <CDropdownItem @click="logout">
+      <CIcon name="cil-lock-locked" />Logout
     </CDropdownItem>
   </CDropdown>
 </template>
 
 <script>
+import {mapState} from "vuex";
 export default {
   name: 'TheHeaderDropdownAccnt',
   data () {
@@ -63,9 +46,13 @@ export default {
     }
   },
   computed: {
-    isLoggedIn: function() {return this.$store.getters.isLoggedIn}
+    isLoggedIn: function() {return this.$store.getters.isLoggedIn},
+    ...mapState(['current_user'])
   },
   methods: {
+    profile: function() {
+      this.$router.push('/my_profile')
+    },
     logout: function() {
       this.$store.dispatch('logout')
       .then(() => {

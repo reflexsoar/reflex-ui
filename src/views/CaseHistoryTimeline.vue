@@ -7,8 +7,9 @@
 </template>
 
 <script>
-import { vSelect } from "vue-select";
 import { Timeline, TimelineItem, TimelineTitle } from 'vue-cute-timeline'
+import 'vue-cute-timeline/dist/index.css'
+
 export default {
   name: "CaseHistoryTimeline",
   components: {

@@ -9,7 +9,6 @@ const TheContainer = () => import('@/containers/TheContainer')
 // Views
 const Dashboard = () => import('@/views/Dashboard')
 const Organizations = () => import('@/views/Organizations')
-const OrganizationsList = () => import('@/views/OrganizationsList')
 const OrganizationDetails = () => import('@/views/OrganizationDetails')
 const CreateOrganization = () => import('@/views/CreateOrganization')
 const Playbooks = () => import('@/views/Playbooks')
@@ -38,13 +37,22 @@ const CaseManagement = () => import('@/views/CaseManagement')
 const CaseDetails = () => import('@/views/CaseDetails')
 const Lists = () => import('@/views/Lists')
 const ListsList = () => import('@/views/ListsList')
+const ListExplorer = () => import('@/views/ListExplorer')
 const Settings = () => import('@/views/Settings')
+const ObservableHistory = () => import('@/views/ObservableHistory')
+const UserProfile = () => import('@/views/UserProfile')
+const Hunter = () => import('@/views/Hunter')
+const DetectionManagement = () => import('@/views/DetectionManagement')
+const EventRuleManagement = () => import('@/views/EventRuleManagement')
+const Organization = () => import('@/views/Organization')
+const OrganizationSettings = () => import('@/views/OrganizationSettings')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
 const Page404 = () => import('@/views/pages/Page404')
 const Page500 = () => import('@/views/pages/Page500')
 const Login = () => import('@/views/Login')
+const MFAPrompt = () => import('@/views/MFAPrompt')
 const ForgotPassword = () => import('@/views/ForgotPassword')
 const ResetPassword = () => import('@/views/ResetPassword')
 const Register = () => import('@/views/pages/Register')
@@ -66,24 +74,40 @@ router.beforeEach((to, from, next) => {
   store.commit('clear_alert')
 
   // Before each request refresh the users permissions
-  if(to.matched.some(record => record.path != '/forgot_password' && !record.path.startsWith('/reset_password') && record.path != '/login' && record.path != '/')) {
-    store.dispatch('getMe').then(() => {
-      if(to.matched.some(record => {
+  if(to.matched.some(record => record.path != '/forgot_password' && !record.path.startsWith('/reset_password') && record.path != '/login' && record.path != '/mfa' && record.path != '/')) {
+    //store.dispatch('getMe').then(() => {
+    if(to.matched.some(record => {
         let current_user = store.getters.current_user
-        if(record.meta.requiresPermission && !current_user.permissions.includes(record.meta.requiresPermission)) {
+        if(record.meta.requiresPermission && !current_user.role.permissions[record.meta.requiresPermission]) {
           next('/401')
         } else {
+          
           next()
           return
         }
-      })) {}
-    })  
+     })) {}
+    //})  
   }
   
   // Fetch the settings before each route in the event that they have changed
   if(to.matched.some(record => record.meta.fetchSettings)) {
-    store.dispatch('getSettings')
-  }  
+    store.dispatch('getSettings', {})
+  }
+
+  if(to.matched.some(record => record.meta.fetchOrganizations)) {
+    if(store.getters.current_user.default_org) {
+      store.dispatch('getOrganizations', {page_size: 100})
+    }    
+  }
+
+  if(to.matched.some(record => record.meta.requiresMFAChallenge)) {
+    if (localStorage.getItem('mfa_challenge_token') === null) {
+      next('/login')
+      return
+    } else {
+      next()
+    }
+  }
 
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isLoggedIn) {
@@ -123,42 +147,28 @@ function configRoutes () {
           }
         },
         {
-          path: 'organizations',
-          name: 'Organizations',
-          component: Organizations,
-          redirect: 'organizations/list',
+          path: 'detections',
+          name: 'Detections',
+          component: DetectionManagement,
           meta: {
             requiresAuth: true
-          },
-          children: [
-            {
-              path: 'create',
-              name: 'Create Organization',
-              component: CreateOrganization,
-              meta: {
-                fetchSettings: true,
-                requiresAuth: true
-              }
-            },
-            {
-              path: 'list',
-              name: '',
-              component: OrganizationsList,
-              meta: {
-                fetchSettings: true,
-                requiresAuth: true
-              }
-            },
-            {
-              path: ':uuid',
-              name: 'View Organization',
-              component: OrganizationDetails,
-              meta: {
-                fetchSettings: true,
-                requiresAuth: true
-              }
-            }
-          ]
+          }
+        },
+        {
+          path: 'hunter',
+          name: 'Threat Hunting',
+          component: Hunter,
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'observables',
+          name: 'Observables',
+          component: ObservableHistory,
+          meta: {
+            requiresAuth: true
+          }
         },
         {
           path: 'cases',
@@ -195,7 +205,8 @@ function configRoutes () {
           component: Inputs,
           redirect: 'inputs/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true
           },
           children: [
             {
@@ -233,7 +244,8 @@ function configRoutes () {
           component: Credentials,
           redirect: 'credentials/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true
           },
           children: [
             {
@@ -272,7 +284,9 @@ function configRoutes () {
           component: Alerts,
           redirect: 'alerts/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true,
+            requiresPermission: 'view_events'
           },
           children: [
             {
@@ -281,7 +295,8 @@ function configRoutes () {
               component: AlertsList,
               meta: {
                 fetchSettings: true,
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'view_events'
               }
             },
             {
@@ -290,10 +305,20 @@ function configRoutes () {
               component: AlertDetails,
               meta: {
                 fetchSettings: true,
-                requiresAuth: true
+                requiresAuth: true,
+                requiresPermission: 'view_events'
               }
             }
           ]
+        },
+        {
+          path:'event_rules',
+          name:'Event Rules',
+          component: EventRuleManagement,
+          meta: {
+            requiresAuth: true,
+            //fetchOrganizations: true
+          }
         },
         {
           path: 'plugins',
@@ -335,7 +360,8 @@ function configRoutes () {
           redirect: 'agents/list',
           meta: {
             requiresAuth: true,
-            requiresPermission: 'view_agents'
+            requiresPermission: 'view_agents',
+            fetchOrganizations: true
           },
           children: [
             {
@@ -402,16 +428,55 @@ function configRoutes () {
           component: Lists,
           redirect: 'lists/list',
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            fetchOrganizations: true
           },
           children: [
             {
               path: 'list',
-              name: 'View Lists',
+              name: 'List Manager',
               component: ListsList,
               meta: {
                 fetchSettings: true,
                 requiresAuth: true
+              }
+            },
+            {
+              path: 'explore',
+              name: 'List Explorer',
+              component: ListExplorer,
+              meta: {
+                fetchSettings: true,
+                requiresAuth: true
+              }
+            }
+          ]
+        },
+        {
+          path: 'my_profile',
+          name: 'My Profile',
+          component: UserProfile,
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'organization',
+          name: 'Organization',
+          component: Organization,
+          redirect: '/settings',
+          meta: {
+            requiresAuth: true,
+            requiresPermission: 'update_settings'
+          },
+          children: [
+            {
+              path: ':uuid',
+              name: 'Organization Settings',
+              component: OrganizationSettings,
+              meta: {
+                requiresAuth: true,
+                requiresPermission: 'update_settings'
               }
             }
           ]
@@ -430,6 +495,11 @@ function configRoutes () {
           path: '401',
           name: 'Page401',
           component: Page401
+        },
+        {
+          path: '404',
+          name: 'Page404',
+          component: Page404
         }
       ]
     },
@@ -437,6 +507,14 @@ function configRoutes () {
       path: '/login',
       name: 'Login',
       component: Login
+    },
+    { 
+      path: '/mfa',
+      name: 'MFA',
+      component: MFAPrompt,
+      meta: {
+        requiresMFAChallenge: true
+      }
     },
     {
       path: '/forgot_password',
@@ -455,12 +533,6 @@ function configRoutes () {
         render (c) { return c('router-view') }
       },
       children: [
-        
-        {
-          path: '404',
-          name: 'Page404',
-          component: Page404
-        },
         {
           path: '500',
           name: 'Page500',

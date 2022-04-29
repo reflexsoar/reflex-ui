@@ -4,11 +4,13 @@
       in-header
       class="ml-3 d-lg-none"
       @click="$store.commit('toggleSidebarMobile')"
+      aria-label="Siderbar Toggle"
     />
     <CToggler
       in-header
       class="ml-3 d-md-down-none"
       @click="$store.commit('toggleSidebarDesktop')"
+      aria-label="Siderbar Toggle"
     />
     <CHeaderBrand class="mx-auto d-lg-none" to="/">
       <CIcon name="reflex" height="48" alt="Logo"/>

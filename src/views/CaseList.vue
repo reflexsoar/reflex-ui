@@ -1,75 +1,106 @@
 <template>
+<div>
   <CRow>
-    <CCol col v-if="loading">
-        <div style="margin: auto; text-align:center; verticle-align:middle;">
-           <CSpinner
-                color="dark"
-                style="width:6rem;height:6rem;"
-            />
-        </div>
-    </CCol>
-    <CCol col v-else>
+    <CCol>
+      <!-- START FILTER PICKERS TODO: Move this to it's own component-->
       <CRow>
         <CCol col="12">
-            <CCardHeader>
+          <CCard class="cases-picker-card">
               <CRow>
-                <CCol col="10">
-                  <li style="display: inline; margin-right: 2px;" v-for="filter in caseFilters" :key="filter.value+filter.dataType"><CButton color="secondary" class="tag"  size="sm" @click="toggleCaseFilter({'dataType': filter.dataType.name, 'value': filter.value})"><b>{{filter.dataType}}</b>: <span v-if="filter.filter_type == 'severity'">{{getSeverityText(filter.value).toLowerCase()}}</span><span v-else>{{ filter.value }}</span></CButton></li><span v-if="caseFilters.length > 0" class="separator">|</span>Showing {{filtered_cases.length}} cases.
+                <CCol col="9">
+                  <li style="display: inline; margin-right: 2px;" v-for="obs in caseFilters" :key="obs.value+obs.data_type"><CButton color="secondary" class="tag"  size="sm" @click="toggleCaseFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else-if="obs.filter_type == 'escalated'">{{ obs.value ? 'Yes' : 'No'}}</span><span v-else>{{ obs.value | truncate }}</span></CButton></li><span v-if="caseFilters.length > 0" class="separator">|</span>Showing {{filtered_cases ? filtered_cases.length : 0  }} cases.</span>
                 </CCol>
-                <CCol col="2" class="text-right">
-                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">Quick Filters</CButton>
+                <CCol col="3" class="text-right">
+                  <CButton @click="quick_filters = !quick_filters" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>&nbsp;
+                  <CButton @click="my_cases = !my_cases" :color="my_cases ? 'warning' : 'info'" size="sm">{{my_cases ? 'Assigned To All' : 'Assigned To Me'}}</CButton>
                 </CCol>
               </CRow>
-            </CCardHeader>
-            <CCollapse :show="quick_filters">
-              <CNav variant="tabs" :justified="true">
-                <CNavItem>
-                  <div @click="toggleCaseFilter({'filter_type': 'status', 'dataType':'status','value':'New'})">
-                    New
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleCaseFilter({'filter_type': 'status', 'dataType':'status','value':'In Progress'})">
-                    In Progress
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleCaseFilter({'filter_type': 'status', 'dataType':'status','value':'Closed'})">
-                    Closed
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleCaseFilter({'filter_type': 'cases', 'dataType':'cases','value':'My Cases'})">
-                    My Cases
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleCaseFilter({'filter_type': 'tasks', 'dataType':'tasks','value':'Cases I have Tasks'})">
-                    My Tasks
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':4})">
-                    Critical
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':3})">
-                    High
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':2})">
-                    Medium
-                  </div>
-                </CNavItem>
-                <CNavItem>
-                  <div @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':1})">
-                    Low
-                  </div>
-                </CNavItem>
-              </CNav>
+            </CCard>
+            
+            <CCollapse :show="quick_filters"><CCard class="cases-picker-card">
+              <!-- MOVE THIS TO ITS OWN COMPONENT -->
+            <CRow class='event-stats-container event-stats-row'>
+              <div class='event-stats-picker'>
+                <CRow>
+                  <CCol>
+                    <b>Search</b><br>
+                    <p>Select a term to free search on </p>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CSelect :options="free_search_options"></CSelect>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput></CInput>
+                  </CCol>
+                </CRow>
+              </div>
+              <div class='event-stats-picker' style='padding-right: 10px'>
+                <v-date-picker
+                          v-model="range"
+                          mode="dateTime"
+                          :masks="masks"
+                          is-range
+                        >
+                          <template v-slot="{ inputValue, inputEvents }">
+                            <CRow>
+                              <CCol>
+                                <b>Time Filter</b><p>Select a date range</p>
+                              </CCol>
+                              <CCol class='text-right'>
+                                <CButtonGroup>
+                                  <CButton size="sm" color="secondary" @click="clearTimeFilter()">Reset</CButton>
+                                  <CButton size="sm" color="primary" @click="applyTimeFilter()">Apply</CButton>
+                                </CButtonGroup>
+                                
+                              </CCol>
+                            </CRow>
+                            <CRow>
+                              <CCol>
+                                <CInput :value="inputValue.start" v-on="inputEvents.start">
+                                  <template #prepend>
+                                    <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                                  </template>
+                                </CInput>
+                                <CInput :value="inputValue.end" v-on="inputEvents.end">
+                                <template #prepend>
+                                    <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar'/></CButton>
+                                  </template>
+                                </CInput>
+                              </CCol>
+                            </CRow>
+                            <CRow>
+                              
+                            </CRow>
+                          </template>
+                        </v-date-picker>
+              </div>
+              <div class='event-stats-picker' v-for="bucket, title in case_stats" :key="title">
+                <b class='event-stats-title'>{{title}}</b>
+                <div v-if="loading == 'loading'" class='event-stats-div' style="overflow-y: scroll; margin:auto; text-align:center; verticle-align:middle;">
+                  <CSpinner
+                        color="dark"
+                        style="width:3rem;height:3rem;"
+                        size="sm"
+                    />
+                </div>
+                <div v-else class="event-stats-div" style="margin-top:5px; overflow-y: scroll">
+                  <CRow v-for="k,v in case_stats[title]" :key="v">
+                    <CCol v-if="title === 'severity'" v-c-tooltip="{ content: `${getSeverityText(parseInt(v))}`, placement: 'left' }" @click="toggleCaseFilter({'filter_type': title, 'data_type':title,'value':parseInt(v)})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getSeverityText(parseInt(v))}}</span></CCol>
+                    <CCol v-else-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleCaseFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
+                    <CCol v-else-if="title === 'escalated'" v-c-tooltip="{ content: `${v ? 'Yes' : 'No'}`, placement: 'left'}" @click="toggleCaseFilter({'filter_type': 'escalated', 'data_type':'escalated','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v ? 'Yes': 'No'}}</span></CCol>
+                    <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleCaseFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
+                    <CCol class="text-right" col="3"><CBadge color="secondary">{{k.toLocaleString('en-US')}}</CBadge></CCol>
+                  </CRow>                
+                </div>
+              </div>
+            </CRow>
+            <!-- END EVENT STATS COMPONENT --></CCard>
             </CCollapse>
+          
         </CCol>
       </CRow>
       <CRow style="padding:10px">
@@ -80,7 +111,7 @@
 
         </CCol>
       </CRow>
-              <CDataTable
+             <CRow><CCol> <CDataTable
                   :hover="hover"
                   :striped="striped"
                   :bordered="bordered"
@@ -88,20 +119,31 @@
                   :fixed="fixed"
                   :items="filtered_cases"
                   :fields="fields"
-                  :items-per-page="small ? 25 : 10"
+                  :items-per-page="25"
                   :dark="dark"
+                  :loading = loading
                   :sorter='{external: true, resetable: true}'
-                  pagination
                   :responsive="false"
+                  @update:sorter-value="sort($event)"
                   style="border-top: 1px solid #cfcfcf;"
               >
               <template #title="{item}">
                   <td>
-                      <router-link :to="`${item.uuid}`">{{item.title}}</router-link><br>
+                      <router-link :to="`${item.uuid}`"><span v-if="item.escalated"><CIcon name='cilWarning' class='escalated'/>&nbsp;</span>{{item.title}}</router-link><br>
                       <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name">
-                        <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;cursor: pointer;" @click="toggleCaseFilter({'filter_type': 'tag', 'dataType':'tag','value':tag.name})">{{ tag.name }}</CBadge>
+                        <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;cursor: pointer;" @click="toggleCaseFilter({'filter_type': 'tag', 'data_type':'tag','value':tag.name})">{{ tag.name }}</CBadge>
                       </li>
                   </td>
+              </template>
+              <template #organization="{item}">
+              <td>
+                <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+              </td>
+              </template>
+              <template #created_at="{item}">
+                <td>
+                  {{item.created_at | moment('from','now')}}
+                </td>
               </template>
               <template #status="{item}">
                 <td>
@@ -121,7 +163,7 @@
               </template>
               <template #severity="{item}">
                 <td>
-                  <CButton :color="getSeverityColor(item.severity)" size="sm" @click="toggleCaseFilter({'filter_type': 'severity', 'dataType':'severity','value':item.severity})">{{getSeverityText(item.severity)}}</CButton>
+                  <CButton :color="getSeverityColor(item.severity)" size="sm" @click="toggleCaseFilter({'filter_type': 'severity', 'data_type':'severity','value':item.severity})">{{getSeverityText(item.severity)}}</CButton>
                 </td>
               </template>
               <template #owner="{item}">
@@ -139,6 +181,8 @@
                 </td>
               </template>
               </CDataTable>
+            </CCol>
+          </CRow>
     </CCol>
     <CreateCaseModal :show.sync='newCaseModal'></CreateCaseModal>
     <CModal title="Close Case" :centered="true" size="lg" :show="close_case_modal">
@@ -151,7 +195,7 @@
           <CTextarea :value="close_comment" @change="close_comment = $event" v-bind:required="settings.require_case_close_comment" v-bind:disabled="closure_reason_uuid == ''" label="Additional information" rows="5" placeholder="Enter additional information related to the closure reason."></CTextarea>
       </CForm>
       <template #footer>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton type="submit" form="closeCaseForm" color="primary">Close</CButton>
       </template>
     </CModal>
@@ -160,11 +204,19 @@
             <p>Deleting a case is a permanent action, all work on the event will be removed and any associated events will be set to <b>New</b> status, are you sure you want to continue?</p>
         </div>
         <template #footer>
-            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Dismiss</CButton>
+            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Cancel</CButton>
             <CButton @click="deleteCase()" color="danger">Delete</CButton>
         </template>
     </CModal>
   </CRow>
+  <CRow>
+    <CCol lg="12" sm="12">
+      <CCardBody v-if="pagination.pages > 0">
+        <CPagination :activePage.sync="current_page" :pages="pagination.pages"/>
+      </CCardBody>
+    </CCol>
+  </CRow>
+  </div>
 </template>
 
 <style scoped>
@@ -198,8 +250,17 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['settings']),
+    computed: mapState(['settings','current_user']),
     created: function () {
+      this.caseFilters = this.$store.getters.case_filters
+      if(this.current_user.default_org) {
+        
+          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+          if (!this.fields.includes('organization')) {
+            this.fields.splice(1,0,'organization')
+          }
+        this.fields.push()
+      }
         this.filterCases()
         this.loadClosureReasons()
         this.refresh = setInterval(function() {
@@ -215,12 +276,12 @@ export default {
         newCaseModal: false,
         deleteCaseModal: false,
         target_case: "",
-        fields: ['title','status','events','tlp','severity','owner','actions'],
+        fields: ['title','created_at','status','events','tlp','severity','owner','actions'],
         available_fields: ['title','status','events','tlp','severity','owner','actions','created_at','modified_at'],
         quick_filters: false,
-        caseFilters: [{'filter_type':'status','dataType':'status','value':'New'}],
+        caseFilters: [{'filter_type':'status','data_type':'status','value':'New'}],
         filtered_cases: [],
-        page_data: {},
+        pagination: {},
         close_reasons: [],
         case_closed: false,
         status_uuid: "",
@@ -229,10 +290,70 @@ export default {
         error: false,
         error_message: "",
         closure_reason_uuid: "",
-        close_case_modal: false
+        close_case_modal: false,
+        current_page: 1,
+        range: {
+          start: this.days_ago(7),
+          end: this.today()
+        },
+        masks: {
+          input: 'YYYY-MM-DD h:mm A'
+        },
+        free_search_options: [
+          'Title', //'Commenter', 'Owner', 'Description', 'Comments', 'Task Note', 'Observable'
+        ],
+        case_stats: {},
+        my_cases: false,
+        sort_by: "created_at",
+        sort_direction: "asc"
+        
+      }
+    },
+    watch: {
+      current_page: function () {
+        this.filterCases()
+      },
+      my_cases: function() {
+        this.filterCases()
+      }
+    },
+    filters: {
+      truncate: function (value) {
+          let maxLength = 75
+          if (!value) return ''
+          value = value.toString()
+          if (value.length > maxLength) {
+              return value.substring(0,maxLength) + "..."
+          } else {
+              return value.substring(0,maxLength)
+          }
       }
     },
     methods: {
+      sort(event) {
+        this.sort_direction = event.asc ? 'asc' : 'desc'
+        this.sort_by = event.column ? event.column : 'created_at'
+        this.filterCases()
+      },
+      today() {
+        let d = new Date()
+        d.setHours(23,59,59,0)
+        return d
+      },
+      days_ago(offset) {
+        let d = new Date()
+        d.setDate(d.getDate() - offset)
+        d.setHours(0,0,0,0)
+        return d
+      },
+      mapOrgToName(uuid) {
+        let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+        if (org.length > 0) {
+          return org[0].name
+        } else {
+          return "Unknown"
+        }
+      },
       dismiss() {
         this.closure_reason_uuid = undefined
         this.error = false
@@ -262,13 +383,14 @@ export default {
       },
       toggleCloseCase(uuid) {
         this.target_case = uuid
-        this.loadClosureReasons()
+        let organization = this.filtered_cases.filter(c => c.uuid === uuid)[0].organization
+        this.loadClosureReasons(organization)
         this.loadCaseStatuses()
         this.close_case_modal = !this.close_case_modal        
       },
-      loadClosureReasons() {
+      loadClosureReasons(organization=null) {
           // Call the closure reasons API endpoint
-          this.$store.dispatch('getCloseReasons').then(resp => {
+          this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
               this.close_reasons = resp.data.map((reason) => { return {'label': reason.title, 'value': reason.uuid }})
           })            
       },
@@ -284,7 +406,8 @@ export default {
         this.deleteCaseModal = !this.deleteCaseModal
       },
       loadCaseStatuses() {
-        this.$store.dispatch('getCaseStatus').then(resp => {
+        let organization = this.filtered_cases.filter(c => c.uuid === this.target_case)[0].organization
+        this.$store.dispatch('getCaseStatus', {organization: organization}).then(resp => {
           this.status_uuid = resp.data.find(s => s.name === 'Closed').uuid
         })
       },
@@ -318,13 +441,21 @@ export default {
 
         // Build the filters based on what is currently selected
         this.$store.commit('add_start')
+        this.loading = true
         let status_filters = []
+        let title_filters = []
         let tag_filters = []
         let severity_filter = []
         let search = []
         let owner = []
         let my_cases = false
         let my_tasks = false
+        let start_time = ""
+        let end_time = ""
+        let organization_filters = []
+        let close_reasons_filters = []
+        let owner_filters = []
+        let escalated = false
         for(let f in this.caseFilters) {
           let filter = this.caseFilters[f]
 
@@ -332,7 +463,7 @@ export default {
             status_filters.push(filter.value)
           }
 
-          if(filter.filter_type == 'tag') {
+          if(filter.filter_type == 'tags') {
             tag_filters.push(filter.value)
           }
 
@@ -344,16 +475,40 @@ export default {
             severity_filter.push(filter.value)
           }
 
-          if(filter.filter_type == 'owner') {
-            owner.push(filter.value)
-          }
-
           if(filter.filter_type == 'tasks') {
             my_tasks = true
           }
 
           if(filter.filter_type == 'cases') {
             my_cases = true
+          }
+
+          if(filter.filter_type == 'title') {
+            title_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'start') {
+            start_time = filter.value
+          }
+
+          if(filter.filter_type == 'end') {
+            end_time = filter.value
+          }
+
+          if(filter.filter_type == 'organization') {
+            organization_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'close reason') {
+            close_reasons_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'owner') {
+            owner_filters.push(filter.value)
+          }
+
+          if(filter.filter_type == 'escalated') {
+            escalated = filter.value
           }
         }
 
@@ -364,16 +519,54 @@ export default {
           search: search,
           owner: owner,
           fields: ['title','status','tlp','severity','owner','uuid','id','event_count'],
-          my_cases: my_cases,
+          my_cases: this.my_cases,
           my_tasks: my_tasks,
           page: this.current_page,
-          page_size: this.card_per_page
+          page_size: this.card_per_page,
+          sort_by: this.sort_by,
+          sort_direction: this.sort_direction,
+          organization: organization_filters,
+          close_reason: close_reasons_filters,
+          owner: owner_filters,
+          start: start_time,
+          end: end_time,
+          escalated: escalated
         }).then(resp => {
           this.filtered_cases = this.$store.getters.cases
-          this.page_data = resp.data.pagination
+          this.pagination = resp.data.pagination
           this.$store.commit('add_success')
           this.loading = false
         })
+
+        this.$store.dispatch('getCaseStats', {
+          status: status_filters,
+          severity: severity_filter,
+          tags: tag_filters,          
+          title: title_filters,
+          start: start_time,
+          end: end_time,   
+          organization: organization_filters,
+          close_reason: close_reasons_filters,
+          owner: owner_filters,
+          my_cases: this.my_cases,
+          metrics: ['tag','status','severity','close_reason','organization','owner','escalated'],
+          escalated: escalated
+        }).then(resp => {
+          this.case_stats = this.$store.getters.case_stats
+        })
+      },
+      applyTimeFilter() {
+        this.clearTimeFilter(false)
+        this.toggleCaseFilter({'filter_type':'start','data_type':'start','value':this.range.start.toISOString()})
+        this.toggleCaseFilter({'filter_type':'end','data_type':'end','value':this.range.end.toISOString()})
+        this.filterCases()
+      },
+      clearTimeFilter(refresh=true) {
+        this.caseFilters = this.caseFilters.filter(f => f.filter_type !== 'start')
+        this.caseFilters = this.caseFilters.filter(f => f.filter_type !== 'end')
+        if(refresh) {
+          this.filterCases()
+        }
       },
       toggleCaseFilter(filter) {
         let exists = this.caseFilters.some((item) => {
@@ -398,9 +591,20 @@ export default {
         if(!exists) {
           this.caseFilters.push(filter)
         } else {
-          this.caseFilters = this.caseFilters.filter(item => item.value !== filter.value)
+          if(filter.data_type == 'start' || filter.data_type == 'end') {
+            this.caseFilters = this.caseFilters.filter(item => item.filter_type !== 'start')
+            this.caseFilters = this.caseFilters.filter(item => item.filter_type !== 'end')
+          } else {
+            this.caseFilters = this.caseFilters.filter(item => item.value !== filter.value)
+          }
         }
-        this.filterCases()
+
+        this.$store.commit('update_case_filters', this.caseFilters)
+
+        if(!['end','start'].includes(filter.filter_type)) {
+          this.filterCases()
+        }
+          
       }
     },
     beforeDestroy: function() {

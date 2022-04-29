@@ -21,14 +21,14 @@
                         toggler-text="Actions" 
                         color="secondary"
                         >
-                        <CDropdownItem v-if="!event.case_uuid" @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
+                        <CDropdownItem v-if="!event.case" @click="dismissEventModal = !dismissEventModal">Dismiss Event</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
-                        <CDropdownItem v-if="!event.case_uuid" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
-                        <CDropdownItem v-if="!event.case_uuid" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
+                        <CDropdownItem v-if="!event.case" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
+                        <CDropdownItem v-if="!event.case" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
                         <CDropdownDivider/>
                         <CDropdownItem @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
                         </CDropdown>
-                        <CButton v-if="event.case_uuid" :to="`/cases/${event.case_uuid}`" color="success">ViewCase</CButton>
+                        <CButton v-if="event.case" :to="`/cases/${event.case}`" color="success">ViewCase</CButton>
                     </CButtonGroup>
                 </CCol>
                 
@@ -37,7 +37,7 @@
                 <CCol col="12" lg="10" sm="12">{{event.description}}<br><br></CCol>
             </CRow>
             <CRow>
-                <CCol col="12" lg="6" sm="12" style="margin-top:5px;"><li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li></CCol>
+                <CCol col="12" lg="6" sm="12" style="margin-top:5px;"><li style="display: inline; margin-right: 2px;" v-for="tag in event.tags" :key="tag"><CButton color="primary" size="sm" disabled="">{{ tag }}</CButton></li></CCol>
             </CRow>
         </CCardHeader>
         <CCardBody>
@@ -74,7 +74,7 @@
             >
                 <template #value="{item}">
                     <td>
-                        {{item.value | defang}}
+                        <b>{{item.value | defang}}</b><br><small>{{item.source_field.toLowerCase()}} | {{item.data_type}}</small>
                     </td>
                 </template>
                 <template #ioc="{item}">
@@ -92,14 +92,9 @@
                         <CSwitch style="padding-top:3px" color="success" label-on="Yes" label-off="No" :checked.sync="item.safe"/>
                     </td>
                 </template>
-                <template #dataType="{item}">
-                    <td>
-                        {{item.dataType.name | defang}}
-                    </td>
-                </template>                
                 <template #tags="{item}">
                     <td>
-                        <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton color="primary" size="sm" disabled>{{ tag.name }}</CButton></li>
+                        <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
                     </td>
               </template>
             </CDataTable>
@@ -114,9 +109,9 @@
             </CRow>
         </CCardHeader>
         <CCollapse :show="collapse_raw_log">
-        <CCardBody class="bg-dark" style="overflow:scroll">
-            <CRow class="bg-dark" >
-                <CCol col="12" class="bg-dark pre-formatted raw_log">{{jsonify(event.raw_log)}}</CCol>
+        <CCardBody  style="overflow:scroll">
+            <CRow >
+                <CCol col="12"><vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'" :data="jsonify(event.raw_log)"></vue-json-pretty></CCol>
             </CRow>
         </CCardBody></CCollapse>
     </CCard>
@@ -184,19 +179,22 @@ import {mapState} from "vuex";
 import hoverselect from './HoverSelect'
 import CreateCaseModal from './CreateCaseModal'
 import MergeEventIntoCaseModal from './MergeEventIntoCaseModal'
+import VueJsonPretty from 'vue-json-pretty';
+import 'vue-json-pretty/lib/styles.css';
 export default {
     name: 'EventDetails',
     components: {
         hoverselect,
         CreateCaseModal,
-        MergeEventIntoCaseModal
+        MergeEventIntoCaseModal,
+        VueJsonPretty
     },
     computed: mapState(['settings']),
     props: {
         observable_fields: {
             type: Array,
             default () {
-            return ['value', 'ioc', 'spotted', 'safe', 'dataType', 'tags']
+            return ['value', 'ioc', 'spotted', 'safe', 'tags']
             }
         },
         caption: {

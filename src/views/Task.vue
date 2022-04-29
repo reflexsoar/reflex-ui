@@ -4,7 +4,7 @@
         <CCol col="8">
         <b>{{task_data.title}}</b>
         <br />
-        {{task_data.description}}
+        {{task_data.description}}<br>
         </CCol>
         <CCol col="2">
             <div @mouseenter="owner_hover = true" @mouseleave="owner_hover = false">
@@ -31,6 +31,8 @@
                         >
                     </multiselect>
                 </span>
+                <span v-if="task_data.start_date" v-c-tooltip="task_data.start_date"><br><small><b>Started:</b> {{task_data.start_date | moment('from','now')}}</small><br></span>
+                <span v-if="task_data.finish_date" v-c-tooltip="task_data.finish_date"><small><b>Finished:</b> {{task_data.finish_date | moment('from','now')}}</small></span>
             </div>
         </CCol>
         <CCol col="1"><CButton color="primary" size="sm" disabled>{{task_data.status | statusIcon}}</CButton></CCol>
@@ -45,12 +47,9 @@
     </CRow>
     <CCollapse :show.sync="collapse">
         <br>
-        <div v-if="loading">
-            Loading notes...
-        </div>
-        <div v-else-if="notes.length > 0">
+        <div v-if="task_data.notes.length > 0">
             <timeline>
-                <timeline-item v-for="note in notes" :key="note.uuid" >
+                <timeline-item v-for="note in task_data.notes" :key="note.uuid" >
                     <CCard>
                         <CCardHeader class="bg-light">Note from <b>{{note.created_by.username}}</b> <i v-if="note.after_complete">after task was complete</i> on {{note.created_at | moment('LLLL')}} </CCardHeader>
                         <CCardBody><vue-markdown>{{note.note}}</vue-markdown></CCardBody>
@@ -93,6 +92,7 @@
 <script>
 import { mapState } from "vuex";
 import { Timeline, TimelineItem, TimelineTitle } from "vue-cute-timeline";
+import 'vue-cute-timeline/dist/index.css'
 export default {
   name: "Task",
   computed: mapState(["current_user", "settings", "users"]),
@@ -156,20 +156,21 @@ export default {
     toggleNotes(uuid) {
         
         this.loading = true
-        if(!this.collapse) {
-            this.$store.dispatch('getTaskNotes', uuid).then(resp => {
-                this.notes = this.$store.getters.task_notes
-                this.loading = false
-                this.collapse = !this.collapse
-            })
-        } else {
-            this.collapse = !this.collapse
-        }
+        this.collapse = !this.collapse
         
     },
     createNote(uuid) {
-        this.$store.dispatch('addTaskNote', {'note': this.note, 'task_uuid': this.task_data.uuid}).then(resp => {
-            this.notes = this.$store.getters.task_notes
+        
+        let data = {
+            'note': this.note
+        }
+        this.$store.dispatch('addTaskNote', {uuid, data}).then(resp => {
+            if(this.task_data.notes.length >= 1) {
+                this.task_data.notes.push(resp.data)
+            } else {
+                this.task_data.notes = [resp.data]
+            }
+            this.note = ""
         })
     }
   },

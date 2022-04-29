@@ -1,42 +1,43 @@
 <template>
   <CRow>
-    <CCol col v-if="loading">
-        <div style="margin: auto; text-align:center; verticle-align:middle;">
-           <CSpinner
-                color="dark"
-                style="width:6rem;height:6rem;"
-            />  
-        </div>
-    </CCol>
-    <CCol col v-else>
-          <div style="padding: 10px;"><CButton color="primary" @click="generateToken()" v-bind:disabled="!current_user.permissions.includes('pair_agent')">New Agent</CButton></div>
+    <CCol col>
+          <div style="padding: 10px;"><CButton color="primary" @click="generateToken()" >New Agent</CButton></div>
               <CDataTable
                   :hover="hover"
                   :striped="striped"
                   :bordered="bordered"
                   :small="small"
                   :fixed="fixed"
-                  :items="inputs"
+                  :items="agents"
                   :fields="fields"
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
                   :sorter='{external: true, resetable: true}'
-                  pagination
+                  :loading="loading"
                   style="border-top: 1px solid #cfcfcf;"
+                  @update:sorter-value="sort($event)"
               >
               <template #name="{item}">
                   <td>
                       <router-link :to="`${item.uuid}`">{{item.name}}</router-link>
                   </td>
               </template>
+              <template #organization="{item}">
+                <td>
+                  <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+                </td>
+              </template>
               <template #inputs="{item}">
-                  <td>
-                    {{item.inputs.length}}
+                  <td v-if="item.inputs">
+                    {{totalInputs(item)}}
+                  </td>
+                  <td v-else>
+                    0
                   </td>
               </template>
               <template #roles="{item}">
                   <td>
-                    <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role.name"><CButton color="primary" size="sm" disabled>{{ role.name }}</CButton></li>
+                    <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role"><CButton color="primary" size="sm" disabled>{{ role }}</CButton></li>
                   </td>
               </template>
               <template #active="{item}">
@@ -51,6 +52,13 @@
               </template>
               
               </CDataTable>
+              <CRow>
+              <CCol>
+                <CCardBody>
+                  <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
+                </CCardBody>
+              </CCol>
+            </CRow>
 
     </CCol>
     <CModal
@@ -93,7 +101,7 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user']),
+    computed: mapState(['current_user','agents','pagination']),
     created: function () {
       this.current_url = window.location.origin;
       this.loadData()
@@ -111,10 +119,28 @@ export default {
         pairingToken: "Failed to load pairing token",
         orgs: Array,
         dismissCountDown: 10,
-        loading: true
+        loading: true,
+        organizations: [],
+        active_page: 1
+      }
+    },
+    watch: {
+      active_page: function() {
+        this.reloadAgents(this.active_page)
       }
     },
     methods: {
+      sort(event) {
+        let sort_direction = event.asc ? 'asc' : 'desc'
+        event.column = event.column ? event.column : 'created_at'
+        this.reloadAgents(this.active_page, event.column, sort_direction)
+      },
+      reloadAgents(page, sort_by, sort_direction) {
+        this.loading = true
+        this.$store.dispatch('getAgents', {page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
+          this.loading = false
+        })
+      },
       addSuccess: function() {
         if (this.$store.getters.addSuccess == 'success') {
           return true
@@ -123,11 +149,28 @@ export default {
         }
       },
       loadData: function() {
+        if(this.current_user.default_org) {
+          if (!this.fields.includes('organization')) {
+            this.fields.splice(1,0,'organization')
+            
+          }
+          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        }
         this.loading = true
-        this.$store.dispatch('getAgents').then(resp => {
-            this.inputs = resp.data
+        this.$store.dispatch('getAgents', {}).then(() => {
             this.loading = false
         })
+      },
+      totalInputs(item) {
+
+        let inputs = item.inputs.map(item => { return item.uuid })
+        for(let g in item.groups) {
+          let group_inputs = item.groups[g].inputs.map(item => { return item.uuid })
+          inputs = [...inputs, ...group_inputs]
+        }
+        inputs = [...new Set(inputs)]
+        return inputs.length
+
       },
       getStatus(status) { 
         switch (status) {
@@ -141,6 +184,14 @@ export default {
         this.$store.dispatch('getPairingToken').then(resp => {
           this.pairingToken = resp.data
         })
+      },
+      mapOrgToName(uuid) {
+        let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+        if (org.length > 0) {
+          return org[0].name
+        } else {
+          return "Unknown"
+        }
       }
     },
     filters: {

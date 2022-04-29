@@ -21,7 +21,9 @@ import {
   cibStripe,
   cibPaypal,
   cibGooglePay, 
-  cibCcAmex
+  cibCcAmex,
+  cilChevronCircleRightAlt,
+  cilLockUnlocked
 } from '@coreui/icons'
 import {
   cifUs,
@@ -40,6 +42,7 @@ import {
   cilCalculator,
   cilCalendar,
   cilCloudDownload,
+  cilCloudUpload,
   cilChartPie,
   cilCheck,
   cilChevronBottom,
@@ -101,7 +104,20 @@ import {
   cilMediaPlay,
   cilTrash,
   cilCenterFocus,
-  cilFlagAlt
+  cilFlagAlt,
+  cilExitToApp,
+  cilPlus,
+  cil3d,
+  cilSortAscending,
+  cilSortDescending,
+  cilLifeRing,
+  cilReload,
+  cilCopy,
+  cilFolderOpen,
+  cilThumbUp,
+  cilVector,
+  cilWarning,
+  cilFilter
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -118,6 +134,7 @@ export const iconsSet = Object.assign(
     cilCalculator,
     cilCalendar,
     cilCloudDownload,
+    cilCloudUpload,
     cilChartPie,
     cilCheck,
     cilChevronBottom,
@@ -179,7 +196,22 @@ export const iconsSet = Object.assign(
     cilMediaPlay,
     cilTrash,
     cilCenterFocus,
-    cilFlagAlt
+    cilFlagAlt,
+    cilExitToApp,
+    cilPlus,
+    cil3d,
+    cilSortAscending,
+    cilSortDescending,
+    cilChevronCircleRightAlt,
+    cilLifeRing,
+    cilReload,
+    cilCopy,
+    cilLockUnlocked,
+    cilFolderOpen,
+    cilThumbUp,
+    cilVector,
+    cilWarning,
+    cilFilter
   },
   {
     cifUs,

@@ -20,7 +20,7 @@
                   placeholder="Email"
                   autocomplete="username email"
                   required
-                  v-model="username"
+                  v-model="email"
                 >
                   <template #prepend-content><CIcon name="cil-user"/></template>
                 </CInput>
@@ -51,7 +51,7 @@
             body-wrapper
           >
             
-            <h1 style="font-size: 5em">re<span class="text-info">flex</span></h1>
+            <img v-bind:src="logo_path" width="80%"/>
             <p>Welcome to Reflex, your Security Orchestration, Automation and Response Platform.  To get started, log in to the left. </p>
             
           </CCard>
@@ -67,16 +67,26 @@ export default {
   name: 'Login',
   data(){
     return {
-      username: "",
-      password: ""
+      email: "",
+      password: "",
+      logo_path: require("../assets/img/color-logo-dots.png")
     }
   },
   methods: {
     login: function () {
-      let username = this.username
+      let email = this.email
       let password = this.password
-      this.$store.dispatch('login', { username, password })
-      .then(() => this.$router.push('/'))
+      this.$store.dispatch('login', { email, password })
+      .then(() => {
+        if(this.$store.getters.authStatus == "mfa_check") {
+          this.$router.push('/mfa')
+        } else if (this.$store.getters.authStatus == "success") {
+          this.$store.dispatch('getMe').then(resp => {
+            this.$router.push('/')
+          })
+          
+        }
+      })
       .catch(err => console.log(err))
     },
     authStatus: function() {

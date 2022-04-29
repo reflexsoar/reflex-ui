@@ -64,7 +64,7 @@
         </CListGroup>
       </CCard>
     </CCol>
-    <CCol v-if="plugin.configs.length > 0">
+    <CCol v-if="plugin.configs && plugin.configs.length > 0">
       <CCard class="shadow-sm bg-white rounded">
         <CCardHeader>
           <b>Configs</b>

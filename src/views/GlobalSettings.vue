@@ -4,7 +4,7 @@
       <CRow>
         <CCol col="6">
           <h4>Basic Settings</h4>
-          <CInput v-model="settings.base_url" label="Base URL" v-bind:disabled="!current_user.permissions['set_baseurl']"/>
+          <CInput v-model="settings.base_url" label="Base URL" v-bind:disabled="!current_user.role.permissions['set_baseurl']"/>
           <CInput v-model="settings.logon_password_attempts" label="Max Logon Attempts"/>
           <h4>Playbook Settings</h4>
           <CRow>
@@ -52,6 +52,20 @@
           </CRow>
         </CCol>
         <CCol col="6">
+          <h4>User Account Settings</h4>
+          <label>Require MFA</label><br><CSwitch v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_mfa"/><br>
+          <small class="form-text text-muted w-100">When enabled all users must configure MFA at first login.</small><br>
+          <CInput v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" label="Minimum Password Length" v-model="settings.minimum_password_length" placeholder="8" disabled/>
+          <label>Enforce Password Complexity</label><br><CSwitch v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.enforce_password_complexity"/><br>
+          <small class="form-text text-muted w-100">Requires passwords to contain special characters.</small><br>
+          <CTextarea v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled label="Disallowed Keywords" rows="5" v-model="settings.disallowed_password_keywords" description="Blocks keywords from being used in new passwords.  Each keyword should be on it's own line."/>          
+          <h4>Advanced Settings</h4>
+          <label v-c-tooltip="{
+            content: 'Only requests from IPs in the Approve IPs list will be allowed to communicate with the platform.',
+            placement: 'right'}">Restrict Access to Approved IPs</label><br>
+            <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_approved_ips"/><br>
+            <small class="form-text text-danger w-100"><b>WARNING - This setting can prevent access to your console.</b></small><br>
+          <CTextarea v-model="settings.approved_ips" description="Enter IP addresses in single host or CIDR format, one per line." label="Approved IPs" rows="5" placeholder="10.0.0.0/8" v-bind:disabled="!settings.require_approved_ips"/>
           <h4>Mail Settings</h4>
           <CInput v-model="settings.email_from" label="Email From" placeholder="admin@reflexsoar.com"/>
           <CInput v-model="settings.email_server" label="Email Server" placeholder="127.0.0.1:25"/>
@@ -67,7 +81,7 @@
         <CCol col="12" class="text-right">
           <CButton color="primary" @click="updateSettings()">Save</CButton>
         </CCol>
-      </CRow>  
+      </CRow>
     </CForm>
     <CModal title="Persistent Pairing Token" color="danger" :centered="true" size="lg" :show.sync="generate_modal">
       <CForm id="confirmPairingConfirm" @submit.prevent="deleteUser(user.uuid)">
@@ -122,8 +136,8 @@ export default {
       })
     },
     loadData() {
-      this.$store.dispatch('getSettings')
-      this.$store.dispatch('getCredentialList')
+      //this.$store.dispatch('getSettings')
+      this.$store.dispatch('getCredentialList', {})
     },
     dismiss(){
       this.generate_modal = false;
@@ -132,7 +146,8 @@ export default {
     },
     updateSettings() {
       let settings = this.settings
-      if(this.settings.agent_pairing_token_valid_minutes > 365) {
+      if(this.settings.agent_pairing_token_valid_minutes > 525600) {
+        console.log(this.settings.agent_pairing_token_valid_minutes)
         this.$store.commit('show_alert', {'message': 'Pairing tokens can not exceed 1 year in validity.', 'type':'danger'})
         return
       }

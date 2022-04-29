@@ -83,7 +83,6 @@ export default {
               'uuid': uuid,
               'data': addTags
             }
-            console.log(postbody)
             this.$store.dispatch('addTagsToOrganization', postbody)
           }
           this.$router.push({path: '/organizations/'+uuid})

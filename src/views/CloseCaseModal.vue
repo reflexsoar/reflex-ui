@@ -10,7 +10,7 @@
           <CTextarea :value="close_comment" @change="close_comment = $event" v-bind:required="settings.require_case_close_comment" v-bind:disabled="closure_reason_uuid == ''" label="Additional information" rows="5" placeholder="Enter additional information related to the closure reason."></CTextarea>
       </CForm>
       <template #footer>
-        <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
+        <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton type="submit" form="closeCaseForm" color="primary">Close</CButton>
       </template>
     </CModal>
@@ -25,6 +25,7 @@ export default {
     props: {
         show: Boolean,
         case_uuid: String,
+        organization: String,
         status_uuid: String,
         task_count: Number,
         closed: Boolean
@@ -87,8 +88,9 @@ export default {
 
         },
         loadClosureReasons() {
+            let organization = this.organization
             // Call the closure reasons API endpoint
-            this.$store.dispatch('getCloseReasons').then(resp => {
+            this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
                 this.close_reasons = resp.data.map((reason) => { return {'label': reason.title, 'value': reason.uuid }})
             })            
         },

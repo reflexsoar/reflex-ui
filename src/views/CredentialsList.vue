@@ -1,6 +1,8 @@
 <template>
   <CRow>
+    
     <CCol col>
+      <h1>Credentials<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/credentials')"><CIcon name='cil-book' size="lg"/></button></h1><br>
       <CButton color="primary" @click="newCredential()">New Credential</CButton><br /><br />
       <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
         {{alert.message}}
@@ -20,22 +22,34 @@
             :fields="fields"
             :items-per-page="small ? 25 : 10"
             :dark="dark"
-            :sorter="{ external: true, resetable: true }"
-            pagination
+            :sorter='{external: true, resetable: true}'
+            @update:sorter-value="sort($event)"
           >
             <template #name="{ item }">
               <td>
                 <b>{{ item.name }}</b>
               </td>
             </template>
+            <template #organization="{item}">
+              <td>
+                <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+              </td>
+            </template>
             <template #actions="{ item }">
               <td class="text-right" style="width:10%">
-                <CButton color="primary" size="sm" @click="getCredentialDetails(item.uuid)">Edit</CButton>&nbsp;
-                <CButton color="danger" size="sm" @click="removeCredential(item.uuid)">Delete</CButton>
+                <CButton color="info" size="sm" @click="getCredentialDetails(item.uuid)"><CIcon name='cilPencil'/></CButton>&nbsp;
+                <CButton color="danger" size="sm" @click="removeCredential(item.uuid)"><CIcon name='cilTrash'/></CButton>
               </td>
             </template>
           </CDataTable>
         </CCardBody>
+        <CRow>
+          <CCol>
+            <CCardBody>
+              <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
+            </CCardBody>
+          </CCol>
+        </CRow>
       </CCard>
     </CCol>
     <CModal
@@ -49,6 +63,7 @@
         {{ error_message }}
       </CAlert>
       <CForm name="credentialForm" id="credentialForm" @submit.prevent="modal_action">
+        <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.default_org" :value.sync="credential_data.organization" :options="organizations"/>
         <CInput
           placeholder="Credential Name"
           required
@@ -124,7 +139,7 @@ export default {
     fields: {
       type: Array,
       default() {
-        return ["name", "description", "actions"];
+        return ["name", {key:"description", sorter: false}, "actions"];
       },
     },
     caption: {
@@ -139,9 +154,17 @@ export default {
     dark: Boolean
   },
   created() {
-    this.$store.dispatch("getCredentials");
+    this.$store.dispatch("getCredentials", {});
+    if(this.current_user.default_org) {
+      if (!this.fields.includes('organization')) {
+        this.fields.splice(1,0,{key:'organization', sorter: false})
+        this.$store.dispatch('getOrganizations', {}).then(resp => {
+          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+        })
+      }      
+    }
   },
-  computed: mapState(["credentials", "alert"]),
+  computed: mapState(["credentials", "alert","current_user","pagination"]),
   data() {
     return {
       name: "",
@@ -156,17 +179,45 @@ export default {
         name: "",
         username: "",
         secret: "",
-        description: ""
+        description: "",
+        organization: ""
       },
       modal_title: "New Credential",
       modal_action: this.createCredential,
       modal_submit_text: "Create",
       modal_status: false,
       error: false,
-      error_message:""
+      error_message:"",
+      organization: "",
+      organizations: [],
+      active_page: 1
     };
   },
+  watch: {
+  active_page: function() {
+    this.reloadCredentials(this.active_page)
+  }
+},
   methods: {
+    sort(event) {
+      let sort_direction = event.asc ? 'asc' : 'desc'
+      event.column = event.column ? event.column : 'created_at'
+      this.reloadCredentials(this.active_page, event.column, sort_direction)
+    },
+    reloadCredentials(page, sort_by, sort_direction) {
+      this.loading = true
+      this.$store.dispatch('getCredentials', {page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
+        this.loading = false
+      })
+    },
+    mapOrgToName(uuid) {
+      let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+      if (org.length > 0) {
+        return org[0].name
+      } else {
+        return "Unknown"
+      }
+    },
     dismiss() {
       this.modal_status = false
 
@@ -222,7 +273,8 @@ export default {
       let credential = {
         name: this.credential_data.name,
         description: this.credential_data.description,
-        username: this.credential_data.username
+        username: this.credential_data.username,
+        organization: this.credential_data.organization
       }
       if (this.credential_data.secret != "") {
         credential.secret = this.credential_data.secret

@@ -1,5 +1,6 @@
 <template>
   <CRow>
+    <event-drawer :event_data="event_data"></event-drawer>
     <CCol col v-if="loading"><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
         <div style="margin: auto; text-align:center; verticle-align:middle;">
            <CSpinner
@@ -12,16 +13,17 @@
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
+
     <CCard class="shadow-sm bg-white rounded" >
-        <CCardHeader>
+        <CCardHeader class='bg-white'>
             <CRow>
                 <CCol col="12" lg="6" sm="12" class="text-left" @mouseover="edit_title_hint = true" @mouseleave="edit_title_hint = false">
                     <h3 style="margin-bottom:0px;">
                     <span v-if="!edit_title">
-                    <CButton :color="getSeverityColor(case_data.severity)">{{getSeverityText(case_data.severity)}}</CButton>
-                    &nbsp;#{{case_data.id}} - {{case_data.title | truncate}}
+                    <CIcon v-if="case_data.escalated" name="cilWarning" class="escalated" size="xl"/>&nbsp;<CButton :color="getSeverityColor(case_data.severity)">{{getSeverityText(case_data.severity)}}</CButton>
+                    &nbsp;{{case_data.title | truncate}}
                         <small>
-                            <a v-if="edit_title_hint && case_data.status && !case_data.status.closed" @click="edit_title = !edit_title"><CIcon name="cilPencil" size="sm"/></a>
+                            <a v-if="edit_title_hint && case_data.status && !case_data.status.closed" @click="edit_title = !edit_title"><CIcon  style="cursor: pointer" name="cilPencil" size="sm"/></a>
                         </small>  
                     <span v-if="case_data.status && case_data.status.closed"> - Closed</span>
                     </span><span v-else><CInput v-model="case_data.title"><template #append>
@@ -35,13 +37,16 @@
                         color="secondary"
                         v-bind:disabled="case_data.status && case_data.status.closed"
                         >
-                        <CDropdownItem @click="caseTemplateModal = !caseTemplateModal">Add Case Template</CDropdownItem>
-                        <CDropdownItem @click="caseTaskModal = !caseTaskModal">Add Task</CDropdownItem>
+                        <CDropdownItem @click="closeCaseModal = !closeCaseModal">Close Case</CDropdownItem>
+                        <CDropdownItem v-if="case_data.escalated !== true" @click="escalateCase()">Escalate Case</CDropdownItem>
+                        <CDropdownItem v-if="case_data.escalated == true" @click="escalateCase(false)">De-Escalate Case</CDropdownItem>
+                        <CDropdownItem @click="caseTemplateModal = !caseTemplateModal">Apply Case Template</CDropdownItem>
+                        <CDropdownItem v-if="case_data.case_template_uuid" @click="removeCaseTemplate()">Remove Case Template</CDropdownItem>
                         <CDropdownItem @click="addObservableModal = !addObservableModal">Add Observables</CDropdownItem>
                         <CDropdownItem @click="linkCaseModal = !linkCaseModal">Link Cases</CDropdownItem>
                         <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled>Run Playbook</CDropdownItem>
-                        <CDropdownDivider v-if="current_user.permissions.includes('delete_case')"/>
-                        <CDropdownItem v-if="current_user.permissions.includes('delete_case')" @click="deleteCaseModal = !deleteCaseModal">Delete</CDropdownItem>
+                        <CDropdownDivider v-if="current_user.role.permissions['delete_case']"/>
+                        <CDropdownItem v-if="current_user.role.permissions['delete_case']" @click="deleteCaseModal = !deleteCaseModal">Delete</CDropdownItem>
                         </CDropdown>
                 </CCol>
             </CRow>
@@ -55,7 +60,7 @@
                     <b>Created By: </b>{{case_data.created_by.username}}&nbsp;<br><b>Updated By: </b>{{case_data.updated_by.username}}
                 </CCol>
                 <CCol col="6" class="text-right" @mouseenter="edit_tags_hint = true" @mouseleave="edit_tags_hint = false">
-                    <span v-if="!edit_tags"><CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li><a v-if="edit_tags_hint" @click="editTags()"><CIcon name="cilPencil" size="sm"/></a></span>
+                    <span v-if="!edit_tags"><CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li><a v-if="edit_tags_hint" @click="editTags()"><CIcon  style="cursor: pointer"  name="cilPencil" size="sm"/></a></span>
                     <span v-if="edit_tags">
                         <multiselect 
                             v-model="current_tags" 
@@ -67,7 +72,7 @@
                             :options="tags" 
                             :multiple="true"
                             :close-on-select="false"
-                            @tag="current_tags.push({'name':$event})"
+                            @tag="addTag"
                             style="z-index:50"
                         ></multiselect>
                         <CButton color="danger" @click="edit_tags = !edit_tags" size="sm"><CIcon name="cilXCircle"/></CButton>
@@ -81,10 +86,55 @@
           <CCardBody class="tabbed">
             <CTabs :activeTab.sync="activeTab">
               <CTab title="Case Details" active>
-                  <CCardBody>
-                    <CRow>
+                  <CCardBody style="padding-top: 5px">
+                      <CRow style="border-bottom: 1px dotted #cfcfcf; padding-top: 0px">
+                        <CCol col="12" style="border-right: 1px dotted #cfcfcf;">
+                            <CRow>
+                                 <CCol col="2">
+                                     <CCallout color="success">
+                                        <small class="text-muted">SLA Status</small><br>
+                                        <strong class="h1">Okay</strong>
+                                    </CCallout>
+                                </CCol>
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Total Events</small><br>
+                                        <strong class="h1">{{case_data.event_count ? case_data.event_count : 0}}</strong>
+                                    </CCallout>                                    
+                                </CCol>
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Related Cases</small><br>
+                                        <strong class="h1">{{related_cases.length}}</strong>
+                                    </CCallout>
+                                </CCol>
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Remaining Tasks</small><br>
+                                        <strong class="h1">{{case_data.open_tasks}} / {{case_data.total_tasks}}</strong>
+                                    </CCallout>
+                                    
+                                </CCol>
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Total Observables</small><br>
+                                        <strong class="h1">{{case_data.observable_count}}</strong>
+                                    </CCallout>
+                                </CCol>
+                                
+                                <CCol col="2">
+                                    <CCallout color="info">
+                                        <small class="text-muted">Days Open</small><br>
+                                        <strong class="h1">{{daysOpen()}}</strong>
+                                    </CCallout>
+                                </CCol>
+                                                                
+                            </CRow>
+                        </CCol>
+                    </CRow>
+                    <CRow style=" padding-top: 10px;">
                         <CCol col="3" style="border-right: 1px dotted #cfcfcf;">
-                            <CSelect label="Status" v-bind:description="case_data.close_reason.title" :options="case_statuses" :value.sync="case_data.status_uuid" @change="updateStatus()"></CSelect>
+                            <CSelect label="Status" :options="case_statuses" :value.sync="case_data.status.uuid" @change="updateStatus()"></CSelect>
                             <label>Assignee</label>
                             <div role="group" class="form-group">
                                 <multiselect 
@@ -106,9 +156,9 @@
                             <span v-if="case_data.case_template && case_data.case_template.title != null"><b>Applied Case Template: </b> {{case_data.case_template.title}}</span>
                         </CCol>
                         <CCol col="9" @mouseover="edit_description_hint = true" @mouseleave="edit_description_hint = false" style="overflow-y:scroll; max-height:350px;">
-                            <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description"><CIcon name="cilPencil" size="sm"/></a></small></h5>
-                            <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
-                            <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event"></CTextarea><CButton color="danger" @click="edit_description = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;<CButton color="primary" @click="saveDescription()" size="sm"><CIcon name="cilSave"/></CButton></span>
+                            <h5>Description <small><a v-if="edit_description_hint && case_data.status && !case_data.status.closed" @click="edit_description = !edit_description"><CIcon style="cursor: pointer" name="cilPencil" size="sm"/></a></small></h5>
+                                                        <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
+                            <span v-if="edit_description"><CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event" description="HINT: Use markdown to create a beautiful description."></CTextarea><CButton color="danger" @click="edit_description = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;<CButton color="primary" @click="saveDescription()" size="sm"><CIcon name="cilSave"/></CButton></span>
                             <span v-if="closureComments().length > 0 && case_data.status.closed">
                                 <br><h5>Closure Details</h5><hr style="border-top: 1px dotted #cfcfcf;">
                                 <span v-for="comment in closureComments()" :key="comment.uuid">
@@ -119,38 +169,7 @@
                             </span>
                         </CCol>
                     </CRow>
-                    <CRow style="border-top: 1px dotted #cfcfcf; padding-top:10px; margin-top: 10px;">
-                        <CCol col="12" style="border-right: 1px dotted #cfcfcf;">
-                            <h5>Metrics</h5>
-                            <CRow>
-                                <CCol col="2">
-                                    <CWidgetSimple header="Related Cases" :text="String(related_cases.length)" v-on:click.native="activeTab=7">
-                                    </CWidgetSimple>
-                                </CCol>
-                                <CCol col="2">
-                                    <CWidgetSimple header="Remaining Tasks" :text="String(case_data.open_tasks)+'/'+String(case_data.total_tasks)">
-                                    </CWidgetSimple>
-                                </CCol>
-                                <CCol col="2">
-                                    <CWidgetSimple header="Total Observables" :text="String(case_data.observable_count)">
-                                    </CWidgetSimple>
-                                </CCol>
-                                <CCol col="2">
-                                    <CWidgetSimple header="Total Events" :text="String(case_data.event_count)">
-                                    </CWidgetSimple>
-                                </CCol>
-                                <CCol col="2">
-                                    <CWidgetSimple header="Time Open" :text="daysOpen()">
-                                    </CWidgetSimple>
-                                </CCol>
-                                 <CCol col="2">
-                                    <CWidgetSimple header="SLA Status" text="Okay">
-                                    </CWidgetSimple>
-                                </CCol>
-                                
-                            </CRow>
-                        </CCol>
-                    </CRow>
+                    
                   </CCardBody>
               </CTab>
               <CTab title="Observables">
@@ -166,14 +185,14 @@
                         <CCardBody style="border-bottom: 1px solid #cfcfcf; padding-bottom:0px;">
                             <CRow>
                                 <CCol col="8">
-                                    <li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length}} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events.length}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
+                                    <!--<li style="display: inline; margin-right: 2px;" v-for="obs in observableFilters" :key="obs.value"><CButton color="secondary" class="tag"  size="sm" @click="toggleObservableFilter({'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else>{{ obs.value }}</span></CButton></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events.length}} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events.length}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>-->
                                 </CCol>
                                 <CCol col="2">                                    
                                     <CInput placeholder="Search" :value="search_filter" @change="search_filter = $event" v-on:keydown.enter.native="toggleObservableFilter({'filter_type':'search','dataType':'search','value':$event.target.value})"><template #append>
                                     <CButton color="secondary" @click="toggleObservableFilter({'filter_type':'search','dataType':'search','value':search_filter})">Search</CButton></template></CInput>
                                     </CCol>
                                 <CCol col="2">
-                                    <CPagination :activePage.sync="current_events_page" :pages="events_page_data.pages"/>
+                                    <!--<CPagination :activePage.sync="current_events_page" :pages="events_page_data.pages"/>-->
                                 </CCol>
                             </CRow>
                         </CCardBody>
@@ -191,8 +210,8 @@
               <template #name="{item}">
                   <td>
                       <input v-if="!(item.case_uuid || item.status.closed)" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':item.title})">{{item.title}}</a><br>
-                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,2)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.dataType.name, 'value': obs.value})"><b>{{obs.dataType.name}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 2" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(2))}"><small>&nbsp;+{{ item.observables.length - 2}}</small></span><br>
-                      <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag.name})" color="dark" class="tag" size="sm">{{ tag.name }}</CButton></li>
+                      <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,3)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.data_type, 'value': obs.value})"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 3" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(3))}"><small>&nbsp;+{{ item.observables.length - 3}}</small></span><br>
+                      <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
                   </td>
               </template>
               <template #reference="{item}">
@@ -230,7 +249,7 @@
                         size="sm"
                         right
                         >
-                        <CDropdownItem :to="`/alerts/${item.uuid}`">View Event</CDropdownItem>
+                        <CDropdownItem @click="showDrawer(item.uuid)">View Event</CDropdownItem>
                         <CDropdownItem v-if="item.status != 2">Close</CDropdownItem>
                         <CDropdownItem v-if="item.status == 2">Reopen</CDropdownItem>
                         <CDropdownItem>Remove from Case</CDropdownItem>
@@ -252,14 +271,20 @@
                     </div>
               </CTab>
               <CTab title="Tasks">
+                    
                     <div v-if="tab_loading" style="margin: auto; padding:10px; text-align:center; verticle-align:middle;">
                         <CSpinner color="dark" style="width:6rem;height:6rem;"/>
                     </div>
                     <div v-else>
+                        <CRow style="padding:10px">
+                            <CCol>
+                                <CButton color="primary" @click="caseTaskModal = !caseTaskModal" size="sm">Add Task</CButton>
+                            </CCol>
+                        </CRow>
                         <CaseTaskList :uuid="uuid" :key="reloadTasks"></CaseTaskList>
                     </div>                
               </CTab>
-              <CTab title="Attachments">
+              <CTab title="Attachments" disabled v-c-tooltip="{ content: 'Coming Soon', placement: 'top' }">
                     <div v-if="tab_loading" style="margin: auto; text-align:center; verticle-align:middle;">
                         <CSpinner color="dark" style="width:6rem;height:6rem;"/>
                     </div>
@@ -315,7 +340,7 @@
                       </CDataTable>
                   </div>
               </CTab>
-              <CTab title="Playbook/Action Output" disabled>
+              <CTab title="Playbook/Action Output" disabled v-c-tooltip="{ content: 'Coming Soon', placement: 'top' }">
                  <div class="bg-dark console-output">
                      <code class="bg-dark pre-formatted raw_log">2020-09-13 20:33:50,591 - Extracting ZIP file<br>2020-09-13 20:33:50,593 - Running test plugin!<br>2020-09-13 20:33:54,716 - Running agent<br>2020-09-13 20:34:28,846 - Running agent<br>2020-09-13 20:34:28,847 - Running input ES_PROD<br>2020-09-13 20:34:28,847 - Fetching credentials for ES_PROD<br>2020-09-13 20:34:33,124 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:34:33,150 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.025s]<br>2020-09-13 20:34:33,154 - Pushing 26 events to bulk ingest...<br>2020-09-13 20:35:12,878 - Running agent<br>2020-09-13 20:35:12,879 - Running input ES_PROD<br>2020-09-13 20:35:12,879 - Fetching credentials for ES_PROD<br>2020-09-13 20:35:17,060 - RUNNING ELASTICSEARCH PLUGIN<br>2020-09-13 20:35:17,085 - POST https://localhost:9200/.siem-signals-*/_search [status:200 request:0.024s]<br>2020-09-13 20:35:17,089 - Pushing 26 events to bulk ingest...</code>
                  </div>
@@ -328,14 +353,14 @@
             <p>Deleting a case is a permanent action, all work on the event will be removed and any associated events will be set to <b>New</b> status, are you sure you want to continue?</p>
         </div>
         <template #footer>
-            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Dismiss</CButton>
+            <CButton @click="deleteCaseModal = !deleteCaseModal" color="secondary">Cancel</CButton>
             <CButton @click="deleteCase()" color="danger">Delete</CButton>
         </template>
     </CModal>
-    <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" ></AddObservableModal>
+    <AddObservableModal :case_data.sync="case_data" :show.sync="addObservableModal" :uuid="case_data.uuid" :organization="this.case_data.organization"></AddObservableModal>
     <AddTaskModal :show.sync="caseTaskModal" :case_uuid="this.uuid"></AddTaskModal>
-    <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status_uuid" :closed.sync="case_closed"></CloseCaseModal>
-    <ApplyCaseTemplateModal :show.sync="caseTemplateModal" :case_uuid="this.uuid" :current_case_template_uuid="case_data.case_template ? case_data.case_template.uuid : null"/>
+    <CloseCaseModal :show.sync="closeCaseModal" :case_uuid="this.uuid" :status_uuid.sync="this.case_data.status.uuid" :organization="this.case_data.organization" :closed.sync="case_closed"></CloseCaseModal>
+    <ApplyCaseTemplateModal :show.sync="caseTemplateModal" :case_uuid="this.uuid" :current_case_template_uuid="case_data.case_template ? case_data.case_template.uuid : null" :organization="this.case_data.organization"/>
     <LinkCaseModal :show.sync="linkCaseModal" :case_uuid="this.uuid" :related_cases="related_cases"/>
   </CCol>
   </CRow>
@@ -362,6 +387,8 @@ import LinkCaseModal from './LinkCaseModal'
 import Comments from './Comments'
 import CaseHistoryTimeline from './CaseHistoryTimeline'
 import CaseFileList from './CaseFileList'
+import EventDrawer from './EventDrawer.vue';
+import CRightDrawer from './CRightDrawer.vue';
 
 import { Mentionable } from 'vue-mention'
 import moment from 'moment';
@@ -378,9 +405,10 @@ export default {
         CaseHistoryTimeline,
         ApplyCaseTemplateModal,
         Comments,
-        CaseFileList
+        CaseFileList,
+        EventDrawer
     },
-    computed: mapState(['alert','current_user','settings','tags']),
+    computed: mapState(['alert','current_user','settings','tags','case_observables']),
     props: {
         caption: {
             type: String,
@@ -451,9 +479,10 @@ export default {
             tab_loading: false,
             search_filter: '',
             filtered_events: [],
+            event_observables: {},
             related_cases: [],
             case_files: [],
-            observableFilters: [{'filter_type':'status','dataType':'status','value':'Open'}],
+            observableFilters: [{'filter_type':'status','data_type':'status','value':'Open'}],
             collapse_tasks: Array(),
             events_per_page: 10,
             current_events_page: 1,
@@ -499,7 +528,8 @@ export default {
                     'label':'Red',
                     'value': 4,
                 }
-            ]
+            ],
+            event_data: {}
         }
     },
     created() {
@@ -517,13 +547,14 @@ export default {
                 if(this.case_closed) {
                     this.case_data.status.closed = true  // This is hacky...figure out a better way
                 } else {
-                    this.case_data.status_uuid = this.original_status
+                    this.case_data.status.uuid = this.original_status
                 }
             }
         },
         linkCaseModal: function() {
             if(!this.linkCaseModal) {
-                this.loadRelatedCases()
+                this.related_cases = this.$store.getters.related_cases
+                //this.loadRelatedCases()
             }
         },
         caseTemplateModal: function() {
@@ -564,28 +595,24 @@ export default {
             this.loading = true
             this.activeTab = 0
             this.uuid = this.$route.params.uuid
-            this.loadRelatedCases()
+            //this.loadRelatedCases()
             this.loadComments()
-            this.original_status = this.case_data.status_uuid
+            this.original_status = this.case_data.status.uuid
             this.filterEvents()
-            this.$store.dispatch('getSettings')
-            this.$store.dispatch('getTags')
-            this.$store.dispatch('getUsers').then(resp => {
-                this.users = this.$store.getters.users
-            })
-
-            this.$store.dispatch('getCaseStatus').then(resp => {
-                this.case_statuses = resp.data.map(function(status) {
-                    return {'value': status.uuid, 'label': status.name, 'closed': status.closed}
-                })
-            })
-
+            this.$store.dispatch('getSettings', {uuid: this.case_data.organization})
+            //this.$store.dispatch('getTags')
+        
             for(let task in this.tasks) {
                 this.collapse_tasks[this.tasks[task].order] = false;
             }
         },
         addTag(event) {
-            console.log(event)
+            const t = {
+                name: event,
+                uuid: ''
+            }
+            this.tags.push(t)
+            this.current_tags.push(t)
         },
         editTags() {
             this.current_tags = this.case_data.tags
@@ -593,7 +620,7 @@ export default {
         },
         saveTags() {
             let uuid = this.uuid
-            let data = {tags: this.current_tags.map(tag => {return tag.name})}
+            let data = {tags: this.current_tags.map(tag => { return tag.name })}
             this.$store.dispatch('updateCase', {uuid, data: data}).then(resp => {
                 this.case_data.tags = resp.data.tags
                 this.edit_tags = false
@@ -617,7 +644,10 @@ export default {
             })
         },
         closureComments() {
-            return this.comments.filter(comment => comment.is_closure_comment == true && comment.message != '')
+            if (this.comments != undefined) {
+                return this.comments.filter(comment => comment.is_closure_comment == true && comment.message != '')
+            }
+            
         },
         loadRelatedCases() {
             let uuid = this.uuid
@@ -636,7 +666,7 @@ export default {
         },
         loadObservables() {
             this.tab_loading = true
-            this.$store.dispatch('getCaseObservables', {uuid: this.$route.params.uuid}).then(resp => {
+            this.$store.dispatch('getCaseObservablesFromEvents', {uuid: this.$route.params.uuid}).then(resp => {
                 this.observables = this.$store.getters.observables
                 this.tab_loading = false
             })
@@ -666,13 +696,23 @@ export default {
         loadData() {
             this.$store.dispatch('getCase', this.$route.params.uuid).then(resp => {
                 this.case_data = this.$store.getters.case_data
-                this.case_data.status_uuid = this.case_data.status.uuid
-                if(this.case_data.owner.username != null) {
+                this.case_data.status.uuid = this.case_data.status.uuid
+                if(this.case_data.owner && this.case_data.owner.username != null) {
                     this.assignee = this.case_data.owner
                 } else{
                     this.assignee = {username: 'Unassigned'}
                 }
                 this.loading = false
+            })
+
+            this.$store.dispatch('getUsers', {organization: this.$store.getters.case_data.organization}).then(resp => {
+                this.users = this.$store.getters.users
+            })
+
+            this.$store.dispatch('getCaseStatus', {organization: this.$store.getters.case_data.organization}).then(resp => {
+                this.case_statuses = resp.data.map(function(status) {
+                    return {'value': status.uuid, 'label': status.name, 'closed': status.closed}
+                })
             })
         },
         filteredBySignature() {
@@ -708,19 +748,19 @@ export default {
             let content = "<ul style='list-style-type: none; padding:0; margin: 0;'>"
             for(let o in observables) {
             let obs = observables[o]
-            content += `<li><b>${obs.dataType.name}</b>: ${this.sanitizeHTML(obs.value)}</li>`
+            content += `<li><b>${obs.data_type}</b>: ${this.sanitizeHTML(obs.value)}</li>`
             }
             content += "</ul>"
             return content
         },
         filterEvents() {
             this.tab_loading = true
-            let status_filters = []
+            let status_filters = ['New','Open','Closed']
             let tag_filters = []
             let observables_filters = []
             let severity_filter = []
             let signature_filter = ""
-            let grouped = !this.filteredBySignature()
+            let grouped = false
             let search = ""
 
             for(let f in this.observableFilters) {
@@ -751,7 +791,8 @@ export default {
                 }
             }
 
-            this.$store.dispatch('getEvents', {
+            this.$store.dispatch('getCaseEvents', {
+                uuid: this.uuid,
                 signature: signature_filter,
                 grouped: grouped,
                 tags: tag_filters,
@@ -760,11 +801,11 @@ export default {
                 severity: severity_filter,
                 search: search,
                 fields: '',
-                case_uuid: this.uuid,
                 page: this.current_events_page,
                 page_size: 25
             }).then(resp => {
                 this.filtered_events = resp.data.events
+                this.event_observables = resp.data.observables
                 this.events_page_data = resp.data.pagination
                 this.$store.commit('add_success')
                 this.tab_loading = false
@@ -795,11 +836,11 @@ export default {
         },
         updateStatus() {
             let uuid = this.uuid
-            let status = {"status_uuid": this.case_data.status_uuid}
+            let status = {"status_uuid": this.case_data.status.uuid}
             
             // Prompt for a reason before closing the case
             // else change the status
-            if(this.case_statuses.filter((status) => status.value == this.case_data.status_uuid && status.closed === true).length > 0) {
+            if(this.case_statuses.filter((status) => status.value == this.case_data.status.uuid && status.closed === true).length > 0) {
                 this.closeCaseModal = true
             } else {
                 this.$store.dispatch('updateCase', {uuid, data: status}).then(resp => {
@@ -817,19 +858,25 @@ export default {
         },
         updateAssignee(a) {
             let uuid = this.uuid
-            let assignee = {owner_uuid: null}
+            let assignee = {uuid: null}
             if(a.username == 'Unassigned') {
-                assignee.owner_uuid = ''
+                assignee = null
             } else {
-                assignee.owner_uuid = a.uuid
+                assignee.uuid = a.uuid
             }
-            this.$store.dispatch('updateCase', {uuid, data: assignee}).then(resp => {
+            this.$store.dispatch('updateCase', {uuid, data: {'owner': assignee}}).then(resp => {
                 this.case_data = this.$store.getters.case_data
             })
             this.edit_description = false
         },
+        escalateCase(escalated=true) {
+            let uuid = this.uuid
+            this.$store.dispatch('updateCase', {uuid, data: {'escalated': escalated}}).then(resp => {
+                this.case_data = this.$store.getters.case_data
+            })
+        },
         usersFind(query) {
-            this.$store.dispatch('getUsersByName', query).then(resp => {
+            this.$store.dispatch('getUsersByName', {username: query, organization: this.case_data.organization}).then(resp => {
                 this.users = resp.data
             })
         },
@@ -867,6 +914,30 @@ export default {
             case 4: return 'Critical';
             default: return 'Low';
             }
+        },
+        getEventObservables(uuid) {
+            return this.event_observables[uuid]
+        },
+        showDrawer(event_uuid) {
+            let uuid = event_uuid
+            if(this.$store.getters.eventDrawerMinimize) {
+            this.$store.dispatch('getEvent', uuid).then(resp => {
+                this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
+                this.event_data = resp.data
+            })
+            } else {
+                this.$store.commit('set', ['eventDrawerMinimize', !this.$store.getters.eventDrawerMinimize])
+            }   
+        },
+        removeCaseTemplate() {
+            let data = {'case_template_uuid': null}
+            let uuid = this.case_data.uuid
+            this.$store.dispatch('updateCase', {uuid, data}).then(resp => {
+                this.$store.commit('show_alert', {message: 'Successfully removed the case template', type:'success'})
+                this.loadData()
+                this.reloadTasks = Math.random()
+            })
+            
         }
     },
     filters: {
@@ -892,7 +963,12 @@ export default {
             
         },
         defang: function(value) {
-            return value.replace(':','[:]').replace('http','hxxp').replace('.','[.]')
+            if (this.settings.defang_observables) {
+                return value.replace(':','[:]').replace('http','hxxp').replace('.','[.]')
+            } else {
+                return value
+            }
+            
         }
     }
 }

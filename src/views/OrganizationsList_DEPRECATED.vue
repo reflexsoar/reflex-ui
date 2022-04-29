@@ -65,7 +65,7 @@ export default {
     alert: false
     },
     created() {
-        this.$store.dispatch('getOrganizations').then(resp => {
+        this.$store.dispatch('getOrganizations', {}).then(resp => {
             this.organizations = resp.data
             this.loading = false
         })

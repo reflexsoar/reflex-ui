@@ -6,28 +6,57 @@
     @update:show="(value) => $store.commit('set', ['sidebarShow', value])"
   >
     <CSidebarBrand class="d-md-down-none" to="/">
-      <h1 class="c-sidebar-brand-full" style="margin-bottom:0px">re<span class="text-info">flex</span></h1>
-      <h3 class="c-sidebar-brand-minimized" style="margin-bottom:0px">R<span class="text-info">F</span></h3>
+      <img aria-label="logo with slogan" class="c-sidebar-brand-full" style="margin-bottom:0px; width: 80%" v-bind:src="logo_slogan"/>
+      <img aria-label="logo" class="c-sidebar-brand-minimized" style="margin-bottom:0px; width: 80%" v-bind:src="logo"/>
     </CSidebarBrand>
 
-    <CRenderFunction flat :content-to-render="$options.nav"/>
+    <CSidebarNav>
+      <CSidebarNavItem name="Dashboard" to="/dashboard" icon="cil-speedometer"></CSidebarNavItem>
+      <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_cases')" name="Cases" to="/cases" icon="cil-briefcase"></CSidebarNavItem>
+      <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_events') || this.$store.getters.user_has_permission('view_event_rules')" name='Events' icon="cil-bell">
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_events')" name="Queue" to="/alerts/list"></CSidebarNavItem>
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_event_rules')" name="Event Rules" to="/event_rules"></CSidebarNavItem>
+      </CSidebarNavDropdown>
+      <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='Intel' icon="cil-3d">
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="List Manager" to="/lists"></CSidebarNavItem>
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="Intel Explorer" to="/lists/explore"></CSidebarNavItem>
+      </CSidebarNavDropdown>
+      <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='System' icon="cil-settings">
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_settings')" name="Settings" to="/settings"></CSidebarNavItem>
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_agents')" name="Agents" to="/agents"></CSidebarNavItem>
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_credentials')" name="Credentials" to="/credentials"></CSidebarNavItem>
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_inputs')" name="Inputs" to="/inputs"></CSidebarNavItem>
+      </CSidebarNavDropdown>
+    </CSidebarNav>
+
+    <!--<CRenderFunction flat :content-to-render="filtered_nav"/>-->
     <CSidebarMinimizer
       class="d-md-down-none"
       @click.native="$store.commit('set', ['sidebarMinimize', !minimize])"
+      aria-label="Sidebar Minimizer"
     />
   </CSidebar>
 </template>
 
 <script>
 import nav from './_nav'
+import {mapState} from "vuex"
 
 export default {
   name: 'TheSidebar',
   nav,
+  data() {
+    return {
+      logo: require('../assets/img/symbol.png'),
+      logo_slogan: require('../assets/img/white-logo-color-symbol-no-background.png'),
+      filtered_nav: []
+    }
+  },
   created: function() {
     if (this.$store.state.unread_alert_count > 0) {
       nav[0]._children[1]['badge'] = {'color': 'danger', 'text': this.$store.state.unread_alert_count}
     }
+    
   },
   computed: {
     show () {
@@ -35,7 +64,8 @@ export default {
     },
     minimize () {
       return this.$store.state.sidebarMinimize 
-    }
+    },
+    ...mapState(['current_user'])
   }
 }
 </script>

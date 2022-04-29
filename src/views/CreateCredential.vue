@@ -6,6 +6,7 @@
             <CForm @submit.prevent="createCredential" >
                 <h1>Create Credential</h1>
                 <p class="text-muted">Fill out the form below to create a new credential.</p>
+                <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations && modal_mode =='new'" v-model="user.organization" :options="organizations"/>
                 <CInput
                   placeholder="Credential Name"
                   required
@@ -65,6 +66,7 @@ export default {
     created() {
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages     
     },
+    computer: mapState(["organizations","current_user"]),
     methods: {
       createCredential: function () {
         let name = this.name
@@ -86,7 +88,9 @@ export default {
         success: false,
         errorMessage: "",
         test: 0,
-        selected: ""
+        selected: "",
+        organization: "",
+        organizations: []
       }
     }
 }
