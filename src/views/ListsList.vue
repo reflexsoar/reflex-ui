@@ -18,10 +18,9 @@
           :items="lists"
           :fields="fields"
           :items-per-page="small ? 25 : 10"
-          items-per-page-select
           table-filter
           :dark="dark"
-          :sorter='{external: false, resetable: true}'
+          :sorter='{external: true, resetable: true}'
           :sorterValue='{column: "name", asc: true}'
           :loading="loading"
       >
