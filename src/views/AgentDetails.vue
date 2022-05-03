@@ -46,7 +46,7 @@
                 <CCol>
                   <h3>Inputs</h3>
                   Inputs selected here will be polled by the agent at the period defined in the input configuration.<br><br>
-                  <multiselect v-model="selected" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list" :multiple="true" @input="updateInputs()">
+                  <multiselect @search-change="searchInputs" v-model="selected" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list" :multiple="true" @input="updateInputs()">
                   </multiselect>
                 </div>
                 </CCol>
@@ -106,11 +106,12 @@ import {mapState} from "vuex";
 import {vSelect} from "vue-select";
 export default {
     name: 'InputDetails',
+    computed: mapState(['input_list']),
     data() {
         return {
             uuid: this.$route.params.uuid,
             agent: {},
-            input_list: [],
+            //input_list: [],
             group_list: [],
             selected: [],
             selected_groups: [],
@@ -130,11 +131,7 @@ export default {
         }
     },
     created() {
-        this.$store.dispatch('getInputList', {}).then(resp => {
-            for(let i in resp.data) {
-                this.input_list.push({'name': resp.data[i].name, 'uuid': resp.data[i].uuid})
-            }
-        })
+        this.$store.dispatch('getInputList', {})
         this.$store.dispatch('getAgentGroups', {}).then(resp => {
             this.group_list = this.$store.getters.agent_groups
         })
@@ -179,6 +176,9 @@ export default {
                 let input = this.agent.inputs[i]
                 this.selected.push({'uuid': input.uuid, 'name': input.name})
             }
+        },
+        searchInputs(name) {
+            this.$store.dispatch('getInputList', {organization: this.agent.organization, name: name})
         },
         selectedGroups() {
             for(const i in this.agent.groups) {
