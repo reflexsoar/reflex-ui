@@ -1939,6 +1939,18 @@ const actions = {
       })
     })
   },
+  updateUserPassword({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/set_password`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_user', resp.data.user)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   deleteUser({commit}, uuid) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/user/${uuid}`, method: 'DELETE'})
