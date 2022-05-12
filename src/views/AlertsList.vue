@@ -915,7 +915,7 @@ export default {
         }).then(resp => {
           this.event_stats = this.$store.getters.event_stats
           let rule_ids = Object.keys(this.event_stats['event rule'])
-          this.$store.dispatch('loadEventRules', {rules: rule_ids, save: false}).then(resp => {
+          this.$store.dispatch('loadEventRules', {page_size: 500, save: false}).then(resp => {
             this.event_rules = resp.data.event_rules
           })
         })
