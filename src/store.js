@@ -2291,6 +2291,7 @@ const actions = {
   },
   updateObservable({commit}, {uuid, observable_value, data}) {
     return new Promise((resolve, reject) => {
+      observable_value = Buffer.from(observable_value).toString('base64')
       Axios({url: `${BASE_URL}/case/${uuid}/observables/${observable_value}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_observable', resp.data)
@@ -2303,6 +2304,7 @@ const actions = {
   },
   updateEventObservable({commit}, {uuid, observable_value, data}) {
     return new Promise((resolve, reject) => {
+      observable_value = Buffer.from(observable_value).toString('base64')
       Axios({url: `${BASE_URL}/event/${uuid}/observables/${observable_value}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_observable', resp.data)

@@ -1,22 +1,18 @@
 {
-  "name": "@coreui/coreui-free-vue-admin-template",
-  "version": "3.0.2",
-  "description": "Open Source Bootstrap Admin Template",
+  "name": "@reflexsoar/reflex-ui",
+  "version": "2022.05.00",
+  "description": "ReflexSOAR UI",
   "author": {
-    "name": "CoreUI",
-    "url": "https://coreui.io",
-    "github": "https://github.com/coreui",
-    "twitter": "https://twitter.com/core_ui"
+    "name": "ReflexSOAR",
+    "url": "https://reflexsoar.com",
+    "github": "https://github.com/reflexsoar",
+    "twitter": "https://twitter.com/reflexsoar"
   },
   "contributors": [
-    {
-      "name": "CoreUI Team",
-      "url": "https://github.com/orgs/coreui/people"
-    }
   ],
-  "homepage": "http://coreui.io",
-  "copyright": "Copyright 2020 creativeLabs Łukasz Holeczek",
-  "license": "MIT",
+  "homepage": "http://reflexsoar.com",
+  "copyright": "",
+  "license": "GPL 3.0",
   "scripts": {
     "serve": "set NODE_ENV=development&& vue-cli-service serve",
     "build": "vue-cli-service build",
