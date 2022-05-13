@@ -365,6 +365,10 @@ export default {
           update_data_type: false,
           update_settings: false,
           view_settings: false,
+          create_detection: false,
+          update_detection: false,
+          view_detections: false,
+          delete_detection: false,
           create_persistent_pairing_token: false,
         }
       },
@@ -411,6 +415,12 @@ export default {
           'delete_observable',
           'add_tag_to_observable',
           'remove_tag_from_observable',
+        ],
+        "Detections": [
+          'create_detection',
+          'update_detection',
+          'view_detections',
+          'delete_detection',
         ],
         /*"Playbooks": [
           'add_playbook',
