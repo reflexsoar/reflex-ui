@@ -77,7 +77,7 @@
         <CTextarea rows="3" label="Description" placeholder="Enter a description for the role so it is understood what it is used for" :value.sync="role.description"/>
         <h3>Role Permissions</h3>
         <div v-if="role.permissions">
-          <CTabs :fade="false"
+          <CTabs :fade="true"
               variant="pills"
               :activeTab.sync="active_tab"
 :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
@@ -88,11 +88,8 @@
             <CCol >
               <CRow>
                 <CCol col="3" v-for="permission in permissions" :key="permission">
-                  <CInputCheckbox :checked.sync="role.permissions[permission]">
-                    <template #label>
-                      <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label>
-                    </template>
-                  </CInputCheckbox>
+                  <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label><br>
+                  <CSwitch :checked.sync="role.permissions[permission]" label-on="Yes" label-off="No" color="success"></CSwitch><br><br>
                 </CCol>
               </CRow>
               <br>
