@@ -335,10 +335,6 @@ export default {
           if(filter.filter_type == 'list_name__like') {
             list_name__like = filter.value
           }
-
-          if(filter.filter_type == 'value__like') {
-            list_name__like = filter.value
-          }
         }
 
         this.$store.dispatch('getIntelListValues', {
@@ -383,6 +379,10 @@ export default {
         }
 
         if(filter.filter_type == 'record_id') {
+          this.intelFilters = this.intelFilters.filter(item => item.filter_type !== filter.filter_type)
+        }
+
+        if(filter.filter_type == 'list_name__like') {
           this.intelFilters = this.intelFilters.filter(item => item.filter_type !== filter.filter_type)
         }
 
