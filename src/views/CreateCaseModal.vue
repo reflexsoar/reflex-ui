@@ -263,7 +263,7 @@ export default {
         },
         loadUsers() {
             let organization = this.organization
-            this.$store.dispatch('getUsers', {organization:organization}).then(resp => {
+            this.$store.dispatch('getUsers', {organization:organization, page_size: 200}).then(resp => {
                 this.users = this.$store.getters.users
             })
         },

@@ -267,7 +267,7 @@
           </div>
         </div>
         <div v-else>
-          <CForm id="dismissEventForm" @submit.prevent="dismissEvent()">
+          <CForm id="dismissEventForm" @submit.prevent="dismissEventByFilter()">
               <CRow>
                   <CCol><br>
               <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value" label="Reason"/>
@@ -286,7 +286,7 @@
         </div>
       </div>
       <template #footer>
-        <CButton color="warning" @click="dismissEventByFilter()" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>TEST Dismiss Event</span></CButton>
+        <!--<CButton color="warning" @click="dismissEventByFilter()" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>-->
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
     </CModal>
@@ -915,7 +915,7 @@ export default {
         }).then(resp => {
           this.event_stats = this.$store.getters.event_stats
           let rule_ids = Object.keys(this.event_stats['event rule'])
-          this.$store.dispatch('loadEventRules', {rules: rule_ids, save: false}).then(resp => {
+          this.$store.dispatch('loadEventRules', {page_size: 500, save: false}).then(resp => {
             this.event_rules = resp.data.event_rules
           })
         })

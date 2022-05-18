@@ -77,8 +77,12 @@
         <CTextarea rows="3" label="Description" placeholder="Enter a description for the role so it is understood what it is used for" :value.sync="role.description"/>
         <h3>Role Permissions</h3>
         <div v-if="role.permissions">
-          <CRow v-for="permissions, category in filteredPermissionMap" :key="category">
-            <CCol col="3">
+          <CTabs :fade="false"
+              variant="pills"
+              :activeTab.sync="active_tab"
+:vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
+<div v-for="permissions, category in filteredPermissionMap" :key="category" >
+            <CTab :title="category"><CCol col="3">
               <h5>{{category}}</h5>
             </CCol>
             <CCol >
@@ -92,8 +96,8 @@
                 </CCol>
               </CRow>
               <br>
-            </CCol>
-          </CRow>
+            </CCol></CTab></div>
+          </CTabs>
         </div>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
@@ -246,6 +250,7 @@ export default {
     return {
       loading: true,
       active_page: 1,
+      active_tab: 0,
       role_modal: false,
       modal_mode: 'create',
       role: {},

@@ -4,7 +4,7 @@
       <CCol>
         <CRow>
           <CCol xs="12" lg="12">
-            <CAlert :show.sync="success_message" color="success" closeButton>
+            <CAlert :show.sync="reset_success" color="success" closeButton>
               {{this.success_message}}
             </CAlert>
             <!--<img width="150px" height="150px" src="#" style="float:left; margin-right: 25px"/>-->
@@ -99,6 +99,7 @@ export default {
       mfa_wizard_step: 0,
       mfa_enable_success: false,
       success_message: null,
+      reset_success: false,
       mfa_token: "",
       loading_code: false
     }
@@ -191,15 +192,18 @@ export default {
       } else {
         this.error = false
         this.error_message = ""
-        let user = {
+        let data = {
           password: this.confirm_password
         }
         let uuid = this.current_user.uuid
-        this.$store.dispatch('updateUser', {uuid, user}).then(resp => {
+        this.$store.dispatch('updateUserPassword', data).then(resp => {
           this.edit_password_modal = false
           this.success_message = "Successfully changed password."
+          this.reset_success = true
           this.password = ""
           this.confirm_password = ""
+        }).catch(err => {
+          this.reset_success = false
         })
         
       }

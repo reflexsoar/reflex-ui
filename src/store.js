@@ -988,7 +988,7 @@ const actions = {
       })
     })
   },
-  getIntelListValues({commit}, {page=1, page_size=25, list=[], value=[], data_type=[], from_poll=null, record_id=null, sort_by='created_at', sort_direction='desc', start=null, end=null, organization=null}) {
+  getIntelListValues({commit}, {page=1, page_size=25, list=[], value=[], data_type=[], from_poll=null, record_id=null, sort_by='created_at', list_name__like=null, sort_direction='desc', start=null, end=null, organization=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/list/values?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -1015,6 +1015,10 @@ const actions = {
 
       if(record_id) {
         url = url+`&record_id=${record_id}`
+      }
+
+      if(list_name__like) {
+        url = url+`&list_name__like=${list_name__like}`
       }
 
       Axios({url: url, method: 'GET'})
@@ -1939,6 +1943,18 @@ const actions = {
       })
     })
   },
+  updateUserPassword({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/user/set_password`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_user', resp.data.user)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   deleteUser({commit}, uuid) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/user/${uuid}`, method: 'DELETE'})
@@ -2134,7 +2150,7 @@ const actions = {
         base_url += `&escalated=${escalated}`
       }
 
-      Axios({url: base_url, method: 'GET'})
+      Axios({url: base_url, method: 'GET', headers: {'Content-Type': 'application/json'}})
       .then(resp => {
         commit('save_cases', resp.data.cases)
         resolve(resp)
@@ -2279,6 +2295,7 @@ const actions = {
   },
   updateObservable({commit}, {uuid, observable_value, data}) {
     return new Promise((resolve, reject) => {
+      observable_value = Buffer.from(observable_value).toString('base64')
       Axios({url: `${BASE_URL}/case/${uuid}/observables/${observable_value}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_observable', resp.data)
@@ -2291,6 +2308,7 @@ const actions = {
   },
   updateEventObservable({commit}, {uuid, observable_value, data}) {
     return new Promise((resolve, reject) => {
+      observable_value = Buffer.from(observable_value).toString('base64')
       Axios({url: `${BASE_URL}/event/${uuid}/observables/${observable_value}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_observable', resp.data)
@@ -2441,7 +2459,7 @@ const actions = {
 
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
-        commit('save_users', resp.data)
+        commit('save_users', resp.data.users)
         resolve(resp)
       })
       .catch(err => {
