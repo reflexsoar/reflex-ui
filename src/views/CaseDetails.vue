@@ -140,7 +140,7 @@
                                 <multiselect 
                                     v-model="assignee" 
                                     label="username" 
-                                    :options="[...users, {username:'Unassigned'}]" 
+                                    :options="users" 
                                     track-by="username" 
                                     :searchable="true"
                                     :internal-search="false"
@@ -702,18 +702,21 @@ export default {
                 } else{
                     this.assignee = {username: 'Unassigned'}
                 }
+                
+                this.$store.dispatch('getUsers', {organization: this.case_data.organization}).then(resp => {
+                    this.users = [...this.$store.getters.users, {username:'Unassigned'}]
+                })
+
+                this.$store.dispatch('getCaseStatus', {organization: this.case_data.organization}).then(resp => {
+                    this.case_statuses = resp.data.map(function(status) {
+                        return {'value': status.uuid, 'label': status.name, 'closed': status.closed}
+                    })
+                })
+
                 this.loading = false
             })
 
-            this.$store.dispatch('getUsers', {organization: this.$store.getters.case_data.organization}).then(resp => {
-                this.users = this.$store.getters.users
-            })
-
-            this.$store.dispatch('getCaseStatus', {organization: this.$store.getters.case_data.organization}).then(resp => {
-                this.case_statuses = resp.data.map(function(status) {
-                    return {'value': status.uuid, 'label': status.name, 'closed': status.closed}
-                })
-            })
+            
         },
         filteredBySignature() {
             if(this.observableFilters.some((filter) => filter.filter_type == 'eventsig')) {
@@ -877,7 +880,8 @@ export default {
         },
         usersFind(query) {
             this.$store.dispatch('getUsersByName', {username: query, organization: this.case_data.organization}).then(resp => {
-                this.users = resp.data
+                console.log(this.$store.getters.users.users)
+                this.users = [...this.$store.getters.users, {username:'Unassigned'}]
             })
         },
         collapseAll() {

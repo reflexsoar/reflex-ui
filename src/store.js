@@ -2150,7 +2150,7 @@ const actions = {
         base_url += `&escalated=${escalated}`
       }
 
-      Axios({url: base_url, method: 'GET'})
+      Axios({url: base_url, method: 'GET', headers: {'Content-Type': 'application/json'}})
       .then(resp => {
         commit('save_cases', resp.data.cases)
         resolve(resp)
@@ -2459,7 +2459,7 @@ const actions = {
 
       Axios({url: base_url, method: 'GET'})
       .then(resp => {
-        commit('save_users', resp.data)
+        commit('save_users', resp.data.users)
         resolve(resp)
       })
       .catch(err => {
