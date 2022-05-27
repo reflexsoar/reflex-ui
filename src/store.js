@@ -483,6 +483,10 @@ const mutations = {
   save_detection(state, detection) {
     state.detection = detection
   },
+  update_detection(state, detection) {
+    state.detection = detection
+    state.detections = state.detections.map(i => i.uuid == detection.uuid ? detection : i)
+  },
   save_pairing_token(state, token) {
     state.pairing_token = token
   },
@@ -1255,6 +1259,18 @@ const actions = {
       Axios({url: `${BASE_URL}/detection/${uuid}`, method: 'GET'})
       .then(resp => {
         commit('save_detection', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateDetection({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_detection', resp.data)
         resolve(resp)
       })
       .catch(err => {

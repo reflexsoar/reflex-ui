@@ -12,6 +12,10 @@
               <CCol>
                 <CButton color="primary" @click="createDetection = !createDetection" >New Detection</CButton>
               </CCol>
+              <CCol col="3" class='text-right'>
+                <CButton aria-label="Export Detections" disabled color="secondary"><CIcon name='cilCloudDownload' size="sm"></CIcon>&nbsp; Export Detections</CButton>
+                &nbsp;<CButton aria-label="Import Detections" disabled color="secondary"><CIcon name='cilCloudUpload' size="sm"></CIcon>&nbsp; Import Detections</CButton>
+              </CCol>
             </CRow>
             <CCardBody>
               <CDataTable
@@ -34,6 +38,11 @@
                   <OrganizationBadge :uuid="item.organization"/>
                 </td>
               </template>
+              <template #last_run="{item}">
+                <td>
+                  {{item.last_run | moment('from','now')}}
+                </td>
+              </template>
               <template #last_hit="{item}">
                 <td>
                   {{item.last_hit | moment('from','now')}}
@@ -41,8 +50,10 @@
               </template>
               <template #actions="{item}">
                 <td style="min-width:25px" class="text-right">
-                  <CButton aria-label="Edit List" @click="editDetectionModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit Detection', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
-                  <CButton aria-label="Delete List" @click="deleteDetectionModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete Detection', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
+                  <CButton aria-label="Edit Detection" @click="editDetectionModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit Detection', placement:'left'}"><CIcon name='cilPencil'/></CButton>
+                  <span v-if="item.active">&nbsp;<CButton aria-label="Disable Detection" @click="disableDetection(item.uuid)" size="sm" color="warning" v-c-tooltip="{content:'Disable Detection', placement:'left'}"><CIcon name='cilBan'/></CButton></span>
+                  <span v-if="!item.active">&nbsp;<CButton aria-label="Enable Detection" @click="enableDetection(item.uuid)" size="sm" color="success" v-c-tooltip="{content:'Enable Detection', placement:'left'}"><CIcon name='cilCheck'/></CButton></span>
+                  <span v-if="!item.active">&nbsp;<CButton aria-label="Delete Detection" @click="deleteDetectionModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete Detection', placement:'left'}"><CIcon name='cilTrash'/></CButton></span>
                 </td>
               </template>
               </CDataTable>
@@ -172,7 +183,7 @@ export default {
     },
     data () {
       return {
-        detection_list_fields: ['name','organization','last_hit','total_hits','actions'],
+        detection_list_fields: ['name','organization','last_run','last_hit','total_hits','actions'],
         tabs: [
           '1. Rule Details',
           '2. Sigma Rule',
@@ -243,6 +254,12 @@ level: "critical"`
       }
     },
     methods: {
+      disableDetection(uuid) {
+        this.$store.dispatch('updateDetection', {uuid: uuid, data: {'active': false}})
+      },
+      enableDetection(uuid) {
+        this.$store.dispatch('updateDetection', {uuid: uuid, data: {'active': true}})
+      },
       editDetectionModal(uuid) {
         console.log(uuid)
       },
