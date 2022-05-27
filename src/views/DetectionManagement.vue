@@ -21,7 +21,7 @@
               <CDataTable
                 :items="detections"
                 :fields="detection_list_fields"
-                items-per-page-select="true"
+                items-per-page-select
                 :items-per-page="25"
                 table-filter
                 :sorter='{external: true, resetable: true}'
@@ -30,7 +30,10 @@
               >
               <template #name="{item}">
                 <td>
-                  <b>{{item.name}}</b>
+                  <b>{{item.name}}</b><br>
+                  <span v-if="item.warnings && item.warnings.length > 0">
+                    <li style="display: inline; margin-right: 2px;" v-for="warning,i in item.warnings" :key="i"><CButton color="warning" class="tag" size="sm">{{ warning }}</CButton></li>
+                  </span>
                 </td>
               </template>
               <template #organization="{item}">
@@ -45,7 +48,17 @@
               </template>
               <template #last_hit="{item}">
                 <td>
-                  {{item.last_hit | moment('from','now')}}
+                  {{ item.last_hit ? item.last_hit : 'Never' | moment('from','now')}}
+                </td>
+              </template>
+              <template #total_hits="{item}">
+                <td>
+                  {{ item.total_hits ? item.total_hits : 0 }}
+                </td>
+              </template>
+              <template #performance="{item}">
+                <td>
+                  {{item.query_time_taken ? item.query_time_taken.toLocaleString() : 0 }} ms / {{item.time_taken ? item.time_taken.toLocaleString(): 0 }} ms
                 </td>
               </template>
               <template #actions="{item}">
@@ -67,8 +80,7 @@
         </CTabs>
       </CCardBody>
     </CCard>
-    <CModal title="Create Detection Rule" :centered="true" size="xl" :show.sync="createDetection">
-      
+    <CModal title="Create Detection Rule" :centered="true" size="xl" :show.sync="createDetection">      
             <CTabs variant="tabs"><br>
               <CTab active>
                 <template slot="title">
@@ -183,7 +195,7 @@ export default {
     },
     data () {
       return {
-        detection_list_fields: ['name','organization','last_run','last_hit','total_hits','actions'],
+        detection_list_fields: ['name','organization','last_run','last_hit','total_hits',{key: 'performance', label: 'Query Time / Total Time'},'actions'],
         tabs: [
           '1. Rule Details',
           '2. Sigma Rule',
