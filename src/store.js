@@ -79,6 +79,8 @@ const state = {
   tag_list: [],
   list: {},
   lists: [],
+  detection: {},
+  detections: [],
   pagination: {},
   credential_list: [],
   intel_filters: [],
@@ -470,6 +472,16 @@ const mutations = {
   update_input(state, input) {
     state.input = input
     state.inputs = state.inputs.map(i => i.uuid == input.uuid ? input : i)
+  },
+  
+  save_detections(state, detections) {
+    state.detections = detections
+  },
+  save_detections_list(state, detections) {
+    state.detections_list = detections.map(item => { return {'name': item.name, 'uuid': item.uuid}})
+  },
+  save_detection(state, detection) {
+    state.detection = detection
   },
   save_pairing_token(state, token) {
     state.pairing_token = token
@@ -1096,6 +1108,20 @@ const actions = {
       })
     })
   },
+  getDetections({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_detections', resp.data.detections)
+        commit('save_pagination', resp.data.pagination)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getInputs({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/input?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -1217,6 +1243,18 @@ const actions = {
       Axios({url: `${BASE_URL}/agent_group`, data: agent_group, method: 'POST'})
       .then(resp => {
         commit('add_agent_group', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getDetection({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_detection', resp.data)
         resolve(resp)
       })
       .catch(err => {

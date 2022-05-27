@@ -95,6 +95,42 @@
           </CCol>
         </CRow>          
       </CTab>
+      <CTab title="Detection" v-if="this.event_data.detection_id">
+        <CRow style="padding: 10px 10px 0px 10px;">
+          <CCol >
+            <h3>Detection</h3>
+            {{detection.description}}<br><br>
+            <div v-for="query,i in detection.query" :key="i">
+              <pre>{{query.query}}</pre>
+              
+            </div>
+
+            <div v-if="detection.guide">
+              <h4>Investigation Guide</h4>
+              {{detection.guide}}<br><br>
+            </div>
+
+            <div v-if="detection.exceptions">
+              <h4>Exceptions</h4>
+              <CDataTable
+              :hover="true"
+              :items="detection.exceptions"
+              :fields="['query','description','created_by']"
+              :items-per-page="10"
+              bordered
+              striped
+              pagination
+            >
+              <template #created_by="{item}">
+                <td>
+                  {{item.created_by.username}}
+                </td>
+              </template>
+              </CDataTable>
+            </div>
+          </CCol>
+        </CRow>
+      </CTab>
     </CTabs>
     </CCol>
   </CRow>
@@ -184,6 +220,11 @@ export default {
             this.rules = resp.data.event_rules
           })
         }
+        if(this.event_data.detection_id) {
+          this.$store.dispatch('getDetection', this.event_data.detection_id).then(resp => {
+            this.detection = resp.data
+          })
+        }
       }
     }
   },
@@ -191,7 +232,8 @@ export default {
     return {
       observable_fields: ['value', 'ioc', 'spotted', 'safe', 'tags'],
       activeTab: 1,
-      rules: []
+      rules: [],
+      detection: {}
     }
   },
   computed: {
