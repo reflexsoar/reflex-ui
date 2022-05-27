@@ -7,16 +7,51 @@
     <CCard>
       <CCardBody class="tabbed">
         <CTabs>
-          <CTab active>
-            <template slot="title">
-              Detection Rules
-            </template>
+          <CTab title="Detection Rules" active>
             <CRow style="padding: 10px;">
               <CCol>
                 <CButton color="primary" @click="createDetection = !createDetection" >New Detection</CButton>
               </CCol>
             </CRow>
+            <CCardBody>
+              <CDataTable
+                :items="detections"
+                :fields="detection_list_fields"
+                items-per-page-select="true"
+                :items-per-page="25"
+                table-filter
+                :sorter='{external: true, resetable: true}'
+                :sorterValue='{column: "name", asc: true}'
+                :loading="loading"
+              >
+              <template #name="{item}">
+                <td>
+                  <b>{{item.name}}</b>
+                </td>
+              </template>
+              <template #organization="{item}">
+                <td>
+                  <OrganizationBadge :uuid="item.organization"/>
+                </td>
+              </template>
+              <template #last_hit="{item}">
+                <td>
+                  {{item.last_hit | moment('from','now')}}
+                </td>
+              </template>
+              <template #actions="{item}">
+                <td style="min-width:25px" class="text-right">
+                  <CButton aria-label="Edit List" @click="editDetectionModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit Detection', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+                  <CButton aria-label="Delete List" @click="deleteDetectionModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete Detection', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
+                </td>
+              </template>
+              </CDataTable>
+            </CCardBody>
             <!--<DetectionRules></DetectionRules>-->
+          </CTab>
+          <CTab title="Detection Repositories">
+          </Ctab>
+          <CTab title="Detection Bundles">
           </CTab>
         </CTabs>
       </CCardBody>
@@ -126,15 +161,18 @@ import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhe
 import 'prismjs/components/prism-yaml';
 import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
+import OrganizationBadge from './OrganizationBadge'
 //const DetectionRules = () => import('@/views/DetectionRuleList')
 export default {
     name: 'DetectionManagement',
     components: {
       //'DetectionRules': DetectionRules
-      PrismEditor
+      PrismEditor,
+      OrganizationBadge
     },
     data () {
       return {
+        detection_list_fields: ['name','organization','last_hit','total_hits','actions'],
         tabs: [
           '1. Rule Details',
           '2. Sigma Rule',
@@ -205,6 +243,12 @@ level: "critical"`
       }
     },
     methods: {
+      editDetectionModal(uuid) {
+        console.log(uuid)
+      },
+      deleteDetectionModal(uuid) {
+        console.log(uuid)
+      },
       highlighter(code) {
         return highlight(code, languages.yaml);
       },
@@ -216,9 +260,10 @@ level: "critical"`
         this.tags.push(tag)
       }
     },
-    computed: mapState(['alert']),
+    computed: mapState(['alert','detections','loading']),
     created() {
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages
+      this.$store.dispatch('getDetections', {})
     }
 }
 </script>
