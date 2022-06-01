@@ -10,7 +10,7 @@
           <CTab title="Detection Rules" active>
             <CRow style="padding: 10px;">
               <CCol>
-                <CButton color="primary" @click="createDetection = !createDetection" >New Detection</CButton>
+                <CButton color="primary" @click="createDetectionModal()" >New Detection</CButton>
               </CCol>
               <CCol col="3" class='text-right'>
                 <CButton aria-label="Export Detections" disabled color="secondary"><CIcon name='cilCloudDownload' size="sm"></CIcon>&nbsp; Export Detections</CButton>
@@ -80,7 +80,8 @@
         </CTabs>
       </CCardBody>
     </CCard>
-    <CModal title="Create Detection Rule" :centered="true" size="xl" :show.sync="createDetection">      
+    <DetectionRuleModal :show.sync="show_detecion_rule_modal" :rule.sync="rule" :mode="modal_mode"/>
+    <CModal title="Create Detection Rule" :centered="true" size="xl">      
             <CTabs variant="tabs"><br>
               <CTab active>
                 <template slot="title">
@@ -185,17 +186,22 @@ import 'prismjs/components/prism-yaml';
 import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import OrganizationBadge from './OrganizationBadge'
+import DetectionRuleModal from './DetectionRuleModal'
 //const DetectionRules = () => import('@/views/DetectionRuleList')
 export default {
     name: 'DetectionManagement',
     components: {
       //'DetectionRules': DetectionRules
       PrismEditor,
-      OrganizationBadge
+      OrganizationBadge,
+      DetectionRuleModal
     },
     data () {
       return {
+        
         detection_list_fields: ['name','organization','last_run','last_hit','total_hits',{key: 'performance', label: 'Query Time / Total Time'},'actions'],
+        modal_mode: "Create",
+        show_detecion_rule_modal: false,
         tabs: [
           '1. Rule Details',
           '2. Sigma Rule',
@@ -262,7 +268,8 @@ falsepositives:
     - "Unknown"
 level: "critical"`
         },
-        createDetection: false
+        createDetection: false,
+        rule: {}
       }
     },
     methods: {
@@ -273,7 +280,14 @@ level: "critical"`
         this.$store.dispatch('updateDetection', {uuid: uuid, data: {'active': true}})
       },
       editDetectionModal(uuid) {
-        console.log(uuid)
+        this.modal_mode = "Edit"
+        this.rule = this.detections.find(detection => detection.uuid === uuid)
+        this.show_detecion_rule_modal = true
+      },
+      createDetectionModal() {
+        this.modal_mode = "Create"
+        this.rule = {}
+        this.show_detecion_rule_modal = true
       },
       deleteDetectionModal(uuid) {
         console.log(uuid)
