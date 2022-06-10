@@ -286,7 +286,15 @@ level: "critical"`
       },
       createDetectionModal() {
         this.modal_mode = "Create"
-        this.rule = {}
+        this.rule = {
+          tags: [],
+          query: {
+            query: "okay",
+            language:""
+          },
+          lookbehind: 5,
+          interval: 5
+        }
         this.show_detecion_rule_modal = true
       },
       deleteDetectionModal(uuid) {

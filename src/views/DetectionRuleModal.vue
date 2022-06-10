@@ -59,15 +59,32 @@
                   :value.sync="organization"
                   :options="organizations"
                 />
-                <CInput v-model="rule.name" label="Name"/>
-                <CTextarea v-model="rule.description" label="Description" :rows="5"/>
+                <CInput v-model="rule.name" label="Name" placeholder="Rule Name"/>
+                <CTextarea v-model="rule.description" label="Description" placeholder="A friendly description of the rule" :rows="5"/>
                 <label>Tags</label>
                 <multiselect v-model="rule.tags" placeholder="Select tags to apply to this detection" :taggable="true" @tag="addTag" tag-placeholder="Add new tag" :options="tag_list" :multiple="true" :close-on-select="false"/><br>
             </CTab>
-            <CTab title="2. Criteria">
-                <h5>Rule Criteria</h5>
+            <CTab title="2. Configuration">
+                <h5>Rule Configuration</h5>
                 <p>Something something dark side</p>
-                <CSelect label="Rule Type" v-model="rule.rule_type" @change="updateRuleType" :options="rule_types"/>{{rule.rule_type}}
+                <CSelect label="Input" :options="input_list" description="The inputt this detection should use for connection and source data" v-model="rule.source"/>
+                
+                <CSelect label="Rule Type" v-model="rule.rule_type" @change="updateRuleType" :options="rule_types"/>
+                <CTextarea label="Base Query" placeholder="A base query" description="A base query defines exactly what the detection shouldb be looking for" v-model="rule.query.query"/>
+                <div v-if="rule.rule_type == 0">Match Configuration</div>
+                <div v-else-if="rule.rule_type == 1">
+                  Threshold
+                </div>
+                <div v-else-if="rule.rule_type == 2">Metric Change</div>
+                <div v-else-if="rule.rule_type == 3">Field Mismatch</div>
+                <CRow>
+                  <CCol>
+                    <CInput label="Interval" v-model="rule.interval" description="How ofthen detection will run in minutes"></CInput>
+                  </CCol>
+                  <CCol>
+                    <CInput label="Lookbehind" v-model="rule.lookbehind" description="How far back the detection should look in minutes. By default the detection will look back to the last run time."></CInput>
+                  </CCol>
+                </CRow>
             </CTab>
             <CTab title="3. MITRE ATT&CK">
                 <h5>MITRE ATT&CK</h5>
@@ -77,25 +94,18 @@
                 <label>MITRE Techniques</label>
                 <multiselect v-model="rule.techniques" placeholder="Select tags to apply to this detection" :taggable="true" tag-placeholder="Add new technique" :options="techniques" :multiple="true" :close-on-select="false"/>
             </CTab>
-            <CTab title="4. Triage Guide">
+            <CTab title="4. Actions">
+              <h5>Actions</h5>
+              <p>Actions run in coordination with a detection matching.  Actions can be individual integration steps or running entire playbooks.</p>
+            </CTab>
+            <CTab title="5. Triage Guide">
                 <h5>Triage Guide</h5>
                 <p>A triage guide helps analysts reviewing events generated from this detection determine the legitimacy of the event.  Being as descriptive as possible will help alert consumers.</p>
                 <CTextarea v-model="rule.guide" :rows="10" label="Guide Details" description="HINT: Use markdown to create a beautiful description."/>
             </CTab>
-            <CTab title="5. Review">
+            <CTab title="6. Review">
             </CTab>
             </CTabs>
-          </CCol>
-        </CRow>
-        <CRow>
-          <CCol>
-            <CForm @submit.prevent="createDetectionRule" id="event_rule_form">
-              <div name="create-event-rule-step-1" v-if="step == 1"></div>
-              <div name="create-case-template-step-2" v-if="step == 2"></div>
-              <div name="create-case-template-step-3" v-if="step == 3"></div>
-              <div name="create-case-template-step-4" v-if="step == 4"></div>
-              <div name="create-case-template-step-5" v-if="step == 5"></div>
-            </CForm>
           </CCol>
         </CRow>
       </div>
@@ -189,19 +199,19 @@ export default {
   computed: {
       formatted_tags: function() {
           return this.rule.tags.map((o) => { return {name: o, uuid: ''}})
-      }, ...mapState(["settings", "current_user"])
+      }, ...mapState(["settings", "current_user","input_list"])
     },
   data() {
     return {
       tabs: [
         { name: "Overview", icon: "cil-description" },
-        { name: "Criteria", icon: "cil-gear" },
+        { name: "Configuration", icon: "cil-gear" },
         { name: "Investigation Guide", icon: "cil-book" },
         { name: "Review", icon: null },
       ],
       rule_types: [
           'Match',
-          'Frequency Change',
+          'Threshold',
           'Metric Change',
           'Field Mismatch'
       ],
@@ -229,7 +239,7 @@ export default {
       error_message: "",
       submitted: false,
       step: 0,
-      final_step: 4,
+      final_step: 5,
       range: {
         start: this.days_ago(7),
         end: this.today(),
@@ -319,8 +329,7 @@ export default {
         uuid: "",
       };
       this.rule.tags.push(t.name)
-      this.tag_list.push(t);
-      this.selected_tags.push(t);
+      this.tag_list.push(t.name);
     },
     loadTags: function () {
       this.tag_list = Array();
@@ -335,6 +344,9 @@ export default {
     },
     updateRuleType(event) {
         this.rule.rule_type = this.rule_types.indexOf(event.target.value)
+    },
+    searchInputs(name) {
+      this.$store.dispatch('getInputList', {organization: this.rule.organization, name: name})
     }
   },
 };
