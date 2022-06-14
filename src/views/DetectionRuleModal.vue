@@ -86,7 +86,10 @@
                   </CCol>
                 </CRow>
             </CTab>
-            <CTab title="3. MITRE ATT&CK">
+            <CTab title="3. Exclusions">
+              <h5>Exclusions</h5>
+            </CTab>
+            <CTab title="4. MITRE ATT&CK">
                 <h5>MITRE ATT&CK</h5>
                 <p>Something something dark side</p>
                 <label>MITRE Tactics</label>
@@ -94,16 +97,16 @@
                 <label>MITRE Techniques</label>
                 <multiselect v-model="rule.techniques" placeholder="Select tags to apply to this detection" :taggable="true" tag-placeholder="Add new technique" :options="techniques" :multiple="true" :close-on-select="false"/>
             </CTab>
-            <CTab title="4. Actions">
+            <CTab title="5. Actions">
               <h5>Actions</h5>
               <p>Actions run in coordination with a detection matching.  Actions can be individual integration steps or running entire playbooks.</p>
             </CTab>
-            <CTab title="5. Triage Guide">
+            <CTab title="6. Triage Guide">
                 <h5>Triage Guide</h5>
                 <p>A triage guide helps analysts reviewing events generated from this detection determine the legitimacy of the event.  Being as descriptive as possible will help alert consumers.</p>
                 <CTextarea v-model="rule.guide" :rows="10" label="Guide Details" description="HINT: Use markdown to create a beautiful description."/>
             </CTab>
-            <CTab title="6. Review">
+            <CTab title="7. Review">
             </CTab>
             </CTabs>
           </CCol>
@@ -239,7 +242,7 @@ export default {
       error_message: "",
       submitted: false,
       step: 0,
-      final_step: 5,
+      final_step: 6,
       range: {
         start: this.days_ago(7),
         end: this.today(),
@@ -312,6 +315,13 @@ export default {
     },
     previousStep() {
       this.step -= 1;
+    },
+    loadMITRETactics() {
+
+    },
+    loadMITRETechniques(selected_tactics=[], search_text="") {
+      /* Return a list of techniques from the API based on the tactics that are currently selected */
+
     },
     loadData() {
       this.$store.dispatch("getCases", {}).then((resp) => {
