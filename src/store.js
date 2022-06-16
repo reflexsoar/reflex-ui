@@ -82,6 +82,8 @@ const state = {
   detection: {},
   detections: [],
   pagination: {},
+  mitre_tactics: [],
+  mitre_techniques: [],
   credential_list: [],
   intel_filters: [],
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
@@ -623,6 +625,12 @@ const mutations = {
   update_role(state, role) {
     state.role = role
     state.roles = state.roles.map(r => r.uuid == role.uuid ? role : r)
+  },
+  save_tactics(state, tactics) {
+    state.mitre_tactics = tactics
+  },
+  save_techniques(state, techniques) {
+    state.mitre_techniques = techniques
   },
   add_success(state) {
     state.status = 'success'
@@ -2779,6 +2787,57 @@ const actions = {
       })
       .catch(err => {
         commit('show_alert', {message: err.response.data.message, 'type': 'danger'})
+        reject(err)
+      })
+    })
+  },
+  getMitreTactics({commit}, {page=1, page_size=10, name__like=null, external_id__like=null}) {
+
+    let url = `${BASE_URL}/mitre/tactic?page=${page}&page_size=${page_size}`
+
+    if(name__like) {
+      url += `&name__like=${name__like}`
+    }
+
+    if(external_id__like) {
+      url += `&external_id__like=${external_id__like}`
+    }
+    
+    return new Promise((resolve, reject) => {
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_tactics', resp.data.tactics)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getMitreTechniques({commit}, {page=1, page_size=10, name__like=null, external_id__like=null, phase_names=null}) {
+
+    let url = `${BASE_URL}/mitre/technique?page=${page}&page_size=${page_size}`
+
+    if(name__like) {
+      url += `&name__like=${name__like}`
+    }
+
+    if(external_id__like) {
+      url += `&external_id__like=${external_id__like}`
+    }
+
+    if(phase_names) {
+      url += `&phase_names=${phase_names}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        console.log(resp.data.techniques)
+        commit('save_techniques', resp.data.techniques)
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })
