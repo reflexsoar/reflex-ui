@@ -87,14 +87,8 @@
                 {{rule.source}}
                 <multiselect @search-change="searchInputs" v-model="rule.source" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list"/>
                 <CSelect
-                  label="Input"
-                  :options="input_list"
-                  description="The input this detection should use for connection and source data"
-                  v-model="rule.source"
-                />
-                <CSelect
                   label="Severity"
-                  v-model="rule.severity"
+                  :value.sync="rule.severity"
                   :options="severities"
                 />
                 <CSelect
@@ -140,12 +134,16 @@
                 <multiselect
                   v-model="rule.tactics"
                   placeholder="Select tags to apply to this detection"
-                  @select="addTactic"
+                  @select="updateTactic"
+                  @remove="updateTactic"
                   :options="mitre_tactics"
                   label="name"
                   track-by="external_id"
                   :multiple="true"
                   :close-on-select="false"
+                  :internal-search="false"
+                  :searchable="true"
+                  @search-change="searchTactic"
                 ><template slot="singleLabel" slot-scope="props"
                     ><img
                       class="option__image"
@@ -225,7 +223,7 @@
                   description="HINT: Use markdown to create a beautiful description."
                 />
               </CTab>
-              <CTab title="7. Review"> </CTab>
+              <CTab title="7. Review">{{rule}} </CTab>
             </CTabs>
           </CCol>
         </CRow>
@@ -446,8 +444,15 @@ export default {
         'external_id': technique.external_id,
         'name': technique.name}}
       )
-      this.$store.dispatch('createDetection', this.rule)
       this.submitted = true;
+      this.$store.dispatch('createDetection', this.rule).then(resp => {
+        this.submitted = false
+        this.dismiss()
+      }).catch(err => {
+        this.submitted = false
+        console.log(err)
+      })
+      
     },
     editDetectionRule() {},
     nextStep() {
@@ -457,6 +462,9 @@ export default {
       this.step -= 1;
     },
     loadMITRETactics() {},
+    searchTactic(external_id) {
+      this.$store.dispatch('getMitreTactics', {external_id__like: external_id, name__like: external_id})
+    },
     findTechnique(external_id) {
       /* Return a list of techniques from the API based on the tactics that are currently selected */
       this.$store.dispatch('getMitreTechniques', {external_id__like: external_id, name__like: external_id, phase_names: this.rule.tactics.map(t => { return t.shortname })})
@@ -482,7 +490,7 @@ export default {
       this.rule.tags.push(t.name);
       this.tag_list.push(t.name);
     },
-    addTactic(tactic) {
+    updateTactic(tactic) {
       this.$store.dispatch("getMitreTechniques", { phase_names: this.rule.tactics.map(t => { return t.shortname }) });
     },
     addTechnique(technique) {

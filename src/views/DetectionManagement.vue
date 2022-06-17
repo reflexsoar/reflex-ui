@@ -213,7 +213,9 @@ level: "critical"`
           techniques: [],
           tactics: [],
           lookbehind: 5,
-          interval: 5
+          interval: 5,
+          rule_type: 0,
+          severity: 1
         }
       }
     },
@@ -240,7 +242,9 @@ level: "critical"`
           techniques: [],
           tactics: [],
           lookbehind: 5,
-          interval: 5
+          interval: 5,
+          rule_type: 0,
+          severity: 1
         }
         this.show_detecion_rule_modal = true
       },

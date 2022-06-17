@@ -477,11 +477,11 @@ const mutations = {
   },
   add_detection(state, detection){
     if(state.detections.length == 0) {
-      state.detections = [input]
+      state.detections = [detection]
     } else {
-      state.detections.push(input)
+      state.detections.push(detection)
     }    
-    state.detection = input
+    state.detection = detection
     state.status = 'success'
   },
   save_detections(state, detections) {
