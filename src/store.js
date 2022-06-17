@@ -475,7 +475,15 @@ const mutations = {
     state.input = input
     state.inputs = state.inputs.map(i => i.uuid == input.uuid ? input : i)
   },
-  
+  add_detection(state, detection){
+    if(state.detections.length == 0) {
+      state.detections = [input]
+    } else {
+      state.detections.push(input)
+    }    
+    state.detection = input
+    state.status = 'success'
+  },
   save_detections(state, detections) {
     state.detections = detections
   },
@@ -599,7 +607,7 @@ const mutations = {
     state.status = 'success'
   },
   add_input(state, input){
-    if(state.inputs.lenght == 0) {
+    if(state.inputs.length == 0) {
       state.inputs = [input]
     } else {
       state.inputs.push(input)
@@ -1134,9 +1142,24 @@ const actions = {
       })
     })
   },
-  getInputs({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+  createDetection({commit}, detection) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection`, data: detection, method: 'POST'})
+      .then(resp => {
+        commit('add_detection', detection)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getInputs({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/input?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+      if (organization) {
+        url += `&organization=${organization}`
+      }
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_inputs', resp.data.inputs)
@@ -2833,7 +2856,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: url, method: 'GET'})
       .then(resp => {
-        console.log(resp.data.techniques)
         commit('save_techniques', resp.data.techniques)
         resolve(resp)
       })

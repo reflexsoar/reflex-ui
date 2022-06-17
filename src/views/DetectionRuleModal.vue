@@ -53,8 +53,9 @@
                 <CSelect
                   label="Organization"
                   placeholder="Select an organization"
+                  @change="updateOrganization"
                   v-if="current_user.role.permissions.view_organizations"
-                  :value.sync="organization"
+                  :value.sync="rule.organization"
                   :options="organizations"
                 />
                 <CInput
@@ -83,13 +84,19 @@
               <CTab title="2. Configuration">
                 <h5>Rule Configuration</h5>
                 <p>Something something dark side</p>
+                {{rule.source}}
+                <multiselect @search-change="searchInputs" v-model="rule.source" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list"/>
                 <CSelect
                   label="Input"
                   :options="input_list"
-                  description="The inputt this detection should use for connection and source data"
+                  description="The input this detection should use for connection and source data"
                   v-model="rule.source"
                 />
-
+                <CSelect
+                  label="Severity"
+                  v-model="rule.severity"
+                  :options="severities"
+                />
                 <CSelect
                   label="Rule Type"
                   v-model="rule.rule_type"
@@ -236,7 +243,7 @@
           >Next</CButton
         >
         <CButton
-          v-if="step == final_step && (mode == 'create' || mode == 'clone')"
+          v-if="step == final_step && (mode == 'Create' || mode == 'Clone')"
           @click="createDetectionRule()"
           color="primary"
           :disabled="submitted"
@@ -244,7 +251,7 @@
           >Create</CButton
         >
         <CButton
-          v-if="step == final_step && mode == 'edit'"
+          v-if="step == final_step && mode == 'Edit'"
           @click="editDetectionRule()"
           color="primary"
           :disabled="submitted"
@@ -344,22 +351,10 @@ export default {
       ],
       rule_types: ["Match", "Threshold", "Metric Change", "Field Mismatch"],
       severities: [
-        {
-          label: "Low",
-          value: 1,
-        },
-        {
-          label: "Medium",
-          value: 2,
-        },
-        {
-          label: "High",
-          value: 3,
-        },
-        {
-          label: "Critical",
-          value: 4,
-        },
+          {'label':'Low', 'value':1},
+          {'label':'Medium', 'value':2},
+          {'label':'High', 'value':3},
+          {'label':'Critical', 'value':4}
       ],
       techniques: [],
       tactics: [],
@@ -438,6 +433,20 @@ export default {
     },
     testDetectionRule() {},
     createDetectionRule() {
+      
+      this.rule.tactics = this.rule.tactics.map(tactic => { return {
+        'mitre_id': tactic.mitre_id,
+        'external_id': tactic.external_id,
+        'name': tactic.name,
+        'shortname': tactic.shortname}}
+      )
+
+      this.rule.techniques = this.rule.techniques.map(technique => { return {
+        'mitre_id': technique.mitre_id,
+        'external_id': technique.external_id,
+        'name': technique.name}}
+      )
+      this.$store.dispatch('createDetection', this.rule)
       this.submitted = true;
     },
     editDetectionRule() {},
@@ -451,6 +460,9 @@ export default {
     findTechnique(external_id) {
       /* Return a list of techniques from the API based on the tactics that are currently selected */
       this.$store.dispatch('getMitreTechniques', {external_id__like: external_id, name__like: external_id, phase_names: this.rule.tactics.map(t => { return t.shortname })})
+    },
+    searchInputs(name) {
+      this.$store.dispatch('getInputList', {organization: this.agent.organization, name: name})
     },
     loadData() {
       this.$store.dispatch("getCases", {}).then((resp) => {
@@ -475,6 +487,11 @@ export default {
     },
     addTechnique(technique) {
 
+    },
+    updateOrganization() {
+      console.log('YO')
+      console.log(this.rule.organization)
+      this.$store.dispatch('getInputList', {organization: this.rule.organization})
     },
     loadTags: function () {
       this.tag_list = Array();
