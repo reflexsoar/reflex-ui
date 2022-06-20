@@ -85,12 +85,23 @@
                 <h5>Rule Configuration</h5>
                 <p>Something something dark side</p>
                 {{rule.source}}
-                <multiselect @search-change="searchInputs" v-model="rule.source" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list"/>
-                <CSelect
-                  label="Severity"
-                  :value.sync="rule.severity"
-                  :options="severities"
-                />
+                <multiselect @search-change="searchInputs" v-model="rule.source" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list"/><br>
+                <CRow>
+                  <CCol col="6">
+                    <CSelect
+                      label="Severity"
+                      :value.sync="rule.severity"
+                      :options="severities"
+                    />
+                  </CCol>
+                  <CCol>
+                    
+                    <div class="slidecontainer">
+                      <label for="risk_score">Risk Score - {{rule.risk_score}}</label><br>
+                      <input type="range" min=1 max=100 value=50 id="risk_score" label="Risk Score" v-model="rule.risk_score" class="slider"/>
+                    </div>
+                  </CCol>
+                </CRow>
                 <CSelect
                   label="Rule Type"
                   v-model="rule.rule_type"
@@ -279,6 +290,14 @@
   padding: 5px;
 }
 
+.slidecontainer {
+  width: 100%;
+}
+
+
+.slider {
+  width: 100%;
+}
 /* optional class for removing the outline */
 .prism-editor__textarea:focus {
   outline: none;
@@ -431,7 +450,6 @@ export default {
     },
     testDetectionRule() {},
     createDetectionRule() {
-      
       this.rule.tactics = this.rule.tactics.map(tactic => { return {
         'mitre_id': tactic.mitre_id,
         'external_id': tactic.external_id,
@@ -444,6 +462,9 @@ export default {
         'external_id': technique.external_id,
         'name': technique.name}}
       )
+
+      parseInt(this.risk_score)
+
       this.submitted = true;
       this.$store.dispatch('createDetection', this.rule).then(resp => {
         this.submitted = false
@@ -452,9 +473,32 @@ export default {
         this.submitted = false
         console.log(err)
       })
-      
     },
-    editDetectionRule() {},
+    editDetectionRule() {
+      this.rule.tactics = this.rule.tactics.map(tactic => { return {
+        'mitre_id': tactic.mitre_id,
+        'external_id': tactic.external_id,
+        'name': tactic.name,
+        'shortname': tactic.shortname}}
+      )
+
+      this.rule.techniques = this.rule.techniques.map(technique => { return {
+        'mitre_id': technique.mitre_id,
+        'external_id': technique.external_id,
+        'name': technique.name}}
+      )
+
+      parseInt(this.risk_score)
+     
+      this.submitted = true;
+      this.$store.dispatch('updateDetection', {uuid: this.rule.uuid, data: this.rule}).then(resp => {
+        this.submitted = false
+        this.dismiss()
+      }).catch(err => {
+        this.submitted = false
+        console.log(err)
+      })
+    },
     nextStep() {
       this.step += 1;
     },

@@ -215,7 +215,8 @@ level: "critical"`
           lookbehind: 5,
           interval: 5,
           rule_type: 0,
-          severity: 1
+          severity: 1,
+          risk_score: 50
         }
       }
     },
@@ -228,7 +229,7 @@ level: "critical"`
       },
       editDetectionModal(uuid) {
         this.modal_mode = "Edit"
-        this.rule = this.detections.find(detection => detection.uuid === uuid)
+        Object.assign(this.rule, this.detections.find(detection => detection.uuid === uuid))
         this.show_detecion_rule_modal = true
       },
       createDetectionModal() {
@@ -244,7 +245,8 @@ level: "critical"`
           lookbehind: 5,
           interval: 5,
           rule_type: 0,
-          severity: 1
+          severity: 1,
+          risk_score: 50
         }
         this.show_detecion_rule_modal = true
       },
