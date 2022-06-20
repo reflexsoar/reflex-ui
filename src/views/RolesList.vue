@@ -52,7 +52,7 @@
             <td class="text-right">
               <CButton :disabled="!current_user.role.permissions.add_role" size="sm" color="secondary" @click="cloneRole(item.uuid)"><CIcon name="cil-copy"/></CButton>&nbsp;
               <CButton :disabled="!current_user.role.permissions.update_role" size="sm" color="primary" @click="editRole(item.uuid)"><CIcon name="cilPencil"/></CButton>&nbsp;
-              <CButton :disabled="!current_user.role.permissions.delete_role" size="sm" color="danger" @click="promptDelete(item.uuid)"><CIcon name="cilTrash"/></CButton>
+              <CButton v-if="item.system_generated === null || item.system_generated === false" :disabled="!current_user.role.permissions.delete_role || (item.members ? item.members.length : 0) > 0" size="sm" color="danger" @click="promptDelete(item.uuid)"><CIcon name="cilTrash"/></CButton>
             </td>
           </template>
         </CDataTable>
@@ -103,6 +103,22 @@
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
         <CButton v-if="modal_mode === 'edit'" @click="updateRole()" color="primary">Edit</CButton>
         <CButton v-if="modal_mode === 'create'" @click="createRole()" color="primary">Create</CButton>
+      </template>
+    </CModal>
+    <CModal title="Delete Role" color="danger" :centered="true" :show.sync="delete_modal">
+      <CForm id="deleteRoleForm" @submit.prevent="deleteRole(role.uuid)">
+        Are you sure you want to delete <b>{{role.name}}</b>?   Type the role name in the box below to confirm your intent.
+        <CForm id="delete-confirm">
+          <CInput
+            v-model="delete_confirm"
+            label="Username"
+            required
+          ></CInput>
+        </CForm>
+      </CForm>
+      <template #footer>
+        <CButton @click="dismiss()" color="secondary">No</CButton>
+        <CButton type="submit" form="deleteRoleForm" color="danger">Yes</CButton>
       </template>
     </CModal>
   </div>
@@ -195,7 +211,17 @@ export default {
       })
     },
     promptDelete(uuid) {
-      console.log(uuid)
+      this.role = this.roles.find(role => role.uuid === uuid)
+      this.delete_modal = true
+    },
+    deleteRole(uuid) {
+      let confirm = this.delete_confirm
+      if(this.role.name === confirm) {
+        this.$store.dispatch('deleteRole', {uuid: uuid}).then(resp => {
+          this.delete_confirm = ""
+          this.delete_modal = false
+        })
+      }
     },
     cloneRole(uuid) {
       Object.assign(this.role, this.roles.find(role => role.uuid === uuid))
@@ -253,6 +279,8 @@ export default {
       active_tab: 0,
       role_modal: false,
       modal_mode: 'create',
+      delete_modal: false,
+      delete_confirm: "",
       role: {},
       organization_filter: null,
       empty_role: {

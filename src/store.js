@@ -430,6 +430,9 @@ const mutations = {
   save_role(state, role) {
     state.role = role
   },
+  remove_role(state, uuid) {
+    state.roles = state.roles.filter(role => role.uuid !== uuid)
+  },
   save_credential(state, credential) {
     state.credential = credential
   },
