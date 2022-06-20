@@ -500,6 +500,9 @@ const mutations = {
   save_pairing_token(state, token) {
     state.pairing_token = token
   },
+  remove_detection(state, uuid) {
+    state.detections = state.detections.filter(a => a.uuid !== uuid)
+  },
   add_plugin(state, plugin) {
     state.plugins.push(plugin)
     state.plugin = plugin
@@ -1147,6 +1150,20 @@ const actions = {
       Axios({url: `${BASE_URL}/detection`, data: detection, method: 'POST'})
       .then(resp => {
         commit('add_detection', detection)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteDetection({commit}, {uuid}) {
+    commit('loading_status', true)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_detection', uuid)
+        commit('loading_status', false)
         resolve(resp)
       })
       .catch(err => {

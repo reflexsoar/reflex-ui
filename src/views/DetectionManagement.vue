@@ -249,7 +249,7 @@ level: "critical"`
         this.show_detecion_rule_modal = true
       },
       deleteDetectionModal(uuid) {
-        console.log(uuid)
+        this.$store.dispatch('deleteDetection', {uuid: uuid}).then(resp => {})
       },
       highlighter(code) {
         return highlight(code, languages.yaml);
