@@ -497,8 +497,6 @@ export default {
 
     },
     updateOrganization() {
-      console.log('YO')
-      console.log(this.rule.organization)
       this.$store.dispatch('getInputList', {organization: this.rule.organization})
     },
     loadTags: function () {
