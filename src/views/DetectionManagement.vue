@@ -187,6 +187,11 @@ export default {
           threshold_config: {
             threshold: 0,
             key_field: null
+          },
+          field_mismatch_config: {
+            source_field: '',
+            target_field: '',
+            operator:'=='
           }
         }
       }
@@ -222,6 +227,11 @@ export default {
           threshold_config: {
             threshold: 0,
             key_field: null
+          },
+          field_mismatch_config: {
+            source_field: '',
+            target_field: '',
+            operator:'=='
           }
         }
         this.show_detecion_rule_modal = true

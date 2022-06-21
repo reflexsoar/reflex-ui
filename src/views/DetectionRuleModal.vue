@@ -128,12 +128,28 @@
                   </CRow>
                 </div>
                 <div v-else-if="rule.rule_type == 2">Metric Change</div>
-                <div v-else-if="rule.rule_type == 3">Field Mismatch</div>
-                <h5>Time Settings</h5>
+                <div v-else-if="rule.rule_type == 3">
+                  <h5>Field Mismatch</h5>
+                  <CRow>
+                    <CCol col="5">
+                      <CInput v-model="rule.field_mismatch_config.source_field" label="Source Field" placeholder="The source field to compare against"/>
+                    </CCol>
+                    <CCol col="2">
+                      <CSelect :value.sync="rule.field_mismatch_config.operator" label="Operator" :options='["==","!=",">","<",">=","<="]'/>
+                    </CCol>
+                    <CCol col="5">
+                      <CInput v-model="rule.field_mismatch_config.target_field" label="Target Field" placeholder="The target field to compare against"/>
+                    </CCol>
+                  </CRow>
+                </div>
+                
+              </CTab>
+              <CTab title="3. Schedule">
+                <h5>Schedule</h5>
                 <CRow>
                   <CCol>
                     <CInput
-                      label="Interval"
+                      label="Run Interval"
                       v-model="rule.interval"
                       description="How often detection will run in minutes"
                     ></CInput>
@@ -154,10 +170,10 @@
                   </CCol>
                 </CRow>
               </CTab>
-              <CTab title="3. Exclusions">
+              <CTab title="4. Exclusions">
                 <h5>Exclusions</h5>
               </CTab>
-              <CTab title="4. MITRE ATT&CK">
+              <CTab title="5. MITRE ATT&CK">
                 <h5>MITRE ATT&CK</h5>
                 <p>Something something dark side</p>
                 <label>MITRE Tactics</label>
@@ -165,7 +181,7 @@
                   v-model="rule.tactics"
                   placeholder="Select tags to apply to this detection"
                   @select="updateTactic"
-                  @remove="updateTactic"
+                  @remove="removeTactic"
                   :options="mitre_tactics"
                   label="name"
                   track-by="external_id"
@@ -223,7 +239,7 @@
                   </template>
                 </multiselect>
               </CTab>
-              <CTab title="5. Actions">
+              <CTab title="6. Actions">
                 <h5>Actions</h5>
                 <p>
                   Actions run in coordination with a detection matching. Actions
@@ -231,7 +247,7 @@
                   playbooks.
                 </p>
               </CTab>
-              <CTab title="6. Triage Guide">
+              <CTab title="7. Triage Guide">
                 <h5>Triage Guide</h5>
                 <p>
                   A triage guide helps analysts reviewing events generated from
@@ -245,7 +261,7 @@
                   description="HINT: Use markdown to create a beautiful description."
                 />
               </CTab>
-              <CTab title="7. Review">{{rule}} </CTab>
+              <CTab title="8. Review">{{rule}} </CTab>
             </CTabs>
           </CCol>
         </CRow>
@@ -392,7 +408,7 @@ export default {
       error_message: "",
       submitted: false,
       step: 0,
-      final_step: 6,
+      final_step: 7,
       range: {
         start: this.days_ago(7),
         end: this.today(),
@@ -410,6 +426,7 @@ export default {
       active: true,
       modalStatus: this.show,
       tag_list: [],
+      short_names: []
     };
   },
   watch: {
@@ -548,7 +565,16 @@ export default {
       this.tag_list.push(t.name);
     },
     updateTactic(tactic) {
-      this.$store.dispatch("getMitreTechniques", { phase_names: this.rule.tactics.map(t => { return t.shortname }) });
+      if(!this.short_names.includes(tactic.shortname)) {
+        this.short_names.push(tactic.shortname)
+      }
+      this.$store.dispatch("getMitreTechniques", { phase_names: this.short_names });
+    },
+    removeTactic(tactic) {
+      if(this.short_names.includes(tactic.shortname)) {
+        this.short_names = this.short_names.filter(t => t !== tactic.shortname)
+      }
+      this.$store.dispatch("getMitreTechniques", { phase_names: this.short_names });
     },
     addTechnique(technique) {
 
