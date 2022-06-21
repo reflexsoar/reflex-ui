@@ -84,8 +84,14 @@
               <CTab title="2. Configuration">
                 <h5>Rule Configuration</h5>
                 <p>Something something dark side</p>
-                {{rule.source}}
-                <multiselect @search-change="searchInputs" v-model="rule.source" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" :options="input_list"/><br>
+                <label for="input">Input</label><br>
+                <multiselect id="input" @search-change="searchInputs" v-model="rule.source" placeholder="Select the input to be used for this detection" track-by="uuid" label="name" :options="input_list"/><br>
+                <CSelect
+                  label="Rule Type"
+                  v-model="rule.rule_type"
+                  @change="updateRuleType"
+                  :options="rule_types"
+                />
                 <CRow>
                   <CCol col="6">
                     <CSelect
@@ -102,28 +108,34 @@
                     </div>
                   </CCol>
                 </CRow>
-                <CSelect
-                  label="Rule Type"
-                  v-model="rule.rule_type"
-                  @change="updateRuleType"
-                  :options="rule_types"
-                />
-                <CTextarea
-                  label="Base Query"
-                  placeholder="A base query"
-                  description="A base query defines exactly what the detection should be looking for"
+                <label for="base_query">Base Query</label><br><prism-editor
+                  id="base_query"
+                  class="my-editor"
                   v-model="rule.query.query"
-                />
-                <div v-if="rule.rule_type == 0">Match Configuration</div>
-                <div v-else-if="rule.rule_type == 1">Threshold</div>
+                  :highlight="highlighter"
+                  line-numbers
+                  aria-label="Reflex Query"
+                ></prism-editor><br>
+                <div v-if="rule.rule_type == 1">
+                  <h5>Threshold Configuration</h5>
+                  <CRow>
+                    <CCol>
+                      <CInput v-model="rule.threshold_config.threshold" label="Threshold"/>
+                    </CCol>
+                    <CCol>
+                      <CInput v-model="rule.threshold_config.key_field" label="Key"/>
+                    </CCol>
+                  </CRow>
+                </div>
                 <div v-else-if="rule.rule_type == 2">Metric Change</div>
                 <div v-else-if="rule.rule_type == 3">Field Mismatch</div>
+                <h5>Time Settings</h5>
                 <CRow>
                   <CCol>
                     <CInput
                       label="Interval"
                       v-model="rule.interval"
-                      description="How ofthen detection will run in minutes"
+                      description="How often detection will run in minutes"
                     ></CInput>
                   </CCol>
                   <CCol>
@@ -131,6 +143,13 @@
                       label="Lookbehind"
                       v-model="rule.lookbehind"
                       description="How far back the detection should look in minutes. By default the detection will look back to the last run time."
+                    ></CInput>
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      label="Mute Period"
+                      v-model="rule.mute_period"
+                      description="How long in minutes to mute all future hits on this detection"
                     ></CInput>
                   </CCol>
                 </CRow>
@@ -156,11 +175,7 @@
                   :searchable="true"
                   @search-change="searchTactic"
                 ><template slot="singleLabel" slot-scope="props"
-                    ><img
-                      class="option__image"
-                      :src="props.option.img"
-                      alt="No Man’s Sky"
-                    /><span class="option__desc"
+                    ><span class="option__desc"
                       ><span class="option__title">{{
                         props.option.title
                       }}</span></span
@@ -191,11 +206,7 @@
                   @search-change="findTechnique"
                 >
                   <template slot="singleLabel" slot-scope="props"
-                    ><img
-                      class="option__image"
-                      :src="props.option.img"
-                      alt="No Man’s Sky"
-                    /><span class="option__desc"
+                    ><span class="option__desc"
                       ><span class="option__title">{{
                         props.option.title
                       }}</span></span
@@ -312,8 +323,10 @@ import { vSelect } from "vue-select";
 import { PrismEditor } from "vue-prism-editor";
 import { highlight, languages } from "prismjs/components/prism-core";
 import "vue-prism-editor/dist/prismeditor.min.css"; // import the styles somewhere
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-kusto';
 import "prismjs/components/prism-python";
-import "../assets/js/prism-rql";
+import "../assets/js/prism-lucene";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
 
 import { mapState } from "vuex";
@@ -446,7 +459,7 @@ export default {
       return d;
     },
     highlighter(code) {
-      return highlight(code, languages.rql);
+      return highlight(code, languages.lucene);
     },
     testDetectionRule() {},
     createDetectionRule() {

@@ -169,40 +169,6 @@ export default {
           {'name':'attack.t1036'},
           {'name':'attack.t1036.003'}],
         tag_list: [],
-        detection: {
-          sigma: `title: "Renamed PowerShell"
-id: "d178a2d7-129a-4ba4-8ee6-d6e1fecd5d20"
-status: "experimental"
-description: "Detects the execution of a renamed PowerShell often used by attackers or malware"
-references:
-    - "https://twitter.com/christophetd/status/1164506034720952320"
-author: "Florian Roth", "frack113"
-date: "2019/08/22"
-modified: "2021/07/03"
-tags:
-    - "car.2013-05-009"
-    - "attack.defense_evasion"
-    - "attack.t1036" # an old one
-    - "attack.t1036.003"
-logsource:
-    product: "windows"
-    category: "process_creation"
-detection:
-    selection:
-        Description|startswith: 
-            - "Windows PowerShell"
-            - 'pwsh'
-        Company: "Microsoft Corporation"
-    filter:
-        Image|endswith: 
-            - "powershell.exe"
-            - "powershell_ise.exe"
-            - 'pwsh.exe'
-    condition: "selection and not filter"
-falsepositives:
-    - "Unknown"
-level: "critical"`
-        },
         createDetection: false,
         rule: {
           tags: [],
@@ -216,7 +182,12 @@ level: "critical"`
           interval: 5,
           rule_type: 0,
           severity: 1,
-          risk_score: 50
+          risk_score: 50,
+          mute_period: 0,
+          threshold_config: {
+            threshold: 0,
+            key_field: null
+          }
         }
       }
     },
@@ -246,7 +217,12 @@ level: "critical"`
           interval: 5,
           rule_type: 0,
           severity: 1,
-          risk_score: 50
+          risk_score: 50,
+          mute_period: 0,
+          threshold_config: {
+            threshold: 0,
+            key_field: null
+          }
         }
         this.show_detecion_rule_modal = true
       },
