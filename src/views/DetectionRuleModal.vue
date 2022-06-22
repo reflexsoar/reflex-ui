@@ -118,18 +118,37 @@
                 ></prism-editor><br>
                 <div v-if="rule.rule_type == 1">
                   <h5>Threshold Configuration</h5>
+                  <p>A Threshold rule allows for alerting when the number of documents exceeds or is below a threshold</p>
                   <CRow>
                     <CCol>
-                      <CInput v-model="rule.threshold_config.threshold" label="Threshold"/>
+                      <CInput v-model="rule.threshold_config.key_field" label="Value Field" placeholder="Optional" description="Optional - When supplied the threshold will compare the total distinct values in this field to the threshold. When not supplied the total number of documents returned from the Base Query are compared"/>
+                    </CCol>
+                    <CCol col="2">
+                      <CSelect :value.sync="rule.threshold_config.operator" label="Operator" :options='["==","!=",">","<",">=","<="]'/>
                     </CCol>
                     <CCol>
-                      <CInput v-model="rule.threshold_config.key_field" label="Key"/>
-                    </CCol>
+                      <CInput v-model="rule.threshold_config.threshold" label="Threshold" description="The number of items that required for the detection to fire"/>
+                    </CCol>                    
                   </CRow>
                 </div>
-                <div v-else-if="rule.rule_type == 2">Metric Change</div>
+                <div v-else-if="rule.rule_type == 2">
+                  <h5>Metric Change Configuration</h5>
+                  {{rule.metric_change_config}}
+                  <CRow>
+                    <CCol col="2">
+                      <label for="metric_increase">Metric Increase</label><br>
+                      <CSwitch id="metric_increase" label-on="Yes" label-off="No" color="success" :value.sync="rule.metric_change_config.increase" label="Metric Increase" description="Does this rule detect metric increases or decreases"/>
+                    </CCol>
+                    <CCol>
+                      <CSelect :value.sync="rule.metric_change_config.threshold_format" :options="['Percentage','Numeric']" label="Metric Format"/>
+                    </CCol>
+                    <CCol>
+                      <CInput v-model="rule.metric_change_config.threshold" label="Metric Threshold"/>
+                    </CCol>
+                  </CRow>
+                </div>                
                 <div v-else-if="rule.rule_type == 3">
-                  <h5>Field Mismatch</h5>
+                  <h5>Field Mismatch Configuration</h5>
                   <CRow>
                     <CCol col="5">
                       <CInput v-model="rule.field_mismatch_config.source_field" label="Source Field" placeholder="The source field to compare against"/>

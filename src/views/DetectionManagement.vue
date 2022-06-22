@@ -192,6 +192,9 @@ export default {
             source_field: '',
             target_field: '',
             operator:'=='
+          },
+          metric_change_config: {
+            increase: false
           }
         }
       }
@@ -232,6 +235,11 @@ export default {
             source_field: '',
             target_field: '',
             operator:'=='
+          },
+          metric_change_config: {
+            increase: false,
+            threshold_format: 0,
+            threshold: 0
           }
         }
         this.show_detecion_rule_modal = true
