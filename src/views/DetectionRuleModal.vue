@@ -340,7 +340,6 @@
   width: 100%;
 }
 
-
 .slider {
   width: 100%;
 }
@@ -363,12 +362,14 @@ import 'prismjs/components/prism-kusto';
 import "prismjs/components/prism-python";
 import "../assets/js/prism-lucene";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
+import { DetectionExceptionModal } from "./DetectionExceptionModal"
 
 import { mapState } from "vuex";
 
 export default {
   components: {
     PrismEditor,
+    DetectionExceptionModal
   },
   name: "DetectionRuleModal",
   props: {
@@ -445,7 +446,8 @@ export default {
       active: true,
       modalStatus: this.show,
       tag_list: [],
-      short_names: []
+      short_names: [],
+      show_exception_modal: false
     };
   },
   watch: {
