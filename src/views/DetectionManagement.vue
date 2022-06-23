@@ -184,6 +184,7 @@ export default {
           severity: 1,
           risk_score: 50,
           mute_period: 0,
+          exceptions: [],
           threshold_config: {
             threshold: 0,
             key_field: null
@@ -227,6 +228,7 @@ export default {
           severity: 1,
           risk_score: 50,
           mute_period: 0,
+          exceptions: [],
           threshold_config: {
             threshold: 0,
             key_field: null

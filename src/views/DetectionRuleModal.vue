@@ -191,6 +191,28 @@
               </CTab>
               <CTab title="4. Exclusions">
                 <h5>Exclusions</h5>
+                <CButton @click="createExclusion">Add Exclusions</CButton>
+                <CDataTable
+                :items="rule.exceptions"
+                :fields="['field','condition','values',{key: 'list', label:'List Based'},{key: 'admin', label: ''}]">
+                <template #admin="{item}">
+                  <td class="text-right">
+                    <CButton aria-label="Edit Exclusion" @click="editExclusion(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit Exclusion', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+                    <CButton aria-label="Delete Exclusion" @click="deleteExclusion(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete Exclusion', placement:'left'}"><CIcon name='cilTrash'/></CButton>
+                  </td>
+                </template>
+                <template #values="{item}">
+                  <td>
+                    <li style="display: inline; margin-right: 2px;" v-for="value in item.values" :key="value"><CButton color="primary" size="sm" disabled>{{ value }}</CButton></li>
+                  </td>
+                </template>
+                <template #list="{item}">
+                  <td>
+                    <span v-if="item.list_uuid !== null">Yes</span> {{item.list_uuid}}
+                  </td>
+                </template>
+                </CDataTable>
+
               </CTab>
               <CTab title="5. MITRE ATT&CK">
                 <h5>MITRE ATT&CK</h5>
@@ -315,6 +337,7 @@
         >
       </template>
     </CModal>
+    <DetectionExclusionModal :exclusion.sync="exclusion" :rule.sync="rule" :show.sync="show_exclusion_modal" mode="Create"/>
   </div>
 </template>
 
@@ -353,6 +376,7 @@
 }
 </style>
 <script>
+import { uuid } from "vue-uuid";
 import { vSelect } from "vue-select";
 import { PrismEditor } from "vue-prism-editor";
 import { highlight, languages } from "prismjs/components/prism-core";
@@ -362,14 +386,14 @@ import 'prismjs/components/prism-kusto';
 import "prismjs/components/prism-python";
 import "../assets/js/prism-lucene";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
-import { DetectionExceptionModal } from "./DetectionExceptionModal"
+import DetectionExclusionModal from './DetectionExclusionModal.vue'
 
 import { mapState } from "vuex";
 
 export default {
   components: {
     PrismEditor,
-    DetectionExceptionModal
+    DetectionExclusionModal
   },
   name: "DetectionRuleModal",
   props: {
@@ -447,7 +471,8 @@ export default {
       modalStatus: this.show,
       tag_list: [],
       short_names: [],
-      show_exception_modal: false
+      show_exclusion_modal: false,
+      exclusion: {}
     };
   },
   watch: {
@@ -498,6 +523,20 @@ export default {
     },
     highlighter(code) {
       return highlight(code, languages.lucene);
+    },
+    createExclusion() {
+      this.exclusion = {
+        description: '',
+        condition: 'is',
+        values: [],
+        field: '',
+        uuid: uuid.v4(),
+        list_uuid: null
+      }
+      this.show_exclusion_modal = true
+    },
+    editExclusion(uuid) {
+      console.log(uuid)
     },
     testDetectionRule() {},
     createDetectionRule() {

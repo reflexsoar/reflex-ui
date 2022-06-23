@@ -8,8 +8,7 @@
     "github": "https://github.com/reflexsoar",
     "twitter": "https://twitter.com/reflexsoar"
   },
-  "contributors": [
-  ],
+  "contributors": [],
   "homepage": "http://reflexsoar.com",
   "copyright": "",
   "license": "GPL 3.0",
@@ -53,6 +52,7 @@
     "vue-select": "^3.16.0",
     "vue-simple-context-menu": "^3.4.2",
     "vue-tooltip": "^0.1.0",
+    "vue-uuid": "^3.0.0",
     "vuedraggable": "^2.24.3",
     "vuelidate": "^0.7.7",
     "vuex": "~3.1.3",
