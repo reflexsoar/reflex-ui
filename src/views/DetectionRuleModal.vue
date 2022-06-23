@@ -190,11 +190,12 @@
                 </CRow>
               </CTab>
               <CTab title="4. Exclusions">
-                <h5>Exclusions</h5>
-                <CButton @click="createExclusion">Add Exclusions</CButton>
+                <h5>Exclusions </h5>
+                <p>Exclusions allow for fine tuning a detection without modifying the underlying base query</p>
+                <CAlert color="warning"><b>NOTE:</b> If creating/editing/deleting exclusions from this window you must save the detection rule when finished.</CAlert>
                 <CDataTable
                 :items="rule.exceptions"
-                :fields="['field','condition','values',{key: 'list', label:'List Based'},{key: 'admin', label: ''}]">
+                :fields="['field','condition','values',{key: 'list', label:'Intel List'},{key: 'admin', label: ''}]">
                 <template #admin="{item}">
                   <td class="text-right">
                     <CButton aria-label="Edit Exclusion" @click="editExclusion(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit Exclusion', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
@@ -208,11 +209,11 @@
                 </template>
                 <template #list="{item}">
                   <td>
-                    <span v-if="item.list_uuid !== null">Yes</span> {{item.list_uuid}}
+                    <span v-if="item.list !== null"><CButton color="primary" size="sm" disabled>{{item.list.name}}</CButton></span>
                   </td>
                 </template>
                 </CDataTable>
-
+                <CButton @click="createExclusion" color="success">New Exclusion</CButton>
               </CTab>
               <CTab title="5. MITRE ATT&CK">
                 <h5>MITRE ATT&CK</h5>
@@ -302,12 +303,29 @@
                   description="HINT: Use markdown to create a beautiful description."
                 />
               </CTab>
-              <CTab title="8. Review">{{rule}} </CTab>
+              <CTab title="8. False Positives">
+                <h5>False Positives</h5>
+                <p>False positives are quick indicators that an analyst can use to rule out false positive activity on the detection</p>
+                <CButton @click="addFP" size="sm" color="success">New False Positive</CButton><br><br> 
+                <div v-for="fp,i in rule.false_positives" :key="i">
+                  <CInput v-model="rule.false_positives[i]"><template #append><CButton @click="removeFP(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
+                </div>
+              </CTab>
+              <CTab title="9. References">
+                <h5>References</h5>
+                <p>References are useful external resources that help an analyst understand the detection</p>
+                <CButton @click="addReference" size="sm" color="success">New Reference</CButton><br><br>
+                <div v-for="fp,i in rule.references" :key="i">
+                  <CInput v-model="rule.references[i]"><template #append><CButton @click="removeReference(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
+                </div>
+              </CTab>
+              <CTab title="10. Review">{{rule}} </CTab>
             </CTabs>
           </CCol>
         </CRow>
       </div>
       <template #footer>
+        {{rule}}
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
         <CButton v-if="step != 0" @click="previousStep()" color="info"
           >Previous</CButton
@@ -337,7 +355,7 @@
         >
       </template>
     </CModal>
-    <DetectionExclusionModal :exclusion.sync="exclusion" :rule.sync="rule" :show.sync="show_exclusion_modal" mode="Create"/>
+    <DetectionExclusionModal :exclusion.sync="exclusion" :rule.sync="rule" :show.sync="show_exclusion_modal" :mode="exclusion_modal_mode"/>
   </div>
 </template>
 
@@ -452,7 +470,7 @@ export default {
       error_message: "",
       submitted: false,
       step: 0,
-      final_step: 7,
+      final_step: 9,
       range: {
         start: this.days_ago(7),
         end: this.today(),
@@ -472,6 +490,7 @@ export default {
       tag_list: [],
       short_names: [],
       show_exclusion_modal: false,
+      exclusion_modal_mode: 'Create',
       exclusion: {}
     };
   },
@@ -524,6 +543,28 @@ export default {
     highlighter(code) {
       return highlight(code, languages.lucene);
     },
+    addFP(){
+      if(this.rule.false_positives && this.rule.false_positives.length > 0)
+      {
+        this.rule.false_positives.push('')
+      } else {
+        this.rule.false_positives = ['']
+      }
+      
+    },
+    removeFP(id) {
+      this.rule.false_positives.splice(id,1)
+    },
+    addReference(){
+      if(this.rule.references && this.rule.references.length > 0) {
+        this.rule.references.push('')
+      } else {
+        this.rule.references = ['']
+      }      
+    },
+    removeReference(id) {
+      this.rule.references.splice(id,1)
+    },
     createExclusion() {
       this.exclusion = {
         description: '',
@@ -531,12 +572,18 @@ export default {
         values: [],
         field: '',
         uuid: uuid.v4(),
-        list_uuid: null
+        list: null
       }
+      this.exclusion_modal_mode = 'Create'
       this.show_exclusion_modal = true
     },
     editExclusion(uuid) {
-      console.log(uuid)
+      this.exclusion = this.rule.exceptions.find(exclusion => exclusion.uuid === uuid)
+      this.exclusion_modal_mode = 'Edit'
+      this.show_exclusion_modal = true
+    },
+    deleteExclusion(uuid) {
+      this.rule.exceptions = this.rule.exceptions.filter(exclusions => exclusions.uuid !== uuid)
     },
     testDetectionRule() {},
     createDetectionRule() {
@@ -553,7 +600,7 @@ export default {
         'name': technique.name}}
       )
 
-      parseInt(this.risk_score)
+      this.rule.risk_score = parseInt(this.rule.risk_score)
 
       this.submitted = true;
       this.$store.dispatch('createDetection', this.rule).then(resp => {
@@ -578,7 +625,7 @@ export default {
         'name': technique.name}}
       )
 
-      parseInt(this.risk_score)
+      this.rule.risk_score = parseInt(this.rule.risk_score)
      
       this.submitted = true;
       this.$store.dispatch('updateDetection', {uuid: this.rule.uuid, data: this.rule}).then(resp => {

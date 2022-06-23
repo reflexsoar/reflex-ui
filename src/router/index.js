@@ -43,6 +43,7 @@ const ObservableHistory = () => import('@/views/ObservableHistory')
 const UserProfile = () => import('@/views/UserProfile')
 const Hunter = () => import('@/views/Hunter')
 const DetectionManagement = () => import('@/views/DetectionManagement')
+const DetectionDetails = () => import('@/views/DetectionDetails')
 const EventRuleManagement = () => import('@/views/EventRuleManagement')
 const Organization = () => import('@/views/Organization')
 const OrganizationSettings = () => import('@/views/OrganizationSettings')
@@ -150,6 +151,14 @@ function configRoutes () {
           path: 'detections',
           name: 'Detections',
           component: DetectionManagement,
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'detections/:uuid',
+          name: 'Detection Details',
+          component: DetectionDetails,
           meta: {
             requiresAuth: true
           }

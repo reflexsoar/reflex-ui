@@ -939,7 +939,7 @@ const actions = {
       })
     })
   },
-  getLists({commit}, {data_type=[], organization=null, page=1, page_size=10}) {
+  getLists({commit}, {data_type=[], organization=null, name__like=null, page=1, page_size=10}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/list?page=${page}&page_size=${page_size}`
@@ -950,6 +950,10 @@ const actions = {
 
       if(organization) {
         base_url += `&organization=${organization}`
+      }
+
+      if(name__like) {
+        base_url += `&name__like=${name__like}`
       }
 
       Axios({url: base_url, method: 'GET'})
@@ -1319,6 +1323,7 @@ const actions = {
   },
   updateDetection({commit}, {uuid, data}) {
     return new Promise((resolve, reject) => {
+      console.log(data)
       Axios({url: `${BASE_URL}/detection/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_detection', resp.data)

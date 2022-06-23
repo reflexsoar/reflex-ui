@@ -63,7 +63,7 @@
               </template>
               <template #actions="{item}">
                 <td style="min-width:25px" class="text-right">
-                  <CButton aria-label="Edit Detection" @click="editDetectionModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit Detection', placement:'left'}"><CIcon name='cilPencil'/></CButton>
+                  <CButton aria-label="View Detection" :to="`detections/${item.uuid}`" size="sm" color="info" v-c-tooltip="{content:'View Detection', placement:'left'}"><CIcon name='cilMagnifyingGlass'/></CButton>&nbsp;<CButton aria-label="Edit Detection" @click="editDetectionModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit Detection', placement:'left'}"><CIcon name='cilPencil'/></CButton>
                   <span v-if="item.active">&nbsp;<CButton aria-label="Disable Detection" @click="disableDetection(item.uuid)" size="sm" color="warning" v-c-tooltip="{content:'Disable Detection', placement:'left'}"><CIcon name='cilBan'/></CButton></span>
                   <span v-if="!item.active">&nbsp;<CButton aria-label="Enable Detection" @click="enableDetection(item.uuid)" size="sm" color="success" v-c-tooltip="{content:'Enable Detection', placement:'left'}"><CIcon name='cilCheck'/></CButton></span>
                   <span v-if="!item.active">&nbsp;<CButton aria-label="Delete Detection" @click="deleteDetectionModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete Detection', placement:'left'}"><CIcon name='cilTrash'/></CButton></span>
@@ -185,6 +185,8 @@ export default {
           risk_score: 50,
           mute_period: 0,
           exceptions: [],
+          false_positives:[],
+          references: [],
           threshold_config: {
             threshold: 0,
             key_field: null
@@ -229,9 +231,11 @@ export default {
           risk_score: 50,
           mute_period: 0,
           exceptions: [],
+          false_positives:[],
+          references: [],
           threshold_config: {
             threshold: 0,
-            key_field: null
+            key_field: ''
           },
           field_mismatch_config: {
             source_field: '',

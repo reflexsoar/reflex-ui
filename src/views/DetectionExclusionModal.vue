@@ -5,7 +5,7 @@
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
     />
     <CModal
-      title="Create Detection Exclusion"
+      :title="`${mode} Detection Exclusion`"
       :centered="false"
       size="xl"
       :show.sync="modalStatus"
@@ -29,15 +29,21 @@
     <CRow>
       <CCol>
         <label for="exclusion_values">Values</label><br>
-        <multiselect id="exclusion_values" :multiple="true" @tag="addExclusionValue" v-model="exclusion.values" placeholder="Enter the values to exclude" :taggable="true" :options="exclusion_values"/><br>
+        <multiselect id="exclusion_values" :multiple="true" @tag="addExclusionValue" v-model="exclusion.values" placeholder="Enter the values to exclude" :taggable="true" :close-on-select="false" :options="exclusion_values"/><br>
       </CCol>
     </CRow>
     <CRow>
       <CCol>
-        <CSelect label="Intel List" v-model="exclusion.list_uuid" :options="[]" description="Optional - If selected the values in this list will be excluded along with any manually provided values"/>
+        <label for="intel_list">Intel List</label><br>
+        <multiselect id="intel_list" v-model="exclusion.list" :options="formatted_lists" track-by="uuid" label="name" :close-on-select="true"
+                  :internal-search="false"
+                  :searchable="true"
+                  @search-change="getThreatList"
+                  @select="setList"/>
+        <small class="form-text text-muted w-100">Optional - If selected the values in this list will be excluded along with any manually provided values</small><br>
       </CCol>
     </CRow>
-    {{rule.organization}}
+    {{rule.organization}} {{exclusion}}
     <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
         <CButton
@@ -66,6 +72,8 @@
 }
 </style>
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "DetectionExclusionModal",
   props: {
@@ -76,6 +84,11 @@ export default {
       type: String,
       default: "Create",
     },
+  },
+  computed: {
+    formatted_lists () {
+      return this.lists.map(list => { return {'name': list.name, 'uuid': list.uuid}})
+    }, ...mapState(['lists'])
   },
   data () {
     return {
@@ -95,8 +108,7 @@ export default {
     },
     modalStatus: function () {
       if (this.modalStatus) {
-        this.$store.dispatch("getMitreTactics", {});
-        this.$store.dispatch("getMitreTechniques", {});
+        this.getThreatList()
         this.test_failed = true;
       }
       this.$emit("update:show", this.modalStatus);
@@ -123,7 +135,25 @@ export default {
       this.modalStatus = false
     },
     editExclusion() {
-      console.log('Edit')
+      if(this.rule.exceptions > 0) {
+        this.rule.exceptions = [...this.rule.exceptions.filter(e => e.uuid !== this.exclusion.uuid), this.exclusion]
+      } else {
+        this.rule.exceptions = [this.exclusion]
+      }
+      this.modalStatus = false
+    },
+    getThreatList(search) {
+      let organization = this.rule.organization
+      let params = {
+        organization: organization
+      }
+      if(search) {
+        params['name__like'] = search
+      }
+      this.$store.dispatch('getLists', params)
+    },
+    setList(list) {
+      this.exclusion.list = list
     },
     reset() {
     },
