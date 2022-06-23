@@ -140,7 +140,7 @@
                                 <multiselect 
                                     v-model="assignee" 
                                     label="username" 
-                                    :options="users" 
+                                    :options="[...users, {username:'Unassigned'}]" 
                                     track-by="username" 
                                     :searchable="true"
                                     :internal-search="false"
@@ -704,7 +704,7 @@ export default {
                 }
                 
                 this.$store.dispatch('getUsers', {organization: this.case_data.organization}).then(resp => {
-                    this.users = [...this.$store.getters.users, {username:'Unassigned'}]
+                    this.users = this.$store.getters.users
                 })
 
                 this.$store.dispatch('getCaseStatus', {organization: this.case_data.organization}).then(resp => {
@@ -880,8 +880,7 @@ export default {
         },
         usersFind(query) {
             this.$store.dispatch('getUsersByName', {username: query, organization: this.case_data.organization}).then(resp => {
-                console.log(this.$store.getters.users.users)
-                this.users = [...this.$store.getters.users, {username:'Unassigned'}]
+                this.users = this.$store.getters.users
             })
         },
         collapseAll() {
