@@ -96,8 +96,7 @@
         </CRow>          
       </CTab>
       <CTab title="Detection" v-if="this.event_data.detection_id">
-        <CRow style="padding: 10px 10px 0px 10px;">
-          <CCol >
+        <CCardBody>
             <h3>Detection</h3>
             {{detection.description}}<br><br>
             <div>
@@ -145,8 +144,7 @@
                 </template>
                 </CDataTable>
             </div>
-          </CCol>
-        </CRow>
+        </CCardBody>
       </CTab>
     </CTabs>
     </CCol>

@@ -25,13 +25,13 @@
         <!--<CInput v-model="exclusion.field" label="Field Name" description="The field to compare values to"/>-->
       </CCol>
       <CCol>
-        <CSelect :value.sync="exclusion.condition" :options='["is","one of"]' label="Condition"/>
+        <CSelect :value.sync="exclusion.condition" :options='["is","one of"]' @change="checkValues" label="Condition"/>
       </CCol>
     </CRow>
     <CRow>
       <CCol>
         <label for="exclusion_values">Values</label><br>
-        <multiselect id="exclusion_values" :multiple="true" @tag="addExclusionValue" v-model="exclusion.values" placeholder="Enter the values to exclude" :taggable="true" :close-on-select="false" :options="exclusion_values"/><br>
+        <multiselect id="exclusion_values" :multiple="allow_multiple" @tag="addExclusionValue" v-model="exclusion.values" placeholder="Enter the values to exclude" :taggable="true" :close-on-select="!allow_multiple" :options="exclusion_values"/><br>
       </CCol>
     </CRow>
     <CRow>
@@ -87,6 +87,13 @@ export default {
     },
   },
   computed: {
+    allow_multiple () {
+      if(this.exclusion.condition === 'one of') {
+        return true
+      } else {
+        return false
+      }
+    },
     formatted_lists () {
       return this.lists.map(list => { return {'name': list.name, 'uuid': list.uuid}})
     }, ...mapState(['lists','index_fields'])
@@ -123,6 +130,11 @@ export default {
     addExclusionValue(value) {
         this.exclusion_values.push(value)
         this.exclusion.values.push(value);
+    },
+    checkValues(event) {
+      if(this.exclusion.values.length > 1 && event.target.value === 'is') {
+        this.exclusion.values = []
+      }
     },
     createExclusion() {
       if('exceptions' in this.rule) {
