@@ -100,33 +100,50 @@
           <CCol >
             <h3>Detection</h3>
             {{detection.description}}<br><br>
-            <div v-for="query,i in detection.query" :key="i">
-              <pre>{{query.query}}</pre>
-              
+            <div>
+              <h4>Base Query</h4>
+              <pre>{{detection.query.query}}</pre>
             </div>
-
             <div v-if="detection.guide">
               <h4>Investigation Guide</h4>
               {{detection.guide}}<br><br>
+
+              <p><b>False Positives</b><br>
+              <li v-for="fp,i in detection.false_positives" :key="i">
+                  {{fp}}
+              </li></p>
+              <p><b>References</b><br>
+              <li v-for="ref,i in detection.references" :key="i">
+                  <a v-bind:href="ref" target="_">{{ref}}</a>
+              </li></p>
             </div>
+
+            <h4>MITRE ATT&CK</h4>
+            <p><b>MITRE ATT&CK Tactics</b> <li style="display: inline; margin-right: 2px;" v-for="t in detection.tactics" :key="t.name"><CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton></li></p>
+            <p><b>MITRE ATT&CK Techniques</b> <li style="display: inline; margin-right: 2px;" v-for="t in detection.techniques" :key="t.name"><CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton></li></p>
 
             <div v-if="detection.exceptions">
               <h4>Exceptions</h4>
               <CDataTable
-              :hover="true"
-              :items="detection.exceptions"
-              :fields="['query','description','created_by']"
-              :items-per-page="10"
-              bordered
-              striped
-              pagination
-            >
-              <template #created_by="{item}">
-                <td>
-                  {{item.created_by.username}}
+                :items="detection.exceptions"
+                :fields="['field','condition','values',{key: 'list', label:'Intel List'},{key: 'admin', label: ''}]">
+                <template #admin="{item}">
+                <td class="text-right">
+                    <CButton aria-label="Edit Exclusion"  size="sm" color="info" v-c-tooltip="{content:'Edit Exclusion', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+                    <CButton aria-label="Delete Exclusion"  size="sm" color="danger" v-c-tooltip="{content:'Delete Exclusion', placement:'left'}"><CIcon name='cilTrash'/></CButton>
                 </td>
-              </template>
-              </CDataTable>
+                </template>
+                <template #values="{item}">
+                <td>
+                    <li style="display: inline; margin-right: 2px;" v-for="value in item.values" :key="value"><CButton color="primary" size="sm" disabled>{{ value }}</CButton></li>
+                </td>
+                </template>
+                <template #list="{item}">
+                <td>
+                    <span v-if="item.list.name !== null"><CButton color="primary" size="sm" disabled>{{item.list.name}}</CButton></span>
+                </td>
+                </template>
+                </CDataTable>
             </div>
           </CCol>
         </CRow>

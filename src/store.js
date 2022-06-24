@@ -86,6 +86,7 @@ const state = {
   mitre_techniques: [],
   credential_list: [],
   intel_filters: [],
+  index_fields: [],
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
@@ -477,6 +478,9 @@ const mutations = {
   update_input(state, input) {
     state.input = input
     state.inputs = state.inputs.map(i => i.uuid == input.uuid ? input : i)
+  },
+  save_index_fields(state, fields) {
+    state.index_fields = fields
   },
   add_detection(state, detection){
     if(state.detections.length == 0) {
@@ -1327,6 +1331,29 @@ const actions = {
       Axios({url: `${BASE_URL}/detection/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_detection', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getInputIndexFields({commit}, {uuid, limit=25, organization=null, name__like=null}) {
+    return new Promise((resolve, reject) => {
+
+      let url = `${BASE_URL}/input/${uuid}/index_fields?limit=${limit}`
+
+      if(organization) {
+        url += `&organization=${organization}`
+      }
+
+      if(name__like) {
+        url += `&name__like=${name__like}`
+      }
+
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_index_fields', resp.data.index_fields)
         resolve(resp)
       })
       .catch(err => {

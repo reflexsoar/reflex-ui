@@ -209,15 +209,15 @@
                 </template>
                 <template #list="{item}">
                   <td>
-                    <span v-if="item.list !== null"><CButton color="primary" size="sm" disabled>{{item.list.name}}</CButton></span>
+                    <span v-if="item.list.name !== null"><CButton color="primary" size="sm" disabled>{{item.list.name}}</CButton></span>
                   </td>
                 </template>
                 </CDataTable>
                 <CButton @click="createExclusion" color="success">New Exclusion</CButton>
               </CTab>
-              <CTab title="5. MITRE ATT&CK">
+              <CTab title="5. Meta Information">
                 <h5>MITRE ATT&CK</h5>
-                <p>Something something dark side</p>
+                <p>Selecting MITRE ATT&CK Tactics and Techniques allows for mapping the MITRE ATT&CK Matrix to easily determine detection coverage.</p>
                 <label>MITRE Tactics</label>
                 <multiselect
                   v-model="rule.tactics"
@@ -279,17 +279,15 @@
                       }}</span>
                     </div>
                   </template>
-                </multiselect>
+                </multiselect><br>
+                <h5>References</h5>
+                <p>References are useful external resources that help an analyst understand the detection.</p>
+                <CButton @click="addReference" size="sm" color="success">New Reference</CButton><br><br>
+                <div v-for="fp,i in rule.references" :key="i">
+                  <CInput v-model="rule.references[i]"><template #append><CButton @click="removeReference(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
+                </div>
               </CTab>
-              <CTab title="6. Actions">
-                <h5>Actions</h5>
-                <p>
-                  Actions run in coordination with a detection matching. Actions
-                  can be individual integration steps or running entire
-                  playbooks.
-                </p>
-              </CTab>
-              <CTab title="7. Triage Guide">
+              <CTab title="6. Triage Guide">
                 <h5>Triage Guide</h5>
                 <p>
                   A triage guide helps analysts reviewing events generated from
@@ -298,12 +296,10 @@
                 </p>
                 <CTextarea
                   v-model="rule.guide"
-                  :rows="10"
+                  :rows="5"
                   label="Guide Details"
                   description="HINT: Use markdown to create a beautiful description."
                 />
-              </CTab>
-              <CTab title="8. False Positives">
                 <h5>False Positives</h5>
                 <p>False positives are quick indicators that an analyst can use to rule out false positive activity on the detection</p>
                 <CButton @click="addFP" size="sm" color="success">New False Positive</CButton><br><br> 
@@ -311,21 +307,12 @@
                   <CInput v-model="rule.false_positives[i]"><template #append><CButton @click="removeFP(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
                 </div>
               </CTab>
-              <CTab title="9. References">
-                <h5>References</h5>
-                <p>References are useful external resources that help an analyst understand the detection</p>
-                <CButton @click="addReference" size="sm" color="success">New Reference</CButton><br><br>
-                <div v-for="fp,i in rule.references" :key="i">
-                  <CInput v-model="rule.references[i]"><template #append><CButton @click="removeReference(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
-                </div>
-              </CTab>
-              <CTab title="10. Review">{{rule}} </CTab>
+              <CTab title="7. Review">{{rule}} </CTab>
             </CTabs>
           </CCol>
         </CRow>
       </div>
       <template #footer>
-        {{rule}}
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
         <CButton v-if="step != 0" @click="previousStep()" color="info"
           >Previous</CButton
@@ -470,7 +457,7 @@ export default {
       error_message: "",
       submitted: false,
       step: 0,
-      final_step: 9,
+      final_step: 6,
       range: {
         start: this.days_ago(7),
         end: this.today(),

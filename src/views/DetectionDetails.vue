@@ -22,8 +22,6 @@
                                 <CCardBody>
                                     <p>{{detection.description}}</p>
                                     <p><b>Created By: </b> {{detection.created_by.username}}</p>
-                                    <b>Base Query</b>
-                                    <p>{{detection.query}}</p>
                                     <p><b>False Positives</b><br>
                                     <li v-for="fp,i in detection.false_positives" :key="i">
                                         {{fp}}
@@ -49,9 +47,9 @@
                                     <b>Configuration</b>
                                 </CCardHeader>
                                 <CCardBody>
-                                    SOURCE: {{detection.source}}<br>
-                                    TYPE: {{detection.rule_type}}<br>
-                                    QUERY: {{detection.query.query}}
+                                    <p><b>Source Input</b><br>{{detection.source.name}}</p>
+                                    <p><b>Detection Type</b><br>{{detectionType(detection.rule_type)}}</p>
+                                    <p><b>Base Query</b><br>{{detection.query.query}}</p>
                                 </CCardBody>
                             </CCard>
                         </CCol>
@@ -77,9 +75,38 @@
                     <CCard>
                         <CCardBody class='tabbed'>
                             <CTabs>
-                                <CTab title="Hits">stuff</CTab>
-                                <CTab title="Exclusions"/>
-                                <CTab title="Log"/>
+                                <CTab title="Hits">
+                                    <CCardBody>
+                                        Coming Soon
+                                    </CCardBody>
+                                </CTab>
+                                <CTab title="Exclusions">
+                                    <CDataTable
+                                        :items="detection.exceptions"
+                                        :fields="['field','condition','values',{key: 'list', label:'Intel List'},{key: 'admin', label: ''}]">
+                                        <template #admin="{item}">
+                                        <td class="text-right">
+                                            <CButton aria-label="Edit Exclusion"  size="sm" color="info" v-c-tooltip="{content:'Edit Exclusion', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+                                            <CButton aria-label="Delete Exclusion"  size="sm" color="danger" v-c-tooltip="{content:'Delete Exclusion', placement:'left'}"><CIcon name='cilTrash'/></CButton>
+                                        </td>
+                                        </template>
+                                        <template #values="{item}">
+                                        <td>
+                                            <li style="display: inline; margin-right: 2px;" v-for="value in item.values" :key="value"><CButton color="primary" size="sm" disabled>{{ value }}</CButton></li>
+                                        </td>
+                                        </template>
+                                        <template #list="{item}">
+                                        <td>
+                                            <span v-if="item.list.name !== null"><CButton color="primary" size="sm" disabled>{{item.list.name}}</CButton></span>
+                                        </td>
+                                        </template>
+                                        </CDataTable>
+                                </CTab>
+                                <CTab title="Log">
+                                    <CCardBody>
+                                        Coming Soon
+                                    </CCardBody>
+                                </CTab>
                             </CTabs>
                         </CCardBody>
                     </CCard>
@@ -107,6 +134,9 @@ export default {
     methods: {
         getDetection(uuid) {
             this.$store.dispatch('getDetection', uuid)
+        },
+        detectionType(i){
+            return ["Match", "Threshold", "Metric Change", "Field Mismatch"][i]
         }
     }
 }

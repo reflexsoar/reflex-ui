@@ -20,7 +20,9 @@
     </CRow>
     <CRow>
       <CCol>
-        <CInput v-model="exclusion.field" label="Field Name" description="The field to compare values to"/>
+        <label for="exclusion_values">Field Name</label><br>
+        <multiselect id="exclusion_field" v-model="exclusion.field" placeholder="Select a field" :options="index_fields" :internal-search="false" @search-change="getIndexField" :close-on_select="true"/>
+        <!--<CInput v-model="exclusion.field" label="Field Name" description="The field to compare values to"/>-->
       </CCol>
       <CCol>
         <CSelect :value.sync="exclusion.condition" :options='["is","one of"]' label="Condition"/>
@@ -43,7 +45,6 @@
         <small class="form-text text-muted w-100">Optional - If selected the values in this list will be excluded along with any manually provided values</small><br>
       </CCol>
     </CRow>
-    {{rule.organization}} {{exclusion}}
     <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
         <CButton
@@ -88,7 +89,7 @@ export default {
   computed: {
     formatted_lists () {
       return this.lists.map(list => { return {'name': list.name, 'uuid': list.uuid}})
-    }, ...mapState(['lists'])
+    }, ...mapState(['lists','index_fields'])
   },
   data () {
     return {
@@ -109,6 +110,7 @@ export default {
     modalStatus: function () {
       if (this.modalStatus) {
         this.getThreatList()
+        this.getIndexField()
         this.test_failed = true;
       }
       this.$emit("update:show", this.modalStatus);
@@ -141,6 +143,18 @@ export default {
         this.rule.exceptions = [this.exclusion]
       }
       this.modalStatus = false
+    },
+    getIndexField(search) {
+      let organization = this.rule.organization
+      let uuid = this.rule.source.uuid
+      let params = {
+        organization: organization,
+        uuid: uuid
+      }
+      if(search) {
+        params['name__like'] = search
+      }
+      this.$store.dispatch('getInputIndexFields', params)
     },
     getThreatList(search) {
       let organization = this.rule.organization
