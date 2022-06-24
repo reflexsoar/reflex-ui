@@ -176,6 +176,9 @@ export default {
             query: "okay",
             language:""
           },
+          source: {
+            uuid: null
+          },
           techniques: [],
           tactics: [],
           lookbehind: 5,
@@ -221,6 +224,9 @@ export default {
           query: {
             query: "okay",
             language:""
+          },
+          source: {
+            uuid: null
           },
           techniques: [],
           tactics: [],

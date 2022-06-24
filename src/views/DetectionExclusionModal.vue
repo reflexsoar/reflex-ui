@@ -20,9 +20,13 @@
     </CRow>
     <CRow>
       <CCol>
-        <label for="exclusion_values">Field Name</label><br>
-        <multiselect id="exclusion_field" v-model="exclusion.field" placeholder="Select a field" :options="index_fields" :internal-search="false" @search-change="getIndexField" :close-on_select="true"/>
-        <!--<CInput v-model="exclusion.field" label="Field Name" description="The field to compare values to"/>-->
+        <div v-if="isSearchable">
+          <label for="exclusion_values">Field Name</label><br>
+          <multiselect id="exclusion_field" v-model="exclusion.field" placeholder="Select a field" :options="index_fields" :internal-search="false" :searchable="isSearchable" @search-change="getIndexField" :close-on_select="true"/>
+        </div>
+        <div v-else>
+          <CInput v-model="exclusion.field" label="Field Name" description="The field to compare values to"/>
+        </div>
       </CCol>
       <CCol>
         <CSelect :value.sync="exclusion.condition" :options='["is","one of"]' @change="checkValues" label="Condition"/>
@@ -87,6 +91,13 @@ export default {
     },
   },
   computed: {
+    isSearchable() {
+      if(this.rule.source && this.rule.source.uuid !== null) {
+        return true
+      } else {
+        return false
+      }
+    },
     allow_multiple () {
       if(this.exclusion.condition === 'one of') {
         return true
@@ -157,16 +168,18 @@ export default {
       this.modalStatus = false
     },
     getIndexField(search) {
-      let organization = this.rule.organization
-      let uuid = this.rule.source.uuid
-      let params = {
-        organization: organization,
-        uuid: uuid
-      }
-      if(search) {
-        params['name__like'] = search
-      }
-      this.$store.dispatch('getInputIndexFields', params)
+      if(this.rule.source.uuid !== null) {
+        let organization = this.rule.organization
+        let uuid = this.rule.source.uuid
+        let params = {
+          organization: organization,
+          uuid: uuid
+        }
+        if(search) {
+          params['name__like'] = search
+        }
+        this.$store.dispatch('getInputIndexFields', params)
+      }      
     },
     getThreatList(search) {
       let organization = this.rule.organization
