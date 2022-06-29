@@ -38,7 +38,7 @@ Prism.languages.rql = {
 	},
     
 	'constant': {
-		pattern: /(?:observables|value|tlp|tags|spotted|safe|source_field|data_type|ioc|original_source_field|title|description|tlp|severity|status|name|reference|source|signature|tags|raw_log[\.]?.*)/
+		pattern: /(?:observables|value|tlp|tags|spotted|safe|source_field|data_type|ioc|original_source_field|title|description|tlp|severity|risk_score|status|name|reference|source|signature|tags|raw_log[\.]?.*)/
 	},
 
 	'command': {
