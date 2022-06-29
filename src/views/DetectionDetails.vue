@@ -52,7 +52,7 @@
                                     <p><b>Detection Type</b><br>{{detectionType(detection.rule_type)}}</p>
                                     <p><b>Base Query</b><br><div class="query">{{detection.query.query}}</div></p>
                                     <p><b>Severity</b><br><CButton class="tag" size="sm" :color="$store.getters.severity_color(detection.severity)">{{$store.getters.severity_text(detection.severity)}}</CButton></p>
-                                    <p><b>Risk Score</b><br><CProgress :value="detection.risk_score" max=100 min=0 show-value /></p>
+                                    <p><b>Risk Score</b><br><CProgress :value="detection.risk_score" show-value :color="riskScoreColor(detection.risk_score)"/></p>
                                 </CCardBody>
                             </CCard>
                         </CCol>
@@ -83,6 +83,16 @@
                                         <CDataTable
                                             :items="detection_hits"
                                         >
+                                        <template #severity="{item}">
+                                            <td>
+                                                <CButton class="tag" size="sm" :color="$store.getters.severity_color(item.severity)">{{$store.getters.severity_text(item.severity)}}</CButton>
+                                            </td>
+                                        </template>
+                                        <template #risk_score="{item}">
+                                            <td>
+                                                <CProgress v-if="item.risk_score" :value="item.risk_score" :color="riskScoreColor(detection.risk_score)" show-value/>
+                                            </td>
+                                        </template>
                                         <template #tags="{item}">
                                             <td>
                                                 <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled="">{{ tag }}</CButton></li>
@@ -181,6 +191,23 @@ export default {
         },
         getHits() {
             this.$store.dispatch('getDetectionHits', {uuid: this.uuid})
+        },
+        riskScoreColor(score) {
+            if(score === null) {
+                return "info"
+            }
+            if(score >= 0 && score <= 10) {
+                return "info"
+            }
+            if(score >= 11 && score <= 25) {
+                return "success"
+            }
+            if(score >= 26 && score <= 75) {
+                return "warning"
+            }
+            if(score >= 76) {
+                return "danger"
+            }
         }
     }
 }
