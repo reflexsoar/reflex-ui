@@ -21,13 +21,14 @@
                                 </CCardHeader>
                                 <CCardBody>
                                     <p>{{detection.description}}</p>
-                                    <p><b>Created By: </b> {{detection.created_by.username}}</p>
+                                    <p><b>Created By: </b> {{detection.created_by.username}} on {{ detection.created_at| moment('MMMM Do YYYY, h:mm:ss a') }}</p>
+                                    <p v-if="detection.updated_by"><b>Updated By: </b> {{detection.updated_by.username}}, {{ detection.updated_at| moment('from','now')  }}</p>
                                     <p><b>False Positives</b><br>
-                                    <li v-for="fp,i in detection.false_positives" :key="i">
+                                    <li v-for="fp in detection.false_positives" :key="fp">
                                         {{fp}}
                                     </li></p>
                                     <p><b>References</b><br>
-                                    <li v-for="ref,i in detection.references" :key="i">
+                                    <li v-for="ref in detection.references" :key="ref">
                                         <a v-bind:href="ref" target="_">{{ref}}</a>
                                     </li></p>
                                     <p><b>MITRE ATT&CK Tactics</b> <li style="display: inline; margin-right: 2px;" v-for="t in detection.tactics" :key="t.name"><CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton></li></p>
@@ -49,7 +50,9 @@
                                 <CCardBody>
                                     <p><b>Source Input</b><br>{{detection.source.name}}</p>
                                     <p><b>Detection Type</b><br>{{detectionType(detection.rule_type)}}</p>
-                                    <p><b>Base Query</b><br>{{detection.query.query}}</p>
+                                    <p><b>Base Query</b><br><div class="query">{{detection.query.query}}</div></p>
+                                    <p><b>Severity</b><br><CButton class="tag" size="sm" :color="$store.getters.severity_color(detection.severity)">{{$store.getters.severity_text(detection.severity)}}</CButton></p>
+                                    <p><b>Risk Score</b><br><CProgress :value="detection.risk_score" max=100 min=0 show-value /></p>
                                 </CCardBody>
                             </CCard>
                         </CCol>
@@ -74,10 +77,18 @@
                 <CCol>
                     <CCard>
                         <CCardBody class='tabbed'>
-                            <CTabs>
+                            <CTabs :activeTab.sync="activeTab">
                                 <CTab title="Hits">
                                     <CCardBody>
-                                        Coming Soon
+                                        <CDataTable
+                                            :items="detection_hits"
+                                        >
+                                        <template #tags="{item}">
+                                            <td>
+                                                <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled="">{{ tag }}</CButton></li>
+                                            </td>
+                                        </template>
+                                        </CDataTable>
                                     </CCardBody>
                                 </CTab>
                                 <CTab title="Exclusions">
@@ -113,23 +124,53 @@
                 </CCol>
             </CRow>
         </CCol>
-        {{detection}}
     </CRow>
 </template>
+<style scoped>
+.tag {
+    font-weight: normal;
+    box-shadow: none;
+}
+.query {
+    background: #0e0e0e;
+    color: #ccc !important;
+    border: 1px solid rgb(216, 219, 224);
+    border-radius: 0.25rem;
+    box-shadow: inset 0 1px 1px rgb(0 0 21 / 8%);
+
+    /* you must provide font-family font-size line-height. Example: */
+    font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 5px;
+    padding-left: 10px;
+}
+
+</style>
 <script>
 import {mapState} from "vuex";
 import moment from 'moment';
 
 export default {
     name: 'DetectionDetails',
-    computed: mapState(['detection']),
+    computed: mapState(['detection','detection_hits']),
+    watch: {
+        activeTab(tab) {
+            // If the tab is the hits tab go fetch them
+            if(tab === 0 ) {
+                this.getHits()
+            }
+        }
+    },
     data () {
         return {
-            uuid: this.$route.params.uuid
+            uuid: this.$route.params.uuid,
+            activeTab: 0
         }
     },
     created() {
         this.getDetection(this.uuid)
+        this.getHits()
     },
     methods: {
         getDetection(uuid) {
@@ -137,6 +178,9 @@ export default {
         },
         detectionType(i){
             return ["Match", "Threshold", "Metric Change", "Field Mismatch"][i]
+        },
+        getHits() {
+            this.$store.dispatch('getDetectionHits', {uuid: this.uuid})
         }
     }
 }

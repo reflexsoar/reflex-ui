@@ -81,6 +81,7 @@ const state = {
   lists: [],
   detection: {},
   detections: [],
+  detection_hits: [],
   pagination: {},
   mitre_tactics: [],
   mitre_techniques: [],
@@ -504,6 +505,9 @@ const mutations = {
     state.detection = detection
     state.detections = state.detections.map(i => i.uuid == detection.uuid ? detection : i)
   },
+  save_detection_hits(state, hits) {
+    state.detection_hits = hits
+  },
   save_pairing_token(state, token) {
     state.pairing_token = token
   },
@@ -704,6 +708,24 @@ const getters = {
   pagination: state => { return state.pagination },
   list_name: state => function(uuid) {
     return state.list_names[uuid]
+  },
+  severity_color: state => function(severity) {
+      switch(severity) {
+        case 1: return 'dark';
+        case 2: return 'info';
+        case 3: return 'warning';
+        case 4: return 'danger';
+        default: return 'danger';
+      }
+  },
+  severity_text: state => function(severity) {
+    switch(severity) {
+        case 1: return 'Low';
+        case 2: return 'Medium';
+        case 3: return 'High';
+        case 4: return 'Critical';
+        default: return 'Unknown';
+    }
   },
   org_name: state => function(uuid) {
     let org = state.organizations.filter(o => o.uuid === uuid)
@@ -1174,6 +1196,20 @@ const actions = {
       Axios({url: `${BASE_URL}/detection/${uuid}`, method: 'DELETE'})
       .then(resp => {
         commit('remove_detection', uuid)
+        commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getDetectionHits({commit}, {uuid}) {
+    commit('loading_status', true)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/${uuid}/hits`, method: 'GET'})
+      .then(resp => {
+        commit('save_detection_hits', resp.data.events)
         commit('loading_status', false)
         resolve(resp)
       })
