@@ -52,7 +52,7 @@
                                     <p><b>Detection Type</b><br>{{detectionType(detection.rule_type)}}</p>
                                     <p><b>Base Query</b><br><div class="query">{{detection.query.query}}</div></p>
                                     <p><b>Severity</b><br><CButton class="tag" size="sm" :color="$store.getters.severity_color(detection.severity)">{{$store.getters.severity_text(detection.severity)}}</CButton></p>
-                                    <p><b>Risk Score</b><br><CProgress :value="detection.risk_score" show-value :color="riskScoreColor(detection.risk_score)"/></p>
+                                    <p><b>Risk Score</b><br><CProgress max=50000 :value="detection.risk_score" show-value :color="riskScoreColor(detection.risk_score)"/></p>
                                 </CCardBody>
                             </CCard>
                         </CCol>
@@ -90,7 +90,7 @@
                                         </template>
                                         <template #risk_score="{item}">
                                             <td>
-                                                <CProgress v-if="item.risk_score" :value="item.risk_score" :color="riskScoreColor(detection.risk_score)" show-value/>
+                                                <CProgress v-if="item.risk_score" max=50000 :value="item.risk_score" :color="riskScoreColor(detection.risk_score)" show-value/>
                                             </td>
                                         </template>
                                         <template #tags="{item}">
@@ -137,10 +137,7 @@
     </CRow>
 </template>
 <style scoped>
-.tag {
-    font-weight: normal;
-    box-shadow: none;
-}
+
 .query {
     background: #0e0e0e;
     color: #ccc !important;
@@ -196,16 +193,16 @@ export default {
             if(score === null) {
                 return "info"
             }
-            if(score >= 0 && score <= 10) {
+            if(score >= 0 && score <= 12500) {
                 return "info"
             }
-            if(score >= 11 && score <= 25) {
+            if(score >= 12501 && score <= 25000) {
                 return "success"
             }
-            if(score >= 26 && score <= 75) {
+            if(score >= 25001 && score <= 37500) {
                 return "warning"
             }
-            if(score >= 76) {
+            if(score >= 37501) {
                 return "danger"
             }
         }

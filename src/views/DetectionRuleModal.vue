@@ -104,7 +104,7 @@
                     
                     <div class="slidecontainer">
                       <label for="risk_score">Risk Score - {{rule.risk_score}}</label><br>
-                      <input type="range" min=1 max=100 value=50 id="risk_score" label="Risk Score" v-model="rule.risk_score" class="slider"/>
+                      <input type="range" min=0 max=50000 value=10000 id="risk_score" label="Risk Score" v-model="rule.risk_score" class="slider"/>
                     </div>
                   </CCol>
                 </CRow>
@@ -588,6 +588,10 @@ export default {
       )
 
       this.rule.risk_score = parseInt(this.rule.risk_score)
+      
+      if(this.rule.threshold_config.threshold) {
+        this.rule.threshold_config.threshold = parseInt(this.rule.threshold_config.threshold)
+      }
 
       this.submitted = true;
       this.$store.dispatch('createDetection', this.rule).then(resp => {

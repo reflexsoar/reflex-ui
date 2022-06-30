@@ -29,7 +29,7 @@
               </template>
               <template #organization="{item}">
                 <td>
-                  <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+                  <OrganizationBadge :uuid="item.organization"/>
                 </td>
               </template>
               <template #tags="{item}">
@@ -59,8 +59,12 @@
 
 <script>
 import {mapState} from "vuex";
+import OrganizationBadge from './OrganizationBadge'
 export default {
     name: 'Inputs',
+    components: {
+      OrganizationBadge
+    },
     props: {
     items: Array,
     fields: {
