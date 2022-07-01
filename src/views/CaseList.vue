@@ -137,7 +137,7 @@
               </template>
               <template #organization="{item}">
               <td>
-                <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+                <OrganizationBadge :uuid="item.organization"/>
               </td>
               </template>
               <template #created_at="{item}">
@@ -230,11 +230,13 @@
 
 <script>
 import {mapState} from "vuex";
+import OrganizationBadge from './OrganizationBadge'
 import CreateCaseModal from './CreateCaseModal'
 export default {
     name: 'Cases',
     components: {
-      CreateCaseModal
+      CreateCaseModal,
+      OrganizationBadge
     },
     props: {
     items: Array,
