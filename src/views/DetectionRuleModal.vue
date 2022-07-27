@@ -121,7 +121,7 @@
                   <p>A Threshold rule allows for alerting when the number of documents exceeds or is below a threshold</p>
                   <CRow>
                     <CCol>
-                      <CInput v-model="rule.threshold_config.key_field" label="Value Field" placeholder="Optional" description="Optional - When supplied the threshold will compare the total distinct values in this field to the threshold. When not supplied the total number of documents returned from the Base Query are compared"/>
+                      <CInput v-model="rule.threshold_config.key_field" label="Threshold Field" placeholder="Optional" description="Optional - When supplied the threshold will apply to the count of total distinct values of this field."/>
                     </CCol>
                     <CCol col="2">
                       <CSelect :value.sync="rule.threshold_config.operator" label="Operator" :options='["==","!=",">","<",">=","<="]'/>
@@ -134,7 +134,7 @@
                     <CCol col="3">
                       <label for="per_field">Alarm per Field Value</label><br>
                       <CSwitch v-bind:disabled="rule.threshold_config.key_field == ''" id="per_field" label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.threshold_config.per_field" label="Per Field" description="Should the number of hits per value of the value field be compared to the threshold?"/><br>
-                      <small class="form-text text-muted w-100">Should the number of hits per value of the value field be compared to the threshold?</small>
+                      <small class="form-text text-muted w-100">When active, changes the threshold field to count of hits per distinct field value.</small>
                     </CCol>
                     <CCol col="3">
                       <label for="dynamic_threshold">Dynamic Threshold</label><br>
