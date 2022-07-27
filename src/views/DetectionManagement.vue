@@ -241,7 +241,12 @@ export default {
           references: [],
           threshold_config: {
             threshold: 0,
-            key_field: ''
+            key_field: '',
+            operator: '==',
+            dynamic: false,
+            per_field: false,
+            discovery_period: 7,
+            recalculation_period: 24
           },
           field_mismatch_config: {
             source_field: '',
