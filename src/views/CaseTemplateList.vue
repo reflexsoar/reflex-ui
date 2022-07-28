@@ -36,7 +36,7 @@
         </template>
         <template #tasks="{ item }">
           <td>
-            {{ item.tasks.length }}
+            {{ item.tasks ? item.tasks.length : 0 }}
           </td>
         </template>
         <template #tlp="{ item }">
