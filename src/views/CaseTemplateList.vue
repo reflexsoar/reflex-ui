@@ -31,7 +31,7 @@
         </template>
         <template #organization="{item}">
         <td>
-          <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+          <OrganizationBadge :uuid="item.organization"/>
         </td>
         </template>
         <template #tasks="{ item }">
@@ -100,11 +100,13 @@
 import { mapState } from "vuex";
 import CreateCaseTemplateModal from "./CreateCaseTemplateModal";
 import EditCaseTemplateModal from "./EditCaseTemplateModal"
+import OrganizationBadge from './OrganizationBadge'
 export default {
   name: "CaseTemplates",
   components: {
     CreateCaseTemplateModal,
-    EditCaseTemplateModal
+    EditCaseTemplateModal,
+    OrganizationBadge
   },
   props: {
     items: Array,

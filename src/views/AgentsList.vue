@@ -58,7 +58,7 @@
               </template>
               <template #health_issues="{item}">
                 <td>
-                  <li style="display: inline; margin-right: 2px;text-transform: capitalize" v-for="issue in item.health_issues" :key="issue">{{ issue }}</li>
+                  <li style="display: inline; margin-right: 2px;text-transform: capitalize" v-for="issue in item.health_issues" :key="issue"><CBadge color="warning">{{issue}}</CBadge></li>
                 </td>
               </template>              
               </CDataTable>

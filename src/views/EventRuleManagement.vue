@@ -43,21 +43,12 @@
               <td v-if="item.last_matched_date"> {{ item.last_matched_date | moment('from','now') }} </td>
               <td v-else>Never</td>
             </template>
-            <template #merge_into_case="{item}">
-              <td><CSwitch label="Rule Will Merge Into Case" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.merge_into_case" disabled></CSwitch></td>
-            </template>
-            <template #dismiss="{item}">
-              <td><CSwitch label="Rule Will Dismiss" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.dismiss" disabled></CSwitch></td>
-            </template>
-            <template #expire="{item}">
-              <td><CSwitch aria-label="Rule Will Expire" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="item.expire" disabled></CSwitch></td>
-            </template>
             <template #hits="{item}">
               <td>
                 {{item.hits.toLocaleString('en-US')}}
               </td>
             </template>
-            <template #admin="{item}"> 
+            <template #manage="{item}"> 
               <td class="text-right">
                 <CButton aria-label="Export Rule" disabled @click="downloadRuleAsJSON(item.uuid)" size="sm" color="secondary" v-c-tooltip="{content: 'Export Rule - COMING SOON', placement:'left'}"><CIcon name='cilCloudDownload'/></CButton>&nbsp;
                 <CButton aria-label="Clone Rule" size="sm" color="secondary" @click="cloneRule(item.uuid)"><CIcon name='cilCopy'/></CButton>&nbsp;
@@ -67,9 +58,22 @@
                 <CButton aria-label="Delete Rule" v-if="!item.active" color='danger' @click="delete_modal = true; target_event_rule_uuid = item.uuid" size="sm" v-c-tooltip="{content:'Delete Rule', placement:'left'}"><CIcon name='cilTrash'/></CButton>
               </td>
             </template>
-            <template #global_rule="{item}">
+            <template #created_by="{item}">
               <td>
-                <CSwitch label="Rule is Global" color="success" label-on="Yes" label-off="No" disabled :checked.sync="item.global_rule"/>
+                {{item.created_by ? item.created_by.username : 'Unknown'}}
+              </td>
+            </template>
+            <template #updated_by="{item}">
+              <td>
+                {{item.updated_by ? item.updated_by.username : 'Unknown'}}
+              </td>
+            </template>
+            <template #properties="{item}">
+              <td>
+                <span v-if="item.global_rule"><CBadge style="font-size: 90%; font-weight: 500" color="info">Global Rule</CBadge>&nbsp;</span>
+                <span v-if="item.merge_into_case"><CBadge style="font-size: 90%; font-weight: 500" color="info">Merge Into Case</CBadge>&nbsp;</span>
+                <span v-if="item.dismiss"><CBadge style="font-size: 90%; font-weight: 500" color="info">Dismiss Event</CBadge>&nbsp;</span>
+                <span v-if="item.expire"><CBadge style="font-size: 90%; font-weight: 500" color="info">Rule Expires</CBadge>&nbsp;</span>
               </td>
             </template>
             </CDataTable>
@@ -163,7 +167,7 @@ export default {
         step: 1,
         rules: [],
         rule: {},
-        fields: ['name','merge_into_case','dismiss','expire','hits','last_matched_date','admin'],
+        fields: ['name','properties','hits','last_matched_date','created_by','updated_by',{key: 'manage', label:''}],
         modal_mode: 'create',
         show_test_results: false,
         global_rule: false,
@@ -470,9 +474,6 @@ export default {
       if(this.current_user.default_org) {
         if (!this.fields.includes('organization')) {
           this.fields.splice(1,0,'organization')
-        }
-        if (!this.fields.includes('global_rule')) {
-          this.fields.splice(2,0,'global_rule')
         }
         this.$store.dispatch('getOrganizations', {})        
       }
