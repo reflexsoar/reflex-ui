@@ -138,7 +138,7 @@
                     </CCol>
                     <CCol col="3">
                       <label for="dynamic_threshold">Dynamic Threshold</label><br>
-                      <CSwitch v-bind:disabled="rule.threshold_config.per_field" id="dynamic_threshold" label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.threshold_config.dynamic" label="Dynamic Threshold" description="Should the detection determine a threshold automatically based on a discovery period?"/><br>
+                      <CSwitch id="dynamic_threshold" label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.threshold_config.dynamic" label="Dynamic Threshold" description="Should the detection determine a threshold automatically based on a discovery period?"/><br>
                       <small class="form-text text-muted w-100">Should the detection determine a threshold automatically based on a discovery period?</small>
                     </CCol>
                     <CCol v-if="rule.threshold_config.dynamic">
