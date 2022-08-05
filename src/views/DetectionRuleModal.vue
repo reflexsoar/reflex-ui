@@ -85,7 +85,6 @@
               </CTab>
               <CTab title="2. Configuration" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Rule Configuration</h5>
-                <p>Something something dark side</p>{{rule.rule_type}}
                 <CSelect
                   label="Rule Type"
                   :value.sync="rule.rule_type"                  
