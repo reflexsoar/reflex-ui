@@ -80,7 +80,7 @@
         </CTabs>
       </CCardBody>
     </CCard>
-    <DetectionRuleModal :show.sync="show_detecion_rule_modal" :rule.sync="rule" :mode="modal_mode"/>
+    <DetectionRuleModal :show.sync="show_detection_rule_modal" :rule.sync="rule" :mode="modal_mode"/>
   </CCol>
   </div>
 </template>
@@ -136,7 +136,7 @@ export default {
         
         detection_list_fields: ['name','organization','last_run','last_hit','total_hits',{key: 'performance', label: 'Query Time / Total Time'},'actions'],
         modal_mode: "Create",
-        show_detecion_rule_modal: false,
+        show_detection_rule_modal: false,
         tabs: [
           '1. Rule Details',
           '2. Sigma Rule',
@@ -215,7 +215,7 @@ export default {
       editDetectionModal(uuid) {
         this.modal_mode = "Edit"
         Object.assign(this.rule, this.detections.find(detection => detection.uuid === uuid))
-        this.show_detecion_rule_modal = true
+        this.show_detection_rule_modal = true
       },
       createDetectionModal() {
         this.modal_mode = "Create"
@@ -260,7 +260,7 @@ export default {
             threshold: 0
           }
         }
-        this.show_detecion_rule_modal = true
+        this.show_detection_rule_modal = true
       },
       deleteDetectionModal(uuid) {
         this.$store.dispatch('deleteDetection', {uuid: uuid}).then(resp => {})

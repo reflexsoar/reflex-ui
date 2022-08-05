@@ -85,11 +85,10 @@
               </CTab>
               <CTab title="2. Configuration" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Rule Configuration</h5>
-                <p>Something something dark side</p>
+                <p>Something something dark side</p>{{rule.rule_type}}
                 <CSelect
                   label="Rule Type"
-                  v-model="rule.rule_type"
-                  @change="updateRuleType"
+                  :value.sync="rule.rule_type"                  
                   :options="rule_types"
                 />
                 <CRow>
@@ -171,7 +170,7 @@
                   </CRow>
                 </div>                
                 <div v-else-if="rule.rule_type == 3">
-                  <h5>Field Mismatch Configuration</h5>
+                  <h5>Field Comparison Configuration</h5>
                   <CRow>
                     <CCol col="5">
                       <CInput v-model="rule.field_mismatch_config.source_field" label="Source Field" placeholder="The source field to compare against"/>
@@ -437,7 +436,7 @@ export default {
         techniques: [],
         tactics: [],
         lookbehind: 5,
-        interval: 5,
+        interval: 5
       },
     },
     mode: {
@@ -467,7 +466,12 @@ export default {
         { name: "Investigation Guide", icon: "cil-book" },
         { name: "Review", icon: null },
       ],
-      rule_types: ["Match", "Threshold", "Metric Change", "Field Mismatch"],
+      rule_types: [
+        {'label': 'Match', 'value': 0},
+        {'label': 'Threshold', 'value': 1},
+        {'label': 'Metric Change', 'value': 2},
+        {'label': 'Field Comparison', 'value':3}
+      ],
       severities: [
           {'label':'Low', 'value':1},
           {'label':'Medium', 'value':2},
