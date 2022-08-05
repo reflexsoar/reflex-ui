@@ -25,6 +25,7 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
+                    <CButton @click="saveFilter()" color="success" size="sm">Save Filter</CButton>
                     <CButton @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
                     <CButton @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
                   </CButtonGroup>
@@ -270,7 +271,7 @@
           <CForm id="dismissEventForm" @submit.prevent="dismissEventByFilter()">
               <CRow>
                   <CCol><br>
-              <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value" label="Reason"/>
+              <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value; dismissalComment = close_reasons.filter(r => r.value == $event.target.value)[0].description" label="Reason"/>
               <CTextarea
                   placeholder="Enter a comment as to why this Event is being dismissed."
                   v-bind:required="settings.require_event_dismiss_comment"
@@ -279,7 +280,7 @@
                   label="Comment"
                   rows=5
               >
-              </CTextarea>            
+              </CTextarea>
                   </CCol>
               </CRow>
           </CForm>
@@ -741,7 +742,7 @@ export default {
         }
 
         this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
-          this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
+          this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid, description: reason.description}})
         })
       },
       addSuccess: function() {
@@ -1334,6 +1335,9 @@ export default {
       toggleFilters() {
         this.quick_filters = !this.quick_filters
         this.$store.commit('set_quick_filter_state', this.quick_filters)
+      },
+      saveFilter() {
+        console.log(JSON.stringify(this.observableFilters))
       }
     },
     beforeDestroy: function() {
