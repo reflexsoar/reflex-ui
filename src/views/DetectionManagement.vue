@@ -241,6 +241,7 @@ export default {
           references: [],
           threshold_config: {
             threshold: 0,
+            max_events: 10,
             key_field: '',
             operator: '==',
             dynamic: false,

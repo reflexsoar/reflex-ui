@@ -69,6 +69,8 @@
                   placeholder="A friendly description of the rule"
                   :rows="5"
                 />
+                <label for="input">Input</label><br>
+                <multiselect id="input" @search-change="searchInputs" v-model="rule.source" placeholder="Select the input to be used for this detection" track-by="uuid" label="name" :options="input_list"/><br>
                 <label>Tags</label>
                 <multiselect
                   v-model="rule.tags"
@@ -81,11 +83,9 @@
                   :close-on-select="false"
                 /><br />
               </CTab>
-              <CTab title="2. Configuration">
+              <CTab title="2. Configuration" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Rule Configuration</h5>
                 <p>Something something dark side</p>
-                <label for="input">Input</label><br>
-                <multiselect id="input" @search-change="searchInputs" v-model="rule.source" placeholder="Select the input to be used for this detection" track-by="uuid" label="name" :options="input_list"/><br>
                 <CSelect
                   label="Rule Type"
                   v-model="rule.rule_type"
@@ -121,7 +121,7 @@
                   <p>A Threshold rule allows for alerting when the number of documents exceeds or is below a threshold</p>
                   <CRow>
                     <CCol>
-                      <CInput v-model="rule.threshold_config.key_field" label="Threshold Field" placeholder="Optional" description="Optional - When supplied the threshold will apply to the count of total distinct values of this field."/>
+                      <CInput v-model="rule.threshold_config.key_field" label="Group By" placeholder="Optional" description="Optional - When supplied the threshold will apply to the count of total distinct values of this field."/>
                     </CCol>
                     <CCol col="2">
                       <CSelect :value.sync="rule.threshold_config.operator" label="Operator" :options='["==","!=",">","<",">=","<="]'/>
@@ -134,7 +134,7 @@
                     <CCol col="3">
                       <label for="per_field">Alarm per Field Value</label><br>
                       <CSwitch v-bind:disabled="rule.threshold_config.key_field == ''" id="per_field" label-on="Yes" label-off="No" color="success" v-bind:checked.sync="rule.threshold_config.per_field" label="Per Field" description="Should the number of hits per value of the value field be compared to the threshold?"/><br>
-                      <small class="form-text text-muted w-100">When active, changes the threshold field to count of hits per distinct field value.</small>
+                      <small class="form-text text-muted w-100">When active, changes the group by field to count of hits per distinct field value.</small>
                     </CCol>
                     <CCol col="3">
                       <label for="dynamic_threshold">Dynamic Threshold</label><br>
@@ -147,7 +147,11 @@
                     <CCol v-if="rule.threshold_config.dynamic">
                       <CInput v-model="rule.threshold_config.recalculation_period" label="Recalculation Period" description="How ofter to recalculate the dynamic threshold (in hours)"/>
                     </CCol>
-                     
+                  </CRow>
+                  <CRow>
+                    <CCol col="3">
+                      <CInput v-model="rule.threshold_config.max_events" label="Max Events" description="The number of events to return when a threshold is crossed"/>
+                    </CCol>
                   </CRow>
                 </div>
                 <div v-else-if="rule.rule_type == 2">
@@ -182,7 +186,7 @@
                 </div>
                 
               </CTab>
-              <CTab title="3. Schedule">
+              <CTab title="3. Schedule" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Schedule</h5>
                 <CRow>
                   <CCol>
@@ -208,7 +212,7 @@
                   </CCol>
                 </CRow>
               </CTab>
-              <CTab title="4. Exclusions">
+              <CTab title="4. Exclusions" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Exclusions </h5>
                 <p>Exclusions allow for fine tuning a detection without modifying the underlying base query</p>
                 <CAlert color="warning"><b>NOTE:</b> If creating/editing/deleting exclusions from this window you must save the detection rule when finished.</CAlert>
@@ -234,7 +238,7 @@
                 </CDataTable>
                 <CButton @click="createExclusion" color="success">New Exclusion</CButton>
               </CTab>
-              <CTab title="5. Meta Information">
+              <CTab title="5. Meta Information" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>MITRE ATT&CK</h5>
                 <p>Selecting MITRE ATT&CK Tactics and Techniques allows for mapping the MITRE ATT&CK Matrix to easily determine detection coverage.</p>
                 <label>MITRE Tactics</label>
@@ -306,7 +310,7 @@
                   <CInput v-model="rule.references[i]"><template #append><CButton @click="removeReference(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
                 </div>
               </CTab>
-              <CTab title="6. Triage Guide">
+              <CTab title="6. Triage Guide" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Triage Guide</h5>
                 <p>
                   A triage guide helps analysts reviewing events generated from
@@ -326,7 +330,7 @@
                   <CInput v-model="rule.false_positives[i]"><template #append><CButton @click="removeFP(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
                 </div>
               </CTab>
-              <CTab title="7. Review">{{rule}} </CTab>
+              <CTab title="7. Review" v-bind:disabled="rule.source['uuid'] === null">{{rule}} </CTab>
             </CTabs>
           </CCol>
         </CRow>
@@ -339,7 +343,7 @@
         <CButton
           v-if="step != final_step"
           @click="nextStep()"
-          :disabled="test_failed && step == 2"
+          :disabled="(test_failed && step == 2) || rule.source['uuid'] === null"
           color="primary"
           >Next</CButton
         >
@@ -698,6 +702,7 @@ export default {
     },
     updateOrganization() {
       this.$store.dispatch('getInputList', {organization: this.rule.organization})
+      this.rule.source = {'uuid': null}
     },
     loadTags: function () {
       this.tag_list = Array();
