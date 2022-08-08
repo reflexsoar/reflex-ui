@@ -63,10 +63,14 @@
               </template>
               <template #actions="{item}">
                 <td style="min-width:25px" class="text-right">
-                  <CButton aria-label="View Detection" :to="`detections/${item.uuid}`" size="sm" color="info" v-c-tooltip="{content:'View Detection', placement:'left'}"><CIcon name='cilMagnifyingGlass'/></CButton>&nbsp;<CButton aria-label="Edit Detection" @click="editDetectionModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit Detection', placement:'left'}"><CIcon name='cilPencil'/></CButton>
-                  <span v-if="item.active">&nbsp;<CButton aria-label="Disable Detection" @click="disableDetection(item.uuid)" size="sm" color="warning" v-c-tooltip="{content:'Disable Detection', placement:'left'}"><CIcon name='cilBan'/></CButton></span>
-                  <span v-if="!item.active">&nbsp;<CButton aria-label="Enable Detection" @click="enableDetection(item.uuid)" size="sm" color="success" v-c-tooltip="{content:'Enable Detection', placement:'left'}"><CIcon name='cilCheck'/></CButton></span>
-                  <span v-if="!item.active">&nbsp;<CButton aria-label="Delete Detection" @click="deleteDetectionModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete Detection', placement:'left'}"><CIcon name='cilTrash'/></CButton></span>
+                  <CButtonGroup>
+                    <CButton aria-label="View Detection" :to="`detections/${item.uuid}`" size="sm" color="primary" v-c-tooltip="{content:'View Detection', placement:'left'}"><CIcon name='cilMagnifyingGlass'/></CButton><CButton aria-label="Edit Detection" @click="editDetectionModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit Detection', placement:'left'}"><CIcon name='cilPencil'/></CButton>
+                    <CButton v-if="item.active" aria-label="Disable Detection" @click="disableDetection(item.uuid)" size="sm" color="warning" v-c-tooltip="{content:'Disable Detection', placement:'left'}"><CIcon name='cilBan'/></CButton>
+                    <CButton v-if="!item.active" aria-label="Enable Detection" @click="enableDetection(item.uuid)" size="sm" color="success" v-c-tooltip="{content:'Enable Detection', placement:'left'}"><CIcon name='cilCheck'/></CButton>
+                    <CButton aria-label="Clone Detection" size="sm" color="secondary" @click="cloneDetection(item.uuid)" v-c-tooltip="{content:'Clone Detection', placement:'left'}"><CIcon name='cilCopy'/></CButton>
+                    <CButton disabled aria-label="Export Detection" @click="downloadedDetectionAsJson(item.uuid)" size="sm" color="info" v-c-tooltip="{content: 'Export Detection - COMING SOON', placement:'left'}"><CIcon name='cilCloudDownload'/></CButton>
+                    <CButton v-if="!item.active" aria-label="Delete Detection" @click="deleteDetectionModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete Detection', placement:'left'}"><CIcon name='cilTrash'/></CButton>
+                  </CButtonGroup>
                 </td>
               </template>
               </CDataTable>
@@ -220,6 +224,7 @@ export default {
       createDetectionModal() {
         this.modal_mode = "Create"
         this.rule = {
+          name: '',
           tags: [],
           query: {
             query: "okay",
@@ -264,6 +269,13 @@ export default {
       },
       deleteDetectionModal(uuid) {
         this.$store.dispatch('deleteDetection', {uuid: uuid}).then(resp => {})
+      },
+      cloneDetection(uuid) {
+        let source_detection = this.detections.find(r => r.uuid === uuid)
+        this.rule = Object.assign({}, source_detection)
+        this.rule.name = '[COPY] ' + source_detection.name
+        this.modal_mode = 'Clone'
+        this.show_detection_rule_modal = true
       },
       highlighter(code) {
         return highlight(code, languages.yaml);

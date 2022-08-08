@@ -619,6 +619,16 @@ export default {
         this.rule.threshold_config.threshold = parseInt(this.rule.threshold_config.threshold)
       }
 
+      alert(this.mode)
+
+      if (this.mode == 'Clone') {
+        ['assigned_agent', 'created_at', 'created_by', 'detection_id', 'last_hit', 'last_run', 'query_time_taken', 'time_taken', 'total_hits', 'updated_at', 'updated_by', 'uuid', 'version'].forEach(k => {
+        delete this.rule[k]
+        })
+      }
+
+      this.rule = this.removeNulls(this.rule)
+
       this.submitted = true;
       this.$store.dispatch('createDetection', this.rule).then(resp => {
         this.submitted = false
@@ -627,6 +637,24 @@ export default {
         this.submitted = false
         console.log(err)
       })
+    },
+    removeNulls(obj) {
+      const isArray = Array.isArray(obj);
+      for (const k of Object.keys(obj)) {
+        if (obj[k] === null) {
+          if (isArray) {
+            obj.splice(k, 1)
+          } else {
+            delete obj[k];
+          }
+        } else if (typeof obj[k] === "object") {
+          this.removeNulls(obj[k]);
+        }
+        if (isArray && obj.length === k) {
+          this.removeNulls(obj);
+        }
+      }
+      return obj;
     },
     editDetectionRule() {
       this.rule.tactics = this.rule.tactics.map(tactic => { return {
