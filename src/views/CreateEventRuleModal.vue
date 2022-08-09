@@ -137,6 +137,11 @@
                     >
                   </CCol>
                 </CRow>
+                <CRow>
+                  <CCol col="3">
+                    <CInput v-model="priority" label="Priority" description="Set the rule priority to determine which rules to run first.  Lower priorities run first  (Min: 1, Max: 65535)"></CInput>
+                  </CCol>
+                </CRow>
               </CTab>
               <CTab title="2. Expiration">
                 <h4>Expiration</h4>
@@ -564,6 +569,7 @@ export default {
       merge_into_case: false,
       tag_event: false,
       global_rule: false,
+      priority: 1,
       update_severity: false,
       target_severity: 0,
       selected_tags: [],
@@ -731,6 +737,7 @@ export default {
           this.description = this.event_rule.description;
           this.merge_into_case = this.event_rule.merge_into_case;
           this.tag_event = this.event_rule.add_tags;
+          this.priority = this.event_rule.priority;
           this.global_rule = this.event_rule.global_rule;
           this.update_severity = this.event_rule.update_severity;
           this.target_severity = this.event_rule.target_severity;
@@ -864,6 +871,7 @@ export default {
         name: this.name,
         organization: this.organization,
         description: this.description,
+        priority: this.priority,
         merge_into_case: this.merge_into_case,
         target_case_uuid: this.target_case.uuid,
         update_severity: this.update_severity,
@@ -910,6 +918,7 @@ export default {
         name: this.name,
         organization: this.organization,
         description: this.description,
+        priority: this.priority,
         merge_into_case: this.merge_into_case,
         target_case_uuid: this.target_case ? this.target_case.uuid : null,
         update_severity: this.update_severity,
