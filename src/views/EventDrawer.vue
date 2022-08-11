@@ -16,6 +16,11 @@
         @click="$store.commit('set', ['eventDrawerMinimize', true])"
       >Close</CButton></CCol>
     </CRow></h1>
+    <CRow  style="padding: 10px 10px 0px 10px">
+      <CCol>
+        <b>Status:</b> {{event_data.status.name}}<span v-if="event_data.dismiss_reason"> - {{event_data.dismiss_reason}}<br><b>Comment:</b> {{event_data.dismiss_comment}}<br><b>Dismissed By:</b> {{event_data.dismissed_by.username}}</span>
+      </CCol>
+    </CRow>
     <CRow style="padding: 10px 10px 0px 10px">
       <CCol>
         <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags" :key="tag"><CButton color="dark" class="tag" size="sm">{{ tag }}</CButton></li><br><br>
