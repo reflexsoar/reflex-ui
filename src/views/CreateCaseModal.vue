@@ -2,7 +2,7 @@
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
     <CModal title="Create Case" :centered="true" size="xl" :show.sync="modalStatus">
       <div>
-        <p v-if="related_events_count > 1">This case will be associated with <b>{{related_events_count}}</b> events.</p>{{selected_org}}
+        <p v-if="related_events_count > 1">This case will be associated with <b>{{related_events_count}}</b> events.</p>
         <CForm @submit.prevent="createCase()" id="create_case_form">
             <CSelect
                   v-if="current_user.default_org"
