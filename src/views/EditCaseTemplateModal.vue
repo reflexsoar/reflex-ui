@@ -18,7 +18,6 @@
         :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
       >
         <CTab title="1. Template Details">
-            {{template}}
           <CForm @submit.prevent="createCase">
             <CInput
               placeholder="Case Template Title"
@@ -94,7 +93,6 @@
             >
               <CListGroupItem v-for="task in tasks" :key="task.order">
                 <div v-if="!task.saved">
-                    {{task}}
                   <CRow>
                     <CCol col="1">
                       <CIcon style="margin-top: 10px" name="cil-menu" />
