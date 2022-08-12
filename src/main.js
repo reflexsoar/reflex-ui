@@ -18,6 +18,7 @@ import Prism from 'prismjs';
 import VueSimpleContextMenu from "vue-simple-context-menu";
 import VCalendar from 'v-calendar';
 import { CMultiSelect } from '@coreui/vue-pro';
+import VueApexCharts from 'vue-apexcharts'
 
 Vue.config.performance = true
 Vue.use(CoreuiVue)
@@ -26,6 +27,9 @@ Vue.component('multiselect', Multiselect)
 Vue.use(VueMoment, {moment})
 Vue.use(VueClipboard)
 Vue.use(VCalendar)
+Vue.use(VueApexCharts)
+
+Vue.component('apexchart', VueApexCharts)
 Vue.component('vue-markdown', VueMarkdown)
 Vue.component("vue-simple-context-menu", VueSimpleContextMenu);
 Vue.component(CMultiSelect)

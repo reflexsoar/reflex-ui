@@ -103,45 +103,39 @@
       <CRow v-if="this.$store.getters.user_has_permission('view_events')">
         <CCol col="12">
           <h4>Event Charts</h4>
+
         </CCol> 
         <CCol xs="4" lg="4">
           <CCard>
             <CCardHeader>Events by Title</CCardHeader>
-              <CChartHorizontalBar
-                :datasets="computedValues(event_stats, 'title')"
-                :labels="computedKeys(event_stats, 'title')"
-                :options="barChart_options"
-              />
+              <apexchart width="100%" type="bar" :options="compute_chart_options('events-chart',event_stats,'title', horizontal=true)" :series="compute_chart_series(event_stats,'title')"></apexchart>
           </CCard>
         </CCol>
         <CCol xs="4" lg="4">
           <CCard>
             <CCardHeader>Events by Severity</CCardHeader>
-              <CChartHorizontalBar
-                :datasets="computedValues(event_stats, 'severity')"
-                :labels="computedKeys(event_stats, 'severity')"
-                :options="barChart_options"
-              />
+              <apexchart width="100%" type="bar"
+                :options="compute_chart_options('events-chart',event_stats,'severity', horizontal=true)"
+                :series="compute_chart_series(event_stats,'severity')">
+              </apexchart>
           </CCard>
         </CCol>
         <CCol xs="4" lg="4">
           <CCard>
             <CCardHeader>Events by Status</CCardHeader>
-          <CChartHorizontalBar
-            :datasets="computedValues(event_stats, 'status')"
-            :labels="computedKeys(event_stats, 'status')"
-            :options="barChart_options"
-          />
+            <apexchart width="100%" type="bar"
+                :options="compute_chart_options('events-chart',event_stats,'status', horizontal=true)"
+                :series="compute_chart_series(event_stats,'status')">
+              </apexchart>
           </CCard>
         </CCol>
         <CCol xs="4" lg="4">
           <CCard>
             <CCardHeader>Events by Dismiss Reason</CCardHeader>
-            <CChartHorizontalBar
-              :datasets="computedValues(event_stats, 'dismiss reason')"
-              :labels="computedKeys(event_stats, 'dismiss reason')"
-              :options="barChart_options"
-            />
+              <apexchart width="100%" type="bar"
+                :options="compute_chart_options('events-chart',event_stats,'dismiss reason', horizontal=true)"
+                :series="compute_chart_series(event_stats,'dismiss reason')">
+              </apexchart>
           </CCard>
         </CCol>
       </CRow>
@@ -244,12 +238,13 @@ export default {
         maintainAspectRatio: false
       },
       range: {
-          start: this.days_ago(7),
-          end: this.today()
-        },
-        masks: {
+        start: this.days_ago(7),
+        end: this.today()
+      },
+      masks: {
           input: 'YYYY-MM-DD h:mm A'
-        }
+      }
+      
     }
   },
   created() {
@@ -262,6 +257,35 @@ export default {
   },
   computed: mapState(['current_user','dashboard_metrics','event_stats','case_stats']),
   methods: {
+    compute_chart_options(name, data, labels, horizontal=false, height=250) {
+      let options = {
+        chart: {
+          id: name,
+          height: height
+        },
+        xaxis: {
+          categories: this.computedKeys(data, labels)
+        }
+      }
+
+      if(horizontal) {
+        options['plotOptions'] = {
+          bar: {
+
+            horizontal: true
+          }
+        }
+      }
+      return options
+    },
+    compute_chart_series(data, labels) {
+      let x = this.computedValues(data, labels)[0]
+      let y = {
+        name: x.label,
+        data: x.data
+      }
+      return [y]
+    },
     applyTimeFilter() {
       this.$store.dispatch("getEventStats", {top: 5, metrics: ['events_over_time','title','status','dismiss_reason', 'severity'], start: this.range.start.toISOString(), end: this.range.end.toISOString()})
       this.$store.dispatch("getCaseStats", {top: 5, metrics: ['cases_over_time',,'status','close_reason','severity'], start: this.range.start.toISOString(), end: this.range.end.toISOString()})

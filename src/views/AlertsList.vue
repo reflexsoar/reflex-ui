@@ -242,8 +242,6 @@
             <h5>Multiple Organization Warning</h5>
             <p>You are dismissing events for multiple organizations at the same time.  Be sure to pick the correct reason and provide a description for each.</p>
           </CCallout>
-          {{multiple_org_dismiss}}
-          {{observable_filters}}
           <div v-for="events,org in selected_orgs" :key="org">
             <CRow>
               <CCol><hr></CCol></CRow>
@@ -282,6 +280,21 @@
               >
               </CTextarea>
                   </CCol>
+              </CRow>
+              <CRow>
+
+                <CCol >
+                  <label for="tuning_advice_switch">Provide Tuning Advice?</label><br>
+                  <CSwitch id="tuning_advice_switch" :checked.sync="tuningAdviceToggle" label-on="Yes" label-off="No" color="success">Provide Tuning Advice</CSwitch><br>
+                  <CTextarea v-if="tuningAdviceToggle"
+                    placeholder="Enter advice on how this Event should be tuned to prevent future False Positives."
+                    :value="tuningAdvice"
+                    @change="tuningAdvice = $event"
+                    label="Tuning Advice"
+                    rows=5
+                  >
+                  </CTextarea>
+                </CCol>
               </CRow>
           </CForm>
         </div>
@@ -481,6 +494,8 @@ export default {
         sourceRuleEventUUID: "",
         dismissalComment: "",
         dismissalReason: null,
+        tuningAdviceToggle: false,
+        tuningAdvice: '',
         close_reason: "",
         close_reasons: [],
         collapse: {},
@@ -552,6 +567,8 @@ export default {
         this.loadCloseReasons()
         this.error = false
         this.error_message = ""
+        this.tuningAdviceToggle = false
+        this.tuningAdvice = ''
         this.dismissEventModal = true
       },
       resetFilters() {
@@ -687,6 +704,13 @@ export default {
           dismiss_comment: this.dismissalComment,
           uuids: this.selected
         }
+
+        if(this.tuningAdviceToggle && this.tuningAdvice != "") {
+          data.tuning_advice = this.tuningAdvice
+        } else {
+          data.tuning_advice = null
+        }
+
         this.$store.dispatch('dismissEventsByFilter', data).then(resp => {
           this.filtered_events = this.filterEvents()
             this.dismissEventModal = false
