@@ -202,11 +202,11 @@
           </CCol>
         </CRow>
       </CTab>
-      <CTab title="Organization">
+      <CTab title="Organization" v-if="current_user.default_org">
         <CCardBody>
           <CCol col="12">
           <CCard>
-            <CCardHeader>Events by Organization by Day</CCardHeader>
+            <CCardHeader>Events by Organization over the last 30 days</CCardHeader>
             <apexchart type="heatmap" :options="heatmap_options()"></apexchart>
           </CCard>
         </CCol>
@@ -260,7 +260,7 @@ export default {
       let options = {
         series: this.event_stats['events_by_day_by_org_series'],
         chart: {
-          height: 300
+          height: 200
         },
         dataLabels: {
           enabled: true
