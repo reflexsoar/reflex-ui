@@ -1,8 +1,48 @@
 <template>
 
     <CCol xs="12" lg="12">
-    <h1>Dashboard</h1>
       <CRow>
+        <CCol>
+          <h1>Dashboard</h1>
+        </CCol>
+        <CCol>
+          <v-date-picker
+            v-model="range"
+            mode="dateTime"
+            :masks="masks"
+            is-range
+          >
+            <template v-slot="{ inputValue, inputEvents }">
+              <CRow>
+                <CCol>
+                  <CInput label="Start" :value="inputValue.start" v-on="inputEvents.start">
+                    <template #prepend>
+                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar' aria-label="Start Date"/></CButton>
+                    </template>
+                  </CInput>
+                </CCol>
+                <CCol>
+                  <CInput label="End" :value="inputValue.end" v-on="inputEvents.end">
+                  <template #prepend>
+                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar' aria-label="End Date"/></CButton>
+                    </template>
+                  </CInput>
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol class='text-right'>
+                  <CButtonGroup>
+                    <CButton size="sm" color="primary" @click="applyTimeFilter()">Apply</CButton>
+                  </CButtonGroup>
+                </CCol>
+              </CRow>
+            </template>
+          </v-date-picker>
+        </CCol>
+      </CRow>
+      <CTabs :active-tab="0">
+        <CTab title="Overview"><CCardBody>
+          <CRow>
         <CCol xs="4" lg="4">
           <CWidgetIcon
             :header="dashboard_metrics.total_cases ? dashboard_metrics.total_cases.toString() : '0'"
@@ -58,82 +98,42 @@
           </CWidgetIcon>
         </CCol>
         
-      </CRow>
-      <CRow>
-        <CCol>
-          <v-date-picker
-            v-model="range"
-            mode="dateTime"
-            :masks="masks"
-            is-range
-          >
-            <template v-slot="{ inputValue, inputEvents }">
-              <CRow>
-                <CCol>
-                  <b>Time Filter</b><p></p>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol>
-                  <CInput label="Start" :value="inputValue.start" v-on="inputEvents.start">
-                    <template #prepend>
-                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar' aria-label="Start Date"/></CButton>
-                    </template>
-                  </CInput>
-                </CCol>
-                <CCol>
-                  <CInput label="End" :value="inputValue.end" v-on="inputEvents.end">
-                  <template #prepend>
-                      <CButton disabled color="secondary" size="sm"><CIcon name='cil-calendar' aria-label="End Date"/></CButton>
-                    </template>
-                  </CInput>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol class='text-right'>
-                  <CButtonGroup>
-                    <CButton size="sm" color="primary" @click="applyTimeFilter()">Apply</CButton>
-                  </CButtonGroup>
-                </CCol>
-              </CRow>
-            </template>
-          </v-date-picker>
-        </CCol>
-      </CRow>
+      </CRow></CCardBody></CTab>
+        <CTab title="Events"><CCardBody>
       <CRow v-if="this.$store.getters.user_has_permission('view_events')">
-        <CCol col="12">
-          <h4>Event Charts</h4>
-
-        </CCol> 
-        <CCol xs="4" lg="4">
+        <CCol xs="3" lg="3">
           <CCard>
             <CCardHeader>Events by Title</CCardHeader>
-              <apexchart width="100%" type="bar" :options="compute_chart_options('events-chart',event_stats,'title', horizontal=true)" :series="compute_chart_series(event_stats,'title')"></apexchart>
+              
+              <apexchart width="100%" type="bar"
+                :options="compute_chart_options('events-chart',event_stats,'title', horizontal=true)"
+                :series="compute_chart_series(event_stats,'title')">
+              </apexchart>
           </CCard>
         </CCol>
-        <CCol xs="4" lg="4">
+        <CCol xs="3" lg="3">
           <CCard>
             <CCardHeader>Events by Severity</CCardHeader>
               <apexchart width="100%" type="bar"
-                :options="compute_chart_options('events-chart',event_stats,'severity', horizontal=true)"
+                :options="compute_chart_options('severities',event_stats,'severity', horizontal=true)"
                 :series="compute_chart_series(event_stats,'severity')">
               </apexchart>
           </CCard>
         </CCol>
-        <CCol xs="4" lg="4">
+        <CCol xs="3" lg="3">
           <CCard>
             <CCardHeader>Events by Status</CCardHeader>
             <apexchart width="100%" type="bar"
-                :options="compute_chart_options('events-chart',event_stats,'status', horizontal=true)"
+                :options="compute_chart_options('statuses',event_stats,'status', horizontal=true)"
                 :series="compute_chart_series(event_stats,'status')">
               </apexchart>
           </CCard>
         </CCol>
-        <CCol xs="4" lg="4">
+        <CCol xs="3" lg="3">
           <CCard>
             <CCardHeader>Events by Dismiss Reason</CCardHeader>
               <apexchart width="100%" type="bar"
-                :options="compute_chart_options('events-chart',event_stats,'dismiss reason', horizontal=true)"
+                :options="compute_chart_options('dismiss_reasons',event_stats,'dismiss reason', horizontal=true)"
                 :series="compute_chart_series(event_stats,'dismiss reason')">
               </apexchart>
           </CCard>
@@ -144,66 +144,76 @@
           <CCard>
             <CCardHeader>Events over Time</CCardHeader>
             <CCardBody>
-              <CChartBar 
-                :datasets="computedValues(event_stats, 'events_over_time')"
-                :labels="computedKeys(event_stats, 'events_over_time')"
-                :options="barChart_options"
-              />
+              <apexchart width="100%" type="bar"
+                :options="compute_chart_options('events_over_time',event_stats,'events_over_time', horizontal=false, height=250)"
+                :series="compute_chart_series(event_stats,'events_over_time')">
+              </apexchart>
             </CCardBody>
           </CCard>
         </CCol>
-      </CRow>
-      <CRow>
-        <CCol col="12">
-          <h4>Case Charts</h4>
-        </CCol> 
-      </CRow>
-      <CRow>
-        <CCol xs="4" lg="4">
+      </CRow></CCardBody>
+      </CTab>
+      <CTab title="Cases">
+        <CRow>
+          <CCol col="12">
+            <h4>Case Charts</h4>
+          </CCol> 
+        </CRow>
+        <CRow>
+          <CCol xs="4" lg="4">
+            <CCard>
+              <CCardHeader>Cases by Severity</CCardHeader>
+                <apexchart width="100%" type="bar"
+                  :options="compute_chart_options('case-severities',case_stats,'severity', label='Cases')"
+                  :series="compute_chart_series(case_stats,'severity')">
+                </apexchart>
+            </CCard>
+          </CCol>
+          <CCol xs="4" lg="4">
+            <CCard>
+              <CCardHeader>Cases by Status</CCardHeader>
+              <apexchart width="100%" type="bar"
+                  :options="compute_chart_options('cases-statuses',case_stats,'status', label='Cases')"
+                  :series="compute_chart_series(case_stats,'status')">
+                </apexchart>
+            </CCard>
+          </CCol>
+          <CCol xs="4" lg="4">
+            <CCard>
+              <CCardHeader>Cases by Closure Reason</CCardHeader>
+              <apexchart width="100%" type="bar"
+                  :options="compute_chart_options('cases-close-reasons',case_stats,'close reason', label='Cases')"
+                  :series="compute_chart_series(case_stats,'close reason')">
+                </apexchart>
+            </CCard>
+          </CCol>
+        </CRow>
+        <CRow>
+          <CCol xs="4" lg="12">
+            <CCard>
+              <CCardHeader>Cases over Time</CCardHeader>
+              <CCardBody>
+                <apexchart width="100%" type="bar"
+                  :options="compute_chart_options('events_over_time',event_stats,'events_over_time', horizontal=false, height=250)"
+                  :series="compute_chart_series(event_stats,'events_over_time')">
+                </apexchart>
+              </CCardBody>
+            </CCard>
+          </CCol>
+        </CRow>
+      </CTab>
+      <CTab title="Organization">
+        <CCardBody>
+          <CCol col="12">
           <CCard>
-            <CCardHeader>Cases by Severity</CCardHeader>
-              <CChartHorizontalBar
-                :datasets="computedValues(case_stats, 'severity', label='Cases')"
-                :labels="computedKeys(case_stats, 'severity')"
-                :options="barChart_options"
-              />
+            <CCardHeader>Events by Organization by Day</CCardHeader>
+            <apexchart type="heatmap" :options="heatmap_options()"></apexchart>
           </CCard>
         </CCol>
-        <CCol xs="4" lg="4">
-          <CCard>
-            <CCardHeader>Cases by Status</CCardHeader>
-          <CChartHorizontalBar
-            :datasets="computedValues(case_stats, 'status', label='Cases')"
-            :labels="computedKeys(case_stats, 'status')"
-            :options="barChart_options"
-          />
-          </CCard>
-        </CCol>
-        <CCol xs="4" lg="4">
-          <CCard>
-            <CCardHeader>Cases by Closure Reason</CCardHeader>
-            <CChartHorizontalBar
-              :datasets="computedValues(case_stats, 'close reason', label='Cases')"
-              :labels="computedKeys(case_stats, 'close reason')"
-              :options="barChart_options"
-            />
-          </CCard>
-        </CCol>
-      </CRow>
-      <CRow>
-        <CCol xs="4" lg="12">
-          <CCard>
-            <CCardHeader>Cases over Time</CCardHeader>
-            <CCardBody>
-              <CChartBar 
-                :datasets="computedValues(case_stats, 'cases_over_time', label='Cases')"
-                :labels="computedKeys(case_stats, 'cases_over_time')"
-                :options="barChart_options"
-              />
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
+        </CCardBody>
+      </CTab>
+      </CTabs>
+      
     </CCol>
 
 </template>
@@ -226,17 +236,6 @@ export default {
   },
   data () {
     return {
-      barChart_options: {
-        scales: {
-          yAxes: [{
-             ticks: {
-                precision:0,
-                beginAtZero: true,
-             }
-          }]
-        },
-        maintainAspectRatio: false
-      },
       range: {
         start: this.days_ago(7),
         end: this.today()
@@ -257,29 +256,49 @@ export default {
   },
   computed: mapState(['current_user','dashboard_metrics','event_stats','case_stats']),
   methods: {
-    compute_chart_options(name, data, labels, horizontal=false, height=250) {
+    heatmap_options() {
       let options = {
+        series: this.event_stats['events_by_day_by_org_series'],
         chart: {
-          id: name,
-          height: height
+          height: 300
         },
-        xaxis: {
-          categories: this.computedKeys(data, labels)
-        }
-      }
-
-      if(horizontal) {
-        options['plotOptions'] = {
-          bar: {
-
-            horizontal: true
+        dataLabels: {
+          enabled: true
+        },
+        plotOptions: {
+          heatmap: {
+            min: 0,
+            enableShades: false,
+            shadeIntensity: 5
           }
         }
       }
       return options
     },
-    compute_chart_series(data, labels) {
-      let x = this.computedValues(data, labels)[0]
+    compute_chart_options(name, data, labels, horizontal=false, height=250) {
+      let options = {
+        chart: {
+          id: name,
+          title: {
+            text: 'awesome'
+          },
+          height: height
+        },
+        xaxis: {
+          categories: this.computedKeys(data, labels),
+        }
+      }
+      if(horizontal) {
+        options['plotOptions'] = {
+          bar: {
+            horizontal: horizontal
+          }
+        }
+      }
+      return options
+    },
+    compute_chart_series(data, labels, label='Events') {
+      let x = this.computedValues(data, labels, label=label)[0]
       let y = {
         name: x.label,
         data: x.data
