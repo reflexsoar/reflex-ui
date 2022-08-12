@@ -8,8 +8,7 @@
     "github": "https://github.com/reflexsoar",
     "twitter": "https://twitter.com/reflexsoar"
   },
-  "contributors": [
-  ],
+  "contributors": [],
   "homepage": "http://reflexsoar.com",
   "copyright": "",
   "license": "GPL 3.0",
@@ -30,6 +29,11 @@
     "@coreui/vue": "^3.2.12",
     "@coreui/vue-chartjs": "^1.0.6",
     "@coreui/vue-pro": "^3.2.3",
+    "@fortawesome/fontawesome-svg-core": "^6.1.2",
+    "@fortawesome/free-brands-svg-icons": "^6.1.2",
+    "@fortawesome/free-regular-svg-icons": "^6.1.2",
+    "@fortawesome/free-solid-svg-icons": "^6.1.2",
+    "@fortawesome/vue-fontawesome": "^2.0.8",
     "axios": "^0.21.4",
     "jwt-decode": "^3.1.2",
     "moment-timezone": "^0.5.34",

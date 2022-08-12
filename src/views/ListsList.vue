@@ -137,7 +137,34 @@
             </CAlert>
             <CTextarea label="Values" v-model="list_data.values" placeholder="Enter values separated by new lines" rows="10" cols="50" wrap="off" :disabled="external_polling"/>
           </CTab>
-          <CTab title="4. Review">
+          <CTab title ="4. Flags">
+            <h3>Flags</h3>
+            <p>When an observable matches a value on this list, the select flags will be set on the observable</p>
+            <CRow>
+              <CCol>
+                <label for="ioc">IOC</label><br>
+                <CSwitch :checked.sync="list_data.flag_ioc" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <CCol>
+                <label for="ioc">Safe</label><br>
+                <CSwitch :checked.sync="list_data.flag_safe" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <CCol>
+                <label for="ioc">Spotted</label><br>
+                <CSwitch :checked.sync="list_data.flag_spotted" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <!--<CCol>
+                <label for="ioc">Adjust TLP</label><br>
+                <CSwitch :checked.sync="list_data.change_tlp" label-on="Yes" label-off="No" color="success"/>
+              </CCol>-->
+            </CRow>
+            <!--<CRow v-if="list_data.change_tlp">
+              <CCol col="6">
+                <CInput v-model="list_data.new_tlp" label="New TLP" placeholder="Enter a TLP value" description="The TLP value to set the observable to"/>
+              </CCol>
+            </CRow>-->
+          </CTab>
+          <CTab title="5. Review">
             <h3>Review List Details</h3>
             <CRow v-if="current_user.default_org"><br><br>
               <CCol>
@@ -261,7 +288,10 @@ export default {
           active: true,
           organization: "",
           csv_headers: '',
-          csv_headers_data_types: ''
+          csv_headers_data_types: '',
+          flag_safe: false,
+          flag_ioc: false,
+          flag_spotted: false
         },
         modal_action: null,
         modal_status: false,
@@ -278,7 +308,7 @@ export default {
         organization: null,
         active_page: 1,
         step: 0,
-        last_step: 3,
+        last_step: 4,
         external_polling: false
       }
     },
@@ -328,6 +358,11 @@ export default {
         let ld = {}
         Object.assign(ld,this.list_data)
         ld.data_type_uuid = ld.data_type.uuid
+
+        ld.flag_spotted = this.list_data.flag_spotted ? true : false
+        ld.flag_safe = this.list_data.flag_safe ? true : false 
+        ld.flag_ioc = this.list_data.flag_ioc ? true : false 
+
         delete ld['data_type']
         ld.active = true
         if(!this.external_polling) {
@@ -368,7 +403,10 @@ export default {
           to_memcached: this.list_data.to_memcached,
           active: this.list_data.active,
           csv_headers: this.list_data.csv_headers,
-          csv_headers_data_types: this.list_data.csv_headers_data_types
+          csv_headers_data_types: this.list_data.csv_headers_data_types,
+          flag_ioc: this.list_data.flag_ioc ? true : false,
+          flag_safe: this.list_data.flag_safe ? true : false,
+          flag_spotted: this.list_data.flag_spotted ? true : false
         }
 
         let uuid = this.list_data.uuid
