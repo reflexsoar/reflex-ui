@@ -19,7 +19,7 @@ import VueSimpleContextMenu from "vue-simple-context-menu";
 import VCalendar from 'v-calendar';
 import { CMultiSelect } from '@coreui/vue-pro';
 import Editor from 'v-markdown-editor'
-import 'v-markdown-editor/dist/v-markdown-editor.css';
+import VueApexCharts from 'vue-apexcharts'
 
 Vue.config.performance = true
 Vue.use(CoreuiVue)
@@ -29,6 +29,9 @@ Vue.use(VueMoment, {moment})
 Vue.use(VueClipboard)
 Vue.use(VCalendar)
 Vue.use(Editor);
+Vue.use(VueApexCharts)
+
+Vue.component('apexchart', VueApexCharts)
 Vue.component('vue-markdown', VueMarkdown)
 Vue.component("vue-simple-context-menu", VueSimpleContextMenu);
 Vue.component(CMultiSelect)
