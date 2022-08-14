@@ -84,6 +84,15 @@
           </CCol>
         </CRow>
       </CTab>
+      <CTab title="Tuning Advice" v-if="this.event_data.tuning_advice">
+      <CRow>
+        <CCol>
+          <CCardBody>
+            <h3>Tuning Advice</h3>
+            <vue-markdown>{{event_data.tuning_advice}}</vue-markdown>
+          </CCardBody>
+        </CCol>
+      </CRow></CTab>
       <CTab :title="`Matched Event Rules - ${this.event_data.event_rules.length}`" v-if="this.event_data.event_rules">
         <CRow style="padding: 10px 10px 0px 10px">
           <CCol>

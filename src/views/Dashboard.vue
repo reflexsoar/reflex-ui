@@ -41,6 +41,7 @@
     </CRow>
     <CTabs variant="pills" :active-tab="0" color=""><br>
       <CTab title="Overview">
+        
         <CRow>
           <CCol xs="4" lg="4">
             <CWidgetIcon :header="dashboard_metrics.total_cases ? dashboard_metrics.total_cases.toString() : '0'"
@@ -226,7 +227,7 @@
   </CCol>
 
 </template>
-
+</style>
 <script>
 import MainChartExample from './charts/MainChartExample'
 import WidgetsDropdown from './widgets/WidgetsDropdown'
@@ -273,7 +274,7 @@ export default {
         },
         dataLabels: {
           enabled: true,
-          distributed: true
+          distributed: false
         },
         title: {
           text: 'Input A',
