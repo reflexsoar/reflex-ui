@@ -25,7 +25,7 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton @click="saveFilter()" color="success" size="sm">Save Filter</CButton>
+                    <CButton @click="saveFilter()" color="success" size="sm" disabled>Save Filter</CButton>
                     <CButton @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
                     <CButton @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
                   </CButtonGroup>
