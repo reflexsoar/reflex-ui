@@ -79,9 +79,15 @@ const state = {
   tag_list: [],
   list: {},
   lists: [],
+  detection: {},
+  detections: [],
+  detection_hits: [],
   pagination: {},
+  mitre_tactics: [],
+  mitre_techniques: [],
   credential_list: [],
   intel_filters: [],
+  index_fields: [],
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
@@ -474,8 +480,39 @@ const mutations = {
     state.input = input
     state.inputs = state.inputs.map(i => i.uuid == input.uuid ? input : i)
   },
+  save_index_fields(state, fields) {
+    state.index_fields = fields
+  },
+  add_detection(state, detection){
+    if(state.detections.length == 0) {
+      state.detections = [detection]
+    } else {
+      state.detections.push(detection)
+    }    
+    state.detection = detection
+    state.status = 'success'
+  },
+  save_detections(state, detections) {
+    state.detections = detections
+  },
+  save_detections_list(state, detections) {
+    state.detections_list = detections.map(item => { return {'name': item.name, 'uuid': item.uuid}})
+  },
+  save_detection(state, detection) {
+    state.detection = detection
+  },
+  update_detection(state, detection) {
+    state.detection = detection
+    state.detections = state.detections.map(i => i.uuid == detection.uuid ? detection : i)
+  },
+  save_detection_hits(state, hits) {
+    state.detection_hits = hits
+  },
   save_pairing_token(state, token) {
     state.pairing_token = token
+  },
+  remove_detection(state, uuid) {
+    state.detections = state.detections.filter(a => a.uuid !== uuid)
   },
   add_plugin(state, plugin) {
     state.plugins.push(plugin)
@@ -584,7 +621,7 @@ const mutations = {
     state.status = 'success'
   },
   add_input(state, input){
-    if(state.inputs.lenght == 0) {
+    if(state.inputs.length == 0) {
       state.inputs = [input]
     } else {
       state.inputs.push(input)
@@ -610,6 +647,12 @@ const mutations = {
   update_role(state, role) {
     state.role = role
     state.roles = state.roles.map(r => r.uuid == role.uuid ? role : r)
+  },
+  save_tactics(state, tactics) {
+    state.mitre_tactics = tactics
+  },
+  save_techniques(state, techniques) {
+    state.mitre_techniques = techniques
   },
   add_success(state) {
     state.status = 'success'
@@ -665,6 +708,24 @@ const getters = {
   pagination: state => { return state.pagination },
   list_name: state => function(uuid) {
     return state.list_names[uuid]
+  },
+  severity_color: state => function(severity) {
+      switch(severity) {
+        case 1: return 'dark';
+        case 2: return 'info';
+        case 3: return 'warning';
+        case 4: return 'danger';
+        default: return 'danger';
+      }
+  },
+  severity_text: state => function(severity) {
+    switch(severity) {
+        case 1: return 'Low';
+        case 2: return 'Medium';
+        case 3: return 'High';
+        case 4: return 'Critical';
+        default: return 'Unknown';
+    }
   },
   org_name: state => function(uuid) {
     let org = state.organizations.filter(o => o.uuid === uuid)
@@ -904,7 +965,7 @@ const actions = {
       })
     })
   },
-  getLists({commit}, {data_type=[], organization=null, page=1, page_size=10}) {
+  getLists({commit}, {data_type=[], organization=null, name__like=null, page=1, page_size=10}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/list?page=${page}&page_size=${page_size}`
@@ -915,6 +976,10 @@ const actions = {
 
       if(organization) {
         base_url += `&organization=${organization}`
+      }
+
+      if(name__like) {
+        base_url += `&name__like=${name__like}`
       }
 
       Axios({url: base_url, method: 'GET'})
@@ -1099,9 +1164,66 @@ const actions = {
       })
     })
   },
-  getInputs({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+  getDetections({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_detections', resp.data.detections)
+        commit('save_pagination', resp.data.pagination)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createDetection({commit}, detection) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection`, data: detection, method: 'POST'})
+      .then(resp => {
+        commit('add_detection', detection)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteDetection({commit}, {uuid}) {
+    commit('loading_status', true)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_detection', uuid)
+        commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getDetectionHits({commit}, {uuid}) {
+    commit('loading_status', true)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/${uuid}/hits`, method: 'GET'})
+      .then(resp => {
+        commit('save_detection_hits', resp.data.events)
+        commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getInputs({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/input?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+      if (organization) {
+        url += `&organization=${organization}`
+      }
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_inputs', resp.data.inputs)
@@ -1220,6 +1342,54 @@ const actions = {
       Axios({url: `${BASE_URL}/agent_group`, data: agent_group, method: 'POST'})
       .then(resp => {
         commit('add_agent_group', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getDetection({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('save_detection', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateDetection({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      console.log(data)
+      Axios({url: `${BASE_URL}/detection/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_detection', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getInputIndexFields({commit}, {uuid, limit=25, organization=null, name__like=null}) {
+    return new Promise((resolve, reject) => {
+
+      let url = `${BASE_URL}/input/${uuid}/index_fields?limit=${limit}`
+
+      if(organization) {
+        url += `&organization=${organization}`
+      }
+
+      if(name__like) {
+        url += `&name__like=${name__like}`
+      }
+
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_index_fields', resp.data.index_fields)
         resolve(resp)
       })
       .catch(err => {
@@ -2728,6 +2898,56 @@ const actions = {
       })
       .catch(err => {
         commit('show_alert', {message: err.response.data.message, 'type': 'danger'})
+        reject(err)
+      })
+    })
+  },
+  getMitreTactics({commit}, {page=1, page_size=10, name__like=null, external_id__like=null}) {
+
+    let url = `${BASE_URL}/mitre/tactic?page=${page}&page_size=${page_size}`
+
+    if(name__like) {
+      url += `&name__like=${name__like}`
+    }
+
+    if(external_id__like) {
+      url += `&external_id__like=${external_id__like}`
+    }
+    
+    return new Promise((resolve, reject) => {
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_tactics', resp.data.tactics)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getMitreTechniques({commit}, {page=1, page_size=10, name__like=null, external_id__like=null, phase_names=null}) {
+
+    let url = `${BASE_URL}/mitre/technique?page=${page}&page_size=${page_size}`
+
+    if(name__like) {
+      url += `&name__like=${name__like}`
+    }
+
+    if(external_id__like) {
+      url += `&external_id__like=${external_id__like}`
+    }
+
+    if(phase_names) {
+      url += `&phase_names=${phase_names}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_techniques', resp.data.techniques)
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })

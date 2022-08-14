@@ -1,4 +1,4 @@
-Prism.languages.rql = {
+Prism.languages.lucene = {
 	'comment': {
 		pattern: /(\/\/.*|#.*)/,
 		greedy: true
@@ -7,13 +7,9 @@ Prism.languages.rql = {
 		pattern: /```[\s\S]*?```|[hH]?(?:"(?:[^\r\n\\"]|\\.)*"|'(?:[^\r\n\\']|\\.)*'|@(?:"[^\r\n"]*"|'[^\r\n']*'))/,
 		greedy: true
 	},
-
-	'class-name': /\b(?:[Ii]n|eq|EQ|Eq|[Rr]eg[Ee]xp|RE|re|[Ee]xpand|[Ee]xists|[Cc]ontains|(?:[Ss]tarts|[Ee]nds)[Ww]ith|not|Not|NOT|ContainsCIS|containscis|GT|gt|Gt|LT|lt|Lt|LTE|lte|Lte|Gte|GTE|gte|intel|IntelLookup|threat|ThreatList|threatlist|threat_lookup|intel_lookup|intellookup|incidr|InCIDR|InCidr)\b/,
 	'keyword': /\b(?:and|or|AND|OR)/,
 	'boolean': /\b(?:true|false|null)\b/,
-
-	'function': /\b(?:\|length|count|lowercase|uppercase|refang|b64decode|b64extract|urldecode|any|all|avg|max|min|sum|split)\b/,
-
+	'function': /\b(\:)\b/,
 	'datetime': [
 		{
 			// RFC 822 + RFC 850
@@ -27,24 +23,19 @@ Prism.languages.rql = {
 		}
 	],
 	'number': /\b(?:0x[0-9A-Fa-f]+|\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)(?:(?:min|sec|[mnµ]s|tick|microsecond|[dhms])\b)?|[+-]?\binf\b/,
-
 	'operator': /=>|[!=]~|[!=<>]=?|[-+*/%|]|\.\./,
-	
-
 	'verb': {
 		pattern: /.*(\|\s*)[a-z][\w-]*/i,
 		lookbehind: true,
 		alias: 'constant'
 	},
-    
 	'constant': {
-		pattern: /(?:observables|value|tlp|tags|spotted|safe|source_field|data_type|ioc|original_source_field|title|description|tlp|severity|risk_score|status|name|reference|source|signature|tags|raw_log[\.]?.*)/
+		pattern: /\b[\w\.\d]+\b/,
+		greedy: true
 	},
-
 	'command': {
 		pattern: /\.[a-z][a-z\d-]*\b/,
 		alias: 'keyword'
 	},
-
 	'punctuation': /[()\[\]{},;.:]/,
 };

@@ -13,10 +13,11 @@
     <CSidebarNav>
       <CSidebarNavItem name="Dashboard" to="/dashboard" icon="cil-speedometer"></CSidebarNavItem>
       <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_cases')" name="Cases" to="/cases" icon="cil-briefcase"></CSidebarNavItem>
+      <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt" to="/detections"></CSidebarNavItem>      
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_events') || this.$store.getters.user_has_permission('view_event_rules')" name='Events' icon="cil-bell">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_events')" name="Queue" to="/alerts/list"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_event_rules')" name="Event Rules" to="/event_rules"></CSidebarNavItem>
-      </CSidebarNavDropdown>
+      </CSidebarNavDropdown>      
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='Intel' icon="cil-3d">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="List Manager" to="/lists"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="Intel Explorer" to="/lists/explore"></CSidebarNavItem>

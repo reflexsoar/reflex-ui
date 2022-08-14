@@ -24,7 +24,7 @@
               </template>
               <template #organization="{item}">
                 <td>
-                  <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+                  <OrganizationBadge :uuid="item.organization"/>
                 </td>
               </template>
               <template #inputs="{item}">
@@ -37,7 +37,7 @@
               </template>
               <template #roles="{item}">
                   <td>
-                    <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role"><CButton color="primary" size="sm" disabled>{{ role }}</CButton></li>
+                    <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role"><CButton color="primary" style="cursor: auto" size="sm" disabled>{{ role }}</CButton></li>
                   </td>
               </template>
               <template #active="{item}">
@@ -50,7 +50,17 @@
                   {{item.last_heartbeat | moment('from', 'now')}}
                 </td>
               </template>
-              
+              <template #healthy="{item}">
+                <td>
+                  <CButton v-if="item.healthy" style="cursor: auto" color="success" size="sm">Healthy</CButton>
+                  <CButton v-else style="cursor: auto" color="warning" size="sm">Unhealthy</CButton>
+                </td>
+              </template>
+              <template #health_issues="{item}">
+                <td>
+                  <li style="display: inline; margin-right: 2px;text-transform: capitalize" v-for="issue in item.health_issues" :key="issue"><CBadge color="warning">{{issue}}</CBadge></li>
+                </td>
+              </template>              
               </CDataTable>
               <CRow>
               <CCol>
@@ -79,14 +89,18 @@
 
 <script>
 import {mapState} from "vuex";
+import OrganizationBadge from './OrganizationBadge'
 export default {
     name: 'Agents',
+    components: {
+      OrganizationBadge
+    },
     props: {
     items: Array,
     fields: {
       type: Array,
       default () {
-        return ['name', 'roles', 'inputs', 'ip_address', 'active', 'last_heartbeat']
+        return ['name', 'roles', 'inputs', 'ip_address', 'active', 'last_heartbeat', 'healthy', 'health_issues']
       }
     },
     caption: {

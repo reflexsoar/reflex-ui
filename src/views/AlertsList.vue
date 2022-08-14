@@ -25,6 +25,7 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
+                    <CButton @click="saveFilter()" color="success" size="sm" disabled>Save Filter</CButton>
                     <CButton @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
                     <CButton @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
                   </CButtonGroup>
@@ -241,8 +242,6 @@
             <h5>Multiple Organization Warning</h5>
             <p>You are dismissing events for multiple organizations at the same time.  Be sure to pick the correct reason and provide a description for each.</p>
           </CCallout>
-          {{multiple_org_dismiss}}
-          {{observable_filters}}
           <div v-for="events,org in selected_orgs" :key="org">
             <CRow>
               <CCol><hr></CCol></CRow>
@@ -270,7 +269,7 @@
           <CForm id="dismissEventForm" @submit.prevent="dismissEventByFilter()">
               <CRow>
                   <CCol><br>
-              <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value" label="Reason"/>
+              <CSelect :reset-on-options-change='true' placeholder="Select a reason for dismissing the event..." :options="close_reasons" :value="dismissalReason" @change="dismissalReason = $event.target.value; dismissalComment = close_reasons.filter(r => r.value == $event.target.value)[0].description" label="Reason"/>
               <CTextarea
                   placeholder="Enter a comment as to why this Event is being dismissed."
                   v-bind:required="settings.require_event_dismiss_comment"
@@ -279,8 +278,23 @@
                   label="Comment"
                   rows=5
               >
-              </CTextarea>            
+              </CTextarea>
                   </CCol>
+              </CRow>
+              <CRow>
+
+                <CCol >
+                  <label for="tuning_advice_switch">Provide Tuning Advice?</label><br>
+                  <CSwitch id="tuning_advice_switch" :checked.sync="tuningAdviceToggle" label-on="Yes" label-off="No" color="success">Provide Tuning Advice</CSwitch><br>
+                  <CTextarea v-if="tuningAdviceToggle"
+                    placeholder="Enter advice on how this Event should be tuned to prevent future False Positives."
+                    :value="tuningAdvice"
+                    @change="tuningAdvice = $event"
+                    label="Tuning Advice"
+                    rows=5
+                  >
+                  </CTextarea>
+                </CCol>
               </CRow>
           </CForm>
         </div>
@@ -480,6 +494,8 @@ export default {
         sourceRuleEventUUID: "",
         dismissalComment: "",
         dismissalReason: null,
+        tuningAdviceToggle: false,
+        tuningAdvice: '',
         close_reason: "",
         close_reasons: [],
         collapse: {},
@@ -551,6 +567,8 @@ export default {
         this.loadCloseReasons()
         this.error = false
         this.error_message = ""
+        this.tuningAdviceToggle = false
+        this.tuningAdvice = ''
         this.dismissEventModal = true
       },
       resetFilters() {
@@ -686,6 +704,13 @@ export default {
           dismiss_comment: this.dismissalComment,
           uuids: this.selected
         }
+
+        if(this.tuningAdviceToggle && this.tuningAdvice != "") {
+          data.tuning_advice = this.tuningAdvice
+        } else {
+          data.tuning_advice = null
+        }
+
         this.$store.dispatch('dismissEventsByFilter', data).then(resp => {
           this.filtered_events = this.filterEvents()
             this.dismissEventModal = false
@@ -741,7 +766,7 @@ export default {
         }
 
         this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
-          this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid}})
+          this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid, description: reason.description}})
         })
       },
       addSuccess: function() {
@@ -1334,6 +1359,9 @@ export default {
       toggleFilters() {
         this.quick_filters = !this.quick_filters
         this.$store.commit('set_quick_filter_state', this.quick_filters)
+      },
+      saveFilter() {
+        console.log(JSON.stringify(this.observableFilters))
       }
     },
     beforeDestroy: function() {
