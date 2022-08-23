@@ -755,6 +755,7 @@ const getters = {
       return "Unknown"
     }
   },
+  notification_channels: state => { return state.notification_channels },
   event_rules: state => { return state.event_rules },
   source_input: state => { return state.source_input },
   lists: state => { return state.lists },
@@ -1566,10 +1567,15 @@ const actions = {
       })
     })
   },
-  getNotificationChannels({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+  getNotificationChannels({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/notification/channel?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+
+      if (organization) {
+        url += `&organization=${organization}`
+      }
+      
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_notification_channels', resp.data.channels)

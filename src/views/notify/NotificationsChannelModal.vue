@@ -65,27 +65,26 @@
                                     <CSwitch id="use_tls" :checked.sync="channel.email_configuration.use_tls" label-on="Yes" label-off="No" label="Use TLS" color="success"/>
                                     
                                 </div>
-                                <div v-if="channel.channel_type == 'slack'">
-                                    <CInput v-model="channel.config.webhook_url" label="Slack Webhook URL"
+                                <div v-if="channel.channel_type == 'teams_webhook'">
+                                    <h4>Teams Configuration</h4>
+                                    <CInput v-model="channel.teams_configuration.webhook_url" label="Teams Webhook URL"
+                                        placeholder="Teams Webhook URL" />
+                                    <CTextarea v-model="channel.teams_configuration.message_template"
+                                        label="Message Template" placeholder="Message Template" rows="5" />
+                                </div>
+                                <div v-if="channel.channel_type == 'slack_webhook'">
+                                    <h4>Slack Configuration</h4>
+                                    <CInput v-model="channel.slack_configuration.webhook_url" label="Slack Webhook URL"
                                         placeholder="Slack Webhook URL" />
+                                    <CTextarea v-model="channel.slack_configuration.message_template"
+                                        label="Message Template" placeholder="Message Template" rows="5" />
                                 </div>
-                                <div v-if="channel.channel_type == 'pagerduty'">
-                                    <CInput v-model="channel.config.pagerduty_service_key" label="Pagerduty Service Key"
+                                <div v-if="channel.channel_type == 'pagerduty_webhook'">
+                                    <h4>PagerDuty Configuration</h4>
+                                    <CInput v-model="channel.pagerduty_configuration.pagerduty_service_key" label="Pagerduty Service Key"
                                         placeholder="Pagerduty Service Key" />
-                                </div>
-                                <div v-if="channel.channel_type == 'webhook'">
-                                    <CInput v-model="channel.config.webhook_url" label="Webhook URL"
-                                        placeholder="Webhook URL" />
-                                </div>
-                                <div v-if="channel.channel_type == 'hipchat'">
-                                    <CInput v-model="channel.config.hipchat_room_id" label="Hipchat Room ID"
-                                        placeholder="Hipchat Room ID" />
-                                    <CInput v-model="channel.config.hipchat_auth_token" label="Hipchat Auth Token"
-                                        placeholder="Hipchat Auth Token" />
-                                </div>
-                                <div v-if="channel.channel_type == 'opsgenie'">
-                                    <CInput v-model="channel.config.opsgenie_api_key" label="Opsgenie API Key"
-                                        placeholder="Opsgenie API Key" />
+                                    <CTextarea v-model="channel.pagerduty_configuration.message_template"
+                                        label="Message Template" placeholder="Message Template" rows="5" />
                                 </div>
                             </CTab>
                             <CTab title="3. Review" :disabled="!channel.channel_type">
@@ -157,7 +156,7 @@ export default {
     data() {
         return {
             channel_types: [
-                { 'label': 'Microsoft Teams', 'value': 'teams_webook' },
+                { 'label': 'Microsoft Teams', 'value': 'teams_webhook' },
                 { 'label': 'Slack', 'value': 'slack_webhook' },
                 { 'label': 'Email', 'value': 'email' },
                 { 'label': 'PagerDuty', 'value': 'pagerduty_webhook' },

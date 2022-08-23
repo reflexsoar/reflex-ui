@@ -81,7 +81,7 @@
                   "
                   :value.sync="organization"
                   :options="organizations"
-                  @change="loadCloseReasons()"
+                  @change="reloadMeta()"
                 />
                 <CInput
                   label="Rule Name"
@@ -418,7 +418,9 @@
                   </CCol>
                 </CRow>
               </CTab>
-              <CTab title="5. Review" :disabled="test_failed && from_card">
+              <CTab title="5. Notifications" :disabled="test_failed && from_card">
+              </CTab>
+              <CTab title="6. Review" :disabled="test_failed && from_card">
                 <h4>Review</h4>
                 <b>Rule Name: </b> {{ name }}<br />
                 <b>Description: </b><br />{{ description }}<br /><br />
@@ -577,7 +579,7 @@ export default {
       expire_days: 1,
       observables: [],
       expire: false,
-      final_step: 4,
+      final_step: 5,
       test_running: false,
       test_result: "",
       test_failed: true,
@@ -682,6 +684,7 @@ export default {
         }
 
         this.caseFind("*");
+        this.loadNotificationChannels();
         this.loadCloseReasons();
       }
       this.$emit("update:show", this.modalStatus);
@@ -1020,6 +1023,24 @@ export default {
       };
       this.tag_list.push(t);
       this.selected_tags.push(t);
+    },
+    reloadMeta() {
+      this.loadCloseReasons()
+      this.loadNotificationChannels()
+    },
+    loadNotificationChannels() {
+      let organization = this.organization;
+
+      if (this.from_card) {
+        organization = this.event_organization
+      }
+
+      this.$store.dispatch("getNotificationChannels", { organization }).then((resp) => {
+        this.notification_channels = this.$store.getters.notification_channels.map((channel) => {
+          return { label: channel.name, value: channel.uuid };
+        });
+      });
+
     },
     loadCloseReasons() {
       let organization = this.organization;
