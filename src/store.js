@@ -116,7 +116,9 @@ const state = {
   list_names: [],
   toasts: [],
   toasted: [],
-  running_tasks: []
+  running_tasks: [],
+  notification_channel: {},
+  notification_channels: []
 }
 
 const mutations = {
@@ -541,6 +543,24 @@ const mutations = {
     }    
     state.credential = credential
     state.status = 'success'
+  },
+  add_notification_channel(state, channel){
+    if (state.notification_channels.length == 0) {
+      state.notification_channels = [channel]
+    } else {
+      state.notification_channels.push(channel)
+    }
+    state.notification_channel = channel
+  },
+  update_notification_channel(state, channel) {
+    state.notification_channel = channel
+    state.notification_channels = state.notification_channels.map(c => c.uuid == channel.uuid ? channel : c)
+  },
+  remove_notification_channel(state, uuid) {
+    state.notification_channels = state.notification_channels.filter(c => c.uuid != uuid)
+  },
+  save_notification_channels(state, channels) {
+    state.notification_channels = channels
   },
   add_case(state, data) {
     state.cases.push(data)
@@ -1539,6 +1559,21 @@ const actions = {
       Axios({url: `${BASE_URL}/dashboard`, method: 'GET'})
       .then(resp => {
         commit('save_dashboard_metrics', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getNotificationChannels({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+    return new Promise((resolve, reject) => {
+
+      let url = `${BASE_URL}/notification/channel?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_notification_channels', resp.data.channels)
+        commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })
       .catch(err => {

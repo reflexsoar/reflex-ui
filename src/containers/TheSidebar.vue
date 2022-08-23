@@ -24,6 +24,7 @@
       </CSidebarNavDropdown>
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='System' icon="cil-settings">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_settings')" name="Settings" to="/settings"></CSidebarNavItem>
+        <CSidebarNavItem name="Notifications" to="/notifications"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_agents')" name="Agents" to="/agents"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_credentials')" name="Credentials" to="/credentials"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_inputs')" name="Inputs" to="/inputs"></CSidebarNavItem>
