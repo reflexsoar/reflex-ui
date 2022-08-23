@@ -18,7 +18,8 @@
                         :sorter="{ external: true, resetable: true }" style="border-top: 1px solid #cfcfcf;">
                         <template #name="{ item }">
                             <td>
-                                <router-link :to="`${item.uuid}`">{{ item.name }}</router-link>
+                                <b>{{ item.name }}</b><br>
+                                {{item.description}}
                             </td>
                         </template>
                         <template #channel_type="{item}">

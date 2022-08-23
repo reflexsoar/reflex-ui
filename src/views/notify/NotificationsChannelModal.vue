@@ -29,7 +29,7 @@
                             <CTab title="1. Overview">
                                 <CSelect label="Organization" placeholder="Select an organization"
                                     v-if="current_user.role.permissions.view_organizations"
-                                    :value.sync="channel.organization" :options="orgs" />
+                                    :value.sync="channel.organization" :options="orgs" @change="reloadMeta()"/>
                                 <CSelect label="Channel Type" placeholder="Select the type of channel being configured"
                                     :value.sync="channel.channel_type" :options="channel_types" />
                                 <CInput v-model="channel.name" label="Name" placeholder="Channel Name" />
@@ -39,6 +39,8 @@
                             <CTab title="2. Configuration" :disabled="!channel.channel_type">
                                 <div v-if="channel.channel_type == 'email'">
                                     <h4>Email Configuration</h4>
+                                    <CSelect :value.sync="channel.email_configuration.credential" label="Credential"
+                                        placeholder="Select an email credential" :options="credential_list" />
                                     <CInput v-model="channel.email_configuration.mail_from" label="Send From"
                                         placeholder="The e-mail address to send as" />
                                     <CInput v-model="channel.email_configuration.subject" label="Email Subject"
@@ -152,7 +154,7 @@ export default {
             default: 'Create'
         }
     },
-    computed: mapState(['settings', 'current_user', 'organizations']),
+    computed: mapState(['settings', 'current_user', 'organizations', 'credential_list']),
     data() {
         return {
             channel_types: [
@@ -175,7 +177,8 @@ export default {
             test_failed: false,
             final_step: 2,
             submitted: false,
-            recipients: []
+            recipients: [],
+            organization: null
         }
     },
     watch: {
@@ -207,6 +210,11 @@ export default {
         }
     },
     methods: {
+        reloadMeta() {
+            let organization = this.channel.organization
+            this.$store.dispatch('getCredentialList', {organization: organization, page_size: 100}).then(resp => {
+            })
+        },
         validEmail(email) {
              var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
              if(validRegex.test(email)) {
