@@ -48,7 +48,7 @@
                                     <label for="mail_recipients">Email Recipients</label><br>
                                     <multiselect id="mail_recipients" v-model="channel.email_configuration.mail_to" :taggable="true"
                                         :multiple="true" :options="recipients" @tag="addRecipient" :searchable="true"
-                                        label="name" :placeholder="'Select recipients'" track-by="uuid" 
+                                        placeholder="Select recipients"
                                         :close-on-select="false"/><br>
                                     <CTextarea v-model="channel.email_configuration.message_template"
                                         label="Message Template" placeholder="Message Template" rows="5" />
@@ -229,8 +229,8 @@ export default {
                     name: email,
                     uuid: email.substring(0, 2) + Math.floor((Math.random() * 10000000))
                 };
-                this.channel.email_configuration.mail_to.push(t);
-                this.recipients.push(t);     
+                this.channel.email_configuration.mail_to.push(email);
+                this.recipients.push(email);     
             }
         },
         createNotificationChannel() {

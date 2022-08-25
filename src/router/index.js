@@ -293,7 +293,8 @@ function configRoutes () {
           name: 'Notifications',
           component: NotificationChannelsList,
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiresPermission: 'update_notification_channel'
           }
         },
         {
