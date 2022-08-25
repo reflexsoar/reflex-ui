@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Axios from 'axios'
 import createPersistedState from "vuex-persistedstate";
+
 Vue.use(Vuex)
 
 const state = {
@@ -1575,7 +1576,7 @@ const actions = {
       if (organization) {
         url += `&organization=${organization}`
       }
-      
+
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_notification_channels', resp.data.channels)
@@ -1937,6 +1938,17 @@ const actions = {
       })
       .catch(err => {
         console.log(err)
+        reject(err)
+      })
+    })
+  },
+  createEventComment({commit}, {uuid, comment}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}/comment`, data: {comment: comment}, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })

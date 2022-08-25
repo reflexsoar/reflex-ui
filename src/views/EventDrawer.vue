@@ -115,7 +115,7 @@
             {{detection.description}}<br><br>
             <div>
               <h4>Base Query</h4>
-              <pre>{{detection.query.query}}</pre>
+              <pre>{{detection.query ? detection.query.query : ''}}</pre>
             </div>
             <div v-if="detection.guide">
               <h4>Investigation Guide</h4>
@@ -158,6 +158,11 @@
                 </template>
                 </CDataTable>
             </div>
+        </CCardBody>
+      </CTab>
+      <CTab title="Comments">
+        <CCardBody>
+          Comments go here
         </CCardBody>
       </CTab>
     </CTabs>
