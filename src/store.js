@@ -8,6 +8,8 @@ Vue.use(Vuex)
 const state = {
   eventDrawerShow: 'responsive',
   eventDrawerMinimize: true,
+  mitreDrawerShow: 'responsive',
+  mitreDrawerMinimize: true,
   sidebarShow: 'responsive',
   sidebarMinimize: false,
   status: '',
@@ -87,6 +89,7 @@ const state = {
   pagination: {},
   mitre_tactics: [],
   mitre_techniques: [],
+  mitre_technique: {},
   credential_list: [],
   intel_filters: [],
   index_fields: [],
@@ -686,6 +689,10 @@ const mutations = {
   save_techniques(state, techniques) {
     state.mitre_techniques = techniques
   },
+  save_technique(state, technique) {
+    state.mitre_technique = {}
+    state.mitre_technique = technique
+  },
   add_success(state) {
     state.status = 'success'
   },
@@ -767,6 +774,7 @@ const getters = {
       return "Unknown"
     }
   },
+  mitre_technique: state => { return state.mitre_technique },
   event_comments: state => { return state.event_comments },
   notification_channels: state => { return state.notification_channels },
   event_rules: state => { return state.event_rules },
@@ -787,6 +795,8 @@ const getters = {
   list_stats: state => { return state.list_stats },
   eventDrawerShow: state => { return state.eventDrawerShow},
   eventDrawerMinimize: state => { return state.eventDrawerMinimize},
+  mitreDrawerShow: state => { return state.mitreDrawerShow},
+  mitreDrawerMinimize: state => { return state.mitreDrawerMinimize},
   mfa_enabled: state => { return state.mfa_enabled },
   isLoggedIn: state => !!state.access_token,
   authStatus: state => state.status,
@@ -3022,6 +3032,37 @@ const actions = {
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('save_techniques', resp.data.techniques)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getMitreTechnique({commit}, {page=1, page_size=10, name__like=null, external_id=null, external_id__like=null, phase_names=null}) {
+
+    let url = `${BASE_URL}/mitre/technique?page=${page}&page_size=${page_size}`
+
+    if(name__like) {
+      url += `&name__like=${name__like}`
+    }
+
+    if(external_id__like) {
+      url += `&external_id__like=${external_id__like}`
+    }
+
+    if(external_id) {
+      url += `&external_id=${external_id}`
+    }
+
+    if(phase_names) {
+      url += `&phase_names=${phase_names}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_technique', resp.data.techniques[0])
         resolve(resp)
       })
       .catch(err => {
