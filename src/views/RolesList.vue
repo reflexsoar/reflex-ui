@@ -79,7 +79,7 @@
         <div v-if="role.permissions">
           <CListGroup>
             <CListGroupItem v-for="permissions, category in filteredPermissionMap" :key="category">
-            <b style="cursor: pointer;" @click="toggleCollapse(category)"><CIcon name="cilMinus" v-if="collapseStatus(category)"/><CIcon v-else name="cilPlus"/>&nbsp;{{category}}</b>
+            <b style="cursor: pointer;" @click="toggleCollapse(category)"><CIcon name="cilMinus" v-if="collapseStatus(category)"/><CIcon v-else name="cilPlus"/>&nbsp;{{category}}</b> ({{activePermissions(category)}})
             <CCollapse :show="collapseStatus(category)"><br>
             <CCol>
               <CRow>
@@ -305,6 +305,20 @@ export default {
     },
     collapseStatus(category) {
       return this.collapse[category]
+    },
+    activePermissions(category) {
+      let permissions = this.filteredPermissionMap[category]
+      let total_permissions = permissions.length
+      let active = 0
+      for(let p in Object.keys(this.role.permissions)) {
+        let permission = Object.keys(this.role.permissions)[p]
+        if(permissions.includes(permission)) {
+          if(this.role.permissions[permission] != null && this.role.permissions[permission] == true) {
+            active++
+          }
+        }
+      }
+      return active.toString()+" of "+total_permissions.toString()
     }
   },
   data() {
