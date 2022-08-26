@@ -1,9 +1,12 @@
 <template>
   <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"><CCol xs="12" lg="12">
-    <h2>Detection Management</h2><br>
+    <h2><CBadge color="primary">BETA</CBadge>&nbsp;Detection Management&nbsp;<button type="button" class="kb"
+                    onclick="window.open('https://docs.reflexsoar.com/en/latest/detections')">
+                    <CIcon name='cil-book' size="lg" /></button></h2><br>
      <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
     </CAlert>
+    <CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and requires a specific agent version and API version.</CAlert>
     <CCard>
       <CCardBody class="tabbed">
         <CTabs>

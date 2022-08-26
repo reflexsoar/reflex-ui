@@ -3,7 +3,8 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 //import CoreuiVue from '@coreui/vue'
-import CoreuiVue from '@coreui/vue-pro'
+//import CoreuiVue from '@coreui/vue-pro'
+import CoreuiVuePro from '../node_modules/@coreui/vue-pro/src/index.js'
 import { iconsSet as icons } from './assets/icons/icons.js'
 import store from './store'
 import Axios from 'axios'
@@ -22,7 +23,7 @@ import Editor from 'v-markdown-editor'
 import VueApexCharts from 'vue-apexcharts'
 
 Vue.config.performance = true
-Vue.use(CoreuiVue)
+Vue.use(CoreuiVuePro)
 Vue.use(Vuelidate)
 Vue.component('multiselect', Multiselect)
 Vue.use(VueMoment, {moment})
