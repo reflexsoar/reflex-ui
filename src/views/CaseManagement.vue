@@ -1,5 +1,5 @@
 <template>
-  <CCol xs="12" lg="12">
+  <CRow><CCol xs="12" lg="12">
     <h2>Case Management<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/cases')"><CIcon name='cil-book' size="lg"/></button></h2><br>
      <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
@@ -22,7 +22,7 @@
         </CTabs>
       </CCardBody>
     </CCard>
-  </CCol>
+  </CCol></CRow>
 </template>
 
 <script>

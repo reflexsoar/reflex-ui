@@ -1,7 +1,7 @@
 <template>
   <CRow>
     <CCol>
-      <h1>Inputs<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/inputs')"><CIcon name='cil-book' size="lg"/></button></h1><br>
+      <h2>Inputs<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/inputs')"><CIcon name='cil-book' size="lg"/></button></h2><br>
       <CButton color="primary" @click="newInput()">New Input</CButton><br><br>
       <CCard>
           <CCardHeader>
