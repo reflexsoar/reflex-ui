@@ -160,7 +160,7 @@
                                                         <p v-if="!edit_description"><vue-markdown>{{case_data.description}}</vue-markdown></p>
                             <span v-if="edit_description">
                             <CButton color="danger" @click="edit_description = false" size="sm"><CIcon name="cilXCircle"/></CButton>&nbsp;<CButton color="primary" @click="saveDescription()" size="sm"><CIcon name="cilSave"/></CButton><br><br>
-                                <markdown-editor height="auto" theme="success" :value="case_data.description" @change="case_data.description = $event"></markdown-editor><br>
+                                <markdown-editor height="auto" theme="info" :value="case_data.description" @change="case_data.description = $event"></markdown-editor><br>
                                 <!--<CTextarea rows="10" :value="case_data.description" @change="case_data.description = $event" description="HINT: Use markdown to create a beautiful description."></CTextarea>-->
                                 </span>
                             <span v-if="closureComments().length > 0 && case_data.status.closed">

@@ -39,7 +39,9 @@
       </CRow>
     </CCardHeader>
     <CCardBody>
-      <vue-markdown v-if="!edit">{{ comment.message }}</vue-markdown><span v-else><CTextarea :value="comment.message" @change="editted_comment = $event" rows="5"></CTextarea>
+      <vue-markdown v-if="!edit">{{ comment.message }}</vue-markdown><span v-else>
+        <markdown-editor height="auto" theme="info" :value="comment.message" @change="editted_comment = $event"></markdown-editor>
+        <!--<CTextarea :value="comment.message" @change="editted_comment = $event" rows="5"></CTextarea>-->
       <CButton color="danger" @click="edit = !edit" size="sm"><CIcon name="cilXCircle"/></CButton>
       <CButton color="primary" @click="updateComment()"  size="sm"><CIcon name="cilSave"/></CButton></span>
     </CCardBody>

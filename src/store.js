@@ -783,6 +783,7 @@ const getters = {
   network_data: state => { return state.network_data },
   case_stats: state => { return state.case_stats },
   event_stats: state => { return state.event_stats },
+  dashboard_metrics: state => { return state.dashboard_metrics },
   list_stats: state => { return state.list_stats },
   eventDrawerShow: state => { return state.eventDrawerShow},
   eventDrawerMinimize: state => { return state.eventDrawerMinimize},
