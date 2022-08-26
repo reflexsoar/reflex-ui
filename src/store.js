@@ -26,6 +26,7 @@ const state = {
   credential: {},
   events: [],
   event: {},
+  event_comments: [],
   cases: [],
   case: {},
   tags: {},
@@ -260,6 +261,16 @@ const mutations = {
   add_comment(state, comment) {
     state.comments.push(comment)
     state.comment = comment
+  },
+  save_event_comments(state, comments) {
+    state.event_comments = comments
+  },
+  add_event_comment(state, comment) {
+    if(state.event_comments.length == 0) {
+      state.event_comments = [comment]
+    } else {
+      state.event_comments.push(comment)
+    }    
   },
   update_observable_filters(state, filters) {
     state.observable_filters = filters
@@ -756,6 +767,7 @@ const getters = {
       return "Unknown"
     }
   },
+  event_comments: state => { return state.event_comments },
   notification_channels: state => { return state.notification_channels },
   event_rules: state => { return state.event_rules },
   source_input: state => { return state.source_input },
@@ -1746,6 +1758,17 @@ const actions = {
       })
     })
   },
+  getEventComments({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}/comment`, method: 'GET'})
+      .then(resp => {
+        commit('save_event_comments', resp.data.comments)
+        resolve(resp)
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  },
   getEventStats({commit}, {title__like=null, signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type','organization','event_rule','signature'],start=null, end=null, organization=[], event_rules=[]}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
@@ -1942,9 +1965,9 @@ const actions = {
       })
     })
   },
-  createEventComment({commit}, {uuid, comment}) {
+  createEventComment({commit}, {uuid, data}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/${uuid}/comment`, data: {comment: comment}, method: 'POST'})
+      Axios({url: `${BASE_URL}/event/${uuid}/comment`, data: data, method: 'POST'})
       .then(resp => {
         resolve(resp)
       })

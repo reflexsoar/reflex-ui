@@ -25,7 +25,7 @@
                 <CRow>
                     <CCol>
                         <p>Add a comment on this event, <b>{{event.title}}</b>.</p>
-                        <markdown-editor height="auto" theme="success" :value="comment"></markdown-editor>
+                        <markdown-editor height="auto" theme="success" :value="comment" @change="comment = $event"></markdown-editor>
                     </CCol>
                 </CRow>
             </div>
@@ -60,7 +60,7 @@ export default {
             error_message: '',
             modalStatus: this.show,
             submitted: false,
-            comment: "adawdaw"
+            comment: ""
         }
     },
     watch: {
@@ -88,6 +88,22 @@ export default {
         dismiss() {
             this.comment = ""
             this.modalStatus = false
+        },
+        createEventComment() {
+            let payload = {
+                comment: this.comment
+            }
+            console.log(this.comment)
+            this.$store.dispatch('createEventComment', {
+                uuid: this.event.uuid,
+                data: payload
+            }).then(response => {
+                this.comment = ""
+                this.modalStatus = false
+            }).catch(error => {
+                this.error = true;
+                this.error_message = error.response.data.message;
+            });
         }
     }
 }
