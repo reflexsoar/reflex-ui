@@ -44,6 +44,7 @@ const UserProfile = () => import('@/views/UserProfile')
 const Hunter = () => import('@/views/Hunter')
 const DetectionManagement = () => import('@/views/DetectionManagement')
 const DetectionDetails = () => import('@/views/DetectionDetails')
+const MitreCoverage = () => import('@/views/detections/MitreCoverage')
 const EventRuleManagement = () => import('@/views/EventRuleManagement')
 const Organization = () => import('@/views/Organization')
 const OrganizationSettings = () => import('@/views/OrganizationSettings')
@@ -153,7 +154,8 @@ function configRoutes () {
           name: 'Detections',
           component: DetectionManagement,
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiresPermission: 'update_detection'
           }
         },
         {
@@ -161,7 +163,17 @@ function configRoutes () {
           name: 'Detection Details',
           component: DetectionDetails,
           meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiresPermission: 'view_detections'
+          }
+        },
+        {
+          path: '/mitre_coverage',
+          name: 'MITRE Coverage',
+          component: MitreCoverage,
+          meta: {
+            requiresAuth: true,
+            requiresPermission: 'view_detections'
           }
         },
         {

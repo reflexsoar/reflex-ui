@@ -43,11 +43,11 @@
         <CCardBody>
           <CRow>
             <CCol col="6">
-              <b>Enabled: </b> True<br />
-              <b>Plugin: </b> Elasticsearch<br />
+              <b>Enabled: </b> True<br>
+              <b>Plugin: </b> Elasticsearch<br>
             </CCol>
             <CCol col="6">
-              <b>Date Created: </b>{{ input.created_at | moment("LLLL") }}<br />
+              <b>Date Created: </b>{{ input.created_at | moment("LLLL") }}<br>
               <b>Last Updated: </b>
             </CCol>
           </CRow>
@@ -132,7 +132,7 @@
             <CCardBody>
               <CRow>
                 <CCol col="4">
-                  <b>Hosts</b><br />
+                  <label>Hosts</label><br>
                   <li
                         style="display: inline; margin-right: 2px"
                         v-for="host in input.config['hosts']"
@@ -144,33 +144,33 @@
                       </li><br/><br/>
                 </CCol>
                 <CCol col="4">
-                  <b>Distro</b><br />
-                  {{ input.config["distro"] }}<br /><br />
+                  <label>Distro</label><br>
+                  {{ input.config["distro"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Alert Index</b><br />
-                  {{ input.config["index"] }}<br /><br />
+                  <label>Alert Index</label><br>
+                  {{ input.config["index"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Lucene Filter</b><br />
-                  {{ input.config["lucene_filter"] }}<br /><br />
+                  <label>Lucene Filter</label><br>
+                  {{ input.config["lucene_filter"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>HTTP scheme</b><br />
-                  {{ input.config["scheme"] }}<br /><br />
+                  <label>HTTP scheme</label><br>
+                  {{ input.config["scheme"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Auth Method</b><br />
-                  {{ input.config["auth_method"] }}<br /><br />
+                  <label>Auth Method</label><br>
+                  {{ input.config["auth_method"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Verify Hostname</b><br />
+                  <label>Verify Hostname</label><br>
                   {{ input.config["check_hostname"] ? "Yes" : "No"
-                  }}<br /><br />
+                  }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>TLS Verification Mode</b><br />
-                  {{ input.config["cert_verification"] }}<br /><br />
+                  <label>TLS Verification Mode</label><br>
+                  {{ input.config["cert_verification"] }}<br><br>
                 </CCol>
               </CRow>
               <CRow>
@@ -178,27 +178,27 @@
                   <h5>Event Base Configuration</h5>
                 </CCol>
                 <CCol col="4">
-                  <b>Event Title Field</b><br />
-                  {{ input.config["rule_name"] }}<br /><br />
+                  <label>Event Title Field</label><br>
+                  {{ input.config["rule_name"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Description Field</b><br />
-                  {{ input.config["description_field"] }}<br /><br />
+                  <label>Description Field</label><br>
+                  {{ input.config["description_field"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Reference Field</b><br />
-                  {{ input.config["source_reference"] }}<br /><br />
+                  <label>Reference Field</label><br>
+                  {{ input.config["source_reference"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Severity Field</b><br />
-                  {{ input.config["severity_field"] }}<br /><br />
+                  <label>Severity Field</label><br>
+                  {{ input.config["severity_field"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Original Date Field</b><br />
-                  {{ input.config["original_date_field"] }}<br /><br />
+                  <label>Original Date Field</label><br>
+                  {{ input.config["original_date_field"] }}<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Tag Fields</b><br />
+                  <label>Tag Fields</label><br>
                   <li
                         style="display: inline; margin-right: 2px"
                         v-for="field in input.config['tag_fields']"
@@ -207,10 +207,10 @@
                         <CButton color="primary" size="sm" disabled>{{
                           field
                         }}</CButton>
-                      </li><br /><br />
+                      </li><br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Signature Fields</b><br />
+                  <label>Signature Fields</label><br>
                   <li
                         style="display: inline; margin-right: 2px"
                         v-for="field in input.config['signature_fields']"
@@ -219,15 +219,29 @@
                         <CButton color="primary" size="sm" disabled>{{
                           field
                         }}</CButton>
-                      </li><br /><br />
+                      </li><br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Search Size</b><br />
-                  {{ input.config["search_size"] }} events<br /><br />
+                  <label>Search Size</label><br>
+                  {{ input.config["search_size"] }} events<br><br>
                 </CCol>
                 <CCol col="4">
-                  <b>Search Period</b><br />
-                  {{ input.config["search_period"] }}<br /><br />
+                  <label>Search Period</label><br>
+                  {{ input.config["search_period"] }}<br><br>
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol>
+                  <label>Static Tags</label><br>
+                   <li
+                        style="display: inline; margin-right: 2px"
+                        v-for="field in input.config['static_tags']"
+                        :key="field"
+                      >
+                        <CButton color="primary" size="sm" disabled>{{
+                          field
+                        }}</CButton>
+                      </li>
                 </CCol>
               </CRow>
             </CCardBody>
