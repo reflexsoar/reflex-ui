@@ -8,11 +8,12 @@
     <CRow>
       <CCol>
         <CCardBody>
-          <CTextarea
+          <markdown-editor height="auto" theme="info" :value="comment_text" @change="comment_text = $event"></markdown-editor><br>
+          <!--<CTextarea
             v-model="comment_text"
             rows="5"
             placeholder="Enter your comment here...Markdown format is supported"
-          ></CTextarea>
+          ></CTextarea>-->
           <CButton color="primary" @click="leaveComment()" v-bind:disabled="comment_text.length == 0">Comment</CButton>
         </CCardBody>
       </CCol>
