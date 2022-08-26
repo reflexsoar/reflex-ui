@@ -1,11 +1,12 @@
 <template>
     <CRow>
         <CCol>
-            <h1>Notification Channels<button type="button" class="kb"
+            <h2><CBadge color="primary">BETA</CBadge>&nbsp;Notification Channels<button type="button" class="kb"
                     onclick="window.open('https://docs.reflexsoar.com/en/latest/notifications')">
                     <CIcon name='cil-book' size="lg" />
-                </button></h1>
+                </button></h2>
                 <p>Notification Channels define where Notifications get sent when an Event Rule, Case Rule or System Wide events action calls for a notification to be sent.</p>
+                <CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and requires a specific agent version and API version.</CAlert>
             <CButton color="primary" @click="createNotificationChannel()">New Channel</CButton><br><br>
             <CCard>
                 <CCardHeader>

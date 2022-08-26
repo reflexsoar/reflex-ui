@@ -7,6 +7,9 @@
 
 
 // If you want to add something do it here
+//@import "~@coreui/coreui-pro/scss/themes/dark/theme";
+@import "~@coreui/coreui-pro/scss/coreui";
+
 @import "custom";
 
 .card-header:not(.content-center) > .c-icon:first-child {

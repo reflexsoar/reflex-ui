@@ -10,10 +10,10 @@
       <img aria-label="logo" class="c-sidebar-brand-minimized" style="margin-bottom:0px; width: 80%" v-bind:src="logo"/>
     </CSidebarBrand>
 
-    <CSidebarNav>
+    <CSidebarNav :overlaid="true">
       <CSidebarNavItem name="Dashboard" to="/dashboard" icon="cil-speedometer"></CSidebarNavItem>
       <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_cases')" name="Cases" to="/cases" icon="cil-briefcase"></CSidebarNavItem>
-      <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt" to="/detections"></CSidebarNavItem>      
+      <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt" to="/detections" :badge="beta_badge"></CSidebarNavItem>      
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_events') || this.$store.getters.user_has_permission('view_event_rules')" name='Events' icon="cil-bell">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_events')" name="Queue" to="/alerts/list"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_event_rules')" name="Event Rules" to="/event_rules"></CSidebarNavItem>
@@ -24,7 +24,7 @@
       </CSidebarNavDropdown>
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='System' icon="cil-settings">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_settings')" name="Settings" to="/settings"></CSidebarNavItem>
-        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_notification_channel')" name="Notifications" to="/notifications"></CSidebarNavItem>
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_notification_channel')" name='Notifications' to="/notifications" :badge="beta_badge"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_agents')" name="Agents" to="/agents"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_credentials')" name="Credentials" to="/credentials"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_inputs')" name="Inputs" to="/inputs"></CSidebarNavItem>
@@ -51,7 +51,11 @@ export default {
     return {
       logo: require('../assets/img/symbol.png'),
       logo_slogan: require('../assets/img/white-logo-color-symbol-no-background.png'),
-      filtered_nav: []
+      filtered_nav: [],
+      beta_badge: {
+        color: 'primary',
+        text: 'BETA'
+      }
     }
   },
   created: function() {

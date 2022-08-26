@@ -1,5 +1,5 @@
 <template>
-  <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"><CCol xs="12" lg="12">
+  <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"><CRow><CCol xs="12" lg="12">
     <h2>Event Rules<button type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/event-rules/')"><CIcon name='cil-book' size="lg"/></button></h2><br>
     <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
       {{alert.message}}
@@ -91,7 +91,7 @@
         </CCol>-->
       </CRow>
     </CCard>
-  </CCol>
+  </CCol></CRow>
   <CreateEventRuleModal :from_card="false" :show.sync="create_event_rule_modal" :event_rule="rule" :mode="modal_mode"/>
   <CModal title="Delete Event Rule" color="danger" :centered="true" size="lg" :show.sync="delete_modal">
       <div>
