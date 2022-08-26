@@ -205,6 +205,11 @@ export default {
           },
           metric_change_config: {
             increase: false
+          },
+          new_terms_config: {
+            key_field: '',
+            max_terms: 1000,
+            window_size: 30
           }
         }
       }
@@ -263,6 +268,11 @@ export default {
             increase: false,
             threshold_format: 0,
             threshold: 0
+          },
+          new_terms_config: {
+            key_field: '',
+            max_terms: 1000,
+            window_size: 30
           }
         }
         this.show_detection_rule_modal = true

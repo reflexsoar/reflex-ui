@@ -47,6 +47,7 @@ const DetectionDetails = () => import('@/views/DetectionDetails')
 const EventRuleManagement = () => import('@/views/EventRuleManagement')
 const Organization = () => import('@/views/Organization')
 const OrganizationSettings = () => import('@/views/OrganizationSettings')
+const NotificationChannelsList = () => import('@/views/notify/NotificationChannelsList')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -286,6 +287,15 @@ function configRoutes () {
               }
             }*/
           ]
+        },
+        {
+          path: 'notifications',
+          name: 'Notifications',
+          component: NotificationChannelsList,
+          meta: {
+            requiresAuth: true,
+            requiresPermission: 'update_notification_channel'
+          }
         },
         {
           path: 'alerts',

@@ -81,7 +81,7 @@
                   "
                   :value.sync="organization"
                   :options="organizations"
-                  @change="loadCloseReasons()"
+                  @change="reloadMeta()"
                 />
                 <CInput
                   label="Rule Name"
@@ -119,8 +119,7 @@
                     <small class="text-muted"
                       >When the rule is saved, Reflex will retroactively attempt
                       to match this rule to any event that is currently in a New
-                      state</small
-                    >
+                      state</small>
                   </CCol>
                   <CCol col="5" v-if="current_user.default_org && !from_card">
                     <label>Global Rule</label><br />
@@ -292,51 +291,8 @@
                   </CCol>
                 </CRow>
               </CTab>
-              <CTab title="4. Actions" :disabled="test_failed && from_card">
-                <h4>Actions</h4>
-
-                <label>Merge into Case</label>
-                <CRow>
-                  <CCol col="1">
-                    <CSwitch
-                      label="Merge into Case"
-                      color="success"
-                      label-on="Yes"
-                      label-off="No"
-                      :checked.sync="merge_into_case"
-                      style="padding-top: 5px"
-                    ></CSwitch>
-                  </CCol>
-                  <CCol col="11">
-                    <multiselect
-                      style="z-index: 50"
-                      v-bind:disabled="!merge_into_case"
-                      :options="cases"
-                      v-model="target_case"
-                      track-by="uuid"
-                      label="title"
-                      :searchable="true"
-                      :internal-search="false"
-                      :options-limit="10"
-                      :show-no-results="false"
-                      @search-change="caseFind"
-                      :custom-label="caseLabel"
-                      placeholder="Select a case"
-                    >
-                      <template slot="option" slot-scope="props">
-                        {{ props.option.title }} ({{ props.option.uuid
-                        }}<br /><small
-                          >{{
-                            props.option.event_count
-                              ? props.option.event_count
-                              : 0
-                          }}
-                          events.</small
-                        >
-                      </template> </multiselect
-                    ><br />
-                  </CCol>
-                </CRow>
+              <CTab title="4. Event Actions" :disabled="test_failed && from_card">
+                <h4>Event Actions</h4>
                 <label>Dismiss Event</label>
                 <CRow>
                   <CCol col="1">
@@ -418,7 +374,91 @@
                   </CCol>
                 </CRow>
               </CTab>
-              <CTab title="5. Review" :disabled="test_failed && from_card">
+              <CTab title="5. Case Actions" :disabled="test_failed && from_card">
+                <h4>Case Actions</h4>
+                <p>Applying Case Actions when an Event Rule matches quickly helps analysts organize events in to Cases.  When <b>Create New Case</b> is selected, each matching event will have it's own unique case created. When <b>Merge into Case</b> is selected, all matching events will merge into the selected case.</p>
+                <CRow>
+                  <CCol col="2"><label>Create New Case</label>
+                    <CSwitch
+                      label="Merge into Case"
+                      color="success"
+                      label-on="Yes"
+                      label-off="No"
+                      :checked.sync="create_new_case"
+                      style="padding-top: 5px"
+                      v-bind:disabled="merge_into_case"
+                    ></CSwitch>
+                  </CCol>
+                  <CCol col="10">
+                      <label for="case_template">Case Template</label>
+                      <multiselect 
+                    v-model="case_template" 
+                    label="title" 
+                    :options="case_templates" 
+                    track-by="uuid" 
+                    :searchable="true"
+                    :internal-search="false"
+                    :options-limit="10"
+                    :show-no-results="false"
+                    placeholder="Select a case template..."
+                    @search-change="caseTemplateFind"
+                    v-bind:disabled="(current_user.role.permissions.view_organizations && organization == null) || !create_new_case">
+                    <template slot="option" slot-scope="props">
+                        {{props.option.title}}<br>
+                        <small>{{props.option.description}}<br>Contains {{props.option.task_count}} tasks.</small>
+                    </template>
+                </multiselect>
+                <small class="text-muted"
+                      >Select a Case Template to apply when the new case is created</small>
+                  </CCol>
+                </CRow>
+                <br><label>Merge into Case</label>
+                <CRow>
+                  <CCol col="1">
+                    <CSwitch
+                      label="Merge into Case"
+                      color="success"
+                      label-on="Yes"
+                      label-off="No"
+                      :checked.sync="merge_into_case"
+                      style="padding-top: 5px"
+                      v-bind:disabled="create_new_case"
+                    ></CSwitch>
+                  </CCol>
+                  <CCol col="11">
+                    <multiselect
+                      style="z-index: 50"
+                      v-bind:disabled="!merge_into_case"
+                      :options="cases"
+                      v-model="target_case"
+                      track-by="uuid"
+                      label="title"
+                      :searchable="true"
+                      :internal-search="false"
+                      :options-limit="10"
+                      :show-no-results="false"
+                      @search-change="caseFind"
+                      :custom-label="caseLabel"
+                      placeholder="Select a case"
+                    >
+                      <template slot="option" slot-scope="props">
+                        {{ props.option.title }} ({{ props.option.uuid
+                        }}<br /><small
+                          >{{
+                            props.option.event_count
+                              ? props.option.event_count
+                              : 0
+                          }}
+                          events.</small
+                        >
+                      </template> </multiselect
+                    ><br />
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab title="6. Notifications" :disabled="test_failed && from_card">
+              </CTab>
+              <CTab title="7. Review" :disabled="test_failed && from_card">
                 <h4>Review</h4>
                 <b>Rule Name: </b> {{ name }}<br />
                 <b>Description: </b><br />{{ description }}<br /><br />
@@ -577,7 +617,7 @@ export default {
       expire_days: 1,
       observables: [],
       expire: false,
-      final_step: 4,
+      final_step: 6,
       test_running: false,
       test_result: "",
       test_failed: true,
@@ -585,8 +625,11 @@ export default {
       query: "",
       close_reason: "",
       close_reasons: [],
+      create_new_case: false,
+      case_template: '',
       dismiss_comment: "",
       tag_list: [],
+      case_templates: [],
       run_retroactively: true,
       add_action: false,
       severities: [
@@ -682,23 +725,14 @@ export default {
         }
 
         this.caseFind("*");
+        this.loadNotificationChannels();
         this.loadCloseReasons();
       }
       this.$emit("update:show", this.modalStatus);
       if (!this.modalStatus) {
         this.reset();
       }
-    },
-    case_template: function () {
-      this.applyCaseTemplate();
-    },
-    use_case_template: function () {
-      if (!this.use_case_template) {
-        this.case_template = null;
-      }
-
-      this.applyCaseTemplate();
-    },
+    }
   },
   created() {
     //this.loadData()
@@ -873,6 +907,8 @@ export default {
         description: this.description,
         priority: parseInt(this.priority),
         merge_into_case: this.merge_into_case,
+        create_new_case: this.create_new_case,
+        case_template: this.case_template ? this.case_template.uuid : null,
         target_case_uuid: this.target_case.uuid,
         update_severity: this.update_severity,
         target_severity: this.target_severity,
@@ -1020,6 +1056,31 @@ export default {
       };
       this.tag_list.push(t);
       this.selected_tags.push(t);
+    },
+    reloadMeta() {
+      this.loadCloseReasons()
+      this.loadNotificationChannels()
+      this.caseTemplateFind('')
+    },
+    loadNotificationChannels() {
+      let organization = this.organization;
+
+      if (this.from_card) {
+        organization = this.event_organization
+      }
+
+      this.$store.dispatch("getNotificationChannels", { organization }).then((resp) => {
+        this.notification_channels = this.$store.getters.notification_channels.map((channel) => {
+          return { label: channel.name, value: channel.uuid };
+        });
+      });
+
+    },
+    caseTemplateFind(query) {
+        let organization = this.organization
+        this.$store.dispatch('getCaseTemplateList', {title: query, organization: organization}).then(resp => {
+            this.case_templates = resp.data
+        })
     },
     loadCloseReasons() {
       let organization = this.organization;

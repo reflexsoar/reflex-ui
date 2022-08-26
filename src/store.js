@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Axios from 'axios'
 import createPersistedState from "vuex-persistedstate";
+
 Vue.use(Vuex)
 
 const state = {
@@ -25,6 +26,7 @@ const state = {
   credential: {},
   events: [],
   event: {},
+  event_comments: [],
   cases: [],
   case: {},
   tags: {},
@@ -116,7 +118,9 @@ const state = {
   list_names: [],
   toasts: [],
   toasted: [],
-  running_tasks: []
+  running_tasks: [],
+  notification_channel: {},
+  notification_channels: []
 }
 
 const mutations = {
@@ -257,6 +261,16 @@ const mutations = {
   add_comment(state, comment) {
     state.comments.push(comment)
     state.comment = comment
+  },
+  save_event_comments(state, comments) {
+    state.event_comments = comments
+  },
+  add_event_comment(state, comment) {
+    if(state.event_comments.length == 0) {
+      state.event_comments = [comment]
+    } else {
+      state.event_comments.push(comment)
+    }    
   },
   update_observable_filters(state, filters) {
     state.observable_filters = filters
@@ -542,6 +556,24 @@ const mutations = {
     state.credential = credential
     state.status = 'success'
   },
+  add_notification_channel(state, channel){
+    if (state.notification_channels.length == 0) {
+      state.notification_channels = [channel]
+    } else {
+      state.notification_channels.push(channel)
+    }
+    state.notification_channel = channel
+  },
+  update_notification_channel(state, channel) {
+    state.notification_channel = channel
+    state.notification_channels = state.notification_channels.map(c => c.uuid == channel.uuid ? channel : c)
+  },
+  remove_notification_channel(state, uuid) {
+    state.notification_channels = state.notification_channels.filter(c => c.uuid != uuid)
+  },
+  save_notification_channels(state, channels) {
+    state.notification_channels = channels
+  },
   add_case(state, data) {
     state.cases.push(data)
     state.case = data
@@ -735,6 +767,8 @@ const getters = {
       return "Unknown"
     }
   },
+  event_comments: state => { return state.event_comments },
+  notification_channels: state => { return state.notification_channels },
   event_rules: state => { return state.event_rules },
   source_input: state => { return state.source_input },
   lists: state => { return state.lists },
@@ -1546,6 +1580,26 @@ const actions = {
       })
     })
   },
+  getNotificationChannels({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
+    return new Promise((resolve, reject) => {
+
+      let url = `${BASE_URL}/notification/channel?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+
+      if (organization) {
+        url += `&organization=${organization}`
+      }
+
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_notification_channels', resp.data.channels)
+        commit('save_pagination', resp.data.pagination)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCredentials({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
     return new Promise((resolve, reject) => {
 
@@ -1700,6 +1754,17 @@ const actions = {
         resolve(resp)
       })
       .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getEventComments({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}/comment`, method: 'GET'})
+      .then(resp => {
+        commit('save_event_comments', resp.data.comments)
+        resolve(resp)
+      }).catch(err => {
         reject(err)
       })
     })
@@ -1896,6 +1961,17 @@ const actions = {
       })
       .catch(err => {
         console.log(err)
+        reject(err)
+      })
+    })
+  },
+  createEventComment({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}/comment`, data: data, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })

@@ -25,7 +25,8 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton @click="saveFilter()" color="success" size="sm" disabled>Save Filter</CButton>
+                    <CButton @click="saveFilter()" color="success" size="sm" disabled>Save View</CButton>
+                    <CButton @click="loadFilterClicked" color="primary" size="sm" disabled>Load View</CButton>
                     <CButton @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
                     <CButton @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
                   </CButtonGroup>
@@ -208,6 +209,7 @@
                     <CButton aria-label="Create Event Rule" size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
                     <CButton aria-label="Create Case" @click="caseFromCard(event.uuid)" v-if="event.status.name === 'New'" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton aria-label="View Event" @click="showDrawer(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
+                    <CButton aria-label="Add Comment" @click="showEventCommentModal(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'Add Comment','placement':'bottom'}"><CIcon name="cilCommentBubble"/> {{event.total_comments ? event.total_comments : 0}}</CButton>
                     <CButton aria-label="Reopen Event" v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
                     <CButton aria-label="View Case" v-if="event.case" size="sm" color="secondary" :to="`/cases/${event.case}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cil-folder-open"/></CButton>
                     <CButton aria-label="Dismiss Event" v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
@@ -304,6 +306,7 @@
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
     </CModal>
+    <EventCommentModal :event="event_comment_target" :show.sync="event_comment_modal"></EventCommentModal>
     <CreateCaseModal :show.sync="createCaseModal" :organization="organization" :events="selected" :related_events_count="related_events_count" :case_from_card="true"></CreateCaseModal>
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :event_organization.sync="event_organization" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables" :from_card="true"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
@@ -324,6 +327,12 @@
       :options="actions"
       :ref="'vueSimpleContextMenu'"
       @option-clicked="actionMenuClicked"
+    />
+    <vue-simple-context-menu
+      :elementId="'savedFiltersMenu'"
+      :options="savedFilters"
+      :ref="'savedFiltersMenu'"
+      @option-clicked="loadFilterClicked"
     />
   </CRow>
 </template>
@@ -410,6 +419,7 @@ import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import EventDrawer from './EventDrawer.vue';
 import CRightDrawer from './CRightDrawer.vue';
 import OrganizationBadge from './OrganizationBadge'
+import EventCommentModal from './event/EventCommentModal'
 export default {
     name: 'Events',
     components: {
@@ -421,7 +431,8 @@ export default {
       PrismEditor,
       EventDrawer,
       CRightDrawer,
-      OrganizationBadge
+      OrganizationBadge,
+      EventCommentModal
     },
     props: {
     items: Array,
@@ -459,6 +470,9 @@ export default {
     },
     data(){
       return {
+        savedFilters: [{
+          'name': 'Filter 1'
+        }],
         actions: [
           {"name": "Filter"},
           {"name": "VT Lookup"},
@@ -551,10 +565,16 @@ export default {
         organization: "",
         event_rules: [],
         error: false,
-        error_message: ""
+        error_message: "",
+        event_comment_modal: false,
+        event_comment_target: {}
       }
     },
     methods: {
+      showEventCommentModal(uuid) {
+        this.event_comment_target = this.filtered_events.find(event => event.uuid == uuid)
+        this.event_comment_modal = true
+      },
       getEventRuleName(uuid) {
         let rule = this.event_rules.find(r => r.uuid === uuid)
         if(rule) {
@@ -610,6 +630,13 @@ export default {
       showActionMenu(event, item, organization) {
         item.organization = organization
         this.$refs.vueSimpleContextMenu.showMenu(event, item, organization)
+      },
+      showSavedFiltersMenu(event, item, organization) {
+        item.organization = organization
+        this.$refs.savedFiltersMenu.showMenu(event, item, organization)
+      },
+      loadFilterClicked(event) {
+        console.log(event)
       },
       actionMenuClicked(event) {
         let action = event.option.name

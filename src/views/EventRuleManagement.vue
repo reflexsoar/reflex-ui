@@ -68,6 +68,11 @@
                 {{item.updated_by ? item.updated_by.username : 'Unknown'}}
               </td>
             </template>
+            <template #priority="{item}">
+              <td>
+                {{item.priority}}
+              </td>
+            </template>
             <template #properties="{item}">
               <td>
                 <span v-if="item.global_rule"><CBadge style="font-size: 90%; font-weight: 500" color="info">Global Rule</CBadge>&nbsp;</span>
@@ -167,7 +172,7 @@ export default {
         step: 1,
         rules: [],
         rule: {},
-        fields: ['name','properties','hits','last_matched_date','created_by','updated_by',{key: 'manage', label:''}],
+        fields: ['name','priority','properties','hits','last_matched_date','created_by','updated_by',{key: 'manage', label:''}],
         modal_mode: 'create',
         show_test_results: false,
         global_rule: false,

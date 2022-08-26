@@ -77,11 +77,28 @@
         <CTextarea rows="3" label="Description" placeholder="Enter a description for the role so it is understood what it is used for" :value.sync="role.description"/>
         <h3>Role Permissions</h3>
         <div v-if="role.permissions">
-          <CTabs :fade="true"
+          <CListGroup>
+            <CListGroupItem v-for="permissions, category in filteredPermissionMap" :key="category">
+            <b style="cursor: pointer;" @click="toggleCollapse(category)"><CIcon name="cilMinus" v-if="collapseStatus(category)"/><CIcon v-else name="cilPlus"/>&nbsp;{{category}}</b>
+            <CCollapse :show="collapseStatus(category)"><br>
+            <CCol>
+              <CRow>
+                <CCol col="3" v-for="permission in permissions" :key="permission">
+                  <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label><br>
+                  <CSwitch :checked.sync="role.permissions[permission]" label-on="Yes" label-off="No" color="success"></CSwitch><br><br>
+                </CCol>
+              </CRow>
+            </CCol>
+            </CCollapse>            
+          </CListGroupItem>
+          </CListGroup>
+          
+          <!--<CTabs :fade="true"
               variant="pills"
               :activeTab.sync="active_tab"
 :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
 <div v-for="permissions, category in filteredPermissionMap" :key="category" >
+            
             <CTab :title="category"><CCol col="3">
               <h5>{{category}}</h5>
             </CCol>
@@ -94,7 +111,7 @@
               </CRow>
               <br>
             </CCol></CTab></div>
-          </CTabs>
+          </CTabs>-->
         </div>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
@@ -232,7 +249,14 @@ export default {
       this.role_modal = true
     },
     editRole(uuid) {
-      Object.assign(this.role, this.roles.find(role => role.uuid === uuid))
+      
+      let role = this.roles.find(role => role.uuid === uuid)
+      for(let permission in this.empty_role.permissions) {
+        if(!(permission in role.permissions)) {
+          this.$set(role.permissions, permission, false)//[permission] = false
+        }        
+      }
+      Object.assign(this.role, role)
       this.modal_mode = 'edit'
       this.role_modal = true
     },
@@ -267,6 +291,20 @@ export default {
     dismiss() {
       this.role_modal = false
       this.role = {}
+    },
+    checkKey(event) {
+      console.log(event)
+    },
+    toggleCollapse(category) {
+      this.$set(this.collapse, category, !this.collapse[category])
+      for(let c in this.collapse) {
+        if(c != category && this.collapse[c]) {
+          this.$set(this.collapse, c, false)
+        }
+      }
+    },
+    collapseStatus(category) {
+      return this.collapse[category]
     }
   },
   data() {
@@ -394,6 +432,11 @@ export default {
           update_detection: false,
           view_detections: false,
           delete_detection: false,
+          create_notification_channel: false,
+          view_notification_channels: false,
+          update_notification_channel: false,
+          delete_notification_channel: false,
+          view_notifications: false,
           create_persistent_pairing_token: false,
         }
       },
@@ -446,6 +489,13 @@ export default {
           'update_detection',
           'view_detections',
           'delete_detection',
+        ],
+        "Notifications": [
+          'create_notification_channel',
+          'view_notification_channels',
+          'update_notification_channel',
+          'delete_notification_channel',
+          'view_notifications'
         ],
         /*"Playbooks": [
           'add_playbook',
@@ -542,6 +592,26 @@ export default {
         "API": [
           'use_api'
         ]
+      },
+      collapse: {
+        'Settings': false,
+        'User Administration': false,
+        'Role Administration': false,
+        'User Groups': false,
+        'Events': false,
+        'Event Rules': false,
+        'Observables': false,
+        'Detections': false,
+        'Notifications': false,
+        'Agents': false,
+        'Inputs': false,
+        'Case Management': false,
+        'Credentials': false,
+        'Organizations': false,
+        'Intel Lists': false,
+        'Data Types': false,
+        'Settings': false,
+        'API': false,
       }
     };
   }

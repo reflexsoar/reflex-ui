@@ -182,6 +182,20 @@
                     </CCol>
                   </CRow>
                 </div>
+                <div v-else-if="rule.rule_type ==4">
+                  <h5>New Terms Configuration</h5>
+                  <CRow>
+                    <CCol col>
+                      <CInput v-model="rule.new_terms_config.key_field" label="Terms Field" placeholder="Field Name" description="The field to collect terms from and observe new terms in"/>
+                    </CCol>
+                    <CCol>
+                      <CInput v-model="rule.new_terms_config.window_size" label="Windows Size" description="The number of days back to look for terms"/>
+                    </CCol>
+                    <CCol>
+                      <CInput v-model="rule.new_terms_config.max_terms" label="Max Terms" description="The maximum number of terms to return.  Too large may have performance impacts, too low may miss terms."/>
+                    </CCol>
+                  </CRow>
+                </div>
                 
               </CTab>
               <CTab title="3. Schedule" v-bind:disabled="rule.source['uuid'] === null">
@@ -469,7 +483,8 @@ export default {
         {'label': 'Match', 'value': 0},
         {'label': 'Threshold', 'value': 1},
         {'label': 'Metric Change', 'value': 2},
-        {'label': 'Field Comparison', 'value':3}
+        {'label': 'Field Comparison', 'value':3},
+        {'label': 'New Terms', 'value': 4}
       ],
       severities: [
           {'label':'Low', 'value':1},
@@ -619,7 +634,13 @@ export default {
         this.rule.threshold_config.threshold = parseInt(this.rule.threshold_config.threshold)
       }
 
-      alert(this.mode)
+      if(this.rule.new_terms_config.max_terms) {
+        this.rule.new_terms_config.max_terms = parseInt(this.rule.new_terms_config.max_terms)
+      }
+
+      if(this.rule.new_terms_config.window_size) {
+        this.rule.new_terms_config.window_size = parseInt(this.rule.new_terms_config.window_size)
+      }
 
       if (this.mode == 'Clone') {
         ['assigned_agent', 'created_at', 'created_by', 'detection_id', 'last_hit', 'last_run', 'query_time_taken', 'time_taken', 'total_hits', 'updated_at', 'updated_by', 'uuid', 'version'].forEach(k => {
