@@ -84,8 +84,6 @@ export default {
                 this.$store.dispatch('getMitreTechnique', { external_id: external_id }).then(resp => {
                     this.$store.commit('set', ['mitreDrawerMinimize', !this.$store.getters.mitreDrawerMinimize])
                 })
-            } else {
-                this.$store.commit('set', ['mitreDrawerMinimize', !this.$store.getters.mitreDrawerMinimize])
             }
         },
         getTechniquesPerPhase(tactic) {

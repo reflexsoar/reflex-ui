@@ -690,6 +690,7 @@ const mutations = {
     state.mitre_techniques = techniques
   },
   save_technique(state, technique) {
+    state.mitre_technique = {}
     state.mitre_technique = technique
   },
   add_success(state) {

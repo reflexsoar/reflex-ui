@@ -14,11 +14,13 @@
               <CButton color="secondary" @click="$store.commit('set', ['mitreDrawerMinimize', true])">Close</CButton>
             </CCol>
           </CRow>
+          <hr>
+          <div style="overflow-y: scroll; overflow-x: wrap; max-height: calc(100vh - 50px)">
           <CRow>
             <CCol>
-              <hr>
+              
               <h3>Description</h3>
-              {{mitre_technique.description}}
+              <vue-markdown :source="mitre_technique.description"></vue-markdown>
             </CCol>
           </CRow>
           <CRow>
@@ -49,7 +51,7 @@
               <h3>Detections</h3>
 
             </CCol>
-          </CRow>
+          </CRow></div>
         </CCardBody>
       </CCol>
     </CRow>
@@ -127,7 +129,7 @@ export default {
   },
   computed: {
     show() {
-      console.log("YO!")
+
       return this.$store.state.mitreDrawerShow
     },
     minimize() {
