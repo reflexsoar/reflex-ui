@@ -1,14 +1,26 @@
 <template>
     <div>
-        <h2><CBadge color="primary">BETA</CBadge>&nbsp;MITRE ATT&CK Coverage Map</h2>
+        <h2>
+            <CBadge color="primary">BETA</CBadge>&nbsp;MITRE ATT&CK Coverage Map
+        </h2>
         <p>See how your detection rules align with MITRE ATT&CK. This will help identify gaps in your detection rules.
-        </p><CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and may not function as intended under all conditions.</CAlert>
-        <p><label>Hide Techniques with no Coverage:</label><br>
-            <CSwitch :checked.sync="hide_empty_techniques" label-on="Yes" label-off="No" color="success"></CSwitch>
         </p>
-        <CRow v-if="loading">
+        <CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and may not function as intended
+            under all conditions.</CAlert>
+        <CRow>
             <CCol>
-                <CSpinner color="primary" size="lg" />
+                <label>Hide Techniques with no Coverage:</label><br>
+                <CSwitch :checked.sync="hide_empty_techniques" label-on="Yes" label-off="No" color="success"></CSwitch>
+            </CCol>
+            <CCol>
+                <CSelect v-if="current_user.default_org" placeholder="Select an Organization..." required
+                    :value.sync="organization" :options="formattedOrganizations()" @change="getDetections()"
+                    label="Organization" />
+            </CCol>
+        </CRow>
+        <CRow v-if="loading" class="text-center" style="line-height: calc(50vh)">
+            <CCol>
+                <CSpinner color="primary" size="xl" />
             </CCol>
         </CRow>
         <div v-else-if="!loading" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 420px)">
@@ -22,13 +34,16 @@
                     <CRow v-for="technique in getTechniquesPerPhase(tactic)" :key="technique.id">
                         <CCol style="font-size:11px"
                             v-if="(hide_empty_techniques && getDetectionCount(technique, tactic.shortname) > 0) || !hide_empty_techniques">
-                            <CCard style="margin: 4px; cursor: pointer" v-if="getDetectionCount(technique, tactic.shortname) == 0" @click="showDrawer(technique.external_id)">
+                            <CCard style="margin: 4px; cursor: pointer"
+                                v-if="getDetectionCount(technique, tactic.shortname) == 0"
+                                @click="showDrawer(technique.external_id)">
                                 <CCardBody style="padding: 4px">
                                     <span class="text-muted">{{ technique.name }}</span>
                                 </CCardBody>
                             </CCard>
                             <CCard style="margin: 4px;" v-else>
-                                <CCardBody style="padding: 4px; cursor: pointer" class="has-detections" @click="showDrawer(technique.external_id)">
+                                <CCardBody style="padding: 4px; cursor: pointer" class="has-detections"
+                                    @click="showDrawer(technique.external_id)">
                                     <span>{{ technique.name }} ({{ getDetectionCount(technique,
                                             tactic.shortname)
                                     }})</span>
@@ -39,7 +54,7 @@
                 </CCol>
             </CRow>
         </div>
-        <MitreTechniqueDrawer/>
+        <MitreTechniqueDrawer :organization.sync="organization"/>
     </div>
 </template>
 
@@ -57,7 +72,7 @@ import CRightDrawer from '../CRightDrawer.vue';
 
 export default {
     name: "MitreCoverage",
-    computed: mapState(['mitre_tactics', 'mitre_techniques', 'detections','mitre_technique']),
+    computed: mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations']),
     components: {
         MitreTechniqueDrawer,
         CRightDrawer
@@ -66,12 +81,16 @@ export default {
         return {
             loading: true,
             hide_empty_techniques: false,
+            organization: ''
         };
     },
     reloadDetections() {
 
     },
     created() {
+        if(this.current_user.default_org) {
+            this.organization = this.current_user.organization
+        }
         this.$store.commit('set', ['mitreDrawerMinimize', true])
         this.loading = true
         this.getDetections()
@@ -80,7 +99,7 @@ export default {
     },
     methods: {
         showDrawer(external_id) {
-            if(this.$store.getters.mitreDrawerMinimize) {
+            if (this.$store.getters.mitreDrawerMinimize) {
                 this.$store.dispatch('getMitreTechnique', { external_id: external_id }).then(resp => {
                     this.$store.commit('set', ['mitreDrawerMinimize', !this.$store.getters.mitreDrawerMinimize])
                 })
@@ -99,20 +118,14 @@ export default {
                     count++
                 }
             }
-
-            /*if(count >= 1 && count < 3) {
-                return 'yellow'
-            }
-            if(count >= 3 && count < 6) {
-                return 'orange'
-            }
-            if(count >=6) {
-                return 'green'
-            }*/
             return count
         },
         getDetections() {
-            this.$store.dispatch('getDetections', { page_size: 1000 })
+            if(this.current_user.default_org) {
+                this.$store.dispatch('getDetections', { page_size: 1000, organization: this.organization })
+            } else {
+                this.$store.dispatch('getDetections', { page_size: 1000 })
+            }
         },
         getMitreTechniques() {
             this.$store.dispatch('getMitreTechniques', { page_size: 1000 }).then(() => {
@@ -121,6 +134,9 @@ export default {
         },
         getMitreTactics() {
             this.$store.dispatch('getMitreTactics', { page_size: 1000 })
+        },
+        formattedOrganizations() {
+            return this.organizations.map((o) => { return { label: o.name, value: o.uuid } })
         }
     }
 }
