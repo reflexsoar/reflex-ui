@@ -5,7 +5,7 @@
       <CCol>
         <CCardBody>
           <CRow>
-            <CCol><h2>{{mitre_technique.name}}</h2><label>Phases</label>:&nbsp;<li style="display: inline; margin-right: 2px;" v-for="name in mitre_technique.phase_names"
+            <CCol><h2>{{mitre_technique.name}} - {{mitre_technique.external_id}}</h2><label>Phases</label>:&nbsp;<li style="display: inline; margin-right: 2px;" v-for="name in mitre_technique.phase_names"
               :key="name">
               <CButton color="dark" class="tag" size="sm">{{ name }}</CButton>
             </li></CCol>
@@ -15,7 +15,7 @@
             </CCol>
           </CRow>
           <hr>
-          <div style="overflow-y: scroll; overflow-x: wrap; max-height: calc(100vh - 50px)">
+          <div style="overflow-y: scroll; overflow-x: hidden; overflow-wrap: break-word; max-height: calc(100vh - 150px)">
           <CRow>
             <CCol>
               
@@ -29,7 +29,7 @@
               <h3>References</h3>
               <ul>
                 <li v-for="ref in mitre_technique.external_references" :key="ref.external_id">
-                  <a :href="ref.url" target="_blank">{{ref.url}}</a>
+                  {{ref.url}}&nbsp;<a _target="_child" :href="ref.url" target="_blank"><CIcon name='cil-external-link' size="sm"/></a>
                 </li>
               </ul>
             </CCol>
@@ -49,7 +49,15 @@
             <CCol>
               <hr>
               <h3>Detections</h3>
-
+              <div v-if="loading" class="text-center"><CSpinner></CSpinner></div>
+              <div v-else>
+                <span v-if="associated_detections.length != 0"><ul>
+                  <li v-for="detection in associated_detections" :key="detection.uuid">
+                  <b><router-link :to="`/detections/${detection.uuid}`">{{detection.name}}</router-link></b> - {{detection.description}}
+                  </li></ul>
+                  </span>
+                  <span v-else>No Associated Detections</span>
+              </div>
             </CCol>
           </CRow></div>
         </CCardBody>
@@ -108,22 +116,22 @@ export default {
   components: {
     CRightDrawer
   },
-  created: function () {
-    if (this.$store.state.unread_alert_count > 0) {
-      nav[0]._children[1]['badge'] = { 'color': 'danger', 'text': this.$store.state.unread_alert_count }
-    }
-     
+  created: function () {     
   },
   watch: {
     minimize(val) {
       if (!val) {
-        
+        this.loading = true
+        this.getDetections(this.mitre_technique.external_id, this.mitre_technique.phase_names)
+      } else {
         
       }
     }
   },
   data() {
     return {
+      associated_detections: [],
+      loading: false
       
     }
   },
@@ -138,6 +146,14 @@ export default {
     ...mapState(['mitre_technique'])
   },
   methods: {
+    getDetections(tech,tactics){
+      this.$store.dispatch('getDetections', { tactics: tactics, technique: tech, save: false }).then(resp => {
+        this.associated_detections = resp.data.detections
+        this.loading = false
+      }).err(err => {
+        this.loading = false
+      })
+    }
     
   }
 }

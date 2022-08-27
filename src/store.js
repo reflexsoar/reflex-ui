@@ -1209,13 +1209,25 @@ const actions = {
       })
     })
   },
-  getDetections({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+  getDetections({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", techniques=[], tactics=[], save=true}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+
+      if(techniques.length > 0) {
+        url = url+`&techniques=${techniques}`
+      }
+
+      if(tactics.length > 0) {
+        url = url+`&tactics=${tactics}`
+      }
+
       Axios({url: url, method: 'GET'})
       .then(resp => {
-        commit('save_detections', resp.data.detections)
-        commit('save_pagination', resp.data.pagination)
+        if(save) {
+          console.log(save)
+          commit('save_detections', resp.data.detections)
+          commit('save_pagination', resp.data.pagination)
+        }
         resolve(resp)
       })
       .catch(err => {

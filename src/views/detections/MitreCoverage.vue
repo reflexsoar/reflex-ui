@@ -3,12 +3,15 @@
         <h2><CBadge color="primary">BETA</CBadge>&nbsp;MITRE ATT&CK Coverage Map</h2>
         <p>See how your detection rules align with MITRE ATT&CK. This will help identify gaps in your detection rules.
         </p><CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and may not function as intended under all conditions.</CAlert>
-        <p><label>Hide Techniques with no Coverage:</label><br>
-            <CSwitch :checked.sync="hide_empty_techniques" label-on="Yes" label-off="No" color="success"></CSwitch>
-        </p>
-        <CRow v-if="loading">
+        <CRow>
             <CCol>
-                <CSpinner color="primary" size="lg" />
+                <label>Hide Techniques with no Coverage:</label><br>
+            <CSwitch :checked.sync="hide_empty_techniques" label-on="Yes" label-off="No" color="success"></CSwitch>
+            </CCol>
+        </CRow>
+        <CRow v-if="loading" class="text-center" style="line-height: calc(50vh)">
+            <CCol>
+                <CSpinner color="primary" size="xl" />
             </CCol>
         </CRow>
         <div v-else-if="!loading" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 420px)">
