@@ -32,17 +32,17 @@
             <CRow style="width: 200%">
                 <CCol v-for="tactic in mitre_tactics" :key="tactic.shortname">
                     <CRow v-for="technique in getTechniquesPerPhase(tactic)" :key="technique.id">
-                        <CCol style="font-size:11px"
+                        <CCol class="technique-col"
                             v-if="(hide_empty_techniques && getDetectionCount(technique, tactic.shortname) > 0) || !hide_empty_techniques">
-                            <CCard style="margin: 4px; cursor: pointer"
+                            <CCard class="technique-card"
                                 v-if="getDetectionCount(technique, tactic.shortname) == 0"
                                 @click="showDrawer(technique.external_id)">
-                                <CCardBody style="padding: 4px">
+                                <CCardBody class="technique-card-body">
                                     <span class="text-muted">{{ technique.name }}</span>
                                 </CCardBody>
                             </CCard>
-                            <CCard style="margin: 4px;" v-else>
-                                <CCardBody style="padding: 4px; cursor: pointer" class="has-detections"
+                            <CCard class="technique-card has-detections" v-else>
+                                <CCardBody class="technique-card-body"
                                     @click="showDrawer(technique.external_id)">
                                     <span>{{ technique.name }} ({{ getDetectionCount(technique,
                                             tactic.shortname)
@@ -59,9 +59,25 @@
 </template>
 
 <style scoped>
+
+.technique-card {
+    margin: 2px;
+    cursor: pointer;
+}
+
+.technique-col {
+    font-size: 11px;
+}
+
+.technique-card-body {
+    padding: 4px;
+}
+
 .has-detections {
     background-color: lightgreen;
+    border: 1px solid green;
 }
+
 </style>
 
 <script>
