@@ -110,7 +110,11 @@ export default {
   name: 'MitreTechniqueDrawer',
   nav,
   props: {
-    technique: {}
+    technique: {},
+    organization: {
+      type: String,
+      default: ''
+    }
   },
   components: {
     CRightDrawer
@@ -130,8 +134,7 @@ export default {
   data() {
     return {
       associated_detections: [],
-      loading: false
-      
+      loading: false      
     }
   },
   computed: {
@@ -146,7 +149,7 @@ export default {
   },
   methods: {
     getDetections(tech,tactics){
-      this.$store.dispatch('getDetections', { tactics: tactics, technique: tech, save: false }).then(resp => {
+      this.$store.dispatch('getDetections', { tactics: tactics, technique: tech, save: false, organization: this.organization }).then(resp => {
         this.associated_detections = resp.data.detections
         this.loading = false
       }).err(err => {

@@ -54,7 +54,7 @@
                 </CCol>
             </CRow>
         </div>
-        <MitreTechniqueDrawer />
+        <MitreTechniqueDrawer :organization.sync="organization"/>
     </div>
 </template>
 
