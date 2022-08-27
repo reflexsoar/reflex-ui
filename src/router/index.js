@@ -99,7 +99,7 @@ router.beforeEach((to, from, next) => {
 
   if(to.matched.some(record => record.meta.fetchOrganizations)) {
     if(store.getters.current_user.default_org) {
-      store.dispatch('getOrganizations', {page_size: 100})
+      store.dispatch('getOrganizations', {page_size: 1000})
     }    
   }
 
@@ -173,7 +173,8 @@ function configRoutes () {
           component: MitreCoverage,
           meta: {
             requiresAuth: true,
-            requiresPermission: 'view_detections'
+            requiresPermission: 'view_detections',
+            fetchOrganizations: true
           }
         },
         {

@@ -17,8 +17,7 @@
           <hr>
           <div style="overflow-y: scroll; overflow-x: hidden; overflow-wrap: break-word; max-height: calc(100vh - 150px)">
           <CRow>
-            <CCol>
-              
+            <CCol>              
               <h3>Description</h3>
               <vue-markdown :source="mitre_technique.description"></vue-markdown>
             </CCol>
@@ -143,7 +142,7 @@ export default {
     minimize() {
       return this.$store.state.mitreDrawerMinimize
     },
-    ...mapState(['mitre_technique'])
+    ...mapState(['mitre_technique','current_user'])
   },
   methods: {
     getDetections(tech,tactics){
