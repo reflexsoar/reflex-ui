@@ -1621,9 +1621,9 @@ const actions = {
       })
     })
   },
-  editNotificationChannel({commit}, {data}) {
+  editNotificationChannel({commit}, {uuid, data}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/notification/channel`, data: data, method: 'PUT'})
+      Axios({url: `${BASE_URL}/notification/channel/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_notification_channel', resp.data)
         resolve(resp)

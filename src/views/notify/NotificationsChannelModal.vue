@@ -257,6 +257,9 @@ export default {
             }
         },
         createNotificationChannel() {
+            for(let field in ['created_at', 'updated_at', 'uuid', 'created_by', 'updated_by']) {
+                delete this.channel[field];
+            }
             this.$store.dispatch('createNotificationChannel', {data: this.channel})
                 .then(resp => {
                     this.submitted = false;
@@ -269,7 +272,11 @@ export default {
                 });
         },
         editNotificationChannel() {
-            this.$store.dispatch('editNotificationChannel', {data: this.channel})
+            let uuid = this.channel.uuid
+            for(let field in ['created_at', 'updated_at', 'uuid', 'created_by', 'updated_by']) {
+                delete this.channel[field];
+            }
+            this.$store.dispatch('editNotificationChannel', {uuid: uuid, data: this.channel})
                 .then(resp => {
                     this.submitted = false;
                     this.dismiss();
