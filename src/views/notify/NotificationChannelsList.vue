@@ -7,13 +7,14 @@
                 </button></h2>
                 <p>Notification Channels define where Notifications get sent when an Event Rule, Case Rule or System Wide events action calls for a notification to be sent.</p>
                 <CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and requires a specific agent version and API version.</CAlert>
-            <CButton color="primary" @click="createNotificationChannel()">New Channel</CButton><br><br>
+            
             <CCard>
                 <CCardHeader>
                     <b>Notification Channels</b>
                 </CCardHeader>
-
-                <CCardBody>
+                    <div style="padding: 10px;">
+                    <CButton color="primary" @click="createNotificationChannel()">New Channel</CButton>
+                    </div>
                     <CDataTable :hover="hover" :striped="striped" :bordered="bordered" :small="small" :fixed="fixed"
                         :items="notification_channels" :fields="fields" :items-per-page="small ? 25 : 10" :dark="dark"
                         :sorter="{ external: true, resetable: true }" style="border-top: 1px solid #cfcfcf;">
@@ -45,8 +46,10 @@
                                 </CButtonGroup>
                             </td>
                         </template>
-                    </CDataTable><CPagination :activePage.sync="active_page" :pages="pagination.pages" />
-                </CCardBody>
+                    </CDataTable>
+                    <div style="padding: 10px;">
+                        <CPagination :activePage.sync="active_page" :pages="pagination.pages" />
+                    </div>
             </CCard>
             <CRow>
                 <CCol>
@@ -131,6 +134,11 @@ export default {
                     webhook_url: '',
                     message_template: ''
                 },
+                rest_api_configuration: {
+                    url: '',
+                    headers: [],
+                    body: ''
+                }
             }
         }
     },

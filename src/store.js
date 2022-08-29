@@ -574,6 +574,10 @@ const mutations = {
   remove_notification_channel(state, uuid) {
     state.notification_channels = state.notification_channels.filter(c => c.uuid != uuid)
   },
+  save_notification_channel(state, channel) {
+    state.notification_channel = channel
+    state.notification_channels.push(channel)
+  },
   save_notification_channels(state, channels) {
     state.notification_channels = channels
   },
@@ -1602,6 +1606,28 @@ const actions = {
         resolve(resp)
       })
       .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createNotificationChannel({commit}, {data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/notification/channel`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('save_notification_channel', resp.data)
+        resolve(resp)
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  },
+  editNotificationChannel({commit}, {data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/notification/channel`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_notification_channel', resp.data)
+        resolve(resp)
+      }).catch(err => {
         reject(err)
       })
     })

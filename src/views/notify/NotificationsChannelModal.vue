@@ -88,6 +88,23 @@
                                     <CTextarea v-model="channel.pagerduty_configuration.message_template"
                                         label="Message Template" placeholder="Message Template" rows="5" />
                                 </div>
+                                <div v-if="channel.channel_type == 'rest_api'">
+                                    <h4>REST API Configuration</h4>
+                                    <p>The REST API Notificaiton Channel will send the configured POST request to the API destination configured.</p>
+                                    <CInput v-model="channel.rest_api_configuration.api_url" label="API URL"
+                                        placeholder="API URL" />
+                                    <h5>Headers</h5>
+                                    <CButton color="primary" size="sm" @click="channel.rest_api_configuration.headers.push({key:'',value:''})">Add Header</CButton><br><br>
+                                    <div v-for="header, i in channel.rest_api_configuration.headers" :key="i">
+                                        <CRow>
+                                            <CCol col=3><CInput v-model="channel.rest_api_configuration.headers[i].key" label="Header Name" placeholder="Header Name" /></CCol>
+                                            <CCol col=7><CInput v-model="channel.rest_api_configuration.headers[i].value" label="Header Value" placeholder="Header Value" /></CCol>
+                                            <CCol><label>&nbsp;</label><br><CButton color="danger" size="sm" @click="channel.rest_api_configuration.headers.pop(i)">Remove</CButton></CCol>
+                                        </CRow>                                        
+                                    </div>
+                                    <CTextarea v-model="channel.rest_api_configuration.body" label="POST Body"
+                                        placeholder="{}" rows="5" />
+                                </div>
                             </CTab>
                             <CTab title="3. Review" :disabled="!channel.channel_type">
                                 {{ channel }}
@@ -102,10 +119,10 @@
                 <CButton v-if="step != final_step" @click="nextStep()"
                     :disabled="(test_failed && step == 2) || !channel.channel_type" color="primary">Next</CButton>
                 <CButton v-if="step == final_step && (mode == 'Create' || mode == 'Clone')"
-                    @click="createDetectionRule()" color="primary" :disabled="submitted"><span v-if="submitted">
+                    @click="createNotificationChannel()" color="primary" :disabled="submitted"><span v-if="submitted">
                         <CSpinner size="sm" />&nbsp;
                     </span>Create</CButton>
-                <CButton v-if="step == final_step && mode == 'Edit'" @click="editDetectionRule()" color="primary"
+                <CButton v-if="step == final_step && mode == 'Edit'" @click="editNotificationChannel()" color="primary"
                     :disabled="submitted"><span v-if="submitted">
                         <CSpinner size="sm" />&nbsp;
                     </span>Save</CButton>
@@ -147,6 +164,11 @@ export default {
                     webhook_url: '',
                     message_template: ''
                 },
+                rest_api_configuration: {
+                    url: '',
+                    headers: [],
+                    body: ''
+                }
             }
         },
         mode: {
@@ -162,6 +184,7 @@ export default {
                 { 'label': 'Slack', 'value': 'slack_webhook' },
                 { 'label': 'Email', 'value': 'email' },
                 { 'label': 'PagerDuty', 'value': 'pagerduty_webhook' },
+                { 'label': 'REST API', 'value': 'rest_api' }
                 //{'label': 'OpsGenie', 'value': 'opsgenie'},
                 //{'label': 'VictorOps', 'value': 'victorops'},
                 //{'label': 'Twilio', 'value': 'twilio'},
@@ -234,10 +257,28 @@ export default {
             }
         },
         createNotificationChannel() {
-
+            this.$store.dispatch('createNotificationChannel', {data: this.channel})
+                .then(resp => {
+                    this.submitted = false;
+                    this.dismiss();
+                })
+                .catch(err => {
+                    this.submitted = false;
+                    this.error = true;
+                    this.error_message = err.message;
+                });
         },
         editNotificationChannel() {
-
+            this.$store.dispatch('editNotificationChannel', {data: this.channel})
+                .then(resp => {
+                    this.submitted = false;
+                    this.dismiss();
+                })
+                .catch(err => {
+                    this.submitted = false;
+                    this.error = true;
+                    this.error_message = err.message;
+                });
         },
         nextStep() {
             this.step++;
