@@ -151,6 +151,7 @@ export default {
         },
         createNotificationChannel() {
             this.modal_mode = 'Create'
+            this.notification_channel = {}
             Object.assign(this.notification_channel, this.empty_channel)
             this.notification_channel_modal = true
         },

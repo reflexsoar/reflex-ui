@@ -123,7 +123,8 @@ const state = {
   toasted: [],
   running_tasks: [],
   notification_channel: {},
-  notification_channels: []
+  notification_channels: [],
+  formatted_notification_channels: []
 }
 
 const mutations = {
@@ -1632,13 +1633,17 @@ const actions = {
       })
     })
   },
-  getNotificationChannels({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
+  getNotificationChannels({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null, name__like=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/notification/channel?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
       if (organization) {
         url += `&organization=${organization}`
+      }
+
+      if (name__like) {
+        url += `&name__like=${name__like}`
       }
 
       Axios({url: url, method: 'GET'})

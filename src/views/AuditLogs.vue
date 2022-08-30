@@ -30,7 +30,7 @@
       </template>
       <template #organization="{item}">
         <td>
-          <CButton class="tag" size="lg" color="secondary">{{mapOrgToName(item.organization)}}</CButton>
+          <OrganizationBadge :uuid="item.organization"></OrganizationBadge>
         </td>
       </template>
       <template #status="{item}">
@@ -67,112 +67,113 @@
 
 <script>
 import { mapState } from "vuex";
+import OrganizationBadge from "./OrganizationBadge.vue";
 export default {
-  name: "AuditLogs",
-  props: {
-    items: Array,
-    fields: {
-      type: Array,
-      default() {
-        return [
-          "created_at",
-          "event_type",          
-          "source_user",
-          "message",
-          "status"
-        ];
-      },
+    name: "AuditLogs",
+    props: {
+        items: Array,
+        fields: {
+            type: Array,
+            default() {
+                return [
+                    "created_at",
+                    "event_type",
+                    "source_user",
+                    "message",
+                    "status"
+                ];
+            },
+        },
+        caption: {
+            type: String,
+            default: "Table",
+        },
+        hover: Boolean,
+        striped: Boolean,
+        bordered: Boolean,
+        small: Boolean,
+        fixed: Boolean,
+        dark: Boolean,
+        alert: false
     },
-    caption: {
-      type: String,
-      default: "Table",
-    },
-    hover: Boolean,
-    striped: Boolean,
-    bordered: Boolean,
-    small: Boolean,
-    fixed: Boolean,
-    dark: Boolean,
-    alert: false
-  },
-  created: function () {
-    this.loadData();
-    if(this.current_user.default_org) {
-      this.fields.splice(1,0,'organization')
-      this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
-    }
-  },
-  computed: mapState(['current_user']),
-  data() {
-    return {
-      loading: true,
-      current_page: 1,
-      audit_logs: [],
-      pagination: {},
-      status_options: [
-        {'name': 'Success'},
-        {'name': 'Failed'}
-      ],
-      selected_status: [
-        {'name': 'Success'},
-        {'name': 'Failed'}
-      ],
-      event_type_options: [
-        //{'name': 'Authentication'},
-        {'name': 'Bulk Event Insert'},
-        //{'name': 'User Management'}
-      ],
-      selected_event_type: [
-        {'name': 'Authentication'},
-        {'name': 'Bulk Event Insert'},
-        {'name': 'User Management'}
-      ]
-    };
-  },
-  watch: {
-    current_page: function(){
-      this.loadData()
-    }
-  },
-  methods: {
-    valueRemoved(event) {
-      this.selected_status = this.selected_status.filter(s => s.name != event.name)
-      this.loadData()
-    },
-    valueAdded(event) {
-      if(!this.selected_status.find(s => s === event)) {
-        this.selected_status.push({...event})
-      }
-      this.loadData()
-    },
-    loadData: function () {
-      this.loading = true;
-      let selected_status = this.selected_status.map(e => e.name)
-      let selected_event_type = this.selected_event_type.map(e => e.name)
-      let page = this.current_page
-      
-      this.$store.dispatch("getAuditLogs", {selected_status, selected_event_type, page}).then((resp) => {
-        this.audit_logs = this.$store.getters.audit_logs;
-        this.pagination = resp.data.pagination
-        this.current_page = this.pagination.page
-        this.loading = false;
-      });
-    },
-    getStatusColor(status) {
-        switch(status) {
-          case 'Failed': return 'danger';
-          default: return 'success';
+    created: function () {
+        this.loadData();
+        if (this.current_user.default_org) {
+            this.fields.splice(1, 0, "organization");
+            this.organizations = this.$store.getters.organizations.map((o) => { return { label: o.name, value: o.uuid }; });
         }
     },
-    mapOrgToName(uuid) {
-      let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
-      if (org.length > 0) {
-        return org[0].name
-      } else {
-        return "Unknown"
-      }
-    }
-
-  }
+    computed: mapState(["current_user"]),
+    data() {
+        return {
+            loading: true,
+            current_page: 1,
+            audit_logs: [],
+            pagination: {},
+            status_options: [
+                { "name": "Success" },
+                { "name": "Failed" }
+            ],
+            selected_status: [
+                { "name": "Success" },
+                { "name": "Failed" }
+            ],
+            event_type_options: [
+                //{'name': 'Authentication'},
+                { "name": "Bulk Event Insert" },
+                //{'name': 'User Management'}
+            ],
+            selected_event_type: [
+                { "name": "Authentication" },
+                { "name": "Bulk Event Insert" },
+                { "name": "User Management" }
+            ]
+        };
+    },
+    watch: {
+        current_page: function () {
+            this.loadData();
+        }
+    },
+    methods: {
+        valueRemoved(event) {
+            this.selected_status = this.selected_status.filter(s => s.name != event.name);
+            this.loadData();
+        },
+        valueAdded(event) {
+            if (!this.selected_status.find(s => s === event)) {
+                this.selected_status.push({ ...event });
+            }
+            this.loadData();
+        },
+        loadData: function () {
+            this.loading = true;
+            let selected_status = this.selected_status.map(e => e.name);
+            let selected_event_type = this.selected_event_type.map(e => e.name);
+            let page = this.current_page;
+            this.$store.dispatch("getAuditLogs", { selected_status, selected_event_type, page }).then((resp) => {
+                this.audit_logs = this.$store.getters.audit_logs;
+                this.pagination = resp.data.pagination;
+                this.current_page = this.pagination.page;
+                this.loading = false;
+            });
+        },
+        getStatusColor(status) {
+            switch (status) {
+                case "Failed": return "danger";
+                default: return "success";
+            }
+        },
+        mapOrgToName(uuid) {
+            let org = this.$store.getters.organizations.filter(o => o.uuid === uuid);
+            if (org.length > 0) {
+                return org[0].name;
+            }
+            else {
+                return "Unknown";
+            }
+        }
+    },
+    components: { OrganizationBadge }
 };
 </script>
