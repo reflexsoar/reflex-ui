@@ -456,11 +456,11 @@
                   </CCol>
                 </CRow>
               </CTab>
-              <CTab title="6. Notifications" :disabled="test_failed && from_card">
+              <CTab title="6. Notifications" :disabled="(test_failed && from_card) || run_retroactively">
                 <h4>Notifications</h4>
                 <p>By selecting a notification channel, any time this Event Rule matches an event, a notification will be sent to all selected channels using the channels defined message template.</p>
                 <CAlert :show="run_retroactively" color="warning">
-                  <b>WARNING</b> Running this rule with a notification retroactively could create unwanted notifications.
+                  <b>WARNING: </b> Running this rule with a notification retroactively could create unwanted notifications.
                 </CAlert>
                 <label for="notification_channel_select">Notification Channel</label><br>
                 <multiselect
