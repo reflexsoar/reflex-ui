@@ -462,7 +462,7 @@
                 <CAlert :show="run_retroactively" color="warning">
                   <b>WARNING</b> Running this rule with a notification retroactively could create unwanted notifications.
                 </CAlert>
-                <label for="notification_channel_select">Notification Channel</label><br>{{formatted_notification_channels}} {{channels}}
+                <label for="notification_channel_select">Notification Channel</label><br>
                 <multiselect
                       id="notification_channel_select"
                       style="z-index: 50"
@@ -809,7 +809,8 @@ export default {
           this.observables = this.event_rule.observables;
           this.expire = this.event_rule.expire;
           this.dismiss_event = this.event_rule.dismiss;
-          this.notification_channels = this.event_rule.notification_channels ? this.event_rule.notification_channels : [];
+          this.run_retroactively = this.event_rule.run_retroactively;
+          this.channels = this.event_rule.notification_channels ? this.event_rule.notification_channels : [];
           if (this.event_rule.target_case_uuid) {
             this.$store
               .dispatch("getCase", this.event_rule.target_case_uuid)
