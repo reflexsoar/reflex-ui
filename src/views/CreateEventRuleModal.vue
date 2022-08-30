@@ -456,12 +456,9 @@
                   </CCol>
                 </CRow>
               </CTab>
-              <CTab title="6. Notifications" :disabled="(test_failed && from_card) || run_retroactively">
+              <CTab title="6. Notifications" :disabled="test_failed && from_card">
                 <h4>Notifications</h4>
                 <p>By selecting a notification channel, any time this Event Rule matches an event, a notification will be sent to all selected channels using the channels defined message template.</p>
-                <CAlert :show="run_retroactively" color="warning">
-                  <b>WARNING: </b> Running this rule with a notification retroactively could create unwanted notifications.
-                </CAlert>
                 <label for="notification_channel_select">Notification Channel</label><br>
                 <multiselect
                       id="notification_channel_select"
@@ -953,13 +950,8 @@ export default {
         run_retroactively: this.run_retroactively,
         notification_channels: this.channels ? this.channels : [],
         query: this.query,
-        active: this.active,
+        active: this.active
       };
-
-      // Don't run a rule retroactively if it has notifications
-      if(rule.notification_channels.length > 0 && rule.run_retroactively) {
-        rule.run_retroactively = false;
-      }
 
       if (this.current_user.default_org) {
         rule["global_rule"] = this.global_rule;
@@ -1008,12 +1000,7 @@ export default {
         query: this.query,
         active: this.active,
       };
-      
-      // Don't run a rule retroactively if it has notifications
-      if(rule.notification_channels.length > 0 && rule.run_retroactively) {
-        rule.run_retroactively = false;
-      }
-
+    
       if (this.current_user.default_org) {
         rule["global_rule"] = this.global_rule;
       }
