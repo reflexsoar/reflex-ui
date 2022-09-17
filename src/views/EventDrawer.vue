@@ -21,7 +21,7 @@
           <CCol style="text-align: center;">STATUS<h4>{{ event_data.status ? event_data.status.name : 'Unknown' }}</h4></CCol>
           <CCol style="border-left: 1px solid #cfcfcf; text-align: center;">CREATED<h4>{{ event_data.created_at | moment('from','now') }}</h4></CCol>
           <CCol v-if="event_data.dismissed_at" style="border-left: 1px solid #cfcfcf; text-align: center;">DISMISSED AT<h4>{{ event_data.dismissed_at | moment('from','now') }}</h4></CCol>
-          <CCol v-if="event_data.dismissed_at" style="border-left: 1px solid #cfcfcf; text-align: center;">TIME TAKEN<h4>{{minutesBetween(event_data.created_at, event_data.dismissed_at)}}</h4></CCol>
+          <CCol v-if="event_data.dismissed_at" style="border-left: 1px solid #cfcfcf; text-align: center;">DURATION<h4>{{minutesBetween(event_data.created_at, event_data.dismissed_at)}}</h4></CCol>
         </CRow>
         <hr style="margin-bottom: 0px; margin-top: 0px;">
         <CTabs :activeTab.sync="activeTab" class="tabbed">
@@ -180,7 +180,7 @@
           </CTab>
           <CTab title="Comments">
             <CCardBody class="tab-container">
-              <CCard v-if="event_data.dismiss_comment"><CCardHeader>Dismissed By <b>{{event_data.dismissed_by.username}}</b></CCardHeader>
+              <CCard v-if="event_data.dismiss_comment"><CCardHeader>Dismissed By <b>{{event_data.dismissed_by.username}}</b> - {{ event_data.dismissed_at | moment('from','now')}}</CCardHeader>
                 <CCardBody><vue-markdown>{{event_data.dismiss_comment}}</vue-markdown></CCardBody>
               </CCard>
               <div v-if="!comments_loading"><CCard v-for="comment in comments" :key="comment.uuid">
