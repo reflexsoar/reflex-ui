@@ -5,19 +5,25 @@
       <CCol>
           <CRow style="padding: 10px 10px 0px 10px;">
             <CCol>
-              <h3>{{ event_data.title }}</h3>
+              <h4>{{ event_data.title }}</h4>
               <CIcon name="cilTags" />&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags"
               :key="tag">
               <CButton color="dark" class="tag" size="sm">{{ tag }}</CButton>
             </li>
             </CCol>
-            <CCol col="2" style="border-left: 1px solid #cfcfcf; text-align: center;">STATUS<h4>{{ event_data.status ? event_data.status.name : 'Unknown' }}</h4></CCol>
-            <CCol col="2" style="border-left: 1px solid #cfcfcf; text-align: center;">CREATED<h4>{{ event_data.created_at | moment('from','now') }}</h4></CCol>
             <CCol col="2" style="border-left: 1px solid #cfcfcf" class="text-right">
               <CButton color="secondary" @click="$store.commit('set', ['eventDrawerMinimize', true])">Minimize</CButton>
             </CCol>
           </CRow>
-        <hr style="margin-bottom: 0px">
+          <hr style="margin-bottom: 0px">
+        <CRow>
+          
+          <CCol style="text-align: center;">STATUS<h4>{{ event_data.status ? event_data.status.name : 'Unknown' }}</h4></CCol>
+          <CCol style="border-left: 1px solid #cfcfcf; text-align: center;">CREATED<h4>{{ event_data.created_at | moment('from','now') }}</h4></CCol>
+          <CCol v-if="event_data.dismissed_at" style="border-left: 1px solid #cfcfcf; text-align: center;">DISMISSED AT<h4>{{ event_data.dismissed_at | moment('from','now') }}</h4></CCol>
+          <CCol v-if="event_data.dismissed_at" style="border-left: 1px solid #cfcfcf; text-align: center;">TIME TAKEN<h4>{{minutesBetween(event_data.created_at, event_data.dismissed_at)}}</h4></CCol>
+        </CRow>
+        <hr style="margin-bottom: 0px; margin-top: 0px;">
         <CTabs :activeTab.sync="activeTab" class="tabbed">
           <CTab title="Overview" active>
             <CCardBody>
@@ -320,6 +326,32 @@ export default {
       this.$store.dispatch('updateEventObservable', { uuid, observable_value, data }).then(resp => {
         this.observables = this.$store.getters.observables
       })
+    },
+    minutesBetween(start, end) {
+      start = Date.parse(start)
+      end = Date.parse(end)
+      let value = Math.round((end - start) / 60000)
+      if (value > 60) {
+        value = Math.round(value / 60)
+        if (value > 24) {
+          value = Math.round(value / 24)
+          if (value > 30) {
+            value = Math.round(value / 30)
+            if (value > 12) {
+              value = Math.round(value / 12)
+              return value + ' years'
+            } else if (value == 12) {
+              return '1 year'
+            }
+            return value + ' months'
+          }
+          return value + ' days'
+        } else {
+          return value + ' hours'
+        }
+      } else {
+        return value + ' minutes'
+      }
     },
     highlighter(code) {
       return highlight(code, languages.rql);
