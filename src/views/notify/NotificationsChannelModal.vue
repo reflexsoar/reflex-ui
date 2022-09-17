@@ -81,10 +81,12 @@
                                     <CTextarea v-model="channel.slack_configuration.message_template"
                                         label="Message Template" placeholder="Message Template" rows="5" />
                                 </div>
-                                <div v-if="channel.channel_type == 'pagerduty_webhook'">
+                                <div v-if="channel.channel_type == 'pagerduty_api'">
                                     <h4>PagerDuty Configuration</h4>
-                                    <CInput v-model="channel.pagerduty_configuration.pagerduty_service_key" label="Pagerduty Service Key"
-                                        placeholder="Pagerduty Service Key" />
+                                    <CSelect :value.sync="channel.pagerduty_configuration.credential" label="Credential"
+                                        placeholder="Select an email credential" :options="credential_list" />
+                                    <CInput v-model="channel.pagerduty_configuration.default_from" label="Default From"
+                                        placeholder="The e-mail to send the incident from" />
                                     <CTextarea v-model="channel.pagerduty_configuration.message_template"
                                         label="Message Template" placeholder="Message Template" rows="5" />
                                 </div>
@@ -107,7 +109,12 @@
                                 </div>
                             </CTab>
                             <CTab title="3. Review" :disabled="!channel.channel_type">
-                                {{ channel }}
+                                <label>Channel Name:</label>
+                                {{ channel.name }}<br>
+                                <label>Channel Description:</label>
+                                {{ channel.description }}<br>
+                                <label>Message Template:</label><br>
+                                <pre style="background-color: #f1f1f1; padding:5px; border-radius: 5px; border: 1px solid #cfcfcf">{{get_message_template(channel, channel.channel_type)}}</pre>
                             </CTab>
                         </CTabs>
                     </CCol>
@@ -183,7 +190,7 @@ export default {
                 { 'label': 'Microsoft Teams', 'value': 'teams_webhook' },
                 { 'label': 'Slack', 'value': 'slack_webhook' },
                 { 'label': 'Email', 'value': 'email' },
-                { 'label': 'PagerDuty', 'value': 'pagerduty_webhook' },
+                { 'label': 'PagerDuty', 'value': 'pagerduty_api' },
                 { 'label': 'REST API', 'value': 'rest_api' }
                 //{'label': 'OpsGenie', 'value': 'opsgenie'},
                 //{'label': 'VictorOps', 'value': 'victorops'},
@@ -233,6 +240,19 @@ export default {
         }
     },
     methods: {
+        get_message_template(channel, channel_type) {
+            if (channel_type == "email") {
+                return channel.email_configuration.message_template;
+            } else if (channel_type == "slack_webhook") {
+                return channel.slack_configuration.message_template;
+            } else if (channel_type == "teams_webhook") {
+                return channel.teams_configuration.message_template;
+            } else if (channel_type == "pagerduty_api") {
+                return channel.pagerduty_configuration.message_template;
+            } else if (channel_type == "rest_api") {
+                return channel.rest_api_configuration.body;
+            }
+        },
         reloadMeta() {
             let organization = this.channel.organization
             this.$store.dispatch('getCredentialList', {organization: organization, page_size: 100}).then(resp => {
