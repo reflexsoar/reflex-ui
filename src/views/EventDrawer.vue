@@ -5,7 +5,7 @@
       <CCol>
           <CRow style="padding: 10px 10px 0px 10px;">
             <CCol>
-              <h4>{{ event_data.title }}</h4>
+              <h2>{{ event_data.title }}</h2>
               <CIcon name="cilTags" />&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags"
               :key="tag">
               <CButton color="dark" class="tag" size="sm">{{ tag }}</CButton>
@@ -16,12 +16,35 @@
             </CCol>
           </CRow>
           <hr style="margin-bottom: 0px">
-        <CRow>
-          
-          <CCol style="text-align: center;">STATUS<h4>{{ event_data.status ? event_data.status.name : 'Unknown' }}</h4></CCol>
-          <CCol style="border-left: 1px solid #cfcfcf; text-align: center;">CREATED<h4>{{ event_data.created_at | moment('from','now') }}</h4></CCol>
-          <CCol v-if="event_data.dismissed_at" style="border-left: 1px solid #cfcfcf; text-align: center;">DISMISSED AT<h4>{{ event_data.dismissed_at | moment('from','now') }}</h4></CCol>
-          <CCol v-if="event_data.dismissed_at" style="border-left: 1px solid #cfcfcf; text-align: center;">DURATION<h4>{{minutesBetween(event_data.created_at, event_data.dismissed_at)}}</h4></CCol>
+        <CRow class="metrics">
+          <CCol>
+            <CCard class="metrics-card">
+              <CCardBody class="metrics-card-body">
+                STATUS<h4>{{ event_data.status ? event_data.status.name : 'Unknown' }}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol>
+            <CCard class="metrics-card">
+              <CCardBody class="metrics-card-body">
+                CREATED<h4>{{ event_data.created_at | moment('from','now') }}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol>
+            <CCard class="metrics-card">
+              <CCardBody class="metrics-card-body">
+                DISMISSED AT<h4>{{ event_data.dismissed_at | moment('from','now') }}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol>
+            <CCard class="metrics-card">
+              <CCardBody class="metrics-card-body">
+                DURATION<h4>{{minutesBetween(event_data.created_at, event_data.dismissed_at)}}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
         </CRow>
         <hr style="margin-bottom: 0px; margin-top: 0px;">
         <CTabs :activeTab.sync="activeTab" class="tabbed">
@@ -217,6 +240,19 @@
   z-index: 1052;
 }
 
+.metrics {
+  margin:5px;
+  margin-bottom:0px;
+}
+
+.metrics-card {
+  margin-bottom:5px;
+}
+
+.metrics-card-body {
+  padding: 10px;
+}
+
 .c-sidebar-minimized.c-sidebar-fixed {
   width: 0px !important;
   z-index: 1052;
@@ -331,6 +367,10 @@ export default {
       start = Date.parse(start)
       end = Date.parse(end)
       let value = Math.round((end - start) / 60000)
+      console.log(value)
+      if (isNaN(value)) {
+        return "N/A"
+      }
       if (value > 60) {
         value = Math.round(value / 60)
         if (value > 24) {
