@@ -38,15 +38,15 @@
                                 v-if="getDetectionCount(technique, tactic.shortname) == 0"
                                 @click="showDrawer(technique.external_id)">
                                 <CCardBody class="technique-card-body">
-                                    <span class="text-muted">{{ technique.name }}</span>
+                                    <span class="text-muted"><b>{{ technique.name }}</b><br>{{ technique.external_id }}</span>
                                 </CCardBody>
                             </CCard>
                             <CCard class="technique-card has-detections" v-else>
                                 <CCardBody class="technique-card-body"
                                     @click="showDrawer(technique.external_id)">
-                                    <span>{{ technique.name }} ({{ getDetectionCount(technique,
-                                            tactic.shortname)
-                                    }})</span>
+                                    <span><b>{{ technique.name }}</b>&nbsp;({{ getDetectionCount(technique,
+                                            tactic.shortname)}})<br>{{ technique.external_id }}
+                                        </span>
                                 </CCardBody>
                             </CCard>
                         </CCol>

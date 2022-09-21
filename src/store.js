@@ -2407,11 +2407,27 @@ const actions = {
       })
     })
   },
-  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25, start=null, end=null, sort_by="created_at", sort_direction="asc", escalated=null}) {
+  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25, start=null, end=null, sort_by="created_at", sort_direction="asc", escalated=null, title__like=null, observables=[], comments__like=null, description__like=null}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
+      if(title__like) {
+        base_url += `&title__like=${title__like}`
+      }
+
+      if(comments__like) {
+        base_url += `&comments__like=${comments__like}`
+      }
+
+      if(description__like) {
+        base_url += `&description__like=${description__like}`
+      }
+
+      if(observables.length > 0) {
+        base_url += `&observables=${observables.join(',')}`
+      }
+      
       if(status.length > 0 ) {
         base_url += `&status=${status}`
       }
