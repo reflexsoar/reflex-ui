@@ -13,6 +13,9 @@
                 <CSwitch :checked.sync="hide_empty_techniques" label-on="Yes" label-off="No" color="success"></CSwitch>
             </CCol>
             <CCol>
+                <CInput label="Search" v-model="search" placeholder="Search"></CInput>
+            </CCol>
+            <CCol>
                 <CSelect v-if="current_user.default_org" placeholder="Select an Organization..." required
                     :value.sync="organization" :options="formattedOrganizations()" @change="getDetections()"
                     label="Organization" />
@@ -38,15 +41,15 @@
                                 v-if="getDetectionCount(technique, tactic.shortname) == 0"
                                 @click="showDrawer(technique.external_id)">
                                 <CCardBody class="technique-card-body">
-                                    <span class="text-muted">{{ technique.name }}</span>
+                                    <span class="text-muted"><b>{{ technique.name }}</b><br>{{ technique.external_id }}</span>
                                 </CCardBody>
                             </CCard>
                             <CCard class="technique-card has-detections" v-else>
                                 <CCardBody class="technique-card-body"
                                     @click="showDrawer(technique.external_id)">
-                                    <span>{{ technique.name }} ({{ getDetectionCount(technique,
-                                            tactic.shortname)
-                                    }})</span>
+                                    <span><b>{{ technique.name }}</b>&nbsp;({{ getDetectionCount(technique,
+                                            tactic.shortname)}})<br>{{ technique.external_id }}
+                                        </span>
                                 </CCardBody>
                             </CCard>
                         </CCol>
@@ -88,7 +91,18 @@ import CRightDrawer from '../CRightDrawer.vue';
 
 export default {
     name: "MitreCoverage",
-    computed: mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations']),
+    computed: {
+        filtered_techniques() {
+            if(this.search !== null) {
+                return this.mitre_techniques.filter((technique) => {
+                    return technique.name.toLowerCase().includes(this.search.toLowerCase()) || technique.external_id.toLowerCase().includes(this.search.toLowerCase());
+                });
+            } else {
+                return this.mitre_techniques;
+            }
+        },
+        ...mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations'])
+    },
     components: {
         MitreTechniqueDrawer,
         CRightDrawer
@@ -97,7 +111,8 @@ export default {
         return {
             loading: true,
             hide_empty_techniques: false,
-            organization: ''
+            organization: '',
+            search: null
         };
     },
     reloadDetections() {
@@ -122,7 +137,8 @@ export default {
             }
         },
         getTechniquesPerPhase(tactic) {
-            return this.mitre_techniques.filter(technique => technique.phase_names.includes(tactic.shortname))
+            //console.log(this.filtered_techniques)
+            return this.filtered_techniques.filter(technique => technique.phase_names.includes(tactic.shortname))
         },
         getDetectionCount(technique, tactic) {
             let count = 0

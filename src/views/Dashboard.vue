@@ -40,8 +40,7 @@
       </CCol>
     </CRow>
     <CTabs variant="pills" :active-tab="0" color=""><br>
-      <CTab title="Overview">
-        
+      <CTab title="Overview">        
         <CRow>
           <CCol xs="4" lg="4">
             <CWidgetIcon :header="dashboard_metrics.total_cases ? dashboard_metrics.total_cases.toString() : '0'"
@@ -183,7 +182,7 @@
       <CTab title="Organization" v-if="current_user.default_org">
         <CCol col="12">
           <CCard>
-            <CCardHeader>Events by Organization over the last 30 days</CCardHeader>
+            <CCardHeader>Events by Organization over the last 14 days</CCardHeader>
             <apexchart type="heatmap" :options="heatmap_options()" :series="heatmap_series()"></apexchart>
           </CCard>
         </CCol>
@@ -234,6 +233,7 @@ import WidgetsDropdown from './widgets/WidgetsDropdown'
 import WidgetsBrand from './widgets/WidgetsBrand'
 import { CChartHorizontalBar, CChartBar } from '@coreui/vue-chartjs'
 import { mapState } from 'vuex';
+import autolink from 'markdown-it/lib/rules_inline/autolink';
 
 export default {
   name: 'Dashboard',
@@ -306,7 +306,6 @@ export default {
     heatmap_options() {
       let options = {
         chart: {
-          height: 200
         },
         dataLabels: {
           enabled: true

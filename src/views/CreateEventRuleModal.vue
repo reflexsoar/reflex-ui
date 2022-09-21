@@ -457,6 +457,26 @@
                 </CRow>
               </CTab>
               <CTab title="6. Notifications" :disabled="test_failed && from_card">
+                <h4>Notifications</h4>
+                <p>By selecting a notification channel, any time this Event Rule matches an event, a notification will be sent to all selected channels using the channels defined message template.</p>
+                <label for="notification_channel_select">Notification Channel</label><br>
+                <multiselect
+                      id="notification_channel_select"
+                      style="z-index: 50"
+                      :options="formatted_notification_channels"
+                      v-model="channels"
+                      track-by="uuid"
+                      label="name"
+                      :searchable="true"
+                      :internal-search="false"
+                      :options-limit="10"
+                      :show-no-results="false"
+                      @search-change="loadNotificationChannels"
+                      placeholder="Select a notification channel"
+                      :multiple="true"
+                      :close-on-select="false"
+                      
+                    ></multiselect>
               </CTab>
               <CTab title="7. Review" :disabled="test_failed && from_card">
                 <h4>Review</h4>
@@ -599,7 +619,11 @@ export default {
       default: null,
     },
   },
-  computed: mapState(["settings", "current_user"]),
+  computed: {
+    formatted_notification_channels() {
+      return this.notification_channels.map((o) => { return { name:o.name, uuid:o.uuid}})
+    }, ...mapState(["settings", "current_user", "notification_channels"])
+  },
   data() {
     return {
       name: "",
@@ -632,6 +656,7 @@ export default {
       case_templates: [],
       run_retroactively: true,
       add_action: false,
+      channels: [],
       severities: [
         {
           label: "Low",
@@ -781,6 +806,8 @@ export default {
           this.observables = this.event_rule.observables;
           this.expire = this.event_rule.expire;
           this.dismiss_event = this.event_rule.dismiss;
+          this.run_retroactively = this.event_rule.run_retroactively;
+          this.channels = this.event_rule.notification_channels ? this.event_rule.notification_channels : [];
           if (this.event_rule.target_case_uuid) {
             this.$store
               .dispatch("getCase", this.event_rule.target_case_uuid)
@@ -921,8 +948,9 @@ export default {
         dismiss: this.dismiss_event,
         event_signature: this.event_signature,
         run_retroactively: this.run_retroactively,
+        notification_channels: this.channels ? this.channels : [],
         query: this.query,
-        active: this.active,
+        active: this.active
       };
 
       if (this.current_user.default_org) {
@@ -968,10 +996,11 @@ export default {
         dismiss: this.dismiss_event,
         event_signature: this.event_signature,
         run_retroactively: this.run_retroactively,
+        notification_channels: this.channels ? this.channels : [], 
         query: this.query,
         active: this.active,
       };
-
+    
       if (this.current_user.default_org) {
         rule["global_rule"] = this.global_rule;
       }
@@ -1049,6 +1078,13 @@ export default {
       this.reset();
       this.modalStatus = false;
     },
+    addChannel(channel) {
+      const c = {
+        name: channel.name,
+        uuid: channel.uuid,
+      };
+      this.channels.push(c)
+    },
     addTag(newTag) {
       const t = {
         name: newTag,
@@ -1061,19 +1097,20 @@ export default {
       this.loadCloseReasons()
       this.loadNotificationChannels()
       this.caseTemplateFind('')
+      this.channels = []
     },
-    loadNotificationChannels() {
+    loadNotificationChannels(name=null) {
       let organization = this.organization;
 
       if (this.from_card) {
         organization = this.event_organization
       }
 
-      this.$store.dispatch("getNotificationChannels", { organization }).then((resp) => {
-        this.notification_channels = this.$store.getters.notification_channels.map((channel) => {
-          return { label: channel.name, value: channel.uuid };
-        });
-      });
+      if(name) {
+        this.$store.dispatch("getNotificationChannels", { organization: organization, name__like: name });
+      } else {
+        this.$store.dispatch("getNotificationChannels", { organization });
+      }
 
     },
     caseTemplateFind(query) {

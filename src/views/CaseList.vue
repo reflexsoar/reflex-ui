@@ -23,18 +23,33 @@
               <div class='event-stats-picker'>
                 <CRow>
                   <CCol>
-                    <b>Search</b><br>
-                    <p>Select a term to free search on </p>
+                  <b>Search</b>
+                  <p>Free search by field</p>
+                </CCol>
+                <CCol class="text-right">
+                  <CButtonGroup>
+                    <CButton
+                      size="sm"
+                      color="primary"
+                      @click="applyFreeSearch()"
+                      >Search</CButton
+                    >
+                  </CButtonGroup>
+                </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CSelect :options="free_search_options" aria-label="Search Field" :value.sync="selected_search_option"></CSelect>
                   </CCol>
                 </CRow>
                 <CRow>
                   <CCol>
-                    <CSelect :options="free_search_options"></CSelect>
-                  </CCol>
-                </CRow>
-                <CRow>
-                  <CCol>
-                    <CInput></CInput>
+                    <CInput
+                    placeholder="Enter a search term..."
+                    v-model="search_text"
+                    @keydown.enter="applyFreeSearch()"
+                    key="case_list_search_field"
+                  ></CInput>
                   </CCol>
                 </CRow>
               </div>
@@ -294,6 +309,8 @@ export default {
         closure_reason_uuid: "",
         close_case_modal: false,
         current_page: 1,
+        search_text: "",
+        selected_search_option: "Title",
         range: {
           start: this.days_ago(7),
           end: this.today()
@@ -302,7 +319,7 @@ export default {
           input: 'YYYY-MM-DD h:mm A'
         },
         free_search_options: [
-          'Title', //'Commenter', 'Owner', 'Description', 'Comments', 'Task Note', 'Observable'
+          'Title', 'Description', 'Observable', 'Comment'//'Commenter', 'Owner', 'Description', 'Comments', 'Task Note', 'Observable'
         ],
         case_stats: {},
         my_cases: false,
@@ -383,6 +400,16 @@ export default {
           })
           this.dismiss()
       },
+      applyFreeSearch() {
+        if(!['',null].includes(this.search_text)) {
+          if(this.selected_search_option.toLowerCase() == 'title') {
+            this.toggleCaseFilter({'filter_type':'title__like', 'data_type': 'title', 'value': this.search_text})
+          } else {
+            this.toggleCaseFilter({'filter_type':this.selected_search_option.toLowerCase(), 'data_type': this.selected_search_option.toLowerCase(), 'value': this.search_text})
+          }
+          this.search_text = ""
+        }
+      },
       toggleCloseCase(uuid) {
         this.target_case = uuid
         let organization = this.filtered_cases.filter(c => c.uuid === uuid)[0].organization
@@ -458,6 +485,10 @@ export default {
         let close_reasons_filters = []
         let owner_filters = []
         let escalated = false
+        let observables_filters = []
+        let title__like = null
+        let comments__like = null
+        let description__like = null
         for(let f in this.caseFilters) {
           let filter = this.caseFilters[f]
 
@@ -465,6 +496,10 @@ export default {
             status_filters.push(filter.value)
           }
 
+          if(filter.filter_type == 'observable') {
+            observables_filters.push(encodeURIComponent(filter.value))
+          }
+          
           if(filter.filter_type == 'tags') {
             tag_filters.push(filter.value)
           }
@@ -512,6 +547,18 @@ export default {
           if(filter.filter_type == 'escalated') {
             escalated = filter.value
           }
+
+          if(filter.filter_type == 'title__like') {
+            title__like = filter.value
+          }
+
+          if(filter.filter_type == 'comment') {
+            comments__like = filter.value
+          }
+
+          if(filter.filter_type == 'description') {
+            description__like = filter.value
+          }
         }
 
         this.$store.dispatch('getCases', {
@@ -532,7 +579,11 @@ export default {
           owner: owner_filters,
           start: start_time,
           end: end_time,
-          escalated: escalated
+          escalated: escalated,
+          observables: observables_filters,
+          title__like: title__like,
+          comments__like: comments__like,
+          description__like: description__like
         }).then(resp => {
           this.filtered_cases = this.$store.getters.cases
           this.pagination = resp.data.pagination
@@ -552,7 +603,11 @@ export default {
           owner: owner_filters,
           my_cases: this.my_cases,
           metrics: ['tag','status','severity','close_reason','organization','owner','escalated'],
-          escalated: escalated
+          escalated: escalated,
+          observables: observables_filters,
+          title__like: title__like,
+          comments__like: comments__like,
+          description__like: description__like
         }).then(resp => {
           this.case_stats = this.$store.getters.case_stats
         })

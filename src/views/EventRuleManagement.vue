@@ -70,15 +70,18 @@
             </template>
             <template #priority="{item}">
               <td>
-                {{item.priority}}
+                <CBadge style="font-size: 90%; font-weight: 500" color="info">{{item.priority}}</CBadge>
               </td>
             </template>
             <template #properties="{item}">
               <td>
                 <span v-if="item.global_rule"><CBadge style="font-size: 90%; font-weight: 500" color="info">Global Rule</CBadge>&nbsp;</span>
+                <span v-if="item.run_retroactively"><CBadge style="font-size: 90%; font-weight: 500" color="info">Retroactive</CBadge>&nbsp;</span>
                 <span v-if="item.merge_into_case"><CBadge style="font-size: 90%; font-weight: 500" color="info">Merge Into Case</CBadge>&nbsp;</span>
+                <span v-if="item.create_new_case"><CBadge style="font-size: 90%; font-weight: 500" color="info">Create New Case</CBadge>&nbsp;</span>
                 <span v-if="item.dismiss"><CBadge style="font-size: 90%; font-weight: 500" color="info">Dismiss Event</CBadge>&nbsp;</span>
                 <span v-if="item.expire"><CBadge style="font-size: 90%; font-weight: 500" color="info">Rule Expires</CBadge>&nbsp;</span>
+                <span v-if="item.notification_channels"><CBadge style="font-size: 90%; font-weight: 500" color="info">Notifies</CBadge>&nbsp;</span>
               </td>
             </template>
             </CDataTable>

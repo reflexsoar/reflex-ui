@@ -3,29 +3,50 @@
     @update:show="(value) => $store.commit('set', ['eventDrawerShow', value])">
     <CRow>
       <CCol>
-        <h1>
-          <CRow style="padding: 10px 10px 0px 10px">
-            <CCol>{{ event_data.title }}</CCol>
-            <CCol col="3" class="text-right">
-              <CButton color="secondary" @click="$store.commit('set', ['eventDrawerMinimize', true])">Close</CButton>
-            </CCol>
-          </CRow>
-        </h1>
-        <CRow style="padding: 10px 10px 0px 10px">
-          <CCol>
-            <b>Status:</b> {{ event_data.status ? event_data.status.name : 'Unknown' }}<span
-              v-if="event_data.dismiss_reason"> - {{ event_data.dismiss_reason }}<br><b>Comment:</b>
-              {{ event_data.dismiss_comment }}<br><b>Dismissed By:</b> {{ event_data.dismissed_by.username }}</span>
-          </CCol>
-        </CRow>
-        <CRow style="padding: 10px 10px 0px 10px">
-          <CCol>
-            <CIcon name="cilTags" />&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags"
+          <CRow style="padding: 10px 10px 0px 10px;">
+            <CCol>
+              <h2>{{ event_data.title }}</h2>
+              <CIcon name="cilTags" />&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags"
               :key="tag">
               <CButton color="dark" class="tag" size="sm">{{ tag }}</CButton>
-            </li><br><br>
+            </li>
+            </CCol>
+            <CCol col="2" style="border-left: 1px solid #cfcfcf" class="text-right">
+              <CButton color="secondary" @click="$store.commit('set', ['eventDrawerMinimize', true])">Minimize</CButton>
+            </CCol>
+          </CRow>
+          <hr style="margin-bottom: 0px">
+        <CRow class="metrics">
+          <CCol>
+            <CCard class="metrics-card">
+              <CCardBody class="metrics-card-body">
+                STATUS<h4>{{ event_data.status ? event_data.status.name : 'Unknown' }}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol>
+            <CCard class="metrics-card">
+              <CCardBody class="metrics-card-body">
+                CREATED<h4>{{ event_data.created_at | moment('from','now') }}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol>
+            <CCard class="metrics-card">
+              <CCardBody class="metrics-card-body">
+                DISMISSED AT<h4>{{ event_data.dismissed_at | moment('from','now') }}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol>
+            <CCard class="metrics-card">
+              <CCardBody class="metrics-card-body">
+                DURATION<h4>{{minutesBetween(event_data.created_at, event_data.dismissed_at)}}</h4>
+              </CCardBody>
+            </CCard>
           </CCol>
         </CRow>
+        <hr style="margin-bottom: 0px; margin-top: 0px;">
         <CTabs :activeTab.sync="activeTab" class="tabbed">
           <CTab title="Overview" active>
             <CCardBody>
@@ -182,12 +203,18 @@
           </CTab>
           <CTab title="Comments">
             <CCardBody class="tab-container">
-              <CCard v-for="comment in comments" :key="comment.uuid">
-                <CCardHeader>By {{ comment.created_by }} - {{ comment.created_at | moment('from', 'now') }}</CCardHeader>
+              <CCard v-if="event_data.dismiss_comment"><CCardHeader>Dismissed By <b>{{event_data.dismissed_by.username}}</b> - {{ event_data.dismissed_at | moment('from','now')}}</CCardHeader>
+                <CCardBody><vue-markdown>{{event_data.dismiss_comment}}</vue-markdown></CCardBody>
+              </CCard>
+              <div v-if="!comments_loading"><CCard v-for="comment in comments" :key="comment.uuid">
+                <CCardHeader>By <b>{{ comment.created_by }}</b> - {{ comment.created_at | moment('from', 'now') }}</CCardHeader>
                 <CCardBody>
                   <vue-markdown>{{ comment.comment }}</vue-markdown>
                 </CCardBody>
               </CCard>
+            </div><div v-else class="text-center">
+              <CSpinner color="primary" size="xl"></CSpinner>
+            </div>
             </CCardBody>
           </CTab>
         </CTabs>
@@ -211,6 +238,19 @@
 
 .c-sidebar.c-sidebar-fixed {
   z-index: 1052;
+}
+
+.metrics {
+  margin:5px;
+  margin-bottom:0px;
+}
+
+.metrics-card {
+  margin-bottom:5px;
+}
+
+.metrics-card-body {
+  padding: 10px;
 }
 
 .c-sidebar-minimized.c-sidebar-fixed {
@@ -278,8 +318,11 @@ export default {
   watch: {
     minimize(val) {
       if (!val) {
-        this.$store.dispatch('getEventComments', this.event_data.uuid)
-        this.comments = this.$store.getters.event_comments
+        this.comments_loading = true
+        this.$store.dispatch('getEventComments', this.event_data.uuid).then(() => {
+          this.comments = this.$store.state.event_comments
+          this.comments_loading = false
+        })
         this.event_data = this.$store.getters.event
         if (this.event_data.event_rules) {
           this.$store.dispatch('loadEventRules', { rules: this.event_data.event_rules, save: false }).then(resp => {
@@ -300,7 +343,8 @@ export default {
       activeTab: 1,
       rules: [],
       detection: {},
-      comments: []
+      comments: [],
+      comments_loading: false
     }
   },
   computed: {
@@ -318,6 +362,36 @@ export default {
       this.$store.dispatch('updateEventObservable', { uuid, observable_value, data }).then(resp => {
         this.observables = this.$store.getters.observables
       })
+    },
+    minutesBetween(start, end) {
+      start = Date.parse(start)
+      end = Date.parse(end)
+      let value = Math.round((end - start) / 60000)
+      console.log(value)
+      if (isNaN(value)) {
+        return "N/A"
+      }
+      if (value > 60) {
+        value = Math.round(value / 60)
+        if (value > 24) {
+          value = Math.round(value / 24)
+          if (value > 30) {
+            value = Math.round(value / 30)
+            if (value > 12) {
+              value = Math.round(value / 12)
+              return value + ' years'
+            } else if (value == 12) {
+              return '1 year'
+            }
+            return value + ' months'
+          }
+          return value + ' days'
+        } else {
+          return value + ' hours'
+        }
+      } else {
+        return value + ' minutes'
+      }
     },
     highlighter(code) {
       return highlight(code, languages.rql);

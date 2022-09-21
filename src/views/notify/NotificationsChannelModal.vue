@@ -81,16 +81,40 @@
                                     <CTextarea v-model="channel.slack_configuration.message_template"
                                         label="Message Template" placeholder="Message Template" rows="5" />
                                 </div>
-                                <div v-if="channel.channel_type == 'pagerduty_webhook'">
+                                <div v-if="channel.channel_type == 'pagerduty_api'">
                                     <h4>PagerDuty Configuration</h4>
-                                    <CInput v-model="channel.pagerduty_configuration.pagerduty_service_key" label="Pagerduty Service Key"
-                                        placeholder="Pagerduty Service Key" />
+                                    <CSelect :value.sync="channel.pagerduty_configuration.credential" label="Credential"
+                                        placeholder="Select an email credential" :options="credential_list" />
+                                    <CInput v-model="channel.pagerduty_configuration.default_from" label="Default From"
+                                        placeholder="The e-mail to send the incident from" />
                                     <CTextarea v-model="channel.pagerduty_configuration.message_template"
                                         label="Message Template" placeholder="Message Template" rows="5" />
                                 </div>
+                                <div v-if="channel.channel_type == 'rest_api'">
+                                    <h4>REST API Configuration</h4>
+                                    <p>The REST API Notificaiton Channel will send the configured POST request to the API destination configured.</p>
+                                    <CInput v-model="channel.rest_api_configuration.api_url" label="API URL"
+                                        placeholder="API URL" />
+                                    <h5>Headers</h5>
+                                    <CButton color="primary" size="sm" @click="channel.rest_api_configuration.headers.push({key:'',value:''})">Add Header</CButton><br><br>
+                                    <div v-for="header, i in channel.rest_api_configuration.headers" :key="i">
+                                        <CRow>
+                                            <CCol col=3><CInput v-model="channel.rest_api_configuration.headers[i].key" label="Header Name" placeholder="Header Name" /></CCol>
+                                            <CCol col=7><CInput v-model="channel.rest_api_configuration.headers[i].value" label="Header Value" placeholder="Header Value" /></CCol>
+                                            <CCol><label>&nbsp;</label><br><CButton color="danger" size="sm" @click="channel.rest_api_configuration.headers.pop(i)">Remove</CButton></CCol>
+                                        </CRow>                                        
+                                    </div>
+                                    <CTextarea v-model="channel.rest_api_configuration.body" label="POST Body"
+                                        placeholder="{}" rows="5" />
+                                </div>
                             </CTab>
                             <CTab title="3. Review" :disabled="!channel.channel_type">
-                                {{ channel }}
+                                <label>Channel Name:</label>
+                                {{ channel.name }}<br>
+                                <label>Channel Description:</label>
+                                {{ channel.description }}<br>
+                                <label>Message Template:</label><br>
+                                <pre style="background-color: #f1f1f1; padding:5px; border-radius: 5px; border: 1px solid #cfcfcf">{{get_message_template(channel, channel.channel_type)}}</pre>
                             </CTab>
                         </CTabs>
                     </CCol>
@@ -102,10 +126,10 @@
                 <CButton v-if="step != final_step" @click="nextStep()"
                     :disabled="(test_failed && step == 2) || !channel.channel_type" color="primary">Next</CButton>
                 <CButton v-if="step == final_step && (mode == 'Create' || mode == 'Clone')"
-                    @click="createDetectionRule()" color="primary" :disabled="submitted"><span v-if="submitted">
+                    @click="createNotificationChannel()" color="primary" :disabled="submitted"><span v-if="submitted">
                         <CSpinner size="sm" />&nbsp;
                     </span>Create</CButton>
-                <CButton v-if="step == final_step && mode == 'Edit'" @click="editDetectionRule()" color="primary"
+                <CButton v-if="step == final_step && mode == 'Edit'" @click="editNotificationChannel()" color="primary"
                     :disabled="submitted"><span v-if="submitted">
                         <CSpinner size="sm" />&nbsp;
                     </span>Save</CButton>
@@ -147,6 +171,11 @@ export default {
                     webhook_url: '',
                     message_template: ''
                 },
+                rest_api_configuration: {
+                    url: '',
+                    headers: [],
+                    body: ''
+                }
             }
         },
         mode: {
@@ -161,7 +190,8 @@ export default {
                 { 'label': 'Microsoft Teams', 'value': 'teams_webhook' },
                 { 'label': 'Slack', 'value': 'slack_webhook' },
                 { 'label': 'Email', 'value': 'email' },
-                { 'label': 'PagerDuty', 'value': 'pagerduty_webhook' },
+                { 'label': 'PagerDuty', 'value': 'pagerduty_api' },
+                { 'label': 'REST API', 'value': 'rest_api' }
                 //{'label': 'OpsGenie', 'value': 'opsgenie'},
                 //{'label': 'VictorOps', 'value': 'victorops'},
                 //{'label': 'Twilio', 'value': 'twilio'},
@@ -210,6 +240,19 @@ export default {
         }
     },
     methods: {
+        get_message_template(channel, channel_type) {
+            if (channel_type == "email") {
+                return channel.email_configuration.message_template;
+            } else if (channel_type == "slack_webhook") {
+                return channel.slack_configuration.message_template;
+            } else if (channel_type == "teams_webhook") {
+                return channel.teams_configuration.message_template;
+            } else if (channel_type == "pagerduty_api") {
+                return channel.pagerduty_configuration.message_template;
+            } else if (channel_type == "rest_api") {
+                return channel.rest_api_configuration.body;
+            }
+        },
         reloadMeta() {
             let organization = this.channel.organization
             this.$store.dispatch('getCredentialList', {organization: organization, page_size: 100}).then(resp => {
@@ -234,10 +277,35 @@ export default {
             }
         },
         createNotificationChannel() {
-
+            for(let field in ['created_at', 'updated_at', 'uuid', 'created_by', 'updated_by']) {
+                delete this.channel[field];
+            }
+            this.$store.dispatch('createNotificationChannel', {data: this.channel})
+                .then(resp => {
+                    this.submitted = false;
+                    this.dismiss();
+                })
+                .catch(err => {
+                    this.submitted = false;
+                    this.error = true;
+                    this.error_message = err.message;
+                });
         },
         editNotificationChannel() {
-
+            let uuid = this.channel.uuid
+            for(let field in ['created_at', 'updated_at', 'uuid', 'created_by', 'updated_by']) {
+                delete this.channel[field];
+            }
+            this.$store.dispatch('editNotificationChannel', {uuid: uuid, data: this.channel})
+                .then(resp => {
+                    this.submitted = false;
+                    this.dismiss();
+                })
+                .catch(err => {
+                    this.submitted = false;
+                    this.error = true;
+                    this.error_message = err.message;
+                });
         },
         nextStep() {
             this.step++;

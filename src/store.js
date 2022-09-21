@@ -123,7 +123,8 @@ const state = {
   toasted: [],
   running_tasks: [],
   notification_channel: {},
-  notification_channels: []
+  notification_channels: [],
+  formatted_notification_channels: []
 }
 
 const mutations = {
@@ -573,6 +574,10 @@ const mutations = {
   },
   remove_notification_channel(state, uuid) {
     state.notification_channels = state.notification_channels.filter(c => c.uuid != uuid)
+  },
+  save_notification_channel(state, channel) {
+    state.notification_channel = channel
+    state.notification_channels.push(channel)
   },
   save_notification_channels(state, channels) {
     state.notification_channels = channels
@@ -1606,13 +1611,39 @@ const actions = {
       })
     })
   },
-  getNotificationChannels({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
+  createNotificationChannel({commit}, {data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/notification/channel`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('save_notification_channel', resp.data)
+        resolve(resp)
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  },
+  editNotificationChannel({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/notification/channel/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_notification_channel', resp.data)
+        resolve(resp)
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getNotificationChannels({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null, name__like=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/notification/channel?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
       if (organization) {
         url += `&organization=${organization}`
+      }
+
+      if (name__like) {
+        url += `&name__like=${name__like}`
       }
 
       Axios({url: url, method: 'GET'})
@@ -2376,11 +2407,27 @@ const actions = {
       })
     })
   },
-  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25, start=null, end=null, sort_by="created_at", sort_direction="asc", escalated=null}) {
+  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25, start=null, end=null, sort_by="created_at", sort_direction="asc", escalated=null, title__like=null, observables=[], comments__like=null, description__like=null}) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
+      if(title__like) {
+        base_url += `&title__like=${title__like}`
+      }
+
+      if(comments__like) {
+        base_url += `&comments__like=${comments__like}`
+      }
+
+      if(description__like) {
+        base_url += `&description__like=${description__like}`
+      }
+
+      if(observables.length > 0) {
+        base_url += `&observables=${observables.join(',')}`
+      }
+      
       if(status.length > 0 ) {
         base_url += `&status=${status}`
       }

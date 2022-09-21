@@ -25,7 +25,7 @@
                 <CRow>
                     <CCol>
                         <p>Add a comment on this event, <b>{{event.title}}</b>.</p>
-                        <markdown-editor height="auto" theme="success" :value="comment" @change="comment = $event"></markdown-editor>
+                        <markdown-editor height="auto" theme="primary" :value="comment" @change="comment = $event"></markdown-editor>
                     </CCol>
                 </CRow>
             </div>

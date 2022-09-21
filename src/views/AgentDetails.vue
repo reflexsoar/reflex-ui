@@ -58,6 +58,15 @@
                 </div>
                 </CCol>
             </CRow>
+            <CRow>
+                <CCol><br>
+                  <h3>Roles</h3>
+                  Roles tell the agent what actions to participate in. Detectors can run detection rules, Runners run playbook actions and individual response actions, Pollers query inputs.<br><br>
+                  <multiselect v-model="agent.roles" placeholder="Select the groups this agent belongs to" :options="roles" :multiple="true" @input="updateRoles()">
+                  </multiselect>
+                </div>
+                </CCol>
+            </CRow>
         </CCardBody>
         <CCardFooter>
             <CRow>
@@ -115,6 +124,8 @@ export default {
             group_list: [],
             selected: [],
             selected_groups: [],
+            roles: ['detector','poller','runner'],
+            selected_roles: [],
             loading: true,
             cardCollapse: true,
             collapse: {},
@@ -139,6 +150,7 @@ export default {
             this.agent = resp.data
             this.selectedInputs()
             this.selectedGroups()
+            this.selectedRoles()
             this.loading = false
         }) 
     },
@@ -180,6 +192,9 @@ export default {
         searchInputs(name) {
             this.$store.dispatch('getInputList', {organization: this.agent.organization, name: name})
         },
+        selectedRoles() {
+            this.selected_roles = this.agent.roles.map(r => r)
+        },
         selectedGroups() {
             for(const i in this.agent.groups) {
                 let group = this.agent.groups[i]
@@ -205,6 +220,15 @@ export default {
             }
             let uuid = this.uuid
             this.$store.dispatch('setAgentGroups', {uuid, groups})
+        },
+        updateRoles() {
+            let uuid = this.uuid;
+            let data = {
+                roles: this.agent.roles
+            }
+            this.$store.dispatch('updateAgent', {uuid, data}).then(resp => {
+                this.agent = this.$store.getters.agent
+            })
         },
         updateAgentName() {
             let uuid = this.uuid;
