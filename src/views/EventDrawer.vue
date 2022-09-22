@@ -31,14 +31,14 @@
               </CCardBody>
             </CCard>
           </CCol>
-          <CCol>
+          <CCol v-if="event_data.dismissed_at">
             <CCard class="metrics-card">
               <CCardBody class="metrics-card-body">
                 DISMISSED AT<h4>{{ event_data.dismissed_at | moment('from','now') }}</h4>
               </CCardBody>
             </CCard>
           </CCol>
-          <CCol>
+          <CCol v-if="event_data.dismissed_at">
             <CCard class="metrics-card">
               <CCardBody class="metrics-card-body">
                 DURATION<h4>{{minutesBetween(event_data.created_at, event_data.dismissed_at)}}</h4>

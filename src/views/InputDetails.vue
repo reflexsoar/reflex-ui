@@ -456,7 +456,7 @@ export default {
       this.loading = false;
     });
     this.$store
-      .dispatch("getDataTypes", { organization: this.organization })
+      .dispatch("getDataTypes", { organization: this.input.organization })
       .then((resp) => {
         this.data_types = resp.data.map((item) => {
           return { value: item.name, label: item.name };
