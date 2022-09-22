@@ -150,7 +150,6 @@ export default {
             this.agent = resp.data
             this.selectedInputs()
             this.selectedGroups()
-            this.selectedRoles()
             this.loading = false
         }) 
     },
@@ -192,9 +191,7 @@ export default {
         searchInputs(name) {
             this.$store.dispatch('getInputList', {organization: this.agent.organization, name: name})
         },
-        selectedRoles() {
-            this.selected_roles = this.agent.roles.map(r => r)
-        },
+        
         selectedGroups() {
             for(const i in this.agent.groups) {
                 let group = this.agent.groups[i]
