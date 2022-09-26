@@ -91,20 +91,24 @@
                   :options="rule_types"
                 />
                 <CRow>
-                  <CCol col="6">
+                  <CCol col="3">
                     <CSelect
                       label="Severity"
                       :value.sync="rule.severity"
                       :options="severities"
                     />
                   </CCol>
-                  <CCol>
-                    
+                  <CCol>                    
                     <div class="slidecontainer">
-                      <label for="risk_score">Risk Score - {{rule.risk_score}}</label><br>
+                      <label for="risk_score">Risk Score</label><br>
                       <input type="range" min=0 max=50000 value=10000 id="risk_score" label="Risk Score" v-model="rule.risk_score" class="slider"/>
                     </div>
                   </CCol>
+                  <CCol col="3"><CInput
+                        v-model="rule.risk_score"
+                        label="Risk Score"
+                        placeholder="Risk Score">
+                      </CInput></CCol>
                 </CRow>
                 <label for="base_query">Base Query</label><br><prism-editor
                   id="base_query"
