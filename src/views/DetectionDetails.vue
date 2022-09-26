@@ -29,7 +29,8 @@
                                     </li></p>
                                     <p><b>References</b><br>
                                     <li v-for="ref in detection.references" :key="ref">
-                                        <a v-bind:href="ref" target="_">{{ref}}</a>
+                                        <span v-if="ref.startsWith('http')">{{ref}}&nbsp;<a _target="_child" :href="ref" target="_blank"><CIcon name='cil-external-link' size="sm"/></a></span>
+                                        <span v-else>{{ref}}</span>
                                     </li></p>
                                     <p><b>MITRE ATT&CK Tactics</b> <li style="display: inline; margin-right: 2px;" v-for="t in detection.tactics" :key="t.name"><CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton></li></p>
                                     <p><b>MITRE ATT&CK Techniques</b> <li style="display: inline; margin-right: 2px;" v-for="t in detection.techniques" :key="t.name"><CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton></li></p>

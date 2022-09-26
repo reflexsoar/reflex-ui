@@ -316,7 +316,7 @@
                   </template>
                 </multiselect><br>
                 <h5>References</h5>
-                <p>References are useful external resources that help an analyst understand the detection.</p>
+                <p>References are links to useful external resources that help an analyst understand the detection.</p>
                 <CButton @click="addReference" size="sm" color="success">New Reference</CButton><br><br>
                 <div v-for="fp,i in rule.references" :key="i">
                   <CInput v-model="rule.references[i]"><template #append><CButton @click="removeReference(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
@@ -355,7 +355,7 @@
         <CButton
           v-if="step != final_step"
           @click="nextStep()"
-          :disabled="(test_failed && step == 2) || rule.source['uuid'] === null"
+          :disabled="rule.source['uuid'] === null"
           color="primary"
           >Next</CButton
         >
@@ -529,6 +529,14 @@ export default {
       if (this.mode == "Edit") {
         this.step = 0;
       }
+
+      if (this.mode == 'Clone') {
+        this.step = 0;
+        ['assigned_agent', 'created_at', 'created_by', 'detection_id', 'last_hit', 'last_run', 'query_time_taken', 'time_taken', 'total_hits', 'updated_at', 'updated_by', 'uuid', 'version', 'warnings'].forEach(k => {
+          delete this.rule[k]
+        })
+      }
+
       this.modalStatus = this.show;
     },
     modalStatus: function () {
@@ -642,10 +650,16 @@ export default {
         this.rule.new_terms_config.window_size = parseInt(this.rule.new_terms_config.window_size)
       }
 
-      if (this.mode == 'Clone') {
-        ['assigned_agent', 'created_at', 'created_by', 'detection_id', 'last_hit', 'last_run', 'query_time_taken', 'time_taken', 'total_hits', 'updated_at', 'updated_by', 'uuid', 'version'].forEach(k => {
-        delete this.rule[k]
-        })
+      if(this.rule.interval) {
+        this.rule.interval = parseInt(this.rule.interval)
+      }
+
+      if(this.rule.lookbehind) {
+        this.rule.lookbehind = parseInt(this.rule.lookbehind)
+      }
+
+      if(this.rule.mute_period) {
+        this.rule.mute_period = parseInt(this.rule.mute_period)
       }
 
       this.rule = this.removeNulls(this.rule)
@@ -656,7 +670,16 @@ export default {
         this.dismiss()
       }).catch(err => {
         this.submitted = false
-        console.log(err)
+        this.error = true
+        this.error_message = err.response.data.message
+        if(err.response.data.errors) {
+          let errors = []
+          this.error_message += ': '
+          for(let e in err.response.data.errors) {
+            errors.push(err.response.data.errors[e])
+          }
+          this.error_message += errors.join(', ')
+        }
       })
     },
     removeNulls(obj) {
@@ -726,6 +749,9 @@ export default {
     },
     reset() {},
     dismiss() {
+      this.step = 0;
+      this.error = false
+      this.error_message = null
       this.reset();
       this.modalStatus = false;
     },
