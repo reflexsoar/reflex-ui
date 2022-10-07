@@ -764,7 +764,12 @@ export default {
         name: newTag,
         uuid: "",
       };
-      this.rule.tags.push(t.name);
+      if(this.rule.tags) {
+        this.rule.tags.push(t.name);
+      } else {
+        this.rule.tags = [t.name]
+      }
+      
       this.tag_list.push(t.name);
     },
     updateTactic(tactic) {
