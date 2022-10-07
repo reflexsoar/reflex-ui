@@ -21,6 +21,7 @@ import VCalendar from 'v-calendar';
 import { CMultiSelect } from '@coreui/vue-pro';
 import Editor from 'v-markdown-editor'
 import VueApexCharts from 'vue-apexcharts'
+import JSONView from 'vue-json-component';
 
 Vue.config.performance = true
 Vue.use(CoreuiVuePro)
@@ -31,6 +32,7 @@ Vue.use(VueClipboard)
 Vue.use(VCalendar)
 Vue.use(Editor);
 Vue.use(VueApexCharts)
+Vue.use(JSONView)
 
 Vue.component('apexchart', VueApexCharts)
 Vue.component('vue-markdown', VueMarkdown)

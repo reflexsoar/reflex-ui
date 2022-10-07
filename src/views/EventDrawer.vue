@@ -98,9 +98,9 @@
           </CTab>
           <CTab title="Raw Log">
             <CCardBody class="tab-container">
-              <h3>Raw Log</h3>
-              <vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'"
-                :data="jsonify(event_data.raw_log)"></vue-json-pretty><br>
+              <json-view :data="jsonify(event_data.raw_log)" rootKey="/" :maxDepth="1" />              
+              <!--<vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'"
+                :data="jsonify(event_data.raw_log)"></vue-json-pretty><br>-->
             </CCardBody>
           </CTab>
           <CTab title="Tuning Advice" v-if="this.event_data.tuning_advice">
@@ -226,7 +226,6 @@
 
 <style scoped>
 .tab-container {
-  overflow-y: scroll;
   overflow-x: scroll;
   max-height: calc(100vh - 200px);
 }
@@ -256,6 +255,10 @@
 .c-sidebar-minimized.c-sidebar-fixed {
   width: 0px !important;
   z-index: 1052;
+}
+
+.overflow-guard {
+  height: 100% !important
 }
 </style>
 
@@ -298,6 +301,7 @@ import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhe
 import 'prismjs/components/prism-python';
 import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
+import MonacoEditor from 'monaco-editor-vue';
 
 export default {
   name: 'EventDrawer',
@@ -308,7 +312,8 @@ export default {
   components: {
     VueJsonPretty,
     CRightDrawer,
-    PrismEditor
+    PrismEditor,
+    MonacoEditor
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
