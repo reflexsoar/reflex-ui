@@ -705,12 +705,14 @@ export default {
       return obj;
     },
     editDetectionRule() {
-      this.rule.tactics = this.rule.tactics.map(tactic => { return {
-        'mitre_id': tactic.mitre_id,
-        'external_id': tactic.external_id,
-        'name': tactic.name,
-        'shortname': tactic.shortname}}
-      )
+      if(this.rule.tactics) {
+        this.rule.tactics = this.rule.tactics.map(tactic => { return {
+          'mitre_id': tactic.mitre_id,
+          'external_id': tactic.external_id,
+          'name': tactic.name,
+          'shortname': tactic.shortname}}
+        )
+      }
 
       this.rule.techniques = this.rule.techniques.map(technique => { return {
         'mitre_id': technique.mitre_id,
@@ -764,7 +766,12 @@ export default {
         name: newTag,
         uuid: "",
       };
-      this.rule.tags.push(t.name);
+      if(this.rule.tags) {
+        this.rule.tags.push(t.name);
+      } else {
+        this.rule.tags = [t.name]
+      }
+      
       this.tag_list.push(t.name);
     },
     updateTactic(tactic) {
