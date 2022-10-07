@@ -54,7 +54,7 @@
         <CCardBody>
             <CRow>
                 <CCol col="3">
-                    <b>Created: </b>{{case_data.created_at | moment('LLLL')}}&nbsp;<br><b>Updated: </b>{{case_data.modified_at | moment('LLLL')}}&nbsp;
+                    <b>Created: </b>{{case_data.created_at | moment('LLLL')}}&nbsp;<br><b>Updated: </b>{{case_data.updated_at | moment('LLLL')}}&nbsp;
                 </CCol>
                 <CCol col="3">
                     <b>Created By: </b>{{case_data.created_by.username}}&nbsp;<br><b>Updated By: </b>{{case_data.updated_by.username}}

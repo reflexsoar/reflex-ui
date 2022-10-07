@@ -146,7 +146,7 @@ export default {
                 let detection = this.detections[i]
                 let detection_tactics = detection.tactics ? detection.tactics.map(t => t.shortname) : []
                 let detection_techniques = detection.techniques ? detection.techniques.map(t => t.external_id) : []
-                if (detection_tactics.includes(tactic) && detection_techniques.includes(technique.external_id)) {
+                if (detection_tactics.includes(tactic) || detection_techniques.includes(technique.external_id)) {
                     count++
                 }
             }
