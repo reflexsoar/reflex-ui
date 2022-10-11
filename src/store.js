@@ -3402,6 +3402,18 @@ const actions = {
         reject(err)
       })
     })
+  },
+  importSigmaRule({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/parse_sigma`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 }
 

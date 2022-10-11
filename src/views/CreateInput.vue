@@ -215,7 +215,15 @@
                       </CCol>
                     </CRow>
               </CTab>
-              <CTab title="4. Confirmation">
+              <CTab title="4. Sigma Configuration">
+                <CRow>
+                  <CCol>
+                    <h3>Sigma Configuration</h3>
+                    <p>Providing Sigma configurations allows <CLink to='/detections'>Detections</CLink> to automatically convert Sigma rules that use this input to the target pipeline and backend.</p>
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab title="5. Confirmation">
                 <CRow>
                       <CCol col="12">
                         <h3>Confirmation</h3>
@@ -351,8 +359,8 @@
           <CCardFooter>
             <div class="text-right">
               <CButton v-if="current_step > 0" color="secondary" @click="current_step -= 1">Back</CButton>&nbsp;
-              <CButton v-if="current_step < 3" color="primary" @click="current_step += 1">Next</CButton>
-              <CButton v-if="current_step == 3" color="primary" @click="createInput()">Create</CButton>
+              <CButton v-if="current_step < last_step" color="primary" @click="current_step += 1">Next</CButton>
+              <CButton v-if="current_step == last_step" color="primary" @click="createInput()">Create</CButton>
             </div>
           </CCardFooter>
         </CCardBody>
@@ -570,7 +578,8 @@ export default {
         new_field_mapping: {'fields': []},
         new_mapping: false,
         current_field: {},
-        data_types: []
+        data_types: [],
+        last_step: 4
       }
     }
 }
