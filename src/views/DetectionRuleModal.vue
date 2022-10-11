@@ -12,7 +12,7 @@
       :closeOnBackdrop="false"
     >
       <template #header>
-        <h5 style="text-transform: capitalize">{{ mode }} Detection Rule</h5>
+        <h5 style="text-transform: capitalize">{{ mode }} Detection Rule {{step}} {{show_sigma}}</h5>
         <span class="text-right">
           <button
             type="button"
@@ -48,8 +48,28 @@
               :activeTab.sync="step"
               :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
             >
-              <CTab title="1. Details">
+              <CTab title="Sigma Import" v-if="show_sigma">
+                <h5>Sigma Configuration</h5>
+                <label>Import from Sigma?</label><br>
+                <CSwitch :checked.sync="show_sigma" label="From Sigma?" label-on="Yes" label-off="No" color="success"/><br>
+                <label>Rule</label>
+                <prism-editor
+                  rows="10"
+                  class="my-editor"
+                  v-model="sigma_rule"
+                  :highlight="highlighter"
+                  line-numbers
+                  aria-label="Sigma Rule"
+                ></prism-editor><br>
+                <CSelect :value.sync="sigma_backend" :options="['opensearch','elasticsearch']" placeholder="Select a backend" label="Backend"></CSelect>
+                <CSelect :value.sync="sigma_pipeline" :options="['ecs_windows']" placeholder="Select a pipeline" label="Pipeline"></CSelect>
+                <CButton color="primary" @click="convertRule()">Convert</CButton>
+
+              </CTab>
+              <CTab title="Details" v-if="!show_sigma">
                 <h5>Rule Details</h5>
+                <label>Import from Sigma?</label><br>
+                <CSwitch :checked.sync="show_sigma" label="From Sigma?"  label-on="Yes" label-off="No" color="success"/>
                 <CSelect
                   label="Organization"
                   placeholder="Select an organization"
@@ -83,7 +103,7 @@
                   :close-on-select="false"
                 /><br />
               </CTab>
-              <CTab title="2. Configuration" v-bind:disabled="rule.source['uuid'] === null">
+              <CTab title="Configuration" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Rule Configuration</h5>
                 <CSelect
                   label="Rule Type"
@@ -202,7 +222,7 @@
                 </div>
                 
               </CTab>
-              <CTab title="3. Schedule" v-bind:disabled="rule.source['uuid'] === null">
+              <CTab title="Schedule" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Schedule</h5>
                 <CRow>
                   <CCol>
@@ -228,7 +248,7 @@
                   </CCol>
                 </CRow>
               </CTab>
-              <CTab title="4. Exclusions" v-bind:disabled="rule.source['uuid'] === null">
+              <CTab title="Exclusions" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Exclusions </h5>
                 <p>Exclusions allow for fine tuning a detection without modifying the underlying base query</p>
                 <CAlert color="warning"><b>NOTE:</b> If creating/editing/deleting exclusions from this window you must save the detection rule when finished.</CAlert>
@@ -254,7 +274,7 @@
                 </CDataTable>
                 <CButton @click="createExclusion" color="success">New Exclusion</CButton>
               </CTab>
-              <CTab title="5. Meta Information" v-bind:disabled="rule.source['uuid'] === null">
+              <CTab title="Meta Information" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>MITRE ATT&CK</h5>
                 <p>Selecting MITRE ATT&CK Tactics and Techniques allows for mapping the MITRE ATT&CK Matrix to easily determine detection coverage.</p>
                 <label>MITRE Tactics</label>
@@ -326,7 +346,7 @@
                   <CInput v-model="rule.references[i]"><template #append><CButton @click="removeReference(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
                 </div>
               </CTab>
-              <CTab title="6. Triage Guide" v-bind:disabled="rule.source['uuid'] === null">
+              <CTab title="Triage Guide" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Triage Guide</h5>
                 <p>
                   A triage guide helps analysts reviewing events generated from
@@ -346,7 +366,7 @@
                   <CInput v-model="rule.false_positives[i]"><template #append><CButton @click="removeFP(i)" color="danger"><CIcon name="cilTrash" size="sm"/></CButton></template></CInput>
                 </div>
               </CTab>
-              <CTab title="7. Review" v-bind:disabled="rule.source['uuid'] === null">{{rule}} </CTab>
+              <CTab title="Review" v-bind:disabled="rule.source['uuid'] === null">{{rule}} </CTab>
             </CTabs>
           </CCol>
         </CRow>
@@ -390,7 +410,7 @@
 .my-editor {
   /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
   /*background: #fdfdfd;*/
-  background: #0e0e0e;
+  background: #0e0e0e !important;
   color: #ccc !important;
   border: 1px solid rgb(216, 219, 224);
   border-radius: 0.25rem;
@@ -428,16 +448,19 @@ import "vue-prism-editor/dist/prismeditor.min.css"; // import the styles somewhe
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-kusto';
 import "prismjs/components/prism-python";
+import "prismjs/components/prism-yaml";
 import "../assets/js/prism-lucene";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
 import DetectionExclusionModal from './DetectionExclusionModal.vue'
+import ImportSigmaRuleWizard from './detections/ImportSigmaRuleWizard.vue'
 
 import { mapState } from "vuex";
 
 export default {
   components: {
     PrismEditor,
-    DetectionExclusionModal
+    DetectionExclusionModal,
+    ImportSigmaRuleWizard
   },
   name: "DetectionRuleModal",
   props: {
@@ -523,7 +546,12 @@ export default {
       short_names: [],
       show_exclusion_modal: false,
       exclusion_modal_mode: 'Create',
-      exclusion: {}
+      exclusion: {},
+      show_sigma: false,
+      saved_step: 0,
+      sigma_rule: '',
+      sigma_backend: '',
+      sigma_pipeline: ''
     };
   },
   watch: {
@@ -753,7 +781,12 @@ export default {
         this.cases = this.$store.getters.cases;
       });
     },
-    reset() {},
+    reset() {
+      this.sigma_rule = ''
+      this.sigma_backend = ''
+      this.sigma_pipeline = ''
+      this.show_sigma = false
+    },
     dismiss() {
       this.step = 0;
       this.error = false
@@ -813,6 +846,31 @@ export default {
         name: name,
       });
     },
+    toggleSigma() {
+      this.show_sigma = !this.show_sigma
+      
+      if(this.show_sigma) {
+        this.saved_step = this.step
+        this.final_step += 1
+      } else {
+        this.step = this.saved_step
+        this.final_step -= 1
+      }
+    },
+    convertRule() {
+        let data = {
+            'sigma_rule': encodeURIComponent(this.sigma_rule),
+            'backend': this.sigma_backend,
+            'pipeline': this.sigma_pipeline
+        }
+        this.$store.dispatch('importSigmaRule', data).then((response) => {
+            this.rule = Object.assign(this.rule, response.data)
+            this.show_sigma = false
+        }).catch((error) => {
+            this.error = true
+            this.error_message = error
+        })
+    }
   },
 };
 </script>

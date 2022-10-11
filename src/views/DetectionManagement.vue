@@ -124,58 +124,30 @@
   </div>
 </template>
 
-<style>
-/* required class */
-.my-editor {
-  /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
-  /*background: #fdfdfd;*/
-  background: #0e0e0e;
-  color: #ccc !important;
-  border: 1px solid rgb(216, 219, 224);
-  border-radius: 0.25rem;
-  box-shadow: inset 0 1px 1px rgb(0 0 21 / 8%);
-
-  /* you must provide font-family font-size line-height. Example: */
-  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  padding: 5px;
-  max-height: 400px;
-  overflow: scroll;
-  overflow-x: hidden;
-}
-
-/* optional class for removing the outline */
-.prism-editor__textarea:focus {
-  outline: none;
-
-}
-</style>
 <script>
 import { mapState } from 'vuex';
-import { PrismEditor } from 'vue-prism-editor'
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhere
 import 'prismjs/components/prism-yaml';
 import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import OrganizationBadge from './OrganizationBadge'
 import DetectionRuleModal from './DetectionRuleModal'
+import ImportSigmaRuleWizard from './detections/ImportSigmaRuleWizard.vue';
 //const DetectionRules = () => import('@/views/DetectionRuleList')
 export default {
   name: 'DetectionManagement',
   components: {
     //'DetectionRules': DetectionRules
-    PrismEditor,
     OrganizationBadge,
-    DetectionRuleModal
-  },
+    DetectionRuleModal,
+    ImportSigmaRuleWizard
+},
   data() {
     return {
 
       detection_list_fields: ['name', 'organization', 'last_run', 'last_hit', 'total_hits', { key: 'performance', label: 'Query Time / Total Time' }, 'actions'],
       modal_mode: "Create",
       show_detection_rule_modal: false,
+      show_import_sigma_rule_modal: false,
       tabs: [
         '1. Rule Details',
         '2. Sigma Rule',
@@ -261,6 +233,59 @@ export default {
       Object.assign(this.rule, this.detections.find(detection => detection.uuid === uuid))
       this.show_detection_rule_modal = true
     },
+    importSigmaRuleModal() {
+      this.rule = this.defaultRule()
+      this.show_import_sigma_rule_modal = true
+    },
+    defaultRule() {
+      return {
+        name: '',
+        tags: [],
+        query: {
+          query: "okay",
+          language: ""
+        },
+        source: {
+          uuid: null
+        },
+        techniques: [],
+        tactics: [],
+        lookbehind: 5,
+        interval: 5,
+        rule_type: 0,
+        severity: 1,
+        risk_score: 50,
+        mute_period: 0,
+        exceptions: [],
+        false_positives: [],
+        references: [],
+        threshold_config: {
+          threshold: 0,
+          max_events: 10,
+          key_field: '',
+          operator: '==',
+          dynamic: false,
+          per_field: false,
+          discovery_period: 7,
+          recalculation_period: 24
+        },
+        field_mismatch_config: {
+          source_field: '',
+          target_field: '',
+          operator: '=='
+        },
+        metric_change_config: {
+          increase: false,
+          threshold_format: 0,
+          threshold: 0
+        },
+        new_terms_config: {
+          key_field: '',
+          max_terms: 1000,
+          window_size: 30
+        }
+      }
+    },
     createDetectionModal() {
       this.modal_mode = "Create"
       this.rule = {
@@ -322,16 +347,13 @@ export default {
       this.modal_mode = 'Clone'
       this.show_detection_rule_modal = true
     },
-    highlighter(code) {
-      return highlight(code, languages.yaml);
-    },
     addTag(newTag) {
       const tag = {
         name: newTag
       }
       this.tag_list.push(tag)
       this.tags.push(tag)
-    }
+    },
   },
   computed: mapState(['alert', 'detections', 'loading']),
   created() {

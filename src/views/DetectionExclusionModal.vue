@@ -150,7 +150,7 @@ export default {
     createExclusion() {
       if('exceptions' in this.rule) {
         if(this.rule.exceptions === null) {
-          this.rule.exceptions = [this.exclusion]
+          this.$set(this.rule,'exceptions',[this.exclusion])
         } else {
           this.rule.exceptions.push(this.exclusion)
         }        

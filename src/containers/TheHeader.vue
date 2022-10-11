@@ -13,7 +13,7 @@
       aria-label="Siderbar Toggle"
     />
     <CHeaderBrand class="mx-auto d-lg-none" to="/">
-      <CIcon name="reflex" height="48" alt="Logo"/>
+      
     </CHeaderBrand>
     <CHeaderNav class="d-md-down-none mr-auto">
     </CHeaderNav>
