@@ -116,18 +116,20 @@
                       label="Severity"
                       :value.sync="rule.severity"
                       :options="severities"
+                      @change="setRiskScore()"
                     />
                   </CCol>
                   <CCol>                    
                     <div class="slidecontainer">
                       <label for="risk_score">Risk Score</label><br>
-                      <input type="range" min=0 max=50000 value=10000 id="risk_score" label="Risk Score" v-model="rule.risk_score" class="slider"/>
+                      <input type="range" min=0 max=50000 value=10000 id="risk_score" label="Risk Score" v-model="rule.risk_score" class="slider" @change="setSeverity()"/>
                     </div>
                   </CCol>
                   <CCol col="3"><CInput
                         v-model="rule.risk_score"
                         label="Risk Score"
-                        placeholder="Risk Score">
+                        placeholder="Risk Score"
+                        @change="setSeverity()">
                       </CInput></CCol>
                 </CRow>
                 <label for="base_query">Base Query</label><br><prism-editor
@@ -597,6 +599,28 @@ export default {
     this.$store.dispatch("getMitreTactics", {});
   },
   methods: {
+    setRiskScore() {
+      if (this.rule.severity == 1) {
+        this.rule.risk_score = 1;
+      } else if (this.rule.severity == 2) {
+        this.rule.risk_score = 12501;
+      } else if (this.rule.severity == 3) {
+        this.rule.risk_score = 25001;
+      } else if (this.rule.severity == 4) {
+        this.rule.risk_score = 37501;
+      }
+    },
+    setSeverity() {
+      if(this.rule.risk_score <= 12500) {
+        this.rule.severity = 1
+      } else if(this.rule.risk_score <= 25000 && this.rule.risk_score > 12500) {
+        this.rule.severity = 2
+      } else if(this.rule.risk_score <= 37500 && this.rule.risk_score > 25000) {
+        this.rule.severity = 3
+      } else {
+        this.rule.severity = 4
+      }
+    },
     today() {
       let d = new Date();
       d.setHours(23, 59, 59, 0);

@@ -143,16 +143,26 @@
                 <h4>Investigation Guide</h4>
                 {{ detection.guide }}<br><br>
 
-                <p><b>False Positives</b><br>
+                <span v-if="detection.false_positives && detection.false_positives.length > 0">
+                  <h4>False Positives</h4>
                   <li v-for="fp, i in detection.false_positives" :key="i">
                     {{ fp }}
-                  </li>
-                </p>
-                <p><b>References</b><br>
+                  </li><br>
+                </span>
+                
+                <span v-if="detection.references && detection.references.length > 0">
+                  <h4>References</h4>
                   <li v-for="ref, i in detection.references" :key="i">
-                    <a v-bind:href="ref" target="_">{{ ref }}</a>
-                  </li>
-                </p>
+                    <span v-if="ref.startsWith('http')">{{ref}}&nbsp;<a _target="_child" :href="ref" target="_blank"><CIcon name='cil-external-link' size="sm"/></a></span>
+                    <span v-else-if="ref.toLowerCase().startsWith('cve-')">{{ref}}
+                    <ol>
+                        <li><a _target="_child" :href="'https://cve.mitre.org/cgi-bin/cvename.cgi?name='+ref" target="_blank">https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ref}}</a></li>
+                        <li><a _target="_child" :href="'https://nvd.nist.gov/vuln/detail/'+ref" target="_blank">https://nvd.nist.gov/vuln/detail/{{ref}}</a></li>
+                        <li><a _target="_child" :href="'https://www.cvedetails.com/cve/'+ref" target="_blank">https://www.cvedetails.com/cve/{{ref}}</a></li>                        
+                    </ol></span>
+                    <span v-else>{{ref}}</span>
+                  </li><br>
+                </span>
               </div>
 
               <h4>MITRE ATT&CK</h4>
