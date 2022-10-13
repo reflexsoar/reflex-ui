@@ -16,6 +16,12 @@
                 </template>
                 <AgentGroups></AgentGroups>
               </CTab>
+              <CTab>
+                <template slot="title">
+                  <CIcon name="cil-settings"/> Agent Policies
+                </template>
+                <AgentPolicies></AgentPolicies>
+              </CTab>
             </CTabs>
           </CCardBody>
         </CCard>
@@ -26,11 +32,13 @@
 
 const Agents = () => import('@/views/AgentsList')
 const AgentGroups = () => import('@/views/AgentGroupList')
+const AgentPolicies = () => import('@/views/agents/AgentPolicies')
 export default {
     name: 'AgentManagement',
     components: {
       'Agents': Agents,
-      'AgentGroups': AgentGroups
+      'AgentGroups': AgentGroups,
+      'AgentPolicies': AgentPolicies
     },
     created() {
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages

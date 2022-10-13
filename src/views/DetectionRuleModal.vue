@@ -12,7 +12,7 @@
       :closeOnBackdrop="false"
     >
       <template #header>
-        <h5 style="text-transform: capitalize">{{ mode }} Detection Rule {{step}} {{show_sigma}}</h5>
+        <h5 style="text-transform: capitalize">{{ mode }} Detection Rule</h5>
         <span class="text-right">
           <button
             type="button"
@@ -52,17 +52,30 @@
                 <h5>Sigma Configuration</h5>
                 <label>Import from Sigma?</label><br>
                 <CSwitch :checked.sync="show_sigma" label="From Sigma?" label-on="Yes" label-off="No" color="success"/><br>
+                <CSelect
+                  label="Organization"
+                  placeholder="Select an organization"
+                  @change="updateOrganization"
+                  v-if="current_user.role.permissions.view_organizations"
+                  :value.sync="rule.organization"
+                  :options="organizations"
+                />
+<label for="input">Input</label><br>
+                <multiselect id="input" @search-change="searchInputs" v-model="rule.source" placeholder="Select the input to be used for this detection" track-by="uuid" label="name" :options="input_list"/><br>
+                
                 <label>Rule</label>
                 <prism-editor
-                  rows="10"
                   class="my-editor"
                   v-model="sigma_rule"
                   :highlight="highlighter"
                   line-numbers
                   aria-label="Sigma Rule"
+                  style="height: 250px"
                 ></prism-editor><br>
-                <CSelect :value.sync="sigma_backend" :options="['opensearch','elasticsearch']" placeholder="Select a backend" label="Backend"></CSelect>
-                <CSelect :value.sync="sigma_pipeline" :options="['ecs_windows']" placeholder="Select a pipeline" label="Pipeline"></CSelect>
+                <CRow>
+                <CCol><CSelect :value.sync="sigma_backend" :options="['opensearch','elasticsearch']" placeholder="Select a backend" label="Backend"></CSelect></CCol>
+                <CCol><CSelect :value.sync="sigma_pipeline" :options="['ecs_windows']" placeholder="Select a pipeline" label="Pipeline"></CSelect></CCol>
+                </CRow>
                 <CButton color="primary" @click="convertRule()">Convert</CButton>
 
               </CTab>
@@ -620,6 +633,7 @@ export default {
       } else {
         this.rule.severity = 4
       }
+      this.rule.risk_score = parseInt(this.rule.risk_score)
     },
     today() {
       let d = new Date();
@@ -887,12 +901,20 @@ export default {
             'backend': this.sigma_backend,
             'pipeline': this.sigma_pipeline
         }
+        let organization = this.rule.organization
+        let source = this.rule.source
         this.$store.dispatch('importSigmaRule', data).then((response) => {
             this.rule = Object.assign(this.rule, response.data)
+            this.rule.organization = organization
+            this.rule.source = source
             this.show_sigma = false
+            this.error = false
+            this.error_message = ''
+            this.setRiskScore()
+            this.setSeverity()
         }).catch((error) => {
             this.error = true
-            this.error_message = error
+            this.error_message = error.response.data.message
         })
     }
   },

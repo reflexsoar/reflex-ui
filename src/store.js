@@ -93,6 +93,8 @@ const state = {
   credential_list: [],
   intel_filters: [],
   index_fields: [],
+  agent_policies: [],
+  agent_policy: {},
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
@@ -214,6 +216,17 @@ const mutations = {
     state.list_names = stats['lists']
     delete stats['lists']
     state.list_stats = stats
+  },
+  save_agent_policy(state, policy) {
+    state.agent_policy = policy
+    if(state.agent_policies.length > 0) {
+      state.agent_policies = [...state.agent_policies.filter(p => p.uuid != policy.uuid), policy]
+    } else {
+      state.agent_policies = [policy]
+    }
+  },
+  save_agent_policies(state, policies) {
+    state.agent_policies = policies
   },
   save_event_stats(state, stats) {
     state.event_stats = stats
@@ -3408,6 +3421,20 @@ const actions = {
       Axios({url: `${BASE_URL}/detection/parse_sigma`, data: data, method: 'POST'})
       .then(resp => {
         commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getAgentPolicies({commit}, {page=1, page_size=500, sort_by="created_at", sort_direction="asc"}) {
+
+    let url = `${BASE_URL}/agent_policy?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+    return new Promise((resolve, reject) => {
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_agent_policies', resp.data.policies)
         resolve(resp)
       })
       .catch(err => {
