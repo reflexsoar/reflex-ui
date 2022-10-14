@@ -20,6 +20,15 @@
             <OrganizationBadge :uuid="item.organization" />
           </td>
         </template>
+        <template #tags="{item}">
+          <td>
+            <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
+              <CButton class="tag" color="secondary" style="cursor: auto" size="sm">
+                {{ tag }}
+              </CButton>
+            </li>
+          </td>
+          </template>
         <template #created_at="{ item }">
           <td>
             {{ item.created_at | moment("from", "now") }}
@@ -56,17 +65,20 @@
           </td>
         </template>
       </CDataTable>
+      <AgentPolicyWizard :show.sync="show_agent_wizard" :modal_mode="modal_mode" :policy="agent_policy" />
     </CCol>
   </CRow>
 </template>
 <script>
 import { mapState } from "vuex";
 import OrganizationBadge from "../OrganizationBadge.vue";
+import AgentPolicyWizard from "./AgentPolicyWizard.vue";
 
 export default {
   name: "AgentPolicies",
   components: {
     OrganizationBadge,
+    AgentPolicyWizard
   },
   data() {
     return {
@@ -81,19 +93,106 @@ export default {
         "name",
         "organization",
         "roles",
+        "tags",
         "created_at",
-        "created_by",
         "updated_at",
         "updated_by",
         "actions",
       ],
+      agent_policy: {
+        "name": "",
+        "description": null,
+        "roles": [
+          "runner",
+          "detector",
+          "poller"
+        ],
+        "health_check_interval": 30,
+        "logging_level": "ERROR",
+        "max_intel_db_size": 0,
+        "disable_event_cache_check": false,
+        "event_realert_ttl": 3600,
+        "poller_config": {
+          "concurrent_inputs": 5,
+          "graceful_exit": true,
+          "logging_level": "ERROR",
+          "max_input_attempts": 3,
+          "signature_cache_ttl": 3600
+        },
+        "detector_config": {
+          "concurrent_rules": 10,
+          "graceful_exit": true,
+          "catchup_period": 60,
+          "wait_interval": 30,
+          "max_threshold_events": 1000,
+          "logging_level": "ERROR"
+        },
+        "runner_config": {
+          "concurrent_actions": 10,
+          "graceful_exit": true,
+          "wait_interval": 30,
+          "plugin_poll_interval": 30,
+          "logging_level": "ERROR"
+        },
+        "tags": [],
+        "priority": 1,
+      },
+      loading: false,
+      small: false,
+      modal_mode: 'Create'
     };
   },
   created() {
     this.listPolicies();
   },
   methods: {
-    newAgentPolicy() {},
+    newAgentPolicy() {
+      this.modal_mode = "Create";
+      this.agent_policy = {
+        "name": "",
+        "description": null,
+        "roles": [
+          "runner",
+          "detector",
+          "poller"
+        ],
+        "health_check_interval": 30,
+        "logging_level": "ERROR",
+        "max_intel_db_size": 0,
+        "disable_event_cache_check": false,
+        "event_realert_ttl": 3600,
+        "poller_config": {
+          "concurrent_inputs": 5,
+          "graceful_exit": true,
+          "logging_level": "ERROR",
+          "max_input_attempts": 3,
+          "signature_cache_ttl": 3600
+        },
+        "detector_config": {
+          "concurrent_rules": 10,
+          "graceful_exit": true,
+          "catchup_period": 60,
+          "wait_interval": 30,
+          "max_threshold_events": 1000,
+          "logging_level": "ERROR"
+        },
+        "runner_config": {
+          "concurrent_actions": 10,
+          "graceful_exit": true,
+          "wait_interval": 30,
+          "plugin_poll_interval": 30,
+          "logging_level": "ERROR"
+        },
+        "tags": [],
+        "priority": 1,
+      };
+      this.show_agent_wizard = true;
+    },
+    editAgentPolicy(uuid) {
+      this.modal_mode = 'Edit'
+      this.agent_policy = Object.assign({},this.agent_policies.find((agent_policy) => agent_policy.uuid === uuid));
+      this.show_agent_wizard = true;
+    },
     listPolicies() {
       this.$store.dispatch("getAgentPolicies", {});
     },

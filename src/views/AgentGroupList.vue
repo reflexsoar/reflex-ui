@@ -102,7 +102,7 @@
     <CModal title="Delete Group" color="danger" :centered="true" :show.sync="delete_modal">
       <CForm id="deleteForm" @submit.prevent="deleteGroup(group.uuid)">
         Are you sure you want to delete <b>{{group.name}}</b>?   Type the groups name in the box below to confirm your intent.<br><br>
-        <CForm id="delete-confirm">
+        <CForm id="delete-confirm-agent-group">
           <CInput
             v-model="delete_confirm"
             label="Group Name"

@@ -3441,6 +3441,30 @@ const actions = {
         reject(err)
       })
     })
+  },
+  createAgentPolicy({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_policy`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('save_agent_policy', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateAgentPolicy({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_policy/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_agent_policy', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 }
 
