@@ -410,6 +410,11 @@ const mutations = {
   },
   save_agent_group(state, agent_group) {
     state.agent_group = agent_group
+    if(state.agent_groups.length > 0) {
+      state.agent_groups = [...state.agent_groups.filter(g => g.uuid != agent_group.uuid), agent_group]
+    } else {
+      state.agent_groups = [agent_group]
+    }
   },
   update_agent_group(state, agent_group) {
     state.agent_group = agent_group
@@ -791,6 +796,9 @@ const getters = {
     } else {
       return "Unknown"
     }
+  },
+  agent_policies_list: state => {
+    return state.agent_policies.map(p => { return {name: p.name, uuid: p.uuid} })
   },
   mitre_technique: state => { return state.mitre_technique },
   event_comments: state => { return state.event_comments },
@@ -3428,13 +3436,18 @@ const actions = {
       })
     })
   },
-  getAgentPolicies({commit}, {page=1, page_size=500, sort_by="created_at", sort_direction="asc"}) {
-
+  getAgentPolicies({commit}, {page=1, page_size=500, sort_by="created_at", sort_direction="asc", organization=null, save=true}) {
     let url = `${BASE_URL}/agent_policy?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+
+    if(organization) {
+      url += `&organization=${organization}`
+    }
     return new Promise((resolve, reject) => {
       Axios({url: url, method: 'GET'})
       .then(resp => {
-        commit('save_agent_policies', resp.data.policies)
+        if(save) {
+          commit('save_agent_policies', resp.data.policies)
+        }
         resolve(resp)
       })
       .catch(err => {

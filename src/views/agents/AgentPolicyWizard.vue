@@ -29,12 +29,17 @@
             </CAlert>
           </CCol>
         </CRow>
-        <h3>Agent Policy</h3>
+        <CRow>
+        <CCol><h3>Agent Policy</h3>
         <p>
           Agent policies allow you to control how all agents behave without having to
           manually configure each one. Agent policies can be assigned to Agent Groups or
           directly to a single agent as a policy override.
         </p>
+        </CCol>
+        </CRow>
+        <CRow>
+        <CCol>
         <CTabs
           variant="pills"
           :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
@@ -377,28 +382,19 @@
           <CTab title="Review">
             <CRow>
               <CCol>
-                <h3>Review</h3>
+                <h4>Review</h4>
                 <p>Review the policy settings and click save to create the policy.</p>
               </CCol>
             </CRow>
             <CRow>
               <CCol>
-                <h4>General Settings</h4>
+                <h5>General Settings</h5>
                 <label>Name:</label> {{ policy.name }}<br />
+                <label>Tags:</label> <li style="display: inline; margin-right: 2px;" v-for="tag in policy.tags" :key="tag">
+                    <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
+                </li><br>
                 <label>Description:</label> {{ policy.description }}<br />
                 <label>Priority:</label> {{ policy.priority }}<br />
-
-                <label>Tags:</label><br />
-                <li
-                  style="display: inline; margin-right: 2px"
-                  v-for="tag in policy.tags"
-                  :key="tag"
-                >
-                  <CButton color="primary" style="cursor: auto" size="sm" disabled>{{
-                    tag
-                  }}</CButton>
-                </li>
-                <br />
                 <label>Roles:</label><br />
                 <li
                   style="display: inline; margin-right: 2px"
@@ -418,7 +414,7 @@
             </CRow>
             <CRow>
               <CCol>
-                <h4>Poller Settings</h4>
+                <h5>Poller Settings</h5>
 
                 <label>Signature Cache TTL:</label>
                 {{ policy.poller_config.signature_cache_ttl }}<br />
@@ -429,7 +425,7 @@
                 <label>Log Level:</label> {{ policy.poller_config.logging_level }}<br />
               </CCol>
               <CCol>
-                <h4>Runner Settings</h4>
+                <h5>Runner Settings</h5>
                 <label>Concurrent Actions:</label>
                 {{ policy.runner_config.concurrent_actions }}<br />
 
@@ -441,7 +437,7 @@
                 }}<br />
               </CCol>
               <CCol>
-                <h4>Detector Settings</h4>
+                <h5>Detector Settings</h5>
                 <label>Concurrent Rules:</label>
                 {{ policy.detector_config.concurrent_rules }}<br />
                 <label>Wait Interval:</label> {{ policy.detector_config.wait_interval
@@ -455,7 +451,7 @@
               </CCol>
             </CRow>
           </CTab>
-        </CTabs>
+        </CTabs></CCol></CRow>
       </div>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>

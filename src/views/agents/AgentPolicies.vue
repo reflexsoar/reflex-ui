@@ -22,11 +22,9 @@
         </template>
         <template #tags="{item}">
           <td>
-            <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
-              <CButton class="tag" color="secondary" style="cursor: auto" size="sm">
-                {{ tag }}
-              </CButton>
-            </li>
+            <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
+            <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
+          </li>
           </td>
           </template>
         <template #created_at="{ item }">
