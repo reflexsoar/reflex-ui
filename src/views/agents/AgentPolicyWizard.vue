@@ -74,7 +74,7 @@
             <CRow>
               <CCol>
                 <CInput
-                  v-model="policy.priority"
+                  v-model.number="policy.priority"
                   label="Priority"
                   placeholder="Enter a priority for the policy"
                   description="If more than one policy is assigned to an agent the higher priority policy will override all other policies when there is setting conflict. 1 is the highest priority."
@@ -144,7 +144,7 @@
               </CCol>
               <CCol>
                 <CSelect
-                  v-model="policy.logging_level"
+                  :value.sync="policy.logging_level"
                   label="Log Level"
                   placeholder="Select a logging level"
                   :options="log_levels"
@@ -152,18 +152,7 @@
               </CCol>
             </CRow>
             <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.event_realert_ttl"
-                  label="Event Resend TTL"
-                  placeholder="Enter a resend TTL in seconds"
-                  description="Agents will backoff when trying to send the same event signature until this TTL (seconds) expires"
-                  :isValid="
-                    validate(policy.event_realert_ttl, validations.event_realert_ttl)
-                  "
-                  :invalidFeedback="validations.event_realert_ttl.message"
-                />
-              </CCol>
+              
               <CCol>
                 <CInput
                   disabled
@@ -172,6 +161,9 @@
                   placeholder="Size in Mb"
                   description="The agent will cache some intel locally to improve intel check performance"
                 />
+              </CCol>
+              <CCol>
+                
               </CCol>
             </CRow>
           </CTab>
@@ -197,7 +189,7 @@
               </CCol>
               <CCol>
                 <CSelect
-                  v-model="policy.poller_config.logging_level"
+                  :value.sync="policy.poller_config.logging_level"
                   label="Log Level"
                   placeholder="Select a logging level"
                   :options="log_levels"
@@ -225,7 +217,7 @@
                   v-model.number="policy.poller_config.signature_cache_ttl"
                   label="Event Signature Cache TTL"
                   placeholder="Enter a time in seconds"
-                  description="How long the poller role will cache Event Signatures before Event Realert will happen according to the agents Event Realert TTL"
+                  description="How long the poller role will cache Event Signatures before Event Realert will happen"
                   :isValid="
                     validate(
                       policy.poller_config.signature_cache_ttl,
@@ -259,7 +251,7 @@
               </CCol>
               <CCol>
                 <CSelect
-                  v-model="policy.runner_config.logging_level"
+                  :value.sync="policy.runner_config.logging_level"
                   label="Log Level"
                   placeholder="Select a logging level"
                   :options="log_levels"
@@ -321,7 +313,7 @@
               </CCol>
               <CCol>
                 <CSelect
-                  v-model="policy.detector_config.logging_level"
+                  :value.sync="policy.detector_config.logging_level"
                   label="Log Level"
                   placeholder="Select a logging level"
                   :options="log_levels"
@@ -408,8 +400,7 @@
                 <br /><br />
                 <label>Health Check Interval:</label> {{ policy.health_check_interval
                 }}<br />
-                <label>Event Realert TTL</label> {{ policy.event_realert_ttl
-                }}<br /><br />
+                <label>Log Level:</label> {{ policy.logging_level }}<br /><br>
               </CCol>
             </CRow>
             <CRow>
