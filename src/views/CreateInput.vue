@@ -219,7 +219,23 @@
                 <CRow>
                   <CCol>
                     <h3>Sigma Configuration</h3>
-                    <p>Providing Sigma configurations allows <CLink to='/detections'>Detections</CLink> to automatically convert Sigma rules that use this input to the target pipeline and backend.</p>
+                    <p>Providing Sigma configurations allows <CLink to='/detections'>Detections</CLink> to automatically convert Sigma rules that use this input to the target pipeline and backend.  The values selected here can be overriden at the time of Sigma to Detection conversion.</p>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CSelect :options="['ecs_windows','custom']" :value.sync="sigma_pipeline" label="Pipeline" placeholder="Select a pipeline" description="The pipeline to use when converting Sigma rules to Detections"/>
+                  </CCol>
+                </CRow>
+                <CRow v-if="sigma_pipeline == 'custom'">
+                  <CCol>
+                    
+                    <CTextarea label="Custom Pipeline Configuration" v-model="sigma_custom_pipeline" rows="5" description="Custom pipelines can be configured by supplying a YAML configuration.  Refer to <a href='https://sigmahq-pysigma.readthedocs.io/en/latest/Processing_Pipelines.html'>SigmaHQ's documentation</a> for more information."/>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CSelect :options="['opensearch','elasticsearch']" :value.sync="sigma_backend" label="Backend" placeholder="Select a backend" description="The backend to use when converting Sigma rules to Detections"/>
                   </CCol>
                 </CRow>
               </CTab>
@@ -579,7 +595,10 @@ export default {
         new_mapping: false,
         current_field: {},
         data_types: [],
-        last_step: 4
+        last_step: 4,
+        sigma_backend: '',
+        sigma_pipeline: '',
+        sigma_custom_pipeline: ''
       }
     }
 }

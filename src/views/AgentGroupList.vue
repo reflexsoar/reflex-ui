@@ -85,11 +85,13 @@
               rows=5
             >
             </CTextarea>
+            <label>Inputs</label>
             <div v-if="modal_button_text == 'Edit'"><multiselect :disabled="organization === null" :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" @search-change="searchInputs" :options="input_list" :multiple="true"></multiselect></div>
             <div v-else><multiselect :disabled="organization === null" :close-on-select="false" v-model="inputs" placeholder="Select inputs to be used by this agent" track-by="uuid" label="name" @search-change="searchInputs" :options="input_list" :multiple="true"></multiselect></div>
             <CRow>
-              <CCol col="12" class="text-right">
-                
+              <CCol>
+              <br><label>Agent Policies</label>
+                <multiselect :options="agent_policies_list" v-model="agent_policy" :multiple="true" :close-on-select="false" label="name" track-by="uuid" placeholder="Select Agent Policies" :disabled="organization === null"></multiselect>
               </CCol>
             </CRow>
         </CForm>
@@ -102,7 +104,7 @@
     <CModal title="Delete Group" color="danger" :centered="true" :show.sync="delete_modal">
       <CForm id="deleteForm" @submit.prevent="deleteGroup(group.uuid)">
         Are you sure you want to delete <b>{{group.name}}</b>?   Type the groups name in the box below to confirm your intent.<br><br>
-        <CForm id="delete-confirm">
+        <CForm id="delete-confirm-agent-group">
           <CInput
             v-model="delete_confirm"
             label="Group Name"
@@ -180,7 +182,10 @@ export default {
         },
         group: {},
         delete_modal: false,
-        delete_confirm: ''
+        delete_confirm: '',
+        agent_policy: [],
+        agent_policies_list: [],
+        wait: false
       }
     },
     watch: {
@@ -235,6 +240,9 @@ export default {
       searchInputs(name) {
         this.$store.dispatch('getInputList', {organization: this.organization, name: name})
       },
+      searchPolicies(name) {
+        this.$store.dispatch('getAgentPolicies', {organization: this.organization, name__like: name})
+      },
       refreshInputs(event) {
         let organization = this.organization
         
@@ -243,6 +251,7 @@ export default {
         }
           
         this.$store.dispatch('getInputList', {organization: organization, page_size: 5})
+        this.loadAgentPolicies()
       },
       formattedOrganizations() {
         return this.organizations.map((o) => { return {label: o.name, value: o.uuid}})
@@ -255,6 +264,7 @@ export default {
           this.description = ""
           this.organization = null
           this.inputs = []
+          this.agent_policy = []
           this.agentGroupModal = true
       },
       createAgentGroup: function () {
@@ -262,7 +272,8 @@ export default {
         let description = this.description
         let organization = this.organization
         let inputs = this.inputs.map(item => { return item.uuid })
-        this.$store.dispatch('createAgentGroup', { name, description, organization, inputs })
+        let agent_policy = this.agent_policy.map(item => { return item.uuid })
+        this.$store.dispatch('createAgentGroup', { name, description, organization, inputs, agent_policy })
         .then(resp => {
           this.error = false
           this.error_message = ""
@@ -278,8 +289,8 @@ export default {
           name: this.name,
           description: this.description,
           organization: this.organization,
-          inputs: this.inputs.map(item => { return item.uuid })
-
+          inputs: this.inputs.map(item => { return item.uuid }),
+          agent_policy: this.agent_policy.map(item => { return item.uuid })
         }
         this.$store.dispatch('updateAgentGroup', {uuid, data}).then(resp => {
           this.error = false
@@ -290,25 +301,30 @@ export default {
           this.error_message = err.response.data.message
         })
       },
-      editAgentGroup(uuid) {         
-        this.$store.dispatch('getAgentGroup', uuid).then(resp => {
-          this.modal_title = "Edit Agent Group"
-          this.modal_action = this.updateAgentGroup
-          this.modal_button_text = "Edit"
-          this.name = this.agent_group.name
-          this.organization = this.agent_group.organization
-          this.description = this.agent_group.description
-          this.inputs = this.agent_group.inputs.map(item => { return {'name': item.name, 'uuid': item.uuid}})
-          this.target_agent_group = uuid
-          this.refreshInputs()
-          this.error_message = ""
-          this.agentGroupModal = false
-          this.agentGroupModal = true
-          
-        }).catch(err => {
-          this.error = true
-          this.error_message = err.response.data.message
-        })
+      editAgentGroup(uuid) {
+        let agent_group = this.agent_groups.find(group => group.uuid === uuid)
+        console.log(agent_group)
+        this.modal_title = "Edit Agent Group"
+        this.organization = agent_group.organization
+        this.refreshInputs()
+        this.modal_action = this.updateAgentGroup
+        this.modal_button_text = "Edit"
+        this.name = agent_group.name          
+        this.description = agent_group.description
+        this.inputs = agent_group.inputs ? agent_group.inputs.map(item => { return {'name': item.name, 'uuid': item.uuid}}) : []
+        this.agent_policy = agent_group.agent_policy ? agent_group.agent_policy.map(item => { return {'name': item.name, 'uuid': item.uuid}}) : []
+        this.target_agent_group = uuid
+        this.error_message = ""
+        this.agentGroupModal = false
+        this.agentGroupModal = true
+      },
+      getPolicyName(uuid) {
+        let policy = this.agent_policies_list.find(x => x.uuid == uuid)
+        if (policy) {
+          return policy.name
+        } else {
+          return "Unknown"
+        }
       },
       addSuccess: function() {
         if (this.$store.getters.addSuccess == 'success') {
@@ -330,7 +346,13 @@ export default {
           case false: return 'danger'
           default: 'primary'
         }
-      }
+      },
+      loadAgentPolicies(edit=false) {
+        let organization = this.organization
+        this.$store.dispatch('getAgentPolicies', {organization: organization, save: false}).then(resp => {
+          this.agent_policies_list = resp.data.policies
+        })
+      }      
     },
     filters: {
       getStatusText(status) {

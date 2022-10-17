@@ -22,8 +22,6 @@ import {
   cibPaypal,
   cibGooglePay, 
   cibCcAmex,
-  cilChevronCircleRightAlt,
-  cilLockUnlocked
 } from '@coreui/icons'
 import {
   cifUs,
@@ -120,7 +118,10 @@ import {
   cilFilter,
   cilCommentBubble,
   cilMinus,
-  cilExternalLink
+  cilExternalLink,
+  cilChevronCircleRightAlt,
+  cilLockUnlocked,
+  cilAppSettings
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -217,7 +218,8 @@ export const iconsSet = Object.assign(
     cilFilter,
     cilCommentBubble,
     cilMinus,
-    cilExternalLink
+    cilExternalLink,
+    cilAppSettings
   },
   {
     cifUs,

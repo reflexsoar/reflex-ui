@@ -21,7 +21,7 @@
                                 </CCardHeader>
                                 <CCardBody>
                                     <p>{{detection.description}}</p>
-                                    <p><b>Created By: </b> {{detection.created_by.username}} on {{ detection.created_at| moment('MMMM Do YYYY, h:mm:ss a') }}</p>
+                                    <p><b>Created By: </b> {{detection.created_by ? detection.created_by.username : 'N/A'}} on {{ detection.created_at| moment('MMMM Do YYYY, h:mm:ss a') }}</p>
                                     <p v-if="detection.updated_by"><b>Updated By: </b> {{detection.updated_by.username}}, {{ detection.updated_at| moment('from','now')  }}</p>
                                     <p><b>False Positives</b><br>
                                     <li v-for="fp in detection.false_positives" :key="fp">
@@ -30,12 +30,19 @@
                                     <p><b>References</b><br>
                                     <li v-for="ref in detection.references" :key="ref">
                                         <span v-if="ref.startsWith('http')">{{ref}}&nbsp;<a _target="_child" :href="ref" target="_blank"><CIcon name='cil-external-link' size="sm"/></a></span>
+                                        <span v-else-if="ref.toLowerCase().startsWith('cve-')">{{ref}}
+                                        <ol>
+                                            <li><a _target="_child" :href="'https://cve.mitre.org/cgi-bin/cvename.cgi?name='+ref" target="_blank">https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ref}}</a></li>
+                                            <li><a _target="_child" :href="'https://nvd.nist.gov/vuln/detail/'+ref" target="_blank">https://nvd.nist.gov/vuln/detail/{{ref}}</a></li>
+                                            <li><a _target="_child" :href="'https://www.cvedetails.com/cve/'+ref" target="_blank">https://www.cvedetails.com/cve/{{ref}}</a></li>                        
+                                        </ol></span>
                                         <span v-else>{{ref}}</span>
                                     </li></p>
                                     <p><b>MITRE ATT&CK Tactics</b> <li style="display: inline; margin-right: 2px;" v-for="t in detection.tactics" :key="t.name"><CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton></li></p>
-                                    <p><b>MITRE ATT&CK Techniques</b> <li style="display: inline; margin-right: 2px;" v-for="t in detection.techniques" :key="t.name"><CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton></li></p>
+                                    <p><b>MITRE ATT&CK Techniques</b><li style="display: inline; margin-right: 2px;" v-for="t in detection.techniques" :key="t.name"><CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton></li></p>
                                     <p><b>Tags</b> <li style="display: inline; margin-right: 2px;" v-for="tag in detection.tags" :key="tag"><CButton color="primary" size="sm" disabled="">{{ tag }}</CButton></li></p>
-                                    
+                                    <span v-if="detection.from_sigma"><b>Sigma Rule (<span style="cursor: pointer" @click="show_sigma = !show_sigma">{{ show_sigma ? 'Hide' : 'Show' }}</span>)</b>
+                                    <CCollapse :show.sync="show_sigma"><br><pre>{{detection.sigma_rule}}</pre></CCollapse></span>
                                 </CCardBody>
                             </CCard>
                         </CCol>
@@ -53,7 +60,7 @@
                                     <p><b>Detection Type</b><br>{{detectionType(detection.rule_type)}}</p>
                                     <p><b>Base Query</b><br><div class="query">{{detection.query.query}}</div></p>
                                     <p><b>Severity</b><br><CButton class="tag" size="sm" :color="$store.getters.severity_color(detection.severity)">{{$store.getters.severity_text(detection.severity)}}</CButton></p>
-                                    <p><b>Risk Score</b><br><CProgress max=50000 :value="detection.risk_score" show-value :color="riskScoreColor(detection.risk_score)"/></p>
+                                    <p><b>Risk Score</b><br><CProgress :max="max_risk" :value="parseInt(detection.risk_score)" show-value :color="riskScoreColor(detection.risk_score)"/></p>
                                 </CCardBody>
                             </CCard>
                         </CCol>
@@ -83,6 +90,7 @@
                                     <CCardBody>
                                         <CDataTable
                                             :items="detection_hits"
+                                            :fields="['title','tags','reference','severity','risk_score','created_at','updated_at','original_date']"
                                         >
                                         <template #severity="{item}">
                                             <td>
@@ -91,7 +99,22 @@
                                         </template>
                                         <template #risk_score="{item}">
                                             <td>
-                                                <CProgress v-if="item.risk_score" max=50000 :value="item.risk_score" :color="riskScoreColor(detection.risk_score)" show-value/>
+                                                <CProgress v-if="item.risk_score" :max="max_risk" :value="parseInt(item.risk_score)" :color="riskScoreColor(detection.risk_score)" show-value/>
+                                            </td>
+                                        </template>
+                                        <template #created_at="{item}">
+                                            <td>
+                                                {{ item.created_at| moment('MMMM Do YYYY, h:mm:ss a') }}
+                                            </td>
+                                        </template>
+                                        <template #updated_at="{item}">
+                                            <td>
+                                                {{ item.updated_at| moment('MMMM Do YYYY, h:mm:ss a') }}
+                                            </td>
+                                        </template>
+                                        <template #original_date="{item}">
+                                            <td>
+                                                {{ item.original_date| moment('MMMM Do YYYY, h:mm:ss a') }}
                                             </td>
                                         </template>
                                         <template #tags="{item}">
@@ -173,7 +196,9 @@ export default {
     data () {
         return {
             uuid: this.$route.params.uuid,
-            activeTab: 0
+            activeTab: 0,
+            show_sigma: false,
+            max_risk: 50000
         }
     },
     created() {

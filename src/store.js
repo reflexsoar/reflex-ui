@@ -93,6 +93,8 @@ const state = {
   credential_list: [],
   intel_filters: [],
   index_fields: [],
+  agent_policies: [],
+  agent_policy: {},
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
@@ -214,6 +216,17 @@ const mutations = {
     state.list_names = stats['lists']
     delete stats['lists']
     state.list_stats = stats
+  },
+  save_agent_policy(state, policy) {
+    state.agent_policy = policy
+    if(state.agent_policies.length > 0) {
+      state.agent_policies = [...state.agent_policies.filter(p => p.uuid != policy.uuid), policy]
+    } else {
+      state.agent_policies = [policy]
+    }
+  },
+  save_agent_policies(state, policies) {
+    state.agent_policies = policies
   },
   save_event_stats(state, stats) {
     state.event_stats = stats
@@ -397,6 +410,11 @@ const mutations = {
   },
   save_agent_group(state, agent_group) {
     state.agent_group = agent_group
+    if(state.agent_groups.length > 0) {
+      state.agent_groups = [...state.agent_groups.filter(g => g.uuid != agent_group.uuid), agent_group]
+    } else {
+      state.agent_groups = [agent_group]
+    }
   },
   update_agent_group(state, agent_group) {
     state.agent_group = agent_group
@@ -778,6 +796,9 @@ const getters = {
     } else {
       return "Unknown"
     }
+  },
+  agent_policies_list: state => {
+    return state.agent_policies.map(p => { return {name: p.name, uuid: p.uuid} })
   },
   mitre_technique: state => { return state.mitre_technique },
   event_comments: state => { return state.event_comments },
@@ -3408,6 +3429,49 @@ const actions = {
       Axios({url: `${BASE_URL}/detection/parse_sigma`, data: data, method: 'POST'})
       .then(resp => {
         commit('loading_status', false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getAgentPolicies({commit}, {page=1, page_size=500, sort_by="created_at", sort_direction="asc", organization=null, save=true}) {
+    let url = `${BASE_URL}/agent_policy?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+
+    if(organization) {
+      url += `&organization=${organization}`
+    }
+    return new Promise((resolve, reject) => {
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        if(save) {
+          commit('save_agent_policies', resp.data.policies)
+        }
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createAgentPolicy({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_policy`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('save_agent_policy', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateAgentPolicy({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/agent_policy/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('save_agent_policy', resp.data)
         resolve(resp)
       })
       .catch(err => {
