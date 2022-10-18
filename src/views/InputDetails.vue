@@ -22,8 +22,8 @@
               </template>
               <li
                 style="display: inline; margin-right: 2px"
-                v-for="tag in input.tags"
-                :key="tag"
+                v-for="tag, i in input.tags"
+                :key="i"
               >
                 <CButton color="primary" size="sm" disabled>{{ tag }}</CButton>
               </li>
@@ -43,11 +43,11 @@
         <CCardBody>
           <CRow>
             <CCol col="6">
-              <b>Enabled: </b> True<br>
-              <b>Plugin: </b> Elasticsearch<br>
+              <b>Enabled: </b> True<br />
+              <b>Plugin: </b> Elasticsearch<br />
             </CCol>
             <CCol col="6">
-              <b>Date Created: </b>{{ input.created_at | moment("LLLL") }}<br>
+              <b>Date Created: </b>{{ input.created_at | moment("LLLL") }}<br />
               <b>Last Updated: </b>
             </CCol>
           </CRow>
@@ -118,59 +118,72 @@
         <CCol v-else col="12">
           <CCard>
             <CCardHeader>
-            <CRow>
+              <CRow>
                 <CCol><b>Configuration</b></CCol>
                 <CCol class="text-right"
-                  ><CButton
-                    size="sm"
-                    color="primary"
-                    @click="edit_config = !edit_config"
-                    >Edit Config</CButton
-                  ></CCol>
+                  ><CButton size="sm" color="primary" @click="editConfig()"
+                    >{{edit_config ? 'Save' : 'Edit'}} Config</CButton
+                  ></CCol
+                >
               </CRow>
             </CCardHeader>
             <CCardBody>
               <CRow>
                 <CCol col="4">
-                  <label>Hosts</label><br>
-                  <li
-                        style="display: inline; margin-right: 2px"
-                        v-for="host in input.config['hosts']"
-                        :key="host"
-                      >
-                        <CButton color="primary" size="sm" disabled>{{
-                          host
-                        }}</CButton>
-                      </li><br/><br/>
+                  <label>Hosts</label><br />
+                  <div v-if="!edit_config">
+                    <li
+                      style="display: inline; margin-right: 2px"
+                      v-for="host, i in input.config['hosts']"
+                      :key="i"
+                    >
+                      <CButton color="primary" size="sm" disabled>{{ host }}</CButton>
+                    </li>
+                    <br /><br />
+                  </div>
+                  <div v-else>
+                    <multiselect
+                      v-model="input.config['hosts']"
+                      :taggable="true"
+                      @tag="addHost"
+                      :options="hosts"
+                      :multiple="true"
+                      :close-on-select="false"
+                      placeholder="Select"
+                      :preselect-first="true"
+                    ></multiselect
+                    ><br />
+                  </div>
                 </CCol>
                 <CCol col="4">
-                  <label>Distro</label><br>
-                  {{ input.config["distro"] }}<br><br>
+                  <label>Distro</label><br />
+                  <div v-if="!edit_config">{{ input.config["distro"] }}<br /><br /></div>
+                  <div v-else><CSelect :value.sync="input.config['distro']" :options="distros">
+                    </CSelect></div>
                 </CCol>
                 <CCol col="4">
-                  <label>Alert Index</label><br>
-                  {{ input.config["index"] }}<br><br>
+                  <label>Alert Index</label><br />
+                  {{ input.config["index"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Lucene Filter</label><br>
-                  {{ input.config["lucene_filter"] }}<br><br>
+                  <label>Lucene Filter</label><br />
+                  {{ input.config["lucene_filter"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>HTTP scheme</label><br>
-                  {{ input.config["scheme"] }}<br><br>
+                  <label>HTTP scheme</label><br />
+                  {{ input.config["scheme"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Auth Method</label><br>
-                  {{ input.config["auth_method"] }}<br><br>
+                  <label>Auth Method</label><br />
+                  {{ input.config["auth_method"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Verify Hostname</label><br>
-                  {{ input.config["check_hostname"] ? "Yes" : "No"
-                  }}<br><br>
+                  <label>Verify Hostname</label><br />
+                  {{ input.config["check_hostname"] ? "Yes" : "No" }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>TLS Verification Mode</label><br>
-                  {{ input.config["cert_verification"] }}<br><br>
+                  <label>TLS Verification Mode</label><br />
+                  {{ input.config["cert_verification"] }}<br /><br />
                 </CCol>
               </CRow>
               <CRow>
@@ -178,70 +191,66 @@
                   <h5>Event Base Configuration</h5>
                 </CCol>
                 <CCol col="4">
-                  <label>Event Title Field</label><br>
-                  {{ input.config["rule_name"] }}<br><br>
+                  <label>Event Title Field</label><br />
+                  {{ input.config["rule_name"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Description Field</label><br>
-                  {{ input.config["description_field"] }}<br><br>
+                  <label>Description Field</label><br />
+                  {{ input.config["description_field"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Reference Field</label><br>
-                  {{ input.config["source_reference"] }}<br><br>
+                  <label>Reference Field</label><br />
+                  {{ input.config["source_reference"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Severity Field</label><br>
-                  {{ input.config["severity_field"] }}<br><br>
+                  <label>Severity Field</label><br />
+                  {{ input.config["severity_field"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Original Date Field</label><br>
-                  {{ input.config["original_date_field"] }}<br><br>
+                  <label>Original Date Field</label><br />
+                  {{ input.config["original_date_field"] }}<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Tag Fields</label><br>
+                  <label>Tag Fields</label><br />
                   <li
-                        style="display: inline; margin-right: 2px"
-                        v-for="field in input.config['tag_fields']"
-                        :key="field"
-                      >
-                        <CButton color="primary" size="sm" disabled>{{
-                          field
-                        }}</CButton>
-                      </li><br><br>
+                    style="display: inline; margin-right: 2px"
+                    v-for="field, i in input.config['tag_fields']"
+                    :key="i"
+                  >
+                    <CButton color="primary" size="sm" disabled>{{ field }}</CButton>
+                  </li>
+                  <br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Signature Fields</label><br>
+                  <label>Signature Fields</label><br />
                   <li
-                        style="display: inline; margin-right: 2px"
-                        v-for="field in input.config['signature_fields']"
-                        :key="field"
-                      >
-                        <CButton color="primary" size="sm" disabled>{{
-                          field
-                        }}</CButton>
-                      </li><br><br>
+                    style="display: inline; margin-right: 2px"
+                    v-for="field, i in input.config['signature_fields']"
+                    :key="i"
+                  >
+                    <CButton color="primary" size="sm" disabled>{{ field }}</CButton>
+                  </li>
+                  <br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Search Size</label><br>
-                  {{ input.config["search_size"] }} events<br><br>
+                  <label>Search Size</label><br />
+                  {{ input.config["search_size"] }} events<br /><br />
                 </CCol>
                 <CCol col="4">
-                  <label>Search Period</label><br>
-                  {{ input.config["search_period"] }}<br><br>
+                  <label>Search Period</label><br />
+                  {{ input.config["search_period"] }}<br /><br />
                 </CCol>
               </CRow>
               <CRow>
                 <CCol>
-                  <label>Static Tags</label><br>
-                   <li
-                        style="display: inline; margin-right: 2px"
-                        v-for="field in input.config['static_tags']"
-                        :key="field"
-                      >
-                        <CButton color="primary" size="sm" disabled>{{
-                          field
-                        }}</CButton>
-                      </li>
+                  <label>Static Tags</label><br />
+                  <li
+                    style="display: inline; margin-right: 2px"
+                    v-for="field, i in input.config['static_tags']"
+                    :key="i"
+                  >
+                    <CButton color="primary" size="sm" disabled>{{ field }}</CButton>
+                  </li>
                 </CCol>
               </CRow>
             </CCardBody>
@@ -254,9 +263,7 @@
                 <CCol
                   ><b
                     >Field Mapping
-                    <CButton size="sm" color="success" @click="addField()"
-                      >+</CButton
-                    ></b
+                    <CButton size="sm" color="success" @click="addField()">+</CButton></b
                   ></CCol
                 >
                 <CCol class="text-right"
@@ -272,124 +279,12 @@
                     color="secondary"
                     @click="discardChanges()"
                     >Discard Changes</CButton
-                  ></CCol>
+                  ></CCol
+                >
               </CRow>
             </CCardHeader>
             <CCardBody style="padding: 0px">
-              <CDataTable
-                :items="input.field_mapping['fields']"
-                :key="input.field_mapping['fields']"
-                :fields="[
-                  'field',
-                  'alias',
-                  'data_type',
-                  'tlp',
-                  'tags',
-                  'actions',
-                ]"
-                :noItemsView="{
-                  noResults: 'No Fields Mapped',
-                  noItems: 'No Fields Mapped',
-                }"
-                :itemsPerPage="10"
-                :pagination="true"
-                :sorter="true"
-                :columnFilter="true"
-                size="sm"
-              >
-                <template #field="{ item }">
-                  <td>
-                    <div v-if="edit_field == itemIndex(item['field'])">
-                      <CInput :value.sync="item['field']" />
-                    </div>
-                    <div v-else>{{ item["field"] }}</div>
-                  </td>
-                </template>
-                <template #alias="{ item }">
-                  <td>
-                    <div v-if="edit_field == itemIndex(item['field'])">
-                      <CInput :value.sync="item['alias']" />
-                    </div>
-                    <div v-else>{{ item["alias"] }}</div>
-                  </td>
-                </template>
-                <template #data_type="{ item }">
-                  <td>
-                    <div v-if="edit_field == itemIndex(item['field'])">
-                      <CSelect
-                        :options="data_types"
-                        :value.sync="item['data_type']"
-                      />
-                    </div>
-                    <div v-else>{{ item["data_type"] }}</div>
-                  </td>
-                </template>
-                <template #tlp="{ item }">
-                  <td>
-                    <div v-if="edit_field == itemIndex(item['field'])">
-                      <CSelect
-                        :options="[1, 2, 3, 4]"
-                        :value.sync="item['tlp']"
-                      />
-                    </div>
-                    <div v-else>{{ item["tlp"] }}</div>
-                  </td>
-                </template>
-                <template #tags="{ item }">
-                  <td v-if="edit_field == itemIndex(item['field'])">
-                    <multiselect
-                      v-model="item['tags']"
-                      :close-on-select="false"
-                      :options="[]"
-                      placeholder="Select tags to apply to this input"
-                      :taggable="true"
-                      tag-placeholder="Add new tag"
-                      :multiple="true"
-                      @tag="addFieldTag(item, $event)"
-                    />
-                  </td>
-                  <td v-else>
-                    <div v-if="item['tags'].length > 0">
-                      <li
-                        style="display: inline; margin-right: 2px"
-                        v-for="tag in item['tags']"
-                        :key="tag"
-                      >
-                        <CButton color="primary" size="sm" disabled="">{{
-                          tag
-                        }}</CButton>
-                      </li>
-                    </div>
-                    <div v-else>None</div>
-                  </td>
-                </template>
-                <template #actions="{ item }">
-                  <td class="text-right">
-                    <CButtonGroup>
-                      <CButton
-                        v-if="edit_field != itemIndex(item['field'])"
-                        size="sm"
-                        color="success"
-                        @click="editFieldMapping(item['field'])"
-                        ><CIcon name="cil-pencil"
-                      /></CButton>
-                      <CButton
-                        v-if="edit_field == itemIndex(item['field'])"
-                        size="sm"
-                        color="primary"
-                        @click="saveField(item)"
-                        ><CIcon name="cil-save"
-                      /></CButton>
-                      <CButton
-                        size="sm"
-                        color="danger"
-                        @click="removeField(item['field'])"
-                        ><CIcon name="cil-trash"
-                      /></CButton>
-                    </CButtonGroup>
-                  </td>
-                </template>
-              </CDataTable>
+              
             </CCardBody>
           </CCard>
         </CCol>
@@ -414,9 +309,7 @@
           </CForm>
           <template #footer>
             <CButton @click="dismiss()" color="secondary">No</CButton>
-            <CButton type="submit" form="deleteForm" color="danger"
-              >Yes</CButton
-            >
+            <CButton type="submit" form="deleteForm" color="danger">Yes</CButton>
           </template>
         </CModal>
       </CRow>
@@ -448,12 +341,15 @@ export default {
       current_field: {},
       data_types: [],
       changes_made: false,
+      hosts: [],
+      distros: ["elasticsearch","opensearch"]
     };
   },
   computed: mapState(["input"]),
   created() {
     this.$store.dispatch("getInput", this.$route.params.uuid).then((resp) => {
       this.loading = false;
+      this.hosts = this.input.config["hosts"];
     });
     this.$store
       .dispatch("getDataTypes", { organization: this.input.organization })
@@ -508,9 +404,9 @@ export default {
       this.changes_made = true;
     },
     removeField(field) {
-      this.input.field_mapping["fields"] = this.input.field_mapping[
-        "fields"
-      ].filter((item) => item["field"] != field);
+      this.input.field_mapping["fields"] = this.input.field_mapping["fields"].filter(
+        (item) => item["field"] != field
+      );
       this.changes_made = true;
     },
     discardChanges() {
@@ -543,6 +439,13 @@ export default {
         this.input.config = this.input.config;
         this.config_json_error = true;
       }
+    },
+    editConfig() {
+      console.log(this.edit_config)     
+      if(this.edit_config) {
+        console.log('saving config')
+      }
+      this.edit_config = !this.edit_config;
     },
     updateConfig() {
       let uuid = this.uuid;
@@ -580,7 +483,7 @@ export default {
             data: { field_mapping: field_mapping },
           })
           .then((resp) => {
-            console.log(this.input)
+            console.log(this.input);
             this.edit_field_mapping = false;
             this.changes_made = false;
           });
@@ -602,6 +505,10 @@ export default {
         }
       }
       this.toggleCollapse = true;
+    },
+    addHost(host) {
+      this.hosts.push(host);
+      this.input.config["hosts"].push(host);
     },
   },
   filters: {

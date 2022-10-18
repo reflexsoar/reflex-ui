@@ -1,11 +1,14 @@
 <template>
   <CRow>
     <CCol>
-      <div style="padding: 10px;"><CButton color="primary" @click="newInput()">New Input</CButton></div>
- <CCardBody>
-              <CDataTable
+    
+      <div style="padding: 10px;">
+      <CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and requires specific conditions.</CAlert>
+      <CButton color="primary" @click="newFieldMappingTemplate()">New Field Mapping</CButton></div>
+      {{source_field_mapping_template}}
+             <CCardBody><CDataTable
                   :hover="hover"
-                  :items="inputs"
+                  :items="field_mapping_templates"
                   :fields="fields"
                   :loading="loading"
                   :items-per-page="small ? 25 : 10"                 
@@ -13,9 +16,9 @@
                   table-filter
                   @update:sorter-value="sort($event)"
               >
-              <template #name="{item}">
+              <template #title="{item}">
                   <td>
-                      <b>{{item.name}}</b>
+                      <b>{{item.title}}</b>
                   </td>
               </template>
               <template #organization="{item}">
@@ -23,15 +26,10 @@
                   <OrganizationBadge :uuid="item.organization"/>
                 </td>
               </template>
-              <template #tags="{item}">
-                <td>
-                  <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag"><CButton color="primary" size="sm" disabled>{{ tag }}</CButton></li>
-                </td>
-              </template>
               <template #actions="{item}">
                 <td class='text-right'>
                   <CButton color="info" size="sm" :to="item.uuid"><CIcon name="cilPencil"/></CButton>&nbsp;
-                  <CButton color="secondary" size="sm" @click="cloneInput(item.uuid)"><CIcon name="cilCopy"/></CButton>
+                  <CButton color="secondary" size="sm" @click="cloneFieldMappingTemplate(item.uuid)"><CIcon name="cilCopy"/></CButton>
                 </td>
               </template>
               </CDataTable>
@@ -42,7 +40,7 @@
                   </CCardBody>
                 </CCol>
               </CRow>
-            </CCardBody>
+              </CCardBody>
     </CCol>
   </CRow>
 </template>
@@ -51,7 +49,7 @@
 import {mapState} from "vuex";
 import OrganizationBadge from './OrganizationBadge'
 export default {
-    name: 'Inputs',
+    name: 'InputFieldMappingList',
     components: {
       OrganizationBadge
     },
@@ -76,7 +74,7 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user','inputs', 'pagination', 'source_input']),
+    computed: mapState(['current_user','field_mapping_templates', 'pagination', 'source_field_mapping_template']),
     created: function () {
         if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
@@ -86,9 +84,6 @@ export default {
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         }
         this.loadData()
-        this.refresh = setInterval(function() {
-          this.loadData()
-        }.bind(this), 60000)
     },
     data(){
       return {
@@ -103,22 +98,24 @@ export default {
     },
     watch: {
       active_page: function() {
-        this.reloadInputs(this.active_page)
+        this.reloadFieldMappingTemplates(this.active_page)
       }
     },
     methods: {
       sort(event) {
         let sort_direction = event.asc ? 'asc' : 'desc'
         event.column = event.column ? event.column : 'created_at'
-        this.reloadInputs(this.active_page, event.column, sort_direction)
+        this.reloadFieldMappingTemplates(this.active_page, event.column, sort_direction)
       },
-      newInput() {
-        this.$store.commit('clone_input', null)
-        this.$router.push('/inputs/create')
+      newFieldMappingTemplate() {
+        this.$store.commit('clone_field_mapping_template', null)
+        alert('Not implemented')
+        //this.$router.push('/inputs/create_field_mapping_template')
       },
-      cloneInput(uuid) {
-        this.$store.commit('clone_input', this.inputs.find(item => item.uuid === uuid))
-        this.$router.push('/inputs/create')
+      cloneFieldMappingTemplate(uuid) {
+        this.$store.commit('clone_field_mapping_template', this.field_mapping_templates.find(item => item.uuid === uuid))
+        alert('Not implemented')
+        //this.$router.push('/inputs/create_field_mapping_template')
       },
       mapOrgToName(uuid) {
         let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
@@ -135,16 +132,16 @@ export default {
           return false
         }
       },
-      reloadInputs(page, sort_by, sort_direction) {
+      reloadFieldMappingTemplates(page, sort_by, sort_direction) {
         this.loading = true
-          this.$store.dispatch('getInputs',{page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
+          this.$store.dispatch('getFieldMappingTemplates',{page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
             this.loading = false
         })
       },
       loadData: function() {
         this.loading = true
         
-        this.$store.dispatch('getInputs', {}).then(resp => {
+        this.$store.dispatch('getFieldMappingTemplates', {}).then(resp => {
             this.loading = false
         })
       }

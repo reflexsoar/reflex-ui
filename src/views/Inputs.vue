@@ -5,7 +5,7 @@
 <script>
 
 export default {
-    name: 'InputList',
+    name: 'Inputs',
     created() {
       this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages
     }
