@@ -123,6 +123,7 @@
                   <CCol>
                     <CCardBody>
                       <h5>{{ rule.name }}</h5>
+                      <vue-markdown>{{ rule.description }}</vue-markdown>
                       <prism-editor rows="10" class="my-editor" v-model="rule.query" :highlight="highlighter"
                         line-numbers></prism-editor>
                     </CCardBody>

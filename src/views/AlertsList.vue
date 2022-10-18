@@ -186,6 +186,7 @@
       </CRow>
       <CRow v-else @mouseenter="pauseRefresh = true" @mouseleave="pauseRefresh = false">
         <CCol :col="12" v-for="event in filtered_events" :key="event.uuid">
+          <!--<EventCard :event="event"></EventCard>-->
           <CCard :accent-color="getSeverityColor(event.severity)">
             <CCardBody>
               <CRow>
@@ -421,6 +422,8 @@ import EventDrawer from './EventDrawer.vue';
 import CRightDrawer from './CRightDrawer.vue';
 import OrganizationBadge from './OrganizationBadge'
 import EventCommentModal from './event/EventCommentModal'
+import EventCard from './event/EventCard'
+
 export default {
     name: 'Events',
     components: {
@@ -433,7 +436,8 @@ export default {
       EventDrawer,
       CRightDrawer,
       OrganizationBadge,
-      EventCommentModal
+      EventCommentModal,
+      EventCard
     },
     props: {
     items: Array,

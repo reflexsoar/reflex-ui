@@ -120,8 +120,7 @@ import {
   cilMinus,
   cilExternalLink,
   cilChevronCircleRightAlt,
-  cilLockUnlocked,
-  cilAppSettings
+  cilLockUnlocked
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -218,8 +217,7 @@ export const iconsSet = Object.assign(
     cilFilter,
     cilCommentBubble,
     cilMinus,
-    cilExternalLink,
-    cilAppSettings
+    cilExternalLink
   },
   {
     cifUs,
