@@ -56,7 +56,7 @@
                                     <b>Configuration</b>
                                 </CCardHeader>
                                 <CCardBody>
-                                    <p><b>Source Input</b><br>{{detection.source.name}}</p>
+                                    <p><b>Source Input</b><br>{{detection.source ? detection.source.name : 'Unknown'}}</p>
                                     <p><b>Detection Type</b><br>{{detectionType(detection.rule_type)}}</p>
                                     <p><b>Base Query</b><br><div class="query">{{detection.query.query}}</div></p>
                                     <p><b>Severity</b><br><CButton class="tag" size="sm" :color="$store.getters.severity_color(detection.severity)">{{$store.getters.severity_text(detection.severity)}}</CButton></p>

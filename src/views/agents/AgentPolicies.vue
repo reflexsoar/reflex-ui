@@ -22,7 +22,7 @@
         </template>
         <template #tags="{item}">
           <td>
-            <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
+            <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
             <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
           </li>
           </td>

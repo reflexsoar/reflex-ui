@@ -49,6 +49,7 @@ const EventRuleManagement = () => import('@/views/EventRuleManagement')
 const Organization = () => import('@/views/Organization')
 const OrganizationSettings = () => import('@/views/OrganizationSettings')
 const NotificationChannelsList = () => import('@/views/notify/NotificationChannelsList')
+const InputManagement = () => import('@/views/InputManagement')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -244,7 +245,7 @@ function configRoutes () {
             {
               path: 'list',
               name: '',
-              component: InputsList,
+              component: InputManagement,
               meta: {
                 fetchSettings: true,
                 requiresAuth: true
