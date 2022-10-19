@@ -40,14 +40,15 @@
                     <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role"><CButton color="primary" style="cursor: auto" size="sm" disabled>{{ role }}</CButton></li>
                   </td>
               </template>
-              <template #active="{item}">
-                <td>
-                  <CButton :color="getStatus(item.active)" size="sm" disabled>{{item.active | getStatusText }}</CButton>
-                </td>
-              </template>
+              <template #version="{item}">
+                  <td>
+                      {{item.version ? item.version : "Unknown"}}
+                  </td>
+                </template>
               <template #last_heartbeat="{item}">
                 <td>
-                  {{item.last_heartbeat | moment('from', 'now')}}
+                  <span v-if="item.last_heartbeat">{{ item.last_heartbeat | moment('from','now')}}</span>
+                  <span v-else>Never</span>
                 </td>
               </template>
               <template #healthy="{item}">
@@ -100,7 +101,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['name', 'roles', 'inputs', 'ip_address', 'active', 'last_heartbeat', 'healthy', 'health_issues']
+        return ['name', 'roles', 'inputs', 'ip_address', 'version', 'last_heartbeat', 'healthy', 'health_issues']
       }
     },
     caption: {
@@ -119,9 +120,9 @@ export default {
     created: function () {
       this.current_url = window.location.origin;
       this.loadData()
-      this.refresh = setInterval(function() {
-        this.loadData()
-      }.bind(this), 60000)
+      //this.refresh = setInterval(function() {
+      //  this.loadData()
+      //}.bind(this), 60000)
     },
     data(){
       return {
@@ -218,7 +219,7 @@ export default {
       }
     },
     beforeDestroy: function() {
-      clearInterval(this.refresh)
+      //clearInterval(this.refresh)
     }
 }
 </script>
