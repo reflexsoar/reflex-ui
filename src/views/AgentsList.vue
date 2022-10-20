@@ -7,13 +7,13 @@
                   :striped="striped"
                   :bordered="bordered"
                   :small="small"
-                  :fixed="fixed"
                   :items="agents"
                   :fields="fields"
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
                   :sorter='{external: true, resetable: true}'
                   :loading="loading"
+                  :responsive="true"
                   style="border-top: 1px solid #cfcfcf;"
                   @update:sorter-value="sort($event)"
               >

@@ -13,6 +13,7 @@
         :fields="fields"
         :items-per-page="small ? 25 : 10"
         :loading="loading"
+        :responsive="true"
         :sorter="{ external: false, resetable: true }"
       >
         <template #organization="{ item }">

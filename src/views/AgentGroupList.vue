@@ -13,6 +13,7 @@
           :items-per-page="small ? 25 : 10"
           :dark="dark"
           :loading="loading"
+          :responsive="true"
           :sorter='{external: true, resetable: true}'
           @update:sorter-value="sort($event)"
           style="border-top: 1px solid #cfcfcf;"
