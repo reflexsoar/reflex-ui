@@ -136,7 +136,9 @@ export default {
         dismissCountDown: 10,
         loading: true,
         organizations: [],
-        active_page: 1
+        active_page: 1,
+        sort_by: 'created_at',
+        sort_direction: 'desc',
       }
     },
     watch: {
@@ -146,13 +148,13 @@ export default {
     },
     methods: {
       sort(event) {
-        let sort_direction = event.asc ? 'asc' : 'desc'
-        event.column = event.column ? event.column : 'created_at'
-        this.reloadAgents(this.active_page, event.column, sort_direction)
+        this.sort_direction = event.asc ? 'asc' : 'desc'
+        this.sort_by = event.column ? event.column : 'created_at'
+        this.reloadAgents(this.active_page)
       },
-      reloadAgents(page, sort_by, sort_direction) {
+      reloadAgents(page) {
         this.loading = true
-        this.$store.dispatch('getAgents', {page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
+        this.$store.dispatch('getAgents', {page: page, sort_by: this.sort_by, sort_direction: this.sort_direction}).then(() => {
           this.loading = false
         })
       },
