@@ -780,11 +780,13 @@ export default {
         )
       }
 
-      this.rule.techniques = this.rule.techniques.map(technique => { return {
-        'mitre_id': technique.mitre_id,
-        'external_id': technique.external_id,
-        'name': technique.name}}
-      )
+      if(this.rule.techniques) {
+        this.rule.techniques = this.rule.techniques.map(technique => { return {
+          'mitre_id': technique.mitre_id,
+          'external_id': technique.external_id,
+          'name': technique.name}}
+        )
+      }
 
       this.rule.risk_score = parseInt(this.rule.risk_score)
      
