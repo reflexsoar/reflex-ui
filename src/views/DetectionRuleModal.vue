@@ -164,7 +164,7 @@
                       <CSelect :value.sync="rule.threshold_config.operator" label="Operator" :options='["==","!=",">","<",">=","<="]'/>
                     </CCol>
                     <CCol>
-                      <CInput v-model="rule.threshold_config.threshold" v-bind:disabled="rule.threshold_config.dynamic" label="Threshold" description="The number of items that required for the detection to fire"/>
+                      <CInput v-model.number="rule.threshold_config.threshold" v-bind:disabled="rule.threshold_config.dynamic" label="Threshold" description="The number of items that required for the detection to fire"/>
                     </CCol>
                   </CRow>
                   <CRow>
@@ -179,15 +179,15 @@
                       <small class="form-text text-muted w-100">Should the detection determine a threshold automatically based on a discovery period?</small>
                     </CCol>
                     <CCol v-if="rule.threshold_config.dynamic">
-                      <CInput v-model="rule.threshold_config.discovery_period" label="Discovery Period" description="How far back to compute the threshold value (in days)"/>
+                      <CInput v-model.number="rule.threshold_config.discovery_period" label="Discovery Period" description="How far back to compute the threshold value (in days)"/>
                     </CCol>
                     <CCol v-if="rule.threshold_config.dynamic">
-                      <CInput v-model="rule.threshold_config.recalculation_period" label="Recalculation Period" description="How ofter to recalculate the dynamic threshold (in hours)"/>
+                      <CInput v-model.number="rule.threshold_config.recalculation_period" label="Recalculation Period" description="How ofter to recalculate the dynamic threshold (in hours)"/>
                     </CCol>
                   </CRow>
                   <CRow>
                     <CCol col="3">
-                      <CInput v-model="rule.threshold_config.max_events" label="Max Events" description="The number of events to return when a threshold is crossed"/>
+                      <CInput v-model.number="rule.threshold_config.max_events" label="Max Events" description="The number of events to return when a threshold is crossed"/>
                     </CCol>
                   </CRow>
                 </div>
@@ -203,7 +203,7 @@
                       <CSelect :value.sync="rule.metric_change_config.threshold_format" :options="['Percentage','Numeric']" label="Metric Format"/>
                     </CCol>
                     <CCol>
-                      <CInput v-model="rule.metric_change_config.threshold" label="Metric Threshold"/>
+                      <CInput v-model.number="rule.metric_change_config.threshold" label="Metric Threshold"/>
                     </CCol>
                   </CRow>
                 </div>                
@@ -228,10 +228,10 @@
                       <CInput v-model="rule.new_terms_config.key_field" label="Terms Field" placeholder="Field Name" description="The field to collect terms from and observe new terms in"/>
                     </CCol>
                     <CCol>
-                      <CInput v-model="rule.new_terms_config.window_size" label="Windows Size" description="The number of days back to look for terms"/>
+                      <CInput v-model.number="rule.new_terms_config.window_size" label="Windows Size" description="The number of days back to look for terms"/>
                     </CCol>
                     <CCol>
-                      <CInput v-model="rule.new_terms_config.max_terms" label="Max Terms" description="The maximum number of terms to return.  Too large may have performance impacts, too low may miss terms."/>
+                      <CInput v-model.number="rule.new_terms_config.max_terms" label="Max Terms" description="The maximum number of terms to return.  Too large may have performance impacts, too low may miss terms."/>
                     </CCol>
                   </CRow>
                 </div>
@@ -243,21 +243,21 @@
                   <CCol>
                     <CInput
                       label="Run Interval"
-                      v-model="rule.interval"
+                      v-model.number="rule.interval"
                       description="How often detection will run in minutes"
                     ></CInput>
                   </CCol>
                   <CCol>
                     <CInput
                       label="Lookbehind"
-                      v-model="rule.lookbehind"
+                      v-model.number="rule.lookbehind"
                       description="How far back the detection should look in minutes. By default the detection will look back to the last run time."
                     ></CInput>
                   </CCol>
                   <CCol>
                     <CInput
                       label="Mute Period"
-                      v-model="rule.mute_period"
+                      v-model.number="rule.mute_period"
                       description="How long in minutes to mute all future hits on this detection"
                     ></CInput>
                   </CCol>
@@ -780,11 +780,13 @@ export default {
         )
       }
 
-      this.rule.techniques = this.rule.techniques.map(technique => { return {
-        'mitre_id': technique.mitre_id,
-        'external_id': technique.external_id,
-        'name': technique.name}}
-      )
+      if(this.rule.techniques) {
+        this.rule.techniques = this.rule.techniques.map(technique => { return {
+          'mitre_id': technique.mitre_id,
+          'external_id': technique.external_id,
+          'name': technique.name}}
+        )
+      }
 
       this.rule.risk_score = parseInt(this.rule.risk_score)
      
