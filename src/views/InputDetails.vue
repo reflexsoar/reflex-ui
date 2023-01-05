@@ -284,7 +284,120 @@
               </CRow>
             </CCardHeader>
             <CCardBody style="padding: 0px">
-              
+              <CDataTable
+                :items="input.field_mapping['fields']"
+                :key="input.field_mapping['fields']"
+                :fields="[
+                  'field',
+                  'alias',
+                  'data_type',
+                  'tlp',
+                  'tags',
+                  'actions',
+                ]"
+                :noItemsView="{
+                  noResults: 'No Fields Mapped',
+                  noItems: 'No Fields Mapped',
+                }"
+                :itemsPerPage="10"
+                :pagination="true"
+                :sorter="true"
+                :columnFilter="true"
+                size="sm"
+              >
+                <template #field="{ item }">
+                  <td>
+                    <div v-if="edit_field == itemIndex(item['field'])">
+                      <CInput :value.sync="item['field']" />
+                    </div>
+                    <div v-else>{{ item["field"] }}</div>
+                  </td>
+                </template>
+                <template #alias="{ item }">
+                  <td>
+                    <div v-if="edit_field == itemIndex(item['field'])">
+                      <CInput :value.sync="item['alias']" />
+                    </div>
+                    <div v-else>{{ item["alias"] }}</div>
+                  </td>
+                </template>
+                <template #data_type="{ item }">
+                  <td>
+                    <div v-if="edit_field == itemIndex(item['field'])">
+                      <CSelect
+                        :options="data_types"
+                        :value.sync="item['data_type']"
+                      />
+                    </div>
+                    <div v-else>{{ item["data_type"] }}</div>
+                  </td>
+                </template>
+                <template #tlp="{ item }">
+                  <td>
+                    <div v-if="edit_field == itemIndex(item['field'])">
+                      <CSelect
+                        :options="[1, 2, 3, 4]"
+                        :value.sync="item['tlp']"
+                      />
+                    </div>
+                    <div v-else>{{ item["tlp"] }}</div>
+                  </td>
+                </template>
+                <template #tags="{ item }">
+                  <td v-if="edit_field == itemIndex(item['field'])">
+                    <multiselect
+                      v-model="item['tags']"
+                      :close-on-select="false"
+                      :options="[]"
+                      placeholder="Select tags to apply to this input"
+                      :taggable="true"
+                      tag-placeholder="Add new tag"
+                      :multiple="true"
+                      @tag="addFieldTag(item, $event)"
+                    />
+                  </td>
+                  <td v-else>
+                    <div v-if="item['tags'].length > 0">
+                      <li
+                        style="display: inline; margin-right: 2px"
+                        v-for="tag in item['tags']"
+                        :key="tag"
+                      >
+                        <CButton color="primary" size="sm" disabled="">{{
+                          tag
+                        }}</CButton>
+                      </li>
+                    </div>
+                    <div v-else>None</div>
+                  </td>
+                </template>
+                <template #actions="{ item }">
+                  <td class="text-right">
+                    <CButtonGroup>
+                      <CButton
+                        v-if="edit_field != itemIndex(item['field'])"
+                        size="sm"
+                        color="success"
+                        @click="editFieldMapping(item['field'])"
+                        ><CIcon name="cil-pencil"
+                      /></CButton>
+                      <CButton
+                        v-if="edit_field == itemIndex(item['field'])"
+                        size="sm"
+                        color="primary"
+                        @click="saveField(item)"
+                        ><CIcon name="cil-save"
+                      /></CButton>
+                      <CButton
+                        size="sm"
+                        color="danger"
+                        @click="removeField(item['field'])"
+                        ><CIcon name="cil-trash"
+                      /></CButton>
+                    </CButtonGroup>
+                  </td>
+                </template>
+              </CDataTable>
             </CCardBody>
           </CCard>
         </CCol>
