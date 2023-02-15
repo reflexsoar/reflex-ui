@@ -28,7 +28,7 @@
       </div>
       <template #footer>
           <CButton @click="dismiss()" color="secondary">Cancel</CButton>
-        <CButton @click="mergeEventIntoCase()" v-bind:disabled="!case_data" color="primary">Merge</CButton>
+        <CButton @click="mergeEventIntoCase()" v-bind:disabled="!case_data" color="primary"><span v-if="!submitted || complete">Merge</span><span v-if="submitted && !complete"><CSpinner color="success" size="sm"/></span></CButton>
       </template>
     </CModal>
 </div>
@@ -48,7 +48,9 @@ export default {
         return {
             case_data: {},
             modalStatus: false,
-            include_related_events: true
+            include_related_events: true,
+            submitted: false,
+            complete: true
         }
     },
     watch: {
@@ -91,10 +93,18 @@ export default {
             let uuid = this.case_data.uuid;
             let events = this.events;
             let include_related_events = this.include_related_events
+            this.complete = false
+            this.submitted = true
             this.$store.dispatch('addEventsToCase', {uuid, include_related_events, events}).then(resp => {
+                this.complete = true
+                this.submitted = false
                 this.modalStatus = false
                 this.$store.commit('show_alert', {'message':'Successfully merged events into Case.', 'type':'success'})
                 this.$router.push({path: '/cases/'+uuid})
+            }).catch(err => {
+                this.submitted = false
+                this.complete = true
+                this.$store.commit('show_alert', {'message':'Error merging events into Case.', 'type':'danger'})
             })
         },
         reset () {
