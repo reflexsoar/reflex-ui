@@ -9,10 +9,17 @@
                   :fields="fields"
                   :loading="loading"
                   :items-per-page="small ? 25 : 10"                 
-                  :sorter='{external: true, resetable: true}'
-                  table-filter
+                  :sorter='{external: false, resetable: true}'
+                  column-filter
+                  items-per-page-select
+                  pagination
                   @update:sorter-value="sort($event)"
+                  :column-filter-value.sync="column_filters"
+                  cleaner
               >
+              <template #organization-filter="{item}">
+                <input type="text" class="form-control form-control-sm" v-model="org_filter" />
+              </template>
               <template #name="{item}">
                   <td>
                       <b>{{item.name}}</b>
@@ -35,13 +42,7 @@
                 </td>
               </template>
               </CDataTable>
-              <CRow>
-                <CCol>
-                  <CCardBody>
-                    <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
-                  </CCardBody>
-                </CCol>
-              </CRow>
+              
             </CCardBody>
     </CCol>
   </CRow>
@@ -86,9 +87,7 @@ export default {
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         }
         this.loadData()
-        this.refresh = setInterval(function() {
-          this.loadData()
-        }.bind(this), 60000)
+        
     },
     data(){
       return {
@@ -98,12 +97,28 @@ export default {
         organizations: Array,
         dismissCountDown: 10,
         loading: true,
-        active_page: 1
+        active_page: 1,
+        page_size: 10000,
+        org_filter: "",
+        org_filter_uuid: null,
+        column_filters: {}
       }
     },
     watch: {
       active_page: function() {
         this.reloadInputs(this.active_page)
+      },
+      org_filter: function(e) {
+        let x = this.$store.getters.organizations.filter(o => o.name.toLowerCase().includes(e.toLowerCase()))
+        console.log(x)
+        if (x.length > 1) {
+          this.$delete(this.column_filters, 'organization')
+        } else if (x.length == 0) {
+          this.$delete(this.column_filters, 'organization')
+          this.$set(this.column_filters, 'organization', null)
+        } else {
+          this.$set(this.column_filters, 'organization', x.map(o => o.uuid)[0])
+        }
       }
     },
     methods: {
@@ -137,14 +152,14 @@ export default {
       },
       reloadInputs(page, sort_by, sort_direction) {
         this.loading = true
-          this.$store.dispatch('getInputs',{page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
+          this.$store.dispatch('getInputs',{page_size: this.page_size, page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
             this.loading = false
         })
       },
       loadData: function() {
         this.loading = true
         
-        this.$store.dispatch('getInputs', {}).then(resp => {
+        this.$store.dispatch('getInputs', {page_size: this.page_size}).then(resp => {
             this.loading = false
         })
       }
