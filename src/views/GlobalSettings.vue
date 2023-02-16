@@ -29,6 +29,10 @@
                 content: 'This will require users add additional details when dismissing an event.',
                 placement: 'right'}">Require Event Dismiss Comment</label><br>
               <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_event_dismiss_comment"/><br><br>
+              <label v-c-tooltip="{
+                content: 'This will require users add additional details when dismissing an event.',
+                placement: 'right'}">Re-Open Cases when Events added</label><br>
+              <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.reopen_case_on_event_merge"/><br><br>
               <CInput v-model="settings.events_page_refresh" description="Setting this too high may result in performance issues" label="Event queue refresh interval (seconds)" placeholder="60"/>
               <CSelect :value="settings.events_per_page" :options="[10,25,50,100]" label="Events per page" @change="settings.events_per_page = $event.target.value"/>
             </CCol>
