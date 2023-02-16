@@ -2039,6 +2039,18 @@ const actions = {
       })
     })
   },
+  getEventIndex({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}/indexed`, method: 'GET'})
+      .then(resp => {
+        //commit('save_event_index', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   updateEvent({commit}, {uuid, data}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event/${uuid}`, data: data, method: 'PUT'})

@@ -103,6 +103,39 @@
                 :data="jsonify(event_data.raw_log)"></vue-json-pretty><br>-->
             </CCardBody>
           </CTab>
+          <CTab title="Table">
+            <CCardBody class="tab-container">
+              <CDataTable
+                :items="event_index"
+                :fields="['Field','Value']"
+                :items-per-page="25"
+                items-per-page-select
+                hover
+                sorter
+                column-filter
+                bordered
+                striped
+                pagination
+                cleaner
+                table-filter
+                >
+                <template #Field="{ item }">
+                  <td><b>{{item.Field}}</b></td>
+                </template>
+                <template #Value="{ item }">
+                  <td v-if="!Array.isArray(item.Value)">{{item.Value}}</td>
+                  <td v-else>
+                    <ul class="no-bullets">
+                      <li v-for="value in item.Value" :key="value">
+                        {{value}}
+                      </li> 
+                    </ul>
+                  </td>
+                </template>
+                <template #caption><br></template>
+                </CDataTable>
+            </CCardBody>
+          </CTab>
           <CTab title="Tuning Advice" v-if="this.event_data.tuning_advice">
             <CRow>
               <CCol>
@@ -299,6 +332,13 @@
 .modal-body {
   padding-left: 0px;
 }
+
+ul.no-bullets {
+  list-style-type: none; /* Remove bullets */
+  padding: 0; /* Remove padding */
+  margin: 0; /* Remove margins */
+}
+
 </style>
 
 <script>
@@ -335,6 +375,12 @@ export default {
     minimize(val) {
       if (!val) {
         this.comments_loading = true
+        this.$store.dispatch('getEventIndex', this.event_data.uuid).then(resp => {
+          let data = resp.data
+          for (let [key, value] of Object.entries(data)) {
+            this.event_index.push({ Field: key, Value: value })
+          }
+        })
         this.$store.dispatch('getEventComments', this.event_data.uuid).then(() => {
           this.comments = this.$store.state.event_comments
           this.comments_loading = false
@@ -360,7 +406,8 @@ export default {
       rules: [],
       detection: {},
       comments: [],
-      comments_loading: false
+      comments_loading: false,
+      event_index: []
     }
   },
   computed: {
