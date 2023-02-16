@@ -48,11 +48,26 @@
             <CCol>
               <hr>
               <h3>Detections</h3>
-              <div v-if="loading" class="text-center"><CSpinner></CSpinner></div>
+              <div v-if="detections_loading" class="text-center"><CSpinner></CSpinner></div>
               <div v-else>
                 <span v-if="associated_detections.length != 0"><ul>
                   <li v-for="detection in associated_detections" :key="detection.uuid">
                   <b><router-link :to="`/detections/${detection.uuid}`">{{detection.name}}</router-link></b> - {{detection.description}}
+                  </li></ul>
+                  </span>
+                  <span v-else>No Associated Detections</span>
+              </div>
+            </CCol>
+          </CRow>
+          <CRow>
+            <CCol>
+              <hr>
+              <h3>Inputs</h3>
+              <div v-if="detections_loading" class="text-center"><CSpinner></CSpinner></div>
+              <div v-else>
+                <span v-if="associated_inputs.length != 0"><ul>
+                  <li v-for="input in associated_inputs" :key="input.uuid">
+                  <b><router-link :to="`/inputs/${input.uuid}`">{{input.name}}</router-link></b> - {{input.description}}
                   </li></ul>
                   </span>
                   <span v-else>No Associated Detections</span>
@@ -126,6 +141,7 @@ export default {
       if (!val) {
         this.loading = true
         this.getDetections(this.mitre_technique.external_id, this.mitre_technique.phase_names)
+        this.getInputs(this.mitre_technique.data_sources)
       } else {
         
       }
@@ -134,7 +150,10 @@ export default {
   data() {
     return {
       associated_detections: [],
-      loading: false      
+      associated_inputs: [],
+      loading: false,
+      detections_loading: true,
+      inputs_loading: true
     }
   },
   computed: {
@@ -149,14 +168,23 @@ export default {
   },
   methods: {
     getDetections(tech,tactics){
+      this.detections_loading = true
       this.$store.dispatch('getDetections', { tactics: tactics, technique: tech, save: false, organization: this.organization }).then(resp => {
         this.associated_detections = resp.data.detections
-        this.loading = false
-      }).err(err => {
-        this.loading = false
+        this.detections_loading = false
+      }).catch(err => {
+        this.detections_loading = false
       })
-    }
-    
+    },
+    getInputs(mitre_data_sources) {
+      this.inputs_loading = true
+      this.$store.dispatch('getInputs', { mitre_data_sources: mitre_data_sources, organization: this.organization }).then(resp => {
+        this.associated_inputs = resp.data.inputs
+        this.inputs_loading = false
+      }).catch(err => {
+        this.inputs_loading = false
+      })
+    }    
   }
 }
 </script>
