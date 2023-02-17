@@ -2,7 +2,7 @@
   <CRow>
     <CCol>
       <div style="padding: 10px;"><CButton color="primary" @click="newInput()">New Input</CButton></div>
- <CCardBody>
+
               <CDataTable
                   :hover="hover"
                   :items="filtered_inputs"
@@ -12,6 +12,7 @@
                   :sorter='{external: false, resetable: true}'
                   column-filter
                   pagination
+                  style="border-top: 1px solid #cfcfcf;"
                   @update:sorter-value="sort($event)"
                   :column-filter-value.sync="column_filters"
               >
@@ -40,11 +41,15 @@
                 </td>
               </template>
               </CDataTable>
-              
-            </CCardBody>
     </CCol>
   </CRow>
 </template>
+
+<style scoped>
+.position-relative {
+  position: none;
+}
+</style>
 
 <script>
 import {mapState} from "vuex";

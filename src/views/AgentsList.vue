@@ -70,11 +70,6 @@
               </template>              
               </CDataTable>
               <CRow>
-              <CCol>
-                <CCardBody>
-                  <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
-                </CCardBody>
-              </CCol>
             </CRow>
 
     </CCol>
@@ -93,6 +88,7 @@
     </CModal>
   </CRow>  
 </template>
+
 
 <script>
 import {mapState} from "vuex";

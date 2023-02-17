@@ -117,6 +117,13 @@ button.kb {
     margin-bottom: 0px !important;
 }
 
+tbody {
+    /* THIS IS SUPER HACKY I NEED TO FIX THIS - This is the only way
+    that a dropdown menu on a table filter wont be hidden if there arent
+    many items in the table */
+    height: 161px !important; 
+}
+
 /*.card {
     border-radius: 0px !important;
 }*/

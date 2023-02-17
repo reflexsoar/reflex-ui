@@ -32,29 +32,22 @@
   border: 1px solid;
   border-radius: 0.25rem;
   background-color: #fff;
-  position: fixed;
+  position: absolute;
   margin-top: 2.5px;
   box-shadow: 0 0.5rem 1rem rgb(0 0 21 / 18%);
   border-color: #d8dbe0;
-  ul {
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-top: 0;
-    border-radius: 0 0 3px 3px;
-    left: 0px;
-    position: absolute;
-    top: -1rem;
-    width: 100%;
-    list-style: none;
-    max-height: 150px;
-    overflow: auto;
-  }
-  font: clear;
+  overflow-y: scroll;
+  max-height: 150px;
+  max-width: 300px;
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .multiselect ul {
   list-style-type: none; /* Remove bullets */
   padding: 5px;
+  margin-bottom: 5px;
 }
 
 .multiselect ul li input {
