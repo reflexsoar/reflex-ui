@@ -95,6 +95,7 @@ const state = {
   index_fields: [],
   agent_policies: [],
   agent_policy: {},
+  mitre_data_sources: [],
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
@@ -778,6 +779,9 @@ const mutations = {
   },
   clone_field_mapping_template(state, template) {
     state.source_field_mapping_template = template
+  },
+  set_mitre_data_sources(state, sources) {
+    state.mitre_data_sources = sources
   }
 }
 
@@ -1338,11 +1342,14 @@ const actions = {
       })
     })
   },
-  getInputs({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
+  getInputs({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null, mitre_data_sources=[]}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/input?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       if (organization) {
         url += `&organization=${organization}`
+      }
+      if (mitre_data_sources.length > 0) {
+        url += `&mitre_data_sources=${mitre_data_sources}`
       }
       Axios({url: url, method: 'GET'})
       .then(resp => {
@@ -2025,6 +2032,18 @@ const actions = {
       Axios({url: `${BASE_URL}/event/${uuid}`, method: 'GET'})
       .then(resp => {
         commit('save_event', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getEventIndex({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/${uuid}/indexed`, method: 'GET'})
+      .then(resp => {
+        //commit('save_event_index', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -3102,6 +3121,19 @@ const actions = {
       })
       .catch(err => {
         commit('show_alert', {message: err.response.data.message, 'type': 'danger'})
+        reject(err)
+      })
+    })
+  },
+  getMitreDataSources({commit}) {
+    let url = `${BASE_URL}/mitre/data_sources`
+    return new Promise((resolve, reject) => {
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('set_mitre_data_sources', resp.data.data_sources)
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })

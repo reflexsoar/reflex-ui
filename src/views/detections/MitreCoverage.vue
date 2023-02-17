@@ -9,8 +9,12 @@
             under all conditions.</CAlert>
         <CRow>
             <CCol>
-                <label>Hide Techniques with no Coverage:</label><br>
+                <label>Hide Techniques with no Detections:</label><br>
                 <CSwitch :checked.sync="hide_empty_techniques" label-on="Yes" label-off="No" color="success"></CSwitch>
+            </CCol>
+            <CCol>
+                <label>Hide Techniques with no Data Source:</label><br>
+                <CSwitch :checked.sync="hide_empty_data_sources" label-on="Yes" label-off="No" color="success"></CSwitch>
             </CCol>
             <CCol>
                 <CInput label="Search" v-model="search" placeholder="Search"></CInput>
@@ -36,19 +40,19 @@
                 <CCol v-for="tactic in mitre_tactics" :key="tactic.shortname">
                     <CRow v-for="technique in getTechniquesPerPhase(tactic)" :key="technique.id">
                         <CCol class="technique-col"
-                            v-if="(hide_empty_techniques && getDetectionCount(technique, tactic.shortname) > 0) || !hide_empty_techniques">
+                            v-if="((hide_empty_techniques && getDetectionCount(technique, tactic.shortname) > 0) || !hide_empty_techniques) && (hide_empty_data_sources && getInputCount(technique.data_sources) || ! hide_empty_data_sources)">
                             <CCard class="technique-card"
                                 v-if="getDetectionCount(technique, tactic.shortname) == 0"
                                 @click="showDrawer(technique.external_id)">
                                 <CCardBody class="technique-card-body">
-                                    <span class="text-muted"><b>{{ technique.name }}</b><br>{{ technique.external_id }}</span>
+                                    <span class="text-muted"><b>{{ technique.name }}</b>&nbsp;(I: {{ getInputCount(technique.data_sources) }})<br>{{ technique.external_id }}</span>
                                 </CCardBody>
                             </CCard>
                             <CCard class="technique-card has-detections" v-else>
                                 <CCardBody class="technique-card-body"
                                     @click="showDrawer(technique.external_id)">
-                                    <span><b>{{ technique.name }}</b>&nbsp;({{ getDetectionCount(technique,
-                                            tactic.shortname)}})<br>{{ technique.external_id }}
+                                    <span><b>{{ technique.name }}</b>&nbsp;(D: {{ getDetectionCount(technique,
+                                            tactic.shortname)}}) (I: {{ getInputCount(technique.data_sources) }})<br>{{ technique.external_id }}
                                         </span>
                                 </CCardBody>
                             </CCard>
@@ -101,7 +105,7 @@ export default {
                 return this.mitre_techniques;
             }
         },
-        ...mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations'])
+        ...mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations', 'inputs'])
     },
     components: {
         MitreTechniqueDrawer,
@@ -111,6 +115,7 @@ export default {
         return {
             loading: true,
             hide_empty_techniques: false,
+            hide_empty_data_sources: false,
             organization: '',
             search: null
         };
@@ -125,6 +130,7 @@ export default {
         this.$store.commit('set', ['mitreDrawerMinimize', true])
         this.loading = true
         this.getDetections()
+        this.getInputs()
         this.getMitreTactics()
         this.getMitreTechniques()
     },
@@ -152,11 +158,31 @@ export default {
             }
             return count
         },
+        getInputCount(data_sources) {
+            let count = 0
+            for (let i in this.inputs) {
+                let input = this.inputs[i]
+                for (let data_source in data_sources) {
+                    
+                    if (input.mitre_data_sources.includes(data_sources[data_source])) {
+                        count++
+                    }
+                }
+            }
+            return count
+        },
         getDetections() {
             if(this.current_user.default_org) {
                 this.$store.dispatch('getDetections', { page_size: 1000, organization: this.organization })
             } else {
                 this.$store.dispatch('getDetections', { page_size: 1000 })
+            }
+        },
+        getInputs() {
+            if(this.current_user.default_org) {
+                this.$store.dispatch('getInputs', { page_size: 1000, organization: this.organization })
+            } else {
+                this.$store.dispatch('getInputs', { page_size: 1000 })
             }
         },
         getMitreTechniques() {

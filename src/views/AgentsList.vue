@@ -7,16 +7,22 @@
                   :striped="striped"
                   :bordered="bordered"
                   :small="small"
-                  :items="agents"
+                  :items="filtered_agents"
                   :fields="fields"
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
-                  :sorter='{external: true, resetable: true}'
+                  :sorter='{external: false, resetable: true}'
                   :loading="loading"
                   :responsive="true"
                   style="border-top: 1px solid #cfcfcf;"
                   @update:sorter-value="sort($event)"
+                  column-filter
+                  pagination
+                  :column-filter-value.sync="column_filters"
               >
+              <template #organization-filter="{item}">
+                <RMultiCheck :items="organizations" @checked="filter_organizations"></RMultiCheck>
+              </template>
               <template #name="{item}">
                   <td>
                       <router-link :to="`${item.uuid}`">{{item.name}}</router-link>
@@ -90,18 +96,20 @@
 
 <script>
 import {mapState} from "vuex";
+import RMultiCheck from './components/MultiCheck.vue';
 import OrganizationBadge from './OrganizationBadge'
 export default {
     name: 'Agents',
     components: {
-      OrganizationBadge
+      OrganizationBadge,
+      RMultiCheck
     },
     props: {
     items: Array,
     fields: {
       type: Array,
       default () {
-        return ['name', 'roles', 'inputs', 'ip_address', 'version', 'last_heartbeat', 'healthy', 'health_issues']
+        return ['name', 'roles', 'inputs', 'ip_address', 'version', {key: 'last_heartbeat', filter: false}, 'healthy', 'health_issues']
       }
     },
     caption: {
@@ -116,7 +124,18 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user','agents','pagination']),
+    computed: {
+      ...mapState(['current_user','agents','pagination']),
+      filtered_agents() {
+        if (this.org_filter.length == 0) {
+          return this.agents
+        } else {
+          return this.agents.filter((agent) => {
+            return this.org_filter.includes(agent.organization)
+          })
+        }
+      }
+    },
     created: function () {
       this.current_url = window.location.origin;
       this.loadData()
@@ -139,6 +158,8 @@ export default {
         active_page: 1,
         sort_by: 'created_at',
         sort_direction: 'desc',
+        org_filter: [],
+        column_filters: {}
       }
     },
     watch: {
@@ -168,13 +189,18 @@ export default {
       loadData: function() {
         if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
-            this.fields.splice(1,0,'organization')
-            
+            this.fields.splice(1,0,{key:'organization', filterable: false, sorter: false})
           }
-          this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+          if(this.$store.getters.organizations.length == 0) {
+            this.$store.dispatch('getOrganizations', {}).then(() => {
+              this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+            })
+          } else {
+            this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+          }
         }
         this.loading = true
-        this.$store.dispatch('getAgents', {}).then(() => {
+        this.$store.dispatch('getAgents', {page_size: 10000}).then(() => {
             this.loading = false
         })
       },
@@ -208,6 +234,17 @@ export default {
           return org[0].name
         } else {
           return "Unknown"
+        }
+      },
+      filter_organizations(val) {
+        if(val === null) {
+          this.org_filter = []
+          return
+        }        
+        if (this.org_filter.includes(val)) {
+          this.org_filter = this.org_filter.filter(o => o !== val)
+        } else {
+          this.org_filter.push(val)
         }
       }
     },

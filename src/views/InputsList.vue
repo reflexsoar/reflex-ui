@@ -5,14 +5,19 @@
  <CCardBody>
               <CDataTable
                   :hover="hover"
-                  :items="inputs"
+                  :items="filtered_inputs"
                   :fields="fields"
                   :loading="loading"
                   :items-per-page="small ? 25 : 10"                 
-                  :sorter='{external: true, resetable: true}'
-                  table-filter
+                  :sorter='{external: false, resetable: true}'
+                  column-filter
+                  pagination
                   @update:sorter-value="sort($event)"
+                  :column-filter-value.sync="column_filters"
               >
+              <template #organization-filter="{item}">
+                <RMultiCheck :items="organizations" @checked="filter_organizations"></RMultiCheck>
+              </template>
               <template #name="{item}">
                   <td>
                       <b>{{item.name}}</b>
@@ -35,13 +40,7 @@
                 </td>
               </template>
               </CDataTable>
-              <CRow>
-                <CCol>
-                  <CCardBody>
-                    <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
-                  </CCardBody>
-                </CCol>
-              </CRow>
+              
             </CCardBody>
     </CCol>
   </CRow>
@@ -50,10 +49,12 @@
 <script>
 import {mapState} from "vuex";
 import OrganizationBadge from './OrganizationBadge'
+import RMultiCheck from './components/MultiCheck.vue'
 export default {
     name: 'Inputs',
     components: {
-      OrganizationBadge
+      OrganizationBadge,
+      RMultiCheck
     },
     props: {
     items: Array,
@@ -76,19 +77,28 @@ export default {
     dark: Boolean,
     alert: false
     },
-    computed: mapState(['current_user','inputs', 'pagination', 'source_input']),
+    computed: {
+      ...mapState(['current_user','inputs', 'pagination', 'source_input']),
+      filtered_inputs() {
+        if (this.org_filter.length == 0) {
+          return this.inputs
+        } else {
+          return this.inputs.filter((input) => {
+            return this.org_filter.includes(input.organization)
+          })
+        }
+      }
+    },
     created: function () {
         if(this.current_user.default_org) {
           if (!this.fields.includes('organization')) {
-            this.fields.splice(1,0,{key:'organization', sorter: false})
+            this.fields.splice(1,0,{key:'organization', filterable: false, sorter: false})
             
           }
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
         }
         this.loadData()
-        this.refresh = setInterval(function() {
-          this.loadData()
-        }.bind(this), 60000)
+        
     },
     data(){
       return {
@@ -98,7 +108,10 @@ export default {
         organizations: Array,
         dismissCountDown: 10,
         loading: true,
-        active_page: 1
+        active_page: 1,
+        page_size: 10000,
+        org_filter: [],
+        column_filters: {}
       }
     },
     watch: {
@@ -137,16 +150,27 @@ export default {
       },
       reloadInputs(page, sort_by, sort_direction) {
         this.loading = true
-          this.$store.dispatch('getInputs',{page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
+          this.$store.dispatch('getInputs',{page_size: this.page_size, page: page, sort_by: sort_by, sort_direction: sort_direction}).then(() => {
             this.loading = false
         })
       },
       loadData: function() {
         this.loading = true
         
-        this.$store.dispatch('getInputs', {}).then(resp => {
+        this.$store.dispatch('getInputs', {page_size: this.page_size}).then(resp => {
             this.loading = false
         })
+      },
+      filter_organizations(val) {
+        if(val === null) {
+          this.org_filter = []
+          return
+        }        
+        if (this.org_filter.includes(val)) {
+          this.org_filter = this.org_filter.filter(o => o !== val)
+        } else {
+          this.org_filter.push(val)
+        }
       }
     },
     beforeDestroy: function() {
