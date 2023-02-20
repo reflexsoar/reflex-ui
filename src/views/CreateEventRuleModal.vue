@@ -905,7 +905,13 @@ export default {
             if (this.return_events) {
               this.test_results = resp.data.hits;
             }
+
             this.test_result_color = "success";
+
+            if(resp.data.danger) {
+              this.test_result_color = "danger";
+            } 
+            
             this.test_failed = false;
           } else {
             this.test_result =
