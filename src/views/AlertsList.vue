@@ -1288,7 +1288,6 @@ export default {
               }
 
               // If the event isn't selected in that org yet, push it
-              console.log(this.selected_orgs[e.organization])
               if(!(e.uuid in this.selected_orgs[e.organization].events)) {
                   this.selected_orgs[e.organization].events.push(e.uuid)
               }
