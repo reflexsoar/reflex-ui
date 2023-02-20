@@ -3,6 +3,8 @@
 
     <CModal title="Merge Event Into Case" :centered="true" size="lg" :show.sync="modalStatus">
       <div>
+        <CAlert color="danger" v-if="error">{{error_message}}</CAlert>
+
           <p>Merging <b>{{events.length}}</b> event<span v-if="events.length > 1">s</span>.</p>
            <multiselect 
                 v-model="case_data"
@@ -50,7 +52,9 @@ export default {
             modalStatus: false,
             include_related_events: true,
             submitted: false,
-            complete: true
+            complete: true,
+            error: false,
+            error_message: ""
         }
     },
     watch: {
@@ -95,6 +99,8 @@ export default {
             let include_related_events = this.include_related_events
             this.complete = false
             this.submitted = true
+            this.error = false
+            this.error_message = ""
             this.$store.dispatch('addEventsToCase', {uuid, include_related_events, events}).then(resp => {
                 this.complete = true
                 this.submitted = false
@@ -104,7 +110,9 @@ export default {
             }).catch(err => {
                 this.submitted = false
                 this.complete = true
-                this.$store.commit('show_alert', {'message':'Error merging events into Case.', 'type':'danger'})
+                this.error = true
+                this.error_message = err.response.data.message
+                //this.$store.commit('show_alert', {'message':'Error merging events into Case. '+err.response.data.message, 'type':'danger'})
             })
         },
         reset () {

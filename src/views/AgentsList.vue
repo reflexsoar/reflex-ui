@@ -11,11 +11,10 @@
                   :fields="fields"
                   :items-per-page="small ? 25 : 10"
                   :dark="dark"
-                  :sorter='{external: false, resetable: true}'
+                  :sorter='{external: false, resetable: false}'
                   :loading="loading"
                   :responsive="true"
                   style="border-top: 1px solid #cfcfcf;"
-                  @update:sorter-value="sort($event)"
                   column-filter
                   pagination
                   :column-filter-value.sync="column_filters"

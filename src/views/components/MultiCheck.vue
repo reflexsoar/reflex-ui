@@ -8,7 +8,8 @@
     </div>
     <div class="multiselect" v-if="show">
       <ul>
-        <li v-for="item in items" :key="item.value">
+        <input type="text" class="form-control form-control-sm" v-model="search" placeholder=""/>
+        <li v-for="item in filtered_items" :key="item.value">
         <CInputCheckbox :key="item.value" :value="item.value" :label="item.label" @change="select" />
         </li>
       </ul>
@@ -80,7 +81,8 @@ export default {
     return {
       show: false,
       selected: [],
-      prompt: "Select..."
+      prompt: "Select...",
+      search: ""
     };
   },
   created() {
@@ -88,6 +90,16 @@ export default {
   },
   beforeDestroy() {
     window.removeEventListener("click", this.close);
+  },
+  computed: {
+    filtered_items() {
+      if(this.search === "") {
+        return this.items;
+      }
+      return this.items.filter((item) => {
+        return item.label.toLowerCase().includes(this.search.toLowerCase());
+      });
+    }
   },
   methods: {
     close(e) {
