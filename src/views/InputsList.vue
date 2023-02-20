@@ -17,7 +17,7 @@
                   :column-filter-value.sync="column_filters"
               >
               <template #organization-filter="{item}">
-                <RMultiCheck :items="organizations" @checked="filter_organizations"></RMultiCheck>
+                <RMultiCheck :items="organizations" @checked="set_picker_filters($event, 'organization')"></RMultiCheck>
               </template>
               <template #name="{item}">
                   <td>
@@ -85,13 +85,25 @@ export default {
     computed: {
       ...mapState(['current_user','inputs', 'pagination', 'source_input']),
       filtered_inputs() {
-        if (this.org_filter.length == 0) {
+        let inputs = []
+        if(Object.keys(this.picker_filters).length == 0) {
           return this.inputs
-        } else {
-          return this.inputs.filter((input) => {
-            return this.org_filter.includes(input.organization)
-          })
         }
+        for(let i in this.inputs) {
+          let input = this.inputs[i]
+          let match = true
+          for(let key in this.picker_filters) {
+            if(this.picker_filters[key].length > 0) {
+              if(!this.picker_filters[key].includes(input[key])) {
+                match = false
+              }
+            }
+          }
+          if(match) {
+            inputs.push(input)
+          }
+        }
+        return inputs
       }
     },
     created: function () {
@@ -116,7 +128,8 @@ export default {
         active_page: 1,
         page_size: 10000,
         org_filter: [],
-        column_filters: {}
+        column_filters: {},
+        picker_filters: {}
       }
     },
     watch: {
@@ -166,17 +179,16 @@ export default {
             this.loading = false
         })
       },
-      filter_organizations(val) {
-        if(val === null) {
-          this.org_filter = []
-          return
-        }        
-        if (this.org_filter.includes(val)) {
-          this.org_filter = this.org_filter.filter(o => o !== val)
-        } else {
-          this.org_filter.push(val)
+      set_picker_filters(val, key) {
+        if(!this.picker_filters.hasOwnProperty(key)) {
+          this.$set(this.picker_filters, key, [])
         }
-      }
+        if(val.length == 0) {
+          this.$set(this.picker_filters, key, [])
+        } else {
+          this.$set(this.picker_filters, key, val)
+        }
+      },
     },
     beforeDestroy: function() {
       clearInterval(this.refresh)

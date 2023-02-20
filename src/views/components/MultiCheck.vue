@@ -10,8 +10,10 @@
       <ul>
         <input type="text" class="form-control form-control-sm" v-model="search" placeholder=""/>
         <li v-for="item in filtered_items" :key="item.value">
-        <CInputCheckbox :key="item.value" :value="item.value" :label="item.label" @change="select" />
+        <CInputCheckbox :key="item.value" :value="item.value" :label="item.label" @change="select"  :checked="selected.includes(item.value)" />
         </li>
+        <li>
+        <CInputCheckbox key="2023.03.00" value="2023.03.00" label="2023.03.00" @change="select" /></li>
       </ul>
     </div>
   </div>
@@ -121,7 +123,7 @@ export default {
         } else {
             this.prompt = "Select...";
         }
-        this.$emit("checked", val.target.value);
+        this.$emit("checked", this.selected);
     },
     clear() {
         for(let item of this.items) {

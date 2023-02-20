@@ -1,6 +1,6 @@
 <template>
   <CRow>
-    <CCol col>
+    <CCol col>{{picker_filters}}
           <div style="padding: 10px;"><CButton color="primary" @click="generateToken()" >New Agent</CButton></div>
               <CDataTable
                   :hover="hover"
@@ -20,7 +20,10 @@
                   :column-filter-value.sync="column_filters"
               >
               <template #organization-filter="{item}">
-                <RMultiCheck :items="organizations" @checked="filter_organizations"></RMultiCheck>
+                <RMultiCheck :items="organizations" @checked="set_picker_filters($event, 'organization')"></RMultiCheck>
+              </template>
+              <template #version-filter="{item}">
+                <RMultiCheck :items="agent_versions" @checked="set_picker_filters($event, 'version')"></RMultiCheck>
               </template>
               <template #name="{item}">
                   <td>
@@ -122,13 +125,34 @@ export default {
     computed: {
       ...mapState(['current_user','agents','pagination']),
       filtered_agents() {
-        if (this.org_filter.length == 0) {
+        let agents = []
+        if(Object.keys(this.picker_filters).length == 0) {
           return this.agents
-        } else {
-          return this.agents.filter((agent) => {
-            return this.org_filter.includes(agent.organization)
-          })
         }
+        for(let i in this.agents) {
+          let agent = this.agents[i]
+          let match = true
+          for(let key in this.picker_filters) {
+            if(this.picker_filters[key].length > 0) {
+              if(!this.picker_filters[key].includes(agent[key])) {
+                match = false
+              }
+            }
+          }
+          if(match) {
+            agents.push(agent)
+          }
+        }
+        return agents
+      },
+      agent_versions() {
+        let versions = []
+        this.agents.forEach((agent) => {
+          if (agent.version && !versions.includes(agent.version)) {
+            versions.push({value: agent.version, label: agent.version})
+          }
+        })
+        return versions
       }
     },
     created: function () {
@@ -154,7 +178,8 @@ export default {
         sort_by: 'created_at',
         sort_direction: 'desc',
         org_filter: [],
-        column_filters: {}
+        column_filters: {},
+        picker_filters: {}
       }
     },
     watch: {
@@ -231,17 +256,16 @@ export default {
           return "Unknown"
         }
       },
-      filter_organizations(val) {
-        if(val === null) {
-          this.org_filter = []
-          return
-        }        
-        if (this.org_filter.includes(val)) {
-          this.org_filter = this.org_filter.filter(o => o !== val)
-        } else {
-          this.org_filter.push(val)
+      set_picker_filters(val, key) {
+        if(!this.picker_filters.hasOwnProperty(key)) {
+          this.$set(this.picker_filters, key, [])
         }
-      }
+        if(val.length == 0) {
+          this.$set(this.picker_filters, key, [])
+        } else {
+          this.$set(this.picker_filters, key, val)
+        }
+      },      
     },
     filters: {
       getStatusText(status) {
