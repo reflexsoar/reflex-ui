@@ -3,17 +3,34 @@
     <div class="dropdown" @click.prevent="showDropDown">
       <div class="overselect"></div>
       <select class="form-control form-control-sm">
-        <option value="">{{prompt}}</option>
+        <option value="">{{ prompt }}</option>
       </select>
     </div>
     <div class="multiselect" v-if="show">
       <ul>
-        <input type="text" class="form-control form-control-sm" v-model="search" placeholder=""/>
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          v-model="search"
+          placeholder=""
+        />
         <li v-for="item in filtered_items" :key="item.value">
-        <CInputCheckbox :key="item.value" :value="item.value" :label="item.label" @change="select"  :checked="selected.includes(item.value)" />
+          <CInputCheckbox
+            :key="item.value"
+            :value="item.value"
+            :label="item.label"
+            @change="select"
+            :checked="selected.includes(item.value)"
+          />
         </li>
         <li>
-        <CInputCheckbox key="2023.03.00" value="2023.03.00" label="2023.03.00" @change="select" /></li>
+          <CInputCheckbox
+            key="2023.03.00"
+            value="2023.03.00"
+            label="2023.03.00"
+            @change="select"
+          />
+        </li>
       </ul>
     </div>
   </div>
@@ -77,14 +94,14 @@ export default {
   name: "RMultiCheck",
   props: {
     label: String,
-    items: Array
+    items: Array,
   },
   data() {
     return {
       show: false,
       selected: [],
       prompt: "Select...",
-      search: ""
+      search: "",
     };
   },
   created() {
@@ -95,42 +112,44 @@ export default {
   },
   computed: {
     filtered_items() {
-      if(this.search === "") {
+      if (this.search === "") {
         return this.items;
       }
       return this.items.filter((item) => {
         return item.label.toLowerCase().includes(this.search.toLowerCase());
       });
-    }
+    },
   },
   methods: {
     close(e) {
-        if (!this.$el.contains(e.target)) {
-            this.show = false;
-        }
+      if (!this.$el.contains(e.target)) {
+        this.show = false;
+      }
     },
     showDropDown() {
-        this.show = !this.show;
+      this.show = !this.show;
     },
     select(val) {
-        if(this.selected.includes(val.target.value)) {
-            this.selected = this.selected.filter((item) => item !== val.target.value);
-        } else {
-            this.selected.push(val.target.value);
-        }
-        if(this.selected.length > 0) {
-            this.prompt = "Selected: " + this.selected.length + " of " + this.items.length + " items"
-        } else {
-            this.prompt = "Select...";
-        }
-        this.$emit("checked", this.selected);
+      if (this.selected.includes(val.target.value)) {
+        this.selected = this.selected.filter((item) => item !== val.target.value);
+      } else {
+        this.selected.push(val.target.value);
+      }
+      if (this.selected.length > 0) {
+        this.prompt =
+          "Selected: " + this.selected.length + " of " + this.items.length + " items";
+      } else {
+        this.prompt = "Select...";
+      }
+      console.log(this.selected);
+      this.$emit("checked", this.selected);
     },
     clear() {
-        for(let item of this.items) {
-            item.selected = false;
-        }
-        this.$emit("checked", null);
-    }
-  }
+      for (let item of this.items) {
+        item.selected = false;
+      }
+      this.$emit("checked", null);
+    },
+  },
 };
 </script>

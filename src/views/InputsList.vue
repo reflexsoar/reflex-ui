@@ -67,7 +67,7 @@ export default {
       type: Array,
       default () {
         return ['name', {
-          key:'description', sorter:false}, 'tags', 'actions']
+          key:'description', sorter:false}, 'tags', {key: "actions", filter: false}]
       }
     },
     caption: {
@@ -184,7 +184,7 @@ export default {
           this.$set(this.picker_filters, key, [])
         }
         if(val.length == 0) {
-          this.$set(this.picker_filters, key, [])
+          this.$delete(this.picker_filters, key);
         } else {
           this.$set(this.picker_filters, key, val)
         }
