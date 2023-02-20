@@ -2749,7 +2749,7 @@ const actions = {
   getCasesByTitle({commit}, {title, organization=null, fields='uuid,title,id,event_count,owner,severity'}) {
     return new Promise((resolve, reject) => {
 
-      let base_url = `${BASE_URL}/case?title=${title}`
+      let base_url = `${BASE_URL}/case?title__like=${title}`
 
       if (organization) {
         base_url += `&organization=${organization}`
