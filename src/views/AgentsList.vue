@@ -26,24 +26,28 @@
           <RMultiCheck
             :items="organizations"
             @checked="set_picker_filters($event, 'organization')"
+            size="sm"
           ></RMultiCheck>
         </template>
         <template #version-filter="{ item }">
           <RMultiCheck
             :items="agent_versions"
             @checked="set_picker_filters($event, 'version')"
+            size="sm"
           ></RMultiCheck>
         </template>
         <template #health_issues-filter="{ item }">
           <RMultiCheck
             :items="agent_versions"
             @checked="set_picker_filters($event, 'health_issues')"
+            size="sm"
           ></RMultiCheck>
         </template>
         <template #healthy-filter="{ item }">
           <RMultiCheck
             :items="health_statuses"
             @checked="set_picker_filters($event, 'healthy')"
+            size="sm"
           ></RMultiCheck>
         </template>
         <template #name="{ item }">

@@ -25,6 +25,7 @@
           <RMultiCheck
             :items="names"
             @checked="set_picker_filters($event, 'name')"
+            size="sm"
           ></RMultiCheck>
         </template>
         <template #name="{ item }">

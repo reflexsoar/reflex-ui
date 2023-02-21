@@ -96,6 +96,7 @@ const state = {
   agent_policies: [],
   agent_policy: {},
   mitre_data_sources: [],
+  service_accounts: [],
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
@@ -782,6 +783,18 @@ const mutations = {
   },
   set_mitre_data_sources(state, sources) {
     state.mitre_data_sources = sources
+  },
+  save_service_accounts(state, accounts) {
+    state.service_accounts = accounts
+  },
+  update_service_account(state, account) {
+    state.service_account = account
+    state.service_account = state.service_account.map(a => a.uuid == account.uuid ? account : a)
+  },
+  add_service_account(state, account) {
+    state.service_accounts.push(account)
+    state.service_account = account
+    state.status = 'success'
   }
 }
 
@@ -834,7 +847,7 @@ const getters = {
   observable_filters: state => { return state.observable_filters },
   organization: state => { return state.organization },
   organizations: state => {return state.organizations},
-  formatted_organizations: state => {return state.organizations.map((o) => { return {label: o.name, value: o.uuid}})},
+  formatted_organizations: state => { return state.organizations.map((o) => { return {label: o.name, value: o.uuid}})},
   network_data: state => { return state.network_data },
   case_stats: state => { return state.case_stats },
   event_stats: state => { return state.event_stats },
@@ -901,7 +914,8 @@ const getters = {
   user_has: state => function(permission) {
     return Object.keys(state.current_user.permissions).includes(permission)
   },
-  tags: state => state.tags
+  tags: state => state.tags,
+  service_accounts: state => { return state.service_accounts }
 }
 
 let BASE_URL = ""
@@ -3538,6 +3552,30 @@ const actions = {
       Axios({url: `${BASE_URL}/agent_policy/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('save_agent_policy', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getServiceAccounts({commit}, {}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/service_account`, method: 'GET'})
+      .then(resp => {
+        commit('save_service_accounts', resp.data.service_accounts)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createServiceAccount({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/service_account`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_service_account', resp.data)
         resolve(resp)
       })
       .catch(err => {

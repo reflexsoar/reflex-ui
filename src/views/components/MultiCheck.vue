@@ -1,8 +1,9 @@
 <template>
   <div>
+    <label v-if="label">{{ label }}</label>
     <div class="dropdown" @click.prevent="showDropDown">
       <div class="overselect"></div>
-      <select class="form-control form-control-sm">
+      <select :class="{ 'form-control-sm': size === 'sm', 'form-control': true }">
         <option value="">{{ prompt }}</option>
       </select>
     </div>
@@ -10,7 +11,7 @@
       <ul>
         <input
           type="text"
-          class="form-control form-control-sm"
+          :class="{ 'form-control-sm': size === 'sm', 'form-control': true }"
           v-model="search"
           placeholder=""
         />
@@ -23,16 +24,9 @@
             :checked="selected.includes(item.value)"
           />
         </li>
-        <li>
-          <CInputCheckbox
-            key="2023.03.00"
-            value="2023.03.00"
-            label="2023.03.00"
-            @change="select"
-          />
-        </li>
       </ul>
     </div>
+    <br v-if="label" />
   </div>
 </template>
 
@@ -93,15 +87,26 @@
 export default {
   name: "RMultiCheck",
   props: {
-    label: String,
+    label: {
+      type: String,
+      default: "",
+    },
     items: Array,
+    size: {
+      type: String,
+      default: "md",
+    },
+    value: {
+      type: Array,
+      default: () => [],
+    }
   },
   data() {
     return {
       show: false,
       selected: [],
       prompt: "Select...",
-      search: "",
+      search: ""
     };
   },
   created() {
@@ -109,6 +114,17 @@ export default {
   },
   beforeDestroy() {
     window.removeEventListener("click", this.close);
+  },
+  watch: {
+    value() {
+      this.selected = this.value
+      if (this.selected.length > 0) {
+        this.prompt =
+          "Selected: " + this.selected.length + " of " + this.items.length + " items";
+      } else {
+        this.prompt = "Select...";
+      }
+    }
   },
   computed: {
     filtered_items() {
@@ -141,14 +157,15 @@ export default {
       } else {
         this.prompt = "Select...";
       }
-      console.log(this.selected);
       this.$emit("checked", this.selected);
+      this.$emit("update:value", this.selected)
     },
     clear() {
       for (let item of this.items) {
         item.selected = false;
       }
       this.$emit("checked", null);
+      this.$emit("update:value", null)
     },
   },
 };

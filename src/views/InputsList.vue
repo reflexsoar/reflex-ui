@@ -17,7 +17,7 @@
                   :column-filter-value.sync="column_filters"
               >
               <template #organization-filter="{item}">
-                <RMultiCheck :items="organizations" @checked="set_picker_filters($event, 'organization')"></RMultiCheck>
+                <RMultiCheck :items="organizations" @checked="set_picker_filters($event, 'organization')" size="sm"></RMultiCheck>
               </template>
               <template #name="{item}">
                   <td>
