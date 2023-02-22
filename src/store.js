@@ -2891,7 +2891,7 @@ const actions = {
   },
   getCase({commit}, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET', headers: {'X-Fields':'id,uuid,organization,case_template_uuid,title,tlp,description,status,owner,severity,observable_count,event_count,tags,case_template,created_at,created_by,modified_at,updated_by,close_reason,total_tasks,open_tasks,escalated'}})
+      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET'})
       .then(resp => {
         commit('save_case', resp.data)
         resolve(resp)
