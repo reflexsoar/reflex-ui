@@ -210,7 +210,7 @@ export default {
     agent_versions() {
       let versions = [];
       this.agents.forEach((agent) => {
-        if (agent.version && !versions.includes(agent.version)) {
+        if (agent.version && !versions.find((v) => v.value == agent.version)) {
           versions.push({ value: agent.version, label: agent.version });
         }
       });
@@ -219,10 +219,10 @@ export default {
     health_statuses() {
       let healths = [];
       this.agents.forEach((agent) => {
-        if (agent.healthy && !healths.includes("healthy")) {
+        if (agent.healthy && !healths.find((h) => h.value == true)) {
           healths.push({ value: true, label: "Healthy" });
         }
-        if (!agent.healthy && !healths.includes("unhealthy")) {
+        if (!agent.healthy && !healths.find((h) => h.value == false)) {
           healths.push({ value: false, label: "Unhealthy" });
         }
       });
