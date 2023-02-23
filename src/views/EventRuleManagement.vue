@@ -15,7 +15,6 @@
           </button>
         </h2>
         <br />
-        {{ event_rule_users }} {{ organizations_pick_list }} {{ picker_filters }} {{organiations}}
         <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
           {{ alert.message }}
         </CAlert>
