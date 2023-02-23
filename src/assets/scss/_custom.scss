@@ -504,3 +504,6 @@ label {
     color: #6B7785 !important;
 }
 
+html:not([dir="rtl"]) nav >  .pagination {
+    padding-left: 25px !important;
+  }
