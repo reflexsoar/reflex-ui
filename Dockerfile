@@ -12,6 +12,7 @@ FROM nginx:latest
 
 RUN mkdir /opt/reflex
 RUN mkdir /opt/reflex/ssl
+COPY --from=base maintenance.html /opt/reflex/ui/maintenance.html
 COPY --from=base /dist /opt/reflex/ui
 COPY --from=base reflex.conf /etc/nginx/conf.d/default.conf
 RUN openssl dhparam -dsaparam -out /opt/reflex/ssl/ssl-dhparams.pem 4096
