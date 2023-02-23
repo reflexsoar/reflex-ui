@@ -164,7 +164,7 @@ export default {
                 let input = this.inputs[i]
                 for (let data_source in data_sources) {
                     
-                    if (input.mitre_data_sources.includes(data_sources[data_source])) {
+                    if (input.mitre_data_sources && input.mitre_data_sources.includes(data_sources[data_source])) {
                         count++
                     }
                 }
