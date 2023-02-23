@@ -377,6 +377,7 @@ export default {
         this.comments_loading = true
         this.$store.dispatch('getEventIndex', this.event_data.uuid).then(resp => {
           let data = resp.data
+          this.event_index = []
           for (let [key, value] of Object.entries(data)) {
             this.event_index.push({ Field: key, Value: value })
           }
