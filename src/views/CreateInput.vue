@@ -772,6 +772,9 @@ export default {
         uuid: "",
         color: "#ffffff",
       };
+      if(this.tags === null) {
+        this.tags = [];
+      }
       this.tags.push(newTag);
       this.tag_list.push(t);
       this.selected.push(t);
