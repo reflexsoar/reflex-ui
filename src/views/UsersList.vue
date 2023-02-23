@@ -104,7 +104,7 @@
     <CModal title="Delete User" color="danger" :centered="true" :show.sync="delete_modal">
       <CForm id="deleteForm" @submit.prevent="deleteUser(user.uuid)">
         Are you sure you want to delete <b>{{user.username}}</b>?   Type their username in the box below to confirm your intent.
-        <CForm id="delete-confirm">
+        <CForm id="delete-user-confirm">
           <CInput
             v-model="delete_confirm"
             label="Username"

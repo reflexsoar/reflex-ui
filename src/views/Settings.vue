@@ -47,13 +47,18 @@
                 </template>
                 <RolesList/>
               </CTab>
+              <CTab v-if="current_user.role.permissions.view_service_accounts">
+                <template slot="title">
+                  <CIcon name="cil-bolt"/> {{tabs[5]}}
+                </template>
+                <ServiceAccountList/>
+              </CTab>
               <CTab>
                 <template slot="title">
-                  <CIcon name="cil-graph"/> {{tabs[5]}}
+                  <CIcon name="cil-graph"/> {{tabs[6]}}
                 </template>
                 <AuditLogs :key="reloadLogs"/>
               </CTab>
-              
             </CTabs>
           </CCardBody>
         </CCard>
@@ -66,6 +71,7 @@
 import UsersList from './UsersList'
 import RolesList from './RolesList'
 import GroupList from './GroupList'
+import ServiceAccountList from './ServiceAccountList'
 import AuditLogs from './AuditLogs'
 import OrganizationList from './OrganizationList'
 import GlobalSettings from './GlobalSettings'
@@ -79,11 +85,12 @@ export default {
     GlobalSettings,
     GroupList,
     AuditLogs,
-    OrganizationList
+    OrganizationList,
+    ServiceAccountList
   },
   watch: {
     activeTab: function () {
-      if(this.activeTab == 4) {
+      if(this.activeTab == 5) {
         this.reloadLogs = Math.random()
       }
     }
@@ -98,6 +105,7 @@ export default {
         'Users',
         'Groups',
         'Roles',
+        'Service Accounts',
         'Audit Logs'
       ],
       activeTab: 0,

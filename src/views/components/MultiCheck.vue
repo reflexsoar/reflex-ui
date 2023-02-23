@@ -1,19 +1,32 @@
 <template>
   <div>
+    <label v-if="label">{{ label }}</label>
     <div class="dropdown" @click.prevent="showDropDown">
       <div class="overselect"></div>
-      <select class="form-control form-control-sm">
-        <option value="">{{prompt}}</option>
+      <select :class="{ 'form-control-sm': size === 'sm', 'form-control': true }">
+        <option value="">{{ prompt }}</option>
       </select>
     </div>
     <div class="multiselect" v-if="show">
       <ul>
-        <input type="text" class="form-control form-control-sm" v-model="search" placeholder=""/>
+        <input
+          type="text"
+          :class="{ 'form-control-sm': size === 'sm', 'form-control': true }"
+          v-model="search"
+          placeholder=""
+        />
         <li v-for="item in filtered_items" :key="item.value">
-        <CInputCheckbox :key="item.value" :value="item.value" :label="item.label" @change="select" />
+          <CInputCheckbox
+            :key="item.value"
+            :value="item.value"
+            :label="item.label"
+            @change="select"
+            :checked="selected.includes(item.value)"
+          />
         </li>
       </ul>
     </div>
+    <br v-if="label" />
   </div>
 </template>
 
@@ -74,8 +87,19 @@
 export default {
   name: "RMultiCheck",
   props: {
-    label: String,
-    items: Array
+    label: {
+      type: String,
+      default: "",
+    },
+    items: Array,
+    size: {
+      type: String,
+      default: "md",
+    },
+    value: {
+      type: Array,
+      default: () => [],
+    }
   },
   data() {
     return {
@@ -91,44 +115,58 @@ export default {
   beforeDestroy() {
     window.removeEventListener("click", this.close);
   },
+  watch: {
+    value() {
+      this.selected = this.value
+      if (this.selected.length > 0) {
+        this.prompt =
+          "Selected: " + this.selected.length + " of " + this.items.length + " items";
+      } else {
+        this.prompt = "Select...";
+      }
+    }
+  },
   computed: {
     filtered_items() {
-      if(this.search === "") {
+      if (this.search === "") {
         return this.items;
       }
       return this.items.filter((item) => {
         return item.label.toLowerCase().includes(this.search.toLowerCase());
       });
-    }
+    },
   },
   methods: {
     close(e) {
-        if (!this.$el.contains(e.target)) {
-            this.show = false;
-        }
+      if (!this.$el.contains(e.target)) {
+        this.show = false;
+      }
     },
     showDropDown() {
-        this.show = !this.show;
+      this.show = !this.show;
     },
     select(val) {
-        if(this.selected.includes(val.target.value)) {
-            this.selected = this.selected.filter((item) => item !== val.target.value);
-        } else {
-            this.selected.push(val.target.value);
-        }
-        if(this.selected.length > 0) {
-            this.prompt = "Selected: " + this.selected.length + " of " + this.items.length + " items"
-        } else {
-            this.prompt = "Select...";
-        }
-        this.$emit("checked", val.target.value);
+      if (this.selected.includes(val.target.value)) {
+        this.selected = this.selected.filter((item) => item !== val.target.value);
+      } else {
+        this.selected.push(val.target.value);
+      }
+      if (this.selected.length > 0) {
+        this.prompt =
+          "Selected: " + this.selected.length + " of " + this.items.length + " items";
+      } else {
+        this.prompt = "Select...";
+      }
+      this.$emit("checked", this.selected);
+      this.$emit("update:value", this.selected)
     },
     clear() {
-        for(let item of this.items) {
-            item.selected = false;
-        }
-        this.$emit("checked", null);
-    }
-  }
+      for (let item of this.items) {
+        item.selected = false;
+      }
+      this.$emit("checked", null);
+      this.$emit("update:value", null)
+    },
+  },
 };
 </script>
