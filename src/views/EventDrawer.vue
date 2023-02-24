@@ -146,7 +146,7 @@
               </CCol>
             </CRow>
           </CTab>
-          <CTab :title="`Matched Event Rules - ${this.event_data.event_rules.length}`"
+          <CTab :title="`Matched Event Rules (${this.event_data.event_rules.length})`"
             v-if="this.event_data.event_rules">
             <CRow style="padding: 10px 10px 0px 10px">
               <CCol>
@@ -245,7 +245,7 @@
               </div>
             </CCardBody>
           </CTab>
-          <CTab title="Comments">
+          <CTab :title="`Comments (${this.event_data.total_comments})`">
             <CCardBody class="tab-container">
               <CCard v-if="event_data.dismiss_comment"><CCardHeader>Dismissed By <b>{{event_data.dismissed_by.username}}</b> - {{ event_data.dismissed_at | moment('from','now')}}</CCardHeader>
                 <CCardBody><vue-markdown>{{event_data.dismiss_comment}}</vue-markdown></CCardBody>
