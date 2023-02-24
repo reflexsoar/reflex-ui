@@ -191,7 +191,7 @@
                       >Rule Expires</CBadge
                     >&nbsp;</span
                   >
-                  <span v-if="item.notification_channels"
+                  <span v-if="item.notification_channels && item.notification_channels.length > 0"
                     ><CBadge style="font-size: 90%; font-weight: 500" color="info"
                       >Notifies</CBadge
                     >&nbsp;</span

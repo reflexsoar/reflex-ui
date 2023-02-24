@@ -33,6 +33,7 @@
                         style="display: inline; margin-right: 2px"
                         v-for="obs in event.observables"
                         :key="obs.uuid"
+                        @click.prevent.stop="setPopoverData(obs)"
                     >
                         <CButton
                         color="secondary"
@@ -153,6 +154,7 @@
         </CRow>
       </CCardFooter>
     </CCard>
+    <ObservablePopover ref="popover" :show.sync="show_observable_popover" :data="popover_data"/>
   </div>
 </template>
 
@@ -187,11 +189,13 @@
 <script>
 import { mapState } from "vuex";
 import OrganizationBadge from "../OrganizationBadge.vue";
+import ObservablePopover from '../components/ObservablePopover'
 
 export default {
   name: "EventCard",
   components: {
     OrganizationBadge,
+    ObservablePopover
   },
   computed: {
     ...mapState(["current_user"]),
@@ -206,10 +210,16 @@ export default {
   data() {
     return {
       show_event_details: false,
-      observable_fields: ['value', 'data_type', 'ioc', 'spotted', 'safe', 'tags']
+      observable_fields: ['value', 'data_type', 'ioc', 'spotted', 'safe', 'tags'],
+      popover_data: {},
+      show_observable_popover: false
     };
   },
   methods: {
+    setPopoverData(data) {
+        this.popover_data = data
+        this.show_observable_popover = true
+      },
     getCardAccent(severity) {
       switch (severity) {
         case 1:
