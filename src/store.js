@@ -3585,6 +3585,7 @@ const actions = {
   },
   getObservableMetric({commit}, {value}) {
     return new Promise((resolve, reject) => {
+      value = encodeURI(encodeURIComponent(value))
       Axios({url: `${BASE_URL}/observable/${value}/hits`, method: 'GET'})
       .then(resp => {
         resolve(resp)
