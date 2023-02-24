@@ -507,3 +507,19 @@ label {
 html:not([dir="rtl"]) nav >  .pagination {
     padding-left: 25px !important;
   }
+
+.observable-popover {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    position: fixed;
+    padding: 0px;
+    z-index: 9999;
+//max-width: 40% !important;
+    bottom: 0;
+    right: 0;
+    min-height:400px;
+    width: 50%;
+    left: unset !important;
+    box-shadow: 0 1px 1px 0 rgba(60,75,100,.14), 0 2px 1px -1px rgba(60,75,100,.12), 0 1px 3px 0 rgba(60,75,100,.2)
+}

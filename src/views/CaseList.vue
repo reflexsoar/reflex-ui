@@ -303,7 +303,7 @@ export default {
 {value: 'severity', label: 'severity'},
 {value: 'owner', label: 'owner'},
 {value: 'created_at', label: 'created_at'},
-{value: 'modified_at', label: 'modified_at'}],
+{value: 'updated_at', label: 'updated_at'}],
         quick_filters: false,
         caseFilters: [{'filter_type':'status','data_type':'status','value':'New'}],
         filtered_cases: [],

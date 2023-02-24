@@ -38,7 +38,7 @@
             <CAlert :show.sync="error" color="danger" closeButton>
               {{ error_message }}
             </CAlert>
-            <CAlert :show="disable_reason" color="danger" closeButton>
+            <CAlert :show="show_disable_reason" color="danger" closeButton>
               <b>Rule Disabled by System: </b>{{ disable_reason }}
             </CAlert>
           </CCol>
@@ -726,6 +726,7 @@ export default {
       test_results: "",
       test_complete: false,
       disable_reason: null,
+      show_disable_reason: false,
       active: true,
     };
   },
@@ -814,9 +815,8 @@ export default {
           this.expire = this.event_rule.expire;
           this.dismiss_event = this.event_rule.dismiss;
           this.run_retroactively = this.event_rule.run_retroactively;
-          this.channels = this.event_rule.notification_channels ? this.event_rule.notification_channels : [];
           this.channels = this.formatted_notification_channels.filter((channel) =>
-            this.event_rule.notification_channels.includes(channel.uuid)
+            this.event_rule.notification_channels && this.event_rule.notification_channels.includes(channel.uuid)
           );
           if (this.event_rule.target_case_uuid) {
             this.$store
@@ -828,6 +828,7 @@ export default {
             this.target_case = {};
           }
           if (this.event_rule.disable_reason) {
+            this.show_disable_reason = true;
             this.disable_reason = this.event_rule.disable_reason;
           }
           this.active = this.event_rule.active;
