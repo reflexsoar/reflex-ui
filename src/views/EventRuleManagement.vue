@@ -40,7 +40,6 @@
               </CCol>
             </CRow>
           </CCardHeader>
-          <CCardBody>
             <CDataTable
               :items="computed_event_rules"
               :fields="fields"
@@ -54,18 +53,12 @@
             >
               <template #organization-filter="{ item }">
                 <RMultiCheck
-                  :items="organizations_pick_list"
+                  :items="formatted_organizations"
                   @checked="set_picker_filters($event, 'organization')"
                   size="sm"
                 ></RMultiCheck>
               </template>
-              <template #created_by-filter="{ item }">
-                <RMultiCheck
-                  :items="event_rule_users"
-                  @checked="set_picker_filters($event, 'created_by')"
-                  size="sm"
-                ></RMultiCheck>
-              </template>
+              
               <template #name="{ item }">
                 <td>
                   <b>{{ item.name }}</b
@@ -77,7 +70,6 @@
                   <OrganizationBadge :uuid="item.organization" />
                 </td>
               </template>
-
               <template #last_matched_date="{ item }">
                 <td v-if="item.last_matched_date">
                   {{ item.last_matched_date | moment("from", "now") }}
@@ -207,7 +199,6 @@
                 </td>
               </template>
             </CDataTable>
-          </CCardBody>
           <CRow>
             <!--<CCol lg="12" sm="12">
           <CCardBody v-if="pagination.pages > 0">
@@ -418,6 +409,7 @@ export default {
       sort_by: "created_at",
       sort_direction: "asc",
       picker_filters: {},
+      formatted_organizations: []
     };
   },
   watch: {
@@ -679,7 +671,7 @@ export default {
     event_rule_users() {
       let users = [];
       this.computed_event_rules.forEach((rule) => {
-        if (!users.includes({label: rule.created_by.username, value: rule.created_by.username})) {
+        if (!users.find((u) => u.value == rule.created_by.username)) {
           users.push({label: rule.created_by.username, value: rule.created_by.username});
         }
       });
@@ -688,6 +680,13 @@ export default {
     ...mapState(["alert", "current_user", "loading", "event_rules", "event_rule_stats"]),
   },
   created() {
+    if (this.organizations.length == 0 && this.current_user.default_org) {
+      this.$store.dispatch("getOrganizations", {}).then(() => {
+        this.formatted_organizations = this.$store.getters.formatted_organizations;
+      });
+    } else {
+      this.formatted_organizations = this.$store.getters.formatted_organizations;
+    }
     this.loadRules();
     if (this.current_user.default_org) {
       if (!this.fields.includes("organization")) {
