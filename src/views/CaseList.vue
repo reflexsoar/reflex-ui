@@ -123,7 +123,7 @@
           <CButton color="primary" @click="newCaseModal = !newCaseModal">New Case</CButton>
         </CCol>
         <CCol col="2" class="text-right">
-
+          <RMultiCheck :items="available_fields" :value.sync="fields" default_prompt="Select Columns"></RMultiCheck>
         </CCol>
       </CRow>
              <CRow><CCol> <CDataTable
@@ -134,12 +134,12 @@
                   :fixed="fixed"
                   :items="filtered_cases"
                   :fields="fields"
-                  :items-per-page="25"
+                  :items-per-page="10"
                   :dark="dark"
                   :loading = loading
-                  :sorter='{external: true, resetable: true}'
+                  :sorter='{external: false, resetable: true}'
                   :responsive="false"
-                  @update:sorter-value="sort($event)"
+                  pagination
                   style="border-top: 1px solid #cfcfcf;"
               >
               <template #title="{item}">
@@ -158,6 +158,11 @@
               <template #created_at="{item}">
                 <td>
                   {{item.created_at | moment('from','now')}}
+                </td>
+              </template>
+              <template #updated_at="{item}">
+                <td>
+                  {{item.updated_at | moment('from','now')}}
                 </td>
               </template>
               <template #status="{item}">
@@ -224,13 +229,7 @@
         </template>
     </CModal>
   </CRow>
-  <CRow>
-    <CCol lg="12" sm="12">
-      <CCardBody v-if="pagination.pages > 0">
-        <CPagination :activePage.sync="current_page" :pages="pagination.pages"/>
-      </CCardBody>
-    </CCol>
-  </CRow>
+  
   </div>
 </template>
 
@@ -247,11 +246,13 @@
 import {mapState} from "vuex";
 import OrganizationBadge from './OrganizationBadge'
 import CreateCaseModal from './CreateCaseModal'
+import RMultiCheck from './components/MultiCheck'
 export default {
     name: 'Cases',
     components: {
       CreateCaseModal,
-      OrganizationBadge
+      OrganizationBadge,
+      RMultiCheck
     },
     props: {
     items: Array,
@@ -275,6 +276,7 @@ export default {
           this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
           if (!this.fields.includes('organization')) {
             this.fields.splice(1,0,'organization')
+            this.available_fields.splice(1,0,{value: 'organization', label: 'organization'})
           }
         this.fields.push()
       }
@@ -294,7 +296,14 @@ export default {
         deleteCaseModal: false,
         target_case: "",
         fields: ['title','created_at','status','events','tlp','severity','owner','actions'],
-        available_fields: ['title','status','events','tlp','severity','owner','actions','created_at','modified_at'],
+        available_fields: [
+{value: 'status', label: 'status'},
+{value: 'events', label: 'events'},
+{value: 'tlp', label: 'tlp'},
+{value: 'severity', label: 'severity'},
+{value: 'owner', label: 'owner'},
+{value: 'created_at', label: 'created_at'},
+{value: 'modified_at', label: 'modified_at'}],
         quick_filters: false,
         caseFilters: [{'filter_type':'status','data_type':'status','value':'New'}],
         filtered_cases: [],
@@ -571,7 +580,7 @@ export default {
           my_cases: this.my_cases,
           my_tasks: my_tasks,
           page: this.current_page,
-          page_size: this.card_per_page,
+          page_size: 10000,
           sort_by: this.sort_by,
           sort_direction: this.sort_direction,
           organization: organization_filters,
@@ -663,6 +672,9 @@ export default {
         }
           
       }
+    },
+    set_columns() {
+
     },
     beforeDestroy: function() {
       clearInterval(this.refresh)
