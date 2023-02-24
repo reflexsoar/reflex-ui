@@ -45,6 +45,19 @@
             </li>
           </td>
         </template>
+        <template #created_at="{item}">
+          <td>
+            
+              {{item.created_at | moment('from','now')}}
+            </td>
+          </template>
+        <template #expires_at="{item}">
+          <td>
+            <span v-if="item.expires_at">
+              {{ item.expires_at | moment('from','now') }}
+            </span>
+            </td>
+          </template>
         <template #actions="{ item }">
           <td class="text-right">
             <CButton color="info" size="sm" @click="editServiceAccount(item.uuid)">
@@ -191,6 +204,8 @@ export default {
         "description",
         "organization",
         "tags",
+        "created_at",
+        "expires_at",
         { key: "actions", filter: false },
       ],
       formatted_organizations: [],
