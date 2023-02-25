@@ -38,7 +38,7 @@
             <CAlert :show.sync="error" color="danger" closeButton>
               {{ error_message }}
             </CAlert>
-            <CAlert :show="disable_reason" color="danger" closeButton>
+            <CAlert :show="show_disable_reason" color="danger" closeButton>
               <b>Rule Disabled by System: </b>{{ disable_reason }}
             </CAlert>
           </CCol>
@@ -621,7 +621,13 @@ export default {
   },
   computed: {
     formatted_notification_channels() {
+      if(this.notification_channels.length == 0) {
+        this.$store.dispatch("getNotificationChannels", {}).then(() => {
+          return this.notification_channels.map((o) => { return { name:o.name, uuid:o.uuid}})
+        });
+      }
       return this.notification_channels.map((o) => { return { name:o.name, uuid:o.uuid}})
+      
     }, ...mapState(["settings", "current_user", "notification_channels"])
   },
   data() {
@@ -720,6 +726,7 @@ export default {
       test_results: "",
       test_complete: false,
       disable_reason: null,
+      show_disable_reason: false,
       active: true,
     };
   },
@@ -796,6 +803,7 @@ export default {
           this.description = this.event_rule.description;
           this.merge_into_case = this.event_rule.merge_into_case;
           this.tag_event = this.event_rule.add_tags;
+          this.tags_to_add = this.event_rule.tags_to_add
           this.priority = this.event_rule.priority;
           this.global_rule = this.event_rule.global_rule;
           this.update_severity = this.event_rule.update_severity;
@@ -807,7 +815,9 @@ export default {
           this.expire = this.event_rule.expire;
           this.dismiss_event = this.event_rule.dismiss;
           this.run_retroactively = this.event_rule.run_retroactively;
-          this.channels = this.event_rule.notification_channels ? this.event_rule.notification_channels : [];
+          this.channels = this.formatted_notification_channels.filter((channel) =>
+            this.event_rule.notification_channels && this.event_rule.notification_channels.includes(channel.uuid)
+          );
           if (this.event_rule.target_case_uuid) {
             this.$store
               .dispatch("getCase", this.event_rule.target_case_uuid)
@@ -818,6 +828,7 @@ export default {
             this.target_case = {};
           }
           if (this.event_rule.disable_reason) {
+            this.show_disable_reason = true;
             this.disable_reason = this.event_rule.disable_reason;
           }
           this.active = this.event_rule.active;
@@ -954,7 +965,7 @@ export default {
         dismiss: this.dismiss_event,
         event_signature: this.event_signature,
         run_retroactively: this.run_retroactively,
-        notification_channels: this.channels ? this.channels : [],
+        notification_channels: Array(),
         query: this.query,
         active: this.active
       };
@@ -965,6 +976,10 @@ export default {
 
       for (let tag in this.selected_tags) {
         rule.tags_to_add.push(this.selected_tags[tag].name);
+      }
+
+      for (let channel in this.channels) {
+        rule.notification_channels.push(this.channels[channel].uuid);
       }
 
       this.$store
@@ -1002,7 +1017,7 @@ export default {
         dismiss: this.dismiss_event,
         event_signature: this.event_signature,
         run_retroactively: this.run_retroactively,
-        notification_channels: this.channels ? this.channels : [], 
+        notification_channels: Array(),
         query: this.query,
         active: this.active,
       };
@@ -1013,6 +1028,10 @@ export default {
 
       for (let tag in this.selected_tags) {
         rule.tags_to_add.push(this.selected_tags[tag].name);
+      }
+
+      for (let channel in this.channels) {
+        rule.notification_channels.push(this.channels[channel].uuid);
       }
 
       this.$store

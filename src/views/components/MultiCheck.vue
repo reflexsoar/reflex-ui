@@ -99,7 +99,11 @@ export default {
     value: {
       type: Array,
       default: () => [],
-    }
+    },
+    default_prompt: {
+      type: String,
+      default: "Select...",
+    },
   },
   data() {
     return {
@@ -111,6 +115,12 @@ export default {
   },
   created() {
     window.addEventListener("click", this.close);
+    if(this.value.length > 0) {
+      this.selected = this.value
+      this.prompt = "Selected: " + this.selected_count + " of " + this.items.length;
+    } else {
+      this.prompt = this.default_prompt;
+    }
   },
   beforeDestroy() {
     window.removeEventListener("click", this.close);
@@ -120,9 +130,9 @@ export default {
       this.selected = this.value
       if (this.selected.length > 0) {
         this.prompt =
-          "Selected: " + this.selected.length + " of " + this.items.length + " items";
+          "Selected: " + this.selected_count + " of " + this.items.length;
       } else {
-        this.prompt = "Select...";
+        this.prompt = this.default_prompt;
       }
     }
   },
@@ -135,6 +145,9 @@ export default {
         return item.label.toLowerCase().includes(this.search.toLowerCase());
       });
     },
+    selected_count() {
+      return this.selected.filter(o => this.items.find(i => i.value === o)).length;
+    }
   },
   methods: {
     close(e) {
@@ -153,7 +166,7 @@ export default {
       }
       if (this.selected.length > 0) {
         this.prompt =
-          "Selected: " + this.selected.length + " of " + this.items.length + " items";
+          "Selected: " + this.selected_count + " of " + this.items.length + " items";
       } else {
         this.prompt = "Select...";
       }

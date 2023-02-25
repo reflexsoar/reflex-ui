@@ -1,0 +1,230 @@
+<template>
+  <div>
+    <CCard v-show="show" class="observable-popover" :style="positionInlineStyle">
+      <CCardHeader
+        ><CRow>
+          <CCol
+            ><CBadge color="info">{{ data.data_type }}</CBadge
+            >&nbsp;{{ data.value }}</CCol
+          >
+          <CCol col="1"
+            ><CDropdown
+              class="text-right"
+              size="sm"
+              color="secondary"
+              toggler-text="Actions"
+            >
+              <CDropdownItem>Virus Total Lookup</CDropdownItem>
+              <CDropdownItem>Google Search</CDropdownItem>
+              <CDropdownItem>Copy Value</CDropdownItem>
+              <CDropdownItem>Add To List</CDropdownItem>
+              <CDropdownItem disabled>Run Action</CDropdownItem>
+            </CDropdown> </CCol
+          ><CCol col="2">
+            <span class="text-right">
+              <button type="button" aria-label="Close" class="close" @click="close()">
+                <CIcon name="cil-x"/>
+              </button>
+              <button type="button" class="kb" @click="maximize()"><CIcon :name="full_screen ? 'cil-window-minimize' : 'cil-window-maximize'"/></button>
+            </span>
+          </CCol></CRow
+        ></CCardHeader
+      >
+      <CRow v-if="loading">
+        <CCol>
+          <span v-if="loading"><CSpinner color="primary" /></span>
+        </CCol>
+      </CRow>
+      <CRow v-if="!loading">
+        <CCol>
+          <CTabs>
+            <CTab title="Overview">
+            <CCardBody>
+              <CRow>
+                <CCol>
+                  <CIcon name="cilTags" />&nbsp;
+                  <li
+                    style="display: inline; margin-right: 2px"
+                    v-for="tag in data.tags"
+                    :key="tag"
+                  >
+                    <CButton color="primary" size="sm" disabled>{{ tag }}</CButton>
+                  </li>
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol>
+                  <CCallout color="info">
+                    <small class="text-muted">Total Events</small><br />
+                    <strong class="h1">{{
+                      metrics.system_wide_events.toLocaleString()
+                    }}</strong>
+                  </CCallout>
+                </CCol>
+                <CCol>
+                  <CCallout :color="classByValue(metrics.total_org_events)">
+                    <small class="text-muted">Total Organization Events</small><br />
+                    <strong class="h1">{{
+                      metrics.total_org_events.toLocaleString()
+                    }}</strong>
+                  </CCallout>
+                </CCol>
+                <CCol>
+                  <CCallout color="info">
+                    <small class="text-muted">Total Organization Cases</small><br />
+                    <strong class="h1">{{
+                      metrics.total_org_cases.toLocaleString()
+                    }}</strong>
+                  </CCallout>
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol>
+                  <CCallout color="info">
+                    <small class="text-muted">Intel List Matches</small><br />
+                    <strong class="h1">{{
+                      metrics.threat_list_hits.length.toLocaleString()
+                    }}</strong>
+                  </CCallout>
+                </CCol>
+              </CRow>
+              </CCardBody>
+            </CTab>
+            <CTab title="Intel Lists" v-if="metrics.threat_list_hits.length > 0">
+            <CDataTable
+              :items="metrics.threat_list_hits"
+              :fields="[
+                { key: 'name', label: 'Name' },
+                { key: 'external_feed', label: 'External Feed' },
+                { key: 'list_type', label: 'List Type' },
+              ]"
+              :itemsPerPage="5"
+              :bordered="true"
+              :small="true"
+              :pagination="true"
+              :loading="loading"
+              :loadingText="loading ? 'Loading...' : ''"
+              :noItemsViewSlot="loading ? '' : 'No items found'"
+              :noItemsView="loading ? '' : { noResults: 'No items found', noItems: 'No items found' }"
+            ><template #external_feed="{item}">
+              <td>
+                <span v-if="item.external_feed">
+                  <p v-c-tooltip="{ content: `${item.url}`, placement: 'left' }">Yes</p>
+                </span>
+                <span v-else>
+                  <p>No</p>
+                </span>
+              </td>
+            </template>
+            </CDataTable>            
+            </CTab>
+            <CTab title="Related Events" v-if="metrics.top_events.length > 0">
+            <CDataTable
+              :items="metrics.top_events"
+              :fields="[
+                { key: 'title', label: 'Title' },
+                { key: 'hits', label: 'Hits' },
+              ]"
+              :itemsPerPage="5"
+              :bordered="true"
+              :small="true"
+              :pagination="true"
+              :loading="loading"
+              :loadingText="loading ? 'Loading...' : ''"
+              :noItemsViewSlot="loading ? '' : 'No items found'"
+              :noItemsView="loading ? '' : { noResults: 'No items found', noItems: 'No items found' }"/>
+              </CTab>
+          </CTabs>
+          
+        </CCol>
+      </CRow>
+    </CCard>
+  </div>
+</template>
+
+<style scoped>
+.tab-content {
+    padding: 5px !important;
+}
+</style>
+
+<script>
+export default {
+  name: "ObservablePopover",
+  props: {
+    data: {
+      type: Object,
+      default: () => {},
+    },
+    show: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      txt: "",
+      posX: 0,
+      posY: 0,
+      popovers: [],
+      loading: false,
+      metrics: {
+        system_wide_events: 0,
+        total_org_events: 0,
+        total_org_cases: 0,
+        threat_list_hits: [],
+        top_events: [],
+      },
+      full_screen: false,
+    };
+  },
+  watch: {
+    show() {
+      if (this.show) {
+        this.full_screen = false;
+        this.loadObservableMetrics();
+      }
+    },
+    data() {
+      if (this.show) {
+        
+        this.loadObservableMetrics();
+      }
+    },
+  },
+  methods: {
+    do_x() {
+      console.log("do_x");
+    },
+    loadObservableMetrics() {
+      this.loading = true;
+      this.$store
+        .dispatch("getObservableMetric", { value: this.data.value })
+        .then((resp) => {
+          this.metrics = resp.data;
+          this.loading = false;
+        });
+    },
+    close() {
+      this.$emit("update:show", false);
+    },
+    classByValue(v) {
+      if (v > 1000) {
+        return "danger";
+      } else if (v > 5000) {
+        return "warning";
+      } else {
+        return "info";
+      }
+    },
+    maximize() {
+      this.full_screen = !this.full_screen;      
+    },
+  },
+  computed: {
+    positionInlineStyle() {
+      return `${this.full_screen ? "width: 100%; height: 100%; z-index: 9999; top: 0px; " : "top: unset !important;width: 40%; height: 40%;"}`;
+    },
+  },
+};
+</script>
