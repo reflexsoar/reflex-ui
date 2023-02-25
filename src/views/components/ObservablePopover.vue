@@ -4,8 +4,8 @@
       <CCardHeader
         ><CRow>
           <CCol
-            ><CBadge color="info">{{ data.data_type }}</CBadge
-            >&nbsp;{{ data.value }}</CCol
+            ><CBadge color="info">{{ observable.data_type }}</CBadge
+            >&nbsp;<span v-c-tooltip="`${observable.value}`">{{ observable.value | truncate }}</span></CCol
           >
           <CCol col="1"
             ><CDropdown
@@ -43,7 +43,7 @@
                   <CIcon name="cilTags" />&nbsp;
                   <li
                     style="display: inline; margin-right: 2px"
-                    v-for="tag in data.tags"
+                    v-for="tag in observable.tags"
                     :key="tag"
                   >
                     <CButton color="primary" size="sm" disabled>{{ tag }}</CButton>
@@ -152,7 +152,7 @@ import { mapState } from "vuex";
 export default {
   name: "ObservablePopover",
   props: {
-    data: {
+    observable: {
       type: Object,
       default: () => {},
     },
@@ -204,7 +204,7 @@ export default {
     loadObservableMetrics() {
       this.loading = true;
       let request_params = {
-        value: this.data.value
+        value: this.observable.value
       }
       if(this.current_user.default_org) {
         request_params['organization'] = this.organization
@@ -234,9 +234,22 @@ export default {
   },
   computed: {
     positionInlineStyle() {
-      return `${this.full_screen ? "width: 100%; height: 100%; z-index: 9999; top: 0px; " : "top: unset !important;width: 40%; height: 40%;"}`;
+      return `${this.full_screen ? "width: 100%; height: 100%; z-index: 9999; top: 0px; " : "top: unset !important;width: 40%; height: auto; max-height: 450px;"}`;
     },
     ...mapState(['current_user']),
   },
+  filters: {
+        truncate: function (value) {
+            let maxLength = 50
+            if (!value) return ''
+            value = value.toString()
+            if (value.length > maxLength) {
+                return value.substring(0,maxLength) + "..."
+            } else {
+                return value.substring(0,maxLength)
+            }
+            
+        }
+    }
 };
 </script>
