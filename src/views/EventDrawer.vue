@@ -175,7 +175,7 @@
               </div>
               <div v-if="detection.guide">
                 <h4>Investigation Guide</h4>
-                {{ detection.guide }}<br><br>
+                <vue-markdown>{{ detection.guide }}</vue-markdown><br><br>
 
                 <span v-if="detection.false_positives && detection.false_positives.length > 0">
                   <h4>False Positives</h4>
