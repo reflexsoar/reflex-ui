@@ -283,7 +283,7 @@
                 </template>
                 <template #list="{item}">
                   <td>
-                    <span v-if="item.list.name !== null"><CButton color="primary" size="sm" disabled>{{item.list.name}}</CButton></span>
+                    <span v-if="item.list && item.list.name !== null"><CButton color="primary" size="sm" disabled>{{item.list.name}}</CButton></span><span v-else>None</span>
                   </td>
                 </template>
                 </CDataTable>

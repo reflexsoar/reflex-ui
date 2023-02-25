@@ -22,7 +22,7 @@
       <CCol>
         <div v-if="isSearchable">
           <label for="exclusion_values">Field Name</label><br>
-          <multiselect id="exclusion_field" v-model="exclusion.field" placeholder="Select a field" :options="index_fields" :internal-search="false" :searchable="isSearchable" @search-change="getIndexField" :close-on_select="true"/>
+          <multiselect id="exclusion_field" v-model="exclusion.field" tag-placeholder="Select field" :taggable="true" @tag="setField" placeholder="Select a field" :options="index_fields" :internal-search="false" :searchable="isSearchable" @search-change="getIndexField" :close-on_select="true"/>
         </div>
         <div v-else>
           <CInput v-model="exclusion.field" label="Field Name" description="The field to compare values to"/>
@@ -35,7 +35,7 @@
     <CRow>
       <CCol>
         <label for="exclusion_values">Values</label><br>
-        <multiselect id="exclusion_values" :multiple="allow_multiple" @tag="addExclusionValue" v-model="exclusion.values" placeholder="Enter the values to exclude" :taggable="true" :close-on-select="!allow_multiple" :options="exclusion_values"/><br>
+        <multiselect id="exclusion_values" :multiple="allow_multiple" @tag="addExclusionValue"  v-model="exclusion.values" placeholder="Enter the values to exclude" :taggable="true" :close-on-select="!allow_multiple" :options="exclusion_values"/><br>
       </CCol>
     </CRow>
     <CRow>
@@ -138,6 +138,9 @@ export default {
     },
   },
   methods: {
+    setField(value) {
+      this.exclusion.field = value
+    },
     addExclusionValue(value) {
         this.exclusion_values.push(value)
         this.exclusion.values.push(value);
