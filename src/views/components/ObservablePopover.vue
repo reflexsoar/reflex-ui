@@ -190,7 +190,7 @@ export default {
         this.loadObservableMetrics();
       }
     },
-    data() {
+    observable() {
       if (this.show) {
         
         this.loadObservableMetrics();
