@@ -621,13 +621,7 @@ export default {
   },
   computed: {
     formatted_notification_channels() {
-      if(this.notification_channels.length == 0) {
-        this.$store.dispatch("getNotificationChannels", {}).then(() => {
-          return this.notification_channels.map((o) => { return { name:o.name, uuid:o.uuid}})
-        });
-      }
       return this.notification_channels.map((o) => { return { name:o.name, uuid:o.uuid}})
-      
     }, ...mapState(["settings", "current_user", "notification_channels"])
   },
   data() {
@@ -735,6 +729,9 @@ export default {
       this.error = false;
       this.error_message = "";
       this.modalStatus = this.show;
+      if(this.show) {
+        this.$store.dispatch("getNotificationChannels", {})
+      }
     },
     modalStatus: function () {
       if (this.modalStatus) {
