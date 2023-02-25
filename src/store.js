@@ -3583,10 +3583,14 @@ const actions = {
       })
     })
   },
-  getObservableMetric({commit}, {value}) {
+  getObservableMetric({commit}, {value, organization}) {
     return new Promise((resolve, reject) => {
       value = encodeURI(encodeURIComponent(value))
-      Axios({url: `${BASE_URL}/observable/${value}/hits`, method: 'GET'})
+      let url = `${BASE_URL}/observable/${value}/hits`
+      if(organization) {
+        url += `?organization=${organization}`
+      }
+      Axios({url: url, method: 'GET'})
       .then(resp => {
         resolve(resp)
       })

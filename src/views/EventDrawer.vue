@@ -88,7 +88,7 @@
                 <template #tags="{ item }">
                   <td>
                     <CIcon name='cilTags' />&nbsp;<li style="display: inline; margin-right: 2px;"
-                      v-for="tag in item.tags" :key="tag">
+                      v-for="tag,i in item.tags" :key="i">
                       <CButton color="primary" size="sm" disabled>{{ tag }}</CButton>
                     </li>
                   </td>
