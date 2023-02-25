@@ -30,10 +30,8 @@
           </CCol></CRow
         ></CCardHeader
       >
-      <CRow v-if="loading">
-        <CCol>
-          <span v-if="loading"><CSpinner color="primary" /></span>
-        </CCol>
+      <CRow v-if="loading" class="absolute-middle" style="height: 100%">
+          <center><span><img v-bind:src="logo" class="logo-spinner"></span></center>
       </CRow>
       <CRow v-if="!loading">
         <CCol>
@@ -61,7 +59,7 @@
                     }}</strong>
                   </CCallout>
                 </CCol>
-                <CCol>
+                <CCol v-if="current_user.default_org">
                   <CCallout :color="classByValue(metrics.total_org_events)">
                     <small class="text-muted">Total Organization Events</small><br />
                     <strong class="h1">{{
@@ -149,12 +147,18 @@
 </style>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "ObservablePopover",
   props: {
     data: {
       type: Object,
       default: () => {},
+    },
+    organization: {
+      type: String,
+      default: "",
     },
     show: {
       type: Boolean,
@@ -163,6 +167,7 @@ export default {
   },
   data() {
     return {
+      logo: require("@/assets/img/symbol.png"),
       txt: "",
       posX: 0,
       posY: 0,
@@ -198,8 +203,14 @@ export default {
     },
     loadObservableMetrics() {
       this.loading = true;
+      let request_params = {
+        value: this.data.value
+      }
+      if(this.current_user.default_org) {
+        request_params['organization'] = this.organization
+      }
       this.$store
-        .dispatch("getObservableMetric", { value: this.data.value })
+        .dispatch("getObservableMetric", request_params)
         .then((resp) => {
           this.metrics = resp.data;
           this.loading = false;
@@ -225,6 +236,7 @@ export default {
     positionInlineStyle() {
       return `${this.full_screen ? "width: 100%; height: 100%; z-index: 9999; top: 0px; " : "top: unset !important;width: 40%; height: 40%;"}`;
     },
+    ...mapState(['current_user']),
   },
 };
 </script>

@@ -195,7 +195,7 @@
                     <input type="checkbox" aria-label="Select Card" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})" style="cursor: pointer;">{{event.title}}</a></h4>
                   {{event.description | truncate_description}}<br>
-                  <CIcon name="cilCenterFocus" />&nbsp;<li  style="display: inline; margin-right: 2px;" v-for="obs,i in event.observables.slice(0,max_observables)" :key="i"><CButton @click.prevent.stop="setPopoverData(obs)" :id="`popover-${obs.value}`" data-popover="test" color="secondary" class="tag" size="sm" style="margin-top:5px; margin-bottom:5px;" ><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="event.observables.length > max_observables" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(event.observables.slice(max_observables))}"><small>&nbsp;+{{ event.observables.length - max_observables}}</small></span><br>
+                  <CIcon name="cilCenterFocus" />&nbsp;<li  style="display: inline; margin-right: 2px;" v-for="obs,i in event.observables.slice(0,max_observables)" :key="i"><CButton @click.prevent.stop="setPopoverData(obs, event.organization)" :id="`popover-${obs.value}`" data-popover="test" color="secondary" class="tag" size="sm" style="margin-top:5px; margin-bottom:5px;" ><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CButton></li><span v-if="event.observables.length > max_observables" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(event.observables.slice(max_observables))}"><small>&nbsp;+{{ event.observables.length - max_observables}}</small></span><br>
                   <!--<CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid)" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>-->
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -314,7 +314,7 @@
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>
     <ListAdderModal :show.sync="listAdderModal" :observable="selected_observable"></ListAdderModal>
-    <ObservablePopover ref="popover" :show.sync="show_observable_popover" :data="popover_data"/>
+    <ObservablePopover ref="popover" :show.sync="show_observable_popover" :data="popover_data" :organization="popover_organization"/>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
@@ -577,12 +577,14 @@ export default {
         event_comment_modal: false,
         event_comment_target: {},
         popover_data: {},
+        popover_organization: "",
         show_observable_popover: false
       }
     },
     methods: {
-      setPopoverData(data) {
+      setPopoverData(data, organization) {
         this.popover_data = data
+        this.popover_organization = organization
         this.show_observable_popover = true
       },
       showEventCommentModal(uuid) {
