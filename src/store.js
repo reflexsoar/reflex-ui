@@ -1270,7 +1270,7 @@ const actions = {
       })
     })
   },
-  getDetections({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", techniques=[], tactics=[], save=true, organization=null}) {
+  getDetections({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", techniques=[], tactics=[], save=true, organization=null}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 

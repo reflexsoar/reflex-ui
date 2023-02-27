@@ -31,9 +31,17 @@
                 </CCol>
               </CRow>
               <CCardBody>
-                <CDataTable :items="detections" :fields="detection_list_fields" items-per-page-select
-                  :items-per-page="25" table-filter :sorter='{ external: true, resetable: true }'
-                  :sorterValue='{ column: "name", asc: true }' :loading="loading">
+                <CDataTable :items="filtered_items" :fields="detection_list_fields" items-per-page-select
+                  :items-per-page="10" column-filter :sorter='{ external: false, resetable: true }'
+                  :sorterValue='{ column: "name", asc: true }' pagination :loading="loading">
+                  
+                  <template #organization-filter="{ item }">
+                    <RMultiCheck
+                      :items="organizations_pick_list"
+                      @checked="set_picker_filters($event, 'organization')"
+                      size="sm"
+                    ></RMultiCheck>
+                  </template>
                   <template #name="{ item }">
                     <td>
                       <b>{{ item.name }}</b><br>
@@ -56,7 +64,7 @@
                   </template>
                   <template #last_hit="{ item }">
                     <td>
-                      {{ item.last_hit ? item.last_hit : 'Never' | moment('from', 'now') }}
+                      {{ item.last_hit ? (item.last_hit | moment('from', 'now')) : 'Never'  }}
                     </td>
                   </template>
                   <template #total_hits="{ item }">
@@ -132,6 +140,8 @@ import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import OrganizationBadge from './OrganizationBadge'
 import DetectionRuleModal from './DetectionRuleModal'
 import ImportSigmaRuleWizard from './detections/ImportSigmaRuleWizard.vue';
+import RMultiCheck from './components/MultiCheck'
+
 //const DetectionRules = () => import('@/views/DetectionRuleList')
 export default {
   name: 'DetectionManagement',
@@ -139,11 +149,13 @@ export default {
     //'DetectionRules': DetectionRules
     OrganizationBadge,
     DetectionRuleModal,
-    ImportSigmaRuleWizard
+    ImportSigmaRuleWizard,
+    RMultiCheck
 },
   data() {
     return {
 
+      picker_filters: {},
       detection_list_fields: ['name', 'organization', 'last_run', 'last_hit', 'total_hits', { key: 'performance', label: 'Query Time / Total Time' }, 'actions'],
       modal_mode: "Create",
       show_detection_rule_modal: false,
@@ -354,11 +366,75 @@ export default {
       this.tag_list.push(tag)
       this.tags.push(tag)
     },
+    set_picker_filters(val, key) {
+      if (!this.picker_filters.hasOwnProperty(key)) {
+        this.$set(this.picker_filters, key, []);
+      }
+      if (val.length == 0) {
+        this.$delete(this.picker_filters, key);
+      } else {
+        this.$set(this.picker_filters, key, val);
+      }
+    }
   },
-  computed: mapState(['alert', 'detections', 'loading']),
+  computed: {
+    filtered_items() {
+      let items = this.detections;
+      let action = "getDetections";
+      if (items.length == 0) {
+        this.$store.dispatch(action, {});
+        if (this.tags !== undefined) {
+          this.tags = items.map((item) => {
+            if (item.tags !== undefined && item.tags.length > 0) {
+              return item.tags;
+            }
+          });
+        }
+      }
+      let _items = [];
+      if (Object.keys(this.picker_filters).length == 0) {
+        return items;
+      }
+      for (let i in items) {
+        let item = items[i];
+        let match = true;
+        for (let key in this.picker_filters) {
+          if (this.picker_filters[key].length > 0) {
+            if (typeof item[key] == "boolean") {
+              if (!this.picker_filters[key].includes(item[key].toString())) {
+                match = false;
+              }
+            } else if (typeof item[key] == "object") {
+              if (item[key]) {
+                if (!item[key].some((r) => this.picker_filters[key].includes(r))) {
+                  match = false;
+                }
+              } else {
+                match = false;
+              }
+            } else {
+              if (!this.picker_filters[key].includes(item[key])) {
+                match = false;
+              }
+            }
+          }
+        }
+        if (match) {
+          _items.push(item);
+        }
+      }
+      return _items;
+    },
+    organizations_pick_list() {
+      return this.organizations.map((o) => {
+        return { label: o.name, value: o.uuid };
+      });
+    },
+    ...mapState(['alert', 'detections', 'loading','organizations'])
+  },
   created() {
     this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages
-    this.$store.dispatch('getDetections', {})
+    this.$store.dispatch('getDetections', {page_size: 10000})
   }
 }
 </script>
