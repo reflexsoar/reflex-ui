@@ -368,12 +368,8 @@
                   this detection determine the legitimacy of the event. Being as
                   descriptive as possible will help alert consumers.
                 </p>
-                <CTextarea
-                  v-model="rule.guide"
-                  :rows="5"
-                  label="Guide Details"
-                  description="HINT: Use markdown to create a beautiful description."
-                />
+                <markdown-editor height="auto" theme="primary" size="sm" :value="rule.guide" @change="rule.guide = $event"></markdown-editor>
+                
                 <h5>False Positives</h5>
                 <p>False positives are quick indicators that an analyst can use to rule out false positive activity on the detection</p>
                 <CButton @click="addFP" size="sm" color="success">New False Positive</CButton><br><br> 

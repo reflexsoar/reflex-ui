@@ -42,7 +42,7 @@ export default {
   },
   computed: mapState(["alert", "toasts", "running_tasks"]),
   created: function() {
-    this.refresh = setInterval(function() {
+    /*this.refresh = setInterval(function() {
 
       // Look for non-broadcast messages
       if(this.running_tasks !== undefined) {
@@ -99,7 +99,7 @@ export default {
         }
       })
 
-    }.bind(this), 10000)
+    }.bind(this), 10000)*/
   },
   beforeDestroy: function() {
       clearInterval(this.refresh)

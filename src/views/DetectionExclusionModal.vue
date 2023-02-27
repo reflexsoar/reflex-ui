@@ -168,6 +168,7 @@ export default {
       } else {
         this.rule.exceptions = [this.exclusion]
       }
+      this.$emit('exclusion_saved', true)
       this.modalStatus = false
     },
     getIndexField(search) {
