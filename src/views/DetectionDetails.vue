@@ -15,9 +15,8 @@
             <h1>{{ detection.name }}</h1>
             <p>
               <b>Last Run:</b>
-              {{ detection.last_run | moment("MMMM Do YYYY, h:mm:ss a") }} ({{
-                detection.last_run | moment("from", "now")
-              }})
+              <RMoment :date="detection.last_run" format="MMMM Do YYYY, h:mm:ss a" />
+              (<RMoment :date="detection.last_run" />)
             </p>
           </CCol>
           <CCol col="1" class="text-right"> BUTTONS HERE </CCol>
@@ -37,11 +36,11 @@
                       {{
                         detection.created_by ? detection.created_by.username : "N/A"
                       }}
-                      on {{ detection.created_at | moment("MMMM Do YYYY, h:mm:ss a") }}
+                      on <RMoment :date="detection.created_at" format="MMMM Do YYYY, h:mm:ss a" />
                     </p>
                     <p v-if="detection.updated_by">
                       <b>Updated By: </b> {{ detection.updated_by.username }},
-                      {{ detection.updated_at | moment("from", "now") }}
+                      <RMoment :date="detection.updated_at" />
                     </p>
                     <p>
                       <b>False Positives</b><br />
@@ -201,7 +200,7 @@
               </CCol>
             </CRow>
           </CCol> </CRow
-        >{{ detection.exceptions }}
+        >
         <CRow>
           <CCol>
             <CCard>
@@ -245,17 +244,17 @@
                         </template>
                         <template #created_at="{ item }">
                           <td>
-                            {{ item.created_at | moment("MMMM Do YYYY, h:mm:ss a") }}
+                            <RMoment :date="item.created_at"/>                            
                           </td>
                         </template>
                         <template #updated_at="{ item }">
                           <td>
-                            {{ item.updated_at | moment("MMMM Do YYYY, h:mm:ss a") }}
+                            <RMoment :date="item.updated_at"/>
                           </td>
                         </template>
                         <template #original_date="{ item }">
                           <td>
-                            {{ item.original_date | moment("MMMM Do YYYY, h:mm:ss a") }}
+                            <RMoment :date="item.original_date"/>
                           </td>
                         </template>
                         <template #tags="{ item }">
@@ -386,11 +385,13 @@ import { mapState } from "vuex";
 import moment from "moment";
 
 import DetectionExclusionModal from "./DetectionExclusionModal";
+import RMoment from './components/RMoment'
 
 export default {
   name: "DetectionDetails",
   components: {
     DetectionExclusionModal,
+    RMoment
   },
   computed: mapState(["detection", "detection_hits"]),
   watch: {
@@ -438,9 +439,6 @@ export default {
         this.exclusion_modal_mode = "Edit";
         this.show_exclusion_modal = true;
       }
-    },
-    saveDetection() {
-      this.$store.dispatch();
     },
     saveExceptions() {
       let update_data = {

@@ -163,7 +163,7 @@ export default {
       this.modalStatus = false
     },
     editExclusion() {
-      if(this.rule.exceptions > 0) {
+      if(this.rule.exceptions.length > 0) {
         this.rule.exceptions = [...this.rule.exceptions.filter(e => e.uuid !== this.exclusion.uuid), this.exclusion]
       } else {
         this.rule.exceptions = [this.exclusion]
