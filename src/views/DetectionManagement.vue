@@ -64,7 +64,12 @@
                   </template>
                   <template #last_hit="{ item }">
                     <td>
-                      {{ item.last_hit ? (item.last_hit | moment('from', 'now')) : 'Never'  }}
+                      <span v-if="item.last_hit">
+                        {{ item.last_hit | moment('from', 'now') }}
+                      </span>
+                      <span v-else>
+                        Never
+                      </span>
                     </td>
                   </template>
                   <template #total_hits="{ item }">

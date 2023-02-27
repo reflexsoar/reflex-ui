@@ -314,7 +314,7 @@
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
     <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>
     <ListAdderModal :show.sync="listAdderModal" :observable="selected_observable"></ListAdderModal>
-    <ObservablePopover ref="popover" :show.sync="show_observable_popover" :observable="popover_data" :organization="popover_organization"/>
+    <ObservablePopover ref="popover" :show.sync="show_observable_popover" :observable="popover_data" :organization="popover_organization" @add-observable-to-filter="toggleObservableFilter"/>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>

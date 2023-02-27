@@ -14,9 +14,10 @@
               color="secondary"
               toggler-text="Actions"
             >
-              <CDropdownItem>Virus Total Lookup</CDropdownItem>
-              <CDropdownItem>Google Search</CDropdownItem>
+              <CDropdownItem @click="vt_lookup()">Virus Total Lookup</CDropdownItem>
+              <CDropdownItem @click="google_search()">Google Search</CDropdownItem>
               <CDropdownItem>Copy Value</CDropdownItem>
+              <CDropdownItem @click="addToFilter()">Filter for Value</CDropdownItem>
               <CDropdownItem>Add To List</CDropdownItem>
               <CDropdownItem disabled>Run Action</CDropdownItem>
             </CDropdown> </CCol
@@ -198,8 +199,28 @@ export default {
     },
   },
   methods: {
+    vt_lookup() {
+      if (["md5hash","sha1hash","sha256hash","imphash","domain","ip"].includes(this.observable.data_type)) {
+          if (this.observable.data_type == "ip") {
+            window.open(`https://www.virustotal.com/gui/ip-address/${this.observable.value}`, '_blank').focus()
+          } else if (["sha1hash","sha256hash","imphash","md5hash"].includes(this.observable.data_type)) {
+            window.open(`https://www.virustotal.com/gui/file/${this.observable.value}`, '_blank').focus()
+          } else if (event.item.data_type == "domain") {
+            window.open(`https://www.virustotal.com/gui/domain/${this.observable.value}`, '_blank').focus()
+          }
+        } else {
+          alert("Unsupported data type")
+        }
+    
+    },
+    google_search() {
+      window.open(`https://www.google.com/search?q=${this.observable.value}`, '_blank').focus()
+    },
     do_x() {
       console.log("do_x");
+    },
+    addToFilter() {
+      this.$emit('add-observable-to-filter', {filter_type: 'observable', data_type: this.observable.data_type, value: this.observable.value})
     },
     loadObservableMetrics() {
       this.loading = true;
