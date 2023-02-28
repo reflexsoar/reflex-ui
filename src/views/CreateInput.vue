@@ -107,8 +107,7 @@
                             <CSelect
                               label="Credential"
                               :options="credential_list"
-                              v-model="credential"
-                              @change="selectCredential($event)"
+                              :value.sync="credential"
                               placeholder="Select a credential if required by the input"
                               description="This credential will be used to connect to the target system"
                             >
@@ -718,6 +717,15 @@ export default {
         this.credential = "";
         this.config = this.source_input.config;
         this.plugin = this.source_input.plugin;
+        if(!this.config.hasOwnProperty('static_tags')) {
+          this.$set(this.config, 'static_tags', []);
+        }
+        if(!this.config.hasOwnProperty('tag_fields')) {
+          this.$set(this.config, 'tag_fields', []);
+        }
+        if(!this.config.hasOwnProperty('signature_fields')) {
+          this.$set(this.config, 'signature_fields', []);
+        }
         if (this.source_input.tags) {
           this.selected = this.source_input.tags.map((tag) => {
             return { name: tag, uuid: "", color: "#ffffff" };

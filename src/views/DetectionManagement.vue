@@ -161,7 +161,7 @@ export default {
     return {
 
       picker_filters: {},
-      detection_list_fields: ['name', 'organization', 'last_run', 'last_hit', 'total_hits', { key: 'performance', label: 'Query Time / Total Time' }, 'actions'],
+      detection_list_fields: ['name', 'organization', 'last_run', 'last_hit', 'total_hits', { key: 'performance', label: 'Query Time / Total Time' }, {key: 'actions', filter: false}],
       modal_mode: "Create",
       show_detection_rule_modal: false,
       show_import_sigma_rule_modal: false,
