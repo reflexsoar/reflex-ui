@@ -1,5 +1,5 @@
 <template>
-  <CRow>{{config}}
+  <CRow>
     <CCol col>
       <h1>
         Create Input<button
