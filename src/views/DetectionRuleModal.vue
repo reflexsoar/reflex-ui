@@ -289,6 +289,83 @@
                 </CDataTable>
                 <CButton @click="createExclusion" color="success">New Exclusion</CButton>
               </CTab>
+              <CTab title="Observable Mapping" v-bind:disabled="rule.source['uuid'] === null">
+                <CRow>
+                <CCol>
+                  <h5>Observable Mapping</h5>
+                  <p>Adding observable field mappings directly on the Detection allows for pulling in Observables that are otherwise not normally available due to the source inputs configuration.</p>
+                  <p>Observable mapping can be added to the Detection by selecting a Mapping Template, adding individual fields or both.</p>
+                  <h5>Mapping Templates</h5>
+                  COMING SOON<br><br>
+
+                  <CRow>
+                  <CCol>
+                  <h5>Observable Fields</h5></CCol><CCol class='text-right'><CButton @click="addObservableField()" color="success">Add Field</CButton></CCol></CRow>
+                  </CCol>
+                  </CRow>
+                  <CRow  style="max-height: 450px; overflow: auto;">
+                  <CCol>
+                
+                <CDataTable
+                :items="rule.observable_fields"
+                :fields="['field','data_type','alias', 'tags', 'ioc','safe','spotted','tlp', {key: 'admin', label: ''}]"
+                size="sm"
+                small>
+                <template #field="{item}">
+                  <td>
+                    <CInput size="sm" v-model="item.field" placeholder="Field Name"/>
+                  </td>
+                  </template>
+                  <template #data_type="{item}">
+                  <td>
+                    <CSelect size="sm" v-model="item.data_type" :options="data_types" />
+                  </td>
+                  </template>
+                  <template #alias="{item}">
+                  <td>
+                    <CInput size="sm"v-model="item.alias" placeholder="Alias"/>
+                  </td>
+                  </template>
+                  <template #tags="{item}">
+                    <td>
+                      <CInput size="sm" v-model="item.tags" placeholder="Tags"/>
+                    </td>
+                  </template>
+                  <template #ioc="{item}">
+                    <td>
+                      <CSwitch :checked.sync="item.ioc" color="danger"
+                                  label-on="Yes"
+                                  label-off="No"/>
+                    </td>
+                    </template>
+                  <template #safe="{item}">
+                    <td>
+                      <CSwitch :checked.sync="item.safe" color="success"
+                                  label-on="Yes"
+                                  label-off="No"/>
+                    </td>
+                    </template>
+                    <template #spotted="{item}">
+                    <td>
+                      <CSwitch :checked.sync="item.spotted" color="success"
+                                  label-on="Yes"
+                                  label-off="No"/>
+                    </td>
+                    </template>
+                    <template #tlp="{item}">
+                      <td>
+                        <CSelect :options="[1,2,3,4]" v-model="item.tlp" size="sm"/>
+                      </td>
+                    </template>
+                  <template #admin="{item}">
+                    <td>
+                      <CButton aria-label="Delete Field" @click="deleteObservableField(observable_fields.indexOf(item))" size="sm" color="danger"><CIcon name='cilTrash'/></CButton>
+                    </td>
+                  </template>
+                </CDataTable></CCol>
+                </CRow>
+                
+              </CTab>
               <CTab title="Meta Information" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>MITRE ATT&CK</h5>
                 <p>Selecting MITRE ATT&CK Tactics and Techniques allows for mapping the MITRE ATT&CK Matrix to easily determine detection coverage.</p>
@@ -562,7 +639,31 @@ export default {
       saved_step: 0,
       sigma_rule: '',
       sigma_backend: '',
-      sigma_pipeline: ''
+      sigma_pipeline: '',
+      observable_fields: [],
+      data_types: [
+        'url',
+        'user',
+        'sid',
+        'sha256hash',
+        'sha1hash',
+        'process',
+        'port',
+        'pid',
+        'md5hash',
+        'mac',
+        'ip',
+        'imphash',
+        'host',
+        'generic',
+        'fqdn',
+        'filepath',
+        'email_subject',
+        'email',
+        'domain',
+        'detection_id',
+        'command'
+      ]
     };
   },
   watch: {
@@ -686,6 +787,35 @@ export default {
     },
     deleteExclusion(uuid) {
       this.rule.exceptions = this.rule.exceptions.filter(exclusions => exclusions.uuid !== uuid)
+    },
+    addObservableField() {
+      if(this.rule.observable_fields && this.rule.observable_fields.length > 0) {
+        this.rule.observable_fields.splice(0, 0, {
+          field: '',
+          data_type: '',
+          alias: '',
+          tags: [],
+          ioc: false,
+          safe: false,
+          spotted: false,
+          tlp: 1
+        })
+      } else {
+        console.log("YARP")
+        this.rule.observable_fields.splice(0, 0, {
+          field: '',
+          data_type: '',
+          alias: '',
+          tags: [],
+          ioc: false,
+          safe: false,
+          spotted: false,
+          tlp: 1
+        })
+      }
+    },
+    deleteObservableField(id) {
+      this.rule.observable_fields.splice(id,1)
     },
     testDetectionRule() {},
     createDetectionRule() {
@@ -821,6 +951,7 @@ export default {
       this.sigma_rule = ''
       this.sigma_backend = ''
       this.sigma_pipeline = ''
+      this.observable_fields = []
       this.show_sigma = false
     },
     dismiss() {
