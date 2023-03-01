@@ -292,6 +292,7 @@ export default {
       pagination: {},
       tags: [],
       picker_filters: {},
+      formatted_organizations: []
     };
   },
   watch: {

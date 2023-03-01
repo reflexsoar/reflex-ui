@@ -3598,6 +3598,21 @@ const actions = {
         reject(err)
       })
     })
+  },
+  getAssetByHostname({commit}, {hostname, organization=null}) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/asset/host/${hostname}`
+      if(organization) {
+        url += `?organization=${organization}`
+      }
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 }
 

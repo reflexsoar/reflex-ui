@@ -268,6 +268,10 @@ export default {
             view_notifications: false,
             create_persistent_pairing_token: false,
             user_api: false,
+            create_asset: false,
+            view_assets: false,
+            update_asset: false,
+            delete_asset: false
           },
         };
       },
@@ -383,6 +387,12 @@ export default {
           "update_case_status",
           "delete_case_status",
         ],
+        "Asset Management": [
+          "create_asset",
+          "view_assets",
+          "update_asset",
+          "delete_asset"
+        ],
         /*"Closure Reasons": [
           'create_close_reason',
           'update_close_reason',
@@ -430,6 +440,7 @@ export default {
         "Intel Lists": false,
         "Data Types": false,
         Settings: false,
+        'Asset Management': false,
         API: false,
       },
     };
