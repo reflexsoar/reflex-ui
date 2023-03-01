@@ -125,7 +125,9 @@ import {
   cilBolt,
   cilWindowMaximize,
   cilWindowMinimize,
-  cilX
+  cilX,
+  cilArrowCircleLeft,
+  cilArrowCircleRight
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -227,7 +229,9 @@ export const iconsSet = Object.assign(
     cilBolt,
     cilWindowMaximize,
     cilWindowMinimize,
-    cilX
+    cilX,
+    cilArrowCircleLeft,
+    cilArrowCircleRight
   },
   {
     cifUs,

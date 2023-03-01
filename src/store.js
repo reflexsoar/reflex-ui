@@ -3599,12 +3599,18 @@ const actions = {
       })
     })
   },
-  getAssetByHostname({commit}, {hostname, organization=null}) {
+  getAssetDetails({commit}, {hostname=null, organization=null, host__ip=null}) {
     return new Promise((resolve, reject) => {
-      let url = `${BASE_URL}/asset/host/${hostname}`
-      if(organization) {
-        url += `?organization=${organization}`
+      let url = `${BASE_URL}/asset?organization=${organization}`
+      if(hostname) {
+        url += `&host__name=${hostname}`
       }
+
+      if(host__ip) {
+        url += `&host__ip=${host__ip}`
+      }
+      
+      console.log(url)
       Axios({url: url, method: 'GET'})
       .then(resp => {
         resolve(resp)

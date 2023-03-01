@@ -131,26 +131,42 @@
             </CTab>
             <CTab title="Asset Details" v-if="show_asset_tab">
               <CCardBody :style="tabComputedStyles">
-                <CRow v-if="asset_details.asset_type == 'host'">
+                <p>
+                  <span
+                    v-if="current_asset != 0"
+                    v-on:click="previousAsset()"
+                    style="cursor: pointer"
+                    ><CIcon name="cilArrowCircleLeft"
+                  /></span>
+                  Showing asset {{ assetNumber }} of {{ assets.length }}
+                  <span
+                    v-if="current_asset < assets.length - 1"
+                    v-on:click="nextAsset()"
+                    style="cursor: pointer"
+                    ><CIcon name="cilArrowCircleRight"
+                  /></span>
+                </p>
+                <CRow v-if="visibleAsset.asset_type == 'host'">
                   <CCol>
                     <CRow>
                       <CCol>
-                        <h3>{{ asset_details.host.name }}&nbsp;</h3>
-                        <span class="text-muted">{{ asset_details.host.fqdn }}</span>
+                        <h3>{{ visibleAsset.host.name }}&nbsp;</h3>
+                        <span class="text-muted">{{ visibleAsset.host.fqdn }}</span>
                       </CCol>
                       <CCol>
                         <b>Last Updated:</b>
-                        {{ asset_details.updated_at | moment("from") }}
+                        {{ visibleAsset.updated_at | moment("from") }}
                       </CCol>
                     </CRow>
                     <CRow>
-                      <CCol><br>
+                      <CCol
+                        ><br />
                         <h4>Host Details</h4>
                       </CCol>
                     </CRow>
                     <CRow>
-                      <CCol><b>IP:</b> {{ asset_details.host.ip }} </CCol>
-                      <CCol><b>MAC:</b> {{ asset_details.host.mac }} </CCol>
+                      <CCol><b>IP:</b> {{ visibleAsset.host.ip }} </CCol>
+                      <CCol><b>MAC:</b> {{ visibleAsset.host.mac }} </CCol>
                     </CRow>
                   </CCol>
                 </CRow>
@@ -225,9 +241,10 @@ export default {
         top_events: [],
       },
       full_screen: false,
-      asset_details: {},
+      assets: [],
       active_tab: 0,
-      show_asset_tab: false
+      show_asset_tab: false,
+      current_asset: 0,
     };
   },
   watch: {
@@ -235,18 +252,16 @@ export default {
       if (this.show) {
         this.full_screen = false;
         this.active_tab = 0;
-        this.asset_details = {},
-        this.show_asset_tab = false
+        (this.asset_details = {}), (this.show_asset_tab = false);
       }
     },
     observable() {
       if (this.show) {
         this.full_screen = false;
         this.active_tab = 0;
-        this.asset_details = {},
-        this.show_asset_tab = false
+        (this.asset_details = {}), (this.show_asset_tab = false);
         this.loadObservableMetrics();
-        //this.loadAssetData();
+        this.loadAssetData();
       }
     },
   },
@@ -303,19 +318,34 @@ export default {
       });
     },
     loadAssetData() {
-      if (["host"].includes(this.observable.data_type)) {
-        this.loading = true;
-        this.$store
-          .dispatch("getAssetByHostname", { hostname: this.observable.value })
-          .then((resp) => {
-            this.asset_details = resp.data;
-            this.loading = false;
-            this.show_asset_tab = true;
-          })
-          .catch((err) => {
-            this.loading = false;
-          });
+      let request_body = {
+        organization: this.organization,
+      };
+
+      if (this.observable.data_type == "host") {
+        request_body["hostname"] = this.observable.value;
+      } else if (this.observable.data_type == "ip") {
+        request_body["host__ip"] = this.observable.value;
+      } else if (this.observable.data_type == "domain") {
+        request_body["domain"] = this.observable.value;
+      } else {
+        return;
       }
+
+      this.loading = true;
+
+      this.$store
+        .dispatch("getAssetDetails", request_body)
+        .then((resp) => {
+          this.assets = resp.data.assets;
+          this.loading = false;
+          if (this.assets.length > 0) {
+            this.show_asset_tab = true;
+          }
+        })
+        .catch((err) => {
+          this.loading = false;
+        });
     },
     loadObservableMetrics() {
       this.loading = true;
@@ -350,6 +380,16 @@ export default {
     maximize() {
       this.full_screen = !this.full_screen;
     },
+    nextAsset() {
+      if (this.current_asset < this.assets.length - 1) {
+        this.current_asset += 1;
+      }
+    },
+    previousAsset() {
+      if (this.current_asset > 0) {
+        this.current_asset -= 1;
+      }
+    },
   },
   computed: {
     positionInlineStyle() {
@@ -367,6 +407,16 @@ export default {
       }}`;
     },
     ...mapState(["current_user"]),
+    visibleAsset() {
+      return this.assets[this.current_asset];
+    },
+    assetNumber() {
+      let asset_number = this.current_asset + 1;
+      if (asset_number > this.assets.length) {
+        asset_number = this.assets.length;
+      }
+      return asset_number;
+    },
   },
   filters: {
     truncate: function (value) {
