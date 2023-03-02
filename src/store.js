@@ -129,9 +129,12 @@ const state = {
   notification_channel: {},
   notification_channels: [],
   formatted_notification_channels: [],
-  field_mapping_template: {},
-  field_mapping_templates: [],
-  source_field_mapping_template: {}
+  field_template: {},
+  field_templates: [],
+  source_field_template: {},
+  valid_data_types: ["none","url","user","sid","sha256hash","sha1hash","process","port",
+  "pid","md5hash","mac","ip","imphash","host","generic","fqdn","filepath",
+  "email_subject","email","domain","detection_id","command"]
 }
 
 const mutations = {
@@ -233,16 +236,17 @@ const mutations = {
   save_agent_policies(state, policies) {
     state.agent_policies = policies
   },
-  save_field_mapping_template(state, template) {
-    state.field_mapping_template = template
-    if(state.field_mapping_templates.length > 0) {
-      state.field_mapping_templates = [...state.field_mapping_templates.filter(t => t.uuid != template.uuid), template]
+  save_field_template(state, template) {
+    state.field_template = template
+    if(state.field_templates.length > 0) {
+      state.field_templates = [...state.field_templates.filter(t => t.uuid != template.uuid), template]
+      console.log(state.field_templates)
     } else {
-      state.field_mapping_templates = [template]
+      state.field_templates = [template]
     }
   },
-  save_field_mapping_templates(state, templates) {
-    state.field_mapping_templates = templates
+  save_field_templates(state, templates) {
+    state.field_templates = templates
   },
   save_event_stats(state, stats) {
     state.event_stats = stats
@@ -778,8 +782,8 @@ const mutations = {
   clone_input(state, input) {
     state.source_input = input
   },
-  clone_field_mapping_template(state, template) {
-    state.source_field_mapping_template = template
+  clone_field_template(state, template) {
+    state.source_field_template = template
   },
   set_mitre_data_sources(state, sources) {
     state.mitre_data_sources = sources
@@ -915,7 +919,8 @@ const getters = {
     return Object.keys(state.current_user.permissions).includes(permission)
   },
   tags: state => state.tags,
-  service_accounts: state => { return state.service_accounts }
+  service_accounts: state => { return state.service_accounts },
+  valid_data_types: state => { return state.valid_data_types },
 }
 
 let BASE_URL = ""
@@ -1339,15 +1344,39 @@ const actions = {
       })
     })
   },
+  createFieldTemplate({commit}, field_template) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/field_template`, data: field_template, method: 'POST'})
+      .then(resp => {
+        commit('save_field_template', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateFieldTemplate({commit}, {uuid, template}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/field_template/${uuid}`, data: template, method: 'PUT'})
+      .then(resp => {
+        commit('save_field_template', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getFieldMappingTemplates({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
     return new Promise((resolve, reject) => {
-      let url = `${BASE_URL}/field_mapping_template?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+      let url = `${BASE_URL}/field_template?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       if (organization) {
         url += `&organization=${organization}`
       }
       Axios({url: url, method: 'GET'})
       .then(resp => {
-        commit('save_field_mapping_templates', resp.data.templates)
+        commit('save_field_templates', resp.data.templates)
         commit('save_pagination', resp.data.pagination)
         resolve(resp)
       })

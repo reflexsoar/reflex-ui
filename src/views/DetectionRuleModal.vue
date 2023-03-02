@@ -465,20 +465,20 @@
                 <CButton @click="createExclusion" color="success">New Exclusion</CButton>
               </CTab>
               <CTab
-                title="Observable Mapping"
+                title="Field Templates"
                 v-bind:disabled="rule.source['uuid'] === null"
               >
                 <CRow>
                   <CCol>
-                    <h5>Observable Mapping</h5>
+                    <h5>Field Templates</h5>
                     <p>
-                      Adding observable field mappings directly on the Detection allows
+                      Adding observable field directly on the Detection allows
                       for pulling in Observables that are otherwise not normally available
                       due to the source inputs configuration.
                     </p>
                     <p>
-                      Observable mapping can be added to the Detection by selecting a
-                      Mapping Template, adding individual fields or both.
+                      Field settings can be added to the Detection by selecting a
+                      Field Template, adding individual fields to the detection or both.
                     </p>
                     <h5>Mapping Templates</h5>
                     COMING SOON<br /><br />
@@ -502,9 +502,6 @@
                         'data_type',
                         'alias',
                         'tags',
-                        'ioc',
-                        'safe',
-                        'spotted',
                         'tlp',
                         { key: 'admin', label: '' },
                       ]"
@@ -537,36 +534,6 @@
                       <template #tags="{ item }">
                         <td>
                           <CInput size="sm" v-model="item.tags" placeholder="Tags" />
-                        </td>
-                      </template>
-                      <template #ioc="{ item }">
-                        <td>
-                          <CSwitch
-                            :checked.sync="item.ioc"
-                            color="danger"
-                            label-on="Yes"
-                            label-off="No"
-                          />
-                        </td>
-                      </template>
-                      <template #safe="{ item }">
-                        <td>
-                          <CSwitch
-                            :checked.sync="item.safe"
-                            color="success"
-                            label-on="Yes"
-                            label-off="No"
-                          />
-                        </td>
-                      </template>
-                      <template #spotted="{ item }">
-                        <td>
-                          <CSwitch
-                            :checked.sync="item.spotted"
-                            color="success"
-                            label-on="Yes"
-                            label-off="No"
-                          />
                         </td>
                       </template>
                       <template #tlp="{ item }">
@@ -1051,6 +1018,9 @@ export default {
       );
     },
     addObservableField() {
+      if (this.rule.observable_fields == null) {
+        this.$set(this.rule, "observable_fields", [])
+      }
       if (this.rule.observable_fields && this.rule.observable_fields.length > 0) {
         this.rule.observable_fields.splice(0, 0, {
           field: "",
@@ -1063,7 +1033,6 @@ export default {
           tlp: 1,
         });
       } else {
-        console.log("YARP");
         this.rule.observable_fields.splice(0, 0, {
           field: "",
           data_type: "",

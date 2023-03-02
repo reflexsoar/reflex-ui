@@ -12,7 +12,7 @@
               </CTab>
               <CTab>
                 <template slot="title">
-                  <CIcon name="cil-sitemap"/> Field Mappings <CBadge color="primary">BETA</CBadge>
+                  <CIcon name="cil-sitemap"/> Field Templates <CBadge color="primary">BETA</CBadge>
                 </template>
                 <InputFieldMappingList></InputFieldMappingList>
               </CTab>

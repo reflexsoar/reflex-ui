@@ -49,6 +49,11 @@
         <small class="form-text text-muted w-100">Optional - If selected the values in this list will be excluded along with any manually provided values</small><br>
       </CCol>
     </CRow>
+    <CRow>
+      <CCol col=6>
+        <CInputCheckbox :value.sync="exclusion.is_global" label="Global Exclusion" description="If checked, this exclusion will always follow the rule when it is consumed in Detection Repositories or Bundles.  It can not be modified without cloning the entire Rule."/>
+      </CCol>
+    </CRow>
     <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
         <CButton
@@ -159,7 +164,7 @@ export default {
         }        
       } else {
         this.rule.exceptions = [this.exclusion]
-      }      
+      }
       this.modalStatus = false
     },
     editExclusion() {

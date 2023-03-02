@@ -127,7 +127,8 @@ import {
   cilWindowMinimize,
   cilX,
   cilArrowCircleLeft,
-  cilArrowCircleRight
+  cilArrowCircleRight,
+  cilInfo
 
 } from '@coreui/icons'
 import { logo } from './logo'
@@ -231,7 +232,8 @@ export const iconsSet = Object.assign(
     cilWindowMinimize,
     cilX,
     cilArrowCircleLeft,
-    cilArrowCircleRight
+    cilArrowCircleRight,
+    cilInfo
   },
   {
     cifUs,
