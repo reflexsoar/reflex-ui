@@ -422,7 +422,7 @@
                   ]"
                 >
                   <template #admin="{ item }">
-                    <td class="text-right">
+                    <td class="text-right" v-if="!rule.from_repo_sync && !item.is_global">
                       <CButton
                         aria-label="Edit Exclusion"
                         @click="editExclusion(item.uuid)"
@@ -465,11 +465,35 @@
                 <CButton @click="createExclusion" color="success">New Exclusion</CButton>
               </CTab>
               <CTab
-                title="Field Templates"
+                title="Field Settings"
                 v-bind:disabled="rule.source['uuid'] === null"
               >
                 <CRow>
                   <CCol>
+
+                    <CRow>
+                      <CCol><h5>Signature Fields</h5>
+                    <p>
+                      Signature fields are used to create a unique signature for each
+                      hit.  This is used to prevent duplicate hits from being created
+                      for the same event.  The order of the fields is important as it will
+                      change the signature.
+                      </p>
+                      <CRow>
+                      <CCol><multiselect
+                        :options="signature_fields"
+                        v-model="rule.signature_fields"
+                        :taggable="true"
+                        :multiple="true"
+                        :close-on-select="false"
+                        @tag="addSignatureField"
+                        placeholder="Select or add signature fields"
+                        tag-placeholder="Add a signature field"
+                      /></CCol><CCol col=2><CButton color="primary" size="sm" @click="cloneSignatureFields">Clone From Input</CButton></CCol></CRow><br>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol>
                     <h5>Field Templates</h5>
                     <p>
                       Adding observable field directly on the Detection allows
@@ -480,11 +504,20 @@
                       Field settings can be added to the Detection by selecting a
                       Field Template, adding individual fields to the detection or both.
                     </p>
-                    <h5>Mapping Templates</h5>
-                    COMING SOON<br /><br />
+                    <multiselect
+                      v-model="rule.field_templates"
+                      :options="field_templates_multiselect_options"
+                      :multiple="true"
+                      :close-on-select="false"
+                      track-by="uuid"
+                      label="name"
+                      :searchable="true"
+                      :taggable="true"
+                    /><br></CCol>
+                    </CRow>
 
                     <CRow>
-                      <CCol> <h5>Observable Fields</h5></CCol
+                      <CCol> <h5>Additional Fields</h5></CCol
                       ><CCol class="text-right"
                         ><CButton @click="addObservableField()" color="success"
                           >Add Field</CButton
@@ -493,7 +526,7 @@
                     >
                   </CCol>
                 </CRow>
-                <CRow style="max-height: 450px; overflow: auto">
+                <CRow style="min-height: 300px; max-height: 300px; overflow: auto">
                   <CCol>
                     <CDataTable
                       :items="rule.observable_fields"
@@ -532,10 +565,20 @@
                         </td>
                       </template>
                       <template #tags="{ item }">
-                        <td>
-                          <CInput size="sm" v-model="item.tags" placeholder="Tags" />
-                        </td>
-                      </template>
+                      <td>
+                        <multiselect
+                          size="sm"
+                          v-model="item.tags"
+                          :options="tag_list"
+                          @tag="addTag(item.tags, $event)"
+                          :multiple="true"
+                          :taggable="true"
+                          :close-on-select="false"
+                          :show-labels="false"
+                          placeholder="Tags"
+                        /><br />
+                      </td>
+                    </template>
                       <template #tlp="{ item }">
                         <td>
                           <CSelect :options="[1, 2, 3, 4]" v-model="item.tlp" size="sm" />
@@ -647,7 +690,7 @@
                   size="sm"
                   :value="rule.guide"
                   @change="rule.guide = $event"
-                ></markdown-editor>
+                ></markdown-editor><br>
 
                 <h5>False Positives</h5>
                 <p>
@@ -740,6 +783,11 @@
 .modal-body {
   padding-left: 0px;
 }
+
+.full-height-table {
+  height: 450px !important;
+}
+
 </style>
 <script>
 import { uuid } from "vue-uuid";
@@ -753,6 +801,7 @@ import "prismjs/components/prism-python";
 import "prismjs/components/prism-yaml";
 import "../assets/js/prism-lucene";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
+import 'v-markdown-editor/dist/v-markdown-editor.css';
 import DetectionExclusionModal from "./DetectionExclusionModal.vue";
 import ImportSigmaRuleWizard from "./detections/ImportSigmaRuleWizard.vue";
 
@@ -779,6 +828,7 @@ export default {
         tactics: [],
         lookbehind: 5,
         interval: 5,
+        organization: ""
       },
     },
     mode: {
@@ -792,12 +842,22 @@ export default {
         return { name: o, uuid: "" };
       });
     },
+    field_templates_multiselect_options: function () {
+      return this.field_templates.map((o) => {
+        return { name: o.name, uuid: o.uuid };
+      });
+    },
+    selected_org: function () {
+      return this.rule.organization
+    },
     ...mapState([
       "settings",
       "current_user",
       "input_list",
       "mitre_tactics",
       "mitre_techniques",
+      "field_templates",
+      "inputs"
     ]),
   },
   data() {
@@ -827,7 +887,7 @@ export default {
       error_message: "",
       submitted: false,
       step: 0,
-      final_step: 6,
+      final_step: 7,
       range: {
         start: this.days_ago(7),
         end: this.today(),
@@ -878,6 +938,7 @@ export default {
         "detection_id",
         "command",
       ],
+      signature_fields: []
     };
   },
   watch: {
@@ -885,6 +946,26 @@ export default {
       this.error = false;
       this.error_message = "";
       if (this.mode == "Edit") {
+        this.$store.dispatch("getFieldTemplates", { organization: this.rule.organization }).then(() => {
+          if(this.rule.field_templates) {
+            let template_ids = Object.assign([], this.rule.field_templates)
+            this.rule.field_templates = this.field_templates.map((o) => {
+              return { name: o.name, uuid: o.uuid };
+            }).filter((o) => {
+              return template_ids.includes(o.uuid)
+            })
+          }
+        })
+        if(this.rule.tags) {
+          this.tag_list = this.rule.tags.map((o) => {
+            return o;
+          });
+        }
+
+        if(this.rule.signature_fields) {
+          this.signature_fields = this.rule.signature_fields
+        }
+
         this.step = 0;
       }
 
@@ -905,9 +986,14 @@ export default {
           "uuid",
           "version",
           "warnings",
+          "field_templates"
         ].forEach((k) => {
           delete this.rule[k];
         });
+      }
+
+      if(this.mode == "Create") {
+        this.$store.commit("save_field_templates", [])
       }
 
       this.modalStatus = this.show;
@@ -938,6 +1024,9 @@ export default {
     this.$store.dispatch("getMitreTactics", {});
   },
   methods: {
+    updateSelectedTemplates(t) {
+      this.rule.field_templates.push({name: t.name, uuid: t.uuid});
+    },
     setRiskScore() {
       if (this.rule.severity == 1) {
         this.rule.risk_score = 1;
@@ -1027,9 +1116,6 @@ export default {
           data_type: "",
           alias: "",
           tags: [],
-          ioc: false,
-          safe: false,
-          spotted: false,
           tlp: 1,
         });
       } else {
@@ -1038,9 +1124,6 @@ export default {
           data_type: "",
           alias: "",
           tags: [],
-          ioc: false,
-          safe: false,
-          spotted: false,
           tlp: 1,
         });
       }
@@ -1097,6 +1180,12 @@ export default {
 
       if (this.rule.mute_period) {
         this.rule.mute_period = parseInt(this.rule.mute_period);
+      }
+
+      if (this.rule.field_templates) {
+        this.rule.field_templates = this.rule.field_templates.map((template) => {
+          return template.uuid
+        })
       }
 
       this.rule = this.removeNulls(this.rule);
@@ -1160,6 +1249,12 @@ export default {
             name: technique.name,
           };
         });
+      }
+
+      if (this.rule.field_templates) {
+        this.rule.field_templates = this.rule.field_templates.map((template) => {
+          return template.uuid
+        })
       }
 
       this.rule.risk_score = parseInt(this.rule.risk_score);
@@ -1237,6 +1332,32 @@ export default {
 
       this.tag_list.push(t.name);
     },
+    addTagToField(field, t) {
+      if (field) {
+        fields.push(t)
+      } else {
+        field.push(t)
+      }
+      this.tag_list.push(t);
+    },
+    addSignatureField(t) {
+      if(this.rule.signature_fields) {
+        this.rule.signature_fields.push(t)
+      } else {
+        this.rule.signature_fields = [t]
+      }
+      this.tag_list.push(t);
+    },
+    cloneSignatureFields() {
+      let source_input = this.input_list.find((i) => i.uuid === this.rule.source.uuid)
+      if (source_input !== undefined) {
+        if(this.rule.signature_fields === undefined) {
+          this.$set(this.rule, 'signature_fields', [])
+        }
+        this.rule.signature_fields = source_input.signature_fields
+      }
+      
+    },
     updateTactic(tactic) {
       if (!this.short_names.includes(tactic.shortname)) {
         this.short_names.push(tactic.shortname);
@@ -1252,6 +1373,7 @@ export default {
     addTechnique(technique) {},
     updateOrganization() {
       this.$store.dispatch("getInputList", { organization: this.rule.organization });
+      this.$store.dispatch("getFieldTemplates", { organization: this.rule.organization });
       this.rule.source = { uuid: null };
     },
     loadTags: function () {

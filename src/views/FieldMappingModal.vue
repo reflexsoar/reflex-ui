@@ -123,7 +123,7 @@
                     source input may use <code>process.args</code>.
                   </p>
                   <CAlert color="info" show>
-                    <CAlertHeading><strong>Note:</strong></CAlertHeading>
+                    <strong>Note:</strong>
                     <p>
                       The Sigma Field is only used when converting a Sigma rule to a
                       Detection Rule. Also setting a data type of <code>none</code> will

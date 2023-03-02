@@ -173,7 +173,7 @@ export default {
     reloadFieldMappingTemplates(page, sort_by, sort_direction) {
       this.loading = true;
       this.$store
-        .dispatch("getFieldMappingTemplates", {
+        .dispatch("getFieldTemplates", {
           page: page,
           sort_by: sort_by,
           sort_direction: sort_direction,
@@ -185,7 +185,7 @@ export default {
     loadData: function () {
       this.loading = true;
 
-      this.$store.dispatch("getFieldMappingTemplates", {}).then((resp) => {
+      this.$store.dispatch("getFieldTemplates", {}).then((resp) => {
         this.loading = false;
       });
     },

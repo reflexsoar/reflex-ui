@@ -10,6 +10,10 @@
         >
           {{ alert_message }}
         </CAlert>
+        <div v-if="loading">
+          <CSpinner color="primary" />
+        </div>
+        <div v-else>
         <CRow>
           <CCol>
             <h1>{{ detection.name }}</h1>
@@ -338,7 +342,8 @@
               </CCardBody>
             </CCard>
           </CCol>
-        </CRow>
+        
+        </CRow></div>
       </CCol>
     </CRow>
     <DetectionExclusionModal
@@ -416,6 +421,7 @@ export default {
       alert_type: "success",
       delete_exclusion_warning: false,
       target_exclusion: null,
+      loading: true,
     };
   },
   created() {
@@ -473,7 +479,10 @@ export default {
       this.saveExceptions();
     },
     getDetection(uuid) {
-      this.$store.dispatch("getDetection", uuid);
+      this.loading = true
+      this.$store.dispatch("getDetection", uuid).then(() => {
+        this.loading = false
+      });
     },
     detectionType(i) {
       return ["Match", "Threshold", "Metric Change", "Field Mismatch"][i];

@@ -65,11 +65,11 @@
 </div>
 </template>
 
-<style>
+<style scoped>
 .my-editor {
   /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
   /*background: #fdfdfd;*/
-  background: #fdfdfd !important;
+  background: #0e0e0e;
   color: #ccc;
   border: 1px solid rgb(216, 219, 224);
   border-radius: 0.25rem;

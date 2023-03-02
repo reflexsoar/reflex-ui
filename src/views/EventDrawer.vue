@@ -431,7 +431,6 @@ export default {
       start = Date.parse(start)
       end = Date.parse(end)
       let value = Math.round((end - start) / 60000)
-      console.log(value)
       if (isNaN(value)) {
         return "N/A"
       }
