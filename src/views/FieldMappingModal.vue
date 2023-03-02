@@ -216,7 +216,7 @@
                       <td>
                         <CButton
                           aria-label="Delete Field"
-                          @click="deleteField(template.field_mapping.indexOf(item))"
+                          @click="deleteField(item)"
                           size="sm"
                           color="danger"
                           ><CIcon name="cilTrash"
@@ -374,7 +374,8 @@ export default {
         });
       }
     },
-    deleteField(id) {
+    deleteField(item) {
+      let id = this.template.field_mapping.indexOf(item);
       this.template.field_mapping.splice(id, 1);
     },
     reset() {

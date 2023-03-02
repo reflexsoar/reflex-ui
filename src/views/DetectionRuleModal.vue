@@ -554,7 +554,7 @@
                         <td>
                           <CSelect
                             size="sm"
-                            v-model="item.data_type"
+                            :value.sync="item.data_type"
                             :options="data_types"
                           />
                         </td>
@@ -570,7 +570,7 @@
                           size="sm"
                           v-model="item.tags"
                           :options="tag_list"
-                          @tag="addTag(item.tags, $event)"
+                          @tag="addTagToField(item.tags, $event)"
                           :multiple="true"
                           :taggable="true"
                           :close-on-select="false"
@@ -581,7 +581,7 @@
                     </template>
                       <template #tlp="{ item }">
                         <td>
-                          <CSelect :options="[1, 2, 3, 4]" v-model="item.tlp" size="sm" />
+                          <CSelect :options="[1, 2, 3, 4]" :value.sync="item.tlp" size="sm" />
                         </td>
                       </template>
                       <template #admin="{ item }">
@@ -589,7 +589,7 @@
                           <CButton
                             aria-label="Delete Field"
                             @click="
-                              deleteObservableField(observable_fields.indexOf(item))
+                              deleteObservableField(item)
                             "
                             size="sm"
                             color="danger"
@@ -1128,7 +1128,8 @@ export default {
         });
       }
     },
-    deleteObservableField(id) {
+    deleteObservableField(item) {
+      let id = this.rule.observable_fields.indexOf(item)
       this.rule.observable_fields.splice(id, 1);
     },
     testDetectionRule() {},
@@ -1334,7 +1335,7 @@ export default {
     },
     addTagToField(field, t) {
       if (field) {
-        fields.push(t)
+        field.push(t)
       } else {
         field.push(t)
       }
