@@ -213,7 +213,7 @@ export default {
         interval: 5,
         rule_type: 0,
         severity: 1,
-        risk_score: 50,
+        risk_score: 0,
         mute_period: 0,
         exceptions: [],
         false_positives: [],

@@ -193,6 +193,11 @@
                 "
               />
             </CTab>
+            <CTab v-if="metrics.base64_decoded_values.length > 0" title="Base64 Decoded Values">
+              <CCardBody>
+                <pre v-for="value,i in metrics.base64_decoded_values" :key="i" style="white-space: pre-wrap;">{{ value }}</pre>
+              </CCardBody>
+            </CTab>
           </CTabs>
         </CCol>
       </CRow>

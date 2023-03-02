@@ -171,8 +171,8 @@
                       <input
                         type="range"
                         min="0"
-                        max="50000"
-                        value="10000"
+                        max="100"
+                        value="0"
                         id="risk_score"
                         label="Risk Score"
                         v-model="rule.risk_score"
@@ -1031,19 +1031,19 @@ export default {
       if (this.rule.severity == 1) {
         this.rule.risk_score = 1;
       } else if (this.rule.severity == 2) {
-        this.rule.risk_score = 12501;
+        this.rule.risk_score = 30;
       } else if (this.rule.severity == 3) {
-        this.rule.risk_score = 25001;
+        this.rule.risk_score = 60;
       } else if (this.rule.severity == 4) {
-        this.rule.risk_score = 37501;
+        this.rule.risk_score = 90;
       }
     },
     setSeverity() {
-      if (this.rule.risk_score <= 12500) {
+      if (this.rule.risk_score <= 29) {
         this.rule.severity = 1;
-      } else if (this.rule.risk_score <= 25000 && this.rule.risk_score > 12500) {
+      } else if (this.rule.risk_score <= 59 && this.rule.risk_score > 30) {
         this.rule.severity = 2;
-      } else if (this.rule.risk_score <= 37500 && this.rule.risk_score > 25000) {
+      } else if (this.rule.risk_score <= 89 && this.rule.risk_score > 60) {
         this.rule.severity = 3;
       } else {
         this.rule.severity = 4;
