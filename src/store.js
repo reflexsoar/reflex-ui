@@ -524,7 +524,7 @@ const mutations = {
     state.inputs = inputs
   },
   save_inputs_list(state, inputs) {
-    state.input_list = inputs.map(item => { return {'name': item.name, 'uuid': item.uuid}})
+    state.input_list = inputs.map(item => { return {'name': item.name, 'uuid': item.uuid, 'signature_fields': item.config.signature_fields}})
   },
   save_input(state, input) {
     state.input = input
@@ -540,12 +540,13 @@ const mutations = {
     state.index_fields = fields
   },
   add_detection(state, detection){
+    state.detection = detection
+
     if(state.detections.length == 0) {
       state.detections = [detection]
     } else {
       state.detections.push(detection)
-    }    
-    state.detection = detection
+    }
     state.status = 'success'
   },
   save_detections(state, detections) {
@@ -559,7 +560,7 @@ const mutations = {
   },
   update_detection(state, detection) {
     state.detection = detection
-    state.detections = state.detections.map(i => i.uuid == detection.uuid ? detection : i)
+    state.detections = [...state.detections.filter(d => d.uuid != detection.uuid), detection]
   },
   save_detection_hits(state, hits) {
     state.detection_hits = hits
@@ -700,7 +701,7 @@ const mutations = {
   },
   add_input(state, input){
     if(state.inputs.length == 0) {
-      state.inputs = [input]
+      state.inputs = [...state.inputs.filter(i => i.uuid != input.uuid), input]
     } else {
       state.inputs.push(input)
     }    
@@ -1308,7 +1309,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/detection`, data: detection, method: 'POST'})
       .then(resp => {
-        commit('add_detection', detection)
+        commit('add_detection', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -1368,7 +1369,7 @@ const actions = {
       })
     })
   },
-  getFieldMappingTemplates({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
+  getFieldTemplates({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/field_template?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       if (organization) {
@@ -1499,7 +1500,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/input`, data: input, method: 'POST'})
       .then(resp => {
-        commit('add_input', input)
+        commit('add_input', resp.data)
         resolve(resp)
       })
       .catch(err => {
