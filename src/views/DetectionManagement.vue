@@ -2,7 +2,7 @@
   <div>
     <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
     <CRow><CCol xs="12" lg="12">
-      <h2>
+      <h2 id="detections-page-header">
         <CBadge color="primary">BETA</CBadge>&nbsp;Detection Management&nbsp;<button type="button" class="kb"
           onclick="window.open('https://docs.reflexsoar.com/en/latest/detections')">
           <CIcon name='cil-book' size="lg" />
@@ -21,13 +21,14 @@
                 <CCol>
                   <CButton color="primary" @click="createDetectionModal()">New Detection</CButton>
                 </CCol>
-                <CCol col="3" class='text-right'>
-                  <CButton aria-label="Export Detections" disabled color="secondary">
-                    <CIcon name='cilCloudDownload' size="sm"></CIcon>&nbsp; Export Detections
-                  </CButton>
-                  &nbsp;<CButton aria-label="Import Detections" disabled color="secondary">
-                    <CIcon name='cilCloudUpload' size="sm"></CIcon>&nbsp; Import Detections
-                  </CButton>
+                <CCol col="5" class='text-right'>
+                  <CDropdown color="secondary" toggler-text="Actions" class="m-2">
+                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="enableDetections()"><CIcon name='cilCheck'/>&nbsp;Enable {{selected_items.length}} Detections</CDropdownItem>
+                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="disableDetections()"><CIcon name='cilBan'/>&nbsp; Disable {{selected_items.length}} Detections</CDropdownItem>
+                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="deleteDetections()"><CIcon name='cilTrash' size="sm"/>&nbsp;Delete {{selected_items.length}} Detections</CDropdownItem>
+                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="exportDetections()"><CIcon name='cilCloudDownload' size="sm"></CIcon>&nbsp; Export {{selected_items.length}} Detections</CDropdownItem>
+                      <CDropdownItem><CIcon name='cilCloudUpload' size="sm"></CIcon>&nbsp; Import Detections</CDropdownItem>
+                  </CDropdown>
                 </CCol>
               </CRow>
               <CCardBody>
@@ -42,6 +43,14 @@
                       size="sm"
                     ></RMultiCheck>
                   </template>
+                  <template #select-filter="{ item }">
+                    <input type="checkbox" :checked="selected_items.length > 0" @click="selectAll()" style="margin-left:7px"/>
+                  </template>
+                  <template #select="{ item }">
+                    <td>
+                      <input type="checkbox" :checked="item_is_selected(item.uuid)" @click="select_item(item.uuid)">
+                    </td>
+                    </template>
                   <template #name="{ item }">
                     <td>
                       <b>{{ item.name }}</b><br>
@@ -108,7 +117,7 @@
                           v-c-tooltip="{ content: 'Clone Detection', placement: 'left' }">
                           <CIcon name='cilCopy' />
                         </CButton>
-                        <CButton disabled aria-label="Export Detection" @click="downloadedDetectionAsJson(item.uuid)"
+                        <CButton aria-label="Export Detection" @click="exportDetection(item.uuid)"
                           size="sm" color="info"
                           v-c-tooltip="{ content: 'Export Detection - COMING SOON', placement: 'left' }">
                           <CIcon name='cilCloudDownload' />
@@ -134,6 +143,7 @@
       </CCard>
       <DetectionRuleModal :show.sync="show_detection_rule_modal" :rule.sync="rule" :mode="modal_mode" />
     </CCol></CRow>
+
   </div>
 </template>
 
@@ -159,9 +169,10 @@ export default {
 },
   data() {
     return {
-
+      
+      selected_items: [],
       picker_filters: {},
-      detection_list_fields: ['name', 'organization', 'last_run', 'last_hit', 'total_hits', { key: 'performance', label: 'Query Time / Total Time' }, {key: 'actions', filter: false}],
+      detection_list_fields: [{key:'select', label:'', filter: false}, 'name', 'organization', 'last_run', 'last_hit', 'total_hits', { key: 'performance', label: 'Query Time / Total Time' }, {key: 'actions', filter: false}],
       modal_mode: "Create",
       show_detection_rule_modal: false,
       show_import_sigma_rule_modal: false,
@@ -256,6 +267,7 @@ export default {
     },
     defaultRule() {
       return {
+        
         name: '',
         tags: [],
         query: {
@@ -381,6 +393,51 @@ export default {
       } else {
         this.$set(this.picker_filters, key, val);
       }
+    },
+    select_item(i) {
+      if (this.selected_items.includes(i)) {
+        this.selected_items = this.selected_items.filter((item) => item !== i);
+      } else {
+        this.selected_items.push(i);
+      }
+    },
+    selectAll() {
+      if (this.selected_items.length > 0) {
+        this.selected_items = [];
+      } else {
+        this.selected_items = this.detections.map((item) => item.uuid);
+      }
+    },
+    item_is_selected(i) {
+      return this.selected_items.includes(i);
+    },
+    exportDetection(uuid) {
+      this.$store.dispatch('exportDetection', { uuid: uuid }).then(resp => {
+        let blob = new Blob([JSON.stringify(resp.data)])
+        let link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+        link.download = uuid + '.json'
+        link.click()
+      })
+    },
+    exportDetections() {
+      this.$store.dispatch('exportSelectedDetections', { uuids: this.selected_items }).then(resp => {
+        let blob = new Blob([JSON.stringify(resp.data)])
+        let link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+        link.download = 'detections.json'
+        link.click()
+      })
+    },
+    disableDetections() {
+      this.$store.dispatch('disableSelectedDetections', { uuids: this.selected_items }).then(resp => {
+        this.selected_items = []
+      })
+    },
+    enableDetections() {
+      this.$store.dispatch('enableSelectedDetections', { uuids: this.selected_items }).then(resp => {
+        this.selected_items = []
+      })
     }
   },
   computed: {
