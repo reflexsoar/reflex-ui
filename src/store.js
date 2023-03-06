@@ -3649,6 +3649,56 @@ const actions = {
         reject(err)
       })
     })
+  },
+  exportDetection({commit}, {uuid, format='json'}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/${uuid}/export?format=${format}`, method: 'GET'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  exportSelectedDetections({commit}, {uuids, format='json'}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/export?format=${format}`, data: {detections: uuids}, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  disableSelectedDetections({commit}, {uuids}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/disable`, data: {detections: uuids}, method: 'POST'})
+      .then(resp => {
+        for(let detection in resp.data) {
+          commit('update_detection', resp.data[detection])
+        }
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  enableSelectedDetections({commit}, {uuids}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/enable`, data: {detections: uuids}, method: 'POST'})
+      .then(resp => {
+        for(let detection in resp.data) {
+          commit('update_detection', resp.data[detection])
+        }
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 }
 
