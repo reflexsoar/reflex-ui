@@ -213,7 +213,7 @@ export default {
         interval: 5,
         rule_type: 0,
         severity: 1,
-        risk_score: 50,
+        risk_score: 0,
         mute_period: 0,
         exceptions: [],
         false_positives: [],
@@ -247,7 +247,7 @@ export default {
     },
     editDetectionModal(uuid) {
       this.modal_mode = "Edit"
-      Object.assign(this.rule, this.detections.find(detection => detection.uuid === uuid))
+      this.rule = JSON.parse(JSON.stringify(this.detections.find(detection => detection.uuid === uuid)))
       this.show_detection_rule_modal = true
     },
     importSigmaRuleModal() {
@@ -359,6 +359,7 @@ export default {
     },
     cloneDetection(uuid) {
       let source_detection = this.detections.find(r => r.uuid === uuid)
+      this.rule = JSON.parse(JSON.stringify(source_detection))
       this.rule = Object.assign({}, source_detection)
       this.rule.name = '[COPY] ' + source_detection.name
       this.modal_mode = 'Clone'
