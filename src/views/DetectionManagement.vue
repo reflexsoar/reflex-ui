@@ -24,9 +24,9 @@
                 <CCol col="5" class='text-right'>
                   <CDropdown color="secondary" toggler-text="Actions">
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="enableDetections()"><CIcon name='cilCheck'/>&nbsp;Enable {{selected_items.length}} Detections</CDropdownItem>
-                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="disableDetections()"><CIcon name='cilBan'/>&nbsp; Disable {{selected_items.length}} Detections</CDropdownItem>
-                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="deleteDetections()"><CIcon name='cilTrash' size="sm"/>&nbsp;Delete {{selected_items.length}} Detections</CDropdownItem>
-                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="exportDetections()"><CIcon name='cilCloudDownload' size="sm"></CIcon>&nbsp; Export {{selected_items.length}} Detections</CDropdownItem>
+                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="disableDetections()"><CIcon name='cilBan'/>&nbsp;Disable {{selected_items.length}} Detections</CDropdownItem>
+                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="deleteDetectionModal()"><CIcon name='cilTrash' size="sm"/>&nbsp;Delete {{selected_items.length}} Detections</CDropdownItem>
+                      <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="exportDetections()"><CIcon name='cilCloudDownload' size="sm"></CIcon>&nbsp;Export {{selected_items.length}} Detections</CDropdownItem>
                       <CDropdownItem><CIcon name='cilCloudUpload' size="sm"></CIcon>&nbsp; Import Detections</CDropdownItem>
                   </CDropdown>
                 </CCol>
@@ -139,6 +139,19 @@
           </CTabs>
         </CCardBody>
       </CCard>
+      <CModal :show.sync="confirm_delete" :close-on-backdrop="false" :centered="true" color="danger" title="Delete Detection Confirmation">
+        <CModalBody>
+          <p>Are you sure you want to delete {{ selected_items.length }} detection(s)?</p>
+
+          <CAlert color="info">
+            <b>NOTE:</b> Only inactive detections will be deleted.
+          </CAlert>
+        </CModalBody>
+        <template #footer>
+          <CButton color="secondary" @click="cancelDelete()">Cancel</CButton>
+          <CButton color="danger" @click="deleteDetections()">Delete</CButton>
+        </template>
+      </CModal>
       <DetectionRuleModal :show.sync="show_detection_rule_modal" :rule.sync="rule" :mode="modal_mode" />
     </CCol></CRow>
 
@@ -168,6 +181,7 @@ export default {
   data() {
     return {
       
+      confirm_delete: false,
       selected_items: [],
       picker_filters: {},
       detection_list_fields: [{key:'select', label:'', filter: false}, 'name', 'organization', 'last_run', 'last_hit', 'total_hits', { key: 'performance', label: 'Query Time / Total Time' }, {key: 'actions', filter: false}],
@@ -364,8 +378,10 @@ export default {
       }
       this.show_detection_rule_modal = true
     },
-    deleteDetectionModal(uuid) {
-      this.$store.dispatch('deleteDetection', { uuid: uuid }).then(resp => { })
+    deleteDetectionModal(uuid=null) {
+      this.confirm_delete = true
+      if (uuid !== null)
+       { this.selected_items = [uuid]}
     },
     cloneDetection(uuid) {
       let source_detection = this.detections.find(r => r.uuid === uuid)
@@ -426,6 +442,16 @@ export default {
         link.download = 'detections.json'
         link.click()
       })
+    },
+    deleteDetections() {
+      this.$store.dispatch('deleteSelectedDetections', { uuids: this.selected_items }).then(resp => {
+        this.selected_items = []
+        this.confirm_delete = false
+      })
+    },
+    cancelDelete() {
+      this.selected_items = []
+      this.confirm_delete = false
     },
     disableDetections() {
       this.$store.dispatch('disableSelectedDetections', { uuids: this.selected_items }).then(resp => {
