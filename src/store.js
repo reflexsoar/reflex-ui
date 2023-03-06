@@ -3699,6 +3699,33 @@ const actions = {
         reject(err)
       })
     })
+  },
+  deleteSelectedDetections({commit}, {uuids}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/delete`, data: {detections: uuids}, method: 'DELETE'})
+      .then(resp => {
+        for(let detection in resp.data.detections) {
+          console.log(resp.data.detections[detection])
+          commit('remove_detection', resp.data.detections[detection])
+        }
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  downloadSOCReport({commit}, {organization, days=null, soc_start_hour=null, soc_end_hour=null, utc_offset=null}) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/reporting/${organization}`
+      Axios({url: url, method: 'GET', params: { days: days, soc_start_hour: soc_start_hour, soc_end_hour: soc_end_hour, utc_offset: utc_offset }})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 }
 
