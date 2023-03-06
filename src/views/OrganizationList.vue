@@ -48,7 +48,8 @@
               color="primary"
               v-c-tooltip="{ content: 'Edit Settings', placement: 'left' }"
               ><CIcon name="cilSettings"
-            /></CButton>
+            /></CButton>&nbsp;
+            <CButton size="sm" color="secondary" @click="downloadSOCReport(item.uuid)">SOC Report</CButton>
           </td>
         </template>
       </CDataTable>
@@ -207,6 +208,16 @@ export default {
         this.$set(this.picker_filters, key, val);
       }
     },
+    downloadSOCReport(uuid) {
+      this.$store.dispatch("downloadSOCReport", {organization: uuid}).then((resp) => {
+        // Download the file as a blob
+        let blob = new Blob([resp.data])
+        let link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+        link.download = 'soc-report.html'
+        link.click()
+      })
+    }
   },
 };
 </script>
