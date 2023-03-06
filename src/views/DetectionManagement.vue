@@ -22,7 +22,7 @@
                   <CButton color="primary" @click="createDetectionModal()">New Detection</CButton>
                 </CCol>
                 <CCol col="5" class='text-right'>
-                  <CDropdown color="secondary" toggler-text="Actions" class="m-2">
+                  <CDropdown color="secondary" toggler-text="Actions">
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="enableDetections()"><CIcon name='cilCheck'/>&nbsp;Enable {{selected_items.length}} Detections</CDropdownItem>
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="disableDetections()"><CIcon name='cilBan'/>&nbsp; Disable {{selected_items.length}} Detections</CDropdownItem>
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="deleteDetections()"><CIcon name='cilTrash' size="sm"/>&nbsp;Delete {{selected_items.length}} Detections</CDropdownItem>
@@ -31,10 +31,9 @@
                   </CDropdown>
                 </CCol>
               </CRow>
-              <CCardBody>
-                <CDataTable :items="filtered_items" :fields="detection_list_fields" items-per-page-select
-                  :items-per-page="10" column-filter :sorter='{ external: false, resetable: true }'
-                  :sorterValue='{ column: "name", asc: true }' pagination :loading="loading">
+                <CDataTable :items="filtered_items" :fields="detection_list_fields"
+                  :items-per-page="25" column-filter :sorter='{ external: false, resetable: true }'
+                  :sorterValue='{ column: "name", asc: true }' pagination :loading="loading" style="border-top: 1px solid #cfcfcf">
                   
                   <template #organization-filter="{ item }">
                     <RMultiCheck
@@ -131,7 +130,6 @@
                     </td>
                   </template>
                 </CDataTable>
-              </CCardBody>
               <!--<DetectionRules></DetectionRules>-->
             </CTab>
             <CTab title="Detection Repositories">
