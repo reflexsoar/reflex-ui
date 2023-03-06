@@ -140,13 +140,11 @@
         </CCardBody>
       </CCard>
       <CModal :show.sync="confirm_delete" :close-on-backdrop="false" :centered="true" color="danger" title="Delete Detection Confirmation">
-        <CModalBody>
           <p>Are you sure you want to delete {{ selected_items.length }} detection(s)?</p>
 
           <CAlert color="info">
             <b>NOTE:</b> Only inactive detections will be deleted.
-          </CAlert>
-        </CModalBody>
+            </CAlert>
         <template #footer>
           <CButton color="secondary" @click="cancelDelete()">Cancel</CButton>
           <CButton color="danger" @click="deleteDetections()">Delete</CButton>

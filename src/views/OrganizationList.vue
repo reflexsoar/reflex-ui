@@ -209,7 +209,7 @@ export default {
       }
     },
     downloadSOCReport(uuid) {
-      this.$store.dispatch("downloadSOCReport", {organization: uuid}).then((resp) => {
+      this.$store.dispatch("downloadSOCReport", {organization: uuid, days: 30}).then((resp) => {
         // Download the file as a blob
         let blob = new Blob([resp.data])
         let link = document.createElement('a')
