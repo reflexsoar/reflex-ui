@@ -45,7 +45,6 @@
               :fields="fields"
               :loading="loading"
               :items-per-page="10"
-              items-per-page-select
               pagination
               hover
               column-filter
@@ -83,7 +82,8 @@
               </template>
               <template #manage="{ item }">
                 <td class="text-right">
-                  <CButton
+                  <CDropdown color="secondary" size="sm" toggler-text="Manage">
+                  <CDropdownItem
                     aria-label="Export Rule"
                     disabled
                     @click="downloadRuleAsJSON(item.uuid)"
@@ -93,24 +93,24 @@
                       content: 'Export Rule - COMING SOON',
                       placement: 'left',
                     }"
-                    ><CIcon name="cilCloudDownload" /></CButton
-                  >&nbsp;
-                  <CButton
+                    ><CIcon name="cilCloudDownload" />&nbsp;Export Rule</CDropdownItem
+                  >
+                  <CDropdownItem
                     aria-label="Clone Rule"
                     size="sm"
                     color="secondary"
                     @click="cloneRule(item.uuid)"
-                    ><CIcon name="cilCopy" /></CButton
-                  >&nbsp;
-                  <CButton
+                    ><CIcon name="cilCopy" />&nbsp;Clone Rule</CDropdownItem
+                  >
+                  <CDropdownItem
                     aria-label="Edit Rule"
                     size="sm"
                     color="info"
                     @click="editRule(item.uuid)"
                     v-c-tooltip="{ content: 'Edit Rule', placement: 'left' }"
-                    ><CIcon name="cilPencil" /></CButton
-                  >&nbsp;
-                  <CButton
+                    ><CIcon name="cilPencil" />&nbsp;Edit Rule</CDropdownItem
+                  >
+                  <CDropdownItem
                     aria-label="Disable Rule"
                     v-if="item.active"
                     size="sm"
@@ -118,17 +118,17 @@
                     @click="disableRule(item.uuid)"
                     v-c-tooltip="{ content: 'Disable Rule', placement: 'left' }"
                     ><CIcon name="cilBan"
-                  /></CButton>
-                  <CButton
+                  />&nbsp;Disable Rule</CDropdownItem>
+                  <CDropdownItem
                     aria-label="Enable Rule"
                     v-else
                     size="sm"
                     color="success"
                     @click="enableRule(item.uuid)"
                     v-c-tooltip="{ content: 'Enable Rule', placement: 'left' }"
-                    ><CIcon name="cilCheck" /></CButton
-                  >&nbsp;
-                  <CButton
+                    ><CIcon name="cilCheck" />&nbsp;Enable Rule</CDropdownItem
+                  >
+                  <CDropdownItem
                     aria-label="Delete Rule"
                     v-if="!item.active"
                     color="danger"
@@ -139,7 +139,8 @@
                     size="sm"
                     v-c-tooltip="{ content: 'Delete Rule', placement: 'left' }"
                     ><CIcon name="cilTrash"
-                  /></CButton>
+                  />&nbsp;Delete Rule</CDropdownItem>
+                  </CDropdown>
                 </td>
               </template>
               <template #created_by="{ item }">
