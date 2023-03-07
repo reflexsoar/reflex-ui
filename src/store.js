@@ -3715,6 +3715,21 @@ const actions = {
       })
     })
   },
+  importDetections({commit}, {data}) {
+    return new Promise((resolve, reject) => {
+      console.log(data)
+      Axios({url: `${BASE_URL}/detection/import`, data: data, method: 'POST'})
+      .then(resp => {
+        for(let detection in resp.data) {
+          commit('update_detection', resp.data[detection])
+        }
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   downloadSOCReport({commit}, {organization, days=null, soc_start_hour=null, soc_end_hour=null, utc_offset=null}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/reporting/${organization}`
