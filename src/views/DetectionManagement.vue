@@ -27,7 +27,7 @@
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="disableDetections()"><CIcon name='cilBan'/>&nbsp;Disable {{selected_items.length}} Detections</CDropdownItem>
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="deleteDetectionModal()"><CIcon name='cilTrash' size="sm"/>&nbsp;Delete {{selected_items.length}} Detections</CDropdownItem>
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="exportDetections()"><CIcon name='cilCloudDownload' size="sm"></CIcon>&nbsp;Export {{selected_items.length}} Detections</CDropdownItem>
-                      <CDropdownItem><CIcon name='cilCloudUpload' size="sm"></CIcon>&nbsp; Import Detections</CDropdownItem>
+                      <CDropdownItem @click="import_wizard = !import_wizard"><CIcon name='cilCloudUpload' size="sm"></CIcon>&nbsp; Import Detections</CDropdownItem>
                   </CDropdown>
                 </CCol>
               </CRow>
@@ -150,6 +150,13 @@
           <CButton color="danger" @click="deleteDetections()">Delete</CButton>
         </template>
       </CModal>
+      <CModal :show.sync="import_wizard" :close-on-backdrop="false" :centered="true" size="lg" title="Import Detections JSON">
+        <CTextarea v-model="import_json" placeholder="Paste JSON here" rows="10" />
+        <template #footer>
+          <CButton color="secondary" @click="cancelImport()">Cancel</CButton>
+          <CButton color="info" @click="importDetections()">Import</CButton>
+        </template>
+      </CModal>
       <DetectionRuleModal :show.sync="show_detection_rule_modal" :rule.sync="rule" :mode="modal_mode" />
     </CCol></CRow>
 
@@ -178,7 +185,8 @@ export default {
 },
   data() {
     return {
-      
+      import_wizard: false,
+      import_json: '',
       confirm_delete: false,
       selected_items: [],
       picker_filters: {},
@@ -260,6 +268,16 @@ export default {
     }
   },
   methods: {
+    importDetections() {
+      let data = {
+        detections: JSON.parse(this.import_json)
+      }
+      console.log(data)
+      this.$store.dispatch('importDetections', {data: data}).then(() => {
+        this.import_json = ''
+        this.import_wizard = false
+      })
+    },
     disableDetection(uuid) {
       this.$store.dispatch('updateDetection', { uuid: uuid, data: { 'active': false } })
     },
