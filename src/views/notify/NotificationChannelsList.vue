@@ -36,7 +36,7 @@
                         </template>
                         <template #enabled="{item}">
                             <td>
-                                <CBadge :color="item.enabled ? 'success' : 'danger'">{{item.enabled ? 'Enabled' : 'Disabled'}}</CBadge>
+                                <CBadge class="tag" :color="item.enabled ? 'success' : 'danger'">{{item.enabled ? 'Enabled' : 'Disabled'}}</CBadge>
                             </td>
                         </template>
                         <template #manage="{item}">

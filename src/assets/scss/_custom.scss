@@ -319,6 +319,25 @@ a {
     font-weight: normal;
 }
 
+.tag-clickable {
+    cursor: pointer;
+}
+
+.tag-list {
+    margin-top: 1px;
+    //font-size: .7rem !important;
+}
+
+.badge.tag {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-weight: normal;
+    line-height: 1.5;
+    font-size: 0.76563rem
+}
+
 label {
     font-weight:500;
 }

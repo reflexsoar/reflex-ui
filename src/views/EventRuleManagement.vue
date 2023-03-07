@@ -153,8 +153,8 @@
                 </td>
               </template>
               <template #priority="{ item }">
-                <td>
-                  <CBadge style="font-size: 90%; font-weight: 500" color="info">{{
+                <td class='text-center'>
+                  <CBadge class="tag" color="info">{{
                     item.priority
                   }}</CBadge>
                 </td>
@@ -162,37 +162,37 @@
               <template #properties="{ item }">
                 <td>
                   <span v-if="item.global_rule"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag"
                       >Global Rule</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.run_retroactively"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag"
                       >Retroactive</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.merge_into_case"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag"
                       >Merge Into Case</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.create_new_case"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag"
                       >Create New Case</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.dismiss"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag"
                       >Dismiss Event</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.expire"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag"
                       >Rule Expires</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.notification_channels && item.notification_channels.length > 0"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge class="tag" color="info"
                       >Notifies</CBadge
                     >&nbsp;</span
                   >

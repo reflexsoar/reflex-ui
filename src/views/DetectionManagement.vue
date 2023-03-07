@@ -133,6 +133,7 @@
               <!--<DetectionRules></DetectionRules>-->
             </CTab>
             <CTab title="Detection Repositories">
+              <DetectionRepositoryList/>
             </Ctab>
             <CTab title="Detection Bundles">
             </CTab>
@@ -170,6 +171,7 @@ import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import OrganizationBadge from './OrganizationBadge'
 import DetectionRuleModal from './DetectionRuleModal'
+import DetectionRepositoryList from './detections/DetectionRepositoryList'
 import ImportSigmaRuleWizard from './detections/ImportSigmaRuleWizard.vue';
 import RMultiCheck from './components/MultiCheck'
 
@@ -181,7 +183,8 @@ export default {
     OrganizationBadge,
     DetectionRuleModal,
     ImportSigmaRuleWizard,
-    RMultiCheck
+    RMultiCheck,
+    DetectionRepositoryList
 },
   data() {
     return {
