@@ -8,7 +8,7 @@
               <h2>{{ event_data.title }}</h2>
               <CIcon name="cilTags" />&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags"
               :key="tag">
-              <CButton color="dark" class="tag" size="sm">{{ tag }}</CButton>
+              <CBadge color="dark" class="tag tag-list" size="sm">{{ tag }}</CBadge>
             </li>
             </CCol>
             <CCol col="2" style="border-left: 1px solid #cfcfcf" class="text-right">
@@ -89,7 +89,7 @@
                   <td>
                     <CIcon name='cilTags' />&nbsp;<li style="display: inline; margin-right: 2px;"
                       v-for="tag,i in item.tags" :key="i">
-                      <CButton color="primary" size="sm" disabled>{{ tag }}</CButton>
+                      <CBadge class="tag tag-list" color="info" size="sm">{{ tag }}</CBadge>
                     </li>
                   </td>
                 </template>
@@ -202,12 +202,12 @@
               <h4>MITRE ATT&CK</h4>
               <p><b>MITRE ATT&CK Tactics</b>
                 <li style="display: inline; margin-right: 2px;" v-for="t in detection.tactics" :key="t.name">
-                  <CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton>
+                  <CBadge class="tag" color="info" size="sm" disabled="">{{ t.name }}</CBadge>
                 </li>
               </p>
               <p><b>MITRE ATT&CK Techniques</b>
                 <li style="display: inline; margin-right: 2px;" v-for="t in detection.techniques" :key="t.name">
-                  <CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton>
+                  <CBadge class="tag" color="info" size="sm" disabled="">{{ t.name }}</CBadge>
                 </li>
               </p>
 
@@ -230,14 +230,14 @@
                   <template #values="{ item }">
                     <td>
                       <li style="display: inline; margin-right: 2px;" v-for="value in item.values" :key="value">
-                        <CButton color="primary" size="sm" disabled>{{ value }}</CButton>
+                        <CBadge class="tag" color="dark" size="sm" disabled>{{ value }}</CBadge>
                       </li>
                     </td>
                   </template>
                   <template #list="{ item }">
                     <td>
                       <span v-if="item.list.name !== null">
-                        <CButton color="primary" size="sm" disabled>{{ item.list.name }}</CButton>
+                        <CBadge class="tag" color="dark" size="sm" disabled>{{ item.list.name }}</CBadge>
                       </span>
                     </td>
                   </template>

@@ -22,7 +22,7 @@
                   <CButton color="primary" @click="createDetectionModal()">New Detection</CButton>
                 </CCol>
                 <CCol col="5" class='text-right'>
-                  <CDropdown color="secondary" toggler-text="Actions">
+                  <CDropdown color="dark" toggler-text="Bulk Actions" size="sm" v-bind:disabled="selected_items.length == 0">
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="enableDetections()"><CIcon name='cilCheck'/>&nbsp;Enable {{selected_items.length}} Detections</CDropdownItem>
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="disableDetections()"><CIcon name='cilBan'/>&nbsp;Disable {{selected_items.length}} Detections</CDropdownItem>
                       <CDropdownItem v-bind:disabled="selected_items.length == 0"  @click="deleteDetectionModal()"><CIcon name='cilTrash' size="sm"/>&nbsp;Delete {{selected_items.length}} Detections</CDropdownItem>
@@ -86,47 +86,46 @@
                     </td>
                   </template>
                   <template #performance="{ item }">
-                    <td>
-                      {{ item.query_time_taken ? item.query_time_taken.toLocaleString() : 0 }} ms / {{ item.time_taken ?
+                    <td class="small">
+                      Query Time: {{ item.query_time_taken ? item.query_time_taken.toLocaleString() : 0 }} ms<br>
+                      Total Time: {{ item.time_taken ?
                           item.time_taken.toLocaleString() : 0
                       }} ms
                     </td>
                   </template>
                   <template #actions="{ item }">
                     <td style="min-width:25px" class="text-right">
-                      <CButtonGroup>
-                        <CButton aria-label="View Detection" :to="`detections/${item.uuid}`" size="sm" color="primary"
-                          v-c-tooltip="{ content: 'View Detection', placement: 'left' }">
-                          <CIcon name='cilMagnifyingGlass' />
-                        </CButton>
-                        <CButton aria-label="Edit Detection" @click="editDetectionModal(item.uuid)" size="sm"
+                      <CDropdown color="dark" toggler-text="Manage" size="sm">
+                        <CDropdownItem aria-label="View Detection" :to="`detections/${item.uuid}`" size="sm" color="primary"
+                          v-c-tooltip="{ content: 'View Detection', placement: 'left' }"><CIcon name='cilMagnifyingGlass' />&nbsp; View Detection</CDropdownItem>
+                        <CDropdownItem aria-label="Edit Detection" @click="editDetectionModal(item.uuid)" size="sm"
                           color="info" v-c-tooltip="{ content: 'Edit Detection', placement: 'left' }">
-                          <CIcon name='cilPencil' />
-                        </CButton>
-                        <CButton v-if="item.active" aria-label="Disable Detection" @click="disableDetection(item.uuid)"
+                          <CIcon name='cilPencil' />&nbsp;Edit Detection
+                          </CDropdownItem>
+                        <CDropdownItem v-if="item.active" aria-label="Disable Detection" @click="disableDetection(item.uuid)"
                           size="sm" color="warning" v-c-tooltip="{ content: 'Disable Detection', placement: 'left' }">
-                          <CIcon name='cilBan' />
-                        </CButton>
-                        <CButton v-if="!item.active" aria-label="Enable Detection" @click="enableDetection(item.uuid)"
+                          <CIcon name='cilBan' />&nbsp;Disable Detection
+                        </CDropdownItem>
+                        <CDropdownItem v-if="!item.active" aria-label="Enable Detection" @click="enableDetection(item.uuid)"
                           size="sm" color="success" v-c-tooltip="{ content: 'Enable Detection', placement: 'left' }">
-                          <CIcon name='cilCheck' />
-                        </CButton>
-                        <CButton aria-label="Clone Detection" size="sm" color="secondary"
+                          <CIcon name='cilCheck' />&nbsp;Enable Detection
+                        </CDropdownItem>
+                        <CDropdownItem aria-label="Clone Detection" size="sm" color="secondary"
                           @click="cloneDetection(item.uuid)"
                           v-c-tooltip="{ content: 'Clone Detection', placement: 'left' }">
-                          <CIcon name='cilCopy' />
-                        </CButton>
-                        <CButton aria-label="Export Detection" @click="exportDetection(item.uuid)"
+                          <CIcon name='cilCopy' />&nbsp;Clone Detection
+                        </CDropdownItem>
+                        <CDropdownItem aria-label="Export Detection" @click="exportDetection(item.uuid)"
                           size="sm" color="info"
                           v-c-tooltip="{ content: 'Export Detection - COMING SOON', placement: 'left' }">
-                          <CIcon name='cilCloudDownload' />
-                        </CButton>
-                        <CButton v-if="!item.active" aria-label="Delete Detection"
+                          <CIcon name='cilCloudDownload' />&nbsp;Export Detection
+                        </CDropdownItem>
+                        <CDropdownItem v-if="!item.active" aria-label="Delete Detection"
                           @click="deleteDetectionModal(item.uuid)" size="sm" color="danger"
                           v-c-tooltip="{ content: 'Delete Detection', placement: 'left' }">
-                          <CIcon name='cilTrash' />
-                        </CButton>
-                      </CButtonGroup>
+                          <CIcon name='cilTrash' />&nbsp;Delete Detection
+                        </CDropdownItem>
+                      </CDropdown>
                     </td>
                   </template>
                 </CDataTable>
