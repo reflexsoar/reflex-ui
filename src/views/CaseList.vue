@@ -282,9 +282,9 @@ export default {
       }
         this.filterCases()
         this.loadClosureReasons()
-        this.refresh = setInterval(function() {
-          this.filterCases()
-        }.bind(this), 60000)
+        //this.refresh = setInterval(function() {
+        //  this.filterCases()
+        //}.bind(this), 60000)
     },
     data(){
       return {
