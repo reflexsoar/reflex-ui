@@ -47,13 +47,13 @@
             <CDropdownItem v-if="!item.read_only" color="danger" @click="deleteRepository(item.uuid)" size="sm"
               ><CIcon name="cilTrash" />&nbsp;Delete Repository
             </CDropdownItem>
-            <CDropdownItem v-if="!item.subscribed" @click="startSubscriptionWizard(item.uuid)" size="sm">
+            <CDropdownItem v-if="!item.subscribed && item.organization != current_user.organization" @click="startSubscriptionWizard(item.uuid)" size="sm">
                 <CIcon name="cilPlus" />&nbsp;Subscribe to Repository
             </CDropdownItem>
-            <CDropdownItem v-if="item.subscribed" @click="startUnsubscripeProcess(item.uuid)" size="sm">
+            <CDropdownItem v-if="item.subscribed && item.organization != current_user.organization" @click="startUnsubscripeProcess(item.uuid)" size="sm">
                 <CIcon name="cilMinus" />&nbsp;Unsubscribe from Repository
             </CDropdownItem>
-            <CDropdownItem v-if="item.subscribed" @click="forceSync(item.uuid)" size="sm">
+            <CDropdownItem v-if="item.subscribed && item.organization != current_user.organization" @click="forceSync(item.uuid)" size="sm">
                 <CIcon name="cilSync" />&nbsp;Synchronize Now
             </CDropdownItem>
           </CDropdown>
@@ -130,7 +130,7 @@ import { mapState } from "vuex";
 export default {
   name: "DetectionRepositoryList",
   computed: {
-    ...mapState(["detection_repositories"]),
+    ...mapState(["detection_repositories","current_user"]),
   },
   created: function () {
     this.loading = true;
