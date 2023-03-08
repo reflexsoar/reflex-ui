@@ -192,7 +192,8 @@ export default {
       confirm_delete: false,
       selected_items: [],
       picker_filters: {},
-      detection_list_fields: [{key:'select', label:'', filter: false}, 'name', 'organization', 'last_run', 'last_hit', 'total_hits', { key: 'performance', label: 'Query Time / Total Time' }, {key: 'actions', filter: false}],
+      loading: false,
+      detection_list_fields: [{key:'select', label:'', filter: false}, 'name', 'last_run', 'last_hit', 'total_hits', { key: 'performance', label: 'Query Time / Total Time' }, {key: 'actions', filter: false}],
       modal_mode: "Create",
       show_detection_rule_modal: false,
       show_import_sigma_rule_modal: false,
@@ -485,17 +486,6 @@ export default {
   computed: {
     filtered_items() {
       let items = this.detections;
-      let action = "getDetections";
-      if (items.length == 0) {
-        this.$store.dispatch(action, {});
-        if (this.tags !== undefined) {
-          this.tags = items.map((item) => {
-            if (item.tags !== undefined && item.tags.length > 0) {
-              return item.tags;
-            }
-          });
-        }
-      }
       let _items = [];
       if (Object.keys(this.picker_filters).length == 0) {
         return items;
@@ -535,11 +525,21 @@ export default {
         return { label: o.name, value: o.uuid };
       });
     },
-    ...mapState(['alert', 'detections', 'loading','organizations'])
+    ...mapState(['alert', 'detections', 'loading','organizations', 'current_user'])
   },
   created() {
+    if(this.current_user.default_org) {
+      if (!this.detection_list_fields.includes('organization')) {
+        this.detection_list_fields.splice(2,0,{key:'organization',sorter: false})
+        
+      }
+      //this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
+    }
     this.$store.commit('add_start') // Stop the success/fail add from showing up when changing from other pages
-    this.$store.dispatch('getDetections', {page_size: 10000})
+    this.loading = true
+    this.$store.dispatch('getDetections', {page_size: 10000}).then(() => {
+      this.loading = false
+    })
   }
 }
 </script>

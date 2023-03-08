@@ -3771,6 +3771,42 @@ const actions = {
         reject(err)
       })
     })
+  },
+  createDetectionRepositorySubscription({commit}, {repository_uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${repository_uuid}/subscribe`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('update_detection_repository', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteDetectionRepositorySubscription({commit}, {repository_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${repository_uuid}/unsubscribe`, method: 'POST'})
+      .then(resp => {
+        commit('update_detection_repository', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  synchronizeDetectionRepository({commit}, {repository_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${repository_uuid}/sync`, method: 'POST'})
+      .then(resp => {
+        commit('update_detection_repository', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 }
 

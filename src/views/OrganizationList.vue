@@ -52,6 +52,17 @@
             <CButton size="sm" color="secondary" @click="downloadSOCReport(item.uuid)">SOC Report</CButton>
           </td>
         </template>
+        <template #logon_domains="{item}">
+          <td>
+            <li
+            style="display: inline; margin-right: 2px"
+            v-for="domain,i in item.logon_domains.split('\n')"
+            :key="i"
+          >
+            <CButton color="primary" size="sm" disabled>{{ domain }}</CButton>
+          </li>
+          </td>
+          </template>
       </CDataTable>
       <CRow>
         <CCol>
