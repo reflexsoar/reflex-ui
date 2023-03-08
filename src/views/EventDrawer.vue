@@ -98,7 +98,7 @@
           </CTab>
           <CTab title="Raw Log">
             <CCardBody class="tab-container">
-              <json-view :data="jsonify(event_data.raw_log)" rootKey="/" :maxDepth="1" />              
+              <vue-json-pretty :data="jsonify(event_data.raw_log)" :showLength="true" :showIcon="true" :deep="1" :showDoubleQuotes="false" />              
               <!--<vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'"
                 :data="jsonify(event_data.raw_log)"></vue-json-pretty><br>-->
             </CCardBody>
@@ -153,7 +153,7 @@
                 <h3>Matched Event Rules</h3>
                 <p>The rules listed below have acted on this event at some point in time.</p>
                 <CRow v-for="rule in rules" :key="rule.uuid">
-                  <CCol>
+                  <CCol style="overflow-y: scroll; max-height:65vh">
                     <CCardBody>
                       <h5>{{ rule.name }}</h5>
                       <vue-markdown>{{ rule.description }}</vue-markdown>

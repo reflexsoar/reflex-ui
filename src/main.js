@@ -23,8 +23,10 @@ import Editor from 'v-markdown-editor'
 import VueApexCharts from 'vue-apexcharts'
 import JSONView from 'vue-json-component';
 import VueTour from 'vue-tour'
+import VueJsonPretty from 'vue-json-pretty'
 
 require('vue-tour/dist/vue-tour.css')
+require('vue-json-pretty/lib/styles.css')
 
 Vue.config.performance = true
 Vue.use(CoreuiVuePro)
@@ -37,6 +39,7 @@ Vue.use(Editor);
 Vue.use(VueApexCharts)
 Vue.use(JSONView)
 Vue.use(VueTour)
+Vue.use(VueJsonPretty)
 
 Vue.component('apexchart', VueApexCharts)
 Vue.component('vue-markdown', VueMarkdown)
