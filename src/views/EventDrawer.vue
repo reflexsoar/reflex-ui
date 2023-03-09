@@ -49,17 +49,17 @@
         <hr style="margin-bottom: 0px; margin-top: 0px;">
         <CTabs :activeTab.sync="activeTab" class="tabbed">
           <CTab title="Overview" active>
-            <CCardBody>
+            <CCardBody class="tab-container">
               <h3>Description</h3>
               {{ event_data.description }}
-            </CCardBody>
+            
             <hr>
-            <CCardBody>
+            
               <h3>Observables</h3>
               <CDataTable :hover="true" :items="event_data.observables" :fields="observable_fields" :items-per-page="10"
                 bordered striped pagination>
                 <template #value="{ item }">
-                  <td>
+                  <td class="observable-value">
                     <b>{{ item.value }}</b><br><small>{{ item.source_field ? item.source_field.toLowerCase() : 'none' }} |
                       {{ item.data_type }}</small>
                   </td>
@@ -147,11 +147,13 @@
             </CRow>
           </CTab>
           <CTab v-if="this.event_data.event_rules">
-              <template #title>
+            <template #title>
                 Matched Event Rules&nbsp;<CBadge color="info" class="tag" size="sm" v-if="event_data.event_rules.length > 0">{{event_data.event_rules.length}}</CBadge>
               </template>
-            <CRow style="padding: 10px 10px 0px 10px">
+            <CCardBody  class="tab-container">  
+            <CRow>
               <CCol>
+                
                 <h3>Matched Event Rules</h3>
                 <p>The rules listed below have acted on this event at some point in time.</p>
                 <div v-if="!rules_loading"><CRow v-for="rule in rules" :key="rule.uuid">
@@ -165,6 +167,7 @@
                     </div>
               </CCol>
             </CRow>
+            </CCardBody>
           </CTab>
           <CTab title="Detection" v-if="this.event_data.detection_id">
             <CCardBody class="tab-container">
@@ -273,9 +276,21 @@
 </template>
 
 <style scoped>
+
+.observable-value {
+  max-width: 50ch;
+  overflow-y: clip;
+  text-overflow: ellipsis;
+}
+
+.observable-value:hover {
+  overflow-y: visible;
+  overflow-wrap: anywhere;
+}
+
 .tab-container {
-  overflow-x: scroll;
-  max-height: calc(100vh - 200px);
+  overflow-x: hidden;
+  max-height: calc(100vh - 250px);
 }
 
 .c-sidebar {
@@ -307,6 +322,10 @@
 
 .overflow-guard {
   height: 100% !important
+}
+
+.table-responsive {
+  overflow-y: none;
 }
 </style>
 
@@ -378,6 +397,7 @@ export default {
   watch: {
     minimize(val) {
       if (!val) {
+        document.body.style.overflow = 'hidden'
         this.comments_loading = true
         this.$store.dispatch('getEventIndex', this.event_data.uuid).then(resp => {
           let data = resp.data
@@ -403,6 +423,8 @@ export default {
             this.detection = resp.data
           })
         }
+      } else {
+        document.body.style.overflow = 'auto'
       }
     }
   },

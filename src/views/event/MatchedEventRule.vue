@@ -5,11 +5,16 @@
         ><CIcon name="cilChevronTop" v-if="!show_details" /><CIcon
           name="cilChevronBottom"
           v-else
-        />&nbsp;<b>{{ rule.name }}</b><br>{{rule.description}}</CCardHeader
+        />&nbsp;<b>{{ rule.name }}</b><br></CCardHeader
       >
       <CCollapse :show.sync="show_details">
         <CCardBody>
-          <vue-markdown>{{ rule.description }}</vue-markdown>
+          <CRow>
+            <CCol>
+              <vue-markdown>{{ rule.description }}</vue-markdown>
+            </CCol>
+          </CRow>
+          <label>Rule Query</label>
           <prism-editor
             rows="10"
             class="my-editor"
@@ -17,6 +22,12 @@
             :highlight="highlighter"
             line-numbers
           ></prism-editor>
+          <CRow>
+            <CCol>
+              <br><b>Actions</b>
+              <vue-markdown>{{ rule }}</vue-markdown>
+            </CCol>
+          </CRow>
         </CCardBody>
       </CCollapse>
     </CCard>
