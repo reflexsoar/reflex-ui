@@ -120,10 +120,10 @@
                 table-filter
                 >
                 <template #Field="{ item }">
-                  <td><b>{{item.Field}}</b></td>
+                  <td class="col-4"><b>{{item.Field}}</b></td>
                 </template>
                 <template #Value="{ item }">
-                  <td v-if="!Array.isArray(item.Value)">{{item.Value}}</td>
+                  <td class="table-view-value" v-if="!Array.isArray(item.Value)">{{item.Value}}</td>
                   <td v-else>
                     <ul class="no-bullets">
                       <li v-for="value in item.Value" :key="value">
@@ -360,6 +360,12 @@ ul.no-bullets {
   list-style-type: none; /* Remove bullets */
   padding: 0; /* Remove padding */
   margin: 0; /* Remove margins */
+}
+
+.table-view-value {
+  max-width: 100ch;
+  overflow-y: clip;
+  text-overflow: ellipsis;
 }
 
 </style>
