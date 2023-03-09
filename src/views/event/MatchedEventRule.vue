@@ -22,12 +22,6 @@
             :highlight="highlighter"
             line-numbers
           ></prism-editor>
-          <CRow>
-            <CCol>
-              <br><b>Actions</b>
-              <vue-markdown>{{ rule }}</vue-markdown>
-            </CCol>
-          </CRow>
         </CCardBody>
       </CCollapse>
     </CCard>
@@ -48,8 +42,6 @@
   font-size: 14px;
   line-height: 1.5;
   padding: 5px;
-  max-height: 300px;
-  overflow-y: scroll;
 }
 
 /* optional class for removing the outline */
