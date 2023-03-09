@@ -5,10 +5,8 @@
       <CCol>
         <CCardBody>
           <CRow>
-            <CCol><h2>{{mitre_technique.name}} - {{mitre_technique.external_id}}</h2><label>Phases</label>:&nbsp;<li style="display: inline; margin-right: 2px;" v-for="name in mitre_technique.phase_names"
-              :key="name">
-              <CButton color="dark" class="tag" size="sm">{{ name }}</CButton>
-            </li></CCol>
+            <CCol><h2>{{mitre_technique.name}} - {{mitre_technique.external_id}}</h2><TagList :tags="mitre_technique.phase_names" :tagIcon="false"/>
+              </CCol>
             
             <CCol col="3" class="text-right">
               <CButton color="secondary" @click="$store.commit('set', ['mitreDrawerMinimize', true])">Close</CButton>
@@ -120,6 +118,7 @@ import { mapState } from "vuex";
 import nav from '../../containers/_nav'
 import 'vue-json-pretty/lib/styles.css';
 import CRightDrawer from '../CRightDrawer'
+import TagList from '../components/TagList'
 
 export default {
   name: 'MitreTechniqueDrawer',
@@ -132,7 +131,8 @@ export default {
     }
   },
   components: {
-    CRightDrawer
+    CRightDrawer,
+    TagList
   },
   created: function () {     
   },

@@ -1,7 +1,7 @@
 <template>
   <div>
     <CIcon name="cilTags" />&nbsp;
-    <li style="display: inline; margin-right: 2px" v-for="tag in tags" :key="tag">
+    <li style="display: inline; margin-right: 2px" v-for="tag, i in tags" :key="i">
       <CBadge color="dark" class="tag tag-list" size="sm">{{ tag }}</CBadge>
     </li>
   </div>
@@ -11,7 +11,11 @@
 export default {
   name: "TagList",
   props: {
-    tags: Object,
+    tags: Array,
+    tagIcon: {
+        type: Boolean,
+        default: true
+    }
   },
   data() {
     return {

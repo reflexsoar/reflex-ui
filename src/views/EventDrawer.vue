@@ -148,7 +148,7 @@
           </CTab>
           <CTab v-if="this.event_data.event_rules">
               <template #title>
-                Matched Event Rules&nbsp;<CBadge color="info" class="tag" size="sm" v-if="event_data.event_rules">{{event_data.event_rules.length}}</CBadge>
+                Matched Event Rules&nbsp;<CBadge color="info" class="tag" size="sm" v-if="event_data.event_rules.length > 0">{{event_data.event_rules.length}}</CBadge>
               </template>
             <CRow style="padding: 10px 10px 0px 10px">
               <CCol>
