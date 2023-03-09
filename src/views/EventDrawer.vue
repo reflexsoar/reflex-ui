@@ -146,22 +146,23 @@
               </CCol>
             </CRow>
           </CTab>
-          <CTab :title="`Matched Event Rules (${this.event_data.event_rules.length})`"
-            v-if="this.event_data.event_rules">
+          <CTab v-if="this.event_data.event_rules">
+              <template #title>
+                Matched Event Rules&nbsp;<CBadge color="info" class="tag" size="sm" v-if="event_data.event_rules">{{event_data.event_rules.length}}</CBadge>
+              </template>
             <CRow style="padding: 10px 10px 0px 10px">
               <CCol>
                 <h3>Matched Event Rules</h3>
                 <p>The rules listed below have acted on this event at some point in time.</p>
-                <CRow v-for="rule in rules" :key="rule.uuid">
-                  <CCol style="overflow-y: scroll; max-height:65vh">
-                    <CCardBody>
-                      <h5>{{ rule.name }}</h5>
-                      <vue-markdown>{{ rule.description }}</vue-markdown>
-                      <prism-editor rows="10" class="my-editor" v-model="rule.query" :highlight="highlighter"
-                        line-numbers></prism-editor>
-                    </CCardBody>
+                <div v-if="!rules_loading"><CRow v-for="rule in rules" :key="rule.uuid">
+                  <CCol>
+                    
+                      <MatchedEventRule :rule="rule"/>
+                    
                   </CCol>
-                </CRow>
+                </CRow></div><div v-else class="text-center">
+                      <CSpinner color="primary" size="xl"></CSpinner>
+                    </div>
               </CCol>
             </CRow>
           </CTab>
@@ -246,6 +247,9 @@
             </CCardBody>
           </CTab>
           <CTab :title="`Comments (${this.event_data.total_comments})`">
+            <template #title>
+                Comments&nbsp;<CBadge color="info" class="tag" size="sm" v-if="event_data.total_comments > 0">{{event_data.total_comments}}</CBadge>
+              </template>
             <CCardBody class="tab-container">
               <CCard v-if="event_data.dismiss_comment"><CCardHeader>Dismissed By <b>{{event_data.dismissed_by.username}}</b> - {{ event_data.dismissed_at | moment('from','now')}}</CCardHeader>
                 <CCardBody><vue-markdown>{{event_data.dismiss_comment}}</vue-markdown></CCardBody>
@@ -352,7 +356,7 @@ import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhe
 import 'prismjs/components/prism-python';
 import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
-import MonacoEditor from 'monaco-editor-vue';
+import MatchedEventRule from './event/MatchedEventRule'
 
 export default {
   name: 'EventDrawer',
@@ -364,7 +368,7 @@ export default {
     VueJsonPretty,
     CRightDrawer,
     PrismEditor,
-    MonacoEditor
+    MatchedEventRule
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
@@ -388,8 +392,10 @@ export default {
         })
         this.event_data = this.$store.getters.event
         if (this.event_data.event_rules) {
+          this.rules_loading = true
           this.$store.dispatch('loadEventRules', { rules: this.event_data.event_rules, save: false }).then(resp => {
             this.rules = resp.data.event_rules
+            this.rules_loading = false
           })
         }
         if (this.event_data.detection_id) {
@@ -408,6 +414,7 @@ export default {
       detection: {},
       comments: [],
       comments_loading: false,
+      rules_loading: false,
       event_index: []
     }
   },
