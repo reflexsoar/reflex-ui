@@ -18,6 +18,29 @@
         <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
           {{ alert.message }}
         </CAlert>
+
+        <!--<CRow>
+          <CCol>
+            <CCard>
+              <CCardHeader color="secondary">Event Rule Summary</CCardHeader>
+              <CCardBody><CRow>
+                <CCol class="text-center">
+                  <h1>{{event_rules.length}}</h1>
+                  <small>TOTAL RULES</small>
+                </CCol>
+                <CCol class="text-center" style="border-left:1px solid #cfcfcf">
+                  <h1>{{event_rules.filter(rule => rule.active).length}}</h1>
+                  <small>ACTIVE RULES</small>
+                </CCol>
+                <CCol class="text-center" style="border-left:1px solid #cfcfcf">
+                  <h1>{{event_rules.filter(rule => !rule.active).length}}</h1>
+                  <small>DISABLED RULES</small>
+                </CCol>
+              </CRow></CCardBody>
+              </CCard>
+          </CCol>
+          </CRow>-->
+
         <CCard>
           <CCardHeader style="border-bottom: 0px">
             <CRow>
@@ -59,8 +82,8 @@
               </template>
               
               <template #name="{ item }">
-                <td>
-                  <b>{{ item.name }}</b
+                <td style="min-width: 80ch">
+                  <CBadge class="tag tag-sm" color="success" v-if="item.active">Active</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge>&nbsp;<b>{{ item.name }}</b
                   ><br />{{ item.description }}
                 </td>
               </template>
@@ -163,37 +186,37 @@
               <template #properties="{ item }">
                 <td>
                   <span v-if="item.global_rule"
-                    ><CBadge color="info" class="tag"
+                    ><CBadge color="info" class="tag tag-list"
                       >Global Rule</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.run_retroactively"
-                    ><CBadge color="info" class="tag"
+                    ><CBadge color="info" class="tag tag-list"
                       >Retroactive</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.merge_into_case"
-                    ><CBadge color="info" class="tag"
+                    ><CBadge color="info" class="tag tag-list"
                       >Merge Into Case</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.create_new_case"
-                    ><CBadge color="info" class="tag"
+                    ><CBadge color="info" class="tag tag-list"
                       >Create New Case</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.dismiss"
-                    ><CBadge color="info" class="tag"
+                    ><CBadge color="info" class="tag tag-list"
                       >Dismiss Event</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.expire"
-                    ><CBadge color="info" class="tag"
+                    ><CBadge color="info" class="tag tag-list"
                       >Rule Expires</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.notification_channels && item.notification_channels.length > 0"
-                    ><CBadge class="tag" color="info"
+                    ><CBadge class="tag tag-list" color="info"
                       >Notifies</CBadge
                     >&nbsp;</span
                   >
