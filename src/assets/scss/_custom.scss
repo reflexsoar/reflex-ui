@@ -572,3 +572,8 @@ html:not([dir="rtl"]) nav >  .pagination {
         transform: rotate(359deg);
     }
 }
+
+.c-multi-select-options {
+    max-height: 400px;
+    overflow-y: auto;
+}

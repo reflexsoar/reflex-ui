@@ -346,6 +346,7 @@
         </CRow></div>
       </CCol>
     </CRow>
+    
     <DetectionExclusionModal
       :exclusion.sync="exclusion"
       :rule.sync="detection"
