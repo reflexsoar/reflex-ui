@@ -35,6 +35,10 @@ button.kb {
     z-index: 1051;
 }
 
+.c-sidebar {
+    z-index: 2050 !important;
+}
+
 .admonition {
     border-right: 1px solid #cfcfcf;
     border-top: 1px solid #cfcfcf;
@@ -330,6 +334,16 @@ a {
 .tag-list {
     margin-top: 1px;
     //font-size: .7rem !important;
+}
+
+.tag-sm {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    font-weight: normal !important;
+    line-height: 1.5 !important;
+    font-size: 80% !important;
 }
 
 .badge.tag {

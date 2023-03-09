@@ -60,7 +60,7 @@
                     <b>Created By: </b>{{case_data.created_by.username}}&nbsp;<br><b>Updated By: </b>{{case_data.updated_by.username}}
                 </CCol>
                 <CCol col="6" class="text-right" @mouseenter="edit_tags_hint = true" @mouseleave="edit_tags_hint = false">
-                    <span v-if="!edit_tags"><CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in case_data.tags" :key="tag.name"><CButton color="primary" size="sm" disabled="">{{ tag.name }}</CButton></li><a v-if="edit_tags_hint" @click="editTags()"><CIcon  style="cursor: pointer"  name="cilPencil" size="sm"/></a></span>
+                    <span v-if="!edit_tags"><TagList :tags="case_data.tags" label="name"/><a v-if="edit_tags_hint" @click="editTags()"><CIcon  style="cursor: pointer"  name="cilPencil" size="sm"/></a></span>
                     <span v-if="edit_tags">
                         <multiselect 
                             v-model="current_tags" 
@@ -215,7 +215,7 @@
                   <td>
                       <input v-if="!(item.case_uuid || item.status.closed)" type="checkbox" :value="item.uuid" v-model="selected"/>&nbsp;<a @click="toggleObservableFilter({'filter_type':'title','dataType':'title','value':item.title})">{{item.title}}</a><br>
                       <CIcon name="cilCenterFocus"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in item.observables.slice(0,3)" :key="obs.uuid"><CButton color="secondary" class="tag"  size="sm" style="margin-top:5px; margin-bottom:5px;" @click="toggleObservableFilter({'filter_type':'observable', 'dataType': obs.data_type, 'value': obs.value})"><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li><span v-if="item.observables.length > 3" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(item.observables.slice(3))}"><small>&nbsp;+{{ item.observables.length - 3}}</small></span><br>
-                      <CIcon name="cilTags"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag.name"><CButton @click="toggleObservableFilter({'filter_type': 'tag', 'dataType':'tag', 'value':tag})" color="dark" class="tag" size="sm">{{ tag }}</CButton></li>
+                      <TagList :tags="item.tags"/>
                   </td>
               </template>
               <template #reference="{item}">
@@ -394,6 +394,7 @@ import CaseFileList from './CaseFileList'
 import EventDrawer from './EventDrawer.vue';
 import CRightDrawer from './CRightDrawer.vue';
 import 'v-markdown-editor/dist/v-markdown-editor.css';
+import TagList from './components/TagList'
 
 
 import { Mentionable } from 'vue-mention'
@@ -412,7 +413,8 @@ export default {
         ApplyCaseTemplateModal,
         Comments,
         CaseFileList,
-        EventDrawer
+        EventDrawer,
+        TagList
     },
     computed: mapState(['alert','current_user','settings','tags','case_observables']),
     props: {

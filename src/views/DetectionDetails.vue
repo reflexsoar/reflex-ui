@@ -436,7 +436,6 @@ export default {
       this.show_exclusion_modal = true;
     },
     editExclusion(uuid) {
-      console.log(uuid, this.detection.exceptions);
       if (this.detection.exceptions === undefined) {
         this.detection.exceptions = [];
       }

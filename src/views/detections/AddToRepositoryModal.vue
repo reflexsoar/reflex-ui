@@ -21,7 +21,6 @@ export default {
         ...mapState(["current_user", "detections"]),
         detection_options: function() {
             return this.detections.map((detection) => {
-                console.log(detection);
                 return {
                     text: detection.name,
                     value: detection.uuid,

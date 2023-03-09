@@ -2,7 +2,8 @@
   <div>
     <CIcon name="cilTags" />&nbsp;
     <li style="display: inline; margin-right: 2px" v-for="tag, i in tags" :key="i">
-      <CBadge color="dark" class="tag tag-list" size="sm">{{ tag }}</CBadge>
+      <CBadge color="dark" class="tag tag-list" size="sm">
+        {{ label === null ? tag : tag[label] }}</CBadge>
     </li>
   </div>
 </template>
@@ -15,7 +16,11 @@ export default {
     tagIcon: {
         type: Boolean,
         default: true
-    }
+    },
+    label: {
+      type: String,
+      default: null,
+    },
   },
   data() {
     return {

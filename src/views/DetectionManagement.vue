@@ -112,7 +112,7 @@
                   </template>
                   <template #name="{ item }">
                     <td>
-                      <b>{{ item.name }}</b
+                      <CBadge class="tag tag-sm" color="success" v-if="item.active">Active</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge>&nbsp;<b>{{ item.name }}</b
                       ><br />
                       <span v-if="item.warnings && item.warnings.length > 0">
                         <li
@@ -401,7 +401,6 @@ export default {
       let data = {
         detections: JSON.parse(this.import_json),
       };
-      console.log(data);
       this.$store.dispatch("importDetections", { data: data }).then(() => {
         this.import_json = "";
         this.import_wizard = false;
