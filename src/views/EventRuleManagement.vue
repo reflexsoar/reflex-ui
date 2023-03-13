@@ -18,6 +18,29 @@
         <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
           {{ alert.message }}
         </CAlert>
+
+        <!--<CRow>
+          <CCol>
+            <CCard>
+              <CCardHeader color="secondary">Event Rule Summary</CCardHeader>
+              <CCardBody><CRow>
+                <CCol class="text-center">
+                  <h1>{{event_rules.length}}</h1>
+                  <small>TOTAL RULES</small>
+                </CCol>
+                <CCol class="text-center" style="border-left:1px solid #cfcfcf">
+                  <h1>{{event_rules.filter(rule => rule.active).length}}</h1>
+                  <small>ACTIVE RULES</small>
+                </CCol>
+                <CCol class="text-center" style="border-left:1px solid #cfcfcf">
+                  <h1>{{event_rules.filter(rule => !rule.active).length}}</h1>
+                  <small>DISABLED RULES</small>
+                </CCol>
+              </CRow></CCardBody>
+              </CCard>
+          </CCol>
+          </CRow>-->
+
         <CCard>
           <CCardHeader style="border-bottom: 0px">
             <CRow>
@@ -45,7 +68,6 @@
               :fields="fields"
               :loading="loading"
               :items-per-page="10"
-              items-per-page-select
               pagination
               hover
               column-filter
@@ -60,8 +82,8 @@
               </template>
               
               <template #name="{ item }">
-                <td>
-                  <b>{{ item.name }}</b
+                <td style="min-width: 80ch">
+                  <CBadge class="tag tag-sm" color="success" v-if="item.active">Active</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge>&nbsp;<b>{{ item.name }}</b
                   ><br />{{ item.description }}
                 </td>
               </template>
@@ -83,7 +105,8 @@
               </template>
               <template #manage="{ item }">
                 <td class="text-right">
-                  <CButton
+                  <CDropdown color="secondary" size="sm" toggler-text="Manage">
+                  <CDropdownItem
                     aria-label="Export Rule"
                     disabled
                     @click="downloadRuleAsJSON(item.uuid)"
@@ -93,24 +116,24 @@
                       content: 'Export Rule - COMING SOON',
                       placement: 'left',
                     }"
-                    ><CIcon name="cilCloudDownload" /></CButton
-                  >&nbsp;
-                  <CButton
+                    ><CIcon name="cilCloudDownload" />&nbsp;Export Rule</CDropdownItem
+                  >
+                  <CDropdownItem
                     aria-label="Clone Rule"
                     size="sm"
                     color="secondary"
                     @click="cloneRule(item.uuid)"
-                    ><CIcon name="cilCopy" /></CButton
-                  >&nbsp;
-                  <CButton
+                    ><CIcon name="cilCopy" />&nbsp;Clone Rule</CDropdownItem
+                  >
+                  <CDropdownItem
                     aria-label="Edit Rule"
                     size="sm"
                     color="info"
                     @click="editRule(item.uuid)"
                     v-c-tooltip="{ content: 'Edit Rule', placement: 'left' }"
-                    ><CIcon name="cilPencil" /></CButton
-                  >&nbsp;
-                  <CButton
+                    ><CIcon name="cilPencil" />&nbsp;Edit Rule</CDropdownItem
+                  >
+                  <CDropdownItem
                     aria-label="Disable Rule"
                     v-if="item.active"
                     size="sm"
@@ -118,17 +141,17 @@
                     @click="disableRule(item.uuid)"
                     v-c-tooltip="{ content: 'Disable Rule', placement: 'left' }"
                     ><CIcon name="cilBan"
-                  /></CButton>
-                  <CButton
+                  />&nbsp;Disable Rule</CDropdownItem>
+                  <CDropdownItem
                     aria-label="Enable Rule"
                     v-else
                     size="sm"
                     color="success"
                     @click="enableRule(item.uuid)"
                     v-c-tooltip="{ content: 'Enable Rule', placement: 'left' }"
-                    ><CIcon name="cilCheck" /></CButton
-                  >&nbsp;
-                  <CButton
+                    ><CIcon name="cilCheck" />&nbsp;Enable Rule</CDropdownItem
+                  >
+                  <CDropdownItem
                     aria-label="Delete Rule"
                     v-if="!item.active"
                     color="danger"
@@ -139,7 +162,8 @@
                     size="sm"
                     v-c-tooltip="{ content: 'Delete Rule', placement: 'left' }"
                     ><CIcon name="cilTrash"
-                  /></CButton>
+                  />&nbsp;Delete Rule</CDropdownItem>
+                  </CDropdown>
                 </td>
               </template>
               <template #created_by="{ item }">
@@ -153,8 +177,8 @@
                 </td>
               </template>
               <template #priority="{ item }">
-                <td>
-                  <CBadge style="font-size: 90%; font-weight: 500" color="info">{{
+                <td class='text-center'>
+                  <CBadge class="tag" color="info">{{
                     item.priority
                   }}</CBadge>
                 </td>
@@ -162,37 +186,37 @@
               <template #properties="{ item }">
                 <td>
                   <span v-if="item.global_rule"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag tag-list"
                       >Global Rule</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.run_retroactively"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag tag-list"
                       >Retroactive</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.merge_into_case"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag tag-list"
                       >Merge Into Case</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.create_new_case"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag tag-list"
                       >Create New Case</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.dismiss"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag tag-list"
                       >Dismiss Event</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.expire"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge color="info" class="tag tag-list"
                       >Rule Expires</CBadge
                     >&nbsp;</span
                   >
                   <span v-if="item.notification_channels && item.notification_channels.length > 0"
-                    ><CBadge style="font-size: 90%; font-weight: 500" color="info"
+                    ><CBadge class="tag tag-list" color="info"
                       >Notifies</CBadge
                     >&nbsp;</span
                   >

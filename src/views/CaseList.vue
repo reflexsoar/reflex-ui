@@ -175,15 +175,15 @@
               </template>
               <template #tlp="{item}">
                 <td>
-                  <CButton v-if="item.tlp == 1" color="light" size="sm">TLP:WHITE</CButton>
-                  <CButton v-if="item.tlp == 2" color="success" size="sm">TLP:GREEN</CButton>
-                  <CButton v-if="item.tlp == 3" color="warning" size="sm">TLP:AMBER</CButton>
-                  <CButton v-if="item.tlp >= 4" color="danger" size="sm">TLP:RED</CButton>
+                  <CBadge class="tag" v-if="item.tlp == 1" color="light" size="sm">TLP:WHITE</CBadge>
+                  <CBadge class="tag" v-if="item.tlp == 2" color="success" size="sm">TLP:GREEN</CBadge>
+                  <CBadge class="tag" v-if="item.tlp == 3" color="warning" size="sm">TLP:AMBER</CBadge>
+                  <CBadge class="tag" v-if="item.tlp >= 4" color="danger" size="sm">TLP:RED</CBadge>
                 </td>
               </template>
               <template #severity="{item}">
                 <td>
-                  <CButton :color="getSeverityColor(item.severity)" size="sm" @click="toggleCaseFilter({'filter_type': 'severity', 'data_type':'severity','value':item.severity})">{{getSeverityText(item.severity)}}</CButton>
+                  <CBadge class="tag" :color="getSeverityColor(item.severity)" size="sm" @click="toggleCaseFilter({'filter_type': 'severity', 'data_type':'severity','value':item.severity})">{{getSeverityText(item.severity)}}</CBadge>
                 </td>
               </template>
               <template #owner="{item}">
@@ -282,9 +282,9 @@ export default {
       }
         this.filterCases()
         this.loadClosureReasons()
-        this.refresh = setInterval(function() {
-          this.filterCases()
-        }.bind(this), 60000)
+        //this.refresh = setInterval(function() {
+        //  this.filterCases()
+        //}.bind(this), 60000)
     },
     data(){
       return {

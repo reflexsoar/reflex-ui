@@ -39,9 +39,9 @@
               v-for="tag in item.tags"
               :key="tag"
             >
-              <CButton color="primary" size="sm" disabled>
+              <CBadge class="tag tag-list" color="info" size="sm" disabled>
                 {{ tag }}
-              </CButton>
+              </CBadge>
             </li>
           </td>
         </template>
@@ -129,14 +129,6 @@ export default {
   computed: {
     ...mapState(["current_user", "alert", "service_accounts", "organizations"]),
     filtered_service_accounts() {
-      if (this.service_accounts.length == 0) {
-        this.$store.dispatch("getServiceAccounts", {});
-        this.tags = this.service_accounts.map((account) => {
-          if (account.tags !== undefined && account.tags.length > 0) {
-            return account.tags;
-          }
-        });
-      }
 
       let accounts = [];
       if (Object.keys(this.picker_filters).length == 0) {
@@ -187,6 +179,13 @@ export default {
     },
   },
   created() {
+    this.$store.dispatch("getServiceAccounts", {}).then(() => {
+      this.tags = this.service_accounts.map((account) => {
+          if (account.tags && account.tags.length > 0) {
+            return account.tags;
+          }
+        });
+    });
     if (this.organizations.length == 0) {
       this.$store.dispatch("getOrganizations", {}).then(() => {
         this.formatted_organizations = this.$store.getters.formatted_organizations;

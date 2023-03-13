@@ -134,7 +134,9 @@ const state = {
   source_field_template: {},
   valid_data_types: ["none","url","user","sid","sha256hash","sha1hash","process","port",
   "pid","md5hash","mac","ip","imphash","host","generic","fqdn","filepath",
-  "email_subject","email","domain","detection_id","command"]
+  "email_subject","email","domain","detection_id","command"],
+  detection_repository: {},
+  detection_repositories: [],
 }
 
 const mutations = {
@@ -726,6 +728,22 @@ const mutations = {
   update_role(state, role) {
     state.role = role
     state.roles = state.roles.map(r => r.uuid == role.uuid ? role : r)
+  },
+  add_detection_repository(state, repo) {
+    state.detection_repositories.push(repo)
+    state.detection_repository = repo
+    state.status = 'success'
+  },
+  update_detection_repository(state, repo) {
+    state.detection_repository = repo
+    state.detection_repositories = state.detection_repositories.map(r => r.uuid == repo.uuid ? repo : r)
+  },
+  remove_detection_repository(state, uuid) {
+    state.detection_repository = {}
+    state.detection_repositories = state.detection_repositories.filter(r => r.uuid !== uuid)
+  },
+  save_detection_repositories(state, repos) {
+    state.detection_repositories = repos
   },
   save_tactics(state, tactics) {
     state.mitre_tactics = tactics
@@ -3735,6 +3753,54 @@ const actions = {
       let url = `${BASE_URL}/reporting/${organization}`
       Axios({url: url, method: 'GET', params: { days: days, soc_start_hour: soc_start_hour, soc_end_hour: soc_end_hour, utc_offset: utc_offset }})
       .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getDetectionRepositories({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", techniques=[], tactics=[], save=true, organization=null}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository`, method: 'GET'})
+      .then(resp => {
+        commit('save_detection_repositories', resp.data.repositories)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createDetectionRepositorySubscription({commit}, {repository_uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${repository_uuid}/subscribe`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('update_detection_repository', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteDetectionRepositorySubscription({commit}, {repository_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${repository_uuid}/unsubscribe`, method: 'POST'})
+      .then(resp => {
+        commit('update_detection_repository', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  synchronizeDetectionRepository({commit}, {repository_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${repository_uuid}/sync`, method: 'POST'})
+      .then(resp => {
+        commit('update_detection_repository', resp.data)
         resolve(resp)
       })
       .catch(err => {

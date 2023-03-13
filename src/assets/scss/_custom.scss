@@ -8,7 +8,7 @@ input {
 
 .tooltip-old-inner {
     max-width: none !important;
-  }
+}
 
 button.kb {
     background-color: transparent;
@@ -26,7 +26,7 @@ button.kb {
 }
 
 .c-sidebar-backdrop {
-    background-color:rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     position: fixed;
     left: 0;
     top: 0;
@@ -35,21 +35,25 @@ button.kb {
     z-index: 1051;
 }
 
+.c-sidebar {
+    z-index: 2050 !important;
+}
+
 .admonition {
     border-right: 1px solid #cfcfcf;
     border-top: 1px solid #cfcfcf;
     border-bottom: 1px solid #cfcfcf;
-    padding-top:10px;
-    padding-bottom:10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .event-stats-div {
-    padding-right:20px;
+    padding-right: 20px;
     padding-top: 5px;
     font-size: 13px;
     padding-bottom: 10px;
-    min-height:150px;
-    max-height:150px; 
+    min-height: 150px;
+    max-height: 150px;
 }
 
 .event-stats-container {
@@ -57,12 +61,12 @@ button.kb {
     margin-right: 0px;
 }
 
-.event-stats-container > .event-stats-picker {
+.event-stats-container>.event-stats-picker {
     padding-left: 10px;
     padding-right: 10px;
 }
 
-.event-stats-container > .event-stats-picker ~ .event-stats-picker {
+.event-stats-container>.event-stats-picker~.event-stats-picker {
     padding-left: 10px;
     padding-right: 0px;
 }
@@ -93,7 +97,7 @@ button.kb {
 }
 
 .event-stats-picker {
-    
+
     min-width: 0px;
     width: 20%;
     padding-top: 10px;
@@ -105,11 +109,11 @@ button.kb {
 }
 
 .cases-picker-card {
-    border-radius:0px;
-    padding:10px;
-    margin-bottom:0px;
+    border-radius: 0px;
+    padding: 10px;
+    margin-bottom: 0px;
     border-left: 0px;
-    border-top:0px;
+    border-top: 0px;
     border-right: 0px;
 }
 
@@ -121,7 +125,7 @@ tbody {
     /* THIS IS SUPER HACKY I NEED TO FIX THIS - This is the only way
     that a dropdown menu on a table filter wont be hidden if there arent
     many items in the table */
-    height: 161px !important; 
+    height: 161px !important;
 }
 
 /*.card {
@@ -142,33 +146,37 @@ tbody {
 }*/
 
 .dropbox {
-    outline: 2px dashed grey; /* the dash box */
+    outline: 2px dashed grey;
+    /* the dash box */
     outline-offset: -10px;
     background: lightcyan;
     color: dimgray;
     padding: 10px 10px;
-    min-height: 200px; /* minimum height */
+    min-height: 200px;
+    /* minimum height */
     position: relative;
     cursor: pointer;
-  }
+}
 
-  .input-file {
-    opacity: 0; /* invisible but it's there! */
+.input-file {
+    opacity: 0;
+    /* invisible but it's there! */
     width: 100%;
     height: 200px;
     position: absolute;
     cursor: pointer;
-  }
+}
 
-  .dropbox:hover {
-    background: ligh#0073E6; /* when mouse over to the drop zone, change color */
-  }
+.dropbox:hover {
+    background: ligh#0073E6;
+    /* when mouse over to the drop zone, change color */
+}
 
-  .dropbox p {
+.dropbox p {
     font-size: 1.2em;
     text-align: center;
     padding: 50px 0;
-  }
+}
 
 a {
     text-decoration: none !important;
@@ -186,7 +194,7 @@ a {
 
 
 .btn {
-    box-shadow: 0 1px 1px 0 rgba(60,75,100,.14), 0 2px 1px -1px rgba(60,75,100,.12), 0 1px 3px 0 rgba(60,75,100,.2)
+    box-shadow: 0 1px 1px 0 rgba(60, 75, 100, .14), 0 2px 1px -1px rgba(60, 75, 100, .12), 0 1px 3px 0 rgba(60, 75, 100, .2)
 }
 
 .no-shadow {
@@ -196,7 +204,7 @@ a {
 }
 
 .stepper {
-    width:100%;
+    width: 100%;
     display: table;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -211,18 +219,18 @@ a {
     text-align: center;
 }
 
-.step > button {
+.step>button {
     display: inline-block;
-    width:100%;
-    height:100%;
+    width: 100%;
+    height: 100%;
     border: none;
     background: transparent;
 }
 
-.step > button:focus {
+.step>button:focus {
     display: inline-block;
-    width:100%;
-    height:100%;
+    width: 100%;
+    height: 100%;
     border: none;
     outline: none;
     background: transparent;
@@ -241,7 +249,7 @@ a {
     font-weight: 400;
     color: #fff;
     border: 1px solid #fff;
-    box-shadow: 0 1px 1px 0 rgba(60,75,100,.14), 0 2px 1px -1px rgba(60,75,100,.12), 0 1px 3px 0 rgba(60,75,100,.2)
+    box-shadow: 0 1px 1px 0 rgba(60, 75, 100, .14), 0 2px 1px -1px rgba(60, 75, 100, .12), 0 1px 3px 0 rgba(60, 75, 100, .2)
 }
 
 .stepper .step:hover .step-icon {
@@ -261,10 +269,10 @@ a {
 
 .stepper .step .md-step-bar-left,
 .stepper .step .md-step-bar-right {
-	position:absolute;
-	top:25px;
-	height:1px;
-	border-top:2px solid #DDDDDD;
+    position: absolute;
+    top: 25px;
+    height: 1px;
+    border-top: 2px solid #DDDDDD;
 }
 
 .stepper .step .step-label {
@@ -274,15 +282,15 @@ a {
 }
 
 .stepper .step .md-step-bar-right {
-	right:0;
-	left:50%;
-	margin-left:20px;
+    right: 0;
+    left: 50%;
+    margin-left: 20px;
 }
 
 .stepper .step .md-step-bar-left {
-	left:0;
-	right:50%;
-	margin-right:20px;
+    left: 0;
+    right: 50%;
+    margin-right: 20px;
 }
 
 .pre-formatted {
@@ -290,11 +298,11 @@ a {
 }
 
 .console-output {
-    padding:10px;
+    padding: 10px;
 }
 
 .tab-pane .table {
-    margin-bottom:0px;
+    margin-bottom: 0px;
 }
 
 .raw_log {
@@ -307,7 +315,7 @@ a {
 }
 
 .prewrap {
-    white-space: pre-wrap; 
+    white-space: pre-wrap;
     word-wrap: break-word;
 }
 
@@ -319,8 +327,37 @@ a {
     font-weight: normal;
 }
 
+.tag-clickable {
+    cursor: pointer;
+}
+
+.tag-list {
+    margin-top: 1px;
+    //font-size: .7rem !important;
+}
+
+.tag-sm {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    font-weight: normal !important;
+    line-height: 1.5 !important;
+    font-size: 80% !important;
+}
+
+.badge.tag {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-weight: normal;
+    line-height: 1.5;
+    font-size: 0.76563rem
+}
+
 label {
-    font-weight:500;
+    font-weight: 500;
 }
 
 .danger-accent {
@@ -336,72 +373,75 @@ label {
 }
 
 .tools {
-  height: 30px;
-  padding: 5px 10px;
-  background: #333;
-  border-radius: 3px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform: translate(-425%, -700%);
-  transition: 0.2s all;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    height: 30px;
+    padding: 5px 10px;
+    background: #333;
+    border-radius: 3px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-425%, -700%);
+    transition: 0.2s all;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .tools:after {
 
-  position: absolute;
-  left: 50%;
-  bottom: -5px;
-  transform: translateX(-425%);
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 6px solid #333;
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    transform: translateX(-425%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #333;
 }
 
 .item {
-  color: #FFF;
-  cursor: pointer;
-} 
+    color: #FFF;
+    cursor: pointer;
+}
 
 .item path {
-  fill: #FFF;
+    fill: #FFF;
 }
 
 .item:hover path {
-  fill: #1199ff;
+    fill: #1199ff;
 }
 
 .item:hover {
-  color: #1199ff;
+    color: #1199ff;
 }
 
-.item + .item {
-  margin-left: 10px;
+.item+.item {
+    margin-left: 10px;
 }
 
 .table-responsive {
-    height:auto;
+    height: auto;
 }
 
 .comments .timeline .timeline-item {
     padding-bottom: 0px;
 }
 
-.tabbed > .nav, .nav-tabs {
+.tabbed>.nav,
+.nav-tabs {
     border-bottom: 1px solid #d8dbe0;
 }
 
-.tabbed > .nav, .nav-tabs li:first-child .nav-link {
-    border-left:0px;
-    border-top:0px;
+.tabbed>.nav,
+.nav-tabs li:first-child .nav-link {
+    border-left: 0px;
+    border-top: 0px;
 }
 
-.tabbed > .nav, .nav-tabs .nav-link {
+.tabbed>.nav,
+.nav-tabs .nav-link {
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;
     background-color: white;
@@ -410,11 +450,13 @@ label {
     color: #000;
 }
 
-.tabbed > .tab-content, .tab-pane th {
+.tabbed>.tab-content,
+.tab-pane th {
     border-top: 0px;
 }
 
-.tabbed > .nav, .nav-tabs .nav-link.active {
+.tabbed>.nav,
+.nav-tabs .nav-link.active {
     background-color: $secondary;
     color: white;
 }
@@ -424,17 +466,17 @@ label {
 }
 
 .tabbed {
-    padding:0px;
+    padding: 0px;
 }
 
 .fullscreen {
-    background:red;
-    position:absolute;
-    top:0px;
-    right:0px;
-    bottom:0px;
-    left:0px;
-  }
+    background: red;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+}
 
 .card-header {
     background-color: white !important;
@@ -448,7 +490,7 @@ label {
 .vue-simple-context-menu {
     background-color: white !important;
     border: 1px solid #d8dbe0 !important;
-    
+
 }
 
 .escalated {
@@ -480,11 +522,13 @@ label {
 .text-info {
     color: #0073E6 !important;
 }
+
 .form-control {
     color: #6B7785 !important;
 }
 
-.btn-secondary, .badge-secondary {
+.btn-secondary,
+.badge-secondary {
     color: #445964 !important;
 }
 
@@ -496,7 +540,8 @@ label {
     background-color: #EB0000 !important;
 }
 
-.badge-warning, .btn-warning {
+.badge-warning,
+.btn-warning {
     color: #404F5E !important;
 }
 
@@ -504,9 +549,9 @@ label {
     color: #6B7785 !important;
 }
 
-html:not([dir="rtl"]) nav >  .pagination {
+html:not([dir="rtl"]) nav>.pagination {
     padding-left: 25px !important;
-  }
+}
 
 .observable-popover {
     background: #fff;
@@ -515,26 +560,26 @@ html:not([dir="rtl"]) nav >  .pagination {
     position: fixed;
     padding: 0px;
     z-index: 9999;
-//max-width: 40% !important;
+    //max-width: 40% !important;
     bottom: 0;
     right: 0;
-    min-height:400px;
+    min-height: 400px;
     width: 50%;
     left: unset !important;
-    box-shadow: 0 1px 1px 0 rgba(60,75,100,.14), 0 2px 1px -1px rgba(60,75,100,.12), 0 1px 3px 0 rgba(60,75,100,.2)
+    box-shadow: 0 1px 1px 0 rgba(60, 75, 100, .14), 0 2px 1px -1px rgba(60, 75, 100, .12), 0 1px 3px 0 rgba(60, 75, 100, .2)
 }
 
 .observable-popover-spinner {
-    
-        display: flex;
-        align-items: center;
-    
+
+    display: flex;
+    align-items: center;
+
 }
 
 .absolute-middle {
     display: flex;
-  align-items: center;
-  justify-content: center;
+    align-items: center;
+    justify-content: center;
 }
 
 .logo-spinner {
@@ -549,7 +594,18 @@ html:not([dir="rtl"]) nav >  .pagination {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(359deg);
     }
+}
+
+.c-multi-select-options {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.table-view-value {
+    overflow-y: visible;
+    overflow-wrap: anywhere;
 }

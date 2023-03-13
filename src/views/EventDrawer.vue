@@ -8,7 +8,7 @@
               <h2>{{ event_data.title }}</h2>
               <CIcon name="cilTags" />&nbsp;<li style="display: inline; margin-right: 2px;" v-for="tag in event_data.tags"
               :key="tag">
-              <CButton color="dark" class="tag" size="sm">{{ tag }}</CButton>
+              <CBadge color="dark" class="tag tag-list" size="sm">{{ tag }}</CBadge>
             </li>
             </CCol>
             <CCol col="2" style="border-left: 1px solid #cfcfcf" class="text-right">
@@ -49,17 +49,17 @@
         <hr style="margin-bottom: 0px; margin-top: 0px;">
         <CTabs :activeTab.sync="activeTab" class="tabbed">
           <CTab title="Overview" active>
-            <CCardBody>
+            <CCardBody class="tab-container">
               <h3>Description</h3>
               {{ event_data.description }}
-            </CCardBody>
+            
             <hr>
-            <CCardBody>
+            
               <h3>Observables</h3>
               <CDataTable :hover="true" :items="event_data.observables" :fields="observable_fields" :items-per-page="10"
                 bordered striped pagination>
                 <template #value="{ item }">
-                  <td>
+                  <td class="observable-value">
                     <b>{{ item.value }}</b><br><small>{{ item.source_field ? item.source_field.toLowerCase() : 'none' }} |
                       {{ item.data_type }}</small>
                   </td>
@@ -89,7 +89,7 @@
                   <td>
                     <CIcon name='cilTags' />&nbsp;<li style="display: inline; margin-right: 2px;"
                       v-for="tag,i in item.tags" :key="i">
-                      <CButton color="primary" size="sm" disabled>{{ tag }}</CButton>
+                      <CBadge class="tag tag-list" color="info" size="sm">{{ tag }}</CBadge>
                     </li>
                   </td>
                 </template>
@@ -98,7 +98,7 @@
           </CTab>
           <CTab title="Raw Log">
             <CCardBody class="tab-container">
-              <json-view :data="jsonify(event_data.raw_log)" rootKey="/" :maxDepth="1" />              
+              <vue-json-pretty :data="jsonify(event_data.raw_log)" :showLength="true" :showIcon="true" :deep="1" :showDoubleQuotes="false" />              
               <!--<vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'"
                 :data="jsonify(event_data.raw_log)"></vue-json-pretty><br>-->
             </CCardBody>
@@ -120,10 +120,10 @@
                 table-filter
                 >
                 <template #Field="{ item }">
-                  <td><b>{{item.Field}}</b></td>
+                  <td class="col-4"><b>{{item.Field}}</b></td>
                 </template>
                 <template #Value="{ item }">
-                  <td v-if="!Array.isArray(item.Value)">{{item.Value}}</td>
+                  <td class="table-view-value" v-if="!Array.isArray(item.Value)">{{item.Value}}</td>
                   <td v-else>
                     <ul class="no-bullets">
                       <li v-for="value in item.Value" :key="value">
@@ -146,24 +146,28 @@
               </CCol>
             </CRow>
           </CTab>
-          <CTab :title="`Matched Event Rules (${this.event_data.event_rules.length})`"
-            v-if="this.event_data.event_rules">
-            <CRow style="padding: 10px 10px 0px 10px">
+          <CTab v-if="this.event_data.event_rules">
+            <template #title>
+                Matched Event Rules&nbsp;<CBadge color="info" class="tag" size="sm" v-if="event_data.event_rules.length > 0">{{event_data.event_rules.length}}</CBadge>
+              </template>
+            <CCardBody  class="tab-container">  
+            <CRow>
               <CCol>
+                
                 <h3>Matched Event Rules</h3>
                 <p>The rules listed below have acted on this event at some point in time.</p>
-                <CRow v-for="rule in rules" :key="rule.uuid">
+                <div v-if="!rules_loading"><CRow v-for="rule in rules" :key="rule.uuid">
                   <CCol>
-                    <CCardBody>
-                      <h5>{{ rule.name }}</h5>
-                      <vue-markdown>{{ rule.description }}</vue-markdown>
-                      <prism-editor rows="10" class="my-editor" v-model="rule.query" :highlight="highlighter"
-                        line-numbers></prism-editor>
-                    </CCardBody>
+                    
+                      <MatchedEventRule :rule="rule"/>
+                    
                   </CCol>
-                </CRow>
+                </CRow></div><div v-else class="text-center">
+                      <CSpinner color="primary" size="xl"></CSpinner>
+                    </div>
               </CCol>
             </CRow>
+            </CCardBody>
           </CTab>
           <CTab title="Detection" v-if="this.event_data.detection_id">
             <CCardBody class="tab-container">
@@ -202,12 +206,12 @@
               <h4>MITRE ATT&CK</h4>
               <p><b>MITRE ATT&CK Tactics</b>
                 <li style="display: inline; margin-right: 2px;" v-for="t in detection.tactics" :key="t.name">
-                  <CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton>
+                  <CBadge class="tag" color="info" size="sm" disabled="">{{ t.name }}</CBadge>
                 </li>
               </p>
               <p><b>MITRE ATT&CK Techniques</b>
                 <li style="display: inline; margin-right: 2px;" v-for="t in detection.techniques" :key="t.name">
-                  <CButton color="primary" size="sm" disabled="">{{ t.name }}</CButton>
+                  <CBadge class="tag" color="info" size="sm" disabled="">{{ t.name }}</CBadge>
                 </li>
               </p>
 
@@ -230,14 +234,14 @@
                   <template #values="{ item }">
                     <td>
                       <li style="display: inline; margin-right: 2px;" v-for="value in item.values" :key="value">
-                        <CButton color="primary" size="sm" disabled>{{ value }}</CButton>
+                        <CBadge class="tag" color="dark" size="sm" disabled>{{ value }}</CBadge>
                       </li>
                     </td>
                   </template>
                   <template #list="{ item }">
                     <td>
                       <span v-if="item.list.name !== null">
-                        <CButton color="primary" size="sm" disabled>{{ item.list.name }}</CButton>
+                        <CBadge class="tag" color="dark" size="sm" disabled>{{ item.list.name }}</CBadge>
                       </span>
                     </td>
                   </template>
@@ -246,6 +250,9 @@
             </CCardBody>
           </CTab>
           <CTab :title="`Comments (${this.event_data.total_comments})`">
+            <template #title>
+                Comments&nbsp;<CBadge color="info" class="tag" size="sm" v-if="event_data.total_comments > 0">{{event_data.total_comments}}</CBadge>
+              </template>
             <CCardBody class="tab-container">
               <CCard v-if="event_data.dismiss_comment"><CCardHeader>Dismissed By <b>{{event_data.dismissed_by.username}}</b> - {{ event_data.dismissed_at | moment('from','now')}}</CCardHeader>
                 <CCardBody><vue-markdown>{{event_data.dismiss_comment}}</vue-markdown></CCardBody>
@@ -269,9 +276,21 @@
 </template>
 
 <style scoped>
+
+.observable-value {
+  max-width: 50ch;
+  overflow-y: clip;
+  text-overflow: ellipsis;
+}
+
+.observable-value:hover {
+  overflow-y: visible;
+  overflow-wrap: anywhere;
+}
+
 .tab-container {
-  overflow-x: scroll;
-  max-height: calc(100vh - 200px);
+  overflow-x: hidden;
+  max-height: calc(100vh - 250px);
 }
 
 .c-sidebar {
@@ -303,6 +322,10 @@
 
 .overflow-guard {
   height: 100% !important
+}
+
+.table-responsive {
+  overflow-y: none;
 }
 </style>
 
@@ -339,6 +362,12 @@ ul.no-bullets {
   margin: 0; /* Remove margins */
 }
 
+.table-view-value {
+  max-width: 100ch;
+  overflow-y: clip;
+  text-overflow: ellipsis;
+}
+
 </style>
 
 <script>
@@ -352,7 +381,7 @@ import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhe
 import 'prismjs/components/prism-python';
 import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
-import MonacoEditor from 'monaco-editor-vue';
+import MatchedEventRule from './event/MatchedEventRule'
 
 export default {
   name: 'EventDrawer',
@@ -364,7 +393,7 @@ export default {
     VueJsonPretty,
     CRightDrawer,
     PrismEditor,
-    MonacoEditor
+    MatchedEventRule
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
@@ -374,6 +403,7 @@ export default {
   watch: {
     minimize(val) {
       if (!val) {
+        document.body.style.overflow = 'hidden'
         this.comments_loading = true
         this.$store.dispatch('getEventIndex', this.event_data.uuid).then(resp => {
           let data = resp.data
@@ -388,8 +418,10 @@ export default {
         })
         this.event_data = this.$store.getters.event
         if (this.event_data.event_rules) {
+          this.rules_loading = true
           this.$store.dispatch('loadEventRules', { rules: this.event_data.event_rules, save: false }).then(resp => {
             this.rules = resp.data.event_rules
+            this.rules_loading = false
           })
         }
         if (this.event_data.detection_id) {
@@ -397,6 +429,8 @@ export default {
             this.detection = resp.data
           })
         }
+      } else {
+        document.body.style.overflow = 'auto'
       }
     }
   },
@@ -408,6 +442,7 @@ export default {
       detection: {},
       comments: [],
       comments_loading: false,
+      rules_loading: false,
       event_index: []
     }
   },

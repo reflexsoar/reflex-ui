@@ -73,9 +73,9 @@
               v-for="role in item.roles"
               :key="role"
             >
-              <CButton color="primary" style="cursor: auto" size="sm" disabled>{{
+              <CBadge class="tag tag-list" color="info" style="cursor: auto" size="sm" disabled>{{
                 role
-              }}</CButton>
+              }}</CBadge>
             </li>
           </td>
         </template>
@@ -94,11 +94,11 @@
         </template>
         <template #healthy="{ item }">
           <td>
-            <CButton v-if="item.healthy" style="cursor: auto" color="success" size="sm"
-              >Healthy</CButton
+            <CBadge class="tag tag-list" v-if="item.healthy" style="cursor: auto" color="success" size="sm"
+              >Healthy</CBadge
             >
-            <CButton v-else style="cursor: auto" color="warning" size="sm"
-              >Unhealthy</CButton
+            <CBadge class="tag tag-list" v-else style="cursor: auto" color="warning" size="sm"
+              >Unhealthy</CBadge
             >
           </td>
         </template>
@@ -109,7 +109,7 @@
               v-for="issue in item.health_issues"
               :key="issue"
             >
-              <CBadge color="warning">{{ issue }}</CBadge>
+              <CBadge class="tag" color="warning">{{ issue }}</CBadge>
             </li>
           </td>
         </template>

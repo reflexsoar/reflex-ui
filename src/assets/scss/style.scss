@@ -5,9 +5,10 @@
 @import "~@coreui/coreui/scss/coreui";
 //@import "~@coreui/coreui-pro/scss/coreui";
 
-
 // If you want to add something do it here
 @import "custom";
+
+@import "~@coreui/coreui-pro/css/multi-select.css";
 
 .card-header:not(.content-center) > .c-icon:first-child {
   margin-right: 0.1rem;

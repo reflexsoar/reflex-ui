@@ -25,7 +25,7 @@
                 v-for="tag, i in input.tags"
                 :key="i"
               >
-                <CButton color="primary" size="sm" disabled>{{ tag }}</CButton>
+                <CBadge class="tag tag-list" color="info" size="sm" disabled>{{ tag }}</CBadge>
               </li>
             </CCol>
           </CRow>
@@ -137,7 +137,7 @@
                       v-for="host, i in input.config['hosts']"
                       :key="i"
                     >
-                      <CButton color="primary" size="sm" disabled>{{ host }}</CButton>
+                      <CBadge class="tag tag-list" color="info" size="sm">{{ host }}</CBadge>
                     </li>
                     <br /><br />
                   </div>
@@ -217,7 +217,7 @@
                     v-for="field, i in input.config['tag_fields']"
                     :key="i"
                   >
-                    <CButton color="primary" size="sm" disabled>{{ field }}</CButton>
+                    <CBadge class="tag tag-list" color="info" size="sm">{{ field }}</CBadge>
                   </li>
                   <br /><br />
                 </CCol>
@@ -228,7 +228,7 @@
                     v-for="field, i in input.config['signature_fields']"
                     :key="i"
                   >
-                    <CButton color="primary" size="sm" disabled>{{ field }}</CButton>
+                    <CBadge class="tag tag-list"  color="info" size="sm">{{ field }}</CBadge>
                   </li>
                   <br /><br />
                 </CCol>
@@ -249,7 +249,7 @@
                     v-for="field, i in input.config['static_tags']"
                     :key="i"
                   >
-                    <CButton color="primary" size="sm" disabled>{{ field }}</CButton>
+                    <CBadge class="tag tag-list"  color="info" size="sm">{{ field }}</CBadge>
                   </li>
                 </CCol>
               </CRow>
