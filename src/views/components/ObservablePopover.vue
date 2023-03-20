@@ -192,7 +192,18 @@
                     : { noResults: 'No items found', noItems: 'No items found' }
                 "
               />
+              
             </CTab>
+            <CTab title="IP Whois" v-if="observable.data_type == 'ip' && metrics.ip_whois">
+                <CCardBody :style="tabComputedStyles">
+                  <pre style="white-space: pre-wrap;">{{ metrics.ip_whois }}</pre>
+                </CCardBody>
+              </CTab>
+            <CTab title="URLHaus" v-if="['ip','url','domain'].includes(observable.data_type) && metrics.url_haus">
+                <CCardBody :style="tabComputedStyles">
+                  <pre style="white-space: pre-wrap;">{{ metrics.url_haus }}</pre>
+                </CCardBody>
+              </CTab>
             <CTab v-if="metrics.base64_decoded_values && metrics.base64_decoded_values.length > 0" title="Base64 Decoded Values">
               <CCardBody>
                 <pre v-for="value,i in metrics.base64_decoded_values" :key="i" style="white-space: pre-wrap;">{{ value }}</pre>
@@ -356,6 +367,7 @@ export default {
       this.loading = true;
       let request_params = {
         value: this.observable.value,
+        data_type: this.observable.data_type,
       };
       if (this.current_user.default_org) {
         request_params["organization"] = this.organization;
