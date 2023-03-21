@@ -2019,7 +2019,7 @@ const actions = {
       })
     })
   },
-  getEvents({commit}, {title__like=null, signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null, event_rules=null}) {
+  getEvents({commit}, {title__like=null, signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='original_date', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null, event_rules=null}) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event?grouped=${grouped}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -3631,12 +3631,15 @@ const actions = {
       })
     })
   },
-  getObservableMetric({commit}, {value, organization}) {
+  getObservableMetric({commit}, {value, data_type='general', organization}) {
     return new Promise((resolve, reject) => {
       value = encodeURI(encodeURIComponent(value))
       let url = `${BASE_URL}/observable/${value}/hits`
+      if(data_type) {
+        url += `?data_type=${data_type}`
+      }
       if(organization) {
-        url += `?organization=${organization}`
+        url += `&organization=${organization}`
       }
       Axios({url: url, method: 'GET'})
       .then(resp => {
