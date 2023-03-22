@@ -543,7 +543,7 @@ export default {
         card_per_page: 10,
         page_data: {'total_results': 0, 'pages': 0, 'page': 0, 'page_size': 0},
         current_page: 1,
-        sort_by: 'created_at',
+        sort_by: 'original_date',
         sort_options: [
         //  {'label': 'Severity','value':'severity'},
           {'label': 'Date Created', 'value': 'created_at'},
