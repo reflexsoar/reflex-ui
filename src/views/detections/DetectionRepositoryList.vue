@@ -121,16 +121,21 @@
             <CButton color="danger" @click="deleteSubscription()">Unsubscribe</CButton>
         </template>
     </CModal>
+    <DetectionRepositoryModal :show.sync="show_repository_modal"/>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import DetectionRepositoryModal from './DetectionRepositoryModal'
 
 export default {
   name: "DetectionRepositoryList",
   computed: {
     ...mapState(["detection_repositories","current_user"]),
+  },
+  components: {
+    DetectionRepositoryModal
   },
   created: function () {
     this.loading = true;
@@ -170,18 +175,23 @@ export default {
       repository: null,
       sync_interval: 60,
       show_unsubscribe_modal: false,
-      synchronizing: false
+      synchronizing: false,
+      show_repository_modal: false
     };
   },
   methods: {
     editRepository(uuid) {
-      alert("Not implemented yet");
+      this.show_repository_modal = true;
+      this.modal_mode = "Edit";
+      //alert("Not implemented yet");
     },
     deleteRepository(uuid) {
       alert("Not implemented yet");
     },
     createRepositoryModal() {
-      alert("Not implemented yet");
+      this.show_repository_modal = true;
+      this.modal_mode = "Create";
+      //alert("Not implemented yet");
     },
     startSubscriptionWizard(uuid) {
         this.repository = this.detection_repositories.find((item) => item.uuid === uuid);
@@ -196,7 +206,9 @@ export default {
             sync_interval: this.sync_interval,
         }
         this.$store.dispatch("createDetectionRepositorySubscription", {repository_uuid: this.repository.uuid, data: data}).then(() => {
+          this.$store.dispatch("getDetections", {}).then(() => {
             this.show_subscription_modal = false;
+          })
         });
     },
     select_item(i) {

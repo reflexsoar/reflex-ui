@@ -943,6 +943,14 @@ export default {
   },
   watch: {
     show: function () {
+
+      if(this.show) {
+        if(this.rule.organization) {
+          this.$store.dispatch("getInputList", { organization: this.rule.organization })
+        } else {
+          this.$store.dispatch("getInputList", { organization: this.current_user.organization})
+        }
+      }
       this.error = false;
       this.error_message = "";
       if (this.mode == "Edit") {
@@ -986,7 +994,9 @@ export default {
           "uuid",
           "version",
           "warnings",
-          "field_templates"
+          "field_templates",
+          "from_repo_sync",
+          "original_uuid"
         ].forEach((k) => {
           delete this.rule[k];
         });
@@ -994,6 +1004,9 @@ export default {
 
       if(this.mode == "Create") {
         this.$store.commit("save_field_templates", [])
+        if(this.current_user.default_org) {
+          this.rule.organization = this.current_user.organization
+        }
       }
 
       this.modalStatus = this.show;

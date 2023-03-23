@@ -259,6 +259,9 @@
           color="danger"
           title="Delete Detection Confirmation"
         >
+          <CAlert :show.sync="error" color="danger">
+            {{ error_message }}
+          </CAlert>
           <p>Are you sure you want to delete {{ selected_items.length }} detection(s)?</p>
 
           <CAlert color="info">
@@ -318,6 +321,8 @@ export default {
   },
   data() {
     return {
+      error: false,
+      error_message: "",
       show_add_to_repository_modal: false,
       import_wizard: false,
       import_json: "",
@@ -525,6 +530,7 @@ export default {
     },
     deleteDetectionModal(uuid = null) {
       this.confirm_delete = true;
+      this.resetError()
       if (uuid !== null) {
         this.selected_items = [uuid];
       }
@@ -591,13 +597,20 @@ export default {
           link.click();
         });
     },
+    resetError() {
+      this.error = false
+      this.error_message = ""
+    },
     deleteDetections() {
       this.$store
         .dispatch("deleteSelectedDetections", { uuids: this.selected_items })
         .then((resp) => {
           this.selected_items = [];
           this.confirm_delete = false;
-        });
+        }).catch((err) => {
+          this.error = true
+          this.error_message = err.response.data.message
+        })
     },
     cancelDelete() {
       this.selected_items = [];
