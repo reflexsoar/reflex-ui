@@ -3810,6 +3810,28 @@ const actions = {
         reject(err)
       })
     })
+  },
+  addDetectionToRepository({commit}, {uuid, detections}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${uuid}/add_detections`, data: {detections: detections}, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  removeDetectionFromRepository({commit}, {uuid, detections}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${uuid}/remove_detections`, data: {detections: detections}, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 }
 

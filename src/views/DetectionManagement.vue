@@ -60,7 +60,13 @@
                       <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
                         @click="addToRepository()"
-                        ><CIcon name="cilPlus" size="sm"></CIcon>&nbsp;Add to
+                        ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;Add to
+                        Repository</CDropdownItem
+                      >
+                      <CDropdownItem
+                        v-bind:disabled="selected_items.length == 0"
+                        @click="removeFromRepository()"
+                        ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;Remove from
                         Repository</CDropdownItem
                       >
                       <CDropdownItem
@@ -119,10 +125,10 @@
                       </CCol>
                       <CCol col=2>
                         <div style="display: inline-block; padding-right:2px;">
-                          <TagBucket :tags="item.tags" />
+                          <TagBucket v-if="item.tags && item.tags.length > 0" :tags="item.tags" />
                         </div>
                         <div style="display: inline-block">
-                          <DetectionRepoPopover v-if="item.repository" :repositories="item.repository"/>
+                          <DetectionRepoPopover v-if="item.repository && item.repository.length > 0" :repositories="item.repository"/>
                         </div>
                         </CCol>
                       </CRow>
@@ -243,6 +249,16 @@
                           <CIcon name="cilStorage" />&nbsp;Add To Repository
                           </CDropdownItem>
                         <CDropdownItem
+                          v-if="!item.from_repo_sync"
+                          aria-label="Remove From Repository"
+                          @click="removeFromRepository(item.uuid)"
+                          size="sm"
+                          color="primary"
+                          v-c-tooltip="{ content: 'Remove from Repository', placement: 'left' }"
+                        >
+                          <CIcon name="cilStorage" />&nbsp;Remove from Repository
+                          </CDropdownItem>
+                        <CDropdownItem
                           aria-label="Export Detection"
                           @click="exportDetection(item.uuid)"
                           size="sm"
@@ -280,6 +296,11 @@
         <AddToRepositoryModal
           :show.sync="show_add_to_repository_modal"
           :detection_ids.sync="selected_items"
+        />
+        <RemoveFromRepositoryModal
+          :show.sync="show_remove_from_repository_modal"
+          :detection_ids.sync="selected_items"
+          :selected_repos.sync="selected_item_repos"
         />
         <CModal
           :show.sync="confirm_delete"
@@ -337,6 +358,7 @@ import TagBucket from "./components/TagBucket";
 import DetectionRepoPopover from "./detections/DetectionRepoPopover";
 
 import AddToRepositoryModal from "./detections/AddToRepositoryModal";
+import RemoveFromRepositoryModal from "./detections/RemoveFromRepositoryModal";
 
 //const DetectionRules = () => import('@/views/DetectionRuleList')
 export default {
@@ -349,6 +371,7 @@ export default {
     RMultiCheck,
     DetectionRepositoryList,
     AddToRepositoryModal,
+    RemoveFromRepositoryModal,
     TagBucket,
     DetectionRepoPopover
   },
@@ -357,6 +380,7 @@ export default {
       error: false,
       error_message: "",
       show_add_to_repository_modal: false,
+      show_remove_from_repository_modal: false,
       import_wizard: false,
       import_json: "",
       confirm_delete: false,
@@ -706,6 +730,12 @@ export default {
         this.selected_items = [item]
       }
       this.show_add_to_repository_modal = true;
+    },
+    removeFromRepository(item) {
+      if(item) {
+        this.selected_items = [item]
+      }
+      this.show_remove_from_repository_modal = true;
     },
   },
   computed: {
