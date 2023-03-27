@@ -35,7 +35,7 @@
                   </CCol>
                   <CCol col="5" class="text-right">
                     <CDropdown
-                      color="dark"
+                      color="secondary"
                       toggler-text="Bulk Actions"
                       size="sm"
                     >
@@ -58,6 +58,7 @@
                         {{ selected_items.length }} Detections</CDropdownItem
                       >
                       <CDropdownItem
+                        v-bind:disabled="selected_items.length == 0"
                         @click="addToRepository()"
                         ><CIcon name="cilPlus" size="sm"></CIcon>&nbsp;Add to
                         Repository</CDropdownItem
@@ -78,7 +79,7 @@
                 <CDataTable
                   :items="filtered_items"
                   :fields="detection_list_fields"
-                  :items-per-page="25"
+                  :items-per-page="10"
                   column-filter
                   :sorter="{ external: false, resetable: true }"
                   :sorterValue="{ column: 'name', asc: true }"
@@ -112,8 +113,20 @@
                   </template>
                   <template #name="{ item }">
                     <td>
-                      <CBadge class="tag tag-sm" color="success" v-if="item.active">Active</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge>&nbsp;<b>{{ item.name }}</b
-                      ><br />
+                      <CRow>
+                      <CCol>
+                        <CBadge class="tag tag-sm" color="success" v-if="item.active">Active</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge>&nbsp;<b>{{ item.name }}</b>
+                      </CCol>
+                      <CCol col=2>
+                        <div style="display: inline-block; padding-right:2px;">
+                          <TagBucket :tags="item.tags" />
+                        </div>
+                        <div style="display: inline-block">
+                          <DetectionRepoPopover v-if="item.repository" :repositories="item.repository"/>
+                        </div>
+                        </CCol>
+                      </CRow>
+                      <br />
                       <span v-if="item.warnings && item.warnings.length > 0">
                         <li
                           style="display: inline; margin-right: 2px"
@@ -133,12 +146,12 @@
                     </td>
                   </template>
                   <template #last_run="{ item }">
-                    <td>
+                    <td style="width: 125px">
                       {{ item.last_run | moment("from", "now") }}
                     </td>
                   </template>
                   <template #last_hit="{ item }">
-                    <td>
+                    <td style="width: 125px">
                       <span v-if="item.last_hit">
                         {{ item.last_hit | moment("from", "now") }}
                       </span>
@@ -146,8 +159,13 @@
                     </td>
                   </template>
                   <template #total_hits="{ item }">
-                    <td>
+                    <td style="width: 75px" class="text-center">
                       {{ item.total_hits ? item.total_hits : 0 }}
+                    </td>
+                  </template>
+                  <template #tags="{item}">
+                    <td>
+                      <TagBucket :tags="item.tags" />
                     </td>
                   </template>
                   <template #performance="{ item }">
@@ -163,7 +181,7 @@
                   </template>
                   <template #actions="{ item }">
                     <td style="min-width: 25px" class="text-right">
-                      <CDropdown color="dark" toggler-text="Manage" size="sm">
+                      <CDropdown color="secondary" toggler-text="Manage" size="sm">
                         <CDropdownItem
                           aria-label="View Detection"
                           :to="`detections/${item.uuid}`"
@@ -215,6 +233,16 @@
                           <CIcon name="cilCopy" />&nbsp;Clone Detection
                         </CDropdownItem>
                         <CDropdownItem
+                          v-if="!item.from_repo_sync"
+                          aria-label="Add To Repository"
+                          @click="addToRepository(item.uuid)"
+                          size="sm"
+                          color="primary"
+                          v-c-tooltip="{ content: 'Add to Repository', placement: 'left' }"
+                        >
+                          <CIcon name="cilStorage" />&nbsp;Add To Repository
+                          </CDropdownItem>
+                        <CDropdownItem
                           aria-label="Export Detection"
                           @click="exportDetection(item.uuid)"
                           size="sm"
@@ -227,7 +255,7 @@
                           <CIcon name="cilCloudDownload" />&nbsp;Export Detection
                         </CDropdownItem>
                         <CDropdownItem
-                          v-if="!item.active"
+                          v-if="!item.active && !item.from_repo_sync"
                           aria-label="Delete Detection"
                           @click="deleteDetectionModal(item.uuid)"
                           size="sm"
@@ -251,6 +279,7 @@
         </CCard>
         <AddToRepositoryModal
           :show.sync="show_add_to_repository_modal"
+          :detection_ids.sync="selected_items"
         />
         <CModal
           :show.sync="confirm_delete"
@@ -304,6 +333,8 @@ import DetectionRuleModal from "./DetectionRuleModal";
 import DetectionRepositoryList from "./detections/DetectionRepositoryList";
 import ImportSigmaRuleWizard from "./detections/ImportSigmaRuleWizard.vue";
 import RMultiCheck from "./components/MultiCheck";
+import TagBucket from "./components/TagBucket";
+import DetectionRepoPopover from "./detections/DetectionRepoPopover";
 
 import AddToRepositoryModal from "./detections/AddToRepositoryModal";
 
@@ -318,6 +349,8 @@ export default {
     RMultiCheck,
     DetectionRepositoryList,
     AddToRepositoryModal,
+    TagBucket,
+    DetectionRepoPopover
   },
   data() {
     return {
@@ -328,6 +361,7 @@ export default {
       import_json: "",
       confirm_delete: false,
       selected_items: [],
+      selected_item_repos: [],
       picker_filters: {},
       loading: false,
       detection_list_fields: [
@@ -335,8 +369,8 @@ export default {
         "name",
         "last_run",
         "last_hit",
-        "total_hits",
-        { key: "performance", label: "Query Time / Total Time" },
+        { key: "total_hits", label: "Hits"},
+        { key: "performance", label: "Performance" },
         { key: "actions", filter: false },
       ],
       modal_mode: "Create",
@@ -561,18 +595,55 @@ export default {
       }
     },
     select_item(i) {
+      let item = this.detections.find((detection) => detection.uuid === i);
+
       if (this.selected_items.includes(i)) {
         this.selected_items = this.selected_items.filter((item) => item !== i);
       } else {
         this.selected_items.push(i);
       }
+
+      if (this.selected_items.includes(i)) {
+        let item = this.detections.find((detection) => detection.uuid === i);
+        if(item.repository && item.repository.length > 0) {
+          // Add this items repos to selected_item_repos if not already there
+          this.selected_item_repos = this.selected_item_repos.concat(item.repository.filter((repo) => !this.selected_item_repos.includes(repo)));
+        }
+      } else {
+        // Remove this items repos from selected_item_repos if no other items have it
+        let item = this.detections.find((detection) => detection.uuid === i);
+        if(item.repository && item.repository.length > 0) {
+          // If any other item in selected_items has a repository in selected_item_repos
+          // don't remove if, if not remove it
+          this.selected_item_repos = this.selected_item_repos.filter((repo) => {
+            return this.selected_items.some((item) => {
+              let detection = this.detections.find((detection) => detection.uuid === item);
+              return detection.repository.includes(repo);
+            });
+          });
+        }
+      }
     },
     selectAll() {
       if (this.selected_items.length > 0) {
         this.selected_items = [];
+        this.selected_item_repos = [];
       } else {
+        
         this.selected_items = this.detections.map((item) => item.uuid);
+
+        // Add all the selected items repositories to selected_item_repos if not already there
+        this.selected_item_repos = this.detections.reduce((acc, detection) => {
+          if(detection.repository && detection.repository.length > 0) {
+            return acc.concat(detection.repository.filter((repo) => !acc.includes(repo)));
+          } else {
+            return acc;
+          }
+        }, []);
       }
+
+      
+      
     },
     item_is_selected(i) {
       return this.selected_items.includes(i);
@@ -630,7 +701,10 @@ export default {
           this.selected_items = [];
         });
     },
-    addToRepository() {
+    addToRepository(item) {
+      if(item) {
+        this.selected_items = [item]
+      }
       this.show_add_to_repository_modal = true;
     },
   },

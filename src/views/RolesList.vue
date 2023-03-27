@@ -456,6 +456,12 @@ export default {
           view_assets: false,
           update_asset: false,
           delete_asset: false,
+          create_detection_repository: false,
+          update_detection_repository: false,
+          delete_detection_repository: false,
+          view_detection_repositories: false,
+          share_detection_repository: false,
+          subscribe_detection_repository: false
         }
       },
       permission_map: {
@@ -507,6 +513,12 @@ export default {
           'update_detection',
           'view_detections',
           'delete_detection',
+          'create_detection_repository',
+          'update_detection_repository',
+          'delete_detection_repository',
+          'view_detection_repositories',
+          'share_detection_repository',
+          'subscribe_detection_repository'
         ],
         "Notifications": [
           'create_notification_channel',

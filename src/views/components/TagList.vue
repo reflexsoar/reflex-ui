@@ -1,8 +1,8 @@
 <template>
   <div>
-    <CIcon name="cilTags" />&nbsp;
+    <span  v-if="tagIcon" ><CIcon :name="iconName"/>&nbsp;</span>
     <li style="display: inline; margin-right: 2px" v-for="tag, i in tags" :key="i">
-      <CBadge color="dark" class="tag tag-list" size="sm">
+      <CBadge :color="tagColor" class="tag tag-list" size="sm">
         {{ label === null ? tag : tag[label] }}</CBadge>
     </li>
   </div>
@@ -20,6 +20,14 @@ export default {
     label: {
       type: String,
       default: null,
+    },
+    iconName: {
+      type: String,
+      default: "cilTags"
+    },
+    tagColor: {
+      type: String,
+      default: "dark"
     },
   },
   data() {
