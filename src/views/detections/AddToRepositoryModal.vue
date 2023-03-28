@@ -63,7 +63,6 @@ export default {
     },
     methods: {
         addToRepository() {
-            console.log('Add to repository')
             this.$store.dispatch('addDetectionToRepository', {
                 uuid: this.selected_repository,
                 detections: this.detection_ids

@@ -29,7 +29,7 @@
               <CTab title="Detection Rules" active>
                 <CRow style="padding: 10px">
                   <CCol>
-                    <CButton color="primary" @click="createDetectionModal()"
+                    <CButton v-if="current_user.role.permissions['create_detection']"  color="primary" @click="createDetectionModal()"
                       >New Detection</CButton
                     >
                   </CCol>

@@ -3,9 +3,12 @@
     <CCard class="bucket" @click="toggleDetails()">
       <CIcon :name="iconName" style="margin-top:-1px; width: 14px; height: 14px;"/> {{ tags.length }}
       <CCard class="tag-list" v-if="show_details">
-        <CCardHeader class="small-header"><b>Tags</b></CCardHeader>
+        <CCardHeader class="small-header"><b>{{label}}</b></CCardHeader>
         <CCardBody style="padding: 5px;">
-          <TagList :tags="tags" :tagIcon="false" :iconName="iconName" :tagColor="tagColor"/>
+          <template v-if="countOnly">
+            {{ tags.length }}
+          </template>
+          <TagList v-if="!countOnly" :tags="tags" :tagIcon="false" :iconName="iconName" :tagColor="tagColor"/>
         </CCardBody>
     </CCard>
     </CCard>
@@ -57,7 +60,7 @@ export default {
     },
     label: {
       type: String,
-      default: null,
+      default: "Tags",
     },
     iconName: {
       type: String,
@@ -66,7 +69,11 @@ export default {
     tagColor: {
       type: String,
       default: "dark"
-    }
+    },
+    countOnly: {
+      type: Boolean,
+      default: false
+    },
   },
   data() {
     return {
@@ -81,9 +88,11 @@ export default {
       }
     },
     toggleDetails() {
-      this.show_details = !this.show_details;
-      if(this.show_details) {
-        document.addEventListener('click', this.outsideClickHandler);
+      if(!this.countOnly) {
+        this.show_details = !this.show_details;
+        if(this.show_details) {
+          document.addEventListener('click', this.outsideClickHandler);
+        }
       }
     }
   }
