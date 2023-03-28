@@ -730,7 +730,11 @@ const mutations = {
     state.roles = state.roles.map(r => r.uuid == role.uuid ? role : r)
   },
   add_detection_repository(state, repo) {
-    state.detection_repositories.push(repo)
+    if(state.detection_repositories.length == 0) {
+      state.detection_repositories = [repo]
+    } else {
+      state.detection_repositories.push(repo)
+    }
     state.detection_repository = repo
     state.status = 'success'
   },
@@ -3826,6 +3830,43 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/detection_repository/${uuid}/remove_detections`, data: {detections: detections}, method: 'POST'})
       .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createDetectionRepository({commit}, {data}) {
+    return new Promise((resolve, reject) => {
+      console.log(data)
+      Axios({url: `${BASE_URL}/detection_repository`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_detection_repository', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateDetectionRepository({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_detection_repository', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteDetectionRepository({commit}, {uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection_repository/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_detection_repository', uuid)
         resolve(resp)
       })
       .catch(err => {
