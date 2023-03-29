@@ -3,7 +3,7 @@
       rel="stylesheet"
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
     />
-        <CModal size="lg" :show.sync="modalStatus" :closeOnBackdrop="false">{{repository}}
+        <CModal size="lg" :show.sync="modalStatus" :closeOnBackdrop="false">
             <template #header>
                 <h5 style="text-transform: capitalize">{{mode}} Detection Repository</h5>
                 <span class="text-right">
@@ -40,7 +40,7 @@
             </CRow>
             <template v-if="current_user.default_org && repository.share_type == 'local-shared' && repository.repo_type == 'local'">
                 <label>Access Scope</label>
-                <p>Access scope defines what Organizations can access and synchronize the detections in this repository.</p>
+                <p>Access scope defines what Organizations can access and synchronize the detections in this repository.  If left empty, this will be accessible by all tenants in the ReflexSOAR instance.</p>
                 <multiselect v-model="repository.access_scope" :options="org_options" :multiple="true" :close-on-select="false" placeholder="Select an access scope" label="label" track-by="value"/><br>
             </template>
             <!-- Tags multiselect -->
@@ -147,6 +147,19 @@ export default {
                     this.repository.tags.forEach((tag) => {
                         this.tag_list.push(tag);
                     })
+
+                    if(this.current_user.default_org) {
+                        if(this.repository.access_scope != undefined) {
+                            this.repository.access_scope = this.organizations.filter((org) => {
+                                return this.repository.access_scope.includes(org.uuid);
+                            }).map((org) => {
+                                return {
+                                    label: org.name,
+                                    value: org.uuid,
+                                };
+                            });
+                        }
+                    }
                 }
             }
             this.error = false;

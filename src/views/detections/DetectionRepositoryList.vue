@@ -110,10 +110,79 @@
     <CModal title="Subscribe to Repository" :show.sync="show_subscription_modal" size="lg" :close-on-backdrop="false" @close="resetSubscriptionWizard()">
         <p>Subscribing to a repository will automatically synchronize all detections from the target repository in to your own detection library.
             Based on an interval defined in this wizard, the system will automatically synchronize any new or updated detections from the target repository.
-            The synchronization process will only update the description, base query, MITRE ATT&CK tactics and techniques and other very specific 
-            information for making the detection effective.  The process will not overwrite exclusions.
+            The synchronization process will only update fields based on the synchronization settings below.  The process will not overwrite exclusions.
         </p>
         <CInput v-model.number="sync_interval" label="Synchronization Interval (minutes)" description="How oftern to synchronize rules from this repository" />
+        <h2>Synchronization Settings</h2>
+        <p>These settings will determine how the system will handle conflicts between your local rules and the rules from the target repository.
+          If a setting is On, any time the repository synchronizes local changes to the rule will be overwritten.</p>
+        <CRow>
+        <CCol>
+            <label>Risk Score</label><br>
+            <CSwitch :checked.sync="sync_settings.risk_score" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Severity</label><br>
+            <CSwitch :checked.sync="sync_settings.severity" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Run Interval</label><br>
+            <CSwitch :checked.sync="sync_settings.interval" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Lookbehind</label><br>
+            <CSwitch :checked.sync="sync_settings.lookbehind" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Mute Period</label><br>
+            <CSwitch :checked.sync="sync_settings.mute_period" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+        </CRow><br>
+        <CRow><CCol>
+            <label>Threshold</label><br>
+            <CSwitch :checked.sync="sync_settings.threshold_config" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Field Mismatch</label><br>
+            <CSwitch :checked.sync="sync_settings.field_mismatch_config" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>New Terms</label><br>
+            <CSwitch :checked.sync="sync_settings.new_terms_config" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Signature Fields</label><br>
+            <CSwitch :checked.sync="sync_settings.signature_fields" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Field Templates</label><br>
+            <CSwitch :checked.sync="sync_settings.field_templates" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+        </CRow><br>
+        <CRow>
+        <CCol>
+            <label>Observable Fields</label><br>
+            <CSwitch :checked.sync="sync_settings.observable_fields" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Triage Guide</label><br>
+            <CSwitch :checked.sync="sync_settings.guide" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Setup Guide</label><br>
+            <CSwitch :checked.sync="sync_settings.setup_guide" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>Testing Guide</label><br>
+            <CSwitch :checked.sync="sync_settings.testing_guide" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+          <CCol>
+            <label>False Positives</label><br>
+            <CSwitch :checked.sync="sync_settings.false_positives" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
+        </CRow>
+
+        
         <template #footer>
             <CButton color="secondary" @click="resetSubscriptionWizard()">Dismiss</CButton>
             <CButton color="primary" @click="createSubscription()">Subscribe</CButton>
@@ -181,6 +250,7 @@ export default {
       show_subscription_modal: false,
       repository: null,
       sync_interval: 60,
+      sync_settings: this.defaultSyncSettings(),
       show_unsubscribe_modal: false,
       synchronizing: false,
       show_repository_modal: false,
@@ -218,12 +288,7 @@ export default {
       //alert("Not implemented yet");
     },
     deleteRepository(uuid) {
-      this.$store.dispatch('deleteDetectionRepository', {uuid: uuid}).then(() => {
-        this.loading = true;
-        this.$store.dispatch("getDetectionRepositories", {}).then(() => {
-          this.loading = false;
-        });
-      });
+      this.$store.dispatch('deleteDetectionRepository', {uuid: uuid});
     },
     createRepositoryModal() {
       this.show_repository_modal = true;
@@ -233,6 +298,7 @@ export default {
     },
     startSubscriptionWizard(uuid) {
         this.repository = this.detection_repositories.find((item) => item.uuid === uuid);
+        this.sync_settings = this.defaultSyncSettings();
         this.show_subscription_modal = true;
     },
     startUnsubscripeProcess(uuid) {
@@ -242,6 +308,7 @@ export default {
     createSubscription() {
         let data = {
             sync_interval: this.sync_interval,
+            sync_settings: this.sync_settings
         }
         this.$store.dispatch("createDetectionRepositorySubscription", {repository_uuid: this.repository.uuid, data: data}).then(() => {
           this.$store.dispatch("getDetections", {}).then(() => {
@@ -279,6 +346,26 @@ export default {
         this.$store.dispatch("deleteDetectionRepositorySubscription", {repository_uuid: this.repository.uuid}).then(() => {
             this.show_unsubscribe_modal = false;
         });
+    },
+    defaultSyncSettings() {
+      return {
+        risk_score: true,
+        severity: true,
+        interval: true,
+        lookbehind: true,
+        mute_period: true,
+        threshold_config: true,
+        metric_change_config: true,
+        field_mismatch_config: true,
+        new_terms_config: true,
+        field_templates: true,
+        signature_fields: true,
+        observable_fields: true,
+        guide: true,
+        setup_guide: true,
+        testing_guide: true,
+        false_positives: true,
+      }
     },
     forceSync(uuid) {
         this.synchronizing = true;
