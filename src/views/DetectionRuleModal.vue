@@ -708,6 +708,36 @@
                   ></CInput>
                 </div>
               </CTab>
+              <CTab title="Setup Guide" v-bind:disabled="rule.source['uuid'] === null">
+                <h5>Setup Guide</h5>
+                <p>
+                  The setup guide is a detailed guide on how to setup the detection. This is
+                  useful for alert consumers to understand how to make sure all the prequisite 
+                  data and configurations are in place to ensure the detection works as expected.
+                </p>
+                <markdown-editor
+                  height="auto"
+                  theme="primary"
+                  size="sm"
+                  :value="rule.setup_guide"
+                  @change="rule.setup_guide = $event"
+                ></markdown-editor>
+              </CTab>
+              <CTab title="Testing Guide" v-bind:disabled="rule.source['uuid'] === null">
+                <h5>Testing Guide</h5>
+                <p>
+                  The testing guide is a detailed guide on how to test the detection. This is 
+                  useful for alert consumers to understand how to test the detection to ensure
+                  it is working as expected.
+                </p>
+                <markdown-editor
+                  height="auto"
+                  theme="primary"
+                  size="sm"
+                  :value="rule.testing_guide"
+                  @change="rule.testing_guide = $event"
+                ></markdown-editor>
+              </CTab>
               <CTab title="Review" v-bind:disabled="rule.source['uuid'] === null"
                 >{{ rule }}
               </CTab>
@@ -887,7 +917,7 @@ export default {
       error_message: "",
       submitted: false,
       step: 0,
-      final_step: 7,
+      final_step: 9,
       range: {
         start: this.days_ago(7),
         end: this.today(),
