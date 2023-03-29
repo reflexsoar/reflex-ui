@@ -732,8 +732,13 @@ export default {
       this.show_add_to_repository_modal = true;
     },
     removeFromRepository(item) {
+      item = this.detections.find((detection) => detection.uuid === item);
       if(item) {
-        this.selected_items = [item]
+        this.selected_items = [item.uuid]
+        if(item.repository && item.repository.length > 0) {
+          // Add this items repos to selected_item_repos if not already there
+          this.selected_item_repos = this.selected_item_repos.concat(item.repository.filter((repo) => !this.selected_item_repos.includes(repo)));
+        }
       }
       this.show_remove_from_repository_modal = true;
     },
