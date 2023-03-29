@@ -34,7 +34,14 @@
                     <b>About</b>
                   </CCardHeader>
                   <CCardBody>
-                    <p>{{ detection.description }}</p>
+                    <CTabs
+              :fade="false"
+              variant="pills"
+              :activeTab.sync="step"
+              :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
+            >
+                      <CTab title="Overview">
+                        <p>{{ detection.description }}</p>
                     <p>
                       <b>Created By: </b>
                       {{
@@ -120,6 +127,21 @@
                         <pre>{{ detection.sigma_rule }}</pre>
                       </CCollapse></span
                     >
+                      </CTab>
+                      <CTab title="Triage Guide">
+                      <h3>Triage Guide</h3>
+                        <viewer :initialValue="detection.guide" height="550px" style="min-height:550px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
+                      </CTab>
+                      <CTab title="Setup Guide">
+                      <h3>Setup Guide</h3>
+                        <viewer :initialValue="detection.setup_guide" height="550px" style="min-height:550px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
+                      </CTab>
+                      <CTab title="Testing Guide">
+                        <h3>Testing Guide</h3>
+                        <viewer :initialValue="detection.testing_guide" height="550px" style="min-height:550px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
+                      </CTab>
+                    </CTabs>
+                    
                   </CCardBody>
                 </CCard>
               </CCol>
@@ -368,6 +390,10 @@
 import { mapState } from "vuex";
 import moment from "moment";
 
+import '@toast-ui/editor/dist/toastui-editor-viewer.css';
+
+import { Viewer } from '@toast-ui/vue-editor';
+
 import DetectionExclusionModal from "./DetectionExclusionModal";
 import RMoment from './components/RMoment'
 import TagList from './components/TagList'
@@ -377,7 +403,8 @@ export default {
   components: {
     DetectionExclusionModal,
     RMoment,
-    TagList
+    TagList,
+    Viewer
   },
   computed: {
     ...mapState(["detection", "detection_hits"]),
