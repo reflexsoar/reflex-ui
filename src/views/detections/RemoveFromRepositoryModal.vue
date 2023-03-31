@@ -1,12 +1,12 @@
 <template>
     <div>
-        <CModal title="Add Detections to Repository" size="lg" :show.sync="modalStatus">
-            <p>Select the Detection Repository to add the <b>{{ detection_ids.length }}</b> selected Detections to.</p>
+        <CModal title="Remove Detections from Repository" size="lg" :show.sync="modalStatus">
+            <p>Select the Detection Repository to remove the <b>{{ detection_ids.length }}</b> selected Detections from.</p>
             <label>Repository</label>
             <CSelect :value.sync="selected_repository" :options="repositories" placeholder="Select a repository"/>
             <template v-slot:footer>
                 <CButton color="secondary" @click="dismiss()">Cancel</CButton>
-                <CButton color="primary" @click="addToRepository()">Add</CButton>
+                <CButton color="danger" @click="removeFromRepository()">Remove</CButton>
             </template>
         </CModal>
     </div>
@@ -16,10 +16,14 @@
 import { mapState } from "vuex";
 
 export default {
-    name: "AddToRepositoryModal",
+    name: "RemoveFromRepositoryModal",
     props: {
         show: Boolean,
         detection_ids: {
+            type: Array,
+            default: () => []
+        },
+        selected_repos: {
             type: Array,
             default: () => []
         }
@@ -27,7 +31,7 @@ export default {
     computed: {
         ...mapState(["current_user", "detection_repositories"]),
         repositories() {
-            return this.detection_repositories.map((repo) => {
+            return this.detection_repositories.filter((repo) => this.selected_repos.includes(repo.uuid)).map((repo) => {
                 return {
                     label: repo.name,
                     value: repo.uuid,
@@ -62,15 +66,15 @@ export default {
         }
     },
     methods: {
-        addToRepository() {
-            this.$store.dispatch('addDetectionToRepository', {
+        removeFromRepository() {
+            this.$store.dispatch('removeDetectionFromRepository', {
                 uuid: this.selected_repository,
                 detections: this.detection_ids
             }).then(() => {
                  this.$store.dispatch('getDetections', {}).then(() => {
                     this.dismiss()
                 })
-            })           
+            })     
         },
         dismiss() {
             this.error = false;
@@ -78,6 +82,7 @@ export default {
             this.modalStatus = false;
             this.$emit("update:show", this.modalStatus);
             this.$emit("update:detection_ids", []);
+            this.$emit("update:selected_repos", []);
         }
     }
 }

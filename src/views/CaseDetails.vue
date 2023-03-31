@@ -37,7 +37,7 @@
                         color="secondary"
                         v-bind:disabled="case_data.status && case_data.status.closed"
                         >
-                        <CDropdownItem @click="closeCaseModal = !closeCaseModal">Close Case</CDropdownItem>
+                        <CDropdownItem @click="closeCase()">Close Case</CDropdownItem>
                         <CDropdownItem v-if="case_data.escalated !== true" @click="escalateCase()">Escalate Case</CDropdownItem>
                         <CDropdownItem v-if="case_data.escalated == true" @click="escalateCase(false)">De-Escalate Case</CDropdownItem>
                         <CDropdownItem @click="caseTemplateModal = !caseTemplateModal">Apply Case Template</CDropdownItem>
@@ -844,6 +844,16 @@ export default {
             this.$store.dispatch('updateCase', {uuid, data: tlp}).then(resp => {
                 this.case_data = this.$store.getters.case_data
             })
+        },
+        closeCase() {
+            let _status = this.case_statuses.find((status) => status.label == 'Closed')
+            if (_status !== undefined) {
+                
+            }
+            if(_status !== undefined && _status.closed === true) {
+                this.case_data.status.uuid = _status.value
+                this.closeCaseModal = true
+            }
         },
         updateStatus() {
             let uuid = this.uuid

@@ -684,13 +684,7 @@
                   detection determine the legitimacy of the event. Being as descriptive as
                   possible will help alert consumers.
                 </p>
-                <markdown-editor
-                  height="auto"
-                  theme="primary"
-                  size="sm"
-                  :value="rule.guide"
-                  @change="rule.guide = $event"
-                ></markdown-editor><br>
+                <editor ref="triageGuideEditor" :initialValue="rule.guide" @change="updateTriageGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" /><br>
 
                 <h5>False Positives</h5>
                 <p>
@@ -707,6 +701,24 @@
                         ><CIcon name="cilTrash" size="sm" /></CButton></template
                   ></CInput>
                 </div>
+              </CTab>
+              <CTab title="Setup Guide" v-bind:disabled="rule.source['uuid'] === null">
+                <h5>Setup Guide</h5>
+                <p>
+                  The setup guide is a detailed guide on how to setup the detection. This is
+                  useful for alert consumers to understand how to make sure all the prequisite 
+                  data and configurations are in place to ensure the detection works as expected.
+                </p>
+                <editor ref="setupGuideEditor" :initialValue="rule.setup_guide" @change="updateSetupGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" />
+              </CTab>
+              <CTab title="Testing Guide" v-bind:disabled="rule.source['uuid'] === null">
+                <h5>Testing Guide</h5>
+                <p>
+                  The testing guide is a detailed guide on how to test the detection. This is 
+                  useful for alert consumers to understand how to test the detection to ensure
+                  it is working as expected.
+                </p>
+                <editor ref="testingGuideEditor" :initialValue="rule.testing_guide" @change="updateTestingGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" />
               </CTab>
               <CTab title="Review" v-bind:disabled="rule.source['uuid'] === null"
                 >{{ rule }}
@@ -802,8 +814,13 @@ import "prismjs/components/prism-yaml";
 import "../assets/js/prism-lucene";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
 import 'v-markdown-editor/dist/v-markdown-editor.css';
+import '@toast-ui/editor/dist/toastui-editor.css';
+
+import { Editor } from '@toast-ui/vue-editor';
+
 import DetectionExclusionModal from "./DetectionExclusionModal.vue";
 import ImportSigmaRuleWizard from "./detections/ImportSigmaRuleWizard.vue";
+
 
 import { mapState } from "vuex";
 
@@ -812,6 +829,7 @@ export default {
     PrismEditor,
     DetectionExclusionModal,
     ImportSigmaRuleWizard,
+    Editor
   },
   name: "DetectionRuleModal",
   props: {
@@ -828,7 +846,10 @@ export default {
         tactics: [],
         lookbehind: 5,
         interval: 5,
-        organization: ""
+        organization: "",
+        guide: "",
+        setup_guide: "",
+        testing_guide: "ADADADADD"
       },
     },
     mode: {
@@ -887,7 +908,7 @@ export default {
       error_message: "",
       submitted: false,
       step: 0,
-      final_step: 7,
+      final_step: 9,
       range: {
         start: this.days_ago(7),
         end: this.today(),
@@ -943,9 +964,20 @@ export default {
   },
   watch: {
     show: function () {
+
+      if(this.show) {
+        if(this.rule.organization) {
+          this.$store.dispatch("getInputList", { organization: this.rule.organization })
+        } else {
+          this.$store.dispatch("getInputList", { organization: this.current_user.organization})
+        }
+      }
       this.error = false;
       this.error_message = "";
       if (this.mode == "Edit") {
+        this.$refs.testingGuideEditor.invoke('setMarkdown', this.rule.testing_guide)
+        this.$refs.triageGuideEditor.invoke('setMarkdown', this.rule.guide)
+        this.$refs.setupGuideEditor.invoke('setMarkdown', this.rule.setup_guide)
         this.$store.dispatch("getFieldTemplates", { organization: this.rule.organization }).then(() => {
           if(this.rule.field_templates) {
             let template_ids = Object.assign([], this.rule.field_templates)
@@ -986,7 +1018,9 @@ export default {
           "uuid",
           "version",
           "warnings",
-          "field_templates"
+          "field_templates",
+          "from_repo_sync",
+          "original_uuid"
         ].forEach((k) => {
           delete this.rule[k];
         });
@@ -994,6 +1028,9 @@ export default {
 
       if(this.mode == "Create") {
         this.$store.commit("save_field_templates", [])
+        if(this.current_user.default_org) {
+          this.rule.organization = this.current_user.organization
+        }
       }
 
       this.modalStatus = this.show;
@@ -1407,6 +1444,15 @@ export default {
         this.step = this.saved_step;
         this.final_step -= 1;
       }
+    },
+    updateTestingGuide(field) {
+      this.rule.testing_guide = this.$refs.testingGuideEditor.invoke('getMarkdown')
+    },
+    updateTriageGuide() {
+      this.rule.guide = this.$refs.triageGuideEditor.invoke('getMarkdown')
+    },
+    updateSetupGuide() {
+      this.rule.setup_guide = this.$refs.setupGuideEditor.invoke('getMarkdown')
     },
     convertRule() {
       let data = {
