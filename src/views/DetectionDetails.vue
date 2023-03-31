@@ -407,7 +407,7 @@ export default {
     Viewer
   },
   computed: {
-    ...mapState(["detection", "detection_hits"]),
+    ...mapState(["detection", "detection_hits"]), 
     technique_names() {
       return this.detection.techniques.map((t) => t.name);
     },
