@@ -341,6 +341,13 @@ export default {
       delete this.template.updated_by;
       let uuid = this.template.uuid;
       delete this.template.uuid;
+
+      // Ensure that all the fields don't have a null value for tags
+      this.template.field_mapping.forEach((f) => {
+        if (f.tags == null) {
+          this.$set(f, "tags", []);
+        }
+      });
       this.$store
         .dispatch("updateFieldTemplate", { uuid: uuid, template: this.template })
         .then(() => {
