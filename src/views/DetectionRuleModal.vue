@@ -975,9 +975,15 @@ export default {
       this.error = false;
       this.error_message = "";
       if (this.mode == "Edit") {
-        this.$refs.testingGuideEditor.invoke('setMarkdown', this.rule.testing_guide)
-        this.$refs.triageGuideEditor.invoke('setMarkdown', this.rule.guide)
-        this.$refs.setupGuideEditor.invoke('setMarkdown', this.rule.setup_guide)
+        if(this.rule.testing_guide) { 
+          this.$refs.testingGuideEditor.invoke('setMarkdown', this.rule.testing_guide)
+        }
+        if(this.rule.guide) {
+          this.$refs.triageGuideEditor.invoke('setMarkdown', this.rule.guide)
+        }
+        if(this.rule.setup_guide) {
+          this.$refs.setupGuideEditor.invoke('setMarkdown', this.rule.setup_guide)
+        }
         this.$store.dispatch("getFieldTemplates", { organization: this.rule.organization }).then(() => {
           if(this.rule.field_templates) {
             let template_ids = Object.assign([], this.rule.field_templates)
