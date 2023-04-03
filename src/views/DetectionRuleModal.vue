@@ -151,6 +151,10 @@
               </CTab>
               <CTab title="Configuration" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Rule Configuration</h5>
+                <CSelect label="Rule Status"
+                  :value.sync="rule.status"
+                  :options="rule_statuses"
+                />
                 <CSelect
                   label="Rule Type"
                   :value.sync="rule.rule_type"
@@ -398,6 +402,66 @@
                       v-model.number="rule.mute_period"
                       description="How long in minutes to mute all future hits on this detection"
                     ></CInput>
+                  </CCol>
+                </CRow>
+                <h5>Daily Schedule</h5>
+                <p>Detections can be configured to run on a daily schedule.  If a detection is configured to run on a daily schedule, it will only run during the specified time window.
+                By default a detection will run every day from 00:00 to 23:59.</p>
+                <CRow>
+                  <CCol>
+                    <CRow v-for="i,day in rule.schedule">
+                      <CCol col=2>
+                        <CInputCheckbox
+                          :checked.sync="rule.schedule[day].active"
+                          :label="day.charAt(0).toUpperCase() + day.slice(1)"
+                        />
+                      </CCol>
+                      <CCol col=5>
+                        <CInputCheckbox
+                          :checked.sync="rule.schedule[day].custom"
+                          label="Custom Hours"
+                        />
+                      </CCol>
+                      <CCol>
+                        <ul class="no-bullets" :hidden="!rule.schedule[day].custom">
+                          <li v-for="custom,i in rule.schedule[day].hours">
+                            <CRow>
+                              <CCol>
+                                <CInput v-model="rule.schedule[day].hours[i].from" :disabled="!rule.schedule[day].custom" />
+                              </CCol>
+                              <CCol col=1>
+                                to
+                              </CCol>
+                              <CCol>
+                                <CInput v-model="rule.schedule[day].hours[i].to"  :disabled="!rule.schedule[day].custom">
+                                  <template #append>
+                                    <CButton
+                                      color="danger"
+                                      size="sm"
+                                      v-on:click="rule.schedule[day].hours.splice(i,1)"
+                                       :disabled="!rule.schedule[day].custom || rule.schedule[day].hours.length == 1" 
+                                    >
+                                      -
+                                    </CButton>
+                                  </template>
+                                </CInput>
+                              </CCol>
+                            </CRow>
+                          </li>
+                        </ul>
+                      </CCol>
+                      <CCol col=1>
+                        <CButton
+                          color="success"
+                          size="sm"
+                          v-on:click="rule.schedule[day].hours.push({from: '00:00', to: '23:59'})"
+                          :disabled="!rule.schedule[day].custom || rule.schedule[day].hours.length == 5"
+                           :hidden="!rule.schedule[day].custom"
+                        >
+                          +
+                        </CButton>
+                      </CCol>
+                    </CRow>
                   </CCol>
                 </CRow>
               </CTab>
@@ -686,13 +750,13 @@
                 </p>
                 <editor ref="triageGuideEditor" :initialValue="rule.guide" @change="updateTriageGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" /><br>
 
-                <h5>False Positives</h5>
+                <h5>false Positives</h5>
                 <p>
-                  False positives are quick indicators that an analyst can use to rule out
+                  false positives are quick indicators that an analyst can use to rule out
                   false positive activity on the detection
                 </p>
                 <CButton @click="addFP" size="sm" color="success"
-                  >New False Positive</CButton
+                  >New false Positive</CButton
                 ><br /><br />
                 <div v-for="(fp, i) in rule.false_positives" :key="i">
                   <CInput v-model="rule.false_positives[i]"
@@ -800,6 +864,12 @@
   height: 450px !important;
 }
 
+ul.no-bullets {
+  list-style-type: none; /* Remove bullets */
+  padding: 0; /* Remove padding */
+  margin: 0; /* Remove margins */
+}
+
 </style>
 <script>
 import { uuid } from "vue-uuid";
@@ -849,7 +919,8 @@ export default {
         organization: "",
         guide: "",
         setup_guide: "",
-        testing_guide: "ADADADADD"
+        testing_guide: "",
+        status: "Experimental",
       },
     },
     mode: {
@@ -883,6 +954,12 @@ export default {
   },
   data() {
     return {
+      rule_statuses: ['Experimental','Draft','Superceded',
+      'Beta',
+      'Stable',
+      'Test',
+      'Deprecated',
+      'Production'],
       tabs: [
         { name: "Overview", icon: "cil-description" },
         { name: "Configuration", icon: "cil-gear" },
@@ -959,7 +1036,9 @@ export default {
         "detection_id",
         "command",
       ],
-      signature_fields: []
+      signature_fields: [],
+      daily_schedule: false,
+      schedule: this.defaultSchedule()
     };
   },
   watch: {
@@ -975,6 +1054,10 @@ export default {
       this.error = false;
       this.error_message = "";
       if (this.mode == "Edit") {
+        if(this.rule.monday === undefined)
+        {
+          this.rule.schedule = this.defaultSchedule()
+        }
         if(this.rule.testing_guide) { 
           this.$refs.testingGuideEditor.invoke('setMarkdown', this.rule.testing_guide)
         }
@@ -1485,6 +1568,59 @@ export default {
           this.error_message = error.response.data.message;
         });
     },
+    defaultSchedule() {
+      return {
+        monday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        tuesday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        wednesday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        thursday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        friday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        saturday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        sunday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+      }
+    }
   },
 };
 </script>

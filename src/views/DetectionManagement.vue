@@ -425,6 +425,7 @@ export default {
           query: "okay",
           language: "",
         },
+        status: "Experimental",
         source: {
           uuid: null,
         },
@@ -456,6 +457,8 @@ export default {
           max_terms: 1000,
           window_size: 30,
         },
+      daily_schedule: false,
+      schedule: this.defaultSchedule()
       },
     };
   },
@@ -494,6 +497,7 @@ export default {
           query: "okay",
           language: "",
         },
+        status: "Experimental",
         source: {
           uuid: null,
         },
@@ -533,6 +537,8 @@ export default {
           max_terms: 1000,
           window_size: 30,
         },
+      daily_schedule: false,
+      schedule: this.defaultSchedule()
       };
     },
     createDetectionModal() {
@@ -544,6 +550,7 @@ export default {
           query: "okay",
           language: "",
         },
+        status: "Experimental",
         source: {
           uuid: null,
         },
@@ -583,6 +590,8 @@ export default {
           max_terms: 1000,
           window_size: 30,
         },
+      daily_schedule: false,
+      schedule: this.defaultSchedule()
       };
       this.show_detection_rule_modal = true;
     },
@@ -742,6 +751,59 @@ export default {
       }
       this.show_remove_from_repository_modal = true;
     },
+    defaultSchedule() {
+      return {
+        monday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        tuesday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        wednesday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        thursday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        friday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        saturday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+        sunday: {
+          active: true,
+          custom: false,
+          hours: [
+            {from: "00:00", to: "23:59"}
+          ]
+        },
+      }
+    }
   },
   computed: {
     filtered_items() {
