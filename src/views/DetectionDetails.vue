@@ -407,7 +407,7 @@ export default {
     Viewer
   },
   computed: {
-    ...mapState(["detection", "detection_hits"]),
+    ...mapState(["detection", "detection_hits"]), 
     technique_names() {
       return this.detection.techniques.map((t) => t.name);
     },
@@ -428,7 +428,7 @@ export default {
       uuid: this.$route.params.uuid,
       activeTab: 0,
       show_sigma: false,
-      max_risk: 50000,
+      max_risk: 100,
       exclusion: {},
       show_exclusion_modal: false,
       exclusion_modal_mode: "Create",
