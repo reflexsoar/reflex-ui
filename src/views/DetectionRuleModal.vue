@@ -750,13 +750,13 @@
                 </p>
                 <editor ref="triageGuideEditor" :initialValue="rule.guide" @change="updateTriageGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" /><br>
 
-                <h5>false Positives</h5>
+                <h5>False Positives</h5>
                 <p>
-                  false positives are quick indicators that an analyst can use to rule out
+                  False positives are quick indicators that an analyst can use to rule out
                   false positive activity on the detection
                 </p>
                 <CButton @click="addFP" size="sm" color="success"
-                  >New false Positive</CButton
+                  >New False Positive</CButton
                 ><br /><br />
                 <div v-for="(fp, i) in rule.false_positives" :key="i">
                   <CInput v-model="rule.false_positives[i]"
