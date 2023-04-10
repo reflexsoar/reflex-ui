@@ -26,6 +26,9 @@
     <CDropdownItem onclick="window.open('https://docs.reflexsoar.com')">
       <CIcon name="cil-book" />Documentation
     </CDropdownItem>
+    <CDropdownItem @click="downloadSOCReport()">
+      <CIcon name="cil-cloud-download" />SOC Report
+    </CDropdownItem>
     <CDropdownItem onclick="window.open('https://support.reflexsoar.com')">
       <CIcon name="cil-life-ring" />Support
     </CDropdownItem>
@@ -57,6 +60,16 @@ export default {
       this.$store.dispatch('logout')
       .then(() => {
         this.$router.push('/login')
+      })
+    },
+    downloadSOCReport(uuid) {
+      this.$store.dispatch("downloadSOCReport", {organization: this.current_user.organization, days: 30}).then((resp) => {
+        // Download the file as a blob
+        let blob = new Blob([resp.data])
+        let link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+        link.download = 'soc-report.html'
+        link.click()
       })
     }
   }
