@@ -680,9 +680,6 @@ export default {
           }
         }, []);
       }
-
-      
-      
     },
     item_is_selected(i) {
       return this.selected_items.includes(i);
