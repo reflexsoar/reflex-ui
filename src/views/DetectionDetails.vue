@@ -409,10 +409,17 @@ export default {
   computed: {
     ...mapState(["detection", "detection_hits"]), 
     technique_names() {
-      return this.detection.techniques.map((t) => t.name);
+      if (this.detection.technique_names) {
+        return this.detection.techniques.map((t) => t.name);
+      }
+      return [];
     },
     tactic_names() {
-      return this.detection.tactics.map((t) => t.name);
+      if(this.detection.tactic_names) {
+        return this.detection.tactics.map((t) => t.name);
+      }
+      return [];
+      
     },
   },
   watch: {
