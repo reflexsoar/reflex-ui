@@ -100,6 +100,11 @@
                       size="sm"
                     ></RMultiCheck>
                   </template>
+                  <template #status="{ item }">
+                    <td>
+                      <CBadge class="tag tag-sm" color="info" v-if="item.status">{{item.status}}</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Unknown</CBadge>
+                    </td>
+                  </template>
                   <template #select-filter="{ item }">
                     <input
                       type="checkbox"
@@ -123,7 +128,7 @@
                       <CCol>
                         <CBadge class="tag tag-sm" color="success" v-if="item.active">Active</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge>&nbsp;<b>{{ item.name }}</b>
                       </CCol>
-                      <CCol col=2>
+                      <CCol col=3>
                         <div style="display: inline-block; padding-right:2px;">
                           <TagBucket v-if="item.tags && item.tags.length > 0" :tags="item.tags" />
                         </div>
@@ -391,6 +396,7 @@ export default {
       detection_list_fields: [
         { key: "select", label: "", filter: false },
         "name",
+        "status",
         "last_run",
         "last_hit",
         { key: "total_hits", label: "Hits"},
@@ -506,7 +512,7 @@ export default {
         lookbehind: 5,
         interval: 5,
         rule_type: 0,
-        severity: 1,
+        severity: 2,
         risk_score: 50,
         mute_period: 0,
         exceptions: [],

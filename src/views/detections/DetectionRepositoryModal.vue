@@ -178,6 +178,14 @@ export default {
     },
     methods: {
         createRepository() {
+            
+            // Update the access_scope settings so its just a list of UUIDs
+            if(repo_data.access_scope) {
+                repo_data.access_scope = repo_data.access_scope.map((org) => {
+                    return org.value;
+                })
+            }
+
             this.$store.dispatch('createDetectionRepository', {data: this.repository}).then(() => {
                 this.modalStatus = false;
                 this.$emit("update:show", this.modalStatus);
