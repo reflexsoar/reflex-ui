@@ -66,6 +66,21 @@
                     </CRow>
                     <CRow>
                       <CCol>
+                        <label>Used for Detections</label><br />
+                        <CSwitch
+                          :checked.sync="detections_only"
+                          color="success"
+                          label-on="Yes"
+                          label-off="No"
+                        />
+                        <p class="text-muted">
+                          If this input is used for detections, Reflex Agents will not
+                          attempt to poll it for events like a standard Input.
+                        </p>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol>
                         <h4>Tags</h4>
                         <multiselect
                           v-model="selected"
@@ -461,7 +476,7 @@
                       <CCol col="12">
                         <h3>Confirmation</h3>
                         <h5>{{ name }}</h5>
-                        <CIcon name="cilTags" v-if="selected.length > 0"/>&nbsp;
+                        <CIcon name="cilTags" v-if="selected.length > 0" />&nbsp;
                         <li
                           style="display: inline; margin-right: 2px"
                           v-for="tag in selected"
@@ -717,14 +732,14 @@ export default {
         this.credential = "";
         this.config = this.source_input.config;
         this.plugin = this.source_input.plugin;
-        if(!this.config.hasOwnProperty('static_tags')) {
-          this.$set(this.config, 'static_tags', []);
+        if (!this.config.hasOwnProperty("static_tags")) {
+          this.$set(this.config, "static_tags", []);
         }
-        if(!this.config.hasOwnProperty('tag_fields')) {
-          this.$set(this.config, 'tag_fields', []);
+        if (!this.config.hasOwnProperty("tag_fields")) {
+          this.$set(this.config, "tag_fields", []);
         }
-        if(!this.config.hasOwnProperty('signature_fields')) {
-          this.$set(this.config, 'signature_fields', []);
+        if (!this.config.hasOwnProperty("signature_fields")) {
+          this.$set(this.config, "signature_fields", []);
         }
         if (this.source_input.tags) {
           this.selected = this.source_input.tags.map((tag) => {
@@ -748,6 +763,7 @@ export default {
       let config = btoa(conf);
       let field_mapping = btoa(fm);
       let plugin = this.plugin;
+      let detections_only = this.detections_only;
       let mitre_data_sources = this.selected_mitre_data_sources;
       let tags = this.selected.map((tag) => {
         return tag.name;
@@ -763,6 +779,7 @@ export default {
           plugin,
           credential,
           tags,
+          detections_only,
           mitre_data_sources,
         })
         .then((resp) => {
@@ -780,7 +797,7 @@ export default {
         uuid: "",
         color: "#ffffff",
       };
-      if(this.tags === null) {
+      if (this.tags === null) {
         this.tags = [];
       }
       this.tags.push(newTag);
@@ -932,12 +949,19 @@ export default {
     from_source_input: function () {
       return this.source_input != null;
     },
-    ...mapState(["current_user", "credential_list", "organizations", "source_input", "mitre_data_sources"]),
+    ...mapState([
+      "current_user",
+      "credential_list",
+      "organizations",
+      "source_input",
+      "mitre_data_sources",
+    ]),
   },
   data() {
     return {
       name: "",
       description: "",
+      detections_only: false,
       config: "",
       field_mapping: { fields: [] },
       credential: "",
