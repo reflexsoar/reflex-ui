@@ -1167,9 +1167,9 @@ export default {
     setSeverity() {
       if (this.rule.risk_score <= 29) {
         this.rule.severity = 1;
-      } else if (this.rule.risk_score <= 59 && this.rule.risk_score > 30) {
+      } else if (this.rule.risk_score <= 59 && this.rule.risk_score >= 30) {
         this.rule.severity = 2;
-      } else if (this.rule.risk_score <= 89 && this.rule.risk_score > 60) {
+      } else if (this.rule.risk_score <= 89 && this.rule.risk_score >= 60) {
         this.rule.severity = 3;
       } else {
         this.rule.severity = 4;
