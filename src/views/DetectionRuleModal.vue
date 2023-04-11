@@ -1109,7 +1109,8 @@ export default {
           "warnings",
           "field_templates",
           "from_repo_sync",
-          "original_uuid"
+          "original_uuid",
+          "repository"
         ].forEach((k) => {
           delete this.rule[k];
         });
