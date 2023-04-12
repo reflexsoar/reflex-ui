@@ -142,8 +142,6 @@ export default {
         this.loading = true
         this.getDetections(this.mitre_technique.external_id, this.mitre_technique.phase_names)
         this.getInputs(this.mitre_technique.data_sources)
-      } else {
-        
       }
     }
   },
@@ -169,7 +167,7 @@ export default {
   methods: {
     getDetections(tech,tactics){
       this.detections_loading = true
-      this.$store.dispatch('getDetections', { tactics: tactics, technique: tech, save: false, organization: this.organization }).then(resp => {
+      this.$store.dispatch('getDetections', { tactics: tactics, techniques: tech, save: false, organization: this.organization }).then(resp => {
         this.associated_detections = resp.data.detections
         this.detections_loading = false
       }).catch(err => {
