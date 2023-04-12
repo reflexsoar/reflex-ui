@@ -409,13 +409,14 @@ export default {
     ...mapState(["detection", "detection_hits"]), 
     technique_names() {
       if (this.detection.techniques) {
-        return this.detection.techniques.map((t) => t.name);
+        return this.detection.techniques.map((t) => t.name + " (" + t.external_id + ")");
       }
       return [];
     },
     tactic_names() {
       if(this.detection.tactics) {
-        return this.detection.tactics.map((t) => t.name);
+        // Join the tactic name and external ID together
+        return this.detection.tactics.map((t) => t.name + " (" + t.external_id + ")");
       }
       return [];
       
