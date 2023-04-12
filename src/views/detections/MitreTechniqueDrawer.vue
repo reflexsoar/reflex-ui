@@ -46,15 +46,17 @@
             <CCol>
               <hr>
               <h3>Detections</h3>
-              <div v-if="detections_loading" class="text-center"><CSpinner></CSpinner></div>
-              <div v-else>
-                <span v-if="associated_detections.length != 0"><ul>
-                  <li v-for="detection in associated_detections" :key="detection.uuid">
-                  <b><router-link :to="`/detections/${detection.uuid}`">{{detection.name}}</router-link></b> - {{detection.description}}
-                  </li></ul>
-                  </span>
-                  <span v-else>No Associated Detections</span>
-              </div>
+              <CDataTable
+                :items="associated_detections"
+                :fields="[{key: 'name', label:'Name', _style:'width:40%;'},'description']"
+                pagination
+                >
+                <template #name="{item}">
+                  <td>
+                    <router-link :to="`/detections/${item.uuid}`">{{item.name}}</router-link>
+                  </td>
+                </template>
+              </CDataTable>
             </CCol>
           </CRow>
           <CRow>
