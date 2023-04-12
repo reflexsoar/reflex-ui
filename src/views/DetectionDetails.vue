@@ -37,7 +37,6 @@
                     <CTabs
               :fade="false"
               variant="pills"
-              :activeTab.sync="step"
               :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
             >
                       <CTab title="Overview">
@@ -409,13 +408,13 @@ export default {
   computed: {
     ...mapState(["detection", "detection_hits"]), 
     technique_names() {
-      if (this.detection.technique_names) {
+      if (this.detection.techniques) {
         return this.detection.techniques.map((t) => t.name);
       }
       return [];
     },
     tactic_names() {
-      if(this.detection.tactic_names) {
+      if(this.detection.tactics) {
         return this.detection.tactics.map((t) => t.name);
       }
       return [];
