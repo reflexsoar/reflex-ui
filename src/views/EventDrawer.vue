@@ -179,7 +179,7 @@
               </div>
               <div v-if="detection.guide">
                 <h4>Investigation Guide</h4>
-                <vue-markdown>{{ detection.guide }}</vue-markdown><br><br>
+                <viewer :initialValue="detection.guide" height="100px" style="min-height:100px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
 
                 <span v-if="detection.false_positives && detection.false_positives.length > 0">
                   <h4>False Positives</h4>
@@ -382,6 +382,7 @@ import 'prismjs/components/prism-python';
 import '../assets/js/prism-rql';
 import '../assets/css/prism-reflex.css'; // import syntax highlighting styles
 import MatchedEventRule from './event/MatchedEventRule'
+import { Viewer } from '@toast-ui/vue-editor';
 
 export default {
   name: 'EventDrawer',
@@ -393,7 +394,8 @@ export default {
     VueJsonPretty,
     CRightDrawer,
     PrismEditor,
-    MatchedEventRule
+    MatchedEventRule,
+    Viewer
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
