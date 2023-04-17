@@ -765,7 +765,6 @@ export default {
         }).catch(err => {
             this.error = true
             this.error_message = err.response.data.message
-            this.selected = []
             this.selected_count = 0
             this.dismiss_submitted = false
           })
