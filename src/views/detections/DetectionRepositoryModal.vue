@@ -180,8 +180,8 @@ export default {
         createRepository() {
             
             // Update the access_scope settings so its just a list of UUIDs
-            if(repo_data.access_scope) {
-                repo_data.access_scope = repo_data.access_scope.map((org) => {
+            if(this.repository.access_scope) {
+                this.repository.access_scope = this.repository.access_scope.map((org) => {
                     return org.value;
                 })
             }
