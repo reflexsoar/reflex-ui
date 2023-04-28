@@ -63,49 +63,73 @@
               </CCol>
             </CRow>
           </CCardHeader>
-            <CDataTable
-              :items="computed_event_rules"
-              :fields="fields"
-              :loading="loading"
-              :items-per-page="10"
-              pagination
-              hover
-              column-filter
-              :sorter="{ external: false, resetable: true }"
-            >
-              <template #organization-filter="{ item }">
-                <RMultiCheck
-                  :items="formatted_organizations"
-                  @checked="set_picker_filters($event, 'organization')"
-                  size="sm"
-                ></RMultiCheck>
-              </template>
-              
-              <template #name="{ item }">
-                <td style="min-width: 80ch">
-                  <CBadge class="tag tag-sm" color="success" v-if="item.active">Active</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge>&nbsp;<b>{{ item.name }}</b
-                  ><br />{{ item.description }}
-                </td>
-              </template>
-              <template #organization="{ item }">
-                <td>
-                  <OrganizationBadge :uuid="item.organization" />
-                </td>
-              </template>
-              <template #last_matched_date="{ item }">
-                <td v-if="item.last_matched_date">
-                  {{ item.last_matched_date | moment("from", "now") }}
-                </td>
-                <td v-else>Never</td>
-              </template>
-              <template #hits="{ item }">
-                <td>
-                  {{ item.hits.toLocaleString("en-US") }}
-                </td>
-              </template>
-              <template #manage="{ item }">
-                <td class="text-right">
-                  <CDropdown color="secondary" size="sm" toggler-text="Manage">
+          <CDataTable
+            :items="computed_event_rules"
+            :fields="fields"
+            :loading="loading"
+            :items-per-page="10"
+            pagination
+            hover
+            column-filter
+            :sorter="{ external: false, resetable: true }"
+          >
+            <template #organization-filter="{ item }">
+              <RMultiCheck
+                :items="formatted_organizations"
+                @checked="set_picker_filters($event, 'organization')"
+                size="sm"
+              ></RMultiCheck>
+            </template>
+
+            <template #name="{ item }">
+              <td style="min-width: 80ch">
+                <CRow>
+                  <CCol>
+                    <CBadge class="tag tag-sm" color="success" v-if="item.active"
+                      >Active</CBadge
+                    ><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge
+                    >&nbsp;<b>{{ item.name }}</b
+                    ><br />{{ item.description }}
+                  </CCol>
+                  <CCol col="3">
+                    <div style="display: inline-block; padding-right: 2px">
+                      <TagBucket
+                        v-if="item.tags && item.tags.length > 0"
+                        :tags="item.tags"
+                      />
+                      
+                    </div>
+                    <div style="display: inline-block">
+                      <TagBucket
+                        v-if="event_rule_actions(item).length > 0"
+                        :tags="event_rule_actions(item)"
+                        iconName="cil-bolt"
+                        label="Actions"
+                      />
+                    </div>
+                  </CCol>
+                </CRow>
+              </td>
+            </template>
+            <template #organization="{ item }">
+              <td style="vertical-align: top;">
+                <OrganizationBadge :uuid="item.organization" />
+              </td>
+            </template>
+            <template #last_matched_date="{ item }">
+              <td v-if="item.last_matched_date">
+                {{ item.last_matched_date | moment("from", "now") }}
+              </td>
+              <td v-else>Never</td>
+            </template>
+            <template #hits="{ item }">
+              <td>
+                {{ item.hits.toLocaleString("en-US") }}
+              </td>
+            </template>
+            <template #manage="{ item }">
+              <td class="text-right">
+                <CDropdown color="secondary" size="sm" toggler-text="Manage">
                   <CDropdownItem
                     aria-label="Export Rule"
                     disabled
@@ -140,8 +164,8 @@
                     color="warning"
                     @click="disableRule(item.uuid)"
                     v-c-tooltip="{ content: 'Disable Rule', placement: 'left' }"
-                    ><CIcon name="cilBan"
-                  />&nbsp;Disable Rule</CDropdownItem>
+                    ><CIcon name="cilBan" />&nbsp;Disable Rule</CDropdownItem
+                  >
                   <CDropdownItem
                     aria-label="Enable Rule"
                     v-else
@@ -161,68 +185,61 @@
                     "
                     size="sm"
                     v-c-tooltip="{ content: 'Delete Rule', placement: 'left' }"
-                    ><CIcon name="cilTrash"
-                  />&nbsp;Delete Rule</CDropdownItem>
-                  </CDropdown>
-                </td>
-              </template>
-              <template #created_by="{ item }">
-                <td>
-                  {{ item.created_by ? item.created_by.username : "Unknown" }}
-                </td>
-              </template>
-              <template #updated_by="{ item }">
-                <td>
-                  {{ item.updated_by ? item.updated_by.username : "Unknown" }}
-                </td>
-              </template>
-              <template #priority="{ item }">
-                <td class='text-center'>
-                  <CBadge class="tag" color="info">{{
-                    item.priority
-                  }}</CBadge>
-                </td>
-              </template>
-              <template #properties="{ item }">
-                <td>
-                  <span v-if="item.global_rule"
-                    ><CBadge color="info" class="tag tag-list"
-                      >Global Rule</CBadge
-                    >&nbsp;</span
+                    ><CIcon name="cilTrash" />&nbsp;Delete Rule</CDropdownItem
                   >
-                  <span v-if="item.run_retroactively"
-                    ><CBadge color="info" class="tag tag-list"
-                      >Retroactive</CBadge
-                    >&nbsp;</span
-                  >
-                  <span v-if="item.merge_into_case"
-                    ><CBadge color="info" class="tag tag-list"
-                      >Merge Into Case</CBadge
-                    >&nbsp;</span
-                  >
-                  <span v-if="item.create_new_case"
-                    ><CBadge color="info" class="tag tag-list"
-                      >Create New Case</CBadge
-                    >&nbsp;</span
-                  >
-                  <span v-if="item.dismiss"
-                    ><CBadge color="info" class="tag tag-list"
-                      >Dismiss Event</CBadge
-                    >&nbsp;</span
-                  >
-                  <span v-if="item.expire"
-                    ><CBadge color="info" class="tag tag-list"
-                      >Rule Expires</CBadge
-                    >&nbsp;</span
-                  >
-                  <span v-if="item.notification_channels && item.notification_channels.length > 0"
-                    ><CBadge class="tag tag-list" color="info"
-                      >Notifies</CBadge
-                    >&nbsp;</span
-                  >
-                </td>
-              </template>
-            </CDataTable>
+                </CDropdown>
+              </td>
+            </template>
+            <template #created_by="{ item }">
+              <td>
+                {{ item.created_by ? item.created_by.username : "Unknown" }}
+              </td>
+            </template>
+            <template #updated_by="{ item }">
+              <td>
+                {{ item.updated_by ? item.updated_by.username : "Unknown" }}
+              </td>
+            </template>
+            <template #priority="{ item }">
+              <td class="text-center">
+                <CBadge class="tag" color="info">{{ item.priority }}</CBadge>
+              </td>
+            </template>
+            <template #properties="{ item }">
+              <td>
+                <span v-if="item.global_rule"
+                  ><CBadge color="info" class="tag tag-list">Global Rule</CBadge
+                  >&nbsp;</span
+                >
+                <span v-if="item.run_retroactively"
+                  ><CBadge color="info" class="tag tag-list">Retroactive</CBadge
+                  >&nbsp;</span
+                >
+                <span v-if="item.merge_into_case"
+                  ><CBadge color="info" class="tag tag-list">Merge Into Case</CBadge
+                  >&nbsp;</span
+                >
+                <span v-if="item.create_new_case"
+                  ><CBadge color="info" class="tag tag-list">Create New Case</CBadge
+                  >&nbsp;</span
+                >
+                <span v-if="item.dismiss"
+                  ><CBadge color="info" class="tag tag-list">Dismiss Event</CBadge
+                  >&nbsp;</span
+                >
+                <span v-if="item.expire"
+                  ><CBadge color="info" class="tag tag-list">Rule Expires</CBadge
+                  >&nbsp;</span
+                >
+                <span
+                  v-if="
+                    item.notification_channels && item.notification_channels.length > 0
+                  "
+                  ><CBadge class="tag tag-list" color="info">Notifies</CBadge>&nbsp;</span
+                >
+              </td>
+            </template>
+          </CDataTable>
           <CRow>
             <!--<CCol lg="12" sm="12">
           <CCardBody v-if="pagination.pages > 0">
@@ -332,6 +349,7 @@ import "vue-json-pretty/lib/styles.css";
 import CreateEventRuleModal from "./CreateEventRuleModal";
 import OrganizationBadge from "./OrganizationBadge";
 import RMultiCheck from "./components/MultiCheck";
+import TagBucket from "./components/TagBucket";
 
 export default {
   components: {
@@ -340,6 +358,7 @@ export default {
     CreateEventRuleModal,
     OrganizationBadge,
     RMultiCheck,
+    TagBucket,
   },
   name: "EventRuleManagement",
   data() {
@@ -351,9 +370,8 @@ export default {
       fields: [
         "name",
         "priority",
-        "properties",
         "hits",
-        "last_matched_date",
+        { key: "last_matched_date", label: "Last Matched", filter: false},
         "created_by",
         "updated_by",
         { key: "manage", label: "", filter: false },
@@ -433,7 +451,7 @@ export default {
       sort_by: "created_at",
       sort_direction: "asc",
       picker_filters: {},
-      formatted_organizations: []
+      formatted_organizations: [],
     };
   },
   watch: {
@@ -471,6 +489,29 @@ export default {
     },
   },
   methods: {
+    event_rule_actions(rule) {
+      let actions = []
+      if (rule.dismiss) {
+        actions.push("Dismisses")
+      }
+      if (rule.create_new_case) {
+        actions.push("Creates New Case")
+      }
+      if (rule.merge_into_case) {
+        actions.push("Merges Into Case")
+      }
+      if (rule.run_retroactively) {
+        actions.push("Runs Retroactively")
+      }
+      if (rule.global_rule) {
+        actions.push("Global Rule")
+      }
+      if (rule.expire) {
+        actions.push("Expires")
+      }
+
+      return actions
+    },
     sort(event) {
       this.sort_direction = event.asc ? "asc" : "desc";
       this.sort_by = event.column ? event.column : "created_at";
@@ -696,10 +737,13 @@ export default {
       let users = [];
       this.computed_event_rules.forEach((rule) => {
         if (!users.find((u) => u.value == rule.created_by.username)) {
-          users.push({label: rule.created_by.username, value: rule.created_by.username});
+          users.push({
+            label: rule.created_by.username,
+            value: rule.created_by.username,
+          });
         }
       });
-      return users
+      return users;
     },
     ...mapState(["alert", "current_user", "loading", "event_rules", "event_rule_stats"]),
   },

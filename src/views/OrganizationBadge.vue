@@ -1,5 +1,5 @@
 <template>
-    <span>&nbsp;<CBadge class="tag" :shape="shape" :size="size" :color="color">{{orgName(uuid)}}</CBadge></span>
+    <span><CBadge class="tag" :shape="shape" :size="size" :color="color">{{orgName(uuid)}}</CBadge></span>
 </template>
 
 <script>
