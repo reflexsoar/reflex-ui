@@ -157,6 +157,7 @@ export default {
     return {
       selected_filters: {
         repo_synced: true,
+        active: true
       },
       filters: {},
       show_filters: false,
@@ -165,6 +166,7 @@ export default {
       search_text: null,
       loading: false,
       repo_sync: true,
+      rule_active: true,
     };
   },
   created() {
@@ -176,6 +178,14 @@ export default {
         this.selected_filters.repo_synced = true;
       } else {
         this.selected_filters.repo_synced = false;
+      }
+      this.getFilters();
+    },
+    rule_active: function (val) {
+      if (val == true) {
+        this.selected_filters.active = true;
+      } else {
+        this.selected_filters.active = false;
       }
       this.getFilters();
     },

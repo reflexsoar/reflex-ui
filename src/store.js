@@ -138,9 +138,13 @@ const state = {
   "email_subject","email","domain","detection_id","command"],
   detection_repository: {},
   detection_repositories: [],
+  event_views: [],
 }
 
 const mutations = {
+  save_event_views(state, event_views) {
+    state.event_views = event_views
+  },
   add_task (state, task) {
     state.running_tasks.push(task)
   },
@@ -2187,6 +2191,29 @@ const actions = {
       })
       .catch(err => {
         console.log(err)
+        reject(err)
+      })
+    })
+  },
+  getEventViews({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_view`, method: 'GET'})
+      .then(resp => {
+        commit('save_event_views', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createEventView({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_view`, data: data, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })
