@@ -23,9 +23,10 @@
           ><b>Beta Feature</b>: This feature is in beta and requires a specific agent
           version and API version.</CAlert
         >
+        <span  v-if="current_tab == 0"><DetectionsFilterMenu></DetectionsFilterMenu></span>
         <CCard>
           <CCardBody class="tabbed">
-            <CTabs>
+            <CTabs :activeTab.sync="current_tab">
               <CTab title="Detection Rules" active>
                 <CRow style="padding: 10px">
                   <CCol>
@@ -86,7 +87,7 @@
                   :items="filtered_items"
                   :fields="detection_list_fields"
                   :items-per-page="10"
-                  column-filter
+                  
                   :sorter="{ external: false, resetable: true }"
                   :sorterValue="{ column: 'name', asc: true }"
                   pagination
@@ -294,7 +295,7 @@
               <CTab title="Detection Repositories">
                 <DetectionRepositoryList />
               </CTab>
-              <CTab title="Detection Bundles"> </CTab>
+              <!--<CTab title="Detection Bundles"> </CTab>-->
             </CTabs>
           </CCardBody>
         </CCard>
@@ -361,6 +362,7 @@ import ImportSigmaRuleWizard from "./detections/ImportSigmaRuleWizard.vue";
 import RMultiCheck from "./components/MultiCheck";
 import TagBucket from "./components/TagBucket";
 import DetectionRepoPopover from "./detections/DetectionRepoPopover";
+import DetectionsFilterMenu from "./detections/DetectionsFilterMenu";
 
 import AddToRepositoryModal from "./detections/AddToRepositoryModal";
 import RemoveFromRepositoryModal from "./detections/RemoveFromRepositoryModal";
@@ -378,11 +380,13 @@ export default {
     AddToRepositoryModal,
     RemoveFromRepositoryModal,
     TagBucket,
-    DetectionRepoPopover
+    DetectionRepoPopover,
+    DetectionsFilterMenu,
   },
   data() {
     return {
       error: false,
+      current_tab: 0,
       error_message: "",
       show_add_to_repository_modal: false,
       show_remove_from_repository_modal: false,
