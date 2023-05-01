@@ -8,7 +8,7 @@
               <li style="display: inline">
                 <span v-for="(key, type) in selected_filters" :key="type">
                   <CButton
-                    v-for="value in key"
+                    v-for="(value, i) in key"
                     :key="i"
                     size="sm"
                     class="tag"
@@ -79,6 +79,15 @@
                 </CCol>
               </CRow>
             </div>
+            <div class="event-stats-picker">
+              <b class="event-stats-title">Show Synchronized Rules</b><br />
+              <CSwitch
+                label-on="Yes"
+                label-off="No"
+                :checked.sync="repo_sync"
+                color="success"
+              />
+            </div>
             <div
               class="event-stats-picker"
               v-for="(bucket, title) in filters"
@@ -146,17 +155,30 @@ export default {
   name: "DetectionsFilterMenu",
   data() {
     return {
-      selected_filters: {},
+      selected_filters: {
+        repo_synced: true,
+      },
       filters: {},
       show_filters: false,
       free_search_options: ["Name"],
       selected_search_option: "Name",
       search_text: null,
       loading: false,
+      repo_sync: true,
     };
   },
   created() {
     this.getFilters();
+  },
+  watch: {
+    repo_sync: function (val) {
+      if (val == true) {
+        this.selected_filters.repo_synced = true;
+      } else {
+        this.selected_filters.repo_synced = false;
+      }
+      this.getFilters();
+    },
   },
   methods: {
     getFilters() {
