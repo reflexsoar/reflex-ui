@@ -105,16 +105,17 @@
                       <CBadge class="tag tag-sm" color="info" v-if="item.status">{{item.status}}</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Unknown</CBadge>
                     </td>
                   </template>
-                  <template #select-filter="{ item }">
+                  <template #select-header="{ item }">
+                    <span style="text-align: center;">
                     <input
                       type="checkbox"
                       :checked="selected_items.length > 0"
                       @click="selectAll()"
                       style="margin-left: 7px"
-                    />
+                    /></span>
                   </template>
                   <template #select="{ item }">
-                    <td>
+                    <td style="text-align: center;">
                       <input
                         type="checkbox"
                         :checked="item_is_selected(item.uuid)"
@@ -158,7 +159,11 @@
                   </template>
                   <template #last_run="{ item }">
                     <td style="width: 125px">
-                      {{ item.last_run | moment("from", "now") }}
+                      <span v-if="neverRun(item.last_run)">
+                        Never</span>
+                      <span v-else>
+                        {{ item.last_run | moment("from", "now") }}
+                      </span>
                     </td>
                   </template>
                   <template #last_hit="{ item }">
@@ -664,6 +669,11 @@ export default {
             });
           });
         }
+      }
+    },
+    neverRun(last_run) {
+      if (last_run.startsWith('1969-')) {
+        return true;
       }
     },
     selectAll() {
