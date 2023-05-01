@@ -87,7 +87,6 @@
                   :items="filtered_items"
                   :fields="detection_list_fields"
                   :items-per-page="10"
-                  
                   :sorter="{ external: false, resetable: true }"
                   :sorterValue="{ column: 'name', asc: true }"
                   pagination
