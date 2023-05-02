@@ -2,7 +2,7 @@
     <div>
         <h2>
             <CBadge color="primary">BETA</CBadge>&nbsp;MITRE ATT&CK Coverage Map
-        </h2>{{mitre_mapping}}
+        </h2>
         <p>See how your detection rules align with MITRE ATT&CK. This will help identify gaps in your detection rules.
         </p>
         <CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and may not function as intended
