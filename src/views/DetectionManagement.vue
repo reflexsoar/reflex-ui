@@ -23,11 +23,12 @@
           ><b>Beta Feature</b>: This feature is in beta and requires a specific agent
           version and API version.</CAlert
         >
-        <span  v-if="current_tab == 0"><DetectionsFilterMenu></DetectionsFilterMenu></span>
+        <span  v-if="current_tab == 0"></span>
         <CCard>
           <CCardBody class="tabbed">
             <CTabs :activeTab.sync="current_tab">
               <CTab title="Detection Rules" active>
+                <DetectionsFilterMenu :total_detections="filtered_items.length"></DetectionsFilterMenu>
                 <CRow style="padding: 10px">
                   <CCol>
                     <CButton v-if="current_user.role.permissions['create_detection']"  color="primary" @click="createDetectionModal()"

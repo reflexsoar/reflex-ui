@@ -1,10 +1,12 @@
 <template>
   <CRow>
     <CCol col="12">
-      <CCard>
-        <CCardHeader>
+      
+        <CCard class="cases-picker-card">
           <CRow>
+            
             <CCol col="10">
+            Showing {{ total_detections }} detections <span class="separator">|</span>
               <li style="display: inline">
                 <span v-for="(key, type) in selected_filters" :key="type">
                   <CButton
@@ -42,8 +44,8 @@
               </CButtonGroup>
             </CCol>
           </CRow>
-        </CCardHeader>
-        <CCollapse :show="show_filters">
+        </CCard>
+        <CCollapse :show="show_filters"><CCard class="cases-picker-card">
           <CRow class="event-stats-container event-stats-row">
             <div class="event-stats-picker">
               <CRow>
@@ -141,18 +143,33 @@
               </div>
             </div>
           </CRow>
-          <!-- END EVENT STATS COMPONENT -->
+          <!-- END EVENT STATS COMPONENT --></CCard>
         </CCollapse>
-      </CCard>
+        
     </CCol>
   </CRow>
 </template>
+
+<style scoped>
+
+.separator {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+</style>
 
 <script>
 import { mapState } from "vuex";
 
 export default {
   name: "DetectionsFilterMenu",
+  props: {
+    total_detections: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       selected_filters: {
