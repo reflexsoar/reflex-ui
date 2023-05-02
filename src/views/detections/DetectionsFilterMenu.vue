@@ -1,51 +1,49 @@
 <template>
   <CRow>
     <CCol col="12">
-      
-        <CCard class="cases-picker-card">
-          <CRow>
-            
-            <CCol col="10">
-            Showing {{ total_detections }} detections <span class="separator">|</span>
-              <li style="display: inline">
-                <span v-for="(key, type) in selected_filters" :key="type">
-                  <CButton
-                    v-for="(value, i) in key"
-                    :key="i"
-                    size="sm"
-                    class="tag"
-                    color="secondary"
-                    style="margin-left: 2px"
-                    @click="
-                      selectFilter({
-                        type: type,
-                        value: value,
-                      })
-                    "
-                  >
-                    <b>{{ type }}</b
-                    >: {{ getFilterDisplayName(type, value) }}
-                  </CButton></span
-                >
-              </li>
-            </CCol>
-            <CCol col="2" class="text-right">
-              <CButtonGroup>
-                <CButton @click="show_filters = !show_filters" color="info" size="sm"
-                  >{{ show_filters ? "Hide" : "Show" }} Filters</CButton
-                >
+      <CCard class="cases-picker-card">
+        <CRow>
+          <CCol col="10">
+            <li style="display: inline">
+              <span v-for="(key, type) in selected_filters" :key="type">
                 <CButton
-                  v-if="show_filters"
-                  @click="resetFilters()"
-                  color="secondary"
+                  v-for="(value, i) in key"
+                  :key="i"
                   size="sm"
-                  >Reset Filter</CButton
+                  class="tag"
+                  color="secondary"
+                  style="margin-left: 2px"
+                  @click="
+                    selectFilter({
+                      type: type,
+                      value: value,
+                    })
+                  "
                 >
-              </CButtonGroup>
-            </CCol>
-          </CRow>
-        </CCard>
-        <CCollapse :show="show_filters"><CCard class="cases-picker-card">
+                  <b>{{ type }}</b
+                  >: {{ getFilterDisplayName(type, value) }}
+                </CButton></span
+              >
+            </li>
+          </CCol>
+          <CCol col="2" class="text-right">
+            <CButtonGroup>
+              <CButton @click="show_filters = !show_filters" color="info" size="sm"
+                >{{ show_filters ? "Hide" : "Show" }} Filters</CButton
+              >
+              <CButton
+                v-if="show_filters"
+                @click="resetFilters()"
+                color="secondary"
+                size="sm"
+                >Reset Filter</CButton
+              >
+            </CButtonGroup>
+          </CCol>
+        </CRow>
+      </CCard>
+      <CCollapse :show="show_filters"
+        ><CCard class="cases-picker-card">
           <CRow class="event-stats-container event-stats-row">
             <div class="event-stats-picker">
               <CRow>
@@ -143,20 +141,18 @@
               </div>
             </div>
           </CRow>
-          <!-- END EVENT STATS COMPONENT --></CCard>
-        </CCollapse>
-        
+          <!-- END EVENT STATS COMPONENT --></CCard
+        >
+      </CCollapse>
     </CCol>
   </CRow>
 </template>
 
 <style scoped>
-
 .separator {
   margin-left: 10px;
   margin-right: 10px;
 }
-
 </style>
 
 <script>
@@ -169,12 +165,16 @@ export default {
       type: Number,
       required: true,
     },
+    filter_changed: {
+      type: Boolean,
+      required: false,
+    },
   },
   data() {
     return {
       selected_filters: {
         repo_synced: true,
-        active: true
+        active: true,
       },
       filters: {},
       show_filters: false,
@@ -186,7 +186,12 @@ export default {
       rule_active: true,
     };
   },
+  computed: {
+    ...mapState(["selected_detection_filters"]),
+  },
   created() {
+    this.selected_filters = this.selected_detection_filters;
+    this.filters = this.$store.state.detection_filters;
     this.getFilters();
   },
   watch: {
@@ -217,9 +222,11 @@ export default {
       });
     },
     getFilterDisplayName(type, value) {
-      let filter = this.filters[type].find((item) => item.value === value);
-      if (filter) {
-        return filter.name;
+      if (this.filters[type] != undefined) {
+        let filter = this.filters[type].find((item) => item.value === value);
+        if (filter) {
+          return filter.name;
+        }
       }
       return value;
     },
@@ -241,20 +248,17 @@ export default {
         // Add the filter
         this.$set(this.selected_filters, filter.type, [filter.value]);
       }
+      this.$store.commit("update_selected_detection_filters", this.selected_filters);
       this.getFilters();
+
       let filters = this.selected_filters;
-      this.$store.dispatch("getDetections", filters).then(() => {
-        this.loading = false;
-      });
+      this.$emit('filter_changed', filters);
     },
     resetFilters() {
       this.selected_filters = {};
       this.getFilters();
-      
-
-      this.$store.dispatch("getDetections", filters).then(() => {
-        this.loading = false;
-      });
+      this.$store.commit("update_selected_detection_filters", this.selected_filters);
+      this.$emit('filter_changed', filters);
     },
   },
 };

@@ -23,24 +23,26 @@
           ><b>Beta Feature</b>: This feature is in beta and requires a specific agent
           version and API version.</CAlert
         >
-        <span  v-if="current_tab == 0"></span>
+        <span v-if="current_tab == 0"></span>
         <CCard>
           <CCardBody class="tabbed">
             <CTabs :activeTab.sync="current_tab">
               <CTab title="Detection Rules" active>
-                <DetectionsFilterMenu :total_detections="filtered_items.length"></DetectionsFilterMenu>
+                <DetectionsFilterMenu
+                  :total_detections="filtered_items.length"
+                  @filter_changed="getDetections()"
+                ></DetectionsFilterMenu>
                 <CRow style="padding: 10px">
                   <CCol>
-                    <CButton v-if="current_user.role.permissions['create_detection']"  color="primary" @click="createDetectionModal()"
+                    <CButton
+                      v-if="current_user.role.permissions['create_detection']"
+                      color="primary"
+                      @click="createDetectionModal()"
                       >New Detection</CButton
                     >
                   </CCol>
                   <CCol col="5" class="text-right">
-                    <CDropdown
-                      color="secondary"
-                      toggler-text="Bulk Actions"
-                      size="sm"
-                    >
+                    <CDropdown color="secondary" toggler-text="Bulk Actions" size="sm">
                       <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
                         @click="enableDetections()"
@@ -90,7 +92,6 @@
                   :items-per-page="10"
                   :sorter="{ external: false, resetable: true }"
                   :sorterValue="{ column: 'name', asc: true }"
-                  pagination
                   :loading="loading"
                   style="border-top: 1px solid #cfcfcf"
                 >
@@ -103,20 +104,23 @@
                   </template>
                   <template #status="{ item }">
                     <td>
-                      <CBadge class="tag tag-sm" color="info" v-if="item.status">{{item.status}}</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Unknown</CBadge>
+                      <CBadge class="tag tag-sm" color="info" v-if="item.status">{{
+                        item.status
+                      }}</CBadge
+                      ><CBadge class="tag tag-sm" color="danger" v-else>Unknown</CBadge>
                     </td>
                   </template>
                   <template #select-header="{ item }">
-                    <span style="text-align: center;">
-                    <input
-                      type="checkbox"
-                      :checked="selected_items.length > 0"
-                      @click="selectAll()"
-                      style="margin-left: 7px"
+                    <span style="text-align: center">
+                      <input
+                        type="checkbox"
+                        :checked="selected_items.length > 0"
+                        @click="selectAll()"
+                        style="margin-left: 7px"
                     /></span>
                   </template>
                   <template #select="{ item }">
-                    <td style="text-align: center;">
+                    <td style="text-align: center">
                       <input
                         type="checkbox"
                         :checked="item_is_selected(item.uuid)"
@@ -127,16 +131,26 @@
                   <template #name="{ item }">
                     <td>
                       <CRow>
-                      <CCol>
-                        <CBadge class="tag tag-sm" color="success" v-if="item.active">Active</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge>&nbsp;<b>{{ item.name }}</b>
-                      </CCol>
-                      <CCol col=3>
-                        <div style="display: inline-block; padding-right:2px;">
-                          <TagBucket v-if="item.tags && item.tags.length > 0" :tags="item.tags" />
-                        </div>
-                        <div style="display: inline-block">
-                          <DetectionRepoPopover v-if="item.repository && item.repository.length > 0" :repositories="item.repository"/>
-                        </div>
+                        <CCol>
+                          <CBadge class="tag tag-sm" color="success" v-if="item.active"
+                            >Active</CBadge
+                          ><CBadge class="tag tag-sm" color="danger" v-else
+                            >Inactive</CBadge
+                          >&nbsp;<b>{{ item.name }}</b>
+                        </CCol>
+                        <CCol col="3">
+                          <div style="display: inline-block; padding-right: 2px">
+                            <TagBucket
+                              v-if="item.tags && item.tags.length > 0"
+                              :tags="item.tags"
+                            />
+                          </div>
+                          <div style="display: inline-block">
+                            <DetectionRepoPopover
+                              v-if="item.repository && item.repository.length > 0"
+                              :repositories="item.repository"
+                            />
+                          </div>
                         </CCol>
                       </CRow>
                       <br />
@@ -160,8 +174,7 @@
                   </template>
                   <template #last_run="{ item }">
                     <td style="width: 125px">
-                      <span v-if="neverRun(item.last_run)">
-                        Never</span>
+                      <span v-if="neverRun(item.last_run)"> Never</span>
                       <span v-else>
                         {{ item.last_run | moment("from", "now") }}
                       </span>
@@ -180,7 +193,7 @@
                       {{ item.total_hits ? item.total_hits : 0 }}
                     </td>
                   </template>
-                  <template #tags="{item}">
+                  <template #tags="{ item }">
                     <td>
                       <TagBucket :tags="item.tags" />
                     </td>
@@ -255,20 +268,26 @@
                           @click="addToRepository(item.uuid)"
                           size="sm"
                           color="primary"
-                          v-c-tooltip="{ content: 'Add to Repository', placement: 'left' }"
+                          v-c-tooltip="{
+                            content: 'Add to Repository',
+                            placement: 'left',
+                          }"
                         >
                           <CIcon name="cilStorage" />&nbsp;Add To Repository
-                          </CDropdownItem>
+                        </CDropdownItem>
                         <CDropdownItem
                           v-if="!item.from_repo_sync"
                           aria-label="Remove From Repository"
                           @click="removeFromRepository(item.uuid)"
                           size="sm"
                           color="primary"
-                          v-c-tooltip="{ content: 'Remove from Repository', placement: 'left' }"
+                          v-c-tooltip="{
+                            content: 'Remove from Repository',
+                            placement: 'left',
+                          }"
                         >
                           <CIcon name="cilStorage" />&nbsp;Remove from Repository
-                          </CDropdownItem>
+                        </CDropdownItem>
                         <CDropdownItem
                           aria-label="Export Detection"
                           @click="exportDetection(item.uuid)"
@@ -295,6 +314,7 @@
                     </td>
                   </template>
                 </CDataTable>
+                <CPagination :active-page.sync="current_page" :pages="total_pages" />
                 <!--<DetectionRules></DetectionRules>-->
               </CTab>
               <CTab title="Detection Repositories">
@@ -401,14 +421,14 @@ export default {
       selected_items: [],
       selected_item_repos: [],
       picker_filters: {},
-      loading: false,
+      //loading: false,
       detection_list_fields: [
         { key: "select", label: "", filter: false },
         "name",
         "status",
         "last_run",
         "last_hit",
-        { key: "total_hits", label: "Hits"},
+        { key: "total_hits", label: "Hits" },
         { key: "performance", label: "Performance" },
         { key: "actions", filter: false },
       ],
@@ -472,12 +492,24 @@ export default {
           max_terms: 1000,
           window_size: 30,
         },
-      daily_schedule: false,
-      schedule: this.defaultSchedule()
+        daily_schedule: false,
+        schedule: this.defaultSchedule(),
       },
+      current_page: 1,
+      page_size: 25,
+      total_pages: 1
     };
   },
   methods: {
+    getDetections() {
+      let filters = JSON.parse(JSON.stringify(this.selected_detection_filters));
+      filters["page_size"] = this.page_size;
+      filters["page"] = this.current_page;
+      this.$store.dispatch("getDetections", filters).then((resp) => {
+        let paging = resp.data.pagination;
+        this.total_pages = paging.pages;
+      });
+    },
     importDetections() {
       let data = {
         detections: JSON.parse(this.import_json),
@@ -552,8 +584,8 @@ export default {
           max_terms: 1000,
           window_size: 30,
         },
-      daily_schedule: false,
-      schedule: this.defaultSchedule()
+        daily_schedule: false,
+        schedule: this.defaultSchedule(),
       };
     },
     createDetectionModal() {
@@ -605,14 +637,14 @@ export default {
           max_terms: 1000,
           window_size: 30,
         },
-      daily_schedule: false,
-      schedule: this.defaultSchedule()
+        daily_schedule: false,
+        schedule: this.defaultSchedule(),
       };
       this.show_detection_rule_modal = true;
     },
     deleteDetectionModal(uuid = null) {
       this.confirm_delete = true;
-      this.resetError()
+      this.resetError();
       if (uuid !== null) {
         this.selected_items = [uuid];
       }
@@ -631,6 +663,9 @@ export default {
       };
       this.tag_list.push(tag);
       this.tags.push(tag);
+    },
+    select_all_by_filter() {
+      console.log("NOT IMPLEMENTED");
     },
     set_picker_filters(val, key) {
       if (!this.picker_filters.hasOwnProperty(key)) {
@@ -653,19 +688,23 @@ export default {
 
       if (this.selected_items.includes(i)) {
         let item = this.detections.find((detection) => detection.uuid === i);
-        if(item.repository && item.repository.length > 0) {
+        if (item.repository && item.repository.length > 0) {
           // Add this items repos to selected_item_repos if not already there
-          this.selected_item_repos = this.selected_item_repos.concat(item.repository.filter((repo) => !this.selected_item_repos.includes(repo)));
+          this.selected_item_repos = this.selected_item_repos.concat(
+            item.repository.filter((repo) => !this.selected_item_repos.includes(repo))
+          );
         }
       } else {
         // Remove this items repos from selected_item_repos if no other items have it
         let item = this.detections.find((detection) => detection.uuid === i);
-        if(item.repository && item.repository.length > 0) {
+        if (item.repository && item.repository.length > 0) {
           // If any other item in selected_items has a repository in selected_item_repos
           // don't remove if, if not remove it
           this.selected_item_repos = this.selected_item_repos.filter((repo) => {
             return this.selected_items.some((item) => {
-              let detection = this.detections.find((detection) => detection.uuid === item);
+              let detection = this.detections.find(
+                (detection) => detection.uuid === item
+              );
               return detection.repository.includes(repo);
             });
           });
@@ -673,7 +712,7 @@ export default {
       }
     },
     neverRun(last_run) {
-      if (last_run.startsWith('1969-')) {
+      if (last_run.startsWith("1969-")) {
         return true;
       }
     },
@@ -682,12 +721,11 @@ export default {
         this.selected_items = [];
         this.selected_item_repos = [];
       } else {
-        
         this.selected_items = this.detections.map((item) => item.uuid);
 
         // Add all the selected items repositories to selected_item_repos if not already there
         this.selected_item_repos = this.detections.reduce((acc, detection) => {
-          if(detection.repository && detection.repository.length > 0) {
+          if (detection.repository && detection.repository.length > 0) {
             return acc.concat(detection.repository.filter((repo) => !acc.includes(repo)));
           } else {
             return acc;
@@ -719,8 +757,8 @@ export default {
         });
     },
     resetError() {
-      this.error = false
-      this.error_message = ""
+      this.error = false;
+      this.error_message = "";
     },
     deleteDetections() {
       this.$store
@@ -728,10 +766,11 @@ export default {
         .then((resp) => {
           this.selected_items = [];
           this.confirm_delete = false;
-        }).catch((err) => {
-          this.error = true
-          this.error_message = err.response.data.message
         })
+        .catch((err) => {
+          this.error = true;
+          this.error_message = err.response.data.message;
+        });
     },
     cancelDelete() {
       this.selected_items = [];
@@ -752,18 +791,20 @@ export default {
         });
     },
     addToRepository(item) {
-      if(item) {
-        this.selected_items = [item]
+      if (item) {
+        this.selected_items = [item];
       }
       this.show_add_to_repository_modal = true;
     },
     removeFromRepository(item) {
       item = this.detections.find((detection) => detection.uuid === item);
-      if(item) {
-        this.selected_items = [item.uuid]
-        if(item.repository && item.repository.length > 0) {
+      if (item) {
+        this.selected_items = [item.uuid];
+        if (item.repository && item.repository.length > 0) {
           // Add this items repos to selected_item_repos if not already there
-          this.selected_item_repos = this.selected_item_repos.concat(item.repository.filter((repo) => !this.selected_item_repos.includes(repo)));
+          this.selected_item_repos = this.selected_item_repos.concat(
+            item.repository.filter((repo) => !this.selected_item_repos.includes(repo))
+          );
         }
       }
       this.show_remove_from_repository_modal = true;
@@ -773,54 +814,40 @@ export default {
         monday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         tuesday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         wednesday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         thursday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         friday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         saturday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         sunday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
-      }
-    }
+      };
+    },
   },
   computed: {
     filtered_items() {
@@ -864,7 +891,19 @@ export default {
         return { label: o.name, value: o.uuid };
       });
     },
-    ...mapState(["alert", "detections", "organizations", "current_user"]),
+    ...mapState([
+      "alert",
+      "detections",
+      "organizations",
+      "current_user",
+      "selected_detection_filters",
+      "loading",
+    ]),
+  },
+  watch: {
+    current_page: function(){
+        this.getDetections()
+      }
   },
   created() {
     if (this.current_user.default_org) {
@@ -874,10 +913,7 @@ export default {
       //this.organizations = this.$store.getters.organizations.map((o) => { return {label: o.name, value: o.uuid}})
     }
     this.$store.commit("add_start"); // Stop the success/fail add from showing up when changing from other pages
-    this.loading = true;
-    this.$store.dispatch("getDetections", { page_size: 10000 }).then(() => {
-      this.loading = false;
-    });
+    this.getDetections();
   },
 };
 </script>
