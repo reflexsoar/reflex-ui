@@ -215,10 +215,6 @@ export default {
         this.filters = resp.data;
         this.loading = false;
       });
-
-      this.$store.dispatch("getDetections", filters).then(() => {
-        this.loading = false;
-      });
     },
     getFilterDisplayName(type, value) {
       let filter = this.filters[type].find((item) => item.value === value);
@@ -246,10 +242,19 @@ export default {
         this.$set(this.selected_filters, filter.type, [filter.value]);
       }
       this.getFilters();
+      let filters = this.selected_filters;
+      this.$store.dispatch("getDetections", filters).then(() => {
+        this.loading = false;
+      });
     },
     resetFilters() {
       this.selected_filters = {};
       this.getFilters();
+      
+
+      this.$store.dispatch("getDetections", filters).then(() => {
+        this.loading = false;
+      });
     },
   },
 };
