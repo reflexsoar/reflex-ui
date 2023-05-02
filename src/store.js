@@ -97,7 +97,11 @@ const state = {
   agent_policy: {},
   mitre_data_sources: [],
   service_accounts: [],
-  detection_filters: [],
+  detection_filters: {
+    repo_synced: true,
+    active: true,
+  },
+  selected_detection_filters: {},
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
@@ -315,6 +319,12 @@ const mutations = {
     } else {
       state.event_comments.push(comment)
     }    
+  },
+  update_selected_detection_filters(state, filters) {
+    state.selected_detection_filters = filters
+  },
+  update_detection_filters(state, filters) {
+    state.detection_filters = filters
   },
   update_observable_filters(state, filters) {
     state.observable_filters = filters
@@ -1312,6 +1322,7 @@ const actions = {
 
       Axios({url: url, method: 'GET'})
       .then(resp => {
+        commit('update_detection_filters', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -1320,6 +1331,7 @@ const actions = {
     })
   },
   getDetections({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], save=true, organization=null, repo_synced=true}) {
+    commit('loading_status',true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}&repository=${repository}&status=${status}`
 
@@ -1353,10 +1365,13 @@ const actions = {
           commit('save_detections', resp.data.detections)
           commit('save_pagination', resp.data.pagination)
         }
+        commit('loading_status',false)
         resolve(resp)
       })
       .catch(err => {
+        commit('loading_status',false)
         reject(err)
+        
       })
     })
   },
@@ -3939,6 +3954,6 @@ export default new Vuex.Store({
   getters,
   plugins: [createPersistedState({
     key: 'reflex-state',
-    paths: ['observable_filters','case_filters','intel_filters','current_user','case_templates','quick_filters','detection_filters']
+    paths: ['observable_filters','case_filters','intel_filters','current_user','case_templates','quick_filters','selected_detection_filters']
   })]
 })
