@@ -97,8 +97,8 @@
                   placeholder="Give a brief description of what this rule will do and why."
                 ></CTextarea>
                 <CRow>
-                  <CCol col="2">
-                    <label>Rule Active?</label><br />
+                  <CCol>
+                    <label>Active</label><br />
                     <CSwitch
                       :checked.sync="active"
                       label-on="Yes"
@@ -107,8 +107,21 @@
                       aria-label="Rule Active"
                     /><br />
                   </CCol>
-                  <CCol col="5">
-                    <label>Run rule retroactively after creation?</label><br />
+                  <CCol>
+                    <label>Protected</label><br />
+                    <CSwitch
+                      :checked.sync="protected"
+                      label-on="Yes"
+                      label-off="no"
+                      color="success"
+                      aria-label="Protected Rule"/>
+                      <br>
+                       <small class="text-muted"
+                      >A protected rule can only be edited by it's creator and will not
+                      be disabled via background Event Rule maintenance.</small>
+                  </CCol>
+                  <CCol>
+                    <label>Run Retroactive</label><br />
                     <CSwitch
                       :checked.sync="run_retroactively"
                       label-on="Yes"
@@ -121,7 +134,7 @@
                       to match this rule to any event that is currently in a New
                       state</small>
                   </CCol>
-                  <CCol col="5" v-if="current_user.default_org && !from_card">
+                  <CCol v-if="current_user.default_org && !from_card">
                     <label>Global Rule</label><br />
                     <CSwitch
                       :checked.sync="global_rule"
@@ -655,6 +668,7 @@ export default {
       tag_list: [],
       case_templates: [],
       run_retroactively: true,
+      protected: false,
       add_action: false,
       channels: [],
       severities: [
@@ -812,6 +826,7 @@ export default {
           this.expire = this.event_rule.expire;
           this.dismiss_event = this.event_rule.dismiss;
           this.run_retroactively = this.event_rule.run_retroactively;
+          this.protected = this.event_rule.protected;
           this.channels = this.formatted_notification_channels.filter((channel) =>
             this.event_rule.notification_channels && this.event_rule.notification_channels.includes(channel.uuid)
           );
@@ -962,6 +977,7 @@ export default {
         dismiss: this.dismiss_event,
         event_signature: this.event_signature,
         run_retroactively: this.run_retroactively,
+        protected: this.protected,
         notification_channels: Array(),
         query: this.query,
         active: this.active
@@ -1014,6 +1030,7 @@ export default {
         dismiss: this.dismiss_event,
         event_signature: this.event_signature,
         run_retroactively: this.run_retroactively,
+        protected: this.protected,
         notification_channels: Array(),
         query: this.query,
         active: this.active,

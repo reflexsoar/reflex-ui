@@ -97,6 +97,7 @@ const state = {
   agent_policy: {},
   mitre_data_sources: [],
   service_accounts: [],
+  detection_filters: [],
   observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
   alert: {
@@ -137,9 +138,13 @@ const state = {
   "email_subject","email","domain","detection_id","command"],
   detection_repository: {},
   detection_repositories: [],
+  event_views: [],
 }
 
 const mutations = {
+  save_event_views(state, event_views) {
+    state.event_views = event_views
+  },
   add_task (state, task) {
     state.running_tasks.push(task)
   },
@@ -1298,7 +1303,23 @@ const actions = {
       })
     })
   },
-  getDetections({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", techniques=[], tactics=[], save=true, organization=null}) {
+  getDetectionFilters({commit}, {organization=[], tags=[], techniques=[], tactics=[], repo_synced=true}) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}`
+
+      url = url+`&repo_synced=${repo_synced}`
+      
+
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getDetections({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", phase_names=[], techniques=[], tactics=[], tags=[], save=true, organization=null, repo_synced=true}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
@@ -1313,6 +1334,18 @@ const actions = {
       if(organization) { 
         url = url+`&organization=${organization}`
       }
+
+      if(phase_names.length > 0) {
+        url = url+`&phase_names=${phase_names}`
+      }
+
+      if(tags.length > 0) {
+        url = url+`&tags=${tags}`
+      }
+
+    
+      url = url+`&repo_synced=${repo_synced}`
+      
 
       Axios({url: url, method: 'GET'})
       .then(resp => {
@@ -2158,6 +2191,29 @@ const actions = {
       })
       .catch(err => {
         console.log(err)
+        reject(err)
+      })
+    })
+  },
+  getEventViews({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_view`, method: 'GET'})
+      .then(resp => {
+        commit('save_event_views', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createEventView({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_view`, data: data, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
         reject(err)
       })
     })
@@ -3883,6 +3939,6 @@ export default new Vuex.Store({
   getters,
   plugins: [createPersistedState({
     key: 'reflex-state',
-    paths: ['observable_filters','case_filters','intel_filters','current_user','case_templates','quick_filters']
+    paths: ['observable_filters','case_filters','intel_filters','current_user','case_templates','quick_filters','detection_filters']
   })]
 })

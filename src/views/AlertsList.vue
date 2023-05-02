@@ -25,7 +25,7 @@
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
-                    <CButton @click="saveFilter()" color="success" size="sm" disabled>Save View</CButton>
+                    <CButton @click="saveFilter()" color="success" size="sm">Save View</CButton>
                     <CButton @click="loadFilterClicked" color="primary" size="sm" disabled>Load View</CButton>
                     <CButton @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
                     <CButton @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
@@ -308,6 +308,7 @@
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
     </CModal>
+    <SaveViewModal :filter_string="saved_filter_string" :show.sync="show_save_view_modal"></SaveViewModal>
     <EventCommentModal :event="event_comment_target" :show.sync="event_comment_modal"></EventCommentModal>
     <CreateCaseModal :show.sync="createCaseModal" :organization="organization" :events="selected" :related_events_count="related_events_count" :case_from_card="true"></CreateCaseModal>
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :event_organization.sync="event_organization" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables" :from_card="true"></CreateEventRuleModal>
@@ -425,6 +426,7 @@ import OrganizationBadge from './OrganizationBadge'
 import EventCommentModal from './event/EventCommentModal'
 import EventCard from './event/EventCard'
 import ObservablePopover from './components/ObservablePopover'
+import SaveViewModal from './event/SaveViewModal'
 
 export default {
     name: 'Events',
@@ -440,7 +442,8 @@ export default {
       OrganizationBadge,
       EventCommentModal,
       EventCard,
-      ObservablePopover
+      ObservablePopover,
+      SaveViewModal
     },
     props: {
     items: Array,
@@ -478,6 +481,8 @@ export default {
     },
     data(){
       return {
+        saved_filter_string: "",
+        show_save_view_modal: false,
         savedFilters: [{
           'name': 'Filter 1'
         }],
@@ -1402,7 +1407,8 @@ export default {
         this.$store.commit('set_quick_filter_state', this.quick_filters)
       },
       saveFilter() {
-        console.log(JSON.stringify(this.observableFilters))
+        this.show_save_view_modal = true
+        this.saved_filter_string = JSON.stringify(this.observableFilters)
       }
     },
     beforeDestroy: function() {

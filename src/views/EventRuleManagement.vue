@@ -402,6 +402,7 @@ export default {
       show_testing_pane: false,
       show_actions: false,
       run_retroactively: true,
+      protected: false,
       range: {
         start: new Date().setDate(new Date().getDate() - 7),
         end: new Date(),

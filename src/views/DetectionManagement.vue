@@ -23,10 +23,12 @@
           ><b>Beta Feature</b>: This feature is in beta and requires a specific agent
           version and API version.</CAlert
         >
+        <span  v-if="current_tab == 0"></span>
         <CCard>
           <CCardBody class="tabbed">
-            <CTabs>
+            <CTabs :activeTab.sync="current_tab">
               <CTab title="Detection Rules" active>
+                <DetectionsFilterMenu :total_detections="filtered_items.length"></DetectionsFilterMenu>
                 <CRow style="padding: 10px">
                   <CCol>
                     <CButton v-if="current_user.role.permissions['create_detection']"  color="primary" @click="createDetectionModal()"
@@ -86,7 +88,6 @@
                   :items="filtered_items"
                   :fields="detection_list_fields"
                   :items-per-page="10"
-                  column-filter
                   :sorter="{ external: false, resetable: true }"
                   :sorterValue="{ column: 'name', asc: true }"
                   pagination
@@ -105,16 +106,17 @@
                       <CBadge class="tag tag-sm" color="info" v-if="item.status">{{item.status}}</CBadge><CBadge class="tag tag-sm" color="danger" v-else>Unknown</CBadge>
                     </td>
                   </template>
-                  <template #select-filter="{ item }">
+                  <template #select-header="{ item }">
+                    <span style="text-align: center;">
                     <input
                       type="checkbox"
                       :checked="selected_items.length > 0"
                       @click="selectAll()"
                       style="margin-left: 7px"
-                    />
+                    /></span>
                   </template>
                   <template #select="{ item }">
-                    <td>
+                    <td style="text-align: center;">
                       <input
                         type="checkbox"
                         :checked="item_is_selected(item.uuid)"
@@ -158,7 +160,11 @@
                   </template>
                   <template #last_run="{ item }">
                     <td style="width: 125px">
-                      {{ item.last_run | moment("from", "now") }}
+                      <span v-if="neverRun(item.last_run)">
+                        Never</span>
+                      <span v-else>
+                        {{ item.last_run | moment("from", "now") }}
+                      </span>
                     </td>
                   </template>
                   <template #last_hit="{ item }">
@@ -294,7 +300,7 @@
               <CTab title="Detection Repositories">
                 <DetectionRepositoryList />
               </CTab>
-              <CTab title="Detection Bundles"> </CTab>
+              <!--<CTab title="Detection Bundles"> </CTab>-->
             </CTabs>
           </CCardBody>
         </CCard>
@@ -361,6 +367,7 @@ import ImportSigmaRuleWizard from "./detections/ImportSigmaRuleWizard.vue";
 import RMultiCheck from "./components/MultiCheck";
 import TagBucket from "./components/TagBucket";
 import DetectionRepoPopover from "./detections/DetectionRepoPopover";
+import DetectionsFilterMenu from "./detections/DetectionsFilterMenu";
 
 import AddToRepositoryModal from "./detections/AddToRepositoryModal";
 import RemoveFromRepositoryModal from "./detections/RemoveFromRepositoryModal";
@@ -378,11 +385,13 @@ export default {
     AddToRepositoryModal,
     RemoveFromRepositoryModal,
     TagBucket,
-    DetectionRepoPopover
+    DetectionRepoPopover,
+    DetectionsFilterMenu,
   },
   data() {
     return {
       error: false,
+      current_tab: 0,
       error_message: "",
       show_add_to_repository_modal: false,
       show_remove_from_repository_modal: false,
@@ -661,6 +670,11 @@ export default {
             });
           });
         }
+      }
+    },
+    neverRun(last_run) {
+      if (last_run.startsWith('1969-')) {
+        return true;
       }
     },
     selectAll() {
