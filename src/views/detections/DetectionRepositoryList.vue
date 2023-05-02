@@ -113,6 +113,19 @@
             The synchronization process will only update fields based on the synchronization settings below.  The process will not overwrite exclusions.
         </p>
         <CInput v-model.number="sync_interval" label="Synchronization Interval (minutes)" description="How oftern to synchronize rules from this repository" />
+        
+        <label for="input">Default Input</label><br />
+        <multiselect
+          id="input"
+          @search-change="searchInputs"
+          v-model="default_input"
+          placeholder="Select the input to be used for this detection"
+          track-by="uuid"
+          label="name"
+          :options="input_list"
+        />
+        <small class="text-muted">The default input will be assigned to all detections synchronized from this repository on initial sync.  This can be changed on detection rule setup.</small><br>
+        <br>
         <h2>Synchronization Settings</h2>
         <p>These settings will determine how the system will handle conflicts between your local rules and the rules from the target repository.
           If a setting is On, any time the repository synchronizes local changes to the rule will be overwritten.</p>
@@ -184,8 +197,8 @@
 
         
         <template #footer>
-            <CButton color="secondary" @click="resetSubscriptionWizard()">Dismiss</CButton>
-            <CButton color="primary" @click="createSubscription()">Subscribe</CButton>
+            <CButton color="secondary" @click="resetSubscriptionWizard()" v-bind:disabled="synchronizing">Dismiss</CButton>
+            <CButton color="primary" @click="createSubscription()" v-bind:disabled="synchronizing"><span  v-if="synchronizing"><CSpinner size="sm"/>&nbsp;</span>Subscribe</CButton>
         </template>
     </CModal>
     <CModal title="Unsubscribe from Repository" :show.sync="show_unsubscribe_modal" size="lg" color="danger" @close="resetUnsubscribeWarning()">
@@ -208,7 +221,7 @@ import TagList from '../components/TagList'
 export default {
   name: "DetectionRepositoryList",
   computed: {
-    ...mapState(["detection_repositories","current_user"]),
+    ...mapState(["detection_repositories","current_user","input_list"]),
   },
   components: {
     DetectionRepositoryModal,
@@ -255,6 +268,7 @@ export default {
       synchronizing: false,
       show_repository_modal: false,
       selected_repo: this.default_repo(),
+      default_input: null,
       modal_mode: "Create"
     };
   },
@@ -267,6 +281,7 @@ export default {
           tags: [],
           repo_type: "local",
           share_type: "private",
+          
           access_scope: []
       };
     },
@@ -308,13 +323,22 @@ export default {
     createSubscription() {
         let data = {
             sync_interval: this.sync_interval,
-            sync_settings: this.sync_settings
+            sync_settings: this.sync_settings,
         }
+
+        if (this.default_input != null) {
+          data['default_input'] = this.default_input.uuid;
+        }
+        this.synchronizing = true;
         this.$store.dispatch("createDetectionRepositorySubscription", {repository_uuid: this.repository.uuid, data: data}).then(() => {
           this.$store.dispatch("getDetections", {}).then(() => {
+            this.synchronizing = false;
             this.show_subscription_modal = false;
-          })
+          }).catch(() => {
+            this.synchronizing = false;
+          });
         });
+        
     },
     select_item(i) {
       if (this.selected_items.includes(i)) {
@@ -346,6 +370,12 @@ export default {
         this.$store.dispatch("deleteDetectionRepositorySubscription", {repository_uuid: this.repository.uuid}).then(() => {
             this.show_unsubscribe_modal = false;
         });
+    },
+    searchInputs(name) {
+      this.$store.dispatch("getInputList", {
+        organization: this.current_user.organization,
+        name: name,
+      });
     },
     defaultSyncSettings() {
       return {
