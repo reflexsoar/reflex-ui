@@ -502,7 +502,6 @@ export default {
   },
   methods: {
     getDetections() {
-      console.log("REFRESH!");
       let filters = JSON.parse(JSON.stringify(this.selected_detection_filters));
       filters["page_size"] = this.page_size;
       filters["page"] = this.current_page;
