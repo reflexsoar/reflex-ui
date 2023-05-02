@@ -214,6 +214,9 @@ export default {
             })
         },
         addTag(newTag) {
+            if(this.repository.tags == undefined) {
+                this.repository.tags = [];
+            }
             this.repository.tags.push(newTag);
             this.tag_list.push(newTag);
         },
