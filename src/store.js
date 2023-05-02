@@ -1303,9 +1303,9 @@ const actions = {
       })
     })
   },
-  getDetectionFilters({commit}, {organization=[], tags=[], techniques=[], tactics=[], repo_synced=true}) {
+  getDetectionFilters({commit}, {organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], repo_synced=true}) {
     return new Promise((resolve, reject) => {
-      let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}`
+      let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}&repository=${repository}&status=${status}`
 
       url = url+`&repo_synced=${repo_synced}`
       
@@ -1319,9 +1319,9 @@ const actions = {
       })
     })
   },
-  getDetections({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", phase_names=[], techniques=[], tactics=[], tags=[], save=true, organization=null, repo_synced=true}) {
+  getDetections({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], save=true, organization=null, repo_synced=true}) {
     return new Promise((resolve, reject) => {
-      let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+      let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}&repository=${repository}&status=${status}`
 
       if(techniques.length > 0) {
         url = url+`&techniques=${techniques}`
