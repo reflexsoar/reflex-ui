@@ -4,7 +4,6 @@
       <CCard class="cases-picker-card">
         <CRow>
           <CCol col="10">
-            Showing {{ total_detections }} detections <span class="separator">|</span>
             <li style="display: inline">
               <span v-for="(key, type) in selected_filters" :key="type">
                 <CButton
