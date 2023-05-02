@@ -2,7 +2,7 @@
     <div>
         <h2>
             <CBadge color="primary">BETA</CBadge>&nbsp;MITRE ATT&CK Coverage Map
-        </h2>
+        </h2>{{mitre_mapping}}
         <p>See how your detection rules align with MITRE ATT&CK. This will help identify gaps in your detection rules.
         </p>
         <CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and may not function as intended
@@ -21,7 +21,7 @@
             </CCol>
             <CCol>
                 <CSelect v-if="current_user.default_org" placeholder="Select an Organization..." required
-                    :value.sync="organization" :options="formattedOrganizations()" @change="getDetections()"
+                    :value.sync="organization" :options="formattedOrganizations()" @change="getDetectionMapping()"
                     label="Organization" />
             </CCol>
         </CRow>
@@ -105,7 +105,7 @@ export default {
                 return this.mitre_techniques;
             }
         },
-        ...mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations', 'inputs'])
+        ...mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations', 'inputs', 'mitre_mapping'])
     },
     components: {
         MitreTechniqueDrawer,
@@ -129,7 +129,8 @@ export default {
         }
         this.$store.commit('set', ['mitreDrawerMinimize', true])
         this.loading = true
-        this.getDetections()
+        this.getDetectionMapping()
+        //this.getDetections()
         this.getInputs()
         this.getMitreTactics()
         this.getMitreTechniques()
@@ -147,16 +148,10 @@ export default {
             return this.filtered_techniques.filter(technique => technique.phase_names.includes(tactic.shortname))
         },
         getDetectionCount(technique, tactic) {
-            let count = 0
-            for (let i in this.detections) {
-                let detection = this.detections[i]
-                let detection_tactics = detection.tactics ? detection.tactics.map(t => t.shortname) : []
-                let detection_techniques = detection.techniques ? detection.techniques.map(t => t.external_id) : []
-                if (detection_techniques.includes(technique.external_id)) {
-                    count++
-                }
+            if (technique.external_id in this.mitre_mapping['techniques']) {
+                return this.mitre_mapping['techniques'][technique.external_id]
             }
-            return count
+            return 0
         },
         getInputCount(data_sources) {
             let count = 0
@@ -170,6 +165,22 @@ export default {
                 }
             }
             return count
+        },
+        getDetectionMapping() {
+            this.loading = true
+            if(this.current_user.default_org) {
+                this.$store.dispatch('getDetectionMitreMapping', { organization: this.organization }).then(() => {
+                    this.loading = false
+                }).catch(() => {
+                    this.loading = false
+                })
+            } else {
+                this.$store.dispatch('getDetectionMitreMapping', {}).then(() => {
+                    this.loading = false
+                }).catch(() => {
+                    this.loading = false
+                })
+            }
         },
         getDetections() {
             if(this.current_user.default_org) {

@@ -46,17 +46,20 @@
             <CCol>
               <hr>
               <h3>Detections</h3>
-              <CDataTable
-                :items="associated_detections"
-                :fields="[{key: 'name', label:'Name', _style:'width:40%;'},'description']"
-                pagination
-                >
-                <template #name="{item}">
-                  <td>
-                    <router-link :to="`/detections/${item.uuid}`">{{item.name}}</router-link>
-                  </td>
-                </template>
-              </CDataTable>
+              <div v-if="detections_loading" class="text-center"><CSpinner></CSpinner></div>
+              <div v-else>
+                <CDataTable
+                  :items="associated_detections"
+                  :fields="[{key: 'name', label:'Name', _style:'width:40%;'},'description']"
+                  pagination
+                  >
+                  <template #name="{item}">
+                    <td>
+                      <router-link :to="`/detections/${item.uuid}`">{{item.name}}</router-link>
+                    </td>
+                  </template>
+                </CDataTable>
+              </div>
             </CCol>
           </CRow>
           <CRow>
@@ -159,7 +162,6 @@ export default {
   },
   computed: {
     show() {
-
       return this.$store.state.mitreDrawerShow
     },
     minimize() {

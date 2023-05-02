@@ -143,9 +143,13 @@ const state = {
   detection_repository: {},
   detection_repositories: [],
   event_views: [],
+  mitre_mapping: {}
 }
 
 const mutations = {
+  save_detection_mitre_mapping(state, mitre_mapping) {
+    state.mitre_mapping = mitre_mapping
+  },
   save_event_views(state, event_views) {
     state.event_views = event_views
   },
@@ -1306,6 +1310,24 @@ const actions = {
       .then(resp => {
         commit('save_list_stats', resp.data)
         commit('loading_status',false)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getDetectionMitreMapping({commit}, {organization=null}) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/mitre/detections`
+
+      if(organization) {
+        url = url+`?organization=${organization}`
+      }
+
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('save_detection_mitre_mapping', resp.data)
         resolve(resp)
       })
       .catch(err => {
