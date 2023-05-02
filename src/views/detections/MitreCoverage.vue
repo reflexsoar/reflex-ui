@@ -21,7 +21,7 @@
             </CCol>
             <CCol>
                 <CSelect v-if="current_user.default_org" placeholder="Select an Organization..." required
-                    :value.sync="organization" :options="formattedOrganizations()" @change="getDetections()"
+                    :value.sync="organization" :options="formattedOrganizations()" @change="getDetectionMapping()"
                     label="Organization" />
             </CCol>
         </CRow>
@@ -167,10 +167,19 @@ export default {
             return count
         },
         getDetectionMapping() {
+            this.loading = true
             if(this.current_user.default_org) {
-                this.$store.dispatch('getDetectionMitreMapping', { organization: this.organization })
+                this.$store.dispatch('getDetectionMitreMapping', { organization: this.organization }).then(() => {
+                    this.loading = false
+                }).catch(() => {
+                    this.loading = false
+                })
             } else {
-                this.$store.dispatch('getDetectionMitreMapping', {})
+                this.$store.dispatch('getDetectionMitreMapping', {}).then(() => {
+                    this.loading = false
+                }).catch(() => {
+                    this.loading = false
+                })
             }
         },
         getDetections() {
