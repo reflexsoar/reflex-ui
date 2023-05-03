@@ -1335,12 +1335,15 @@ const actions = {
       })
     })
   },
-  getDetectionFilters({commit}, {organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], repo_synced=true}) {
+  getDetectionFilters({commit}, {organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], active=[], repo_synced=true}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}&repository=${repository}&status=${status}`
 
       url = url+`&repo_synced=${repo_synced}`
-      
+
+      if(active.length > 0) {
+        url = url+`&active=${active}`
+      }      
 
       Axios({url: url, method: 'GET'})
       .then(resp => {
@@ -1352,7 +1355,7 @@ const actions = {
       })
     })
   },
-  getDetections({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], save=true, organization=null, repo_synced=true}) {
+  getDetections({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}&repository=${repository}&status=${status}`
@@ -1371,6 +1374,10 @@ const actions = {
 
       if(phase_names.length > 0) {
         url = url+`&phase_names=${phase_names}`
+      }
+
+      if(active.length > 0) {
+        url = url+`&active=${active}`
       }
 
       if(tags.length > 0) {
