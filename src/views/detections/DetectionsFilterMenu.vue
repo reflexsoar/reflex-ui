@@ -20,7 +20,7 @@
                     })
                   "
                 >
-                  <b>{{ type }}</b
+                  <b>{{ getTypeDisplayName(type) }}</b
                   >: {{ getFilterDisplayName(type, value) }}
                 </CButton></span
               >
@@ -53,7 +53,7 @@
                 </CCol>
                 <CCol class="text-right">
                   <CButtonGroup>
-                    <CButton size="sm" color="primary" @click="applyFreeSearch()"
+                    <CButton size="sm" color="primary" @click="applyFreeSearch()" v-bind:disabled="search_text === null || search_text == ''"
                       >Search</CButton
                     >
                   </CButtonGroup>
@@ -179,7 +179,7 @@ export default {
       },
       filters: {},
       show_filters: false,
-      free_search_options: ["Name"],
+      free_search_options: ["Name","Description"],
       selected_search_option: "Name",
       search_text: null,
       loading: false,
@@ -232,10 +232,36 @@ export default {
       }
       return value;
     },
+    getTypeDisplayName(type) {
+      let display_names = {
+        'name__like': 'name',
+        'description__like': 'description',
+      }
+
+      if (type in display_names) {
+        return display_names[type];
+      }
+      return type;
+    },
+    applyFreeSearch() {
+      if (this.search_text == null || this.search_text == "") {
+        return;
+      }
+
+      let free_search_types = {
+        "Name": "name__like",
+        "Description": "description__like"
+      }
+      let filter = {
+        type: free_search_types[this.selected_search_option],
+        value: this.search_text,
+      };
+      this.search_text = "";
+      this.selectFilter(filter);
+    },
     selectFilter(filter) {
       // If the filter is already selected, remove it
       if (filter.type in this.selected_filters) {
-        console.log(filter.type, this.selected_filters)
         if (this.selected_filters[filter.type].includes(filter.value)) {
           // Remove the filter
           this.$set(
@@ -244,7 +270,10 @@ export default {
             this.selected_filters[filter.type].filter((item) => item !== filter.value)
           );
         } else {
-          // Add the filter
+          // Add the filter  
+          if (["name","description".includes(filter.type)]) {
+            this.selected_filters[filter.type] = [];
+          }
           this.selected_filters[filter.type].push(filter.value);
         }
       } else {
