@@ -67,10 +67,9 @@ export default {
                 uuid: this.selected_repository,
                 detections: this.detection_ids
             }).then(() => {
-                 this.$store.dispatch('getDetections', {}).then(() => {
-                    this.dismiss()
-                })
-            })           
+                this.$emit('rule_added', true)
+                this.dismiss();
+            })
         },
         dismiss() {
             this.error = false;

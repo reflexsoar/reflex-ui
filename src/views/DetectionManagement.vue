@@ -327,11 +327,13 @@
         <AddToRepositoryModal
           :show.sync="show_add_to_repository_modal"
           :detection_ids.sync="selected_items"
+          @rule_added="getDetections()"
         />
         <RemoveFromRepositoryModal
           :show.sync="show_remove_from_repository_modal"
           :detection_ids.sync="selected_items"
           :selected_repos.sync="selected_item_repos"
+          @rule_removed="getDetections()"
         />
         <CModal
           :show.sync="confirm_delete"
@@ -506,6 +508,7 @@ export default {
       filters["page_size"] = this.page_size;
       filters["page"] = this.current_page;
       this.$store.dispatch("getDetections", filters).then((resp) => {
+        this.current_page = resp.data.pagination.page;
         let paging = resp.data.pagination;
         this.total_pages = paging.pages;
       });
@@ -793,6 +796,9 @@ export default {
     addToRepository(item) {
       if (item) {
         this.selected_items = [item];
+      }
+      if(this.show_add_to_repository_modal) {
+        this.show_add_to_repository_modal = false;
       }
       this.show_add_to_repository_modal = true;
     },
