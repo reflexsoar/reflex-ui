@@ -80,13 +80,15 @@
               </CRow>
             </div>
             <div class="event-stats-picker">
-              <b class="event-stats-title">Show Synchronized Rules</b><br />
+              <CRow>
+                <CCol><b class="event-stats-title">Show Synchronized Rules</b><br />
               <CSwitch
                 label-on="Yes"
                 label-off="No"
                 :checked.sync="repo_sync"
                 color="success"
-              />
+              /></CCol>
+              </CRow>
             </div>
             <div
               class="event-stats-picker"
@@ -173,8 +175,7 @@ export default {
   data() {
     return {
       selected_filters: {
-        repo_synced: true,
-        active: true,
+        repo_synced: true
       },
       filters: {},
       show_filters: false,
@@ -220,6 +221,7 @@ export default {
         this.filters = resp.data;
         this.loading = false;
       });
+      this.$emit("filter_changed", this.filters);
     },
     getFilterDisplayName(type, value) {
       if (this.filters[type] != undefined) {
@@ -233,6 +235,7 @@ export default {
     selectFilter(filter) {
       // If the filter is already selected, remove it
       if (filter.type in this.selected_filters) {
+        console.log(filter.type, this.selected_filters)
         if (this.selected_filters[filter.type].includes(filter.value)) {
           // Remove the filter
           this.$set(
@@ -252,7 +255,6 @@ export default {
       this.getFilters();
 
       let filters = this.selected_filters;
-      this.$emit('filter_changed', filters);
     },
     resetFilters() {
       this.selected_filters = {};
