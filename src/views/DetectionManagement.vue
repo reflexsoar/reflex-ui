@@ -208,8 +208,11 @@
                       Total Time:
                       {{ item.time_taken ? item.time_taken.toLocaleString() : 0 }} ms
                       <br>
-                      Estimated Hits Per Day 
-                      {{ item.average_hits_per_day ? item.average_hits_per_day.toLocaleString() : 0}}
+                      Estimated Hits Per Day:
+                      <span v-if="item.average_hits_per_day !== null">
+                        {{ item.average_hits_per_day.toLocaleString() }}
+                      </span>
+                      <span v-else>-</span>
                     </td>
                   </template>
                   <template #actions="{ item }">
@@ -502,7 +505,9 @@ export default {
       },
       current_page: 1,
       page_size: 25,
-      total_pages: 1
+      total_pages: 1,
+      sort_by: "name",
+      sort_direction: "asc",
     };
   },
   methods: {
@@ -510,6 +515,7 @@ export default {
       let filters = JSON.parse(JSON.stringify(this.selected_detection_filters));
       filters["page_size"] = this.page_size;
       filters["page"] = this.current_page;
+      filters["sort_by"] = this.sort_by;
       this.$store.dispatch("getDetections", filters).then((resp) => {
         this.current_page = resp.data.pagination.page;
         let paging = resp.data.pagination;
