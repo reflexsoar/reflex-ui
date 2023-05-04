@@ -59,6 +59,13 @@
           </CRow>
           <CRow>
             <CCol>
+              <h4>Detection settings</h4>
+              <CInput v-model.number="settings.slow_detection_threshold" label="Slow Detection Threshold (milliseconds)" placeholder="1000"/>
+              <CInput v-model.number="settings.high_volume_threshold" label="High Volume Threshold (number of events)" placeholder="1000"/>
+            </CCol>
+          </CRow>
+          <CRow>
+            <CCol>
               <h4>Report Settings</h4>
               <CSelect :options="utc_offsets" :value.sync="settings.utc_offset" label="UTC Offset"/>
             </CCol>
