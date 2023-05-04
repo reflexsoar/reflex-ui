@@ -342,6 +342,10 @@ export default {
       let uuid = this.template.uuid;
       delete this.template.uuid;
 
+      if (this.template.is_global === null) {
+        this.template.is_global = false;
+      }
+
       // Ensure that all the fields don't have a null value for tags
       this.template.field_mapping.forEach((f) => {
         if (f.tags == null) {

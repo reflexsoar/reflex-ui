@@ -179,7 +179,7 @@ export default {
       },
       filters: {},
       show_filters: false,
-      free_search_options: ["Name","Description"],
+      free_search_options: ["Name","Description", "Query"],
       selected_search_option: "Name",
       search_text: null,
       loading: false,
@@ -236,6 +236,7 @@ export default {
       let display_names = {
         'name__like': 'Name',
         'description__like': 'Description',
+        'query__like': 'Query',
         'rule_type': 'Rule Type'
       }
 
@@ -252,6 +253,7 @@ export default {
       let free_search_types = {
         "Name": "name__like",
         "Description": "description__like",
+        "Query": 'query__like'
         
       }
       let filter = {

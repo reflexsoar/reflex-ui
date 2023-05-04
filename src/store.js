@@ -1335,7 +1335,7 @@ const actions = {
       })
     })
   },
-  getDetectionFilters({commit}, {rule_type=[], name__like=null, description__like=null, organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], active=[], repo_synced=true}) {
+  getDetectionFilters({commit}, {rule_type=[], name__like=null, description__like=null, query__like=null, organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], active=[], repo_synced=true}) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}&repository=${repository}&status=${status}`
 
@@ -1353,6 +1353,10 @@ const actions = {
         url = url+`&description__like=${description__like}`
       }
 
+      if(query__like) {
+        url = url+`&query__like=${query__like}`
+      }
+
       if(rule_type.length > 0) {
         url = url+`&rule_type=${rule_type}`
       }
@@ -1367,7 +1371,7 @@ const actions = {
       })
     })
   },
-  getDetections({commit}, {rule_type=[], name__like=null, description__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
+  getDetections({commit}, {rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}&repository=${repository}&status=${status}`
@@ -1402,6 +1406,10 @@ const actions = {
 
       if(description__like) {
         url = url+`&description__like=${description__like}`
+      }
+
+      if(query__like) {
+        url = url+`&query__like=${query__like}`
       }
 
       if(rule_type.length > 0) {
