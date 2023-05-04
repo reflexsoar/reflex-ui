@@ -95,7 +95,7 @@
               v-for="(bucket, title) in filters"
               :key="title"
             >
-              <b class="event-stats-title">{{ title }}</b>
+              <b class="event-stats-title">{{ title.replace('_', ' ') }}</b>
               <div
                 v-if="loading"
                 class="event-stats-div"
@@ -234,8 +234,9 @@ export default {
     },
     getTypeDisplayName(type) {
       let display_names = {
-        'name__like': 'name',
-        'description__like': 'description',
+        'name__like': 'Name',
+        'description__like': 'Description',
+        'rule_type': 'Rule Type'
       }
 
       if (type in display_names) {
@@ -250,7 +251,8 @@ export default {
 
       let free_search_types = {
         "Name": "name__like",
-        "Description": "description__like"
+        "Description": "description__like",
+        
       }
       let filter = {
         type: free_search_types[this.selected_search_option],
