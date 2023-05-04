@@ -139,6 +139,16 @@
                         <h3>Testing Guide</h3>
                         <viewer :initialValue="detection.testing_guide" height="550px" style="min-height:550px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
                       </CTab>
+                      <CTab title="Rule Quality">
+                        <h3>Predicted Hits</h3>
+                        <p>The below chart shows how many hits this rule would have generated over the last 30 days.  This is an estimate based on the last time the rule was assessed.  Rules are automatically assessed when they are synchronized from a repository and the query has changed, or if they are edited directly.</p>
+                        <div v-if="detection.hits_over_time !== null">
+          <apexchart width="100%"
+            :options="chart_options()"
+            :series="chart_series()">
+          </apexchart>
+        </div>
+        </CTab>
                     </CTabs>
                     
                   </CCardBody>
@@ -452,6 +462,37 @@ export default {
     this.getHits();
   },
   methods: {
+    chart_options() {
+      let data = JSON.parse(this.detection.hits_over_time)
+      let labels = Object.keys(data).map((d) => moment(d).format("MM-DD-YY"))
+      let options = {
+        chart: {
+          id: 'hits_over_time',
+          type: 'line',
+          title: {
+            text: 'Hits Over Time'
+          },
+          height: 250
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'smooth',
+          width: 2
+        },
+        labels: labels
+      }
+      return options
+    },
+    chart_series() {
+      let data = JSON.parse(this.detection.hits_over_time)
+      let series = [{
+        name: 'Hits',
+        data: Object.values(data),
+      }]
+      return series
+    },
     createExclusion() {
       this.exclusion = {};
       this.exclusion_modal_mode = "Create";
