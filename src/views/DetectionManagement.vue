@@ -718,7 +718,7 @@ export default {
       }
     },
     neverRun(last_run) {
-      if (last_run.startsWith("1969-")) {
+      if (last_run.startsWith("19")) {
         return true;
       }
     },
