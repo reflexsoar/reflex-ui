@@ -207,6 +207,9 @@
                       ms<br />
                       Total Time:
                       {{ item.time_taken ? item.time_taken.toLocaleString() : 0 }} ms
+                      <br>
+                      Estimated Hits Per Day 
+                      {{ item.average_hits_per_day ? item.average_hits_per_day.toLocaleString() : 0}}
                     </td>
                   </template>
                   <template #actions="{ item }">
