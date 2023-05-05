@@ -53,7 +53,11 @@
                 </CCol>
                 <CCol class="text-right">
                   <CButtonGroup>
-                    <CButton size="sm" color="primary" @click="applyFreeSearch()" v-bind:disabled="search_text === null || search_text == ''"
+                    <CButton
+                      size="sm"
+                      color="primary"
+                      @click="applyFreeSearch()"
+                      v-bind:disabled="search_text === null || search_text == ''"
                       >Search</CButton
                     >
                   </CButtonGroup>
@@ -81,36 +85,56 @@
             </div>
             <div class="event-stats-picker">
               <CRow>
-                <CCol><b class="event-stats-title">Show Synchronized Rules</b><br />
-              <CSwitch
-                label-on="Yes"
-                label-off="No"
-                :checked.sync="repo_sync"
-                color="success"
-              /></CCol>
+                <CCol
+                  ><b class="event-stats-title">Show Synchronized Rules</b><br />
+                  <CSwitch
+                    label-on="Yes"
+                    label-off="No"
+                    :checked.sync="repo_sync"
+                    color="success"
+                /></CCol>
               </CRow>
               <CRow>
-                <CCol><b class="event-stats-title">Max Estimated Hits</b> - {{ max_average_hits_per_day }}<br />
-                <input
-                  type="range"
-                  min="0"
-                  max="1000"
-                  value="0"
-                  id="max_estimated_hits"
-                  label="Risk Score"
-                  v-model="max_average_hits_per_day"
-                  class="slider"
-                  @mouseup="selectFilter({type: 'max_average_hits_per_day', value: max_average_hits_per_day})"
-                />
+                <CCol>
+                  <CRow>
+                    <CCol>
+                      <CInput
+                        size="sm"
+                        label="Max Estimated Hits"
+                        style="width: 95%"
+                        v-model.number="max_average_hits_per_day"
+                        @change="
+                          selectFilter({
+                            type: 'max_average_hits_per_day',
+                            value: max_average_hits_per_day,
+                          })
+                        "
+                      ></CInput>
+                    </CCol>
+                    <CCol
+                      ><CInput
+                        size="sm"
+                        label="Min Estimated Hits"
+                        style="width: 95%"
+                        v-model.number="min_average_hits_per_day"
+                        @change="
+                          selectFilter({
+                            type: 'min_average_hits_per_day',
+                            value: min_average_hits_per_day,
+                          })
+                        "
+                      ></CInput>
+                    </CCol>
+                  </CRow>
                 </CCol>
-                </CRow>
+              </CRow>
             </div>
             <div
               class="event-stats-picker"
               v-for="(bucket, title) in filters"
               :key="title"
             >
-              <b class="event-stats-title">{{ title.replace('_', ' ') }}</b>
+              <b class="event-stats-title">{{ title.replace("_", " ") }}</b>
               <div
                 v-if="loading"
                 class="event-stats-div"
@@ -195,16 +219,17 @@ export default {
   data() {
     return {
       selected_filters: {
-        repo_synced: true
+        repo_synced: true,
       },
       filters: {},
       show_filters: false,
-      free_search_options: ["Name","Description", "Query"],
+      free_search_options: ["Name", "Description", "Query"],
       selected_search_option: "Name",
       search_text: null,
       repo_sync: true,
       rule_active: true,
-      max_average_hits_per_day: 0
+      max_average_hits_per_day: 0,
+      min_average_hits_per_day: 0,
     };
   },
   computed: {
@@ -252,12 +277,13 @@ export default {
     },
     getTypeDisplayName(type) {
       let display_names = {
-        'name__like': 'Name',
-        'description__like': 'Description',
-        'query__like': 'Query',
-        'rule_type': 'Rule Type',
-        'max_average_hits_per_day': 'Max Estimated Hits'
-      }
+        name__like: "Name",
+        description__like: "Description",
+        query__like: "Query",
+        rule_type: "Rule Type",
+        max_average_hits_per_day: "Max Estimated Hits",
+        min_average_hits_per_day: "Min Estimated Hits",
+      };
 
       if (type in display_names) {
         return display_names[type];
@@ -270,12 +296,12 @@ export default {
       }
 
       let free_search_types = {
-        "Name": "name__like",
-        "Description": "description__like",
-        "Query": 'query__like',
-        "Max Estimated Hits": 'max_average_hits_per_day'
-        
-      }
+        Name: "name__like",
+        Description: "description__like",
+        Query: "query__like",
+        "Max Estimated Hits": "max_average_hits_per_day",
+        "Min Estimated Hits": "min_average_hits_per_day",
+      };
       let filter = {
         type: free_search_types[this.selected_search_option],
         value: this.search_text,
@@ -294,8 +320,8 @@ export default {
             this.selected_filters[filter.type].filter((item) => item !== filter.value)
           );
         } else {
-          // Add the filter  
-          if (["name","description".includes(filter.type)]) {
+          // Add the filter
+          if (["name", "description".includes(filter.type)]) {
             this.selected_filters[filter.type] = [];
           }
           this.selected_filters[filter.type].push(filter.value);
@@ -313,7 +339,7 @@ export default {
       this.selected_filters = {};
       this.getFilters();
       this.$store.commit("update_selected_detection_filters", this.selected_filters);
-      this.$emit('filter_changed', filters);
+      this.$emit("filter_changed", filters);
     },
   },
 };
