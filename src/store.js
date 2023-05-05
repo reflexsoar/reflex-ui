@@ -1335,7 +1335,7 @@ const actions = {
       })
     })
   },
-  getDetectionFilters({commit}, {max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], active=[], repo_synced=true}) {
+  getDetectionFilters({commit}, {min_average_hits_per_day=0, max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], active=[], repo_synced=true}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}&repository=${repository}&status=${status}`
@@ -1366,6 +1366,10 @@ const actions = {
         url = url+`&max_average_hits_per_day=${max_average_hits_per_day}`
       }
 
+      if(min_average_hits_per_day > 0) {
+        url = url+`&min_average_hits_per_day=${min_average_hits_per_day}`
+      }
+
       Axios({url: url, method: 'GET'})
       .then(resp => {
         commit('loading_status',false)
@@ -1378,7 +1382,7 @@ const actions = {
       })
     })
   },
-  getDetectionsByFilter({commit}, {max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
+  getDetectionsByFilter({commit}, {min_average_hits_per_day=0, max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
 
@@ -1386,7 +1390,11 @@ const actions = {
         max_average_hits_per_day = '0'
       }
 
-      let url = `${BASE_URL}/detection/select_by_filter?max_average_hits_per_day=${max_average_hits_per_day}`
+      if (min_average_hits_per_day == 0) {
+        min_average_hits_per_day = '0'
+      }
+
+      let url = `${BASE_URL}/detection/select_by_filter?max_average_hits_per_day=${max_average_hits_per_day}&min_average_hits_per_day=${min_average_hits_per_day}`
 
       console.log(url)
 
@@ -1444,7 +1452,7 @@ const actions = {
       })
     })
   },
-  getDetections({commit}, {max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
+  getDetections({commit}, {min_average_hits_per_day=0, max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}&repository=${repository}&status=${status}`
@@ -1491,6 +1499,10 @@ const actions = {
 
       if(max_average_hits_per_day > 0) {
         url = url+`&max_average_hits_per_day=${max_average_hits_per_day}`
+      }
+
+      if(min_average_hits_per_day > 0) {
+        url = url+`&min_average_hits_per_day=${min_average_hits_per_day}`
       }
 
     
