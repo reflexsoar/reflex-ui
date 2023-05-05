@@ -37,12 +37,20 @@
                     <CButton
                       v-if="current_user.role.permissions['create_detection']"
                       color="primary"
+                      size="sm"
                       @click="createDetectionModal()"
                       >New Detection</CButton
                     >
                   </CCol>
-                  <CCol col="5" class="text-right">
+                  <CCol col="11" class="text-right">
                     <CDropdown color="secondary" toggler-text="Bulk Actions" size="sm">
+                     <CDropdownItem
+                        @click="selectAllByFilter()"
+                        >Select All {{ total_items }} Detections</CDropdownItem>
+                        <CDropdownItem
+                        @click="clearSelection()"
+                        >Clear Selection</CDropdownItem>
+                      <CDropdownDivider></CDropdownDivider>
                       <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
                         @click="enableDetections()"
@@ -53,12 +61,6 @@
                         v-bind:disabled="selected_items.length == 0"
                         @click="disableDetections()"
                         ><CIcon name="cilBan" />&nbsp;Disable
-                        {{ selected_items.length }} Detections</CDropdownItem
-                      >
-                      <CDropdownItem
-                        v-bind:disabled="selected_items.length == 0"
-                        @click="deleteDetectionModal()"
-                        ><CIcon name="cilTrash" size="sm" />&nbsp;Delete
                         {{ selected_items.length }} Detections</CDropdownItem
                       >
                       <CDropdownItem
@@ -82,6 +84,14 @@
                       <CDropdownItem @click="import_wizard = !import_wizard"
                         ><CIcon name="cilCloudUpload" size="sm"></CIcon>&nbsp; Import
                         Detections</CDropdownItem
+                      >
+                      <CDropdownDivider></CDropdownDivider>
+                       
+                      <CDropdownItem
+                        v-bind:disabled="selected_items.length == 0"
+                        @click="deleteDetectionModal()"
+                        ><CIcon name="cilTrash" size="sm" />&nbsp;Delete
+                        {{ selected_items.length }} Detections</CDropdownItem
                       >
                     </CDropdown>
                   </CCol>
@@ -508,6 +518,7 @@ export default {
       total_pages: 1,
       sort_by: "name",
       sort_direction: "asc",
+      total_items: 0
     };
   },
   methods: {
@@ -520,6 +531,7 @@ export default {
         this.current_page = resp.data.pagination.page;
         let paging = resp.data.pagination;
         this.total_pages = paging.pages;
+        this.total_items = paging.total_results;
       });
     },
     importDetections() {
@@ -727,6 +739,15 @@ export default {
       if (last_run.startsWith("19")) {
         return true;
       }
+    },
+    selectAllByFilter() {
+      let filters = JSON.parse(JSON.stringify(this.selected_detection_filters));
+      this.$store.dispatch("getDetectionsByFilter", filters).then((resp) => {
+        this.selected_items = resp.data.detections;
+      });
+    },
+    clearSelection() {
+      this.selected_items = [];
     },
     selectAll() {
       if (this.selected_items.length > 0) {

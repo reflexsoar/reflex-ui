@@ -6,11 +6,11 @@
           <CCol col="10">
             <li style="display: inline">
               <span v-for="(key, type) in selected_filters" :key="type">
-                <CButton
+                <CBadge
                   v-for="(value, i) in key"
                   :key="i"
                   size="sm"
-                  class="tag"
+                  class="tag tag-clickable"
                   color="secondary"
                   style="margin-left: 2px"
                   @click="
@@ -22,7 +22,7 @@
                 >
                   <b>{{ getTypeDisplayName(type) }}</b
                   >: {{ getFilterDisplayName(type, value) }}
-                </CButton></span
+                </CBadge></span
               >
             </li>
           </CCol>
@@ -89,6 +89,21 @@
                 color="success"
               /></CCol>
               </CRow>
+              <CRow>
+                <CCol><b class="event-stats-title">Max Estimated Hits</b> - {{ max_average_hits_per_day }}<br />
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  value="0"
+                  id="max_estimated_hits"
+                  label="Risk Score"
+                  v-model="max_average_hits_per_day"
+                  class="slider"
+                  @mouseup="selectFilter({type: 'max_average_hits_per_day', value: max_average_hits_per_day})"
+                />
+                </CCol>
+                </CRow>
             </div>
             <div
               class="event-stats-picker"
@@ -155,6 +170,11 @@
   margin-left: 10px;
   margin-right: 10px;
 }
+
+.slider {
+  width: 95%;
+  margin-right: 10px;
+}
 </style>
 
 <script>
@@ -182,13 +202,13 @@ export default {
       free_search_options: ["Name","Description", "Query"],
       selected_search_option: "Name",
       search_text: null,
-      loading: false,
       repo_sync: true,
       rule_active: true,
+      max_average_hits_per_day: 0
     };
   },
   computed: {
-    ...mapState(["selected_detection_filters"]),
+    ...mapState(["selected_detection_filters", "loading"]),
   },
   created() {
     this.selected_filters = this.selected_detection_filters;
@@ -215,11 +235,9 @@ export default {
   },
   methods: {
     getFilters() {
-      this.loading = true;
       let filters = this.selected_filters;
       this.$store.dispatch("getDetectionFilters", filters).then((resp) => {
         this.filters = resp.data;
-        this.loading = false;
       });
       this.$emit("filter_changed", this.filters);
     },
@@ -237,7 +255,8 @@ export default {
         'name__like': 'Name',
         'description__like': 'Description',
         'query__like': 'Query',
-        'rule_type': 'Rule Type'
+        'rule_type': 'Rule Type',
+        'max_average_hits_per_day': 'Max Estimated Hits'
       }
 
       if (type in display_names) {
@@ -253,7 +272,8 @@ export default {
       let free_search_types = {
         "Name": "name__like",
         "Description": "description__like",
-        "Query": 'query__like'
+        "Query": 'query__like',
+        "Max Estimated Hits": 'max_average_hits_per_day'
         
       }
       let filter = {

@@ -1335,7 +1335,8 @@ const actions = {
       })
     })
   },
-  getDetectionFilters({commit}, {rule_type=[], name__like=null, description__like=null, query__like=null, organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], active=[], repo_synced=true}) {
+  getDetectionFilters({commit}, {max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], active=[], repo_synced=true}) {
+    commit('loading_status',true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}&repository=${repository}&status=${status}`
 
@@ -1361,17 +1362,89 @@ const actions = {
         url = url+`&rule_type=${rule_type}`
       }
 
+      if(max_average_hits_per_day > 0) {
+        url = url+`&max_average_hits_per_day=${max_average_hits_per_day}`
+      }
+
       Axios({url: url, method: 'GET'})
       .then(resp => {
+        commit('loading_status',false)
         commit('update_detection_filters', resp.data)
         resolve(resp)
       })
       .catch(err => {
+        commit('loading_status',false)
         reject(err)
       })
     })
   },
-  getDetections({commit}, {rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
+  getDetectionsByFilter({commit}, {max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
+    commit('loading_status',true)
+    return new Promise((resolve, reject) => {
+
+      if (max_average_hits_per_day == 0) {
+        max_average_hits_per_day = '0'
+      }
+
+      let url = `${BASE_URL}/detection/select_by_filter?max_average_hits_per_day=${max_average_hits_per_day}`
+
+      console.log(url)
+
+      if(techniques.length > 0) {
+        url = url+`&techniques=${techniques}`
+      }
+
+      if(tactics.length > 0) {
+        url = url+`&tactics=${tactics}`
+      }
+
+      if(organization) { 
+        url = url+`&organization=${organization}`
+      }
+
+      if(phase_names.length > 0) {
+        url = url+`&phase_names=${phase_names}`
+      }
+
+      if(active.length > 0) {
+        url = url+`&active=${active}`
+      }
+
+      if(tags.length > 0) {
+        url = url+`&tags=${tags}`
+      }
+
+      if(name__like) {
+        url = url+`&name__like=${name__like}`
+      }
+
+      if(description__like) {
+        url = url+`&description__like=${description__like}`
+      }
+
+      if(query__like) {
+        url = url+`&query__like=${query__like}`
+      }
+
+      if(rule_type.length > 0) {
+        url = url+`&rule_type=${rule_type}`
+      }
+    
+      url = url+`&repo_synced=${repo_synced}`
+      
+
+      Axios({url: url, method: 'GET'})
+      .then(resp => {
+        commit('loading_status',false)
+        resolve(resp)
+      })
+      .catch(err => {
+        commit('loading_status',false)
+        reject(err)
+      })
+    })
+  },
+  getDetections({commit}, {max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], save=true, organization=null, repo_synced=true}) {
     commit('loading_status',true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}&repository=${repository}&status=${status}`
@@ -1414,6 +1487,10 @@ const actions = {
 
       if(rule_type.length > 0) {
         url = url+`&rule_type=${rule_type}`
+      }
+
+      if(max_average_hits_per_day > 0) {
+        url = url+`&max_average_hits_per_day=${max_average_hits_per_day}`
       }
 
     
