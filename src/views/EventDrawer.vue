@@ -175,7 +175,7 @@
               {{ detection.description }}<br><br>
               <div>
                 <h4>Base Query</h4>
-                <pre>{{ detection.query ? detection.query.query : '' }}</pre>
+                <pre class="detection-query">{{ detection.query ? detection.query.query : '' }}</pre>
               </div>
               <div v-if="detection.guide">
                 <h4>Investigation Guide</h4>
@@ -326,6 +326,14 @@
 
 .table-responsive {
   overflow-y: none;
+}
+
+.detection-query {
+    white-space: pre-wrap;       /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 </style>
 
