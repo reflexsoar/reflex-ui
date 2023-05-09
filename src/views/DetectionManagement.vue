@@ -3,7 +3,7 @@
     <link
       rel="stylesheet"
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
-    />
+    />{{sorter_value}}
     <CRow
       ><CCol xs="12" lg="12">
         <h2 id="detections-page-header">
@@ -100,8 +100,8 @@
                   :items="filtered_items"
                   :fields="detection_list_fields"
                   :items-per-page="10"
-                  :sorter="{ external: false, resetable: true }"
-                  :sorterValue="{ column: 'name', asc: true }"
+                  :sorter="{ external: true, resetable: true }"
+                  :sorterValue.sync="sorter_value"
                   :loading="loading"
                   style="border-top: 1px solid #cfcfcf"
                 >
@@ -439,6 +439,7 @@ export default {
       selected_items: [],
       selected_item_repos: [],
       picker_filters: {},
+      sorter_value: { column: 'name', asc: true },
       //loading: false,
       detection_list_fields: [
         { key: "select", label: "", filter: false },
@@ -527,6 +528,13 @@ export default {
       filters["page_size"] = this.page_size;
       filters["page"] = this.current_page;
       filters["sort_by"] = this.sort_by;
+      if (filters["sort_by"] === null) {
+        filters["sort_by"] = "name";
+      }
+      filters["sort_direction"] = this.sort_direction;
+      if (filters["sort_direction"] === null) {
+        filters["sort_direction"] = "asc";
+      }
       this.$store.dispatch("getDetections", filters).then((resp) => {
         this.current_page = resp.data.pagination.page;
         let paging = resp.data.pagination;
@@ -939,7 +947,12 @@ export default {
   watch: {
     current_page: function(){
         this.getDetections()
-      }
+      },
+    sorter_value: function(){
+      this.sort_by = this.sorter_value.column
+      this.sort_direction = this.sorter_value.asc ? 'asc' : 'desc'
+      this.getDetections()
+    },
   },
   created() {
     if (this.current_user.default_org) {
