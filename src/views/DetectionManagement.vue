@@ -3,7 +3,7 @@
     <link
       rel="stylesheet"
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
-    />{{sorter_value}}
+    />
     <CRow
       ><CCol xs="12" lg="12">
         <h2 id="detections-page-header">
