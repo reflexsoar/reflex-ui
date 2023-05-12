@@ -511,6 +511,10 @@ export default {
           max_terms: 1000,
           window_size: 30,
         },
+        indicator_match_config: {
+          intel_list: {},
+          key_field: ""
+        },
         daily_schedule: false,
         schedule: this.defaultSchedule(),
       },
@@ -668,6 +672,10 @@ export default {
           key_field: "",
           max_terms: 1000,
           window_size: 30,
+        },
+        indicator_match_config: {
+          intel_list: {},
+          key_field: ""
         },
         daily_schedule: false,
         schedule: this.defaultSchedule(),
