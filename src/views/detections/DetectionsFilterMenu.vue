@@ -223,13 +223,14 @@ export default {
       },
       filters: {},
       show_filters: false,
-      free_search_options: ["Name", "Description", "Query"],
+      free_search_options: ["Name", "Description", "Query", "Tags"],
       selected_search_option: "Name",
       search_text: null,
       repo_sync: true,
       rule_active: true,
       max_average_hits_per_day: 0,
       min_average_hits_per_day: 0,
+      tag_search: ""
     };
   },
   computed: {
@@ -259,6 +260,15 @@ export default {
     },
   },
   methods: {
+    getFilterValue(type) {
+      if (type === 'tags') {
+        return this.filtered_tags
+      }
+      if (type in this.selected_filters) {
+        return this.selected_filters[type];
+      }
+      return [];
+    },
     getFilters() {
       let filters = this.selected_filters;
       this.$store.dispatch("getDetectionFilters", filters).then((resp) => {
@@ -299,6 +309,7 @@ export default {
         Name: "name__like",
         Description: "description__like",
         Query: "query__like",
+        Tags: "tags",
         "Max Estimated Hits": "max_average_hits_per_day",
         "Min Estimated Hits": "min_average_hits_per_day",
       };

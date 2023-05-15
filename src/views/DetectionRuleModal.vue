@@ -294,7 +294,7 @@
                     </CCol>
                   </CRow>
                 </div>
-                <div v-else-if="rule.rule_type == 2">
+                <!--<div v-else-if="rule.rule_type == 2">
                   <h5>Metric Change Configuration</h5>
                   {{ rule.metric_change_config }}
                   <CRow>
@@ -324,7 +324,7 @@
                       />
                     </CCol>
                   </CRow>
-                </div>
+                </div>-->
                 <div v-else-if="rule.rule_type == 3">
                   <h5>Field Comparison Configuration</h5>
                   <CRow>
@@ -376,6 +376,26 @@
                         description="The maximum number of terms to return.  Too large may have performance impacts, too low may miss terms."
                       />
                     </CCol>
+                  </CRow>
+                </div>
+                <div v-else-if="rule.rule_type == 5">
+                  <h5>Indicator Match Configuration</h5>
+                  <CRow>
+                    <CCol col=6>
+                      <CInput
+                        v-model="rule.indicator_match_config.key_field"
+                        label="Indicator Field"
+                        placeholder="Field Name"
+                        description="The field to collect the values from to compare to the Intel List"
+                      />
+                    </CCol>
+                    <Col col=6>
+                    <multiselect id="intel_list" v-model="exclusion.list" :options="formatted_lists" track-by="uuid" label="name" :close-on-select="true"
+                      :internal-search="false"
+                      :searchable="true"
+                      @search-change="getIntelList"
+                      @select="setList"/>
+                    </Col>
                   </CRow>
                 </div>
               </CTab>
@@ -942,6 +962,9 @@ export default {
     selected_org: function () {
       return this.rule.organization
     },
+    formatted_lists () {
+      return this.lists.map(list => { return {'name': list.name, 'uuid': list.uuid}})
+    },
     ...mapState([
       "settings",
       "current_user",
@@ -949,11 +972,13 @@ export default {
       "mitre_tactics",
       "mitre_techniques",
       "field_templates",
-      "inputs"
+      "inputs",
+      "lists"
     ]),
   },
   data() {
     return {
+      intel_lists: [],
       rule_statuses: ['Experimental','Draft','Superceded',
       'Beta',
       'Stable',
@@ -969,11 +994,13 @@ export default {
       rule_types: [
         { label: "Match", value: 0 },
         { label: "Threshold", value: 1 },
-        { label: "Metric Change", value: 2 },
+        //{ label: "Metric Change", value: 2 },
         { label: "Field Comparison", value: 3 },
         { label: "New Terms", value: 4 },
+        { label: "Intel Match", value: 5}
       ],
       severities: [
+        { label: "Informational", value: 0},
         { label: "Low", value: 1 },
         { label: "Medium", value: 2 },
         { label: "High", value: 3 },
@@ -1151,6 +1178,12 @@ export default {
     this.$store.dispatch("getMitreTactics", {});
   },
   methods: {
+    setList(list) {
+      this.rule.indicator_match_config.intel_list = list
+    },
+    getIntelList(search = null){ 
+      this.$store.dispatch("getLists", { organization: this.rule.organization, name__like: search })
+    },
     updateSelectedTemplates(t) {
       this.rule.field_templates.push({name: t.name, uuid: t.uuid});
     },
@@ -1501,6 +1534,7 @@ export default {
     addTechnique(technique) {},
     updateOrganization() {
       this.$store.dispatch("getInputList", { organization: this.rule.organization });
+      this.getIntelList()
       this.$store.dispatch("getFieldTemplates", { organization: this.rule.organization });
       this.rule.source = { uuid: null };
     },
