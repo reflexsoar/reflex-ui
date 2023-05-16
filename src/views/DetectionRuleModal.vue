@@ -389,13 +389,14 @@
                         description="The field to collect the values from to compare to the Intel List"
                       />
                     </CCol>
-                    <Col col=6>
+                    <CCol col=6>
+                    <label>Intel List</label><br />
                     <multiselect id="intel_list" v-model="exclusion.list" :options="formatted_lists" track-by="uuid" label="name" :close-on-select="true"
                       :internal-search="false"
                       :searchable="true"
                       @search-change="getIntelList"
                       @select="setList"/>
-                    </Col>
+                    </CCol>
                   </CRow>
                 </div>
               </CTab>
