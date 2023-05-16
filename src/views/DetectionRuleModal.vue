@@ -997,7 +997,7 @@ export default {
         //{ label: "Metric Change", value: 2 },
         { label: "Field Comparison", value: 3 },
         { label: "New Terms", value: 4 },
-        { label: "Intel Match", value: 5}
+        { label: "Indicator Match", value: 5}
       ],
       severities: [
         { label: "Informational", value: 0},
