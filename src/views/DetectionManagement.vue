@@ -237,6 +237,15 @@
                           ><CIcon name="cilMagnifyingGlass" />&nbsp; View
                           Detection</CDropdownItem
                         >
+                        <CDropdownItem 
+                          aria-label="Flag for Assessment"
+                          @click="flagForAssessment(item.uuid)"
+                          size="sm"
+                          color="warning"
+                          v-bind:disabled="item.assess_rule"
+                          v-c-tooltip="{ content: 'Flag for Assessment', placement: 'left' }"
+                          ><CIcon name="cilFlagAlt" />&nbsp; Flag for Assessment</CDropdownItem
+                        >
                         <CDropdownItem
                           aria-label="Edit Detection"
                           @click="editDetectionModal(item.uuid)"
@@ -847,6 +856,9 @@ export default {
         this.show_add_to_repository_modal = false;
       }
       this.show_add_to_repository_modal = true;
+    },
+    flagForAssessment(item) {
+      this.$store.dispatch("flagDetectionAssess", { uuid: item })
     },
     removeFromRepository(item) {
       item = this.detections.find((detection) => detection.uuid === item);

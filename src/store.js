@@ -1537,6 +1537,18 @@ const actions = {
       })
     })
   },
+  flagDetectionAssess({commit}, {uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/${uuid}/assess`, method: 'PUT'})
+      .then(resp => {
+        commit('save_detection', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   createDetection({commit}, detection) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/detection`, data: detection, method: 'POST'})
