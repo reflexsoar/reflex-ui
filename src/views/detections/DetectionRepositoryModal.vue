@@ -144,6 +144,9 @@ export default {
                 // If the mode is edit then we need to get the tags for the repository take
                 // the tags from the repository object and add them to tag_list
                 if(this.mode == "Edit") {
+                    if(this.repository.tags == undefined) {
+                        this.repository.tags = [];
+                    }
                     this.repository.tags.forEach((tag) => {
                         this.tag_list.push(tag);
                     })
