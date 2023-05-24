@@ -219,10 +219,7 @@
                       {{ item.time_taken ? item.time_taken.toLocaleString() : 0 }} ms
                       <br>
                       Estimated Hits Per Day:
-                      <span v-if="item.average_hits_per_day !== null">
-                        {{ item.average_hits_per_day.toLocaleString() }}
-                      </span>
-                      <span v-else>-</span>
+                      {{ item.average_hits_per_day ? item.average_hits_per_day.toLocaleString() : '-' }}
                     </td>
                   </template>
                   <template #actions="{ item }">

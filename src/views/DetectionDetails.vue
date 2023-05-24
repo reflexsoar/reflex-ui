@@ -129,15 +129,25 @@
                       </CTab>
                       <CTab title="Triage Guide">
                       <h3>Triage Guide</h3>
-                        <viewer :initialValue="detection.guide" height="550px" style="min-height:550px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
+                        <viewer :initialValue="detection.guide" height="550px" style="min-height:400px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
                       </CTab>
                       <CTab title="Setup Guide">
                       <h3>Setup Guide</h3>
-                        <viewer :initialValue="detection.setup_guide" height="550px" style="min-height:550px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
+                        <viewer :initialValue="detection.setup_guide" height="550px" style="min-height:400px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
                       </CTab>
                       <CTab title="Testing Guide">
                         <h3>Testing Guide</h3>
-                        <viewer :initialValue="detection.testing_guide" height="550px" style="min-height:550px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
+                        <viewer :initialValue="detection.testing_guide" height="550px" style="min-height:400px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
+                      </CTab>
+                      <CTab title="Testing Automation">
+                        <h3>Testing Automation</h3>
+                        <pre class="query">{{detection.test_script}}</pre>
+                        <label>Script Safe:</label>&nbsp;{{ detection.test_script_safe ? "Yes" : "No" }}<br>
+                        <label>Script Language:</label>&nbsp;{{ detection.test_script_language }}
+                      </CTab>
+                      <CTab title="Email Template">
+                        <h3>Email Template</h3>
+                        <pre class="query">{{detection.email_template}}</pre>
                       </CTab>
                       <CTab title="Rule Quality">
                         <h3>Predicted Hits</h3>
@@ -147,7 +157,44 @@
             :options="chart_options()"
             :series="chart_series()">
           </apexchart>
-        </div>
+          
+        </div><h4>Query Performance</h4>
+          <CRow>
+            <CCol col=4>
+
+          <CCard>
+            <CCardHeader>
+              <b>Predicted Query Time (ms)</b>
+            </CCardHeader>
+            <CCardBody>
+              <center style="font-size: 3rem">{{ detection.average_query_time ? detection.average_query_time.toLocaleString() : "Unknown" }}</center>
+              <center><small>Last Assessed: {{ detection.last_assessed | moment('from','now') }}</small></center>
+              </CCardBody>
+            </CCard>
+            </CCol>
+            <CCol col=4>
+             <CCard>
+            <CCardHeader>
+              <b>Last Query Time (ms)</b>
+            </CCardHeader>
+            <CCardBody>
+              <center style="font-size: 3rem">{{ detection.query_time_taken ? detection.query_time_taken.toLocaleString() : "Unknown" }}</center>
+              <center><small>Last Reported: {{ detection.last_run | moment('from','now') }}</small></center>
+              </CCardBody>
+              </CCard>
+              </CCol>
+              <CCol col=4>
+             <CCard>
+            <CCardHeader>
+              <b>Total Execution Time (ms)</b>
+            </CCardHeader>
+            <CCardBody>
+              <center style="font-size: 3rem">{{ detection.time_taken ? detection.time_taken.toLocaleString() : "Unknown" }}</center>
+              <center><small>Last Reported: {{ detection.last_run | moment('from','now') }}</small></center>
+              </CCardBody>
+              </CCard>
+              </CCol>
+            </CRow>     
         </CTab>
                     </CTabs>
                     
