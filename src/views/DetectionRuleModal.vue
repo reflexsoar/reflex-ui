@@ -803,7 +803,35 @@
                   useful for alert consumers to understand how to test the detection to ensure
                   it is working as expected.
                 </p>
-                <editor ref="testingGuideEditor" :initialValue="rule.testing_guide" @change="updateTestingGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" />
+                <editor ref="testingGuideEditor" :initialValue="rule.testing_guide" @change="updateTestingGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" /><br>
+              </CTab>  
+              <CTab title="Testing Automation" v-bind:disabled="rule.source['uuid'] === null">
+                <h5>Test Automation</h5>
+                <p>
+                  When a test script is provided, the detection can be tested automatically by 
+                  running the <code>reflex-rule-tester</code> tool, a guide on how to use this tool can be
+                  found <a href="https://docs.reflexsoar.com/en/latest/detections/automated-testing" target="_">here</a>.
+                </p>
+                <CTextarea v-model="rule.test_script" placeholder="Paste your script here" rows="10"/>
+                <CRow>
+                  <CCol>
+                    <CSelect :value.sync="rule.test_script_language" :options="['python', 'powershell', 'batch', 'bash']" label="Script Language"/>
+                  </CCol>
+                  <CCol>
+                    <label>Safe Script</label><br>
+                    <CSwitch :checked.sync="rule.test_script_safe" label="Safe Script" color="success" label-on="Yes" label-off="No"/><br>
+                    <small class="text-muted">Is the script safe to run automatically?</small>
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab title="Email Template" v-bind:disabled="rule.source['uuid'] === null">
+                <h5>Email Template</h5>
+                <p>
+                  The e-mail template is used to when generating an e-mail related to this detection,
+                  whether manually or automatically.  The template is rendered using the
+                  Jinja2 templating engine.
+                </p>
+                <editor ref="emailTemplateEditor" :initialValue="rule.email_template" @change="updateEmailTemplate()" height="400px" initialEditType="markdown" previewStyle="vertical" /><br>
               </CTab>
               <CTab title="Review" v-bind:disabled="rule.source['uuid'] === null"
                 >{{ rule }}
@@ -1013,7 +1041,7 @@ export default {
       error_message: "",
       submitted: false,
       step: 0,
-      final_step: 9,
+      final_step: 11,
       range: {
         start: this.days_ago(7),
         end: this.today(),
@@ -1088,12 +1116,23 @@ export default {
         }
         if(this.rule.testing_guide) { 
           this.$refs.testingGuideEditor.invoke('setMarkdown', this.rule.testing_guide)
+        } else {
+          this.$refs.testingGuideEditor.invoke('setMarkdown', '')
         }
         if(this.rule.guide) {
           this.$refs.triageGuideEditor.invoke('setMarkdown', this.rule.guide)
+        } else {
+          this.$refs.triageGuideEditor.invoke('setMarkdown', '')
         }
         if(this.rule.setup_guide) {
           this.$refs.setupGuideEditor.invoke('setMarkdown', this.rule.setup_guide)
+        } else {
+          this.$refs.setupGuideEditor.invoke('setMarkdown', '')
+        }
+        if(this.rule.email_template) {
+          this.$refs.emailTemplateEditor.invoke('setMarkdown', this.rule.email_template)
+        } else {
+          this.$refs.emailTemplateEditor.invoke('setMarkdown', '')
         }
         this.$store.dispatch("getFieldTemplates", { organization: this.rule.organization }).then(() => {
           if(this.rule.field_templates) {
@@ -1578,6 +1617,9 @@ export default {
     },
     updateSetupGuide() {
       this.rule.setup_guide = this.$refs.setupGuideEditor.invoke('getMarkdown')
+    },
+    updateEmailTemplate() {
+      this.rule.email_template = this.$refs.emailTemplateEditor.invoke('getMarkdown')
     },
     convertRule() {
       let data = {
