@@ -503,7 +503,7 @@
                     'condition',
                     'values',
                     { key: 'list', label: 'Intel List' },
-                    { key: 'admin', label: '' },
+                    { key: 'admin', label: 'Manage' },
                   ]"
                 >
                   <template #admin="{ item }">
