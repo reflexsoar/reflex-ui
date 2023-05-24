@@ -164,15 +164,37 @@
 
           <CCard>
             <CCardHeader>
-              <b>Average Query Time</b>
+              <b>Predicted Query Time (ms)</b>
             </CCardHeader>
             <CCardBody>
-              <center style="font-size: 3rem">{{ detection.average_query_time ? detection.average_query_time.toLocaleString() : "Unknown" }}</center><br>
-              <center>milliseconds</center>
+              <center style="font-size: 3rem">{{ detection.average_query_time ? detection.average_query_time.toLocaleString() : "Unknown" }}</center>
+              <center><small>Last Assessed: {{ detection.last_assessed | moment('from','now') }}</small></center>
               </CCardBody>
             </CCard>
             </CCol>
-            </CRow>
+            <CCol col=4>
+             <CCard>
+            <CCardHeader>
+              <b>Last Query Time (ms)</b>
+            </CCardHeader>
+            <CCardBody>
+              <center style="font-size: 3rem">{{ detection.query_time_taken ? detection.query_time_taken.toLocaleString() : "Unknown" }}</center>
+              <center><small>Last Reported: {{ detection.last_run | moment('from','now') }}</small></center>
+              </CCardBody>
+              </CCard>
+              </CCol>
+              <CCol col=4>
+             <CCard>
+            <CCardHeader>
+              <b>Total Execution Time (ms)</b>
+            </CCardHeader>
+            <CCardBody>
+              <center style="font-size: 3rem">{{ detection.time_taken ? detection.time_taken.toLocaleString() : "Unknown" }}</center>
+              <center><small>Last Reported: {{ detection.last_run | moment('from','now') }}</small></center>
+              </CCardBody>
+              </CCard>
+              </CCol>
+            </CRow>     
         </CTab>
                     </CTabs>
                     
