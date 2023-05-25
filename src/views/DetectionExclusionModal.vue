@@ -147,8 +147,17 @@ export default {
       this.exclusion.field = value
     },
     addExclusionValue(value) {
+      if(this.exclusion_values === null) {
+        this.exclusion_values = [value]
+      } else { 
         this.exclusion_values.push(value)
+      }
+
+      if(this.exclusion.values === null) {
+        this.exclusion.values = [value]
+      } else {
         this.exclusion.values.push(value);
+      }
     },
     checkValues(event) {
       if(this.exclusion.values.length > 1 && event.target.value === 'is') {
@@ -157,13 +166,14 @@ export default {
     },
     createExclusion() {
       if('exceptions' in this.rule) {
+        console.log('exists')
         if(this.rule.exceptions === null) {
           this.$set(this.rule,'exceptions',[this.exclusion])
         } else {
-          this.rule.exceptions.push(this.exclusion)
+          this.$set(this.rule,'exceptions',[...this.rule.exceptions, this.exclusion])
         }        
       } else {
-        this.rule.exceptions = [this.exclusion]
+        this.$set(this.rule,'exceptions',[this.exclusion])
       }
       this.modalStatus = false
     },
@@ -171,7 +181,7 @@ export default {
       if(this.rule.exceptions.length > 0) {
         this.rule.exceptions = [...this.rule.exceptions.filter(e => e.uuid !== this.exclusion.uuid), this.exclusion]
       } else {
-        this.rule.exceptions = [this.exclusion]
+        this.$set(this.rule,'exceptions',[this.exclusion])
       }
       this.$emit('exclusion_saved', true)
       this.modalStatus = false

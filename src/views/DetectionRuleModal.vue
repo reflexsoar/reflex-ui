@@ -528,21 +528,15 @@
                   </template>
                   <template #values="{ item }">
                     <td>
-                      <li
-                        style="display: inline; margin-right: 2px"
-                        v-for="value in item.values"
-                        :key="value"
-                      >
-                        <CButton color="primary" size="sm" disabled>{{ value }}</CButton>
-                      </li>
+                      <TagBucket :tags="['awesome']"  label="Exclusions"/>
                     </td>
                   </template>
                   <template #list="{ item }">
                     <td>
                       <span v-if="item.list && item.list.name !== null"
-                        ><CButton color="primary" size="sm" disabled>{{
+                        ><CBadge color="dark" size="sm" class="tag">{{
                           item.list.name
-                        }}</CButton></span
+                        }}</CBadge></span
                       ><span v-else>None</span>
                     </td>
                   </template>
@@ -939,6 +933,7 @@ import { Editor } from '@toast-ui/vue-editor';
 
 import DetectionExclusionModal from "./DetectionExclusionModal.vue";
 import ImportSigmaRuleWizard from "./detections/ImportSigmaRuleWizard.vue";
+import TagBucket from "./components/TagBucket.vue";
 
 
 import { mapState } from "vuex";
@@ -948,7 +943,8 @@ export default {
     PrismEditor,
     DetectionExclusionModal,
     ImportSigmaRuleWizard,
-    Editor
+    Editor,
+    TagBucket
   },
   name: "DetectionRuleModal",
   props: {

@@ -1,12 +1,12 @@
 <template>
   <div>
     <CCard class="bucket" @click="toggleDetails()">
-      <CIcon :name="iconName" style="margin-top:-1px; width: 14px; height: 14px;"/> {{ tags.length }}
+      <CIcon :name="iconName" style="margin-top:-1px; width: 14px; height: 14px;"/> {{ tags ? tags.length : 0 }}
       <CCard class="tag-list" v-if="show_details">
         <CCardHeader class="small-header"><b>{{label}}</b></CCardHeader>
         <CCardBody style="padding: 5px;">
           <template v-if="countOnly">
-            {{ tags.length }}
+            {{ tags ? tags.length : 0 }}
           </template>
           <TagList v-if="!countOnly" :tags="tags" :tagIcon="false" :iconName="iconName" :tagColor="tagColor"/>
         </CCardBody>
