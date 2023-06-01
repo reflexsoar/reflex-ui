@@ -1539,12 +1539,12 @@ export default {
       this.tag_list.push(t);
     },
     addSignatureField(t) {
-      if(this.rule.signature_fields) {
-        this.rule.signature_fields.push(t)
+      if(this.rule.signature_fields) {)
+        this.$set(this.rule, 'signature_fields', [...this.rule.signature_fields, t])
       } else {
         this.rule.signature_fields = [t]
       }
-      this.tag_list.push(t);
+      this.signature_fields.push(t);
     },
     cloneSignatureFields() {
       let source_input = this.input_list.find((i) => i.uuid === this.rule.source.uuid)
