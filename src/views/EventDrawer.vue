@@ -428,9 +428,6 @@
         </CTabs>
       </CCol>
     </CRow>
-    {{exclusion}}
-    {{show_exclusion_modal}}
-    {{exclusion_modal_mode}}
     <DetectionExclusionModal
       :exclusion.sync="exclusion"
       :rule.sync="detection"
