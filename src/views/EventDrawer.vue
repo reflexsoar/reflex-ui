@@ -353,45 +353,30 @@
                     'condition',
                     'values',
                     { key: 'list', label: 'Intel List' },
-                    { key: 'admin', label: '' },
+                    //{ key: 'admin', label: '' },
                   ]"
                 >
                   <template #admin="{ item }">
                     <td class="text-right">
                       <CButton
                         aria-label="Edit Exclusion"
+                        @click="editExclusion(item.uuid)"
                         size="sm"
                         color="info"
                         v-c-tooltip="{ content: 'Edit Exclusion', placement: 'left' }"
                       >
                         <CIcon name="cilPencil" /> </CButton
-                      >&nbsp;
-                      <CButton
-                        aria-label="Delete Exclusion"
-                        size="sm"
-                        color="danger"
-                        v-c-tooltip="{ content: 'Delete Exclusion', placement: 'left' }"
                       >
-                        <CIcon name="cilTrash" />
-                      </CButton>
                     </td>
                   </template>
                   <template #values="{ item }">
                     <td>
-                      <li
-                        style="display: inline; margin-right: 2px"
-                        v-for="value in item.values"
-                        :key="value"
-                      >
-                        <CBadge class="tag" color="dark" size="sm" disabled>{{
-                          value
-                        }}</CBadge>
-                      </li>
+                      <TagBucket :tags="item.values" label="Exclusions" />
                     </td>
                   </template>
                   <template #list="{ item }">
                     <td>
-                      <span v-if="item.list.name !== null">
+                      <span v-if="item.list !== null">
                         <CBadge class="tag" color="dark" size="sm" disabled>{{
                           item.list.name
                         }}</CBadge>
@@ -443,6 +428,12 @@
         </CTabs>
       </CCol>
     </CRow>
+    <DetectionExclusionModal
+      :exclusion.sync="exclusion"
+      :rule.sync="detection"
+      :show.sync="show_exclusion_modal"
+      :mode="exclusion_modal_mode"
+    />
   </CRightDrawer>
 </template>
 
@@ -560,6 +551,8 @@ import "../assets/js/prism-rql";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
 import MatchedEventRule from "./event/MatchedEventRule";
 import { Viewer } from "@toast-ui/vue-editor";
+import TagBucket from './components/TagBucket'
+import DetectionExclusionModal from "./DetectionExclusionModal";
 
 export default {
   name: "EventDrawer",
@@ -573,6 +566,8 @@ export default {
     PrismEditor,
     MatchedEventRule,
     Viewer,
+    TagBucket,
+    DetectionExclusionModal
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
@@ -633,6 +628,9 @@ export default {
       comments_loading: false,
       rules_loading: false,
       event_index: [],
+      exclusion: {},
+      show_exclusion_modal: false,
+      exclusion_modal_mode: "Create",
     };
   },
   computed: {
@@ -644,6 +642,11 @@ export default {
     },
   },
   methods: {
+    editExclusion(uuid) {
+      this.exclusion = this.detection.exceptions.find((exclusion) => exclusion.uuid === uuid);
+      this.exclusion_modal_mode = "Edit";
+      this.show_exclusion_modal = true;
+    },
     toggleISS(uuid, observable_value, field, value) {
       let data = {};
       data[field] = value;
