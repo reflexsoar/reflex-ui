@@ -524,6 +524,17 @@ export default {
           intel_list: {},
           key_field: ""
         },
+        source_monitor_config: {
+          data_sources: [],
+          source_lists: [],
+          excluded_sources: [],
+          excluded_source_lists: [],
+          delta_change: false,
+          delta_window: 7,
+          operator: "==",
+          threshold: 0,
+          threshold_as_percent: false
+        },
         daily_schedule: false,
         schedule: this.defaultSchedule(),
       },
@@ -685,6 +696,17 @@ export default {
         indicator_match_config: {
           intel_list: {},
           key_field: ""
+        },
+        source_monitor_config: {
+          data_sources: [],
+          source_lists: [],
+          excluded_sources: [],
+          excluded_source_lists: [],
+          delta_change: false,
+          delta_window: 7,
+          operator: "==",
+          threshold: 0,
+          threshold_as_percent: false
         },
         daily_schedule: false,
         schedule: this.defaultSchedule(),

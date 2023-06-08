@@ -151,15 +151,21 @@
               </CTab>
               <CTab title="Configuration" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Rule Configuration</h5>
-                <CSelect label="Rule Status"
-                  :value.sync="rule.status"
-                  :options="rule_statuses"
-                />
-                <CSelect
-                  label="Rule Type"
-                  :value.sync="rule.rule_type"
-                  :options="rule_types"
-                />
+                <CRow><CCol>
+                    <CSelect
+                      label="Rule Type"
+                      :value.sync="rule.rule_type"
+                      :options="rule_types"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CSelect label="Rule Status"
+                      :value.sync="rule.status"
+                      :options="rule_statuses"
+                    />
+                    </CCol>
+                    
+                  </CRow>
                 <CRow>
                   <CCol col="3">
                     <CSelect
@@ -195,7 +201,9 @@
                     </CInput
                   ></CCol>
                 </CRow>
-                <label for="base_query">Base Query</label><br /><prism-editor
+                <div v-if="rule.rule_type != 6">
+
+                  <label for="base_query">Base Query</label><br /><prism-editor
                   id="base_query"
                   class="my-editor"
                   v-model="rule.query.query"
@@ -203,7 +211,8 @@
                   line-numbers
                   aria-label="Reflex Query"
                 ></prism-editor
-                ><br />
+                ><br>
+                </div>
                 <div v-if="rule.rule_type == 1">
                   <h5>Threshold Configuration</h5>
                   <p>
@@ -396,6 +405,96 @@
                       :searchable="true"
                       @search-change="getIntelList"
                       @select="setList"/>
+                    </CCol>
+                  </CRow>
+                </div>
+                <div v-else-if="rule.rule_type == 6">
+                  <h5>Data Source Monitor Configuration</h5>
+                  <p>Data Source Monitors are in place to detect swings in data source volume.  This is useful for detecting when a data source is no longer sending data or when a data source is sending too much data.</p>
+                  <h5>Included Sources</h5>
+                  <CRow>
+                    
+                    <CCol>
+                    <label>Datastream/Index Patterns</label><br />
+                    <multiselect id="source_monitor_data_sources"
+                      v-model="rule.source_monitor_config.data_sources"
+                      :options="[]"
+                      :close-on-select="false"
+                      :taggable="true"
+                      :multiple="true"
+                      @tag="addSourceMonitorDataSource"
+                    />
+                    </CCol>
+                    <CCol>
+                    
+                    <label>Intel Lists</label><br />
+                    <multiselect id="source_monitor_source_lists"
+                      v-model="rule.source_monitor_config.source_lists"
+                      :options="formatted_lists"
+                      track-by="uuid" label="name"
+                      :close-on-select="false"
+                      :internal-search="false"
+                      :searchable="true"
+                      :multiple="true"
+                      @search-change="getIntelList"
+                      @select="setList"/><br>
+                    </CCol>
+                  </CRow>
+                    
+                  <h5>Excluded Sources</h5>
+                  <CRow>
+                    <CCol>
+
+                    <label>Excluded Datastream/Index Patterns</label><br />
+                    <multiselect id="source_monitor_excluded_data_sources"
+                      v-model="rule.source_monitor_config.excluded_sources"
+                      :options="[]"
+                      :close-on-select="false"
+                      :taggable="true"
+                      :multiple="true"
+                      @tag="addSourceMonitorExcludedDataSource"
+                    />
+                    </CCol>
+                    <CCol>
+                    <label>Excluded Intel Lists</label><br />
+                    <multiselect id="source_monitor_excluded_source_lists"
+                      v-model="rule.source_monitor_config.excluded_source_lists"
+                      :options="formatted_lists"
+                      track-by="uuid"
+                      label="name"
+                      :close-on-select="false"
+                      :internal-search="false"
+                      :searchable="true"
+                      :multiple="true"
+                      @search-change="getIntelList"
+                      @select="setList"/><br>
+                    </CCol>
+                  </CRow>
+                  <h5>Threshold Configuration</h5>
+                  If the current value is <b>{{rule.source_monitor_config.operator}}</b> <b>{{rule.source_monitor_config.threshold}}</b><span v-if="rule.source_monitor_config.threshold_as_percent">%</span> <span v-if="rule.source_monitor_config.delta_change">compared to <b>{{rule.source_monitor_config.delta_window}}</b> days ago, </span> the alert will fire.<br><br>
+                  <CRow>
+                    <CCol col=2>
+                      <CSelect
+                        :value.sync="rule.source_monitor_config.operator"
+                        label="Operator"
+                        :options="['==', '!=', '>', '<', '>=', '<=']"
+                      />
+                    </CCol>
+                    <CCol>
+                      <CInput v-model.number="rule.source_monitor_config.threshold" label="Threshold" />
+                    </CCol>
+                    <CCol>
+                      <label>Alert on Change</label><br />
+                      <CSwitch :checked.sync="rule.source_monitor_config.delta_change" label="Alert on Increase" label-on="Yes" label-off="No" color="success" />
+                    </CCol>
+                    <CCol>
+                      <label>As Percentage</label><br />
+                      <CSwitch v-bind:disabled="!rule.source_monitor_config.delta_change" :checked.sync="rule.source_monitor_config.threshold_as_percent" label="As Percentage" label-on="Yes" label-off="No" color="success" />
+                    </CCol>
+                  </CRow>
+                  <CRow v-if="rule.source_monitor_config.delta_change">
+                    <CCol col=3>
+                      <CInput v-model.number="rule.source_monitor_config.delta_window" label="Days Ago" description="The number of days back to compare to" />
                     </CCol>
                   </CRow>
                 </div>
@@ -1022,7 +1121,8 @@ export default {
         //{ label: "Metric Change", value: 2 },
         { label: "Field Comparison", value: 3 },
         { label: "New Terms", value: 4 },
-        { label: "Indicator Match", value: 5}
+        { label: "Indicator Match", value: 5},
+        { label: "Data Source Monitor", value: 6}
       ],
       severities: [
         { label: "Informational", value: 0},
@@ -1089,6 +1189,7 @@ export default {
         "command",
       ],
       signature_fields: [],
+      source_monitor_excluded_sources: [],
       daily_schedule: false,
       schedule: this.defaultSchedule()
     };
@@ -1215,6 +1316,34 @@ export default {
     this.$store.dispatch("getMitreTactics", {});
   },
   methods: {
+    addSourceMonitorDataSource(l) {
+      if(this.rule.source_monitor_config.data_sources) {
+        this.$set(this.rule.source_monitor_config, 'data_sources', [...this.rule.source_monitor_config.data_sources, l])
+      } else {
+        this.$set(this.rule.source_monitor_config, 'data_sources', [l])
+      }
+    },
+    addSourceMonitorExcludedDataSource(l) {
+      if(this.rule.source_monitor_config.excluded_sources) {
+        this.$set(this.rule.source_monitor_config, 'excluded_sources', [...this.rule.source_monitor_config.excluded_sources, l])
+      } else {
+        this.$set(this.rule.source_monitor_config, 'excluded_sources', [l])
+      }
+    },
+    setSourceMonitorSources(l) {
+      if(this.rule.source_monitor_config.source_lists) {
+        this.$set(this.rule.source_monitor_config, 'source_lists', [...this.rule.source_monitor_config.source_lists, l])
+      } else {
+        this.$set(this.rule.source_monitor_config, 'source_lists', [l])
+      }
+    },
+    setSourceMonitorExcludedSources(l) {
+      if(this.rule.source_monitor_config.excluded_source_lists) {
+        this.$set(this.rule.source_monitor_config, 'excluded_source_lists', [...this.rule.source_monitor_config.excluded_source_lists, l])
+      } else {
+        this.$set(this.rule.source_monitor_config, 'excluded_source_lists', [l])
+      }
+    },
     setList(list) {
       this.rule.indicator_match_config.intel_list = list
     },
@@ -1539,7 +1668,7 @@ export default {
       this.tag_list.push(t);
     },
     addSignatureField(t) {
-      if(this.rule.signature_fields) {)
+      if(this.rule.signature_fields) {
         this.$set(this.rule, 'signature_fields', [...this.rule.signature_fields, t])
       } else {
         this.rule.signature_fields = [t]
