@@ -627,7 +627,7 @@
                   </template>
                   <template #values="{ item }">
                     <td>
-                      <TagBucket :tags="['awesome']"  label="Exclusions"/>
+                      <TagBucket :tags="item.values"  label="Exclusions"/>
                     </td>
                   </template>
                   <template #list="{ item }">
