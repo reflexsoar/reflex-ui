@@ -57,7 +57,6 @@
                 <CIcon name="cilSync" />&nbsp;Synchronize Now
             </CDropdownItem>
           </CDropdown>
-          {{ default_field_template }}
         </td>
       </template>
       <template #name="{ item }">
