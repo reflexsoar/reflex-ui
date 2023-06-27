@@ -126,6 +126,18 @@
         />
         <small class="text-muted">The default input will be assigned to all detections synchronized from this repository on initial sync.  This can be changed on detection rule setup.</small><br>
         <br>
+        <label for="field_template">Field Templates</label><br />
+        <multiselect
+          v-model="default_field_template"
+          :options="field_templates_multiselect_options"
+          :multiple="true"
+          :close-on-select="false"
+          track-by="uuid"
+          label="name"
+          :searchable="true"
+        />
+        <small class="text-muted">Field templates will be assigned to all detections synchronized from this repository on initial sync.  This can be changed on detection rule setup.</small><br>
+        <br>
         <h2>Synchronization Settings</h2>
         <p>These settings will determine how the system will handle conflicts between your local rules and the rules from the target repository.
           If a setting is On, any time the repository synchronizes local changes to the rule will be overwritten.</p>
@@ -221,7 +233,12 @@ import TagList from '../components/TagList'
 export default {
   name: "DetectionRepositoryList",
   computed: {
-    ...mapState(["detection_repositories","current_user","input_list"]),
+    ...mapState(["detection_repositories","current_user","input_list", "field_templates"]),
+    field_templates_multiselect_options: function () {
+      return this.field_templates.map((o) => {
+        return { name: o.name, uuid: o.uuid };
+      });
+    }
   },
   components: {
     DetectionRepositoryModal,
@@ -269,6 +286,7 @@ export default {
       show_repository_modal: false,
       selected_repo: this.default_repo(),
       default_input: null,
+      default_field_template: [],
       modal_mode: "Create"
     };
   },
@@ -313,6 +331,7 @@ export default {
     },
     startSubscriptionWizard(uuid) {
         this.repository = this.detection_repositories.find((item) => item.uuid === uuid);
+        this.$store.dispatch("getFieldTemplates", { organization: this.current_user.organization });
         this.sync_settings = this.defaultSyncSettings();
         this.show_subscription_modal = true;
     },
@@ -329,6 +348,12 @@ export default {
         if (this.default_input != null) {
           data['default_input'] = this.default_input.uuid;
         }
+        if (this.default_field_template.length != 0) {
+          data['default_field_template'] = this.default_field_template.map((template) => {
+            return template.uuid
+          })
+        }
+
         this.synchronizing = true;
         this.$store.dispatch("createDetectionRepositorySubscription", {repository_uuid: this.repository.uuid, data: data}).then(() => {
           this.$store.dispatch("getDetections", {}).then(() => {
