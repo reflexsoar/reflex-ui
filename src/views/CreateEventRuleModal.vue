@@ -1194,11 +1194,11 @@ export default {
       let uuid = this.source_event_uuid;
       if (this.$store.getters.eventDrawerMinimize) {
         this.$store.dispatch("getEvent", uuid).then((resp) => {
+          this.event_data = resp.data;
           this.$store.commit("set", [
             "eventDrawerMinimize",
             !this.$store.getters.eventDrawerMinimize,
           ]);
-          this.event_data = resp.data;
         });
       } else {
         this.$store.commit("set", [
