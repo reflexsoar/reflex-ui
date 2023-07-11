@@ -242,7 +242,7 @@
             </CCardBody>
           </CTab>
           <CTab title="Detection" v-if="this.event_data.detection_id">
-            <CCardBody class="tab-container">
+            <CCardBody class="tab-container" v-if="!this.detection_loading">
               <h3>Detection</h3>
               {{ detection.description }}<br /><br />
               <div>
@@ -365,8 +365,8 @@
                         color="info"
                         v-c-tooltip="{ content: 'Edit Exclusion', placement: 'left' }"
                       >
-                        <CIcon name="cilPencil" /> </CButton
-                      >
+                        <CIcon name="cilPencil" />
+                      </CButton>
                     </td>
                   </template>
                   <template #values="{ item }">
@@ -385,6 +385,9 @@
                   </template>
                 </CDataTable>
               </div>
+            </CCardBody>
+            <CCardBody v-else  class="text-center">
+              <CSpinner color="primary" size="lg"></CSpinner>
             </CCardBody>
           </CTab>
           <CTab :title="`Comments (${this.event_data.total_comments})`">
@@ -551,7 +554,7 @@ import "../assets/js/prism-rql";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
 import MatchedEventRule from "./event/MatchedEventRule";
 import { Viewer } from "@toast-ui/vue-editor";
-import TagBucket from './components/TagBucket'
+import TagBucket from "./components/TagBucket";
 import DetectionExclusionModal from "./DetectionExclusionModal";
 
 export default {
@@ -567,7 +570,7 @@ export default {
     MatchedEventRule,
     Viewer,
     TagBucket,
-    DetectionExclusionModal
+    DetectionExclusionModal,
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
@@ -581,6 +584,8 @@ export default {
     minimize(val) {
       if (!val) {
         document.body.style.overflow = "hidden";
+
+        this.event_data = this.$store.getters.event;
         this.comments_loading = true;
         this.$store.dispatch("getEventIndex", this.event_data.uuid).then((resp) => {
           let data = resp.data;
@@ -592,8 +597,9 @@ export default {
         this.$store.dispatch("getEventComments", this.event_data.uuid).then(() => {
           this.comments = this.$store.state.event_comments;
           this.comments_loading = false;
+        }).catch(() => {
+          this.comments_loading = false;
         });
-        this.event_data = this.$store.getters.event;
         if (this.event_data.event_rules) {
           this.rules_loading = true;
           this.$store
@@ -604,13 +610,19 @@ export default {
             .then((resp) => {
               this.rules = resp.data.event_rules;
               this.rules_loading = false;
-            });
+            }).catch((err) => {
+              this.rules_loading = false;
+            })
         }
         if (this.event_data.detection_id) {
+          this.detection_loading = true;
           this.$store
             .dispatch("getDetection", this.event_data.detection_id)
             .then((resp) => {
               this.detection = resp.data;
+              this.detection_loading = false;
+            }).catch((err) => {
+              this.detection_loading = false;
             });
         }
       } else {
@@ -627,6 +639,7 @@ export default {
       comments: [],
       comments_loading: false,
       rules_loading: false,
+      detection_loading: false,
       event_index: [],
       exclusion: {},
       show_exclusion_modal: false,
@@ -643,7 +656,9 @@ export default {
   },
   methods: {
     editExclusion(uuid) {
-      this.exclusion = this.detection.exceptions.find((exclusion) => exclusion.uuid === uuid);
+      this.exclusion = this.detection.exceptions.find(
+        (exclusion) => exclusion.uuid === uuid
+      );
       this.exclusion_modal_mode = "Edit";
       this.show_exclusion_modal = true;
     },
