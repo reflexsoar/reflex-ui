@@ -21,7 +21,7 @@ import {
   cibStripe,
   cibPaypal,
   cibGooglePay, 
-  cibCcAmex,
+  cibCcAmex
 } from '@coreui/icons'
 import {
   cifUs,
@@ -131,7 +131,6 @@ import {
   cilInfo,
   cilSync,
   cilStorage
-
 } from '@coreui/icons'
 import { logo } from './logo'
 

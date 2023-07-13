@@ -65,6 +65,12 @@
                       >
                       <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
+                        @click="assessDetections()"
+                        ><CIcon name="cilFlagAlt" />&nbsp;Assess
+                        {{ selected_items.length }} Detections</CDropdownItem
+                      >
+                      <CDropdownItem
+                        v-bind:disabled="selected_items.length == 0"
                         @click="addToRepository()"
                         ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;Add to
                         Repository</CDropdownItem
@@ -882,6 +888,13 @@ export default {
     },
     flagForAssessment(item) {
       this.$store.dispatch("flagDetectionAssess", { uuid: item })
+    },
+    assessDetections() {
+      this.$store
+        .dispatch("assessSelectedDetections", { uuids: this.selected_items })
+        .then((resp) => {
+          this.selected_items = [];
+        });
     },
     removeFromRepository(item) {
       item = this.detections.find((detection) => detection.uuid === item);
