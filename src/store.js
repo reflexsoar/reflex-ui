@@ -3956,6 +3956,20 @@ const actions = {
       })
     })
   },
+  assessSelectedDetections({commit}, {uuids}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/assess`, data: {detections: uuids}, method: 'POST'})
+      .then(resp => {
+        for(let detection in resp.data) {
+          commit('update_detection', resp.data[detection])
+        }
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   enableSelectedDetections({commit}, {uuids}) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/detection/enable`, data: {detections: uuids}, method: 'POST'})
