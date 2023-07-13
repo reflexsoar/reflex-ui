@@ -662,6 +662,7 @@ export default {
         lookbehind: 5,
         interval: 5,
         rule_type: 0,
+        suppression_max_events: 0,
         severity: 1,
         risk_score: 50,
         mute_period: 0,

@@ -151,7 +151,8 @@
               </CTab>
               <CTab title="Configuration" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Rule Configuration</h5>
-                <CRow><CCol>
+                <CRow
+                  ><CCol>
                     <CSelect
                       label="Rule Type"
                       :value.sync="rule.rule_type"
@@ -159,13 +160,13 @@
                     />
                   </CCol>
                   <CCol>
-                    <CSelect label="Rule Status"
+                    <CSelect
+                      label="Rule Status"
                       :value.sync="rule.status"
                       :options="rule_statuses"
                     />
-                    </CCol>
-                    
-                  </CRow>
+                  </CCol>
+                </CRow>
                 <CRow>
                   <CCol col="3">
                     <CSelect
@@ -202,16 +203,15 @@
                   ></CCol>
                 </CRow>
                 <div v-if="rule.rule_type != 6">
-
                   <label for="base_query">Base Query</label><br /><prism-editor
-                  id="base_query"
-                  class="my-editor"
-                  v-model="rule.query.query"
-                  :highlight="highlighter"
-                  line-numbers
-                  aria-label="Reflex Query"
-                ></prism-editor
-                ><br>
+                    id="base_query"
+                    class="my-editor"
+                    v-model="rule.query.query"
+                    :highlight="highlighter"
+                    line-numbers
+                    aria-label="Reflex Query"
+                  ></prism-editor
+                  ><br />
                 </div>
                 <div v-if="rule.rule_type == 1">
                   <h5>Threshold Configuration</h5>
@@ -390,7 +390,7 @@
                 <div v-else-if="rule.rule_type == 5">
                   <h5>Indicator Match Configuration</h5>
                   <CRow>
-                    <CCol col=6>
+                    <CCol col="6">
                       <CInput
                         v-model="rule.indicator_match_config.key_field"
                         label="Indicator Field"
@@ -398,82 +398,105 @@
                         description="The field to collect the values from to compare to the Intel List"
                       />
                     </CCol>
-                    <CCol col=6>
-                    <label>Intel List</label><br />
-                    <multiselect id="intel_list" v-model="exclusion.list" :options="formatted_lists" track-by="uuid" label="name" :close-on-select="true"
-                      :internal-search="false"
-                      :searchable="true"
-                      @search-change="getIntelList"
-                      @select="setList"/>
+                    <CCol col="6">
+                      <label>Intel List</label><br />
+                      <multiselect
+                        id="intel_list"
+                        v-model="exclusion.list"
+                        :options="formatted_lists"
+                        track-by="uuid"
+                        label="name"
+                        :close-on-select="true"
+                        :internal-search="false"
+                        :searchable="true"
+                        @search-change="getIntelList"
+                        @select="setList"
+                      />
                     </CCol>
                   </CRow>
                 </div>
                 <div v-else-if="rule.rule_type == 6">
                   <h5>Data Source Monitor Configuration</h5>
-                  <p>Data Source Monitors are in place to detect swings in data source volume.  This is useful for detecting when a data source is no longer sending data or when a data source is sending too much data.</p>
+                  <p>
+                    Data Source Monitors are in place to detect swings in data source
+                    volume. This is useful for detecting when a data source is no longer
+                    sending data or when a data source is sending too much data.
+                  </p>
                   <h5>Included Sources</h5>
                   <CRow>
-                    
                     <CCol>
-                    <label>Datastream/Index Patterns</label><br />
-                    <multiselect id="source_monitor_data_sources"
-                      v-model="rule.source_monitor_config.data_sources"
-                      :options="[]"
-                      :close-on-select="false"
-                      :taggable="true"
-                      :multiple="true"
-                      @tag="addSourceMonitorDataSource"
-                    />
+                      <label>Datastream/Index Patterns</label><br />
+                      <multiselect
+                        id="source_monitor_data_sources"
+                        v-model="rule.source_monitor_config.data_sources"
+                        :options="[]"
+                        :close-on-select="false"
+                        :taggable="true"
+                        :multiple="true"
+                        @tag="addSourceMonitorDataSource"
+                      />
                     </CCol>
                     <CCol>
-                    
-                    <label>Intel Lists</label><br />
-                    <multiselect id="source_monitor_source_lists"
-                      v-model="rule.source_monitor_config.source_lists"
-                      :options="formatted_lists"
-                      track-by="uuid" label="name"
-                      :close-on-select="false"
-                      :internal-search="false"
-                      :searchable="true"
-                      :multiple="true"
-                      @search-change="getIntelList"
-                      @select="setList"/><br>
+                      <label>Intel Lists</label><br />
+                      <multiselect
+                        id="source_monitor_source_lists"
+                        v-model="rule.source_monitor_config.source_lists"
+                        :options="formatted_lists"
+                        track-by="uuid"
+                        label="name"
+                        :close-on-select="false"
+                        :internal-search="false"
+                        :searchable="true"
+                        :multiple="true"
+                        @search-change="getIntelList"
+                        @select="setList"
+                      /><br />
                     </CCol>
                   </CRow>
-                    
+
                   <h5>Excluded Sources</h5>
                   <CRow>
                     <CCol>
-
-                    <label>Excluded Datastream/Index Patterns</label><br />
-                    <multiselect id="source_monitor_excluded_data_sources"
-                      v-model="rule.source_monitor_config.excluded_sources"
-                      :options="[]"
-                      :close-on-select="false"
-                      :taggable="true"
-                      :multiple="true"
-                      @tag="addSourceMonitorExcludedDataSource"
-                    />
+                      <label>Excluded Datastream/Index Patterns</label><br />
+                      <multiselect
+                        id="source_monitor_excluded_data_sources"
+                        v-model="rule.source_monitor_config.excluded_sources"
+                        :options="[]"
+                        :close-on-select="false"
+                        :taggable="true"
+                        :multiple="true"
+                        @tag="addSourceMonitorExcludedDataSource"
+                      />
                     </CCol>
                     <CCol>
-                    <label>Excluded Intel Lists</label><br />
-                    <multiselect id="source_monitor_excluded_source_lists"
-                      v-model="rule.source_monitor_config.excluded_source_lists"
-                      :options="formatted_lists"
-                      track-by="uuid"
-                      label="name"
-                      :close-on-select="false"
-                      :internal-search="false"
-                      :searchable="true"
-                      :multiple="true"
-                      @search-change="getIntelList"
-                      @select="setList"/><br>
+                      <label>Excluded Intel Lists</label><br />
+                      <multiselect
+                        id="source_monitor_excluded_source_lists"
+                        v-model="rule.source_monitor_config.excluded_source_lists"
+                        :options="formatted_lists"
+                        track-by="uuid"
+                        label="name"
+                        :close-on-select="false"
+                        :internal-search="false"
+                        :searchable="true"
+                        :multiple="true"
+                        @search-change="getIntelList"
+                        @select="setList"
+                      /><br />
                     </CCol>
                   </CRow>
                   <h5>Threshold Configuration</h5>
-                  If the current value is <b>{{rule.source_monitor_config.operator}}</b> <b>{{rule.source_monitor_config.threshold}}</b><span v-if="rule.source_monitor_config.threshold_as_percent">%</span> <span v-if="rule.source_monitor_config.delta_change">compared to <b>{{rule.source_monitor_config.delta_window}}</b> days ago, </span> the alert will fire.<br><br>
+                  If the current value is
+                  <b>{{ rule.source_monitor_config.operator }}</b>
+                  <b>{{ rule.source_monitor_config.threshold }}</b
+                  ><span v-if="rule.source_monitor_config.threshold_as_percent">%</span>
+                  <span v-if="rule.source_monitor_config.delta_change"
+                    >compared to <b>{{ rule.source_monitor_config.delta_window }}</b> days
+                    ago,
+                  </span>
+                  the alert will fire.<br /><br />
                   <CRow>
-                    <CCol col=2>
+                    <CCol col="2">
                       <CSelect
                         :value.sync="rule.source_monitor_config.operator"
                         label="Operator"
@@ -481,20 +504,40 @@
                       />
                     </CCol>
                     <CCol>
-                      <CInput v-model.number="rule.source_monitor_config.threshold" label="Threshold" />
+                      <CInput
+                        v-model.number="rule.source_monitor_config.threshold"
+                        label="Threshold"
+                      />
                     </CCol>
                     <CCol>
                       <label>Alert on Change</label><br />
-                      <CSwitch :checked.sync="rule.source_monitor_config.delta_change" label="Alert on Increase" label-on="Yes" label-off="No" color="success" />
+                      <CSwitch
+                        :checked.sync="rule.source_monitor_config.delta_change"
+                        label="Alert on Increase"
+                        label-on="Yes"
+                        label-off="No"
+                        color="success"
+                      />
                     </CCol>
                     <CCol>
                       <label>As Percentage</label><br />
-                      <CSwitch v-bind:disabled="!rule.source_monitor_config.delta_change" :checked.sync="rule.source_monitor_config.threshold_as_percent" label="As Percentage" label-on="Yes" label-off="No" color="success" />
+                      <CSwitch
+                        v-bind:disabled="!rule.source_monitor_config.delta_change"
+                        :checked.sync="rule.source_monitor_config.threshold_as_percent"
+                        label="As Percentage"
+                        label-on="Yes"
+                        label-off="No"
+                        color="success"
+                      />
                     </CCol>
                   </CRow>
                   <CRow v-if="rule.source_monitor_config.delta_change">
-                    <CCol col=3>
-                      <CInput v-model.number="rule.source_monitor_config.delta_window" label="Days Ago" description="The number of days back to compare to" />
+                    <CCol col="3">
+                      <CInput
+                        v-model.number="rule.source_monitor_config.delta_window"
+                        label="Days Ago"
+                        description="The number of days back to compare to"
+                      />
                     </CCol>
                   </CRow>
                 </div>
@@ -525,18 +568,22 @@
                   </CCol>
                 </CRow>
                 <h5>Daily Schedule</h5>
-                <p>Detections can be configured to run on a daily schedule.  If a detection is configured to run on a daily schedule, it will only run during the specified time window.
-                By default a detection will run every day from 00:00 to 23:59.</p>
+                <p>
+                  Detections can be configured to run on a daily schedule. If a detection
+                  is configured to run on a daily schedule, it will only run during the
+                  specified time window. By default a detection will run every day from
+                  00:00 to 23:59.
+                </p>
                 <CRow>
                   <CCol>
-                    <CRow v-for="i,day in rule.schedule">
-                      <CCol col=2>
+                    <CRow v-for="(i, day) in rule.schedule">
+                      <CCol col="2">
                         <CInputCheckbox
                           :checked.sync="rule.schedule[day].active"
                           :label="day.charAt(0).toUpperCase() + day.slice(1)"
                         />
                       </CCol>
-                      <CCol col=5>
+                      <CCol col="5">
                         <CInputCheckbox
                           :checked.sync="rule.schedule[day].custom"
                           label="Custom Hours"
@@ -544,22 +591,29 @@
                       </CCol>
                       <CCol>
                         <ul class="no-bullets" :hidden="!rule.schedule[day].custom">
-                          <li v-for="custom,i in rule.schedule[day].hours">
+                          <li v-for="(custom, i) in rule.schedule[day].hours">
                             <CRow>
                               <CCol>
-                                <CInput v-model="rule.schedule[day].hours[i].from" :disabled="!rule.schedule[day].custom" />
+                                <CInput
+                                  v-model="rule.schedule[day].hours[i].from"
+                                  :disabled="!rule.schedule[day].custom"
+                                />
                               </CCol>
-                              <CCol col=1>
-                                to
-                              </CCol>
+                              <CCol col="1"> to </CCol>
                               <CCol>
-                                <CInput v-model="rule.schedule[day].hours[i].to"  :disabled="!rule.schedule[day].custom">
+                                <CInput
+                                  v-model="rule.schedule[day].hours[i].to"
+                                  :disabled="!rule.schedule[day].custom"
+                                >
                                   <template #append>
                                     <CButton
                                       color="danger"
                                       size="sm"
-                                      v-on:click="rule.schedule[day].hours.splice(i,1)"
-                                       :disabled="!rule.schedule[day].custom || rule.schedule[day].hours.length == 1" 
+                                      v-on:click="rule.schedule[day].hours.splice(i, 1)"
+                                      :disabled="
+                                        !rule.schedule[day].custom ||
+                                        rule.schedule[day].hours.length == 1
+                                      "
                                     >
                                       -
                                     </CButton>
@@ -570,16 +624,40 @@
                           </li>
                         </ul>
                       </CCol>
-                      <CCol col=1>
+                      <CCol col="1">
                         <CButton
                           color="success"
                           size="sm"
-                          v-on:click="rule.schedule[day].hours.push({from: '00:00', to: '23:59'})"
-                          :disabled="!rule.schedule[day].custom || rule.schedule[day].hours.length == 5"
-                           :hidden="!rule.schedule[day].custom"
+                          v-on:click="
+                            rule.schedule[day].hours.push({ from: '00:00', to: '23:59' })
+                          "
+                          :disabled="
+                            !rule.schedule[day].custom ||
+                            rule.schedule[day].hours.length == 5
+                          "
+                          :hidden="!rule.schedule[day].custom"
                         >
                           +
                         </CButton>
+                      </CCol>
+                    </CRow>
+                  </CCol>
+                </CRow><br>
+                <CRow>
+                  <CCol>
+                    <h5>Alert Suppression</h5>
+                    <p>
+                      Alerts can be configured to be suppressed for a specified period of
+                      time after an alert is triggered. This is useful for preventing
+                      alert storms.  Alerts will be deduplicated by the event signature.
+                    </p>
+                    <CRow>
+                      <CCol col=6>
+                        <CInput
+                          label="Max Events"
+                          v-model.number="rule.suppression_max_events"
+                          description="The maximum number of events to send during each run interval.  Default 0 "
+                        ></CInput>
                       </CCol>
                     </CRow>
                   </CCol>
@@ -627,7 +705,7 @@
                   </template>
                   <template #values="{ item }">
                     <td>
-                      <TagBucket :tags="item.values"  label="Exclusions"/>
+                      <TagBucket :tags="item.values" label="Exclusions" />
                     </td>
                   </template>
                   <template #list="{ item }">
@@ -642,56 +720,63 @@
                 </CDataTable>
                 <CButton @click="createExclusion" color="success">New Exclusion</CButton>
               </CTab>
-              <CTab
-                title="Field Settings"
-                v-bind:disabled="rule.source['uuid'] === null"
-              >
+              <CTab title="Field Settings" v-bind:disabled="rule.source['uuid'] === null">
                 <CRow>
                   <CCol>
-
                     <CRow>
-                      <CCol><h5>Signature Fields</h5>
-                    <p>
-                      Signature fields are used to create a unique signature for each
-                      hit.  This is used to prevent duplicate hits from being created
-                      for the same event.  The order of the fields is important as it will
-                      change the signature.
-                      </p>
-                      <CRow>
-                      <CCol><multiselect
-                        :options="signature_fields"
-                        v-model="rule.signature_fields"
-                        :taggable="true"
-                        :multiple="true"
-                        :close-on-select="false"
-                        @tag="addSignatureField"
-                        placeholder="Select or add signature fields"
-                        tag-placeholder="Add a signature field"
-                      /></CCol><CCol col=2><CButton color="primary" size="sm" @click="cloneSignatureFields">Clone From Input</CButton></CCol></CRow><br>
+                      <CCol
+                        ><h5>Signature Fields</h5>
+                        <p>
+                          Signature fields are used to create a unique signature for each
+                          hit. This is used to prevent duplicate hits from being created
+                          for the same event. The order of the fields is important as it
+                          will change the signature.
+                        </p>
+                        <CRow>
+                          <CCol
+                            ><multiselect
+                              :options="signature_fields"
+                              v-model="rule.signature_fields"
+                              :taggable="true"
+                              :multiple="true"
+                              :close-on-select="false"
+                              @tag="addSignatureField"
+                              placeholder="Select or add signature fields"
+                              tag-placeholder="Add a signature field" /></CCol
+                          ><CCol col="2"
+                            ><CButton
+                              color="primary"
+                              size="sm"
+                              @click="cloneSignatureFields"
+                              >Clone From Input</CButton
+                            ></CCol
+                          ></CRow
+                        ><br />
                       </CCol>
                     </CRow>
                     <CRow>
                       <CCol>
-                    <h5>Field Templates</h5>
-                    <p>
-                      Adding observable field directly on the Detection allows
-                      for pulling in Observables that are otherwise not normally available
-                      due to the source inputs configuration.
-                    </p>
-                    <p>
-                      Field settings can be added to the Detection by selecting a
-                      Field Template, adding individual fields to the detection or both.
-                    </p>
-                    <multiselect
-                      v-model="rule.field_templates"
-                      :options="field_templates_multiselect_options"
-                      :multiple="true"
-                      :close-on-select="false"
-                      track-by="uuid"
-                      label="name"
-                      :searchable="true"
-                      :taggable="true"
-                    /><br></CCol>
+                        <h5>Field Templates</h5>
+                        <p>
+                          Adding observable field directly on the Detection allows for
+                          pulling in Observables that are otherwise not normally available
+                          due to the source inputs configuration.
+                        </p>
+                        <p>
+                          Field settings can be added to the Detection by selecting a
+                          Field Template, adding individual fields to the detection or
+                          both.
+                        </p>
+                        <multiselect
+                          v-model="rule.field_templates"
+                          :options="field_templates_multiselect_options"
+                          :multiple="true"
+                          :close-on-select="false"
+                          track-by="uuid"
+                          label="name"
+                          :searchable="true"
+                          :taggable="true" /><br
+                      /></CCol>
                     </CRow>
 
                     <CRow>
@@ -743,32 +828,34 @@
                         </td>
                       </template>
                       <template #tags="{ item }">
-                      <td>
-                        <multiselect
-                          size="sm"
-                          v-model="item.tags"
-                          :options="tag_list"
-                          @tag="addTagToField(item.tags, $event)"
-                          :multiple="true"
-                          :taggable="true"
-                          :close-on-select="false"
-                          :show-labels="false"
-                          placeholder="Tags"
-                        /><br />
-                      </td>
-                    </template>
+                        <td>
+                          <multiselect
+                            size="sm"
+                            v-model="item.tags"
+                            :options="tag_list"
+                            @tag="addTagToField(item.tags, $event)"
+                            :multiple="true"
+                            :taggable="true"
+                            :close-on-select="false"
+                            :show-labels="false"
+                            placeholder="Tags"
+                          /><br />
+                        </td>
+                      </template>
                       <template #tlp="{ item }">
                         <td>
-                          <CSelect :options="[1, 2, 3, 4]" :value.sync="item.tlp" size="sm" />
+                          <CSelect
+                            :options="[1, 2, 3, 4]"
+                            :value.sync="item.tlp"
+                            size="sm"
+                          />
                         </td>
                       </template>
                       <template #admin="{ item }">
                         <td>
                           <CButton
                             aria-label="Delete Field"
-                            @click="
-                              deleteObservableField(item)
-                            "
+                            @click="deleteObservableField(item)"
                             size="sm"
                             color="danger"
                             ><CIcon name="cilTrash"
@@ -862,7 +949,14 @@
                   detection determine the legitimacy of the event. Being as descriptive as
                   possible will help alert consumers.
                 </p>
-                <editor ref="triageGuideEditor" :initialValue="rule.guide" @change="updateTriageGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" /><br>
+                <editor
+                  ref="triageGuideEditor"
+                  :initialValue="rule.guide"
+                  @change="updateTriageGuide()"
+                  height="400px"
+                  initialEditType="wysiwyg"
+                  previewStyle="vertical"
+                /><br />
 
                 <h5>False Positives</h5>
                 <p>
@@ -883,48 +977,94 @@
               <CTab title="Setup Guide" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Setup Guide</h5>
                 <p>
-                  The setup guide is a detailed guide on how to setup the detection. This is
-                  useful for alert consumers to understand how to make sure all the prequisite 
-                  data and configurations are in place to ensure the detection works as expected.
+                  The setup guide is a detailed guide on how to setup the detection. This
+                  is useful for alert consumers to understand how to make sure all the
+                  prequisite data and configurations are in place to ensure the detection
+                  works as expected.
                 </p>
-                <editor ref="setupGuideEditor" :initialValue="rule.setup_guide" @change="updateSetupGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" />
+                <editor
+                  ref="setupGuideEditor"
+                  :initialValue="rule.setup_guide"
+                  @change="updateSetupGuide()"
+                  height="400px"
+                  initialEditType="wysiwyg"
+                  previewStyle="vertical"
+                />
               </CTab>
               <CTab title="Testing Guide" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Testing Guide</h5>
                 <p>
-                  The testing guide is a detailed guide on how to test the detection. This is 
-                  useful for alert consumers to understand how to test the detection to ensure
-                  it is working as expected.
+                  The testing guide is a detailed guide on how to test the detection. This
+                  is useful for alert consumers to understand how to test the detection to
+                  ensure it is working as expected.
                 </p>
-                <editor ref="testingGuideEditor" :initialValue="rule.testing_guide" @change="updateTestingGuide()" height="400px" initialEditType="wysiwyg" previewStyle="vertical" /><br>
-              </CTab>  
-              <CTab title="Testing Automation" v-bind:disabled="rule.source['uuid'] === null">
+                <editor
+                  ref="testingGuideEditor"
+                  :initialValue="rule.testing_guide"
+                  @change="updateTestingGuide()"
+                  height="400px"
+                  initialEditType="wysiwyg"
+                  previewStyle="vertical"
+                /><br />
+              </CTab>
+              <CTab
+                title="Testing Automation"
+                v-bind:disabled="rule.source['uuid'] === null"
+              >
                 <h5>Test Automation</h5>
                 <p>
-                  When a test script is provided, the detection can be tested automatically by 
-                  running the <code>reflex-rule-tester</code> tool, a guide on how to use this tool can be
-                  found <a href="https://docs.reflexsoar.com/en/latest/detections/automated-testing" target="_">here</a>.
+                  When a test script is provided, the detection can be tested
+                  automatically by running the <code>reflex-rule-tester</code> tool, a
+                  guide on how to use this tool can be found
+                  <a
+                    href="https://docs.reflexsoar.com/en/latest/detections/automated-testing"
+                    target="_"
+                    >here</a
+                  >.
                 </p>
-                <CTextarea v-model="rule.test_script" placeholder="Paste your script here" rows="10"/>
+                <CTextarea
+                  v-model="rule.test_script"
+                  placeholder="Paste your script here"
+                  rows="10"
+                />
                 <CRow>
                   <CCol>
-                    <CSelect :value.sync="rule.test_script_language" :options="['python', 'powershell', 'batch', 'bash']" label="Script Language"/>
+                    <CSelect
+                      :value.sync="rule.test_script_language"
+                      :options="['python', 'powershell', 'batch', 'bash']"
+                      label="Script Language"
+                    />
                   </CCol>
                   <CCol>
-                    <label>Safe Script</label><br>
-                    <CSwitch :checked.sync="rule.test_script_safe" label="Safe Script" color="success" label-on="Yes" label-off="No"/><br>
-                    <small class="text-muted">Is the script safe to run automatically?</small>
+                    <label>Safe Script</label><br />
+                    <CSwitch
+                      :checked.sync="rule.test_script_safe"
+                      label="Safe Script"
+                      color="success"
+                      label-on="Yes"
+                      label-off="No"
+                    /><br />
+                    <small class="text-muted"
+                      >Is the script safe to run automatically?</small
+                    >
                   </CCol>
                 </CRow>
               </CTab>
               <CTab title="Email Template" v-bind:disabled="rule.source['uuid'] === null">
                 <h5>Email Template</h5>
                 <p>
-                  The e-mail template is used to when generating an e-mail related to this detection,
-                  whether manually or automatically.  The template is rendered using the
-                  Jinja2 templating engine.
+                  The e-mail template is used to when generating an e-mail related to this
+                  detection, whether manually or automatically. The template is rendered
+                  using the Jinja2 templating engine.
                 </p>
-                <editor ref="emailTemplateEditor" :initialValue="rule.email_template" @change="updateEmailTemplate()" height="400px" initialEditType="markdown" previewStyle="vertical" /><br>
+                <editor
+                  ref="emailTemplateEditor"
+                  :initialValue="rule.email_template"
+                  @change="updateEmailTemplate()"
+                  height="400px"
+                  initialEditType="markdown"
+                  previewStyle="vertical"
+                /><br />
               </CTab>
               <CTab title="Review" v-bind:disabled="rule.source['uuid'] === null"
                 >{{ rule }}
@@ -1011,7 +1151,6 @@ ul.no-bullets {
   padding: 0; /* Remove padding */
   margin: 0; /* Remove margins */
 }
-
 </style>
 <script>
 import { uuid } from "vue-uuid";
@@ -1025,15 +1164,14 @@ import "prismjs/components/prism-python";
 import "prismjs/components/prism-yaml";
 import "../assets/js/prism-lucene";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
-import 'v-markdown-editor/dist/v-markdown-editor.css';
-import '@toast-ui/editor/dist/toastui-editor.css';
+import "v-markdown-editor/dist/v-markdown-editor.css";
+import "@toast-ui/editor/dist/toastui-editor.css";
 
-import { Editor } from '@toast-ui/vue-editor';
+import { Editor } from "@toast-ui/vue-editor";
 
 import DetectionExclusionModal from "./DetectionExclusionModal.vue";
 import ImportSigmaRuleWizard from "./detections/ImportSigmaRuleWizard.vue";
 import TagBucket from "./components/TagBucket.vue";
-
 
 import { mapState } from "vuex";
 
@@ -1043,7 +1181,7 @@ export default {
     DetectionExclusionModal,
     ImportSigmaRuleWizard,
     Editor,
-    TagBucket
+    TagBucket,
   },
   name: "DetectionRuleModal",
   props: {
@@ -1084,10 +1222,12 @@ export default {
       });
     },
     selected_org: function () {
-      return this.rule.organization
+      return this.rule.organization;
     },
-    formatted_lists () {
-      return this.lists.map(list => { return {'name': list.name, 'uuid': list.uuid}})
+    formatted_lists() {
+      return this.lists.map((list) => {
+        return { name: list.name, uuid: list.uuid };
+      });
     },
     ...mapState([
       "settings",
@@ -1097,18 +1237,22 @@ export default {
       "mitre_techniques",
       "field_templates",
       "inputs",
-      "lists"
+      "lists",
     ]),
   },
   data() {
     return {
       intel_lists: [],
-      rule_statuses: ['Experimental','Draft','Superceded',
-      'Beta',
-      'Stable',
-      'Test',
-      'Deprecated',
-      'Production'],
+      rule_statuses: [
+        "Experimental",
+        "Draft",
+        "Superceded",
+        "Beta",
+        "Stable",
+        "Test",
+        "Deprecated",
+        "Production",
+      ],
       tabs: [
         { name: "Overview", icon: "cil-description" },
         { name: "Configuration", icon: "cil-gear" },
@@ -1121,11 +1265,11 @@ export default {
         //{ label: "Metric Change", value: 2 },
         { label: "Field Comparison", value: 3 },
         { label: "New Terms", value: 4 },
-        { label: "Indicator Match", value: 5},
-        { label: "Data Source Monitor", value: 6}
+        { label: "Indicator Match", value: 5 },
+        { label: "Data Source Monitor", value: 6 },
       ],
       severities: [
-        { label: "Informational", value: 0},
+        { label: "Informational", value: 0 },
         { label: "Low", value: 1 },
         { label: "Medium", value: 2 },
         { label: "High", value: 3 },
@@ -1191,64 +1335,68 @@ export default {
       signature_fields: [],
       source_monitor_excluded_sources: [],
       daily_schedule: false,
-      schedule: this.defaultSchedule()
+      schedule: this.defaultSchedule(),
     };
   },
   watch: {
     show: function () {
-
-      if(this.show) {
-        if(this.rule.organization) {
-          this.$store.dispatch("getInputList", { organization: this.rule.organization })
+      if (this.show) {
+        if (this.rule.organization) {
+          this.$store.dispatch("getInputList", { organization: this.rule.organization });
         } else {
-          this.$store.dispatch("getInputList", { organization: this.current_user.organization})
+          this.$store.dispatch("getInputList", {
+            organization: this.current_user.organization,
+          });
         }
       }
       this.error = false;
       this.error_message = "";
       if (this.mode == "Edit") {
-        if(this.rule.monday === undefined)
-        {
-          this.rule.schedule = this.defaultSchedule()
+        if (this.rule.monday === undefined) {
+          this.rule.schedule = this.defaultSchedule();
         }
-        if(this.rule.testing_guide) { 
-          this.$refs.testingGuideEditor.invoke('setMarkdown', this.rule.testing_guide)
+        if (this.rule.testing_guide) {
+          this.$refs.testingGuideEditor.invoke("setMarkdown", this.rule.testing_guide);
         } else {
-          this.$refs.testingGuideEditor.invoke('setMarkdown', '')
+          this.$refs.testingGuideEditor.invoke("setMarkdown", "");
         }
-        if(this.rule.guide) {
-          this.$refs.triageGuideEditor.invoke('setMarkdown', this.rule.guide)
+        if (this.rule.guide) {
+          this.$refs.triageGuideEditor.invoke("setMarkdown", this.rule.guide);
         } else {
-          this.$refs.triageGuideEditor.invoke('setMarkdown', '')
+          this.$refs.triageGuideEditor.invoke("setMarkdown", "");
         }
-        if(this.rule.setup_guide) {
-          this.$refs.setupGuideEditor.invoke('setMarkdown', this.rule.setup_guide)
+        if (this.rule.setup_guide) {
+          this.$refs.setupGuideEditor.invoke("setMarkdown", this.rule.setup_guide);
         } else {
-          this.$refs.setupGuideEditor.invoke('setMarkdown', '')
+          this.$refs.setupGuideEditor.invoke("setMarkdown", "");
         }
-        if(this.rule.email_template) {
-          this.$refs.emailTemplateEditor.invoke('setMarkdown', this.rule.email_template)
+        if (this.rule.email_template) {
+          this.$refs.emailTemplateEditor.invoke("setMarkdown", this.rule.email_template);
         } else {
-          this.$refs.emailTemplateEditor.invoke('setMarkdown', '')
+          this.$refs.emailTemplateEditor.invoke("setMarkdown", "");
         }
-        this.$store.dispatch("getFieldTemplates", { organization: this.rule.organization }).then(() => {
-          if(this.rule.field_templates) {
-            let template_ids = Object.assign([], this.rule.field_templates)
-            this.rule.field_templates = this.field_templates.map((o) => {
-              return { name: o.name, uuid: o.uuid };
-            }).filter((o) => {
-              return template_ids.includes(o.uuid)
-            })
-          }
-        })
-        if(this.rule.tags) {
+        this.$store
+          .dispatch("getFieldTemplates", { organization: this.rule.organization })
+          .then(() => {
+            if (this.rule.field_templates) {
+              let template_ids = Object.assign([], this.rule.field_templates);
+              this.rule.field_templates = this.field_templates
+                .map((o) => {
+                  return { name: o.name, uuid: o.uuid };
+                })
+                .filter((o) => {
+                  return template_ids.includes(o.uuid);
+                });
+            }
+          });
+        if (this.rule.tags) {
           this.tag_list = this.rule.tags.map((o) => {
             return o;
           });
         }
 
-        if(this.rule.signature_fields) {
-          this.signature_fields = this.rule.signature_fields
+        if (this.rule.signature_fields) {
+          this.signature_fields = this.rule.signature_fields;
         }
 
         this.step = 0;
@@ -1275,16 +1423,16 @@ export default {
           "from_repo_sync",
           "original_uuid",
           "repository",
-          "assess_rule"
+          "assess_rule",
         ].forEach((k) => {
           delete this.rule[k];
         });
       }
 
-      if(this.mode == "Create") {
-        this.$store.commit("save_field_templates", [])
-        if(this.current_user.default_org) {
-          this.rule.organization = this.current_user.organization
+      if (this.mode == "Create") {
+        this.$store.commit("save_field_templates", []);
+        if (this.current_user.default_org) {
+          this.rule.organization = this.current_user.organization;
         }
       }
 
@@ -1317,41 +1465,56 @@ export default {
   },
   methods: {
     addSourceMonitorDataSource(l) {
-      if(this.rule.source_monitor_config.data_sources) {
-        this.$set(this.rule.source_monitor_config, 'data_sources', [...this.rule.source_monitor_config.data_sources, l])
+      if (this.rule.source_monitor_config.data_sources) {
+        this.$set(this.rule.source_monitor_config, "data_sources", [
+          ...this.rule.source_monitor_config.data_sources,
+          l,
+        ]);
       } else {
-        this.$set(this.rule.source_monitor_config, 'data_sources', [l])
+        this.$set(this.rule.source_monitor_config, "data_sources", [l]);
       }
     },
     addSourceMonitorExcludedDataSource(l) {
-      if(this.rule.source_monitor_config.excluded_sources) {
-        this.$set(this.rule.source_monitor_config, 'excluded_sources', [...this.rule.source_monitor_config.excluded_sources, l])
+      if (this.rule.source_monitor_config.excluded_sources) {
+        this.$set(this.rule.source_monitor_config, "excluded_sources", [
+          ...this.rule.source_monitor_config.excluded_sources,
+          l,
+        ]);
       } else {
-        this.$set(this.rule.source_monitor_config, 'excluded_sources', [l])
+        this.$set(this.rule.source_monitor_config, "excluded_sources", [l]);
       }
     },
     setSourceMonitorSources(l) {
-      if(this.rule.source_monitor_config.source_lists) {
-        this.$set(this.rule.source_monitor_config, 'source_lists', [...this.rule.source_monitor_config.source_lists, l])
+      if (this.rule.source_monitor_config.source_lists) {
+        this.$set(this.rule.source_monitor_config, "source_lists", [
+          ...this.rule.source_monitor_config.source_lists,
+          l,
+        ]);
       } else {
-        this.$set(this.rule.source_monitor_config, 'source_lists', [l])
+        this.$set(this.rule.source_monitor_config, "source_lists", [l]);
       }
     },
     setSourceMonitorExcludedSources(l) {
-      if(this.rule.source_monitor_config.excluded_source_lists) {
-        this.$set(this.rule.source_monitor_config, 'excluded_source_lists', [...this.rule.source_monitor_config.excluded_source_lists, l])
+      if (this.rule.source_monitor_config.excluded_source_lists) {
+        this.$set(this.rule.source_monitor_config, "excluded_source_lists", [
+          ...this.rule.source_monitor_config.excluded_source_lists,
+          l,
+        ]);
       } else {
-        this.$set(this.rule.source_monitor_config, 'excluded_source_lists', [l])
+        this.$set(this.rule.source_monitor_config, "excluded_source_lists", [l]);
       }
     },
     setList(list) {
-      this.rule.indicator_match_config.intel_list = list
+      this.rule.indicator_match_config.intel_list = list;
     },
-    getIntelList(search = null){ 
-      this.$store.dispatch("getLists", { organization: this.rule.organization, name__like: search })
+    getIntelList(search = null) {
+      this.$store.dispatch("getLists", {
+        organization: this.rule.organization,
+        name__like: search,
+      });
     },
     updateSelectedTemplates(t) {
-      this.rule.field_templates.push({name: t.name, uuid: t.uuid});
+      this.rule.field_templates.push({ name: t.name, uuid: t.uuid });
     },
     setRiskScore() {
       if (this.rule.severity == 1) {
@@ -1434,7 +1597,7 @@ export default {
     },
     addObservableField() {
       if (this.rule.observable_fields == null) {
-        this.$set(this.rule, "observable_fields", [])
+        this.$set(this.rule, "observable_fields", []);
       }
       if (this.rule.observable_fields && this.rule.observable_fields.length > 0) {
         this.rule.observable_fields.splice(0, 0, {
@@ -1455,7 +1618,7 @@ export default {
       }
     },
     deleteObservableField(item) {
-      let id = this.rule.observable_fields.indexOf(item)
+      let id = this.rule.observable_fields.indexOf(item);
       this.rule.observable_fields.splice(id, 1);
     },
     testDetectionRule() {},
@@ -1511,8 +1674,8 @@ export default {
 
       if (this.rule.field_templates) {
         this.rule.field_templates = this.rule.field_templates.map((template) => {
-          return template.uuid
-        })
+          return template.uuid;
+        });
       }
 
       this.rule = this.removeNulls(this.rule);
@@ -1580,8 +1743,8 @@ export default {
 
       if (this.rule.field_templates) {
         this.rule.field_templates = this.rule.field_templates.map((template) => {
-          return template.uuid
-        })
+          return template.uuid;
+        });
       }
 
       this.rule.risk_score = parseInt(this.rule.risk_score);
@@ -1661,29 +1824,28 @@ export default {
     },
     addTagToField(field, t) {
       if (field) {
-        field.push(t)
+        field.push(t);
       } else {
-        field.push(t)
+        field.push(t);
       }
       this.tag_list.push(t);
     },
     addSignatureField(t) {
-      if(this.rule.signature_fields) {
-        this.$set(this.rule, 'signature_fields', [...this.rule.signature_fields, t])
+      if (this.rule.signature_fields) {
+        this.$set(this.rule, "signature_fields", [...this.rule.signature_fields, t]);
       } else {
-        this.rule.signature_fields = [t]
+        this.rule.signature_fields = [t];
       }
       this.signature_fields.push(t);
     },
     cloneSignatureFields() {
-      let source_input = this.input_list.find((i) => i.uuid === this.rule.source.uuid)
+      let source_input = this.input_list.find((i) => i.uuid === this.rule.source.uuid);
       if (source_input !== undefined) {
-        if(this.rule.signature_fields === undefined) {
-          this.$set(this.rule, 'signature_fields', [])
+        if (this.rule.signature_fields === undefined) {
+          this.$set(this.rule, "signature_fields", []);
         }
-        this.rule.signature_fields = source_input.signature_fields
+        this.rule.signature_fields = source_input.signature_fields;
       }
-      
     },
     updateTactic(tactic) {
       if (!this.short_names.includes(tactic.shortname)) {
@@ -1700,7 +1862,7 @@ export default {
     addTechnique(technique) {},
     updateOrganization() {
       this.$store.dispatch("getInputList", { organization: this.rule.organization });
-      this.getIntelList()
+      this.getIntelList();
       this.$store.dispatch("getFieldTemplates", { organization: this.rule.organization });
       this.rule.source = { uuid: null };
     },
@@ -1736,16 +1898,16 @@ export default {
       }
     },
     updateTestingGuide(field) {
-      this.rule.testing_guide = this.$refs.testingGuideEditor.invoke('getMarkdown')
+      this.rule.testing_guide = this.$refs.testingGuideEditor.invoke("getMarkdown");
     },
     updateTriageGuide() {
-      this.rule.guide = this.$refs.triageGuideEditor.invoke('getMarkdown')
+      this.rule.guide = this.$refs.triageGuideEditor.invoke("getMarkdown");
     },
     updateSetupGuide() {
-      this.rule.setup_guide = this.$refs.setupGuideEditor.invoke('getMarkdown')
+      this.rule.setup_guide = this.$refs.setupGuideEditor.invoke("getMarkdown");
     },
     updateEmailTemplate() {
-      this.rule.email_template = this.$refs.emailTemplateEditor.invoke('getMarkdown')
+      this.rule.email_template = this.$refs.emailTemplateEditor.invoke("getMarkdown");
     },
     convertRule() {
       let data = {
@@ -1777,54 +1939,40 @@ export default {
         monday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         tuesday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         wednesday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         thursday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         friday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         saturday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
         sunday: {
           active: true,
           custom: false,
-          hours: [
-            {from: "00:00", to: "23:59"}
-          ]
+          hours: [{ from: "00:00", to: "23:59" }],
         },
-      }
-    }
+      };
+    },
   },
 };
 </script>
