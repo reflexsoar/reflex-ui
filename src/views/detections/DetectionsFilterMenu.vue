@@ -291,6 +291,7 @@ export default {
         description__like: "Description",
         query__like: "Query",
         rule_type: "Rule Type",
+        assess_rule: "Flagged for Assessment",
         max_average_hits_per_day: "Max Estimated Hits",
         min_average_hits_per_day: "Min Estimated Hits",
       };
