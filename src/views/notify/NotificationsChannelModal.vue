@@ -35,6 +35,8 @@
                                 <CInput v-model="channel.name" label="Name" placeholder="Channel Name" />
                                 <CTextarea v-model="channel.description" label="Description"
                                     placeholder="A friendly description of the channel" :rows="5" />
+                                <label for="is_global">Global Channel</label><br>
+                                    <CSwitch id="is_global" :checked.sync="channel.is_global" label-on="Yes" label-off="No" label="Global Channel" color="success"/>
                             </CTab>
                             <CTab title="2. Configuration" :disabled="!channel.channel_type">
                                 <div v-if="channel.channel_type == 'email'">
@@ -59,7 +61,7 @@
                                             placeholder="SMTP Server" />
                                         </CCol>
                                         <CCol>
-                                        <CInput v-model="channel.email_configuration.smtp_port" label="SMTP Port"
+                                        <CInput v-model.number="channel.email_configuration.smtp_port" label="SMTP Port"
                                             placeholder="SMTP Port" />
                                         </CCol>
                                     </CRow>
