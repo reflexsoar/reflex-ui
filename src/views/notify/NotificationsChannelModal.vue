@@ -59,7 +59,7 @@
                                             placeholder="SMTP Server" />
                                         </CCol>
                                         <CCol>
-                                        <CInput v-model="channel.email_configuration.smtp_port" label="SMTP Port"
+                                        <CInput v-model.number="channel.email_configuration.smtp_port" label="SMTP Port"
                                             placeholder="SMTP Port" />
                                         </CCol>
                                     </CRow>
