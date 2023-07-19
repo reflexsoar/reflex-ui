@@ -130,7 +130,9 @@ import {
   cilArrowCircleRight,
   cilInfo,
   cilSync,
-  cilStorage
+  cilStorage,
+  cilTransfer,
+  cilDial
 } from '@coreui/icons'
 import { logo } from './logo'
 
@@ -236,7 +238,9 @@ export const iconsSet = Object.assign(
     cilArrowCircleRight,
     cilInfo,
     cilSync,
-    cilStorage
+    cilStorage,
+    cilTransfer,
+    cilDial
   },
   {
     cifUs,

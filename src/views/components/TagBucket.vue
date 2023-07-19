@@ -1,16 +1,23 @@
 <template>
   <div>
     <CCard class="bucket" @click="toggleDetails()">
-      <CIcon :name="iconName" style="margin-top:-1px; width: 14px; height: 14px;"/> {{ tags ? tags.length : 0 }}
-      <CCard class="tag-list" v-if="show_details">
-        <CCardHeader class="small-header"><b>{{label}}</b></CCardHeader>
-        <CCardBody style="padding: 5px;">
-          <template v-if="countOnly">
-            {{ tags ? tags.length : 0 }}
+      <CIcon :name="iconName" style="margin-top:-1px; width: 14px; height: 14px;"/><template v-if="!noCount">&nbsp;{{ tags ? tags.length : 0 }}</template>
+      
+        <CCard class="tag-list" v-if="show_details">
+          <CCardHeader class="small-header"><b>{{label}}</b></CCardHeader>
+          <template v-if="!noCount">
+          <CCardBody style="padding: 5px;">
+          
+            <template v-if="countOnly">
+              {{ tags ? tags.length : 0 }}
+            </template>
+            <TagList v-if="!countOnly" :tags="tags" :tagIcon="false" :iconName="iconName" :tagColor="tagColor"/>
+          
+          </CCardBody>
           </template>
-          <TagList v-if="!countOnly" :tags="tags" :tagIcon="false" :iconName="iconName" :tagColor="tagColor"/>
-        </CCardBody>
-    </CCard>
+          
+        </CCard>
+      
     </CCard>
     
   </div>
@@ -74,6 +81,10 @@ export default {
       type: Boolean,
       default: false
     },
+    noCount: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {

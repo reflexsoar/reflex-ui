@@ -167,6 +167,9 @@
                               :repositories="item.repository"
                             />
                           </div>
+                          <div v-if="item.assess_rule" style="display: inline-block; padding-left: 2px;">
+                            <TagBucket iconName="cil-speedometer" label="Flagged for Assessment" :noCount="true" tagColor="primary" />
+                            </div>
                         </CCol>
                       </CRow>
                       <br />
