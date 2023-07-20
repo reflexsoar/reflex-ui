@@ -21,12 +21,12 @@
             <CCardHeader>
               <CRow>
                 <CCol col="9">
-                  <li style="display: inline; margin-right: 2px;" v-for="obs,i  in observableFilters" :key="i"><CBadge color="secondary" class="tag tag-clickable"  size="sm" @click="toggleObservableFilter({'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else-if="obs.filter_type == 'event_rule'">{{getEventRuleName(obs.value)}}</span><span v-else-if="obs.filter_type == 'title__like'">{{obs.value}}*</span><span v-else>{{ obs.value | truncate }}</span></CBadge></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
+                  <li style="display: inline; margin-right: 2px;" v-for="obs,i  in observable_filters" :key="i"><CBadge color="secondary" class="tag tag-clickable"  size="sm" @click="toggleObservableFilter({'filter_type': obs.data_type, 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else-if="obs.filter_type == 'event_rule'">{{getEventRuleName(obs.value)}}</span><span v-else-if="obs.filter_type == 'title__like'">{{obs.value}}*</span><span v-else>{{ obs.value | truncate }}</span></CBadge></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="3" class="text-right">
                   <CButtonGroup>
                     <CButton @click="saveFilter()" color="success" size="sm">Save View</CButton>
-                    <CButton @click="loadFilterClicked" color="primary" size="sm" disabled>Load View</CButton>
+                    <CButton @click="loadFilter()" color="primary" size="sm">Edit View</CButton>
                     <CButton @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
                     <CButton @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
                   </CButtonGroup>
@@ -309,6 +309,7 @@
       </template>
     </CModal>
     <SaveViewModal :filter_string="saved_filter_string" :show.sync="show_save_view_modal"></SaveViewModal>
+    <LoadViewModal :show.sync="show_load_view_modal"></LoadViewModal>
     <EventCommentModal :event="event_comment_target" :show.sync="event_comment_modal"></EventCommentModal>
     <CreateCaseModal :show.sync="createCaseModal" :organization="organization" :events="selected" :related_events_count="related_events_count" :case_from_card="true"></CreateCaseModal>
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :event_organization.sync="event_organization" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables" :from_card="true"></CreateEventRuleModal>
@@ -427,6 +428,7 @@ import EventCommentModal from './event/EventCommentModal'
 import EventCard from './event/EventCard'
 import ObservablePopover from './components/ObservablePopover'
 import SaveViewModal from './event/SaveViewModal'
+import LoadViewModal from './event/LoadViewModal'
 
 export default {
     name: 'Events',
@@ -443,7 +445,8 @@ export default {
       EventCommentModal,
       EventCard,
       ObservablePopover,
-      SaveViewModal
+      SaveViewModal,
+      LoadViewModal
     },
     props: {
     items: Array,
@@ -459,15 +462,16 @@ export default {
     dark: Boolean,
     event: false
     },
-    computed: mapState(['status','alert','settings','current_user']),
+    computed: mapState(['status','alert','settings','current_user','observable_filters']),
     created: function () {
 
       /* Set the page size based on the global settings page */
       if(this.settings) {
         this.card_per_page = this.settings.events_per_page
       }
-
-      this.observableFilters = this.$store.getters.observable_filters
+      
+      this.observableFilters = this.observable_filters
+      
       this.quick_filters = this.$store.getters.quick_filters
       this.loadData()
       this.loadCloseReasons()
@@ -483,6 +487,7 @@ export default {
       return {
         saved_filter_string: "",
         show_save_view_modal: false,
+        show_load_view_modal: false,
         savedFilters: [{
           'name': 'Filter 1'
         }],
@@ -615,7 +620,7 @@ export default {
       resetFilters() {
         this.observableFilters = [{'filter_type':'status','data_type':'status','value':'New'}]
         this.$store.commit('update_observable_filters', this.observableFilters)
-        this.filterEvents()
+        //this.filterEvents()
       },
       selectedOrgLength() {
         return Object.keys(this.selected_orgs).length
@@ -1064,6 +1069,7 @@ export default {
             this.observableFilters = this.observableFilters.filter(item => item.filter_type !== 'start')
             this.observableFilters = this.observableFilters.filter(item => item.filter_type !== 'end')
           } else {
+            console.log(obs)
             this.observableFilters = this.observableFilters.filter(item => item.value !== obs.value)
           }
         }
@@ -1071,9 +1077,9 @@ export default {
         this.$store.commit('update_observable_filters', this.observableFilters)
 
         this.current_page = 1
-        if(!['end','start'].includes(obs.filter_type)) {
-          this.filterEvents()
-        }
+        //if(!['end','start'].includes(obs.filter_type)) {
+        //  this.filterEvents()
+        //}
       },
       relatedEvents(signature) {
         return this.events.filter((event) => event.signature === signature).length
@@ -1409,6 +1415,9 @@ export default {
       saveFilter() {
         this.show_save_view_modal = true
         this.saved_filter_string = JSON.stringify(this.observableFilters)
+      },
+      loadFilter() {
+        this.show_load_view_modal = true
       }
     },
     beforeDestroy: function() {
@@ -1417,7 +1426,11 @@ export default {
     watch: {
       current_page: function(){
         this.filterEvents()
-      }
+      },
+      observable_filters: function() {
+        this.observableFilters = this.observable_filters
+        this.filterEvents()
+      },
     },
     filters: {
       truncate_description: function (value) {

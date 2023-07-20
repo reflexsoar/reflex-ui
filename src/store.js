@@ -880,6 +880,9 @@ const getters = {
   agent_policies_list: state => {
     return state.agent_policies.map(p => { return {name: p.name, uuid: p.uuid} })
   },
+  observable_filters_state: state => {
+    return state.observable_filters
+  },
   mitre_technique: state => { return state.mitre_technique },
   event_comments: state => { return state.event_comments },
   notification_channels: state => { return state.notification_channels },
@@ -2400,7 +2403,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event_view`, method: 'GET'})
       .then(resp => {
-        commit('save_event_views', resp.data)
+        commit('save_event_views', resp.data['views'])
         resolve(resp)
       })
       .catch(err => {
@@ -2411,6 +2414,17 @@ const actions = {
   createEventView({commit}, data) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event_view`, data: data, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateEventView({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event_view/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         resolve(resp)
       })
