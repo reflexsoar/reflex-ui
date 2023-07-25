@@ -40,15 +40,7 @@ export default {
     filter_string: String,
   },
   computed: {
-    ...mapState(["current_user"]),
-    repositories() {
-      return this.detection_repositories.map((repo) => {
-        return {
-          label: repo.name,
-          value: repo.uuid,
-        };
-      });
-    },
+    ...mapState(["current_user"])
   },
   data() {
     return {
