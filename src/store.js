@@ -97,6 +97,7 @@ const state = {
   agent_policy: {},
   mitre_data_sources: [],
   service_accounts: [],
+  integrations: [],
   detection_filters: {
     repo_synced: true,
     active: true,
@@ -841,6 +842,9 @@ const mutations = {
     state.service_accounts.push(account)
     state.service_account = account
     state.status = 'success'
+  },
+  store_integrations(state, integrations) {
+    state.integrations = integrations
   }
 }
 
@@ -4152,6 +4156,18 @@ const actions = {
       Axios({url: `${BASE_URL}/detection_repository/${uuid}`, method: 'DELETE'})
       .then(resp => {
         commit('remove_detection_repository', uuid)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getIntegrations({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration`, method: 'GET'})
+      .then(resp => {
+        commit('store_integrations', resp.data.integrations)
         resolve(resp)
       })
       .catch(err => {
