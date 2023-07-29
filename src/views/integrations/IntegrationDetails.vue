@@ -31,7 +31,7 @@
                               <table style="border: 0px">
             <tr>
               <td class="text-right"  style="padding: 5px;"><b>Author:</b></td>
-              <td style="padding: 5px;">{{ integration.author }}</td>
+              <td style="padding: 5px;"><CBadge class="tag tag-list" color="dark">{{ integration.author }}</CBadge></td>
             </tr>
             <tr>
               <td class="text-right"  style="padding: 5px;"><b>Contributors:</b></td>
@@ -39,11 +39,11 @@
             </tr>
             <tr>
               <td class="text-right"  style="padding: 5px;"><b>License:</b></td>
-              <td  style="padding: 5px;">{{ integration.license_name }}</td>
+              <td  style="padding: 5px;"><CBadge class="tag tag-list" color="dark">{{ integration.license_name }}</CBadge></td>
             </tr>
             <tr>
               <td class="text-right"  style="padding: 5px;"><b>Version:</b></td>
-              <td  style="padding: 5px;">{{ integration.version }}</td>
+              <td  style="padding: 5px;"><CBadge class="tag tag-list" color="dark">{{ integration.version }}</CBadge></td>
             </tr>
           </table>
           </CCol>

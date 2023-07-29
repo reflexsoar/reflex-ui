@@ -18,6 +18,7 @@
         <CTab title="Overview">
             <h3>Basic Settings</h3>
             <CInput v-model="configuration.name" label="Name" placeholder="Enter a name for this configuration" required description="Providing a name for the configuration allows users to differentiate between configurations that may have the same action"/>
+            <CTextarea v-model="configuration.description" label="Description" placeholder="Enter a description for this configuration" description="Providing a description for the configuration allows users to determine in more detail why this configuration exsits"/>
             <h3>Global settings</h3>
             <p>Global settings are used by multiple actions for the integration. These settings are not action specific.</p>
             <div v-if="integration.manifest !== undefined && 'configuration' in integration.manifest && Object.keys(integration.manifest.configuration).length > 0">
@@ -26,6 +27,9 @@
                         <CInput v-model="configuration.global_settings[data]" v-if='field.type == "str"' :label="data" :description="field.description" :placeholder="field.default" v-bind:required="field.required"/>
                         <CTextarea v-model="configuration.global_settings[data]" v-if='field.type == "text"' :label="data" :description="field.description" :placeholder="field.default" v-bind:required="field.required"/>
                         <CInput v-model.number="configuration.global_settings[data]" v-if='field.type == "int"' :label="data" :description="field.description" :placeholder="field.default" v-bind:required="field.required"/>
+                        <CSelect v-model="configuration.global_settings[data]" v-if='field.type == "str-select"' :label="data" :description="field.description" :placeholder="field.default" v-bind:required="field.required">
+                            <option v-for="option in field.options" :value="option">{{option}}</option>
+                        </CSelect>
                     </CCol>
                 </CRow>
             </div>
@@ -52,6 +56,7 @@
                         <CInput v-model="configuration.actions[action.name][data]" v-if='field.type == "str"' :label="data" :description="field.description" :placeholder="field.default" v-bind:required="field.required && configuration.actions[action.name].enabled"/>
                         <CTextarea v-model="configuration.actions[action.name][data]" v-if='field.type == "text"' :label="data" :description="field.description" :placeholder="field.default" v-bind:required="field.required && configuration.actions[action.name].enabled"/>
                         <CInput v-model.number="configuration.actions[action.name][data]" v-if='field.type == "int"' :label="data" :description="field.description" :placeholder="field.default" v-bind:required="field.required && configuration.actions[action.name].enabled"/>
+                        <CSelect :value.sync="configuration.actions[action.name][data]" v-if='field.type == "str-select"' :label="data" :options="field.options" :description="field.description" :placeholder="field.default" v-bind:required="field.required && configuration.actions[action.name].enabled"/>
                     </CCol>
                 </CRow>
             </div>
