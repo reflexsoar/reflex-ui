@@ -49,8 +49,8 @@
                 <label>Enable</label><br>
                 <CSwitch :checked.sync="configuration.actions[action.name].enabled" label-on="Yes" label-off="No" color="success" /><br>
             </div>
-            <div v-if="action.name in configuration.actions && configuration.actions[action.name].enabled && configuration.actions.length > 0">
-                <br><h4>Action Specific Settings</h4>
+            <div v-if="action.name in configuration.actions && configuration.actions[action.name].enabled">
+                <span v-if="action.configuration !== undefined && Object.keys(action.configuration).length > 0"><br><h4>Action Specific Settings</h4></span>
                 <CRow v-for="field, data in action.configuration">
                     <CCol>
                         <CInput v-model="configuration.actions[action.name][data]" v-if='field.type == "str"' :label="data" :description="field.description" :placeholder="field.default" v-bind:required="field.required && configuration.actions[action.name].enabled"/>
