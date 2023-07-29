@@ -98,6 +98,9 @@ const state = {
   mitre_data_sources: [],
   service_accounts: [],
   integrations: [],
+  integration: {},
+  integration_configs: [],
+  integration_config: {},
   detection_filters: {
     repo_synced: true,
     active: true,
@@ -845,6 +848,21 @@ const mutations = {
   },
   store_integrations(state, integrations) {
     state.integrations = integrations
+  },
+  store_integration_configurations(state, configs) {
+    state.integration_configs = configs
+  },
+  add_integration_configuration(state, config) {
+    if(state.integration_configs.length == 0) {
+      state.integration_configs = [config]
+    } else {
+      state.integration_configs.push(config)
+    }
+    state.integration_config = config
+    state.status = 'success'
+  },
+  store_integration(state, integration) {
+    state.integration = integration
   }
 }
 
@@ -4168,6 +4186,44 @@ const actions = {
       Axios({url: `${BASE_URL}/integration`, method: 'GET'})
       .then(resp => {
         commit('store_integrations', resp.data.integrations)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getIntegration({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('store_integration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getIntegrationConfigurations({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations`, method: 'GET'})
+      .then(resp => {
+        commit('store_integration_configurations', resp.data['configurations'])
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createIntegrationConfiguration({commit}, {uuid, data}) {
+    console.log(uuid)
+    console.log(data)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_integration_configuration', resp.data)
         resolve(resp)
       })
       .catch(err => {

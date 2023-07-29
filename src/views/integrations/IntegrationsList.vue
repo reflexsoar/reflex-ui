@@ -1,76 +1,97 @@
 <template>
   <div>
-  <h2>Integration Management</h2><br>
-  <CRow>
-    <CCol col=2>
+    <h2>Integration Management</h2>
+    <br />
+    <CRow>
+      <CCol col="2">
         <CRow>
-            <CCol>
-                <CInput v-model="search" placeholder="Search for an Integration" label="Search" />
-            </CCol>
+          <CCol>
+            <CInput
+              v-model="search"
+              placeholder="Search for an Integration"
+              label="Search"
+            />
+          </CCol>
         </CRow>
         <CRow>
-        <CCol>
+          <CCol>
             <h3>Categories</h3>
             <!-- Show each category as a ListGroup without a bullet and a count of the number of integrations in that category -->
             <CListGroup>
-                <CListGroupItem color="secondary" :active="category_filter == null" @click="category_filter = null">
-                    <!-- Align the badge to the right of the list item -->
-                    <CRow>
-                    <CCol>
-                        All
-                    </CCol>
-                    <CCol class="text-right" col=3>
-                        <span class="badge badge-primary badge-pill"> {{ integrations.length }}</span>
-                        </CCol>
-                    </CRow>
-                    
-                </CListGroupItem>
-                <CListGroupItem  color="secondary" v-for="category in categories" :key="category.name" :active="category_filter == category.name" @click="category_filter = category.name">
-                    <CRow>
-                        <CCol>
-                            {{ category.name }}
-                        </CCol>
-                        <CCol class="text-right" col=3>
-                            <span class="badge badge-primary badge-pill"> {{ category.count }}</span>
-                        </CCol>
-                        </CRow>
-                </CListGroupItem>
+              <CListGroupItem
+                color="secondary"
+                :active="category_filter == null"
+                @click="category_filter = null"
+              >
+                <!-- Align the badge to the right of the list item -->
+                <CRow>
+                  <CCol> All </CCol>
+                  <CCol class="text-right" col="3">
+                    <span class="badge badge-primary badge-pill">
+                      {{ integrations.length }}</span
+                    >
+                  </CCol>
+                </CRow>
+              </CListGroupItem>
+              <CListGroupItem
+                color="secondary"
+                v-for="category in categories"
+                :key="category.name"
+                :active="category_filter == category.name"
+                @click="category_filter = category.name"
+              >
+                <CRow>
+                  <CCol>
+                    {{ category.name }}
+                  </CCol>
+                  <CCol class="text-right" col="3">
+                    <span class="badge badge-primary badge-pill">
+                      {{ category.count }}</span
+                    >
+                  </CCol>
+                </CRow>
+              </CListGroupItem>
             </CListGroup>
-            
-        </CCol>
+          </CCol>
         </CRow>
-    </CCol>
-    <CCol>
-    <CRow>
-      <CCol v-for="integration in filtered_results">
-        
-        <CCard>
-          <CCardBody>
-            <img
-              :src="integration.logo"
-              style="height: 50px; object-fit: cover"
-            />
-            <hr />
-            <h4>{{ integration.name }}</h4>
-            <p  style="min-height:200px; max-height: 225px; overflow-y: scroll">{{ integration.description }}<br><br>
-            <b>Supported Actions</b>
-            <ul>
-              <li v-for="action in integration.manifest.actions"><b>{{ action.name }}</b>: {{ action.description }}</li>
-            </ul>
-            </p>
-          </CCardBody>
-          <CCardFooter>
-            <CRow>
-              <CCol> </CCol>
-              <CCol class="text-right">
-                <CButton color="primary" size="sm">Configure</CButton>
-              </CCol>
-            </CRow>
-          </CCardFooter>
-        </CCard>
       </CCol>
-    </CRow>
-    </CCol>
+      <CCol>
+        <CRow>
+          <CCol v-for="integration in filtered_results" col="3">
+            <CCard>
+              <CCardBody>
+                <CRow>
+                  <CCol col="4">
+                    <img :src="integration.logo" style="width: 100%" />
+                  </CCol>
+                  <CCol>
+                    <h4>{{ integration.name }}</h4>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <p style="min-height: 100px; max-height: 100px; overflow-y: scroll">
+                      {{ integration.brief_description }}
+                    </p>
+                  </CCol>
+                </CRow>
+              </CCardBody>
+              <CCardFooter>
+                <CRow>
+                  <CCol> </CCol>
+                  <CCol class="text-right">
+                    <!-- On click send the user to the Integration details page where they 
+                can set up new action configurations -->
+                    <CButton color="primary" :to="`${integration.product_identifier}`" size="sm"
+                      >Configure</CButton
+                    >
+                  </CCol>
+                </CRow>
+              </CCardFooter>
+            </CCard>
+          </CCol>
+        </CRow>
+      </CCol>
     </CRow>
   </div>
 </template>
@@ -82,57 +103,59 @@ export default {
   name: "IntegrationsList",
   computed: {
     ...mapState(["integrations", "current_user"]),
-    filtered_results: function() {
-        // return results that fuzzy match the search string
+    filtered_results: function () {
+      // return results that fuzzy match the search string
 
-        if (this.search == "" && this.category_filter == null) {
-            return this.integrations;
-        }
-        if (this.search == "" && this.category_filter != null) {
-            return this.integrations.filter(integration => {
-                return integration.category.includes(this.category_filter);
-            })
-        }
-        if (this.search != "") {
-            if (this.category_filter != null) {
-                return this.integrations.filter(integration => {
-                    return integration.name.toLowerCase().includes(this.search.toLowerCase()) && integration.category.includes(this.category_filter);
-                })
-            } else
-            {            
-                return this.integrations.filter(integration => {
-                    return integration.name.toLowerCase().includes(this.search.toLowerCase());
-                })
-            }
-        }
+      if (this.search == "" && this.category_filter == null) {
         return this.integrations;
+      }
+      if (this.search == "" && this.category_filter != null) {
+        return this.integrations.filter((integration) => {
+          return integration.category.includes(this.category_filter);
+        });
+      }
+      if (this.search != "") {
+        if (this.category_filter != null) {
+          return this.integrations.filter((integration) => {
+            return (
+              integration.name.toLowerCase().includes(this.search.toLowerCase()) &&
+              integration.category.includes(this.category_filter)
+            );
+          });
+        } else {
+          return this.integrations.filter((integration) => {
+            return integration.name.toLowerCase().includes(this.search.toLowerCase());
+          });
+        }
+      }
+      return this.integrations;
     },
-    categories: function() {
-        // return a list of categories and the number of integrations in each category
-        var categories = [];
-        this.integrations.forEach(integration => {
-            integration.category.forEach(category => {
-                var found = false;
-                categories.forEach(cat => {
-                    if (cat.name == category) {
-                        cat.count += 1;
-                        found = true;
-                    }
-                })
-                if (!found) {
-                    categories.push({name: category, count: 1});
-                }
-            })
-        })
-        return categories;
-    }
+    categories: function () {
+      // return a list of categories and the number of integrations in each category
+      var categories = [];
+      this.integrations.forEach((integration) => {
+        integration.category.forEach((category) => {
+          var found = false;
+          categories.forEach((cat) => {
+            if (cat.name == category) {
+              cat.count += 1;
+              found = true;
+            }
+          });
+          if (!found) {
+            categories.push({ name: category, count: 1 });
+          }
+        });
+      });
+      return categories;
+    },
   },
-    data() {
-        return {
-        search: "",
-        category_filter: null,
-        };
-    },
+  data() {
+    return {
+      search: "",
+      category_filter: null,
+    };
+  },
   created() {
     this.loadIntegrations();
   },
