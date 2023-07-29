@@ -23,7 +23,31 @@
                 <CTab title="Overview">
                     <CCard>
                         <CCardBody>
-                            <p><vue-markdown>{{ integration.description }}</vue-markdown></p>
+                          <CRow>
+                            <CCol col=8>
+                              <p><vue-markdown>{{ integration.description }}</vue-markdown></p>
+                            </CCol>
+                            <CCol>
+                              <table style="border: 0px">
+            <tr>
+              <td class="text-right"  style="padding: 5px;"><b>Author:</b></td>
+              <td style="padding: 5px;">{{ integration.author }}</td>
+            </tr>
+            <tr>
+              <td class="text-right"  style="padding: 5px;"><b>Contributors:</b></td>
+              <td  style="padding: 5px;"><TagList :tagIcon="false" :tags="integration.contributor" /></td>
+            </tr>
+            <tr>
+              <td class="text-right"  style="padding: 5px;"><b>License:</b></td>
+              <td  style="padding: 5px;">{{ integration.license_name }}</td>
+            </tr>
+            <tr>
+              <td class="text-right"  style="padding: 5px;"><b>Version:</b></td>
+              <td  style="padding: 5px;">{{ integration.version }}</td>
+            </tr>
+          </table>
+          </CCol>
+        </CRow>
                         </CCardBody>
                     </CCard>
                 </CTab>
@@ -107,11 +131,6 @@
                     </CCard>
                 </CTab>
             </CTabs>
-        </CCol>
-      </CRow>
-      <CRow>
-        <CCol>
-          
         </CCol>
       </CRow>
     </CCol>
