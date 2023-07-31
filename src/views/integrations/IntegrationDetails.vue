@@ -95,7 +95,7 @@
                                     <td class="text-right">
                                         <CButton color="info" @click="editConfiguration(item)" size="sm"><CIcon name="cil-pencil"/></CButton>&nbsp;
                                         <CButton color="secondary" @click="cloneConfiguration(item)" size="sm"><CIcon name="cil-copy"/></CButton>&nbsp;
-                                        <CButton color="danger" @click="deleteConfiguration(item.uuid)" size="sm"><CIcon name="cil-trash"/></CButton>
+                                        <CButton color="danger" @click="deleteConfigurationWarning(item.uuid)" size="sm"><CIcon name="cil-trash"/></CButton>
                                         </td>
                                     </template>
                                 </CDataTable>
@@ -136,6 +136,23 @@
       </CRow>
     </CCol>
     <IntegrationConfigModal :show.sync="showConfigModal" :integration="integration" :configuration="configuration" :mode="modal_mode"/>
+    <!-- Delete warning modal -->
+    <CModal
+      color="danger"
+      :show.sync="show_delete_confirmation"
+      title="Delete Configuration - Warning">
+        <CAlert :show.sync="delete_error" color="danger">{{ delete_error_message }}</CAlert>
+    
+        <p>Are you sure you want to delete this configuration?  Deleting an active configuration
+        may result in resources leveraging these configuration to fail.</p>
+
+        <p>To confirm, type the name of the configuration <b>{{ delete_target.name }}</b> below:</p>
+        <CInput v-model="delete_confirmation" placeholder="Configuration Name" />
+      <template #footer>
+        <CButton color="danger" @click="deleteConfigurationConfirmed()">Yes</CButton>
+        <CButton color="secondary" @click="dismissDeleteConfirmation()">No</CButton>
+      </template>
+    </CModal>
   </CRow>
 </template>
 
@@ -178,6 +195,13 @@ export default {
         actions: {},
         configuration: {},
       },
+      delete_target: {
+        name: ""
+      },
+      delete_confirmation: '',
+      show_delete_confirmation: false,
+      delete_error: false,
+      delete_error_message: ""
     };
   },
   methods: {
@@ -196,6 +220,40 @@ export default {
       this.configuration.name = this.configuration.name + " (copy)";
       this.modal_mode = "clone";
       this.showConfigModal = true;
+    },
+    deleteConfigurationWarning(uuid) {
+      this.delete_target = this.integration_configs.find((config) => {
+        return config.uuid == uuid;
+      });
+      this.delete_confirmation = '';
+      this.show_delete_confirmation = true;
+    },
+    deleteConfigurationConfirmed() {
+      if(this.delete_confirmation == this.delete_target.name) {
+        this.$store.dispatch("deleteIntegrationConfiguration", {
+          uuid: this.integration.product_identifier,
+          configuration_uuid: this.delete_target.uuid
+        }).then(() => {
+          this.dismissDeleteConfirmation();
+        }).catch((error) => {
+          this.delete_error = true;
+          this.delete_error_message = error;
+        });
+        
+      } else {
+        this.delete_error = true;
+        this.delete_error_message = "The configuration name you entered does not match the configuration name you are trying to delete.";
+        return;
+      }
+    },
+    dismissDeleteConfirmation() {
+      this.show_delete_confirmation = false;
+      this.delete_error = false;
+      this.delete_error_message = "";
+      this.delete_target = {
+        name: ""
+      };
+      this.delete_confirmation = '';
     },
     build_configuration_for_edit(config) {
       let configuration = this.build_default_configuration();

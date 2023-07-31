@@ -865,6 +865,10 @@ const mutations = {
     state.integration_config = config
     state.integration_configs = state.integration_configs.map(c => c.uuid == config.uuid ? config : c)
   },
+  remove_integration_configuration(state, uuid) {
+    state.integration_config = {}
+    state.integration_configs = state.integration_configs.filter(c => c.uuid !== uuid)
+  },
   store_integration(state, integration) {
     state.integration = integration
   }
@@ -4240,6 +4244,18 @@ const actions = {
       Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_integration_configuration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteIntegrationConfiguration({commit}, {uuid, configuration_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_integration_configuration', configuration_uuid)
         resolve(resp)
       })
       .catch(err => {
