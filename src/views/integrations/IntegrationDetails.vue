@@ -92,8 +92,10 @@
                                         </td>
                                     </template>
                                     <template #manage="{item}">
-                                    <td>
-                                        <CButton color="primary" :to="`${integration.product_identifier}/${item.id}`" size="sm">Edit</CButton>
+                                    <td class="text-right">
+                                        <CButton color="info" @click="editConfiguration(item)" size="sm"><CIcon name="cil-pencil"/></CButton>&nbsp;
+                                        <CButton color="secondary" @click="cloneConfiguration(item)" size="sm"><CIcon name="cil-copy"/></CButton>&nbsp;
+                                        <CButton color="danger" @click="deleteConfiguration(item.uuid)" size="sm"><CIcon name="cil-trash"/></CButton>
                                         </td>
                                     </template>
                                 </CDataTable>
@@ -123,7 +125,6 @@
                 </CTab>
                 <CTab title="Manifest">
                     <CCard>
-                       
                         <CCardBody> <h3>Manifest File</h3>
                         <p>The manifest file defines exactly what this integration expects from a configuration perspective</p>
                             <code><pre>{{ integration.manifest }}</pre></code>
@@ -134,7 +135,7 @@
         </CCol>
       </CRow>
     </CCol>
-    <IntegrationConfigModal :show.sync="showConfigModal" :integration="integration" :configuration="configuration"/>
+    <IntegrationConfigModal :show.sync="showConfigModal" :integration="integration" :configuration="configuration" :mode="modal_mode"/>
   </CRow>
 </template>
 
@@ -165,11 +166,12 @@ export default {
       loading: false,
       configurations_loading: false,
       action_fields: [
-        "name",
+        {key: "friendly_name", label: "Action Name"},
         "description",
-        "source_object_type"
+        "type"
       ],
       showConfigModal: false,
+      modal_mode: "create",
       configuration: {
         name: "",
         description: "",
@@ -181,8 +183,42 @@ export default {
   methods: {
     newConfiguration() {
       this.configuration = this.build_default_configuration();
+      this.modal_mode = "create";
       this.showConfigModal = true;
+    },
+    editConfiguration(configuration) {
+      this.configuration = this.build_configuration_for_edit(configuration);
+      this.modal_mode = "edit";
+      this.showConfigModal = true;
+    },
+    cloneConfiguration(configuration) {
+      this.configuration = this.build_configuration_for_edit(configuration);
+      this.configuration.name = this.configuration.name + " (copy)";
+      this.modal_mode = "clone";
+      this.showConfigModal = true;
+    },
+    build_configuration_for_edit(config) {
+      let configuration = this.build_default_configuration();
+      configuration.name = config.name;
+      configuration.description = config.description;
+      configuration.uuid = config.uuid;
+      
+      // Replace all the actions with the ones from the config
+      for (let action of this.integration.manifest.actions) {
+        if(config.actions[action.name]) {
+          configuration.actions[action.name] = config.actions[action.name]
+        }
+      }
 
+      // Replace all the global_settings
+      for (let field in this.integration.manifest.configuration) {
+        if(config.global_settings[field]) {
+          configuration.global_settings[field] = config.global_settings[field]
+        }
+      }
+      
+      // Return a cloned version of the config
+      return JSON.parse(JSON.stringify(configuration))
     },
     build_default_configuration() {
         let configuration = {

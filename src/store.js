@@ -861,6 +861,10 @@ const mutations = {
     state.integration_config = config
     state.status = 'success'
   },
+  update_integration_configuration(state, config) {
+    state.integration_config = config
+    state.integration_configs = state.integration_configs.map(c => c.uuid == config.uuid ? config : c)
+  },
   store_integration(state, integration) {
     state.integration = integration
   }
@@ -4224,6 +4228,18 @@ const actions = {
       Axios({url: `${BASE_URL}/integration/${uuid}/configurations`, data: data, method: 'POST'})
       .then(resp => {
         commit('add_integration_configuration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateIntegrationConfiguration({commit}, {uuid, configuration_uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_integration_configuration', resp.data)
         resolve(resp)
       })
       .catch(err => {
