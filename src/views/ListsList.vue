@@ -109,7 +109,14 @@
               <label>List Active</label><br>
               <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.active"/>
             </div>
+            
           </CCol>
+          <CCol>
+          <div class="form-input">  
+              <label>Global List</label><br>
+              <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.global_list"/>
+            </div>
+            </CCol>
           <!--<CCol>
             <div class="form-input">  
               <label>To Memcached</label><br>
@@ -398,6 +405,7 @@ export default {
           data_type_uuid: this.list_data.data_type.uuid,
           values: this.list_data.values,
           tag_on_match: this.list_data.tag_on_match,
+          global_list: this.list_data.global_list,
           url: this.list_data.url,
           poll_interval: this.list_data.poll_interval,
           to_memcached: this.list_data.to_memcached,

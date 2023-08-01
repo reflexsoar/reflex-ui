@@ -97,6 +97,10 @@ const state = {
   agent_policy: {},
   mitre_data_sources: [],
   service_accounts: [],
+  integrations: [],
+  integration: {},
+  integration_configs: [],
+  integration_config: {},
   detection_filters: {
     repo_synced: true,
     active: true,
@@ -841,6 +845,32 @@ const mutations = {
     state.service_accounts.push(account)
     state.service_account = account
     state.status = 'success'
+  },
+  store_integrations(state, integrations) {
+    state.integrations = integrations
+  },
+  store_integration_configurations(state, configs) {
+    state.integration_configs = configs
+  },
+  add_integration_configuration(state, config) {
+    if(state.integration_configs.length == 0) {
+      state.integration_configs = [config]
+    } else {
+      state.integration_configs.push(config)
+    }
+    state.integration_config = config
+    state.status = 'success'
+  },
+  update_integration_configuration(state, config) {
+    state.integration_config = config
+    state.integration_configs = state.integration_configs.map(c => c.uuid == config.uuid ? config : c)
+  },
+  remove_integration_configuration(state, uuid) {
+    state.integration_config = {}
+    state.integration_configs = state.integration_configs.filter(c => c.uuid !== uuid)
+  },
+  store_integration(state, integration) {
+    state.integration = integration
   }
 }
 
@@ -4152,6 +4182,104 @@ const actions = {
       Axios({url: `${BASE_URL}/detection_repository/${uuid}`, method: 'DELETE'})
       .then(resp => {
         commit('remove_detection_repository', uuid)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getIntegrations({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration`, method: 'GET'})
+      .then(resp => {
+        commit('store_integrations', resp.data.integrations)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getIntegration({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}`, method: 'GET'})
+      .then(resp => {
+        commit('store_integration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getIntegrationConfigurations({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations`, method: 'GET'})
+      .then(resp => {
+        commit('store_integration_configurations', resp.data['configurations'])
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createIntegrationConfiguration({commit}, {uuid, data}) {
+    console.log(uuid)
+    console.log(data)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_integration_configuration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateIntegrationConfiguration({commit}, {uuid, configuration_uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_integration_configuration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteIntegrationConfiguration({commit}, {uuid, configuration_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_integration_configuration', configuration_uuid)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  enableIntegrationConfiguration({commit}, {uuid, configuration_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/enable`, method: 'POST'})
+      .then(resp => {
+        commit('update_integration_configuration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  disableIntegrationConfiguration({commit}, {uuid, configuration_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/disable`, method: 'POST'})
+      .then(resp => {
+        commit('update_integration_configuration', resp.data)
         resolve(resp)
       })
       .catch(err => {

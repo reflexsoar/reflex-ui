@@ -32,6 +32,9 @@ const AgentDetails = () => import('@/views/AgentDetails')
 const Plugins = () => import('@/views/Plugins')
 const PluginList = () => import('@/views/PluginList')
 const PluginDetails = () => import('@/views/PluginDetails')
+const Integrations = () => import('@/views/integrations/Integrations')
+const IntegrationsList = () => import('@/views/integrations/IntegrationsList')
+const IntegrationDetails = () => import('@/views/integrations/IntegrationDetails')
 const Cases = () => import('@/views/Cases')
 const CaseManagement = () => import('@/views/CaseManagement')
 const CaseDetails = () => import('@/views/CaseDetails')
@@ -385,7 +388,38 @@ function configRoutes () {
             }
           ]
         },
-        
+        {
+          path: 'integrations',
+          name: 'Integrations',
+          component: Integrations,
+          redirect: 'integrations/list',
+          meta: {
+            requiresAuth: true,
+            requiresPermission: 'view_integrations'
+          },
+          children: [
+            {
+              path: 'list',
+              name: '',
+              component: IntegrationsList,
+              meta: {
+                fetchSettings: true,
+                requiresAuth: true,
+                requiresPermission: 'view_integrations'
+              }
+            },
+            {
+              path: ':uuid',
+              name: 'View Integration',
+              component: IntegrationDetails,
+              meta: {
+                fetchSettings: true,
+                requiresAuth: true,
+                requiresPermission: 'view_integrations'
+              }
+            }
+          ]
+        },
         {
           path: 'agents',
           name: 'Agents & Agent Groups',

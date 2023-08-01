@@ -132,7 +132,9 @@ import {
   cilSync,
   cilStorage,
   cilTransfer,
-  cilDial
+  cilDial,
+  cilApplications,
+  cilEye
 } from '@coreui/icons'
 import { logo } from './logo'
 
@@ -240,7 +242,9 @@ export const iconsSet = Object.assign(
     cilSync,
     cilStorage,
     cilTransfer,
-    cilDial
+    cilDial,
+    cilApplications,
+    cilEye
   },
   {
     cifUs,
