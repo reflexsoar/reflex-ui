@@ -65,15 +65,21 @@
                             <div v-else>
                                 <CDataTable
                                     :items="integration_configs"
-                                    :fields="[ 'name', {'key':'actions', label:'Configured Actions'}, 'updated_at', 'created_at', 'updated_by', {key: 'manage', label:''} ]"
+                                    :fields="[ 'name', 'enabled', {'key':'actions', label:'Configured Actions'}, 'updated_at', 'created_at', 'updated_by', {key: 'manage', label:''} ]"
                                     :items-per-page="10"
                                     :hover="true"
                                     :bordered="true"
                                     :noItemsView="{ noItems: 'No configurations defined' }"
+                                    :responsive="false"
                                 >
                                     <template #updated_at="{item}">
                                     <td>
                                         {{ item.updated_at | moment("from") }}
+                                        </td>
+                                    </template>
+                                    <template #enabled="{item}">
+                                      <td>
+                                        <CBadge class="tag tag-list" :color="item.enabled ? 'success' : 'danger'">{{ item.enabled ? 'Enabled' : 'Disabled' }}</CBadge>
                                         </td>
                                     </template>
                                     <template #created_at="{item}">
@@ -93,9 +99,13 @@
                                     </template>
                                     <template #manage="{item}">
                                     <td class="text-right">
-                                        <CButton color="info" @click="editConfiguration(item)" size="sm"><CIcon name="cil-pencil"/></CButton>&nbsp;
-                                        <CButton color="secondary" @click="cloneConfiguration(item)" size="sm"><CIcon name="cil-copy"/></CButton>&nbsp;
-                                        <CButton color="danger" @click="deleteConfigurationWarning(item.uuid)" size="sm"><CIcon name="cil-trash"/></CButton>
+                                      <CDropdown color="secondary" toggler-text="Manage" size="sm">
+                                        <CDropdownItem v-if="item.enabled == false || item.enabled === undefined" @click="activateConfiguration(item)" size="sm"><CIcon name="cil-check"/>&nbsp;Activate</CDropdownItem>
+                                        <CDropdownItem v-if="item.enabled == true" @click="deactivateConfiguration(item)" size="sm"><CIcon name="cil-ban"/>&nbsp;Deactivate</CDropdownItem>
+                                        <CDropdownItem @click="editConfiguration(item)" size="sm"><CIcon name="cil-pencil"/>&nbsp;Edit</CDropdownItem>
+                                        <CDropdownItem @click="cloneConfiguration(item)" size="sm"><CIcon name="cil-copy"/>&nbsp;Copy</CDropdownItem>
+                                        <CDropdownItem color="danger" v-bind:disabled="item.enabled" @click="deleteConfigurationWarning(item.uuid)" size="sm"><CIcon name="cil-trash"/>&nbsp; Delete</CDropdownItem>
+                                      </CDropdown>
                                         </td>
                                     </template>
                                 </CDataTable>
@@ -120,7 +130,18 @@
                             :items-per-page="10"
                             :hover="true"
                             :bordered="true"
-                        /></CCardBody>
+                        >
+                        <template #type="{item}">
+                          <td style="text-transform: capitalize">
+                            <CBadge class="tag" color="dark">{{ item.type ? item.type : 'unknown' }}</CBadge>
+                          </td>
+                        </template>
+                        <template #description="{item}">
+                          <td>
+                           {{item.description}}<span v-if="item.configuration"><br><i><b>Note</b>: Requires specific action configuration when setting up for the first time.</i></span>
+                          </td>
+                        </template>
+                      </CDataTable></CCardBody>
                     </CCard>
                 </CTab>
                 <CTab title="Manifest">
@@ -184,6 +205,7 @@ export default {
       configurations_loading: false,
       action_fields: [
         {key: "friendly_name", label: "Action Name"},
+        
         "description",
         "type"
       ],
@@ -254,6 +276,18 @@ export default {
         name: ""
       };
       this.delete_confirmation = '';
+    },
+    deactivateConfiguration(configuration) {
+      this.$store.dispatch("disableIntegrationConfiguration", {
+        uuid: this.integration.product_identifier,
+        configuration_uuid: configuration.uuid
+      });
+    },
+    activateConfiguration(configuration) {
+      this.$store.dispatch("enableIntegrationConfiguration", {
+        uuid: this.integration.product_identifier,
+        configuration_uuid: configuration.uuid
+      });
     },
     build_configuration_for_edit(config) {
       let configuration = this.build_default_configuration();

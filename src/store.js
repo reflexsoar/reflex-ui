@@ -4262,6 +4262,30 @@ const actions = {
         reject(err)
       })
     })
+  },
+  enableIntegrationConfiguration({commit}, {uuid, configuration_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/enable`, method: 'POST'})
+      .then(resp => {
+        commit('update_integration_configuration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  disableIntegrationConfiguration({commit}, {uuid, configuration_uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/disable`, method: 'POST'})
+      .then(resp => {
+        commit('update_integration_configuration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 }
 
