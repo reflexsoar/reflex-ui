@@ -72,6 +72,12 @@
                                     :noItemsView="{ noItems: 'No configurations defined' }"
                                     :responsive="false"
                                 >
+                                    <template #name="{item}">
+                                      <td>
+                                        {{ item.name }}<br>
+                                        <small class="text-muted">{{ item.uuid }}</small>
+                                        </td>
+                                      </template>
                                     <template #updated_at="{item}">
                                     <td>
                                         {{ item.updated_at | moment("from") }}
@@ -138,7 +144,7 @@
                         </template>
                         <template #description="{item}">
                           <td>
-                           {{item.description}}<span v-if="item.configuration"><br><i><b>Note</b>: Requires specific action configuration when setting up for the first time.</i></span>
+                           <vue-markdown>{{item.description}}</vue-markdown><span v-if="item.configuration"><br><i><b>Note</b>: Requires specific action configuration when setting up for the first time.</i></span>
                           </td>
                         </template>
                       </CDataTable></CCardBody>
@@ -205,9 +211,8 @@ export default {
       configurations_loading: false,
       action_fields: [
         {key: "friendly_name", label: "Action Name"},
-        
-        "description",
-        "type"
+        {key: "description", label: "Description", _style: "width: 70%"},
+        {key: "type", label: "Action Type", _style: "width: 10%"}
       ],
       showConfigModal: false,
       modal_mode: "create",

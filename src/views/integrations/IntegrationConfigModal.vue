@@ -108,7 +108,7 @@
               :title="action.friendly_name"
             >
               <h3>Configure {{ action.friendly_name }}</h3>
-              <p>{{ action.description }}</p>
+              <vue-markdown>{{ action.description }}</vue-markdown>
               <div v-if="action.name in configuration.actions">
                 <label>Enable</label><br />
                 <CSwitch
