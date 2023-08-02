@@ -149,6 +149,7 @@
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="runPlaybookModal = !runPlaybookModal">Run Playbook</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="createCaseModal = !createCaseModal">Create Case</CDropdownItem>
                 <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="mergeIntoCaseModal = !mergeIntoCaseModal">Merge into Case</CDropdownItem>
+                <CDropdownItem v-bind:disabled="selectedOrgLength() > 1" @click="showRunActionModal(null, false)">Run Action</CDropdownItem>
                 <div v-if="this.$store.getters.user_has_permission('delete_event')">
                   <CDropdownDivider/>
                   <CDropdownItem  @click="deleteEventModal = !deleteEventModal">Delete</CDropdownItem>
@@ -208,6 +209,7 @@
                 <CCol col="3">
                   <CButtonGroup>
                     <CButton aria-label="Create Event Rule" size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
+                    <CButton aria-label="Run Action" size="sm" color="success" @click="showRunActionModal(event.uuid, true)" v-c-tooltip="{'content':'Run Action','placement':'bottom'}"><i class="fas fa-play"/></CButton>
                     <CButton aria-label="Create Case" @click="caseFromCard(event.uuid)" v-if="event.status.name === 'New'" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton aria-label="View Event" @click="showDrawer(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
                     <CButton aria-label="Add Comment" @click="showEventCommentModal(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'Add Comment','placement':'bottom'}"><CIcon name="cilCommentBubble"/> {{event.total_comments ? event.total_comments : 0}}</CButton>
@@ -314,7 +316,7 @@
     <CreateCaseModal :show.sync="createCaseModal" :organization="organization" :events="selected" :related_events_count="related_events_count" :case_from_card="true"></CreateCaseModal>
     <CreateEventRuleModal :show.sync="createEventRuleModal" :events="selected" :event_signature.sync="event_signature" :event_organization.sync="event_organization" :source_event_uuid="sourceRuleEventUUID" :rule_observables="rule_observables" :from_card="true"></CreateEventRuleModal>
     <MergeEventIntoCaseModal :show.sync="mergeIntoCaseModal" :events="selected"></MergeEventIntoCaseModal>
-    <RunActionModal :show.sync="runActionModal" :observable="selected_observable"></RunActionModal>
+    <RunActionModal :show.sync="runActionModal" :events="selected" :events_data="selected_events"></RunActionModal>
     <ListAdderModal :show.sync="listAdderModal" :observable="selected_observable"></ListAdderModal>
     <ObservablePopover ref="popover" :show.sync="show_observable_popover" :observable="popover_data" :organization="popover_organization" @add-observable-to-filter="toggleObservableFilter"/>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
@@ -697,8 +699,12 @@ export default {
             break
         }        
       },
-      showRunActionModal(observable) {
-        this.selected_observable = observable
+      showRunActionModal(event, clear_selected = false) {
+        // If event is a string convert it to an array
+        if(clear_selected) { this.clearSelected() }
+        if(event) {
+          this.selectEvents(event)
+        }
         this.runActionModal = true
       },
       showListAdder(observable) {
@@ -1264,8 +1270,13 @@ export default {
         this.selected_count = this.selected.length
       },
       selectEvents(event) {
+        let event_uuid = null;
+        if (typeof event === 'string') {
+          event_uuid = event
+        } else {
+          event_uuid = event.target.value
+        }
         if(this.observableFilters.some(e => e.filter_type === 'signature')) {
-          let event_uuid = event.target.value
           
           if(this.selected.includes(event_uuid)) {
             this.selected_count -= 1
@@ -1276,7 +1287,7 @@ export default {
           }
           return
         }
-        let e = this.filtered_events.find(x => x.uuid == event.target.value)
+        let e = this.filtered_events.find(x => x.uuid == event_uuid)
         if(e) {          
           if(this.selected.some((item) => { return item === e.uuid})) {
               this.selected = this.selected.filter(item => item != e.uuid)
@@ -1316,10 +1327,13 @@ export default {
               this.selected_count += this.getRelatedCount(e.signature)
           }
         }
+
+        this.selected_events = this.filtered_events.filter((event) => this.selected.includes(event.uuid))
         
       },
       clearSelected() {
         this.selected = []
+        this.selected_events = []
         this.selected_orgs = {}
         this.select_all = false
         this.selected_count = 0

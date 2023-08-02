@@ -147,7 +147,8 @@ const state = {
   detection_repository: {},
   detection_repositories: [],
   event_views: [],
-  mitre_mapping: {}
+  mitre_mapping: {},
+  configured_actions: []
 }
 
 const mutations = {
@@ -871,6 +872,9 @@ const mutations = {
   },
   store_integration(state, integration) {
     state.integration = integration
+  },
+  store_configured_actions(state, actions) {
+    state.configured_actions = actions
   }
 }
 
@@ -4280,6 +4284,29 @@ const actions = {
       Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/disable`, method: 'POST'})
       .then(resp => {
         commit('update_integration_configuration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getConfiguredActions({commit}, {source_object_type=[], observable_type=[]}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/configured_actions`, method: 'GET', params: {source_object_type: source_object_type, observable_type: observable_type}})
+      .then(resp => {
+        commit('store_configured_actions', resp.data['actions'])
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  runAction({commit}, payload) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/run_action`, data: payload, method: 'POST'})
+      .then(resp => {
         resolve(resp)
       })
       .catch(err => {
