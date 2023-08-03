@@ -178,6 +178,7 @@
                 pagination
                 cleaner
                 table-filter
+                size="sm"
               >
                 <template #Field="{ item }">
                   <td class="col-4">
@@ -389,6 +390,41 @@
             <CCardBody v-else  class="text-center">
               <CSpinner color="primary" size="lg"></CSpinner>
             </CCardBody>
+          </CTab>
+          <CTab title="Integration Output">
+            <CRow>
+              <CCol><CCardBody class="tab-container">
+                <CCard v-for="output,i in event_data.integration_output" :key="i">
+                  <CCardHeader>
+                    <CRow>
+                      <CCol>
+                        {{ output.integration_name }} - {{ output.action }} - {{ output.created_at | moment("from") }}
+                      </CCol>
+                      <CCol>
+                        <CButton
+                          color="info"
+                          class="float-right"
+                          @click="toggleOutputShow(output)"
+                          size="sm"
+                        >
+                          <CIcon
+                            :name="output.show !== undefined && output.show != false ? 'cil-chevron-top' : 'cil-chevron-bottom'"
+                          />
+                        </CButton>
+                      </CCol>
+                    </CRow>
+                  </CCardHeader>
+                    <CCollapse :show.sync="(output.show !== undefined && output.show != false) || output.show">
+                      <CCardBody class="tab-container">
+                        <vue-markdown v-if="output.output_format == 'markdown'">
+                          {{ output.output }}
+                        </vue-markdown>
+                      </CCardBody>
+                    </CCollapse>
+                  </CCard>
+                  </CCardBody>
+              </CCol>
+            </CRow>
           </CTab>
           <CTab :title="`Comments (${this.event_data.total_comments})`">
             <template #title>
@@ -655,6 +691,14 @@ export default {
     },
   },
   methods: {
+    toggleOutputShow(output) {
+      // If the output does not have a show property, create it and set it to false
+      if (!output.hasOwnProperty("show")) {
+        this.$set(output, "show", true);
+        return
+      }
+      output.show = !output.show;
+    },
     editExclusion(uuid) {
       this.exclusion = this.detection.exceptions.find(
         (exclusion) => exclusion.uuid === uuid
