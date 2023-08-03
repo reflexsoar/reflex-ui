@@ -4291,9 +4291,18 @@ const actions = {
       })
     })
   },
-  getConfiguredActions({commit}, {source_object_type=[], observable_type=[]}) {
+  getConfiguredActions({commit}, {source_object_type=[], observable_type=[], trigger='manual'}) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration/configured_actions`, method: 'GET', params: {source_object_type: source_object_type, observable_type: observable_type}})
+      let url = `${BASE_URL}/integration/configured_actions?trigger=${trigger}`
+      if(source_object_type && source_object_type.length > 0) {
+        url += `&source_object_type=${source_object_type}`
+      }
+
+      if(observable_type && observable_type.length > 0) {
+        url += `&observable_type=${observable_type}`
+      }
+
+      Axios({url: url, method: 'GET', params: {source_object_type: source_object_type, observable_type: observable_type}})
       .then(resp => {
         commit('store_configured_actions', resp.data['actions'])
         resolve(resp)
