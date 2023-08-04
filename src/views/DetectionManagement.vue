@@ -54,41 +54,49 @@
                       <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
                         @click="enableDetections()"
-                        ><CIcon name="cilCheck" />&nbsp;Enable
+                        ><CIcon name="cilCheck" />&nbsp;&nbsp;Enable
                         {{ selected_items.length }} Detections</CDropdownItem
                       >
                       <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
                         @click="disableDetections()"
-                        ><CIcon name="cilBan" />&nbsp;Disable
+                        ><CIcon name="cilBan" />&nbsp;&nbsp;Disable
                         {{ selected_items.length }} Detections</CDropdownItem
                       >
                       <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
                         @click="assessDetections()"
-                        ><CIcon name="cilFlagAlt" />&nbsp;Assess
+                        ><i class="fas fa-flag"/>&nbsp;&nbsp;Assess
                         {{ selected_items.length }} Detections</CDropdownItem
                       >
                       <CDropdownItem
+                          aria-label="Clear Warnings"
+                          @click="clearWarnings()"
+                          size="sm"
+                          color="success"
+                          v-bind:disabled="selected_items.length == 0"
+                          v-c-tooltip="{ content: 'Clear Warnings', placement: 'left' }"
+                        ><i class="fas fa-soap" />&nbsp;&nbsp;Clear Warnings</CDropdownItem>
+                      <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
                         @click="addToRepository()"
-                        ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;Add to
+                        ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;&nbsp;Add to
                         Repository</CDropdownItem
                       >
                       <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
                         @click="removeFromRepository()"
-                        ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;Remove from
+                        ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;&nbsp;Remove from
                         Repository</CDropdownItem
                       >
                       <CDropdownItem
                         v-bind:disabled="selected_items.length == 0"
                         @click="exportDetections()"
-                        ><CIcon name="cilCloudDownload" size="sm"></CIcon>&nbsp;Export
+                        ><i class="fas fa-file-export" />&nbsp;&nbsp;Export
                         {{ selected_items.length }} Detections</CDropdownItem
                       >
                       <CDropdownItem @click="import_wizard = !import_wizard"
-                        ><CIcon name="cilCloudUpload" size="sm"></CIcon>&nbsp; Import
+                        ><i class="fas fa-file-import" />&nbsp;&nbsp;Import
                         Detections</CDropdownItem
                       >
                       <CDropdownDivider></CDropdownDivider>
@@ -243,7 +251,7 @@
                           size="sm"
                           color="primary"
                           v-c-tooltip="{ content: 'View Detection', placement: 'left' }"
-                          ><CIcon name="cilMagnifyingGlass" />&nbsp; View
+                          ><CIcon name="cilMagnifyingGlass" />&nbsp;&nbsp;View
                           Detection</CDropdownItem
                         >
                         <CDropdownItem 
@@ -251,10 +259,18 @@
                           @click="flagForAssessment(item.uuid)"
                           size="sm"
                           color="warning"
-                          v-bind:disabled="item.assess_rule"
+                          v-if="!item.assess_rule"
                           v-c-tooltip="{ content: 'Flag for Assessment', placement: 'left' }"
-                          ><CIcon name="cilFlagAlt" />&nbsp; Flag for Assessment</CDropdownItem
+                          ><i class="fas fa-flag"/>&nbsp;&nbsp;Flag for Assessment</CDropdownItem
                         >
+                        <CDropdownItem
+                          aria-label="Clear Warnings"
+                          @click="clearWarnings(item.uuid)"
+                          size="sm"
+                          color="success"
+                          v-if="item.warnings && item.warnings.length > 0"
+                          v-c-tooltip="{ content: 'Clear Warnings', placement: 'left' }"
+                        ><i class="fas fa-soap" />&nbsp;&nbsp;Clear Warnings</CDropdownItem>
                         <CDropdownItem
                           aria-label="Edit Detection"
                           @click="editDetectionModal(item.uuid)"
@@ -262,7 +278,7 @@
                           color="info"
                           v-c-tooltip="{ content: 'Edit Detection', placement: 'left' }"
                         >
-                          <CIcon name="cilPencil" />&nbsp;Edit Detection
+                          <CIcon name="cilPencil" />&nbsp;&nbsp;Edit Detection
                         </CDropdownItem>
                         <CDropdownItem
                           v-if="item.active"
@@ -275,7 +291,7 @@
                             placement: 'left',
                           }"
                         >
-                          <CIcon name="cilBan" />&nbsp;Disable Detection
+                          <CIcon name="cilBan" />&nbsp;&nbsp;Disable Detection
                         </CDropdownItem>
                         <CDropdownItem
                           v-if="!item.active"
@@ -285,7 +301,7 @@
                           color="success"
                           v-c-tooltip="{ content: 'Enable Detection', placement: 'left' }"
                         >
-                          <CIcon name="cilCheck" />&nbsp;Enable Detection
+                          <i class="fas fa-circle-check" />&nbsp;&nbsp;Enable Detection
                         </CDropdownItem>
                         <CDropdownItem
                           aria-label="Clone Detection"
@@ -294,7 +310,7 @@
                           @click="cloneDetection(item.uuid)"
                           v-c-tooltip="{ content: 'Clone Detection', placement: 'left' }"
                         >
-                          <CIcon name="cilCopy" />&nbsp;Clone Detection
+                          <CIcon name="cilCopy" />&nbsp;&nbsp;Clone Detection
                         </CDropdownItem>
                         <CDropdownItem
                           v-if="!item.from_repo_sync"
@@ -307,7 +323,7 @@
                             placement: 'left',
                           }"
                         >
-                          <CIcon name="cilStorage" />&nbsp;Add To Repository
+                          <CIcon name="cilStorage" />&nbsp;&nbsp;Add To Repository
                         </CDropdownItem>
                         <CDropdownItem
                           v-if="!item.from_repo_sync"
@@ -320,7 +336,7 @@
                             placement: 'left',
                           }"
                         >
-                          <CIcon name="cilStorage" />&nbsp;Remove from Repository
+                          <CIcon name="cilStorage" />&nbsp;&nbsp;Remove from Repository
                         </CDropdownItem>
                         <CDropdownItem
                           aria-label="Export Detection"
@@ -328,11 +344,11 @@
                           size="sm"
                           color="info"
                           v-c-tooltip="{
-                            content: 'Export Detection - COMING SOON',
+                            content: 'Export Detection',
                             placement: 'left',
                           }"
                         >
-                          <CIcon name="cilCloudDownload" />&nbsp;Export Detection
+                          <i class="fas fa-file-export" />&nbsp;&nbsp;Export Detection
                         </CDropdownItem>
                         <CDropdownItem
                           v-if="!item.active && !item.from_repo_sync"
@@ -342,7 +358,7 @@
                           color="danger"
                           v-c-tooltip="{ content: 'Delete Detection', placement: 'left' }"
                         >
-                          <CIcon name="cilTrash" />&nbsp;Delete Detection
+                          <CIcon name="cilTrash" />&nbsp;&nbsp;Delete Detection
                         </CDropdownItem>
                       </CDropdown>
                     </td>
@@ -872,6 +888,20 @@ export default {
         .then((resp) => {
           this.selected_items = [];
         });
+    },
+    clearWarnings(uuid) {
+      let uuids = [];
+      if(typeof(uuid) === "string") {
+        uuids = [uuid];
+      } else {
+        uuids = this.selected_items;
+      }
+      this.$store.dispatch("clearDetectionWarnings", { uuids: uuids }).then((resp) => {
+        this.selected_items = [];
+      }).catch((err) => {
+        this.selected_items = [];
+        this.alert = { message: err.response.data.message, type: "danger" };
+      });
     },
     enableDetections() {
       this.$store
