@@ -306,6 +306,7 @@
         </div>
       </div>
       <template #footer>
+        <CButton @click="resetDismissModal()" color="secondary">Cancel</CButton>
         <!--<CButton color="warning" @click="dismissEventByFilter()" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>-->
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
@@ -615,9 +616,18 @@ export default {
         this.loadCloseReasons()
         this.error = false
         this.error_message = ""
+        this.dismissalComment = ""
+        this.dismissalReason = null
         this.tuningAdviceToggle = false
         this.tuningAdvice = ''
         this.dismissEventModal = true
+      },
+      resetDismissModal() {
+        this.dismissEventModal = false
+        this.dismissalComment = ""
+        this.dismissalReason = null
+        this.tuningAdviceToggle = false
+        this.tuningAdvice = ''
       },
       resetFilters() {
         this.observableFilters = [{'filter_type':'status','data_type':'status','value':'New'}]
@@ -735,6 +745,12 @@ export default {
         if(this.related_events_count > 0) {
           this.selected_count = this.related_events_count
         }
+        this.dismissalReason = null
+        this.dismissalComment = ""
+        this.tuningAdviceToggle = false
+        this.tuningAdvice = ''
+        this.error = false
+        this.error_message = ""
         this.dismissEventModal = true
       },
       deleteEvent() {
@@ -1075,7 +1091,6 @@ export default {
             this.observableFilters = this.observableFilters.filter(item => item.filter_type !== 'start')
             this.observableFilters = this.observableFilters.filter(item => item.filter_type !== 'end')
           } else {
-            console.log(obs)
             this.observableFilters = this.observableFilters.filter(item => item.value !== obs.value)
           }
         }
