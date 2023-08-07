@@ -118,6 +118,7 @@
                   :sorterValue.sync="sorter_value"
                   :loading="loading"
                   style="border-top: 1px solid #cfcfcf"
+                  :responsive="false"
                 >
                   <template #organization-filter="{ item }">
                     <RMultiCheck
