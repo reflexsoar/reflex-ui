@@ -291,7 +291,7 @@
                   'field',
                   'alias',
                   'data_type',
-                  'tlp',
+                  { key: 'tlp', label: 'TLP' },
                   'tags',
                   'actions',
                 ]"
