@@ -684,7 +684,7 @@
                   ]"
                 >
                   <template #admin="{ item }">
-                    <td class="text-right" v-if="!rule.from_repo_sync && !item.is_global">
+                    <td class="text-right">
                       <CButton
                         aria-label="Edit Exclusion"
                         @click="editExclusion(item.uuid)"
@@ -798,7 +798,7 @@
                         'data_type',
                         'alias',
                         'tags',
-                        'tlp',
+                        { key: 'tlp', label: 'TLP' },
                         { key: 'admin', label: '' },
                       ]"
                       size="sm"
