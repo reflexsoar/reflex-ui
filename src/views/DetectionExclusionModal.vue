@@ -13,6 +13,9 @@
     >
     <h5>Exclusion</h5>
     <p>An exclusion can be added to prevent a detection rule from firing on very specific criteria.</p>
+    <CAlert :show="performance_warning" color="warning">
+      <strong>Warning:</strong> This exclusion contains a wildcard at the beginning of the value.  This will result in a very expensive query and may cause performance issues.
+    </CAlert>
     <CRow>
       <CCol>
         <CTextarea v-model="exclusion.description" label="Description" placeholder="A description of the exclusion and why it is being created"/>
@@ -29,7 +32,7 @@
         </div>
       </CCol>
       <CCol>
-        <CSelect :value.sync="exclusion.condition" :options='["is","one of"]' @change="checkValues" label="Condition"/>
+        <CSelect :value.sync="exclusion.condition" :options='["is","one of","wildcard"]' @change="checkValues" label="Condition"/>
       </CCol>
     </CRow>
     <CRow>
@@ -103,8 +106,23 @@ export default {
         return false
       }
     },
+    performance_warning() {
+      // If the condition is wildcard and any of the values start with a * or ? then we need to warn the user that this will be a very expensive query
+      if(this.exclusion.condition === 'wildcard') {
+        let values = this.exclusion.values
+        let warning = false
+        values.forEach(value => {
+          if(value.startsWith('*') || value.startsWith('?')) {
+            warning = true
+          }
+        })
+        return warning
+      } else {
+        return false
+      }
+    },
     allow_multiple () {
-      if(this.exclusion.condition === 'one of') {
+      if(['one of','wildcard'].includes(this.exclusion.condition)) {
         return true
       } else {
         return false

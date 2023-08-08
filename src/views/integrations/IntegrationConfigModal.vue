@@ -175,6 +175,17 @@
                         field.required && configuration.actions[action.name].enabled
                       "
                     />
+                    <div v-if="field.type == 'bool'">
+                      <label>{{ data }}</label
+                      ><br />
+                      <CSwitch
+                        :checked.sync="configuration.actions[action.name][data]"
+                        label-on="Yes"
+                        label-off="No"
+                        color="success"
+                      /><br />
+                      <small>{{ field.description }}</small>
+                    </div>
                   </CCol>
                 </CRow>
               </div>
@@ -200,7 +211,7 @@
             color="primary"
             :disabled="submitted"
             ><span v-if="submitted"><CSpinner size="sm" />&nbsp;</span>Save</CButton
-            >
+          >
         </template>
       </CModal>
     </form>
@@ -289,11 +300,15 @@ export default {
       return field_type;
     },
     isRequired(field) {
-        // Only return true if the field is required and the 
-        // action the field belongs to is enabled
-        if (field !== undefined && field.required && this.configuration.actions[field.action].enabled) {
-            return true;
-        }
+      // Only return true if the field is required and the
+      // action the field belongs to is enabled
+      if (
+        field !== undefined &&
+        field.required &&
+        this.configuration.actions[field.action].enabled
+      ) {
+        return true;
+      }
     },
     createConfiguration() {
       this.submitted = true;
@@ -314,32 +329,30 @@ export default {
         });
     },
     updateConfiguration() {
-        this.submitted = true;
-        this.$store
-            .dispatch("updateIntegrationConfiguration", {
-            uuid: this.integration.product_identifier,
-            configuration_uuid: this.uuid,
-            data: this.configuration,
-            })
-            .then((response) => {
-            this.submitted = false;
-            this.dismiss();
-            })
-            .catch((error) => {
-            this.error = true;
-            this.error_message = error.response.data.message;
-            this.step = 0;
-            this.submitted = false;
-            });
-        
+      this.submitted = true;
+      this.$store
+        .dispatch("updateIntegrationConfiguration", {
+          uuid: this.integration.product_identifier,
+          configuration_uuid: this.uuid,
+          data: this.configuration,
+        })
+        .then((response) => {
+          this.submitted = false;
+          this.dismiss();
+        })
+        .catch((error) => {
+          this.error = true;
+          this.error_message = error.response.data.message;
+          this.step = 0;
+          this.submitted = false;
+        });
     },
     submitForm() {
-        if (this.mode == "create" || this.mode == "clone") {
-            this.createConfiguration();
-        } else if (this.mode == "edit") {
-            this.updateConfiguration();
-        }
-        
+      if (this.mode == "create" || this.mode == "clone") {
+        this.createConfiguration();
+      } else if (this.mode == "edit") {
+        this.updateConfiguration();
+      }
     },
     toggleSecrets() {
       this.show_secrets = !this.show_secrets;

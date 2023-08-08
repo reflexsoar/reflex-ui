@@ -211,6 +211,9 @@
                     <b>Configuration</b>
                   </CCardHeader>
                   <CCardBody>
+                    <p v-if="current_user.default_org">
+                      <b>Organization</b><br /><OrganizationBadge :uuid="detection.organization"/>
+                    </p>
                     <p>
                       <b>Source Input</b><br />{{
                         detection.source ? detection.source.name : "Unknown"
@@ -280,6 +283,7 @@
                           'updated_at',
                           'original_date',
                         ]"
+                        
                       >
                         <template #severity="{ item }">
                           <td>
@@ -343,6 +347,7 @@
                         { key: 'list', label: 'Intel List' },
                         { key: 'admin', label: '' },
                       ]"
+                      :responsive="false"
                     >
                       <template #admin="{ item }">
                         <td class="text-right">
@@ -369,15 +374,7 @@
                       </template>
                       <template #values="{ item }">
                         <td>
-                          <li
-                            style="display: inline; margin-right: 2px"
-                            v-for="value in item.values"
-                            :key="value"
-                          >
-                            <CButton color="primary" size="sm" disabled>{{
-                              value
-                            }}</CButton>
-                          </li>
+                          <TagBucket :tags="item.values" label="Exclusions" />
                         </td>
                       </template>
                       <template #list="{ item }">
@@ -453,6 +450,8 @@ import { Viewer } from '@toast-ui/vue-editor';
 import DetectionExclusionModal from "./DetectionExclusionModal";
 import RMoment from './components/RMoment'
 import TagList from './components/TagList'
+import TagBucket from './components/TagBucket'
+import OrganizationBadge from './OrganizationBadge'
 
 export default {
   name: "DetectionDetails",
@@ -460,10 +459,12 @@ export default {
     DetectionExclusionModal,
     RMoment,
     TagList,
-    Viewer
+    Viewer,
+    OrganizationBadge,
+    TagBucket
   },
   computed: {
-    ...mapState(["detection", "detection_hits"]), 
+    ...mapState(["detection", "detection_hits", "current_user"]), 
     technique_names() {
       if (this.detection.techniques) {
         return this.detection.techniques.map((t) => t.name + " (" + t.external_id + ")");

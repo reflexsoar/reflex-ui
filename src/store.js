@@ -147,7 +147,8 @@ const state = {
   detection_repository: {},
   detection_repositories: [],
   event_views: [],
-  mitre_mapping: {}
+  mitre_mapping: {},
+  configured_actions: []
 }
 
 const mutations = {
@@ -587,6 +588,12 @@ const mutations = {
     state.detection = detection
     state.detections = [...state.detections.filter(d => d.uuid != detection.uuid), detection]
   },
+  update_detections(state, detections) {
+    for(let det in detections) {
+      let detection = detections[det]
+      state.detections = [...state.detections.filter(d => d.uuid != detection.uuid), detection]
+    }
+  },
   save_detection_hits(state, hits) {
     state.detection_hits = hits
   },
@@ -871,6 +878,9 @@ const mutations = {
   },
   store_integration(state, integration) {
     state.integration = integration
+  },
+  store_configured_actions(state, actions) {
+    state.configured_actions = actions
   }
 }
 
@@ -1437,7 +1447,6 @@ const actions = {
 
       let url = `${BASE_URL}/detection/select_by_filter?max_average_hits_per_day=${max_average_hits_per_day}&min_average_hits_per_day=${min_average_hits_per_day}`
 
-      console.log(url)
 
       if(techniques.length > 0) {
         url = url+`&techniques=${techniques}`
@@ -1823,7 +1832,6 @@ const actions = {
   },
   updateDetection({commit}, {uuid, data}) {
     return new Promise((resolve, reject) => {
-      console.log(data)
       Axios({url: `${BASE_URL}/detection/${uuid}`, data: data, method: 'PUT'})
       .then(resp => {
         commit('update_detection', resp.data)
@@ -2399,7 +2407,6 @@ const actions = {
   },
   dismissEventsByFilter({commit}, data) {
     return new Promise((resolve, reject) => {
-      console.log(data)
       Axios({url: `${BASE_URL}/event/dismiss_by_filter`, data: data, method: 'PUT'})
       .then(resp => {
         commit('save_multiple_events', resp.data)
@@ -3966,7 +3973,6 @@ const actions = {
         url += `&host__ip=${host__ip}`
       }
       
-      console.log(url)
       Axios({url: url, method: 'GET'})
       .then(resp => {
         resolve(resp)
@@ -4045,7 +4051,6 @@ const actions = {
       Axios({url: `${BASE_URL}/detection/delete`, data: {detections: uuids}, method: 'DELETE'})
       .then(resp => {
         for(let detection in resp.data.detections) {
-          console.log(resp.data.detections[detection])
           commit('remove_detection', resp.data.detections[detection])
         }
         resolve(resp)
@@ -4055,9 +4060,23 @@ const actions = {
       })
     })
   },
+  clearDetectionWarnings({commit}, {uuids}) {
+    commit('loading_status', true)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/detection/clear_warnings`, data: {detections: uuids}, method: 'POST'})
+      .then(resp => {
+        commit('update_detections', resp.data)
+        resolve(resp)
+        commit('loading_status', false)
+      })
+      .catch(err => {
+        reject(err)
+        commit('loading_status', false)
+      })
+    })
+  },
   importDetections({commit}, {data}) {
     return new Promise((resolve, reject) => {
-      console.log(data)
       Axios({url: `${BASE_URL}/detection/import`, data: data, method: 'POST'})
       .then(resp => {
         for(let detection in resp.data) {
@@ -4154,7 +4173,6 @@ const actions = {
   },
   createDetectionRepository({commit}, {data}) {
     return new Promise((resolve, reject) => {
-      console.log(data)
       Axios({url: `${BASE_URL}/detection_repository`, data: data, method: 'POST'})
       .then(resp => {
         commit('add_detection_repository', resp.data)
@@ -4226,8 +4244,6 @@ const actions = {
     })
   },
   createIntegrationConfiguration({commit}, {uuid, data}) {
-    console.log(uuid)
-    console.log(data)
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/integration/${uuid}/configurations`, data: data, method: 'POST'})
       .then(resp => {
@@ -4280,6 +4296,38 @@ const actions = {
       Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/disable`, method: 'POST'})
       .then(resp => {
         commit('update_integration_configuration', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getConfiguredActions({commit}, {source_object_type=[], observable_type=[], trigger='manual'}) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/integration/configured_actions?trigger=${trigger}`
+      if(source_object_type && source_object_type.length > 0) {
+        url += `&source_object_type=${source_object_type}`
+      }
+
+      if(observable_type && observable_type.length > 0) {
+        url += `&observable_type=${observable_type}`
+      }
+
+      Axios({url: url, method: 'GET', params: {source_object_type: source_object_type, observable_type: observable_type}})
+      .then(resp => {
+        commit('store_configured_actions', resp.data['actions'])
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  runAction({commit}, payload) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/integration/run_action`, data: payload, method: 'POST'})
+      .then(resp => {
         resolve(resp)
       })
       .catch(err => {

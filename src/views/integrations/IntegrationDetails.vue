@@ -338,6 +338,7 @@ export default {
                 }
 
                 if(action.configuration[field].default) {
+                  console.log("SETTING DEFAULT", field, action.configuration[field].default)
                     configuration.actions[action.name][field] = action.configuration[field].default
                 }
                 

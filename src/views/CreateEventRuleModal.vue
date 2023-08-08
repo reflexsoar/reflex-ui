@@ -1070,6 +1070,9 @@ export default {
       this.step -= 1;
     },
     loadData() {
+      this.$store.dispatch("getConfiguredActions", {trigger: "event_rule"}).then((resp) => {
+        console.log(resp.data)
+      })
       this.$store.dispatch("getCases", {}).then((resp) => {
         this.cases = this.$store.getters.cases;
       });
