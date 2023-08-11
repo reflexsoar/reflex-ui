@@ -27,7 +27,15 @@ export default {
     },
     methods: {
         orgName(uuid) {
-            return this.$store.getters.org_name(uuid)
+            // Check the store for the org name if it's not there, fetch it
+            let org = this.$store.getters.org_name(uuid)
+            if (org === 'Unknown') {
+                this.$store.dispatch('getOrganizations', uuid).then(() => {
+                    org = this.$store.getters.org_name(uuid)
+                    return org
+                })
+            }
+            return org
         }
 
     }

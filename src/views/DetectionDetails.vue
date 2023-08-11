@@ -23,7 +23,7 @@
               (<RMoment :date="detection.last_run" />)
             </p>
           </CCol>
-          <CCol col="1" class="text-right"> BUTTONS HERE </CCol>
+          
         </CRow>
         <CRow>
           <CCol col="8">
@@ -40,27 +40,14 @@
               :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
             >
                       <CTab title="Overview">
-                        <p>{{ detection.description }}</p>
-                    <p>
-                      <b>Created By: </b>
-                      {{
-                        detection.created_by ? detection.created_by.username : "N/A"
-                      }}
-                      on <RMoment :date="detection.created_at" format="MMMM Do YYYY, h:mm:ss a" />
-                    </p>
-                    <p v-if="detection.updated_by">
-                      <b>Updated By: </b> {{ detection.updated_by.username }},
-                      <RMoment :date="detection.updated_at" />
-                    </p>
-                    <p>
-                      <b>False Positives</b><br />
-                      <li v-for="fp in detection.false_positives" :key="fp">
+                        <table class="properties-table">
+                          <tr><td>Description</td><td>{{ detection.description }}</td></tr>
+                          <tr><td>Created By</td><td>{{ detection.created_by ? detection.created_by.username : "N/A" }} on <RMoment :date="detection.created_at" format="MMMM Do YYYY, h:mm:ss a" /></td></tr>
+                          <tr v-if="detection.updated_by && detection.updated_at"><td>Updated By</td><td>{{ detection.updated_by.username ? detection.updated_by.username : "System" }} on <RMoment :date="detection.updated_at" /> </td></tr>
+                          <tr v-if="detection.false_positives && detection.false_positives.length > 0"><td>False Positives</td><td><li v-for="fp in detection.false_positives" :key="fp">
                         {{ fp }}
-                      </li>
-                    </p>
-                    <p>
-                      <b>References</b><br />
-                      <li v-for="ref in detection.references" :key="ref">
+                      </li></td></tr>
+                        <tr v-if="detection.references && detection.references.length > 0"><td>References</td><td><li v-for="ref in detection.references" :key="ref">
                         <span v-if="ref.startsWith('http')"
                           >{{ ref }}&nbsp;<a _target="_child" :href="ref" target="_blank"
                             ><CIcon name="cil-external-link" size="sm" /></a
@@ -99,20 +86,12 @@
                           </ol></span
                         >
                         <span v-else>{{ ref }}</span>
-                      </li>
-                    </p>
-                    <p>
-                      <b>MITRE ATT&CK Tactics</b>
-                      <TagList :tags="tactic_names" :tagIcon="false" />
-                    </p>
-                    <p>
-                      <b>MITRE ATT&CK Techniques</b>
-                      <TagList :tags="technique_names" :tagIcon="false" />
-                    </p>
-                    <p>
-                      <b>Tags</b>
-                      <TagList :tags="detection.tags" :tagIcon="false"/>
-                    </p>
+                        </li></td></tr>
+                        <tr><td>MITRE ATT&CK Tactics</td><td><TagList :tags="tactic_names" :tagIcon="false" /></td></tr>
+                        <tr><td>MITRE ATT&CK Techniques</td><td><TagList :tags="technique_names" :tagIcon="false" /></td></tr>
+                        <tr><td>Tags</td><td><TagList :tags="detection.tags" :tagIcon="false"/></td></tr>
+                        <tr><td>Last Assessed</td><td><CBadge class="tag" color="info" v-if="detection.assess_rule">Pending - Previously <RMoment :date="detection.last_assessed" /></CBadge><RMoment v-else :date="detection.last_assessed" /></td></tr>
+                        </table>
                     <span v-if="detection.from_sigma"
                       ><b
                         >Sigma Rule (<span
@@ -211,39 +190,24 @@
                     <b>Configuration</b>
                   </CCardHeader>
                   <CCardBody>
-                    <p v-if="current_user.default_org">
-                      <b>Organization</b><br /><OrganizationBadge :uuid="detection.organization"/>
-                    </p>
-                    <p>
-                      <b>Source Input</b><br />{{
-                        detection.source ? detection.source.name : "Unknown"
-                      }}
-                    </p>
-                    <p>
-                      <b>Detection Type</b><br />{{ detectionType(detection.rule_type) }}
-                    </p>
-                    <p>
-                      <b>Base Query</b><br />
-                      <div class="query">
-                        {{ detection.query ? detection.query.query : "" }}
-                      </div>
-                    </p>
-                    <p>
-                      <b>Severity</b><br /><CButton
+                    <table class="properties-table">
+                      <tr v-if="current_user.default_org"><td>Organization</td><td><OrganizationBadge :uuid="detection.organization"/></td></tr>
+                      <tr><td>Source Input</td><td>{{detection.source ? detection.source.name : "Unknown"}}</td></tr>
+                      <tr><td>Detection Type</td><td>{{ detectionType(detection.rule_type) }}</td></tr>
+                      <tr><td>Base Query</td><td><pre style="white-space: pre-wrap;" class="query">{{ detection.query ? detection.query.query : "" }}</pre></td></tr>
+                      <tr><td>Severity</td><td><CBadge
                         class="tag"
                         size="sm"
                         :color="$store.getters.severity_color(detection.severity)"
-                        >{{ $store.getters.severity_text(detection.severity) }}</CButton
-                      >
-                    </p>
-                    <p>
-                      <b>Risk Score</b><br /><CProgress
+                        >{{ $store.getters.severity_text(detection.severity) }}</CBadge>
+                      </td></tr>
+                      <tr><td>Risk Score</td><td><CProgress
                         :max="max_risk"
                         :value="parseInt(detection.risk_score)"
                         show-value
-                        :color="riskScoreColor(detection.risk_score)"
-                      />
-                    </p>
+                        :color="riskScoreColor(detection.risk_score)"/>
+                      </td></tr>
+                    </table>
                   </CCardBody>
                 </CCard>
               </CCol>
@@ -283,6 +247,7 @@
                           'updated_at',
                           'original_date',
                         ]"
+                        :responsive="false"
                         
                       >
                         <template #severity="{ item }">
@@ -323,15 +288,7 @@
                         </template>
                         <template #tags="{ item }">
                           <td>
-                            <li
-                              style="display: inline; margin-right: 2px"
-                              v-for="tag in item.tags"
-                              :key="tag"
-                            >
-                              <CButton color="primary" size="sm" disabled="">{{
-                                tag
-                              }}</CButton>
-                            </li>
+                            <TagBucket :tags="item.tags" label="Tags" />
                           </td>
                         </template>
                       </CDataTable>
@@ -431,12 +388,34 @@
   border-radius: 0.25rem;
   box-shadow: inset 0 1px 1px rgb(0 0 21 / 8%);
 
+  max-height: 200px;
+  overflow-y: auto;
+
   /* you must provide font-family font-size line-height. Example: */
   font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
   font-size: 14px;
   line-height: 1.5;
   padding: 5px;
   padding-left: 10px;
+}
+.properties-table td {
+  padding: 5px;
+  border: 5px solid #fff;
+  border-spacing: 5px;
+  /* Vertically align the text in the middle of the td*/
+}
+
+.properties-table td:first-child {
+  padding-right: 20px;
+  width: 28%;
+  font-weight: bold;
+  vertical-align: top;
+  background-color: #efefef;
+}
+
+.properties-table td:nth-child(2) {
+  text-align: left;
+  vertical-align: top;
 }
 </style>
 <script>

@@ -9,7 +9,7 @@
             </span>
         </span>
         <span v-else>
-            {missing_date_text}
+            Never
         </span>
     </span>
 </template>

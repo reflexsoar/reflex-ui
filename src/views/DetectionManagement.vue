@@ -157,42 +157,37 @@
                     <td>
                       <CRow>
                         <CCol>
-                          <CBadge class="tag tag-sm" color="success" v-if="item.active"
-                            >Active</CBadge
-                          ><CBadge class="tag tag-sm" color="danger" v-else
-                            >Inactive</CBadge
-                          >&nbsp;<b>{{ item.name }}</b>
+                          <CRow>
+                            <CCol col=1>
+                            <CBadge class="tag tag-sm" color="success" v-if="item.active"
+                              >Active</CBadge
+                            ><CBadge class="tag tag-sm" color="danger" v-else
+                              >Inactive</CBadge
+                            >
+                            </CCol>
+                            <CCol style="margin-left:5px"><b>{{ item.name }}</b><br>
+                          <span class="small rule_description">{{ item.description | truncate_description }}</span></CCol>
+                          </CRow>
                         </CCol>
-                        <CCol col="3">
-                          <div style="display: inline-block; padding-right: 2px">
+                        <CCol col=3 class="detection-attributes">
+                          <div v-if="item.tags && item.tags.length > 0">
                             <TagBucket
-                              v-if="item.tags && item.tags.length > 0"
                               :tags="item.tags"
                             />
                           </div>
-                          <div style="display: inline-block">
+                          <div v-if="item.repository && item.repository.length > 0">
                             <DetectionRepoPopover
-                              v-if="item.repository && item.repository.length > 0"
                               :repositories="item.repository"
                             />
                           </div>
-                          <div v-if="item.assess_rule" style="display: inline-block; padding-left: 2px;">
+                          <div v-if="item.assess_rule" style="">
                             <TagBucket iconName="cil-speedometer" label="Flagged for Assessment" :noCount="true" tagColor="primary" />
+                          </div>
+                          <div v-if="item.warnings && item.warnings.length > 0">
+                            <TagBucket :tags="item.warnings" iconName="cil-warning" label="Warnings" tagColor="danger" />
                             </div>
                         </CCol>
                       </CRow>
-                      <br />
-                      <span v-if="item.warnings && item.warnings.length > 0">
-                        <li
-                          style="display: inline; margin-right: 2px"
-                          v-for="(warning, i) in item.warnings"
-                          :key="i"
-                        >
-                          <CButton color="warning" class="tag" size="sm">{{
-                            warning
-                          }}</CButton>
-                        </li>
-                      </span>
                     </td>
                   </template>
                   <template #organization="{ item }">
@@ -221,6 +216,11 @@
                       {{ item.total_hits ? item.total_hits : 0 }}
                     </td>
                   </template>
+                  <template #average_hits_per_day="{ item }">
+                    <td style="width: 75px" class="text-center">
+                      {{ item.average_hits_per_day ? item.average_hits_per_day : 0 }}
+                    </td>
+                  </template>
                   <template #tags="{ item }">
                     <td>
                       <TagBucket :tags="item.tags" />
@@ -235,12 +235,6 @@
                       ms<br />
                       Total Time:
                       {{ item.time_taken ? item.time_taken.toLocaleString() : 0 }} ms
-                      <br>
-                      Estimated Hits Per Day:
-                      <span v-if="item.average_hits_per_day != null">
-                        {{ item.average_hits_per_day ? item.average_hits_per_day.toLocaleString() : 0 }}
-                      </span>
-                      <span v-else>-</span>
                     </td>
                   </template>
                   <template #actions="{ item }">
@@ -428,6 +422,27 @@
   </div>
 </template>
 
+<style scoped>
+.detection-attributes > div {
+  display: inline-block;
+  padding-right: 2px;
+  padding-bottom: 3px;
+}
+
+.rule_description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.rule_description:hover {
+  display: block;
+}
+
+</style>
+
 <script>
 import { mapState } from "vuex";
 import "prismjs/components/prism-yaml";
@@ -482,9 +497,10 @@ export default {
         "status",
         "last_run",
         "last_hit",
+        
+        { key: "average_hits_per_day", label: "Estimated Hits"},
         { key: "total_hits", label: "Hits" },
-        { key: "performance", label: "Performance" },
-        { key: "actions", filter: false },
+        { key: "actions", filter: false }
       ],
       modal_mode: "Create",
       show_detection_rule_modal: false,
@@ -1053,6 +1069,6 @@ export default {
     }
     this.$store.commit("add_start"); // Stop the success/fail add from showing up when changing from other pages
     this.getDetections();
-  },
+  }
 };
 </script>

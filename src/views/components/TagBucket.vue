@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CCard class="bucket" @click="toggleDetails()">
+    <CCard class="bucket" @click="toggleDetails()" :color="color">
       <CIcon :name="iconName" style="margin-top:-1px; width: 14px; height: 14px;"/><template v-if="!noCount">&nbsp;{{ tags ? tags.length : 0 }}</template>
       
         <CCard class="tag-list" v-if="show_details">
@@ -68,6 +68,14 @@ export default {
     label: {
       type: String,
       default: "Tags",
+    },
+    color: {
+      type: String,
+      default: "white",
+    },
+    fontColor: {
+      type: String,
+      default: null,
     },
     iconName: {
       type: String,
