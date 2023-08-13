@@ -166,7 +166,7 @@
                             >
                             </CCol>
                             <CCol style="margin-left:5px"><b>{{ item.name }}</b><br>
-                          <span class="small rule_description">{{ item.description | truncate_description }}</span></CCol>
+                          <span class="small rule_description">{{ item.description }}</span></CCol>
                           </CRow>
                         </CCol>
                         <CCol col=3 class="detection-attributes">
@@ -578,6 +578,7 @@ export default {
           threshold_as_percent: false
         },
         daily_schedule: false,
+        schedule_timezone: "Etc/GMT",
         schedule: this.defaultSchedule(),
       },
       current_page: 1,
@@ -683,6 +684,7 @@ export default {
           window_size: 30,
         },
         daily_schedule: false,
+        schedule_timezone: "Etc/GMT",
         schedule: this.defaultSchedule(),
       };
     },
@@ -752,6 +754,7 @@ export default {
           threshold_as_percent: false
         },
         daily_schedule: false,
+        schedule_timezone: "Etc/GMT",
         schedule: this.defaultSchedule(),
       };
       this.show_detection_rule_modal = true;
