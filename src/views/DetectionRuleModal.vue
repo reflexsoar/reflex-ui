@@ -221,14 +221,40 @@
                   </p>
                   <CRow>
                     <CCol>
-                      <CInput
-                        v-model="rule.threshold_config.key_field"
-                        label="Group By"
-                        placeholder="Optional"
-                        description="Optional - When supplied the threshold will apply to the count of total distinct values of this field."
+                      <label for="key_fields">Key Fields</label><br>
+                      <multiselect v-model="rule.threshold_config.key_field"
+                        id="key_fields"
+                        :options="threshold_key_field_options"
+                        :multiple="true"
+                        @tag="addThresholdKeyField"
+                        :close-on-select="false"
+                        :clear-on-select="false"
+                        :taggable="true"
+                        placeholder="Select a field"
+                        style="z-index:1000"
                       />
+                      <small><p class="text-muted">Optional - The field(s) to group by for the threshold</p></small>
                     </CCol>
-                    <CCol col="2">
+                    <CCol col=4>
+                      <CInput
+                        v-model="rule.threshold_config.threshold_field"
+                        label="Threshold Field"
+                        description="Optional - The field to compute the threshold against"
+                      />
+                      
+                    </CCol>
+                  </CRow>
+                  <CRow>
+                  <CCol>
+                      <CSelect
+                        :value.sync="rule.threshold_config.mode"
+                        label="Threshold Mode"
+                        :options="['count', 'terms', 'cardinality']"
+                        description="How is the threshold value determined.  count = All matching events, terms = Count per term, cardinality = unique count of terms"
+                        />
+                        </CCol>
+
+                    <CCol col=2>
                       <CSelect
                         :value.sync="rule.threshold_config.operator"
                         label="Operator"
@@ -240,12 +266,12 @@
                         v-model.number="rule.threshold_config.threshold"
                         v-bind:disabled="rule.threshold_config.dynamic"
                         label="Threshold"
-                        description="The number of items that required for the detection to fire"
                       />
                     </CCol>
                   </CRow>
                   <CRow>
-                    <CCol col="3">
+                    <!--<CCol col="3">
+                      
                       <label for="per_field">Alarm per Field Value</label><br />
                       <CSwitch
                         v-bind:disabled="rule.threshold_config.key_field == ''"
@@ -259,9 +285,9 @@
                       /><br />
                       <small class="form-text text-muted w-100"
                         >When active, changes the group by field to count of hits per
-                        distinct field value.</small
-                      >
-                    </CCol>
+                        distinct field value.</small>
+                      
+                    </CCol>-->
                     <CCol col="3">
                       <label for="dynamic_threshold">Dynamic Threshold</label><br />
                       <CSwitch
@@ -574,7 +600,7 @@
                   specified time window. By default a detection will run every day from
                   00:00 to 23:59.
                 </p>
-                <CSelect v-model="rule.schedule_timezone" label="Timezone" :options="timezones" />
+                <CSelect :value.sync="rule.schedule_timezone" label="Timezone" :options="timezones" />
                 <CRow>
                   <CCol>
                     <CRow v-for="(i, day) in rule.schedule">
@@ -1408,6 +1434,7 @@ export default {
       sigma_backend: "",
       sigma_pipeline: "",
       observable_fields: [],
+      threshold_key_field_options: [],
       data_types: [
         "url",
         "user",
@@ -1488,6 +1515,10 @@ export default {
                 });
             }
           });
+        if (this.rule.threshold_config.key_field) {
+          this.threshold_key_field_options = this.rule.threshold_config.key_field
+        }
+
         if (this.rule.tags) {
           this.tag_list = this.rule.tags.map((o) => {
             return o;
@@ -2047,6 +2078,19 @@ export default {
           this.error = true;
           this.error_message = error.response.data.message;
         });
+    },
+    addThresholdKeyField(event) {
+      console.log(event)
+      if (this.rule.threshold_config.key_field) {
+        this.$set(this.rule.threshold_config, "key_field", [
+          ...this.rule.threshold_config.key_field,
+          event,
+        ]);
+      } else {
+        this.$set(this.rule.threshold_config, "key_field", [""]);
+      }
+
+      this.threshold_key_field_options.push(event)
     },
     defaultSchedule() {
       return {
