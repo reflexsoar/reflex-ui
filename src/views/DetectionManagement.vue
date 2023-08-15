@@ -661,7 +661,7 @@ export default {
         threshold_config: {
           threshold: 0,
           max_events: 10,
-          key_field: "",
+          key_field: [],
           operator: "==",
           dynamic: false,
           per_field: false,
@@ -716,7 +716,7 @@ export default {
         threshold_config: {
           threshold: 0,
           max_events: 10,
-          key_field: "",
+          key_field: [],
           operator: "==",
           dynamic: false,
           per_field: false,
