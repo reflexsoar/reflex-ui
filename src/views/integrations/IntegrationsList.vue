@@ -61,14 +61,14 @@
             <CCard>
               <CCardBody>
                 <CRow>
-                  <CCol col="4">
-                    <img :src="integration.logo" style="width: 100%" />
+                  <CCol style="height: 50px;">
+                    <img :src="integration.logo" style="height: 100%; width: 100%; object-fit: scale-down" />
                   </CCol>
-                  <CCol>
+                  <CCol col=8 style="padding-top: 10px">
                     <h4>{{ integration.name }}</h4>
                   </CCol>
                 </CRow>
-                <CRow>
+                <CRow style="padding-top: 10px">
                   <CCol>
                     <p style="min-height: 100px; max-height: 100px; overflow-y: scroll">
                       {{ integration.brief_description }}

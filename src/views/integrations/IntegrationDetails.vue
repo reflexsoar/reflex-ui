@@ -8,7 +8,7 @@
         <CCol col=2>
             <CCard>
             <CCardBody class="text-center" style="height: 125px; line-height: 80px;">
-                <img :src="integration.logo" :alt="integration.name" width="100%" />
+                <img :src="integration.logo" :alt="integration.name" style="height: 100%; width: 100%; object-fit: scale-down" />
             </CCardBody>
             </CCard>
         </CCol>
