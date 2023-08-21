@@ -27,6 +27,7 @@
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="Intel Explorer" to="/lists/explore"></CSidebarNavItem>
       </CSidebarNavDropdown>
       <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_events')" name="Integrations" to="/integrations" icon="cil-applications" :badge="beta_badge"></CSidebarNavItem>
+      <CSidebarNavItem name="Assets" to="/assets" icon="cil-layers" :badge="beta_badge"></CSidebarNavItem>
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='System' icon="cil-settings">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_settings')" name="Settings" to="/settings"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_notification_channel')" name='Notifications' to="/notifications" :badge="beta_badge"></CSidebarNavItem>
