@@ -142,6 +142,11 @@
                             <CBadge class="tag" color="dark">{{ item.type ? item.type : 'unknown' }}</CBadge>
                           </td>
                         </template>
+                        <template #run_from="{item}">
+                          <td style="text-transform: capitalize">
+                            <CBadge class="tag" color="dark">{{ item.run_from ? item.run_from : 'unknown' }}</CBadge>
+                          </td>
+                        </template>
                         <template #description="{item}">
                           <td>
                            <vue-markdown>{{item.description}}</vue-markdown><span v-if="item.configuration"><br><i><b>Note</b>: Requires specific action configuration when setting up for the first time.</i></span>
@@ -210,9 +215,10 @@ export default {
       loading: false,
       configurations_loading: false,
       action_fields: [
-        {key: "friendly_name", label: "Action Name"},
-        {key: "description", label: "Description", _style: "width: 70%"},
-        {key: "type", label: "Action Type", _style: "width: 10%"}
+        {key: "friendly_name", label: "Action Name", _style: "width: 20%"},
+        {key: "description", label: "Description", _style: "width: 60%"},
+        {key: "type", label: "Action Type", _style: "width: 10%"},
+        {key: "run_from", label: "Runs From", _style: "width: 10%"}
       ],
       showConfigModal: false,
       modal_mode: "create",
