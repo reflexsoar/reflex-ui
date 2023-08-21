@@ -26,75 +26,70 @@
               placeholder="Enter a description for this configuration"
               description="Providing a description for the configuration allows users to determine in more detail why this configuration exsits"
             />
+          </CTab>
+          <CTab
+            title="Global Settings"
+            v-if="
+              integration.manifest !== undefined &&
+              'configuration' in integration.manifest &&
+              Object.keys(integration.manifest.configuration).length > 0
+            "
+          >
             <h3>Global settings</h3>
             <p>
               Global settings are used by multiple actions for the integration. These
               settings are not action specific.
             </p>
-            <div
-              v-if="
-                integration.manifest !== undefined &&
-                'configuration' in integration.manifest &&
-                Object.keys(integration.manifest.configuration).length > 0
-              "
-            >
-              <CRow v-for="(field, data) in integration.manifest.configuration">
-                <CCol v-if="configuration.global_settings !== undefined">
-                  <CInput
-                    v-model="configuration.global_settings[data]"
-                    v-if="field.type == 'str'"
-                    :label="data"
-                    :description="field.description"
-                    :placeholder="field.default"
-                    v-bind:required="isRequired()"
-                    :type="isSecret(field)"
+
+            <CRow v-for="(field, data) in integration.manifest.configuration">
+              <CCol v-if="configuration.global_settings !== undefined">
+                <CInput
+                  v-model="configuration.global_settings[data]"
+                  v-if="field.type == 'str'"
+                  :label="data"
+                  :description="field.description"
+                  :placeholder="field.default"
+                  v-bind:required="isRequired()"
+                  :type="isSecret(field)"
+                >
+                  <template
+                    v-if="field.secret !== undefined && field.secret == true"
+                    #append-content
                   >
-                    <template
-                      v-if="field.secret !== undefined && field.secret == true"
-                      #append-content
-                    >
-                      <span style="cursor: pointer" @click="show_secrets = !show_secrets"
-                        ><i v-if="show_secrets" class="fas fa-eye-slash"></i
-                        ><i v-else class="fas fa-eye"></i
-                      ></span>
-                    </template>
-                  </CInput>
-                  <CTextarea
-                    v-model="configuration.global_settings[data]"
-                    v-if="field.type == 'text'"
-                    :label="data"
-                    :description="field.description"
-                    :placeholder="field.default"
-                    v-bind:required="field.required"
-                  />
-                  <CInput
-                    v-model.number="configuration.global_settings[data]"
-                    v-if="field.type == 'int'"
-                    :label="data"
-                    :description="field.description"
-                    :placeholder="field.default"
-                    v-bind:required="field.required"
-                  />
-                  <CSelect
-                    v-model="configuration.global_settings[data]"
-                    v-if="field.type == 'str-select'"
-                    :label="data"
-                    :description="field.description"
-                    :placeholder="field.default"
-                    v-bind:required="field.required"
-                  >
-                    <option v-for="option in field.options" :value="option">
-                      {{ option }}
-                    </option>
-                  </CSelect>
-                </CCol>
-              </CRow>
-            </div>
-            <div v-else>
-              <CAlert color="info">
-                <b>Note:</b> Integration has no global settings.
-              </CAlert>
-            </div>
+                    <span style="cursor: pointer" @click="show_secrets = !show_secrets"
+                      ><i v-if="show_secrets" class="fas fa-eye-slash"></i
+                      ><i v-else class="fas fa-eye"></i
+                    ></span>
+                  </template>
+                </CInput>
+                <CTextarea
+                  v-model="configuration.global_settings[data]"
+                  v-if="field.type == 'text'"
+                  :label="data"
+                  :description="field.description"
+                  :placeholder="field.default"
+                  v-bind:required="field.required"
+                />
+                <CInput
+                  v-model.number="configuration.global_settings[data]"
+                  v-if="field.type == 'int'"
+                  :label="data"
+                  :description="field.description"
+                  :placeholder="field.default"
+                  v-bind:required="field.required"
+                />
+                <CSelect
+                  v-model="configuration.global_settings[data]"
+                  v-if="field.type == 'str-select'"
+                  :label="data"
+                  :options="field.options"
+                  :description="field.description"
+                  :placeholder="field.default"
+                  v-bind:required="field.required"
+                >
+                </CSelect>
+              </CCol>
+            </CRow>
           </CTab>
           <div
             v-if="
