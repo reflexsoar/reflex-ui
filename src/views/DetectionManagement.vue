@@ -186,6 +186,9 @@
                           <div v-if="item.warnings && item.warnings.length > 0">
                             <TagBucket :tags="item.warnings" iconName="cil-warning" label="Warnings" tagColor="danger" />
                             </div>
+                          <div v-if="item.status == 'Production - Enterprise'">
+                            <CBadge class="tag" color="warning" size="sm" v-c-tooltip='{"content":"24/7 Eligible"}'><i class="fas fas-small fa-star"></i></CBadge>
+                          </div>
                         </CCol>
                       </CRow>
                     </td>

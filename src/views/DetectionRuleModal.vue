@@ -1278,7 +1278,8 @@ export default {
         "Stable",
         "Test",
         "Deprecated",
-        "Production",
+        'Production',
+        "Production - Enterprise"
       ],
       tabs: [
         { name: "Overview", icon: "cil-description" },
