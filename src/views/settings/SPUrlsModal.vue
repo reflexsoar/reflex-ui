@@ -29,7 +29,8 @@ export default {
   },
   watch: {
     show: function () {
-      this.$emit("update:show", this.show);
+
+      
     },
   },
   data() {
@@ -39,7 +40,7 @@ export default {
       error_message: "",
       acs_url: window.location.origin+"/api/v2.0/auth/sso/"+this.provider_uuid+"/acs",
       slo_url: window.location.origin+"/api/v2.0/auth/sso/"+this.provider_uuid+"/slo",
-      entity_id: window.location.origin,
+      entity_id: "reflexsoar:sp:"+this.provider_uuid+":saml2",
     };
   },
   methods: {
