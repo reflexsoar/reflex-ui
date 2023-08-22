@@ -68,6 +68,7 @@
             :fields="fields"
             :loading="loading"
             :items-per-page="10"
+            :responsive="false"
             pagination
             hover
             column-filter
