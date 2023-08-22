@@ -340,14 +340,33 @@ export default {
                         action.configuration[field].default = false
                     } else if(action.configuration[field].type == "int") {
                         action.configuration[field].default = 0
+                    } else if (action.configuration[field].type == "str-multiple") {
+                      action.configuration[field].default = []
                     }
                 }
 
                 if(action.configuration[field].default) {
-                  console.log("SETTING DEFAULT", field, action.configuration[field].default)
                     configuration.actions[action.name][field] = action.configuration[field].default
                 }
                 
+            }
+        }
+
+        // Build the default global options
+        for (let field in this.integration.manifest.configuration) {
+            console.log(field)
+            if(this.integration.manifest.configuration[field].default == null && this.integration.manifest.configuration[field].required) {
+                if(this.integration.manifest.configuration[field].type == "str") {
+                    configuration.global_settings[field].default = ""
+                } else if(this.integration.manifest.configuration[field].type == "bool") {
+                    configuration.global_settings[field].default = false
+                } else if(this.integration.manifest.configuration[field].type == "int") {
+                    configuration.global_settings[field].default = 0
+                }
+            }
+
+            if(this.integration.manifest.configuration[field].default) {
+                configuration.global_settings[field] = this.integration.manifest.configuration[field].default
             }
         }
         return configuration
