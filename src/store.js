@@ -1044,6 +1044,15 @@ const actions = {
       })
     })
   },
+  loginWithSAML({commit}, user) {
+    return new Promise((resolve, reject) => {
+      commit('auth_request')
+      Axios({url: `${BASE_URL}/auth/ssostart`, data: user, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+    })
+  },
   checkMFA({commit}, user) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/auth/mfa`, data: user, method: 'POST'})
@@ -2474,6 +2483,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event/${uuid}/comment`, data: data, method: 'POST'})
       .then(resp => {
+        commit('add_event_comment', resp.data)
         resolve(resp)
       })
       .catch(err => {

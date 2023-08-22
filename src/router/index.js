@@ -66,6 +66,8 @@ const ForgotPassword = () => import('@/views/ForgotPassword')
 const ResetPassword = () => import('@/views/ResetPassword')
 const Register = () => import('@/views/pages/Register')
 
+import Axios from 'axios'
+
 Vue.use(Router)
 
 Vue.component('v-select', vSelect)
@@ -78,6 +80,24 @@ let router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
+
+  /* Check to see if the access_token and refresh_token cookies exist
+  and if they are move them to local storage */
+  if (localStorage.getItem('access_token') === null) {
+    if (document.cookie.split(';').some((item) => item.trim().startsWith('access_token='))) {
+      let access_token = document.cookie.replace(/(?:(?:^|.*;\s*)access_token\s*\=\s*([^;]*).*$)|^.*$/, "$1")
+      let refresh_token = document.cookie.replace(/(?:(?:^|.*;\s*)refresh_token\s*\=\s*([^;]*).*$)|^.*$/, "$1")
+      localStorage.setItem('access_token', access_token)
+      localStorage.setItem('refresh_token', refresh_token)
+      Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+      store.commit('auth_success', {access_token, refresh_token})
+      // Null out the cookies
+      document.cookie = "access_token =; Max-Age=0"
+      document.cookie = "refresh_token =; Max-Age=0"
+      
+    }
+  }
+
 
   // Clear any alerts before moving on to the next page
   store.commit('clear_alert')
