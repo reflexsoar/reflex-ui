@@ -148,10 +148,44 @@ const state = {
   detection_repositories: [],
   event_views: [],
   mitre_mapping: {},
-  configured_actions: []
+  configured_actions: [],
+  sso_providers: [],
+  sso_provider: {},
+  sso_role_mappings: [],
+  sso_role_mapping: {}
 }
 
 const mutations = {
+  save_sso_providers(state, providers) {
+    state.sso_providers = providers
+  },
+  add_sso_provider(state, provider) {
+    state.sso_providers.push(provider)
+    state.sso_provider = provider
+  },
+  update_sso_provider(state, provider) {
+    state.sso_provider = provider
+    state.sso_providers = [...state.sso_providers.filter(r => r.uuid != provider.uuid), provider]
+  },
+  delete_sso_provider(state, uuid) {
+    state.sso_provider = {}
+    state.sso_providers = state.sso_providers.filter(r => r.uuid != uuid)
+  },
+  save_sso_role_mappings(state, mappings) {
+    state.sso_role_mappings = mappings
+  },
+  add_sso_role_mapping(state, mapping) {
+    state.sso_role_mappings.push(mapping)
+    state.sso_role_mapping = mapping
+  },
+  update_sso_role_mapping(state, mapping) {
+    state.sso_role_mapping = mapping
+    state.sso_role_mappings = [...state.sso_role_mappings.filter(m => m.uuid != mapping.uuid), mapping]
+  },
+  delete_sso_role_mapping(state, uuid) {
+    state.sso_role_mapping = {}
+    state.sso_role_mappings = state.sso_role_mappings.filter(m => m.uuid != uuid)
+  },
   save_detection_mitre_mapping(state, mitre_mapping) {
     state.mitre_mapping = mitre_mapping
   },
@@ -1050,6 +1084,9 @@ const actions = {
       Axios({url: `${BASE_URL}/auth/ssostart`, data: user, method: 'POST'})
       .then(resp => {
         resolve(resp)
+      }).catch(err => {
+        
+        reject(err)
       })
     })
   },
@@ -4338,6 +4375,84 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/integration/run_action`, data: payload, method: 'POST'})
       .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createSSOProvider({commit}, data) {
+    commit('loading_status',true)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/provider`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_sso_provider', resp.data)
+        commit('loading_status',false)
+        resolve(resp)
+      })
+      .catch(err => {
+        commit('loading_status',false)
+        reject(err)
+      })
+    })
+  },
+  getSSOProviders({commit}) {
+    commit('loading_status',true)
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/provider`, method: 'GET'})
+      .then(resp => {
+        commit('save_sso_providers', resp.data.providers)
+        commit('loading_status',false)
+        resolve(resp)
+      })
+      .catch(err => {
+        commit('loading_status',false)
+        reject(err)
+      })
+    })
+  },
+  updateSSOProvider({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/provider/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_sso_provider', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  activateSSOProvider({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/provider/${uuid}/activate`, method: 'PUT'})
+      .then(resp => {
+        commit('update_sso_provider', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deactivateSSOProvider({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/provider/${uuid}/deactivate`, method: 'PUT'})
+      .then(resp => {
+        commit('update_sso_provider', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteSSOProvider({commit}, {uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/provider/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('remove_sso_provider', uuid)
         resolve(resp)
       })
       .catch(err => {

@@ -9,6 +9,13 @@
             >
               Failed to login. Invalid username or password.
             </CAlert>
+        <CAlert v-if="sso_disabled"
+            closeButton
+            color="danger"
+            fade
+          >
+            Unable to login with SSO.  Contact your ReflexSOAR Administrator.
+          </CAlert>
         <CCardGroup>
           <CCard color="light">
             <CCardBody>
@@ -70,7 +77,8 @@ export default {
     return {
       email: "",
       password: "",
-      logo_path: require("../assets/img/color-logo-dots.png")
+      logo_path: require("../assets/img/color-logo-dots.png"),
+      sso_disabled: false
     }
   },
   methods: {
@@ -94,6 +102,8 @@ export default {
       let email = this.email
       this.$store.dispatch('loginWithSAML', {email}).then(resp => {
         window.location.href = resp.data
+      }).catch(err => {
+        this.sso_disabled = true
       })
     },
     authStatus: function() {
