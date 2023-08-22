@@ -1,5 +1,12 @@
 <template>
-<div>
+<div><CRow class="page-sub-header">
+        <CCol>
+          <h2>Cases</h2>
+        </CCol>
+        <CCol class="text-right">
+            <CButton color="primary" @click="newCaseModal = !newCaseModal">New Case</CButton>
+        </CCol>
+      </CRow>
   <CRow>
     <CCol>
       <!-- START FILTER PICKERS TODO: Move this to it's own component-->
@@ -118,15 +125,7 @@
           
         </CCol>
       </CRow>
-      <CRow style="padding:10px">
-        <CCol col="10">
-          <CButton color="primary" @click="newCaseModal = !newCaseModal">New Case</CButton>
-        </CCol>
-        <CCol col="2" class="text-right">
-          <RMultiCheck :items="available_fields" :value.sync="fields" default_prompt="Select Columns"></RMultiCheck>
-        </CCol>
-      </CRow>
-             <CRow><CCol> <CDataTable
+             <CRow style="padding-top: 5px;"><CCol> <CCard><CDataTable
                   :hover="hover"
                   :striped="striped"
                   :bordered="bordered"
@@ -140,7 +139,6 @@
                   :sorter='{external: false, resetable: true}'
                   :responsive="false"
                   pagination
-                  style="border-top: 1px solid #cfcfcf;"
               >
               <template #title="{item}">
                   <td>
@@ -200,7 +198,7 @@
                   </CDropdown>
                 </td>
               </template>
-              </CDataTable>
+              </CDataTable></CCard>
             </CCol>
           </CRow>
     </CCol>

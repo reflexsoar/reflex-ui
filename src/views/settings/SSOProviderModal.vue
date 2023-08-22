@@ -21,6 +21,21 @@
           used for authentication is determined by the domain name of the user's email address. If
           more than one provider exists for a domain, the provider that was created first will be used.
         </p>
+        <CInput label="ACS URL" :value="acs_url" readonly>
+          <template #append>
+              <CButton color="primary" size="sm" @click="copyToClipboard(acs_url, $event)">Copy</CButton>
+          </template>
+      </CInput>
+      <CInput label="SLO URL" :value="slo_url" readonly>
+      <template #append>
+              <CButton color="primary" size="sm" @click="copyToClipboard(slo_url, $event)">Copy</CButton>
+          </template>
+      </CInput>
+      <CInput label="Entity ID" :value="entity_id" readonly>
+      <template #append>
+              <CButton color="primary" size="sm" @click="copyToClipboard(entity_id, $event)">Copy</CButton>
+          </template>
+      </CInput>
       </CTab>
       <CTab title="Provider Details">
         <h5>Provider Details</h5>
@@ -117,6 +132,8 @@
 <script>
 import { mapState } from "vuex";
 
+import { v4 as uuid4 } from "uuid";
+
 export default {
   name: "SSOProviderModal",
   props: {
@@ -139,6 +156,12 @@ export default {
       if(this.show) {
         this.getUserRoles();
       }
+      if(this.show && this.mode == "create") {
+        this.uuid = uuid4();
+        this.acs_url = window.location.origin+"/api/v2.0/auth/sso/"+this.uuid+"/acs";
+        this.slo_url = window.location.origin+"/api/v2.0/auth/sso/"+this.uuid+"/slo";
+        this.entity_id = "reflexsoar:sp:"+this.uuid+":saml2";
+      }
     },
   },
   data() {
@@ -146,6 +169,10 @@ export default {
       loading: false,
       error: false,
       error_message: "",
+      uuid: "",
+      acs_url: "",
+      slo_url: "",
+      entity_id: "",
       name: "",
       description: "",
       idp_entity_id: "",
@@ -181,6 +208,7 @@ CERTIFICATE DATA HERE
       this.logon_domains = this.logon_domains.filter(d => d != domain);
     },
     reset() {
+      this.uuid =  uuid4();
       this.name = "";
       this.description = "";
       this.idp_entity_id = "";
@@ -213,6 +241,15 @@ CERTIFICATE DATA HERE
         console.log(err);
       })
       
+    },
+    copyToClipboard(text, event) {
+        navigator.clipboard.writeText(text);
+        // Set the text of the button to "Copied!"
+        event.target.innerText = "Copied!";
+        // Reset the text of the button after 2 seconds
+        setTimeout(() => {
+            event.target.innerText = "Copy";
+        }, 2000);
     },
     updateProvider() {
       console.log("edit");

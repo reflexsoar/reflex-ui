@@ -74,9 +74,6 @@
                             <CDropdownItem @click="downloadManifest(item.uuid)"
                               >Download Manifest</CDropdownItem
                             >
-                            <CDropdownItem @click="viewURLs(item.uuid)"
-                              >View SP URLs</CDropdownItem
-                            >
                             <CDropdownItem @click="editProvider(item.uuid)"
                               >Edit</CDropdownItem
                             >
@@ -121,14 +118,12 @@
     </CRow>
     <SSOProviderModal :show.sync="show_provider_modal" :mode="provider_modal_mode" />
     <RoleMapModal :show.sync="show_mapping_modal" :mode="mapping_modal_mode" />
-    <SPUrlsModal :show.sync="show_sp_urls" :provider_uuid="provider_uuid" />
   </div>
 </template>
 
 <script>
 import SSOProviderModal from "./SSOProviderModal";
 import RoleMapModal from "./RoleMapModal";
-import SPUrlsModal from "./SPUrlsModal";
 
 import { mapState } from "vuex";
 
@@ -136,8 +131,7 @@ export default {
   name: "AuthenticationSettings",
   components: {
     SSOProviderModal,
-    RoleMapModal,
-    SPUrlsModal
+    RoleMapModal
   },
   computed: {
     ...mapState(["sso_providers", "role_mappings", "loading"]),
@@ -161,15 +155,10 @@ export default {
         { key: "manage", label: "", _classes: "text-right" },
       ],
       role_mapping_fields: ["name", { key: "manage", label: "", _classes: "text-right" }],
-      provider_uuid: "",
-      show_sp_urls: false,
+      provider_uuid: ""
     };
   },
   methods: {
-    viewURLs(provider_uuid) {
-      this.provider_uuid = provider_uuid;
-      this.show_sp_urls = true;
-    },
     editProvider(provider) {
       this.provider_modal_mode = "edit";
       //this.$store.dispatch("getSSOProvider", provider.uuid);
