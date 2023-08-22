@@ -2,13 +2,19 @@
   <div>
     <CRow>
       <CCol col>
+        <CRow class="page-sub-header">
+        <CCol>
+          <h2>Roles</h2>
+        </CCol>
+        <CCol class="text-right">
+            <CButton v-if="current_user.role.permissions.add_role" color="primary" @click="newRole()">New Role</CButton>
+        </CCol>
+      </CRow>
+        <CCard>
         <div style="padding: 10px;">
           <CRow>
-            <CCol>
-              <CButton v-if="current_user.role.permissions.add_role" color="primary" @click="newRole()">New Role</CButton>
-            </CCol>
-            <CCol col=4>
-              <CSelect v-if="current_user.default_org" :horizontal="{label: 'col-sm-4', input: 'col-sm-8'}" label="Filter by Organization:" class="text-right" :options="organizationList(false)" @change="filterByOrganization($event)"/>
+            <CCol class="text-right">
+              <CSelect v-if="current_user.default_org" :horizontal="{label: 'col-sm-4', input: 'col-sm-2'}" :options="organizationList(false)" @change="filterByOrganization($event)"/>
             </CCol>
           </CRow>
         </div>
@@ -45,7 +51,7 @@
           </template>
           <template #created_by="{item}">
             <td>
-              {{item.created_by.username ? item.created_by.username : 'System'}}<OrganizationBadge v-if="current_user.default_org" :uuid="item.created_by.organization"/>
+              {{item.created_by.username ? item.created_by.username : 'System'}}&nbsp;<OrganizationBadge v-if="current_user.default_org" :uuid="item.created_by.organization"/>
             </td>
           </template>
           <template #actions="{item}">
@@ -61,6 +67,7 @@
             <CCardBody><CPagination :pages="pagination.pages" :activePage.sync="active_page"/></CCardBody>
           </CCol>
         </CRow>
+      </CCard>
       </CCol>
     </CRow>
     <CModal size="xl" :closeOnBackdrop="false" :centered="true" :show.sync="role_modal">

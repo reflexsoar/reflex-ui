@@ -2,6 +2,8 @@
 <div><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
   <CRow>
     <CCol v-if="!loading" lg="12" sm="12">
+      <h2 class="page-sub-header">Audit Logs</h2>
+      <CCard>
       <CDataTable
         :hover="hover"
         :striped="striped"
@@ -12,7 +14,7 @@
         :fields="fields"
         :dark="dark"
         :sorter="{external: true, resetable: true}"
-        style="border-top: 1px solid #cfcfcf; overflow-x:auto;"
+        
       ><template #created_at="{item}">
         <td>{{item.created_at | moment('from','now')}}</td>
         </template>
@@ -37,6 +39,7 @@
         <td><CBadge class="btn-sm" :color="getStatusColor(item.status)" disabled>{{item.status}}</CBadge></td>
       </template>
       </CDataTable>
+      </CCard>
     </CCol>
     <CCol v-else lg="12" sm="12">
       <CCardBody>

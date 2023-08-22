@@ -11,7 +11,7 @@
       class="ml-3 d-md-down-none"
       @click="$store.commit('toggleSidebarDesktop')"
       aria-label="Siderbar Toggle"
-    />
+    /><CBreadcrumbRouter class="ml-3 border-0 mb-0 pt-3"/>
     <CHeaderBrand class="mx-auto d-lg-none" to="/">
       
     </CHeaderBrand>
@@ -20,9 +20,6 @@
     <CHeaderNav class="mr-4">
       <TheHeaderDropdownAccnt/>
     </CHeaderNav>
-    <CSubheader class="px-3">
-      <CBreadcrumbRouter class="border-0 mb-0"/>
-    </CSubheader>
   </CHeader>
 </template>
 

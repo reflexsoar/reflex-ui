@@ -1,9 +1,16 @@
 <template>
   <CRow>
     <CCol col>
-      <div style="padding: 10px" v-if="userHas('add_user')">
-        <CButton color="primary" @click="createUserModal()">New User</CButton>
-      </div>
+      <CRow class="page-sub-header">
+        <CCol>
+          <h2>Users</h2>
+        </CCol>
+        <CCol class="text-right">
+            <CButton v-if="userHas('add_user')" color="primary" @click="createUserModal()">New User</CButton>
+        </CCol>
+      </CRow>
+      <CCard>
+      
       <CDataTable
         :hover="hover"
         :striped="striped"
@@ -17,7 +24,6 @@
         :loading="loading"
         column-filter
         :sorter="{ external: false, resetable: true }"
-        style="border-top: 1px solid #cfcfcf; overflow-x: auto"
         pagination
       >
         <template #organization-filter="{ item }">
@@ -78,6 +84,7 @@
           </td>
         </template>
       </CDataTable>
+      </CCard>
     </CCol>
 
     <CModal :title="modal_title" :centered="true" size="lg" :show.sync="modal_status">
