@@ -35,7 +35,8 @@
                 </CInput>
                 <CRow>
                   <CCol col="6" class="text-left">
-                    <CButton color="primary" class="px-4" type="submit">Login</CButton>
+                    <CButton color="primary" class="px-4" type="submit">Login</CButton>&nbsp;
+                    <CButton color="secondary" @click="loginWithSSO">Login with SSO</CButton>
                   </CCol>
                   <CCol col="6" class="text-right">
                     <CButton color="secondary" to="/forgot_password">Forgot password?</CButton>
@@ -88,6 +89,12 @@ export default {
         }
       })
       .catch(err => console.log(err))
+    },
+    loginWithSSO: function() {
+      let email = this.email
+      this.$store.dispatch('loginWithSAML', {email}).then(resp => {
+        window.location.href = resp.data
+      })
     },
     authStatus: function() {
       if(this.$store.getters.authStatus == 'error') {
