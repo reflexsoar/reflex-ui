@@ -78,7 +78,7 @@
               </CCardBody>
               <CCardFooter>
                 <CRow>
-                  <CCol> </CCol>
+                  <CCol><CBadge color="secondary" size="sm">Version: {{integration.version}}</CBadge> </CCol>
                   <CCol class="text-right">
                     <!-- On click send the user to the Integration details page where they 
                 can set up new action configurations -->
