@@ -378,8 +378,11 @@ a {
 }
 
 label {
-    font-weight: 500;
-}
+    /* muted text */
+    color: #6B7485;
+    font-size: 90%;
+    font-weight: 500 !important;
+  }
 
 .danger-accent {
     border-left: 10px solid red;

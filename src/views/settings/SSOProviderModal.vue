@@ -14,7 +14,7 @@
       :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
     >
       <CTab title="Overview">
-        <h5>SSO Providers</h5>
+        <h4>SSO Providers</h4>
         <p>
           SSO Providers are used to configure Single Sign-On for your organization.
           Each provider can be configured to use a different Identity Provider.  The provider that is 
@@ -38,7 +38,7 @@
       </CInput>
       </CTab>
       <CTab title="Provider Details">
-        <h5>Provider Details</h5>
+        <h4>Provider Details</h4>
         <CRow>
           <CCol>
             <CInput label="Provider Name" v-model="name" description="A name to identify this provider" placeholder="Microsoft Azure" required/>
@@ -66,7 +66,7 @@
         </CRow>
       </CTab>
       <CTab title="Identity Provider">
-        <h5>Identity Provider Settings</h5>
+        <h4>Identity Provider Settings</h4>
         <CRow>
           <CCol>
             <CInput label="Entity ID" v-model="idp_entity_id" description="The Entity ID as provided by your IdP" placeholder="Example https://sts.windows.net/88af590a-ca11-46b1-9bb1-39fb5d5d161d/" required/>
@@ -90,7 +90,7 @@
         </CRow>
       </CTab>
       <CTab title="User Provisioning">
-        <h5>Automatic User Provisioning</h5>
+        <h4>Automatic User Provisioning</h4>
         <p>Automatic User Provisioning allows for the automatic creation of users in the system when they authenticate
           with the IdP.  If a user authenticates with an attribute that is mapped to a role, the user will be assigned that role.
           If the user matches none of the mappings, the user will be assigned the default role
@@ -111,7 +111,84 @@
           </CCol>
         </CRow>
       </CTab>
-      <CTab title="Advanced"> </CTab>
+      <CTab title="Advanced">
+        <h4>Advanced Settings</h4>
+        <p>Advanced settings allow for the configuration of the SAML security settings.  These settings should only be changed if required by your IdP.</p>
+        <CRow>
+          <CCol>
+            <h5>Security Settings</h5>
+            <CRow>
+              <CCol col=3>
+                <label>Encrypt Name ID</label><br>
+                <CSwitch v-model="security.name_id_encrypted" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <CCol col=3>
+                <label>Sign Authn Requests</label><br>
+                <CSwitch v-model="security.authn_requests_signed" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <CCol col=3>
+                <label>Sign Logout Requests</label><br>
+                <CSwitch v-model="security.logout_requests_signed" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <CCol col=3>
+                <label>Sign Logout Responses</label><br>
+                <CSwitch v-model="security.logout_response_signed" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol col=3>
+                <label>Sign Metadata</label><br>
+                <CSwitch v-model="security.signin_metadata" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <CCol col=3>
+                <label>Sign Messages</label><br>
+                <CSwitch v-model="security.want_messages_signed" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <CCol col=3>
+                <label>Sign Assertions</label><br>
+                <CSwitch v-model="security.want_assertions_signed" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <CCol col=3>
+                <label>Want Name ID</label><br>
+                <CSwitch v-model="security.want_name_id" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol col=3>
+                <label>Encrypt Name ID</label><br>
+                <CSwitch v-model="security.want_name_id_encrypted" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              <CCol col=3>
+                <label>Encrypt Assertions</label><br>
+                <CSwitch v-model="security.want_assertions_encrypted" label-on="Yes" label-off="No" color="success"/>
+                </CCol>
+              <CCol col=3>
+                <label>Allow Single Label Domains</label><br>
+                <CSwitch v-model="security.allow_single_label_domains" label-on="Yes" label-off="No" color="success"/>
+              </CCol>
+              </CRow>
+              <CRow>
+                <CCol>
+                  <CSelect label="Signature Algorithm" :value.sync="security.signature_algorithm" :options="['http://www.w3.org/2001/04/xmldsig-more#rsa-sha256', 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha384', 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512']" required/>
+                  </CCol>
+                  <CCol>
+                  <CSelect label="Digest Algorithm" :value.sync="security.digest_algorithm" :options="['http://www.w3.org/2001/04/xmlenc#sha256', 'http://www.w3.org/2001/04/xmlenc#sha384', 'http://www.w3.org/2001/04/xmlenc#sha512']" required/>
+                  </CCol>
+                  </CRow>
+                <CRow>
+                  <CCol col=3>
+                    <label>Reject Deprecated Algorithms</label><br>
+                    <CSwitch v-model="security.reject_deprecated_algorithms" label-on="Yes" label-off="No" color="success"/>
+                  </CCol>
+                  <CCol col=3>
+                    <label>Want Attribute Statement</label><br>
+                    <CSwitch v-model="security.want_attribute_statement" label-on="Yes" label-off="No" color="success"/>
+                  </CCol>
+                </CRow>
+
+          </CCol>
+        </CRow>
+      </CTab>
     </CTabs>
     <template #footer>
       <CRow>
@@ -183,6 +260,23 @@ export default {
       logon_domain_options: [],
       auto_provision: false,
       default_role: "",
+      security: {
+        name_id_encrypted: false,
+        authn_requests_signed: false,
+        logout_requests_signed: false,
+        logout_response_signed: false,
+        signin_metadata: false,
+        want_messages_signed: false,
+        want_assertions_signed: false,
+        want_name_id: true,
+        want_name_id_encrypted: false,
+        want_assertions_encrypted: false,
+        allow_single_label_domains: false,
+        signature_algorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+        digest_algorithm: "http://www.w3.org/2001/04/xmlenc#sha256",
+        reject_deprecated_algorithms: true,
+        want_attribute_statement: true
+      },
       step: 0,
       cert_placeholder: `-----BEGIN CERTIFICATE-----
 CERTIFICATE DATA HERE
@@ -221,9 +315,27 @@ CERTIFICATE DATA HERE
       this.step = 0;
       this.error = false;
       this.error_message = "";
+      this.security = {
+        name_id_encrypted: false,
+        authn_requests_signed: false,
+        logout_requests_signed: false,
+        logout_response_signed: false,
+        signin_metadata: false,
+        want_messages_signed: false,
+        want_assertions_signed: false,
+        want_name_id: true,
+        want_name_id_encrypted: false,
+        want_assertions_encrypted: false,
+        allow_single_label_domains: false,
+        signature_algorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+        digest_algorithm: "http://www.w3.org/2001/04/xmlenc#sha256",
+        reject_deprecated_algorithms: true,
+        want_attribute_statement: true
+      }
     },
     createProvider() {
       let payload = {
+        uuid: this.uuid,
         name: this.name,
         description: this.description,
         idp_cert: this.idp_certificate,
@@ -234,6 +346,7 @@ CERTIFICATE DATA HERE
         logon_domains: this.logon_domains,
         auto_provision: this.auto_provision,
         default_role: this.default_role,
+        security: this.security
       }
       this.$store.dispatch("createSSOProvider", payload).then(resp => {
         this.closeModal();

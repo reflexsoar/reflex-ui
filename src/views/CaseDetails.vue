@@ -155,58 +155,46 @@
                 <CCol col="12">
                   <CRow>
                     <CCol col="2">
-                      <CCard class="callout-card">
-                        <CCallout color="success">
-                          <small class="text-muted">SLA Status</small><br />
-                          <strong class="h1">Okay</strong>
-                        </CCallout>
-                      </CCard>
+                      <CalloutCard label="SLA Status" value="Okay" color="success" />
                     </CCol>
                     <CCol col="2">
-                      <CCard class="callout-card">
-                        <CCallout color="info">
-                          <small class="text-muted">Total Events</small><br />
-                          <strong class="h1">{{
-                            case_data.event_count ? case_data.event_count : 0
-                          }}</strong>
-                        </CCallout>
-                      </CCard>
+                      <CalloutCard
+                        label="Total Events"
+                        :value="case_data.event_count ? case_data.event_count : 0"
+                        color="info"
+                      />
                     </CCol>
                     <CCol col="2">
-                      <CCard class="callout-card">
-                        <CCallout color="info">
-                          <small class="text-muted">Related Cases</small><br />
-                          <strong class="h1">{{ related_cases.length }}</strong>
-                        </CCallout>
-                      </CCard>
+                      <CalloutCard
+                        label="Related Cases"
+                        :value="related_cases.length"
+                        color="info"
+                      />
                     </CCol>
                     <CCol col="2">
-                      <CCard class="callout-card">
-                        <CCallout color="info">
-                          <small class="text-muted">Remaining Tasks</small><br />
+                      <CalloutCard
+                        label="Remaining Tasks"
+                        :value="case_data.observable_count"
+                        color="info"
+                      >
+                        <template #value>
                           <strong class="h1"
                             >{{ case_data.open_tasks }} /
                             {{ case_data.total_tasks }}</strong
                           >
-                        </CCallout>
-                      </CCard>
+                        </template>
+                      </CalloutCard>
                     </CCol>
                     <CCol col="2">
-                      <CCard class="callout-card">
-                        <CCallout color="info">
-                          <small class="text-muted">Total Observables</small><br />
-                          <strong class="h1">{{ case_data.observable_count }}</strong>
-                        </CCallout>
-                      </CCard>
+                      <CalloutCard
+                        label="Total Observables"
+                        :value="case_data.observable_count"
+                        color="info"
+                      />
                     </CCol>
 
                     <CCol col="2">
-                      <CCard class="callout-card">
-                        <CCallout color="info">
-                          <small class="text-muted">Days Open</small><br />
-                          <strong class="h1">{{ daysOpen() }}</strong>
-                        </CCallout>
-                      </CCard>
+                      <CalloutCard label="Days Open" :value="daysOpen()" color="info" />
                     </CCol>
                   </CRow>
                 </CCol>
@@ -804,6 +792,7 @@ import CRightDrawer from "./CRightDrawer.vue";
 import "v-markdown-editor/dist/v-markdown-editor.css";
 import TagList from "./components/TagList";
 import ObjectAttribute from "./components/ObjectAttribute";
+import CalloutCard from "./components/CalloutCard";
 import "@toast-ui/editor/dist/toastui-editor.css";
 
 import { Editor } from "@toast-ui/vue-editor";
@@ -828,6 +817,7 @@ export default {
     TagList,
     ObjectAttribute,
     Editor,
+    CalloutCard,
   },
   computed: {
     ...mapState(["alert", "current_user", "settings", "tags", "case_observables"]),
