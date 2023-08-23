@@ -47,7 +47,7 @@
               >&nbsp;{{ case_data.status.name }}
             </h4>
           </CCol>
-          <CCol col="2" class="text-right">
+          <CCol col="1" class="text-right">
             <label class="text-muted" style="text-transform: uppercase"
               ><small><b>Owner</b></small></label
             >
@@ -78,7 +78,7 @@
               </h4>
             </div>
           </CCol>
-          <CCol col="2" class="text-right">
+          <CCol col="1" class="text-right">
             <label class="text-muted" style="text-transform: uppercase"
               ><small><b>Severity</b></small></label
             >
@@ -133,9 +133,9 @@
               <CDropdownItem @click="runPlaybookModal = !runPlaybookModal" disabled
                 >Run Playbook</CDropdownItem
               >
-              <CDropdownDivider v-if="current_user.role.permissions['delete_case']" />
+              <CDropdownDivider v-if="current_user.permissions['delete_case']" />
               <CDropdownItem
-                v-if="current_user.role.permissions['delete_case']"
+                v-if="current_user.permissions['delete_case']"
                 @click="deleteCaseModal = !deleteCaseModal"
                 >Delete</CDropdownItem
               >
@@ -1087,7 +1087,7 @@ export default {
     },
     closeOwnerEdit(e) {
       // If the click is not on the owner select, close the edit
-      if (!e.target.id.includes("owner")) {
+      if (!e.target.id.includes("owner") || !e.target.classList.contains("multiselect__select")) {
         console.log(e);
         this.edit_owner = false;
         document.removeEventListener("click", this.closeOwnerEdit);
