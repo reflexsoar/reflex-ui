@@ -175,7 +175,11 @@ const mutations = {
     state.sso_role_mappings = mappings
   },
   add_sso_role_mapping(state, mapping) {
-    state.sso_role_mappings.push(mapping)
+    if(state.sso_role_mappings.length == 0) {
+      state.sso_role_mappings = [mapping]
+    } else {
+      state.sso_role_mappings.push(mapping)
+    }
     state.sso_role_mapping = mapping
   },
   update_sso_role_mapping(state, mapping) {
@@ -524,6 +528,7 @@ const mutations = {
   },
   save_user(state, user) {
     state.user = user
+    state.users = [...state.users.filter(u => u.uuid != user.uuid), user]
   },
   add_organization(state, organization) {
     state.organizations.push(organization)
@@ -780,7 +785,11 @@ const mutations = {
     state.status = 'success'
   },
   add_user(state, user) {
-    state.users.push(user)
+    if(state.users.length == 0) {
+      state.users = [user]
+    } else { 
+      state.users.push(user)
+    }
     state.user = user
     state.status = 'success'
   },
@@ -1022,9 +1031,9 @@ const getters = {
   audit_logs: state => { return state.audit_logs },
   data_types_list: function() { return state.data_types.map(item => { return {'label': item.name, 'value': item.uuid}}) },
   user_has_permission: state => function(permission) {
-    if(Object.keys(state.current_user.role.permissions).includes(permission)) {
+    if(Object.keys(state.current_user.permissions).includes(permission)) {
       
-      if(!state.current_user.role.permissions[permission] || state.current_user.role.permissions[permission] === null) {
+      if(!state.current_user.permissions[permission] || state.current_user.permissions[permission] === null) {
         return false
       }
       return true
@@ -2736,7 +2745,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/user/${uuid}`, data: user, method: 'PUT'})
       .then(resp => {
-        commit('save_user', resp.data.user)
+        commit('save_user', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -2748,7 +2757,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/user/set_password`, data: data, method: 'PUT'})
       .then(resp => {
-        commit('save_user', resp.data.user)
+        commit('save_user', resp.data)
         resolve(resp)
       })
       .catch(err => {
@@ -4375,6 +4384,78 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/integration/run_action`, data: payload, method: 'POST'})
       .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  createRoleMappingPolicy({commit}, data) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/mapping_policy`, data: data, method: 'POST'})
+      .then(resp => {
+        commit('add_sso_role_mapping', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  getRoleMappingPolicies({commit}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/mapping_policy`, method: 'GET'})
+      .then(resp => {
+        commit('save_sso_role_mappings', resp.data.policies)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  updateRoleMappingPolicy({commit}, {uuid, data}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/mapping_policy/${uuid}`, data: data, method: 'PUT'})
+      .then(resp => {
+        commit('update_sso_role_mapping', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deleteRoleMappingPolicy({commit}, {uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/mapping_policy/${uuid}`, method: 'DELETE'})
+      .then(resp => {
+        commit('delete_sso_role_mapping', uuid)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  activateRoleMappingPolicy({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/mapping_policy/${uuid}/activate`, method: 'PUT'})
+      .then(resp => {
+        commit('update_sso_role_mapping', resp.data)
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+  deactivateRoleMappingPolicy({commit}, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/sso/mapping_policy/${uuid}/deactivate`, method: 'PUT'})
+      .then(resp => {
+        commit('update_sso_role_mapping', resp.data)
         resolve(resp)
       })
       .catch(err => {
