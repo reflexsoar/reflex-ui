@@ -603,7 +603,7 @@
                 <CSelect :value.sync="rule.schedule_timezone" label="Timezone" :options="timezones" />
                 <CRow>
                   <CCol>
-                    <CRow v-for="(i, day) in rule.schedule">
+                    <CRow v-for="(i, day) in rule.schedule" :key="day">
                       <CCol col="2">
                         <CInputCheckbox
                           :checked.sync="rule.schedule[day].active"

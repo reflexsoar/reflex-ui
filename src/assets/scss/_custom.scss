@@ -17,12 +17,12 @@ button.kb {
 
 code {
     color: #fff;
-     background-color: #636f83 !important;
-     padding: 2px !important;
-     border-radius: 3px !important;
-     border: 1px solid #636f83 !important;
-     margin-right: 1px !important;
- }
+    background-color: #636f83 !important;
+    padding: 2px !important;
+    border-radius: 3px !important;
+    border: 1px solid #636f83 !important;
+    margin-right: 1px !important;
+}
 
 .kb {
     float: right;
@@ -382,7 +382,7 @@ label {
     color: #6B7485;
     font-size: 90%;
     font-weight: 500 !important;
-  }
+}
 
 .danger-accent {
     border-left: 10px solid red;
@@ -656,15 +656,15 @@ html:not([dir="rtl"]) nav>.pagination {
 }
 
 .page-nav .nav-tabs .nav-link:hover {
-    
+
     border-bottom: 3px solid $info !important;
 }
 
 .page-nav .nav-tabs .nav-link.active {
     color: $secondary;
-    
+
     border-bottom: 3px solid #636f83 !important;
-    
+
 }
 
 .page-nav-tab-body {
@@ -682,7 +682,7 @@ html:not([dir="rtl"]) nav>.pagination {
 }
 
 .page-heading {
-    padding-left:30px;
+    padding-left: 30px;
     padding-top: 20px;
     margin-top: -35px;
     margin-bottom: 30px;
@@ -705,4 +705,23 @@ html:not([dir="rtl"]) nav>.pagination {
     margin-bottom: 0px;
     padding-top: 10px;
     padding-bottom: 10px;
+}
+
+.profile-photo {
+    /* A circular crop of the image */
+    border-radius: 50%;
+    object-fit: cover;
+    width: 125px;
+    height: 125px;
+    border: 5px solid $dark;
+    float: left;
+}
+
+.user-profile-name {
+    margin-left: 150px;
+}
+
+.task-list .card {
+    max-height: calc(100vh - 275px);
+    overflow-y: auto;
 }
