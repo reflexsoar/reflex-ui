@@ -351,7 +351,7 @@ export default {
       this.selected_filters = {};
       this.getFilters();
       this.$store.commit("update_selected_detection_filters", this.selected_filters);
-      this.$emit("filter_changed", filters);
+      this.$emit("filter_changed", this.filters);
     },
   },
 };
