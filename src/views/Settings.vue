@@ -17,7 +17,7 @@
             v-if="
               current_user &&
               current_user.role &&
-              current_user.role.permissions['update_settings']
+              current_user.permissions['update_settings']
             "
           >
             <template slot="title">
@@ -28,7 +28,7 @@
               <GlobalSettings />
             </CCard>
           </CTab>
-          <CTab v-if="current_user && current_user.role.permissions.view_organizations">
+          <CTab v-if="current_user && current_user.permissions.view_organizations">
             <template slot="title"> <CIcon name="cil-people" /> {{ tabs[1] }} </template>
             <OrganizationList />
           </CTab>
@@ -36,21 +36,22 @@
             <template slot="title"> <CIcon name="cil-user" /> {{ tabs[2] }} </template>
             <UsersList />
           </CTab>
-          <CTab>
-            <template slot="title"> <i class="fa fa-key"></i> {{ tabs[3] }} </template>
-            <AuthSettings :key="reloadAuthTab"/>
-          </CTab>
+          
           <!--<CTab>
                 <template slot="title">
                   <CIcon name="cil-people"/> {{tabs[3]}}
                 </template>
                 <GroupList/>
               </CTab>-->
-          <CTab v-if="current_user.role.permissions.view_roles">
-            <template slot="title"> <CIcon name="cil-people" /> {{ tabs[4] }} </template>
+          <CTab v-if="current_user.permissions.view_roles">
+            <template slot="title"> <CIcon name="cil-people" /> {{ tabs[3] }} </template>
             <RolesList />
           </CTab>
-          <CTab v-if="current_user.role.permissions.view_service_accounts">
+          <CTab>
+            <template slot="title"> <i class="fa fa-key"></i> {{ tabs[4] }} </template>
+            <AuthSettings :key="reloadAuthTab"/>
+          </CTab>
+          <CTab v-if="current_user.permissions.view_service_accounts">
             <template slot="title"> <CIcon name="cil-bolt" /> {{ tabs[5] }} </template>
             <ServiceAccountList />
           </CTab>
@@ -92,7 +93,7 @@ export default {
       if (this.activeTab == 6) {
         this.reloadLogs = Math.random();
       }
-      if (this.activeTab == 3) {
+      if (this.activeTab == 4) {
         this.reloadAuthTab = Math.random()
       }
     },
@@ -104,9 +105,9 @@ export default {
         "Current Tenant",
         "Organizations",
         "Users",
-        "Authentication",
         //'Groups',
         "Roles",
+        "Authentication",
         "Service Accounts",
         "Audit Logs",
       ],
