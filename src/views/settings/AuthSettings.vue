@@ -45,7 +45,6 @@
                       </template>
                       <template #updated_by="{ item }">
                         <td>
-                        
                           {{ item.created_by.username }}
                         </td>
                       </template>
@@ -89,6 +88,9 @@
               </CTab>
               <CTab title="Role Mappings">
                 <CRow>
+                <CAlert :show.sync="alert.show" :color="alert.color" :fade="false" closeButton>
+              {{ alert.message }}
+            </CAlert>
                   <CCol><h5>Role Mappings</h5></CCol>
                   <CCol class="text-right">
                     <CButton @click="show_mapping_modal = true" color="primary"
@@ -99,7 +101,7 @@
                 <CRow>
                   <CCol>
                     <CDataTable
-                      :items="role_mappings"
+                      :items="sso_role_mappings"
                       :fields="role_mapping_fields"
                       :responsive="false"
                       :loading="loading"
@@ -107,7 +109,53 @@
                         noResults: 'No Role Mappings Found',
                         noItems: 'No Role Mappings',
                       }"
-                    ></CDataTable>
+                    >
+                      <template #name="{ item }">
+                        <td>
+                          <CBadge class="tag tag-sm" color="success" v-if="item.active"
+                            >Active</CBadge
+                          ><CBadge class="tag tag-sm" color="danger" v-else
+                            >Inactive</CBadge
+                          >&nbsp;<b>{{ item.name }}</b>
+                        </td>
+                      </template>
+                      <template #updated_by="{ item }">
+                        <td>
+                          {{ item.created_by.username }}
+                        </td>
+                      </template>
+                      <template #updated_at="{ item }">
+                        <td>
+                          {{ item.updated_at | moment("from", "now") }}
+                        </td>
+                      </template>
+
+                      <template #created_at="{ item }">
+                        <td>
+                          {{ item.created_at | moment("from", "now") }}
+                        </td>
+                      </template>
+                      <template #manage="{ item }">
+                        <td class="text-right">
+                          <CDropdown color="secondary" toggler-text="Manage" size="sm">
+                            <CDropdownItem
+                              v-if="!item.active"
+                              @click="activateMappingPolicy(item.uuid)"
+                              >Activate</CDropdownItem
+                            >
+                            <CDropdownItem v-else @click="deactivateMappingPolicy(item.uuid)"
+                              >Deactivate</CDropdownItem
+                            >
+                            <CDropdownItem @click="editMappingPolicy(item.uuid)"
+                              >Edit</CDropdownItem
+                            >
+                            <CDropdownItem @click="startDeleteMappingPolicy(item.uuid)"
+                              >Delete</CDropdownItem
+                            >
+                          </CDropdown>
+                        </td>
+                      </template>
+                      </CDataTable>
                   </CCol>
                 </CRow>
               </CTab>
@@ -118,6 +166,17 @@
     </CRow>
     <SSOProviderModal :show.sync="show_provider_modal" :mode="provider_modal_mode" />
     <RoleMapModal :show.sync="show_mapping_modal" :mode="mapping_modal_mode" />
+    <CModal :show.sync="warn_mapping_delete" color="danger" :centered="true" title="Delete Confirmation">
+      <p>Are you sure you want to delete this role mapping?</p>
+      <template #footer>
+        <CRow>
+          <CCol class="text-right">
+            <CButton color="secondary" @click="warn_mapping_delete = false">Cancel</CButton>&nbsp;
+            <CButton color="danger" @click="deleteMappingPolicy()" v-bind:disabled="submitted"><CSpinner v-if="submitted" size="sm"/>&nbsp;Delete</CButton>
+          </CCol>
+        </CRow>
+      </template>
+    </CModal>
   </div>
 </template>
 
@@ -131,14 +190,14 @@ export default {
   name: "AuthenticationSettings",
   components: {
     SSOProviderModal,
-    RoleMapModal
+    RoleMapModal,
   },
   computed: {
-    ...mapState(["sso_providers", "role_mappings", "loading"]),
+    ...mapState(["sso_providers", "sso_role_mappings", "loading"]),
   },
   created() {
     this.$store.dispatch("getSSOProviders");
-    //this.$store.dispatch("getRoleMappings");
+    this.$store.dispatch("getRoleMappingPolicies");
   },
   data() {
     return {
@@ -146,6 +205,7 @@ export default {
       show_mapping_modal: false,
       provider_modal_mode: "create",
       mapping_modal_mode: "create",
+      warn_mapping_delete: false,
       active_tab: 0,
       sso_provider_fields: [
         "name",
@@ -154,8 +214,21 @@ export default {
         "updated_by",
         { key: "manage", label: "", _classes: "text-right" },
       ],
-      role_mapping_fields: ["name", { key: "manage", label: "", _classes: "text-right" }],
-      provider_uuid: ""
+      role_mapping_fields: [
+        "name",
+        "created_at",
+        "updated_at",
+        "updated_by",
+        { key: "manage", label: "", _classes: "text-right" },
+      ],
+      provider_uuid: "",
+      mapping_uuid: "",
+      submitted: false,
+      alert: {
+        show: false,
+        color: "success",
+        message: "",
+      }
     };
   },
   methods: {
@@ -170,11 +243,37 @@ export default {
     deactivateProvider(provider) {
       this.$store.dispatch("deactivateSSOProvider", provider);
     },
-    editMapping(mapping) {
-      this.mapping_modal_mode = "edit";
-      //this.$store.dispatch("getRoleMapping", mapping.uuid);
-      this.show_mapping_modal = true;
+    activateMappingPolicy(mapping) {
+      this.$store.dispatch("activateRoleMappingPolicy", mapping);
     },
+    deactivateMappingPolicy(mapping) {
+      this.$store.dispatch("deactivateRoleMappingPolicy", mapping);
+    },
+    startDeleteMappingPolicy(mapping) {
+      this.warn_mapping_delete = true;
+      this.mapping_uuid = mapping;
+    },
+    deleteMappingPolicy() {
+      this.submitted = true;
+      this.$store.dispatch("deleteRoleMappingPolicy", {uuid: this.mapping_uuid}).then(() => {
+        this.warn_mapping_delete = false;
+        this.mapping_uuid = "";
+        this.submitted = false;
+      }).catch((err) => {
+        this.submitted = false;
+        this.warn_mapping_delete = false;
+        this.mapping_uuid = "";
+        this.alert.message = err.response.data.message;
+        this.alert.color = "danger";
+        this.alert.show = true;
+
+      });
+    },
+    editMappingPolicy(mapping) {
+      this.mapping_modal_mode = "edit";
+      //this.$store.dispatch("getRoleMappingPolicy", mapping.uuid);
+      this.show_mapping_modal = true;
+    }
   },
 };
 </script>
