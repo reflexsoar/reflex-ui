@@ -453,6 +453,11 @@ export default {
         user["password"] = this.user.password;
       }
 
+      if (this.user.password == "" && this.user.confirm_password == "") {
+        delete user["password"];
+        delete user["confirm_password"];
+      }
+
       let uuid = this.user.uuid;
       this.$store
         .dispatch("updateUser", { uuid, user })
