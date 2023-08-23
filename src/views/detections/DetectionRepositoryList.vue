@@ -1,11 +1,14 @@
 <template>
   <div>
-    <CRow style="padding: 10px">
+    <CRow>
       <CCol>
+        <h2 class="page-sub-header">Detection Repositories</h2>
+      </CCol>
+      <CCol class="text-right">
         <CButton v-if="current_user.role.permissions['create_detection_repository']" color="primary" @click="createRepositoryModal()">New Repository</CButton>
       </CCol>
-      <CCol col="5" class="text-right"> </CCol>
     </CRow>
+    <CCard>
     <CDataTable
       :items="detection_repositories"
       :fields="fields"
@@ -14,7 +17,7 @@
       :loading="loading"
       column-filter
       pagination
-      style="border-top: 1px solid #cfcfcf"
+      :responsive="false"
     >
       <template #select-filter="{ item }">
         <input
@@ -107,6 +110,7 @@
         </td>
       </template>
     </CDataTable>
+    </CCard>
     <CModal title="Subscribe to Repository" :show.sync="show_subscription_modal" size="lg" :close-on-backdrop="false" @close="resetSubscriptionWizard()">
         <p>Subscribing to a repository will automatically synchronize all detections from the target repository in to your own detection library.
             Based on an interval defined in this wizard, the system will automatically synchronize any new or updated detections from the target repository.
