@@ -36,7 +36,7 @@
                   <CTab title="1. Input Overview">
                     <h3>Input Overview</h3>
                     <CSelect
-                      v-if="current_user.role.permissions.view_organizations"
+                      v-if="current_user.permissions.view_organizations"
                       placeholder="Select an Organization..."
                       required
                       :value.sync="organization"

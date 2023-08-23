@@ -5,7 +5,7 @@
         <h2 class="page-sub-header">Detection Repositories</h2>
       </CCol>
       <CCol class="text-right">
-        <CButton v-if="current_user.role.permissions['create_detection_repository']" color="primary" @click="createRepositoryModal()">New Repository</CButton>
+        <CButton v-if="current_user.permissions['create_detection_repository']" color="primary" @click="createRepositoryModal()">New Repository</CButton>
       </CCol>
     </CRow>
     <CCard>
@@ -44,10 +44,10 @@
                <CSpinner size="sm"/>
               </CButton>
             </template>
-            <CDropdownItem v-if="!item.read_only && current_user.role.permissions['update_detection_repository']" color="info" @click="editRepository(item.uuid)" size="sm"
+            <CDropdownItem v-if="!item.read_only && current_user.permissions['update_detection_repository']" color="info" @click="editRepository(item.uuid)" size="sm"
               ><CIcon name="cilPencil" />&nbsp;Edit Repository
             </CDropdownItem>
-            <CDropdownItem v-if="!item.read_only  && current_user.role.permissions['delete_detection_repository']" color="danger" @click="deleteRepository(item.uuid)" size="sm"
+            <CDropdownItem v-if="!item.read_only  && current_user.permissions['delete_detection_repository']" color="danger" @click="deleteRepository(item.uuid)" size="sm"
               ><CIcon name="cilTrash" />&nbsp;Delete Repository
             </CDropdownItem>
             <CDropdownItem v-if="!item.subscribed && item.organization != current_user.organization" @click="startSubscriptionWizard(item.uuid)" size="sm">

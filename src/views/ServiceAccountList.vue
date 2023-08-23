@@ -228,7 +228,7 @@ export default {
   },
   methods: {
     userHas(permission) {
-      return this.current_user.role.permissions[permission];
+      return this.current_user.permissions[permission];
     },
     set_picker_filters(val, key) {
       if (!this.picker_filters.hasOwnProperty(key)) {

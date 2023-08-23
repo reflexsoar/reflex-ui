@@ -76,7 +76,7 @@
                   label="Organization"
                   placeholder="Select an organization"
                   v-if="
-                    current_user.role.permissions.view_organizations &&
+                    current_user.permissions.view_organizations &&
                     !from_card
                   "
                   :value.sync="organization"
@@ -415,7 +415,7 @@
                     :show-no-results="false"
                     placeholder="Select a case template..."
                     @search-change="caseTemplateFind"
-                    v-bind:disabled="(current_user.role.permissions.view_organizations && organization == null) || !create_new_case">
+                    v-bind:disabled="(current_user.permissions.view_organizations && organization == null) || !create_new_case">
                     <template slot="option" slot-scope="props">
                         {{props.option.title}}<br>
                         <small>{{props.option.description}}<br>Contains {{props.option.task_count}} tasks.</small>

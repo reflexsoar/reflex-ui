@@ -10,7 +10,7 @@
       <CRow>
         <CCol col="6">
           <h4>Basic Settings</h4>
-          <CInput v-model="settings.base_url" label="Base URL" v-bind:disabled="!current_user.role.permissions['set_baseurl']"/>
+          <CInput v-model="settings.base_url" label="Base URL" v-bind:disabled="!current_user.permissions['set_baseurl']"/>
           <CInput v-model="settings.logon_password_attempts" label="Max Logon Attempts"/>
           <CInput v-model="settings.logon_expire_at" label="Expire Logon After (Hours)" placeholder="6" description="User Access Tokens will expire after this many hours"/>
           <h4>Playbook Settings</h4>

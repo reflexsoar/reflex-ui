@@ -30,7 +30,7 @@
               </CCol>
               <CCol class="text-right">
                 <CButton
-                  v-if="current_user.role.permissions['create_detection']"
+                  v-if="current_user.permissions['create_detection']"
                   color="primary"
                   @click="createDetectionModal()"
                   >New Detection</CButton
@@ -160,16 +160,19 @@
                     <CRow>
                       <CCol>
                         <CRow>
-                          <CCol col="1">
+                          <CCol>
                             <CBadge class="tag tag-sm" color="success" v-if="item.active"
                               >Active</CBadge
                             ><CBadge class="tag tag-sm" color="danger" v-else
                               >Inactive</CBadge
+                            >&nbsp;<b>{{ item.name }}</b
                             >
                           </CCol>
+                          
+                        </CRow>
+                        <CRow>
                           <CCol style="margin-left: 5px"
-                            ><b>{{ item.name }}</b
-                            ><br />
+                            >
                             <span class="small rule_description">{{
                               item.description
                             }}</span></CCol

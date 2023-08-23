@@ -18,7 +18,7 @@
               required
               v-model="title"
               label="Case Title"
-              v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
+              v-bind:disabled="current_user.permissions.view_organizations && organization == null"
             >
             </CInput>
             <label style="text-align:center; vertical-align:middle; padding-bottom:.8em">Assign Case Template?</label>&nbsp;&nbsp;&nbsp;<CSwitch aria-label="Assign Case Template" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="use_case_template" v-bind:disabled="settings.require_case_templates"/>
@@ -33,7 +33,7 @@
                     :options-limit="10"
                     :show-no-results="false" 
                     @search-change="caseTemplateFind"
-                    v-bind:disabled="current_user.role.permissions.view_organizations && organization == null">
+                    v-bind:disabled="current_user.permissions.view_organizations && organization == null">
                     <template slot="option" slot-scope="props">
                         {{props.option.title}}</br>
                         <small>{{props.option.description}}<br>Contains {{props.option.task_count}} tasks.</small>
@@ -52,7 +52,7 @@
                 :show-no-results="false"
                 @search-change="usersFind"
                 aria-label="Case Owner"
-                v-bind:disabled="current_user.role.permissions.view_organizations && organization == null">
+                v-bind:disabled="current_user.permissions.view_organizations && organization == null">
             </multiselect><br>
             <CTextarea
               placeholder="Enter a description for the case.  The more detail the better."
@@ -61,7 +61,7 @@
               label="Description"
               description="HINT: Use markdown to create a beautiful description."
               rows=5
-              v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
+              v-bind:disabled="current_user.permissions.view_organizations && organization == null"
             >
             </CTextarea>
             <CRow>
@@ -71,7 +71,7 @@
                     :options="tlps"
                     :value.sync="tlp"
                     placeholder="Select a TLP"
-                    v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
+                    v-bind:disabled="current_user.permissions.view_organizations && organization == null"
                   >
                   </CSelect>
               </CCol>
@@ -81,7 +81,7 @@
                     :options="severities"
                     :value.sync="severity"
                     placeholder="Select a Severity"
-                    v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
+                    v-bind:disabled="current_user.permissions.view_organizations && organization == null"
                   >
                   </CSelect>
               </CCol>
@@ -100,12 +100,12 @@
                     @tag="addTag"
                     :close-on-select="false"
                     aria-label="Tags"
-                    v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"
+                    v-bind:disabled="current_user.permissions.view_organizations && organization == null"
                 >
                 </multiselect>
             </div>
             <span v-if="case_from_card">
-                <label>Generate Event Rule</label><br><CSwitch aria-label="Generate Event Rule" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule" v-bind:disabled="current_user.role.permissions.view_organizations && organization == null"/><br>
+                <label>Generate Event Rule</label><br><CSwitch aria-label="Generate Event Rule" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule" v-bind:disabled="current_user.permissions.view_organizations && organization == null"/><br>
                 <small class="form-text text-muted w-100">When enabled all future events will be merged into this case.</small><br>
             </span>
         </CForm>

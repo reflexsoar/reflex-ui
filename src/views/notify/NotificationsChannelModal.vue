@@ -28,7 +28,7 @@
                             :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
                             <CTab title="1. Overview">
                                 <CSelect label="Organization" placeholder="Select an organization"
-                                    v-if="current_user.role.permissions.view_organizations"
+                                    v-if="current_user.permissions.view_organizations"
                                     :value.sync="channel.organization" :options="orgs" @change="reloadMeta()"/>
                                 <CSelect label="Channel Type" placeholder="Select the type of channel being configured"
                                     :value.sync="channel.channel_type" :options="channel_types" />

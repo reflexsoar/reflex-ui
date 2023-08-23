@@ -57,7 +57,7 @@
                   label="Organization"
                   placeholder="Select an organization"
                   @change="updateOrganization"
-                  v-if="current_user.role.permissions.view_organizations"
+                  v-if="current_user.permissions.view_organizations"
                   :value.sync="rule.organization"
                   :options="organizations"
                 />
@@ -116,7 +116,7 @@
                   label="Organization"
                   placeholder="Select an organization"
                   @change="updateOrganization"
-                  v-if="current_user.role.permissions.view_organizations"
+                  v-if="current_user.permissions.view_organizations"
                   :value.sync="rule.organization"
                   :options="organizations"
                 />

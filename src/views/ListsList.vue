@@ -78,7 +78,7 @@
         <CTabs :activeTab.sync="step" :fade="false" variant="pills" :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
           <CTab title="1. List Details">
             <h3>List Details</h3>
-            <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.role.permissions.view_organizations" :value.sync="list_data.organization" :options="organizations" @change="reloadDataTypes"/>
+            <CSelect label="Organization" placeholder="Select an organization" v-if="current_user.permissions.view_organizations" :value.sync="list_data.organization" :options="organizations" @change="reloadDataTypes"/>
             <CInput v-model="list_data.name" label="Name" placeholder="A friendly name for the list" v-bind:required="modal_submit_text == 'Create'"/>
             <CRow>
               <CCol col="12" lg="6">
