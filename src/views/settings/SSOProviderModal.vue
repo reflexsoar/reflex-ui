@@ -120,51 +120,51 @@
             <CRow>
               <CCol col=3>
                 <label>Encrypt Name ID</label><br>
-                <CSwitch v-model="security.name_id_encrypted" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.name_id_encrypted" label-on="Yes" label-off="No" color="success"/>
               </CCol>
               <CCol col=3>
                 <label>Sign Authn Requests</label><br>
-                <CSwitch v-model="security.authn_requests_signed" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.authn_requests_signed" label-on="Yes" label-off="No" color="success"/>
               </CCol>
               <CCol col=3>
                 <label>Sign Logout Requests</label><br>
-                <CSwitch v-model="security.logout_requests_signed" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.logout_requests_signed" label-on="Yes" label-off="No" color="success"/>
               </CCol>
               <CCol col=3>
                 <label>Sign Logout Responses</label><br>
-                <CSwitch v-model="security.logout_response_signed" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.logout_response_signed" label-on="Yes" label-off="No" color="success"/>
               </CCol>
             </CRow>
             <CRow>
               <CCol col=3>
                 <label>Sign Metadata</label><br>
-                <CSwitch v-model="security.signin_metadata" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.signin_metadata" label-on="Yes" label-off="No" color="success"/>
               </CCol>
               <CCol col=3>
                 <label>Sign Messages</label><br>
-                <CSwitch v-model="security.want_messages_signed" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.want_messages_signed" label-on="Yes" label-off="No" color="success"/>
               </CCol>
               <CCol col=3>
                 <label>Sign Assertions</label><br>
-                <CSwitch v-model="security.want_assertions_signed" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.want_assertions_signed" label-on="Yes" label-off="No" color="success"/>
               </CCol>
               <CCol col=3>
                 <label>Want Name ID</label><br>
-                <CSwitch v-model="security.want_name_id" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.want_name_id" label-on="Yes" label-off="No" color="success"/>
               </CCol>
             </CRow>
             <CRow>
               <CCol col=3>
                 <label>Encrypt Name ID</label><br>
-                <CSwitch v-model="security.want_name_id_encrypted" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.want_name_id_encrypted" label-on="Yes" label-off="No" color="success"/>
               </CCol>
               <CCol col=3>
                 <label>Encrypt Assertions</label><br>
-                <CSwitch v-model="security.want_assertions_encrypted" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.want_assertions_encrypted" label-on="Yes" label-off="No" color="success"/>
                 </CCol>
               <CCol col=3>
                 <label>Allow Single Label Domains</label><br>
-                <CSwitch v-model="security.allow_single_label_domains" label-on="Yes" label-off="No" color="success"/>
+                <CSwitch :checked.sync="security.allow_single_label_domains" label-on="Yes" label-off="No" color="success"/>
               </CCol>
               </CRow>
               <CRow>
@@ -178,11 +178,11 @@
                 <CRow>
                   <CCol col=3>
                     <label>Reject Deprecated Algorithms</label><br>
-                    <CSwitch v-model="security.reject_deprecated_algorithms" label-on="Yes" label-off="No" color="success"/>
+                    <CSwitch :checked.sync="security.reject_deprecated_algorithms" label-on="Yes" label-off="No" color="success"/>
                   </CCol>
                   <CCol col=3>
                     <label>Want Attribute Statement</label><br>
-                    <CSwitch v-model="security.want_attribute_statement" label-on="Yes" label-off="No" color="success"/>
+                    <CSwitch :checked.sync="security.want_attribute_statement" label-on="Yes" label-off="No" color="success"/>
                   </CCol>
                 </CRow>
 
@@ -369,7 +369,6 @@ CERTIFICATE DATA HERE
       this.closeModal();
     },
     dismiss() {
-      console.log("dismiss");
       this.closeModal();
     },
   },
