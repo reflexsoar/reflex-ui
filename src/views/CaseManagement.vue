@@ -34,6 +34,11 @@ export default {
     Cases: Cases,
     CaseTemplates,
   },
+  data() {
+    return {
+      activeTab: 0,
+    };
+  },
   computed: mapState(["alert", "current_user"]),
   created() {
     if (this.current_user.default_org) {

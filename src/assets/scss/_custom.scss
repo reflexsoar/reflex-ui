@@ -26,6 +26,7 @@ code {
 
 .kb {
     float: right;
+    margin-right: 30px;
     font-size: 1.3125rem;
     font-weight: 700;
     line-height: 1;
@@ -334,6 +335,16 @@ a {
     padding-top: 2px;
     padding-bottom: 2px;
     font-weight: normal;
+    word-wrap: unset;
+}
+
+.status-tag {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-weight: 500;
+    font-size: inherit;
     word-wrap: unset;
 }
 
@@ -679,4 +690,11 @@ html:not([dir="rtl"]) nav>.pagination {
 
 .card-header-button {
     line-height: 2;
+}
+
+.callout-card .c-callout {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
