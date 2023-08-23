@@ -127,6 +127,7 @@ export default {
                 //{'name': 'User Management'}
             ],
             selected_event_type: [
+                { "name": "SSO Authentication"},
                 { "name": "Authentication" },
                 { "name": "Bulk Event Insert" },
                 { "name": "User Management" }
