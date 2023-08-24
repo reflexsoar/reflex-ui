@@ -65,8 +65,8 @@
           <CButton v-if="mode == 'create'" color="primary" @click="createMapping"
             >Create</CButton
           >
-          <CButton v-if="mode == 'edit'" color="primary" @click="updateMapping"
-            >Update</CButton
+          <CButton v-if="mode == 'edit'" color="primary" @click="updateMapping" v-bind:disabled="submitted"
+            ><span  v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Update</CButton
           >
         </CCol>
       </CRow>
@@ -89,6 +89,10 @@ export default {
       type: String,
       default: "create",
     },
+    role_mapping: {
+      type: Object,
+      default: () => {},
+    },
   },
   computed: {
     ...mapState(["roles"]),
@@ -98,6 +102,11 @@ export default {
       this.$emit("update:show", this.show);
       if (this.show) {
         this.getUserRoles();
+        if(this.role_mapping != {}) {
+          let _role_mapping = JSON.parse(JSON.stringify(this.role_mapping))
+          this.name = _role_mapping.name
+          this.role_mappings = _role_mapping.role_mappings
+        }
       }
     },
   },
@@ -107,7 +116,8 @@ export default {
       name: "",
       role_mappings: [],
       error: false,
-      error_message: ""
+      error_message: "",
+      submitted: false
     };
   },
   methods: {
@@ -119,23 +129,42 @@ export default {
     },
     reset() {},
     createMapping() {
+      this.submitted = true
       let payload = {
         name: this.name,
         role_mappings: this.role_mappings
       }
       this.$store.dispatch("createRoleMappingPolicy", payload).then(() => {
         this.error = false
+        this.submitted = false
         this.closeModal();
       }).catch((err) => {
         this.error = true
         this.error_message = err.response.data.message
+        this.submitted = false
       });
     },
     updateMapping() {
-      console.log("edit");
-      this.closeModal();
+      this.submitted = true
+      let payload = {
+        name: this.name,
+        role_mappings: this.role_mappings
+      }
+
+      let uuid = this.role_mapping.uuid
+      this.$store.dispatch("updateRoleMappingPolicy", {uuid: uuid, data: payload}).then(() => {
+        this.error = false
+        this.submitted = false
+        this.closeModal();
+      }).catch((err) => {
+        this.error = true
+        this.submitted = false
+        this.error_message = err.response.data.message
+      });
     },
     dismiss() {
+      this.error = false
+      this.error_message = ""
       this.closeModal();
     },
   },

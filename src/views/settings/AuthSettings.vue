@@ -1,7 +1,12 @@
 <template>
   <div>
     <CRow class="page-sub-header">
-      <CCol><h2>Authentication Settings</h2></CCol>
+      <CCol>
+        <h2>Authentication Settings</h2>
+        <CAlert :show.sync="alert.show" :color="alert.color" :fade="false" closeButton>
+        {{ alert.message }}
+      </CAlert>
+    </CCol>      
     </CRow>
     <CRow>
       <CCol>
@@ -88,12 +93,9 @@
               </CTab>
               <CTab title="Role Mappings">
                 <CRow>
-                <CAlert :show.sync="alert.show" :color="alert.color" :fade="false" closeButton>
-              {{ alert.message }}
-            </CAlert>
                   <CCol><h5>Role Mappings</h5></CCol>
                   <CCol class="text-right">
-                    <CButton @click="show_mapping_modal = true" color="primary"
+                    <CButton @click="createRoleMapping()" color="primary"
                       >Create Role Mapping</CButton
                     >
                   </CCol>
@@ -143,7 +145,9 @@
                               @click="activateMappingPolicy(item.uuid)"
                               >Activate</CDropdownItem
                             >
-                            <CDropdownItem v-else @click="deactivateMappingPolicy(item.uuid)"
+                            <CDropdownItem
+                              v-else
+                              @click="deactivateMappingPolicy(item.uuid)"
                               >Deactivate</CDropdownItem
                             >
                             <CDropdownItem @click="editMappingPolicy(item.uuid)"
@@ -155,7 +159,7 @@
                           </CDropdown>
                         </td>
                       </template>
-                      </CDataTable>
+                    </CDataTable>
                   </CCol>
                 </CRow>
               </CTab>
@@ -165,14 +169,30 @@
       </CCol>
     </CRow>
     <SSOProviderModal :show.sync="show_provider_modal" :mode="provider_modal_mode" />
-    <RoleMapModal :show.sync="show_mapping_modal" :mode="mapping_modal_mode" />
-    <CModal :show.sync="warn_mapping_delete" color="danger" :centered="true" title="Delete Confirmation">
+    <RoleMapModal
+      :show.sync="show_mapping_modal"
+      :mode="mapping_modal_mode"
+      :role_mapping="role_mapping"
+    />
+    <CModal
+      :show.sync="warn_mapping_delete"
+      color="danger"
+      :centered="true"
+      title="Delete Confirmation"
+    >
       <p>Are you sure you want to delete this role mapping?</p>
       <template #footer>
         <CRow>
           <CCol class="text-right">
-            <CButton color="secondary" @click="warn_mapping_delete = false">Cancel</CButton>&nbsp;
-            <CButton color="danger" @click="deleteMappingPolicy()" v-bind:disabled="submitted"><CSpinner v-if="submitted" size="sm"/>&nbsp;Delete</CButton>
+            <CButton color="secondary" @click="warn_mapping_delete = false"
+              >Cancel</CButton
+            >&nbsp;
+            <CButton
+              color="danger"
+              @click="deleteMappingPolicy()"
+              v-bind:disabled="submitted"
+              ><CSpinner v-if="submitted" size="sm" />&nbsp;Delete</CButton
+            >
           </CCol>
         </CRow>
       </template>
@@ -223,15 +243,24 @@ export default {
       ],
       provider_uuid: "",
       mapping_uuid: "",
+      role_mapping: {},
       submitted: false,
       alert: {
         show: false,
         color: "success",
         message: "",
-      }
+      },
     };
   },
   methods: {
+    createRoleMapping() {
+      this.role_mapping = {
+        name: "",
+        role_mappings: [],
+      };
+      this.mapping_modal_mode = "create";
+      this.show_mapping_modal = true;
+    },
     editProvider(provider) {
       this.provider_modal_mode = "edit";
       //this.$store.dispatch("getSSOProvider", provider.uuid);
@@ -255,25 +284,30 @@ export default {
     },
     deleteMappingPolicy() {
       this.submitted = true;
-      this.$store.dispatch("deleteRoleMappingPolicy", {uuid: this.mapping_uuid}).then(() => {
-        this.warn_mapping_delete = false;
-        this.mapping_uuid = "";
-        this.submitted = false;
-      }).catch((err) => {
-        this.submitted = false;
-        this.warn_mapping_delete = false;
-        this.mapping_uuid = "";
-        this.alert.message = err.response.data.message;
-        this.alert.color = "danger";
-        this.alert.show = true;
-
-      });
+      this.$store
+        .dispatch("deleteRoleMappingPolicy", { uuid: this.mapping_uuid })
+        .then(() => {
+          this.warn_mapping_delete = false;
+          this.mapping_uuid = "";
+          this.submitted = false;
+        })
+        .catch((err) => {
+          this.submitted = false;
+          this.warn_mapping_delete = false;
+          this.mapping_uuid = "";
+          this.alert.message = err.response.data.message;
+          this.alert.color = "danger";
+          this.alert.show = true;
+        });
     },
     editMappingPolicy(mapping) {
       this.mapping_modal_mode = "edit";
       //this.$store.dispatch("getRoleMappingPolicy", mapping.uuid);
+      this.role_mapping = this.sso_role_mappings.find((item) => {
+        return item.uuid === mapping;
+      });
       this.show_mapping_modal = true;
-    }
+    },
   },
 };
 </script>
