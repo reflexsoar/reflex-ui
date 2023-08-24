@@ -104,10 +104,10 @@
         <CRow>
           <CCol col=3>
             <label>Auto Provision Users</label><br>
-            <CSwitch :checked.sync="auto_provision" label-on="Yes" label-off="No" color="success"/>
+            <CSwitch :checked.sync="auto_provision_users" label-on="Yes" label-off="No" color="success"/>
           </CCol>
           <CCol>
-            <CSelect v-bind:disabled="!auto_provision" label="Default Role" :value.sync="default_role" :options="roles.map(role => { return {label: role.name, value: role.uuid}})" required/>
+            <CSelect v-bind:disabled="!auto_provision_users" label="Default Role" :value.sync="default_role" :options="roles.map(role => { return {label: role.name, value: role.uuid}})" required/>
           </CCol>
         </CRow>
       </CTab>
@@ -195,10 +195,10 @@
         <CCol class="text-right">
           <CButton color="secondary" @click="dismiss">Cancel</CButton>&nbsp;
           <CButton v-if="mode == 'create'" color="primary" @click="createProvider"
-            >Create</CButton
+            ><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton
           >
           <CButton v-if="mode == 'edit'" color="primary" @click="updateProvider"
-            >Update</CButton
+            ><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Update</CButton
           >
         </CCol>
       </CRow>
@@ -231,13 +231,29 @@ export default {
     show: function () {
       this.$emit("update:show", this.show);
       if(this.show) {
+        if(this.provider != {}) {
+          this.uuid = this.provider.uuid;
+          this.name = this.provider.name;
+          this.description = this.provider.description;
+          this.idp_entity_id = this.provider.idp_entity_id;
+          this.idp_signon_url = this.provider.idp_signon_url;
+          this.idp_signout_url = this.provider.idp_signout_url;
+          this.idp_certificate = this.provider.idp_certificate;
+          this.logon_domains = this.provider.logon_domains;
+          this.auto_provision_users = this.provider.auto_provision_users;
+          this.default_role = this.provider.default_role;
+          this.security = this.provider.security;
+        }
         this.getUserRoles();
-      }
-      if(this.show && this.mode == "create") {
-        this.uuid = uuid4();
+
+        if(this.mode == "create") {
+          this.uuid = uuid4();
+        }
+
         this.acs_url = window.location.origin+"/api/v2.0/auth/sso/"+this.uuid+"/acs";
         this.slo_url = window.location.origin+"/api/v2.0/auth/sso/"+this.uuid+"/slo";
         this.entity_id = "reflexsoar:sp:"+this.uuid+":saml2";
+      
       }
     },
   },
@@ -246,6 +262,7 @@ export default {
       loading: false,
       error: false,
       error_message: "",
+      submitted: false,
       uuid: "",
       acs_url: "",
       slo_url: "",
@@ -258,7 +275,7 @@ export default {
       idp_certificate: "",
       logon_domains: [],
       logon_domain_options: [],
-      auto_provision: false,
+      auto_provision_users: false,
       default_role: "",
       security: {
         name_id_encrypted: false,
@@ -310,7 +327,7 @@ CERTIFICATE DATA HERE
       this.idp_signout_url = "";
       this.idp_certificate = "";
       this.logon_domains = [];
-      this.auto_provision = false;
+      this.auto_provision_users = false;
       this.default_role = "";
       this.step = 0;
       this.error = false;
@@ -334,6 +351,7 @@ CERTIFICATE DATA HERE
       }
     },
     createProvider() {
+      this.submitted = true;
       let payload = {
         uuid: this.uuid,
         name: this.name,
@@ -344,14 +362,17 @@ CERTIFICATE DATA HERE
         idp_signout_url: this.idp_signout_url,
         idp_certificate: this.idp_certificate,
         logon_domains: this.logon_domains,
-        auto_provision: this.auto_provision,
+        auto_provision_users: this.auto_provision_users,
         default_role: this.default_role,
         security: this.security
       }
       this.$store.dispatch("createSSOProvider", payload).then(resp => {
+        this.submitted = false;
         this.closeModal();
       }).catch(err => {
-        console.log(err);
+        this.error = true;
+        this.error_message = err.response.data.message;
+        this.submitted = false;
       })
       
     },
@@ -365,8 +386,28 @@ CERTIFICATE DATA HERE
         }, 2000);
     },
     updateProvider() {
-      console.log("edit");
-      this.closeModal();
+      this.submitted = true;
+      let payload = {
+        name: this.name,
+        description: this.description,
+        idp_cert: this.idp_certificate,
+        idp_entity_id: this.idp_entity_id,
+        idp_signon_url: this.idp_signon_url,
+        idp_signout_url: this.idp_signout_url,
+        idp_certificate: this.idp_certificate,
+        logon_domains: this.logon_domains,
+        auto_provision_users: this.auto_provision_users,
+        default_role: this.default_role,
+        security: this.security
+      }
+      this.$store.dispatch("updateSSOProvider", {uuid: this.uuid, data: payload}).then(resp => {
+        this.submitted = false;
+        this.closeModal();
+      }).catch(err => {
+        this.error = true;
+        this.error_message = err.response.data.message;
+        this.submitted = false;
+      })
     },
     dismiss() {
       this.closeModal();

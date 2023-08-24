@@ -27,12 +27,8 @@
                           <h2>
                             {{ current_user.first_name }} {{ current_user.last_name }}
                           </h2>
-                          <h5>{{ current_user.email }}</h5>
-                          <TagList
-                            :tags="current_user.role"
-                            label="name"
-                            :tagIcon="false"
-                          />
+                          <label>Chief Technology Officer</label><br>
+                          <i class="fas fa-envelope"/>&nbsp;{{ current_user.email }}
                         </div>
                       </CCol>
                     </CRow>
@@ -55,32 +51,8 @@
                         </CRow>
                         <CRow>
                           <CCol>
-                            <ObjectAttribute label="Last Login"
-                              ><template #value>{{
-                                current_user.last_logon | moment("MMM, Mo, YYYY HH:mm:ss")
-                              }}</template></ObjectAttribute
-                            >
-                          </CCol>
-                          <CCol>
-                            <ObjectAttribute
-                              label="MFA Enabled"
-                              :value="current_user.mfa_enabled ? 'Yes' : 'No'"
-                            />
-                          </CCol>
-                        </CRow>
-                        <CRow>
-                          <CCol>
-                            <ObjectAttribute label="Last Login"
-                              ><template #value>{{
-                                current_user.last_logon | moment("MMM, Mo, YYYY HH:mm:ss")
-                              }}</template></ObjectAttribute
-                            >
-                          </CCol>
-                          <CCol>
-                            <ObjectAttribute
-                              label="MFA Enabled"
-                              :value="current_user.mfa_enabled ? 'Yes' : 'No'"
-                            />
+                            <label>MFA Enabled</label>
+                            <RBlockSwitch :checked.sync="current_user.mfa_enabled" v-on:change="current_user.mfa_enabled ? start_mfa_wizard() : false" />
                           </CCol>
                         </CRow>
                       </CCol>
@@ -185,34 +157,131 @@
             </CRow>
           </CTab>
           <CTab title="Notifications">
+            <h2 class="page-sub-heading">Notification Settings</h2>
             <CCard>
-              <CCardHeader>Notification Settings</CCardHeader>
               <CCardBody>
-                <table style="width: 100%">
-                  <th>Event</th>
-                  <th>Reflex Native</th>
-                  <th>Email</th>
-                  <tr>
-                    <td>When I am mentioned</td>
-                    <td><CInputCheckbox /></td>
-                    <td><CInputCheckbox /></td>
-                  </tr>
-                  <tr>
-                    <td>Case Assigned to Me</td>
-                    <td><CInputCheckbox /></td>
-                    <td><CInputCheckbox /></td>
-                  </tr>
-                  <tr>
-                    <td>Case Severity Changed</td>
-                    <td><CInputCheckbox /></td>
-                    <td><CInputCheckbox /></td>
-                  </tr>
-                  <tr>
-                    <td>Case Comment Added</td>
-                    <td><CInputCheckbox /></td>
-                    <td><CInputCheckbox /></td>
-                  </tr></table
-              ></CCardBody>
+              <CRow>
+                <CCol col=6>
+                  <h5>Platform Notifications</h5>
+                  <p>Get emails to find out what's going on you're not in the system.  You can always change these settings later.</p>
+                </CCol>
+                <CCol>
+                  <label>News and Updates</label>
+                </CCol>
+                <CCol col=4>
+                  <CRow>
+                    <CCol>
+                      <RSwitch :checked.sync="notifications.email.news_and_updates" />
+                    </CCol>
+                  </CRow>
+                </CCol>
+              </CRow>
+              <hr class="horizontal-separator">
+              <CRow>
+                    <CCol col=8>
+                    </CCol>
+                    <CCol>
+                      <label>ReflexSOAR Native</label>
+                    </CCol>
+                    <CCol>
+                      <label>Email</label>
+                    </CCol>
+                  </CRow>
+              <hr class="horizontal-separator">
+              <CRow>
+                <CCol>
+                  <h5>Case Notifications</h5>
+                  <p>Get notified when things happen in your cases.</p>
+                </CCol>
+                <CCol>                  
+                  <CRow>
+                    <CCol>
+                      <label>Case Assigned to Me</label>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                  </CRow>
+                  <CRow>
+                    <CCol>
+                      <label>Case Severity Change</label>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                  </CRow>
+                  <CRow>
+                    <CCol>
+                      <label>Case Closed</label>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                  </CRow>
+                </CCol>
+              </CRow>
+              <hr class="horizontal-separator">
+              <CRow>
+                <CCol>
+                  <h5>Comment Notifications</h5>
+                  <p>Get notified when things happen in your cases.</p>
+                </CCol>
+                <CCol>
+                  <CRow>
+                    <CCol>
+                      <label>Mentioned in Comment</label>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                  </CRow>
+                  <CRow>
+                    <CCol>
+                      <label>Comment Added to Event</label>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                  </CRow>
+                  <CRow>
+                    <CCol>
+                      <label>Comment Added to Case (Assigned)</label>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                  </CRow>
+                  <CRow>
+                    <CCol>
+                      <label>Comment Added to Case (Watching)</label>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                    <CCol>
+                      <RSwitch/>
+                    </CCol>
+                  </CRow>
+                </CCol>
+              </CRow></CCardBody>
             </CCard>
           </CTab>
         </CTabs>
@@ -281,7 +350,7 @@
       </div>
       <center></center>
       <template #footer>
-        <CButton @click="enable_mfa_modal = !enable_mfa_modal" color="secondary"
+        <CButton @click="dismissMfaSetup()" color="secondary"
           >Cancel</CButton
         >
         <CButton
@@ -309,6 +378,8 @@ import { mapState } from "vuex";
 import CalloutCard from "./components/CalloutCard.vue";
 import ObjectAttribute from "./components/ObjectAttribute.vue";
 import TagList from "./components/TagList.vue";
+import RSwitch from "./components/Switch.vue";
+import RBlockSwitch from "./components/BlockSwitch.vue";
 
 export default {
   name: "Dashboard",
@@ -316,6 +387,8 @@ export default {
     CalloutCard,
     ObjectAttribute,
     TagList,
+    RSwitch,
+    RBlockSwitch
   },
   data() {
     return {
@@ -332,6 +405,25 @@ export default {
       reset_success: false,
       mfa_token: "",
       loading_code: false,
+      notifications: {
+        case: {
+          assigned_to_me: {
+            reflex_native: false,
+            email: false,
+          },
+          severity_changed: {
+            reflex_native: false,
+            email: false,
+          },
+          comment_added: {
+            reflex_native: false,
+            email: false,
+          }
+        },
+        email: {
+          news_and_updates: false,
+        }
+      }
     };
   },
   methods: {
@@ -357,6 +449,13 @@ export default {
         this.error_message = "";
         this.mfa_wizard_step += 1;
       }
+    },
+    dismissMfaSetup() {
+      console.log(this.current_user.mfa_enabled)
+      if(this.current_user.mfa_enabled) {
+        this.current_user.mfa_enabled = false;
+      }
+      this.enable_mfa_modal = false;
     },
     finishMFASetup() {
       let token = {

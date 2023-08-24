@@ -24,7 +24,7 @@ export default {
     name: "CalloutCard",
     props: {
         label: String,
-        value: String,
+        value: [String, Number],
         color: String
     }
 }

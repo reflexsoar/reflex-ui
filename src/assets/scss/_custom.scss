@@ -377,10 +377,16 @@ a {
     font-size: 0.76563rem
 }
 
+.horizontal-separator {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-color: #dfdfdf;
+}
+
 label {
     /* muted text */
     color: #6B7485;
-    font-size: 90%;
+    //font-size: 90%;
     font-weight: 500 !important;
 }
 
@@ -791,4 +797,14 @@ html:not([dir="rtl"]) nav>.pagination {
 .reflex-badge-secondary {
     color: #494949;
     background-color: #cfcfcf;
+}
+
+.card-header-icon {
+    padding: 5px;
+    border: 1px solid #d8dbe0;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    margin-right: 10px;
+    line-height: normal;
+    font-size: 60% !important;
 }

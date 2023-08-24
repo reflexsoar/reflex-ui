@@ -47,7 +47,7 @@
               >&nbsp;{{ case_data.status.name }}
             </h4>
           </CCol>
-          <CCol col="1" class="text-right">
+          <CCol col="2" class="text-right">
             <label class="text-muted" style="text-transform: uppercase"
               ><small><b>Owner</b></small></label
             >
@@ -1075,20 +1075,19 @@ export default {
     closeStatusEdit(e) {
       // If the click is not on the status select, close the edit
       if (!e.target.id.includes("status")) {
-        console.log(e);
         this.edit_status = false;
         document.removeEventListener("click", this.closeStatusEdit);
       }
     },
     editOwner() {
-      this.edit_owner = !this.edit_owner;
+      this.edit_owner = true;
       // Create an event listener for a window click
       document.addEventListener("click", this.closeOwnerEdit);
     },
     closeOwnerEdit(e) {
       // If the click is not on the owner select, close the edit
-      if (!e.target.id.includes("owner") || !e.target.classList.contains("multiselect__select")) {
-        console.log(e);
+      if (!e.target.id.includes("owner") && !e.target.classList.contains("multiselect__select")) {
+        console.log(e)
         this.edit_owner = false;
         document.removeEventListener("click", this.closeOwnerEdit);
       }

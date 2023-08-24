@@ -63,10 +63,10 @@
         <CCol class="text-right">
           <CButton color="secondary" @click="dismiss">Cancel</CButton>&nbsp;
           <CButton v-if="mode == 'create'" color="primary" @click="createMapping"
-            >Create</CButton
+            ><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Create</CButton
           >
           <CButton v-if="mode == 'edit'" color="primary" @click="updateMapping" v-bind:disabled="submitted"
-            ><span  v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Update</CButton
+            ><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Update</CButton
           >
         </CCol>
       </CRow>

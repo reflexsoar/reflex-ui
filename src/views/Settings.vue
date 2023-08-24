@@ -23,10 +23,8 @@
             <template slot="title">
               <CIcon name="cil-globe-alt" /> {{ tabs[0] }}
             </template>
-            <h2 class="page-sub-header">Current Tenant</h2>
-            <CCard>
+            
               <GlobalSettings />
-            </CCard>
           </CTab>
           <CTab v-if="current_user && current_user.permissions.view_organizations">
             <template slot="title"> <CIcon name="cil-people" /> {{ tabs[1] }} </template>

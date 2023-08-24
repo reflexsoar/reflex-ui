@@ -168,7 +168,7 @@
         </CCard>
       </CCol>
     </CRow>
-    <SSOProviderModal :show.sync="show_provider_modal" :mode="provider_modal_mode" />
+    <SSOProviderModal :show.sync="show_provider_modal" :mode="provider_modal_mode" :provider="sso_provider" />
     <RoleMapModal
       :show.sync="show_mapping_modal"
       :mode="mapping_modal_mode"
@@ -244,6 +244,7 @@ export default {
       provider_uuid: "",
       mapping_uuid: "",
       role_mapping: {},
+      sso_provider: {},
       submitted: false,
       alert: {
         show: false,
@@ -263,7 +264,9 @@ export default {
     },
     editProvider(provider) {
       this.provider_modal_mode = "edit";
-      //this.$store.dispatch("getSSOProvider", provider.uuid);
+      this.sso_provider = this.sso_providers.find((item) => {
+        return item.uuid === provider;
+      });
       this.show_provider_modal = true;
     },
     activateProvider(provider) {

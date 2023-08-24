@@ -1,13 +1,28 @@
 <template>
-  <CCardBody>
+<div>
+  <CRow class="page-sub-header page-header-row">
+    <CCol>
+      <h2 >Current Tenant</h2>
+    </CCol>
+    <CCol class="text-right">
+      <CButton color="primary" @click="updateSettings()">Save Settings</CButton>
+    </CCol>
+  </CRow>
+  <CRow><CCol>
     <CForm id="settings-form">
       <CRow>
         <CCol col="6">
-          <h4>Basic Settings</h4>
+          <CCard>
+          <CCardBody>
+          <h4><i class="fas fa-sm fa-gear card-header-icon"/>Basic Settings</h4>
           <CInput v-model="settings.base_url" label="Base URL" v-bind:disabled="!current_user.permissions['set_baseurl']"/>
           <CInput v-model="settings.logon_password_attempts" label="Max Logon Attempts"/>
           <CInput v-model="settings.logon_expire_at" label="Expire Logon After (Hours)" placeholder="6" description="User Access Tokens will expire after this many hours"/>
-          <h4>Playbook Settings</h4>
+          </CCardBody>
+          </CCard>
+          <CCard>
+          <CCardBody>
+          <h4><i class="fas fa-sm fa-book card-header-icon"/>Playbook Settings</h4>
           <CRow>
             <CCol col="6">
               <CInput v-model="settings.playbook_action_timeout" label="Playbook Action Timeout (seconds)"/>
@@ -16,7 +31,10 @@
               <CInput v-model="settings.playbook_timeout" label="Playbook Action Timeout (seconds)"/>
             </CCol>
           </CRow>
-          <h4>Case/Event Settings</h4>
+          </CCardBody>
+          </CCard>
+          <CCard><CCardBody>
+          <h4><i class="fas fa-sm fa-briefcase card-header-icon"/>Case/Event Settings</h4>
           <CRow>
             <CCol col="6">
               <label>Require Case Templates</label><br>
@@ -55,49 +73,80 @@
                 <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.allow_comment_deletion"/><br><br>
             </CCol>
           </CRow>
+          </CCardBody></CCard>
+          <CCard>
+            <CCardBody>
+            <h4><i class="fas fa-sm fa-shield-heart card-header-icon"/>Detection settings</h4>
           <CRow>
             <CCol>
-              <h4>Detection settings</h4>
-              <CInput v-model.number="settings.slow_detection_threshold" label="Slow Detection Threshold (milliseconds)" placeholder="1000"/>
-              <CInput v-model.number="settings.high_volume_threshold" label="High Volume Threshold (number of events)" placeholder="1000"/>
+              <CInput v-model.number="settings.slow_detection_warning_threshold" label="Slow Detection Warning Threshold" description="The time in milliseconds a Detection must exceed to generate a warning that is poorly peforming" placeholder="1000"/>
+              <CInput v-model.number="settings.high_volume_warning_threshold" label="High Volume Warning Threshold" description="The number of events a Detection must exceed on a single run to generate a warning that its loud." placeholder="1000"/>
+            </CCol>
+            <CCol>
+              <CInput v-model.number="settings.slow_detection_threshold" label="Slow Detection Disable Threshold" description="The time in milliseconds a Detection must exceed on a single query for the Detection to be disabled." placeholder="60"/>
+              <CInput v-model.number="settings.high_volume_threshold" label="High Volume Disable Threshold" description="The number of events a Detection must exceed on a single run for the Detection to be disabled." placeholder="10000"/>
             </CCol>
           </CRow>
+          </CCardBody></CCard>
+          <CCard><CCardBody>
+          <h4><i class="fas fa-sm fa-chart-line card-header-icon"/>Report Settings</h4>
           <CRow>
             <CCol>
-              <h4>Report Settings</h4>
+              
               <CSelect :options="utc_offsets" :value.sync="settings.utc_offset" label="UTC Offset"/>
             </CCol>
           </CRow>
+          </CCardBody></CCard>
         </CCol>
         <CCol col="6">
-          <h4>User Account Settings</h4>
+          <CCard>
+            <CCardBody>
+              <h4><i class="fas fa-sm fa-user-gear card-header-icon"/>User Account Settings</h4>
           <label>Require MFA</label><br><CSwitch v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_mfa"/><br>
           <small class="form-text text-muted w-100">When enabled all users must configure MFA at first login.</small><br>
           <CInput v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" label="Minimum Password Length" v-model="settings.minimum_password_length" placeholder="8" disabled/>
           <label>Enforce Password Complexity</label><br><CSwitch v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.enforce_password_complexity"/><br>
           <small class="form-text text-muted w-100">Requires passwords to contain special characters.</small><br>
           <CTextarea v-c-tooltip="{content: 'Coming in future release', placement: 'top'}" disabled label="Disallowed Keywords" rows="5" v-model="settings.disallowed_password_keywords" description="Blocks keywords from being used in new passwords.  Each keyword should be on it's own line."/>          
-          <h4>Advanced Settings</h4>
+          </CCardBody>
+          </CCard>
+          <CCard>
+            <CCardBody>
+          <h4><i class="fas fa-sm fa-gears card-header-icon"/>Advanced Settings</h4>
           <label v-c-tooltip="{
             content: 'Only requests from IPs in the Approve IPs list will be allowed to communicate with the platform.',
             placement: 'right'}">Restrict Access to Approved IPs</label><br>
             <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.require_approved_ips"/><br>
             <small class="form-text text-danger w-100"><b>WARNING - This setting can prevent access to your console.</b></small><br>
           <CTextarea v-model="settings.approved_ips" description="Enter IP addresses in single host or CIDR format, one per line." label="Approved IPs" rows="5" placeholder="10.0.0.0/8" v-bind:disabled="!settings.require_approved_ips"/>
-          <h4>Mail Settings</h4>
+          </CCardBody>
+          </CCard>
+          <CCard>
+            <CCardBody>
+          <h4><i class="fas fa-sm fa-envelope card-header-icon"/>Mail Settings</h4>
           <CInput v-model="settings.email_from" label="Email From" placeholder="admin@reflexsoar.com"/>
           <CInput v-model="settings.email_server" label="Email Server" placeholder="127.0.0.1:25"/>
           <CSelect :value.sync="settings.email_secret_uuid" :options="credential_list" label="Email Credentials" placeholder="Select a credential"/>
-          <h4>API Settings</h4>
+          </CCardBody>
+          </CCard>
+          <CCard>
+          <CCardBody>
+          <h4><i class="fas fa-sm fa-code card-header-icon"/>API Settings</h4>
           <CInput v-model="settings.api_key_valid_days" description="Changing this setting will only impact new API keys" label="API Key Valid Period (days)" placeholder="366"/>
-          <h4>Agent Settings</h4>
+          </CCardBody>
+          </CCard>
+          <CCard>
+            <CCardBody>
+          <h4><i class="fas fa-sm fa-robot card-header-icon"/>Agent Settings</h4>
           <CInput v-model="settings.agent_pairing_token_valid_minutes" label="Agent Pairing Token Validity (minutes)" placeholder="15"/>
           <CButton color="danger" @click="persistentTokenModal()">Generate Peristent Pairing Token</CButton>
+          </CCardBody>
+          </CCard>
         </CCol>
       </CRow>
       <CRow>
         <CCol col="12" class="text-right">
-          <CButton color="primary" @click="updateSettings()">Save</CButton>
+          
         </CCol>
       </CRow>
     </CForm>
@@ -115,15 +164,9 @@
         <CButton v-if="confirm_generate" @click="dismiss()" color="success">Finish</CButton>
       </template>
     </CModal>
-  </CCardBody>
+    </CCol></CRow>
+  </div>
 </template>
-
-<style scoped>
-h4 {
-  padding-bottom: 10px;
-  border-bottom: 1px dotted #cfcfcf;
-}
-</style>
 
 <script>
 import { vSelect } from "vue-select";
