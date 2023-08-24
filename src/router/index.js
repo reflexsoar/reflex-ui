@@ -94,7 +94,7 @@ router.beforeEach((to, from, next) => {
       // Null out the cookies
       document.cookie = "access_token =; Max-Age=0"
       document.cookie = "refresh_token =; Max-Age=0"
-      
+      store.dispatch('getMe');
     }
   }
 
@@ -110,7 +110,6 @@ router.beforeEach((to, from, next) => {
         if(record.meta.requiresPermission && !current_user.permissions[record.meta.requiresPermission]) {
           next('/401')
         } else {
-          
           next()
           return
         }
