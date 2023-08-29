@@ -58,37 +58,7 @@
       <CCol>
         <CRow>
           <CCol v-for="integration in filtered_results" col="3">
-            <CCard>
-              <CCardBody>
-                <CRow>
-                  <CCol style="height: 50px;">
-                    <img :src="integration.logo" style="height: 100%; width: 100%; object-fit: scale-down" />
-                  </CCol>
-                  <CCol col=8 style="padding-top: 10px">
-                    <h4>{{ integration.name }}</h4>
-                  </CCol>
-                </CRow>
-                <CRow style="padding-top: 10px">
-                  <CCol>
-                    <p style="min-height: 100px; max-height: 100px; overflow-y: scroll">
-                      {{ integration.brief_description }}
-                    </p>
-                  </CCol>
-                </CRow>
-              </CCardBody>
-              <CCardFooter>
-                <CRow>
-                  <CCol><CBadge color="secondary" size="sm">Version: {{integration.version}}</CBadge> </CCol>
-                  <CCol class="text-right">
-                    <!-- On click send the user to the Integration details page where they 
-                can set up new action configurations -->
-                    <CButton color="primary" :to="`${integration.product_identifier}`" size="sm"
-                      >Configure</CButton
-                    >
-                  </CCol>
-                </CRow>
-              </CCardFooter>
-            </CCard>
+            <IntegrationCard :integration="integration"/>
           </CCol>
         </CRow>
       </CCol>
@@ -99,8 +69,13 @@
 <script>
 import { mapState } from "vuex";
 
+import IntegrationCard from './IntegrationCard'
+
 export default {
   name: "IntegrationsList",
+  components: {
+    IntegrationCard
+  },
   computed: {
     ...mapState(["integrations", "current_user"]),
     filtered_results: function () {

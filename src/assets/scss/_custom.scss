@@ -808,3 +808,14 @@ html:not([dir="rtl"]) nav>.pagination {
     line-height: normal;
     font-size: 60% !important;
 }
+
+.integration-card-logo {
+    max-width: 100%;
+    height: 100%;
+    object-fit: scale-down;
+    left: 0;
+}
+
+.integration-logo-wrapper {
+    height: 50px;
+}

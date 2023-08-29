@@ -1,26 +1,34 @@
 <template>
   <CRow>
-    <CCol v-if="loading">
+    <CCol>
+      <CRow class="page-heading page-heading-row">
+        <CCol>
+          <img :src="integration.logo" :alt="integration.name" class="integration-card-logo"  style="max-height: 50px" />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol v-if="loading">
       <CSpinner color="primary" />
     </CCol>
     <CCol v-else>
       <CRow>
-        <CCol col=2>
-            <CCard>
-            <CCardBody class="text-center" style="height: 125px; line-height: 80px;">
-                <img :src="integration.logo" :alt="integration.name" style="height: 100%; width: 100%; object-fit: scale-down" />
-            </CCardBody>
-            </CCard>
-        </CCol>
         <CCol>
-          <h2>{{ integration.name }}</h2>
-          <TagList :tags="integration.category" />
-        </CCol>
-      </CRow>
-      <CRow>
-        <CCol>
-            <CTabs variant="pills"><br>
+          
+            <CTabs 
+          addNavWrapperClasses="page-nav"
+          addTabClasses="page-nav-tab-body"
+          addNavClasses="page-nav-tab">
                 <CTab title="Overview">
+                <CRow>
+                  <CCol>
+                      <h2 class="page-sub-header">Overview</h2>
+                  </CCol>
+                  <CCol class="text-right">
+                    <CButton color="primary" @click="newConfiguration()">New Configuration</CButton>
+                  </CCol>
+                  </CRow>
+                  <CRow>
+                    <CCol>
                     <CCard>
                         <CCardBody>
                           <CRow>
@@ -50,15 +58,14 @@
         </CRow>
                         </CCardBody>
                     </CCard>
-                </CTab>
-                <CTab title="Configurations">
-                    
-                    <CCard>
-                        <CCardHeader>
-                            <CButton color="primary" @click="newConfiguration()">New Configuration</CButton>
-                        </CCardHeader>
+                      </CCol>
+                      </CRow>
+                      <CRow>
+                      <CCol>
+                      <h2 class="page-sub-header">Configurations</h2>
+                      <CCard>
+                        
                         <CCardBody>
-                            <h3>Configurations</h3>
                             <div v-if="configurations_loading">
                                 <CSpinner color="primary" />
                             </div>
@@ -118,8 +125,11 @@
                                 </div>
                         </CCardBody>
                     </CCard>
+                    </CCol>
+                    </CRow>
                 </CTab>
                 <CTab title="Documentation">
+                  <h2 class="page-sub-header">Documentation</h2>
                     <CCard><CCardBody>
                     <h3>Global Parameters</h3>
                     <p>
@@ -156,10 +166,11 @@
                     </CCard>
                 </CTab>
                 <CTab title="Manifest">
+                  <h2 class="page-sub-header">Manifest</h2>
                     <CCard>
-                        <CCardBody> <h3>Manifest File</h3>
+                        <CCardBody>
                         <p>The manifest file defines exactly what this integration expects from a configuration perspective</p>
-                            <code><pre>{{ integration.manifest }}</pre></code>
+                            <pre style="overflow-x: auto; word-wrap: none; max-height: calc(100vh - 450px)">{{ integration.manifest }}</pre>
                         </CCardBody>
                     </CCard>
                 </CTab>
@@ -167,6 +178,9 @@
         </CCol>
       </CRow>
     </CCol>
+    </CRow>
+    </CCol>
+    
     <IntegrationConfigModal :show.sync="showConfigModal" :integration="integration" :configuration="configuration" :mode="modal_mode"/>
     <!-- Delete warning modal -->
     <CModal
@@ -354,14 +368,13 @@ export default {
 
         // Build the default global options
         for (let field in this.integration.manifest.configuration) {
-            console.log(field)
             if(this.integration.manifest.configuration[field].default == null && this.integration.manifest.configuration[field].required) {
                 if(this.integration.manifest.configuration[field].type == "str") {
-                    configuration.global_settings[field].default = ""
+                    this.integration.manifest.configuration[field].default = ""
                 } else if(this.integration.manifest.configuration[field].type == "bool") {
-                    configuration.global_settings[field].default = false
+                    this.integration.manifest.configuration[field].default = false
                 } else if(this.integration.manifest.configuration[field].type == "int") {
-                    configuration.global_settings[field].default = 0
+                    this.integration.manifest.configuration[field].default = 0
                 }
             }
 

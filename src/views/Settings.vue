@@ -1,11 +1,10 @@
 <template>
   <div>
-    <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
-      {{ alert.message }}
-    </CAlert>
+    
     <CRow>
       <CCol xs="12" lg="12">
         <h1 class="page-heading">Platform Settings</h1>
+        
         <CTabs
           :activeTab.sync="activeTab"
           addNavWrapperClasses="page-nav"
@@ -23,7 +22,6 @@
             <template slot="title">
               <CIcon name="cil-globe-alt" /> {{ tabs[0] }}
             </template>
-            
               <GlobalSettings />
           </CTab>
           <CTab v-if="current_user && current_user.permissions.view_organizations">

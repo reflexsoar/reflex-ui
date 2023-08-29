@@ -8,6 +8,10 @@
       <CButton color="primary" @click="updateSettings()">Save Settings</CButton>
     </CCol>
   </CRow>
+  
+            <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
+              {{ alert.message }}
+            </CAlert>
   <CRow><CCol>
     <CForm id="settings-form">
       <CRow>
@@ -225,7 +229,7 @@ export default {
     this.loadData()
     
   },
-  computed: mapState(['current_user', 'settings', 'credential_list']),
+  computed: mapState(['current_user', 'settings', 'credential_list', 'alert']),
   methods: {
     persistentTokenModal() {
       this.generate_modal = true

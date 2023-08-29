@@ -2,8 +2,6 @@
   <div>
     <CRow>
       <CCol>
-        <CCard>
-          <CCardHeader>
             <CRow>
               <CCol>
                 <span v-if="!comment.is_closure_comment"
@@ -30,11 +28,17 @@
               <CCol class="text-right">
               </CCol>
             </CRow>
-          </CCardHeader>
-          <CCardBody>
-          <viewer :initialValue="comment.comment" />
-          </CCardBody>
-        </CCard>
+            <CRow>
+              <CCol>
+                <CCard>
+                  <CCardBody style="padding-top: 5px; padding-bottom: 5px;">
+                  <viewer :initialValue="comment.comment" />
+                  </CCardBody>
+                  </CCard>
+                  
+              </CCol>
+            </CRow>
+          
       </CCol>
     </CRow>
   </div>

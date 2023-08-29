@@ -2,9 +2,17 @@
   <CRow>
     <CCol col
       >
-      <div style="padding: 10px">
-        <CButton color="primary" @click="generateToken()">New Agent</CButton>
-      </div>
+      
+      <CRow class="page-sub-header page-header-row">
+        <CCol>
+          <h2>Agents</h2>
+        </CCol>
+        <CCol class="text-right">
+          <CButton color="primary" @click="generateToken()">New Agent</CButton>
+        
+        </CCol>
+      </CRow>
+      <CCard>
       <CDataTable
         :hover="hover"
         :striped="striped"
@@ -17,7 +25,6 @@
         :sorter="{ external: false, resetable: false }"
         :loading="loading"
         :responsive="true"
-        style="border-top: 1px solid #cfcfcf"
         column-filter
         pagination
         :column-filter-value.sync="column_filters"
@@ -113,7 +120,7 @@
             </li>
           </td>
         </template>
-      </CDataTable>
+      </CDataTable></CCard>
       <CRow> </CRow>
     </CCol>
     <CModal

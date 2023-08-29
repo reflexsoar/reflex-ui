@@ -1,7 +1,15 @@
 <template>
   <CRow><link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
     <CCol col>
-      <div style="padding: 10px;"><CButton color="primary" @click="newAgentGroup()">New Agent Group</CButton></div>
+      <CRow class="page-sub-header page-header-row">
+        <CCol>
+          <h2>Agent Groups</h2>
+        </CCol>
+        <CCol class="text-right">
+          <CButton color="primary" @click="newAgentGroup()">New Agent Group</CButton>
+        </CCol>
+      </CRow>
+      <CCard>
       <CDataTable
           :hover="hover"
           :striped="striped"
@@ -16,7 +24,6 @@
           :responsive="true"
           :sorter='{external: true, resetable: true}'
           @update:sorter-value="sort($event)"
-          style="border-top: 1px solid #cfcfcf;"
       >
       <template #name="{item}">
           <td>
@@ -40,15 +47,16 @@
             {{item.members? item.members.length : 0}}
           </td>
         </template>
-    </CDataTable>
-    <CRow>
+    </CDataTable><CRow>
       <CCol>
         <CCardBody>
           <CPagination :activePage.sync="active_page" :pages="pagination.pages"/>
         </CCardBody>
       </CCol>
-    </CRow>
+    </CRow></CCard>
+    
     </CCol>
+    
     <CModal
       :title="modal_title"
       color="dark"

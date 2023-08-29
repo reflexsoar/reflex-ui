@@ -98,7 +98,7 @@
             </CRow>
           </CTab>
           <CTab title="Security">
-            <h2 class="page-sub-heading">Security Settings</h2>
+            <h2 class="page-sub-header">Security Settings</h2>
             <CRow>
               <CCol col="6">
                 <CCard>
@@ -157,7 +157,7 @@
             </CRow>
           </CTab>
           <CTab title="Notifications">
-            <h2 class="page-sub-heading">Notification Settings</h2>
+            <h2 class="page-sub-header">Notification Settings</h2>
             <CCard>
               <CCardBody>
               <CRow>
