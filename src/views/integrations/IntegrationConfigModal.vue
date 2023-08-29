@@ -1,5 +1,6 @@
 <template>
-  <div><link
+  <div>
+    <link
       rel="stylesheet"
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
     />
@@ -85,9 +86,9 @@
                   v-model="configuration.global_settings[data]"
                   v-if="field.type == 'str-select'"
                   :label="field.label"
-                  :options="field.options"
+                  :options="getSelectOptions(field)"
                   :description="field.description"
-                  :placeholder="field.default"
+                  :placeholder="field.default ? field.default : 'Select an option'"
                   v-bind:required="field.required"
                 >
                 </CSelect>
@@ -131,8 +132,20 @@
                   <h4>Action Specific Settings</h4></span
                 >
                 <CRow v-for="(field, data) in action.configuration">
-                  <CCol v-if="!field.conditions ||
-                  (field.conditions && field.conditions && field.conditions.every((c) => evaluateFieldValue(configuration.actions[action.name][c.field], c.operator, c.value)))">
+                  <CCol
+                    v-if="
+                      !field.conditions ||
+                      (field.conditions &&
+                        field.conditions &&
+                        field.conditions.every((c) =>
+                          evaluateFieldValue(
+                            configuration.actions[action.name][c.field],
+                            c.operator,
+                            c.value
+                          )
+                        ))
+                    "
+                  >
                     <CInput
                       v-model="configuration.actions[action.name][data]"
                       v-if="field.type == 'str'"
@@ -167,9 +180,10 @@
                       :value.sync="configuration.actions[action.name][data]"
                       v-if="field.type == 'str-select'"
                       :label="field.label"
-                      :options="field.options"
+                      :options="getSelectOptions(field)"
+                      :ref="data"
                       :description="field.description"
-                      :placeholder="field.default"
+                      :placeholder="field.default ? field.default : 'Select an option'"
                       v-bind:required="
                         field.required && configuration.actions[action.name].enabled
                       "
@@ -192,14 +206,15 @@
                         v-model="configuration.actions[action.name][data]"
                         @tag="addMultiOption(action.name, data, $event)"
                         @remove="removeMultiOption(action.name, data, $event)"
-                        :options="getSelectOptions(field, field.default_options_from)"
+                        :options="getSelectOptions(field)"
                         :multiple="true"
                         :close-on-select="false"
                         :placeholder="field.description"
                         :taggable="true"
                       >
                       </multiselect>
-                      <small class="text-muted">{{ field.description }}</small><br><br>
+                      <small class="text-muted">{{ field.description }}</small
+                      ><br /><br />
                     </div>
                   </CCol>
                 </CRow>
@@ -260,6 +275,9 @@ export default {
   computed: {
     ...mapState(["current_user"]),
   },
+  created() {
+    this.$store.dispatch("getCloseReasons", {})
+  },
   data() {
     return {
       modalStatus: false,
@@ -272,6 +290,7 @@ export default {
       title: "Integration Configuration",
       uuid: null,
       show_secrets: false,
+      close_reasons: []
     };
   },
   watch: {
@@ -404,11 +423,25 @@ export default {
         return target.match(value);
       }
     },
-    getSelectOptions(field_config, field) {
+    getSelectOptions(field_config) {
       let values = [];
-      if (field == "intel_list") {
-        values = this.$store.getters.intel
+      if(field_config.default_options_from) {
+        let options_field = field_config.default_options_from
+          if (options_field == "intel_list") {
+            values = this.$store.getters.intel
+          }
+          if (options_field == "close_reasons") {
+            values = this.$store.getters.close_reasons.map((reason) => {
+              return { label: reason.title, value: reason.uuid }
+            })
+
+            return values;
+            
+          }
+      } else {
+        return field_config.options;
       }
+
       return [...new Set(values)];
     },
     addMultiOption(action, field, $event) {
