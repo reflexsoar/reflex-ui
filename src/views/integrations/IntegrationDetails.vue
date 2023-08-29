@@ -7,10 +7,7 @@
         </CCol>
       </CRow>
       <CRow>
-        <CCol v-if="loading">
-      <CSpinner color="primary" />
-    </CCol>
-    <CCol v-else>
+    <CCol>
       <CRow>
         <CCol>
           
@@ -19,21 +16,25 @@
           addTabClasses="page-nav-tab-body"
           addNavClasses="page-nav-tab">
                 <CTab title="Overview">
+                
                 <CRow>
                   <CCol>
                       <h2 class="page-sub-header">Overview</h2>
                   </CCol>
-                  <CCol class="text-right">
-                    <CButton color="primary" @click="newConfiguration()">New Configuration</CButton>
-                  </CCol>
                   </CRow>
+                  
                   <CRow>
                     <CCol>
                     <CCard>
                         <CCardBody>
-                          <CRow>
+                        <CRow v-if="loading">
+                  <CCardBody style="text-align: center">
+                    <CSpinner />
+                  </CCardBody>
+                </CRow>
+                          <CRow v-else>
                             <CCol col=8>
-                              <p><vue-markdown>{{ integration.description }}</vue-markdown></p>
+                              <p><vue-markdown :source="integration.description"></vue-markdown></p>
                             </CCol>
                             <CCol>
                               <table style="border: 0px">
@@ -60,9 +61,19 @@
                     </CCard>
                       </CCol>
                       </CRow>
-                      <CRow>
+                      
+                </CTab>
+                <CTab title="Configurations">
+                <CRow>
                       <CCol>
-                      <h2 class="page-sub-header">Configurations</h2>
+                      <CRow  class="page-sub-header">
+                  <CCol>
+                      <h2>Configurations</h2>
+                  </CCol>
+                  <CCol class="text-right">
+                    <CButton color="primary" @click="newConfiguration()">New Configuration</CButton>
+                  </CCol>
+                  </CRow>
                       <CCard>
                         
                         <CCardBody>
@@ -127,7 +138,7 @@
                     </CCard>
                     </CCol>
                     </CRow>
-                </CTab>
+                    </CTab>
                 <CTab title="Documentation">
                   <h2 class="page-sub-header">Documentation</h2>
                     <CCard><CCardBody>
