@@ -21,24 +21,20 @@
                       comment.other_organization_name
                     }}</CBadge></span
                   >
-                  closed the case with the following comment
+                  closed the {{ item_type }} with the following comment
                   {{ comment.created_at | moment("from", "now") }}.</span
                 >
-              </CCol>
-              <CCol class="text-right">
               </CCol>
             </CRow>
             <CRow>
               <CCol>
-                <CCard>
-                  <CCardBody style="padding-top: 5px; padding-bottom: 5px;">
+                <CCard style="background-color: #f9f9f9;">
+                  <CCardBody style="padding-top: 5px; padding-bottom: 10px;">
                   <viewer :initialValue="comment.comment" />
                   </CCardBody>
-                  </CCard>
-                  
+                </CCard>
               </CCol>
-            </CRow>
-          
+            </CRow>          
       </CCol>
     </CRow>
   </div>
@@ -57,6 +53,10 @@ export default {
   props: {
     comment: Object,
     settings: Object,
+    item_type: {
+      type: String,
+      default: "event",
+    },
   },
 };
 </script>

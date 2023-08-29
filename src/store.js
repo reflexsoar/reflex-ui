@@ -364,7 +364,7 @@ const mutations = {
     if(state.event_comments.length == 0) {
       state.event_comments = [comment]
     } else {
-      state.event_comments.push(comment)
+      state.event_comments = [comment, ...state.event_comments]
     }    
   },
   update_selected_detection_filters(state, filters) {

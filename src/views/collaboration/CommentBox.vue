@@ -1,9 +1,8 @@
 <template>
   <div>
-    <br />
     <CRow>
       <CCol>
-        <editor
+        <!--<editor
           ref="commentEditor"
           :initialValue="comment_text"
           @change="updateCommentText()"
@@ -16,7 +15,17 @@
           @click="createEventComment()"
           v-bind:disabled="comment_text.length == 0"
           >Comment</CButton
-        >
+        >-->
+        <CInput v-model="comment_text" placeholder="Enter your comment here">
+          <template #append>
+            <CButton
+              color="primary"
+              @click="createComment()"
+              v-bind:disabled="comment_text.length == 0"
+              >Comment</CButton
+            >
+          </template>
+        </CInput>   
       </CCol>
     </CRow>
   </div>
@@ -72,6 +81,7 @@ export default {
         })
         .then((response) => {
           this.$refs.commentEditor.invoke("setMarkdown", "");
+          this.comment_text = "";
         })
         .catch((error) => {
           this.error = true;
