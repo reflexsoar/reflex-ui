@@ -1,7 +1,7 @@
 <template>
   <CModal :centered="false" size="xl" :show.sync="show">
     <template #header>
-      <h5 class="modal-title" style="text-transform: capitalize">{{ mode }} SSO Realm</h5>
+      <h5 class="modal-title" style="text-transform: capitalize">{{ mode }} Role Mapping</h5>
     </template>
     <CAlert v-if="error" :show.sync="error" color="danger" closeButton>
       {{ error_message }}

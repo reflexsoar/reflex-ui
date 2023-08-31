@@ -248,6 +248,23 @@ export default {
 
         if(this.mode == "create") {
           this.uuid = uuid4();
+          this.security= {
+            name_id_encrypted: false,
+            authn_requests_signed: false,
+            logout_requests_signed: false,
+            logout_response_signed: false,
+            signin_metadata: false,
+            want_messages_signed: false,
+            want_assertions_signed: false,
+            want_name_id: true,
+            want_name_id_encrypted: false,
+            want_assertions_encrypted: false,
+            allow_single_label_domains: false,
+            signature_algorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+            digest_algorithm: "http://www.w3.org/2001/04/xmlenc#sha256",
+            reject_deprecated_algorithms: true,
+            want_attribute_statement: true
+          }
         }
 
         this.acs_url = window.location.origin+"/api/v2.0/auth/sso/"+this.uuid+"/acs";
