@@ -2273,6 +2273,17 @@ const actions = {
       })
     })
   },
+  getEventExport({commit}, report_params) {
+    return new Promise((resolve, reject) => {
+      Axios({url: `${BASE_URL}/event/export`, data: report_params, method: 'POST'})
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getEventComments({commit}, uuid) {
     return new Promise((resolve, reject) => {
       Axios({url: `${BASE_URL}/event/${uuid}/comment`, method: 'GET'})

@@ -24,12 +24,19 @@
                   <li style="display: inline; margin-right: 2px;" v-for="obs,i  in observable_filters" :key="i"><CBadge color="secondary" class="tag tag-clickable"  size="sm" @click="toggleObservableFilter({'filter_type': obs.data_type, 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else-if="obs.filter_type == 'event_rule'">{{getEventRuleName(obs.value)}}</span><span v-else-if="obs.filter_type == 'title__like'">{{obs.value}}*</span><span v-else>{{ obs.value | truncate }}</span></CBadge></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
                 <CCol col="3" class="text-right">
-                  <CButtonGroup>
-                    <CButton @click="saveFilter()" color="success" size="sm">Save View</CButton>
-                    <CButton @click="loadFilter()" color="primary" size="sm">Edit View</CButton>
-                    <CButton @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filters</CButton>
-                    <CButton @click="resetFilters()" color="secondary" size="sm">Reset Filter</CButton>
-                  </CButtonGroup>
+                  <CDropdown 
+                    toggler-text="Options"
+                    color="secondary"
+                    class='d-inline-block'
+                    aria-label="Filtering Options"
+                    size="sm"
+                >                  
+                    <CDropdownItem @click="saveFilter()" color="success" size="sm">Save View</CDropdownItem>
+                    <CDropdownItem @click="loadFilter()" color="primary" size="sm">Edit View</CDropdownItem>
+                    <CDropdownItem @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filter Menu</CDropdownItem>
+                    <CDropdownItem @click="resetFilters()" color="secondary" size="sm">Reset Filter</CDropdownItem>
+                    <CDropdownItem @click="showExportWizard()" color="secondary" size="sm"><i class="fas fa-download"/>&nbsp;Export</CDropdownItem>
+                  </CDropdown>
                 </CCol>
                 
               </CRow>
@@ -320,6 +327,7 @@
     <RunActionModal :show.sync="runActionModal" :events="selected" :events_data="selected_events"></RunActionModal>
     <ListAdderModal :show.sync="listAdderModal" :observable="selected_observable"></ListAdderModal>
     <ObservablePopover ref="popover" :show.sync="show_observable_popover" :observable="popover_data" :organization="popover_organization" @add-observable-to-filter="toggleObservableFilter"/>
+    <EventExportWizard :show.sync="show_export_wizard"/>
     <CModal title="Delete Event" color="danger" :centered="true" size="lg" :show.sync="deleteEventModal">
       <div>
         <p>Deleting an event is a permanent action, are you sure you want to continue?</p>
@@ -432,6 +440,7 @@ import EventCard from './event/EventCard'
 import ObservablePopover from './components/ObservablePopover'
 import SaveViewModal from './event/SaveViewModal'
 import LoadViewModal from './event/LoadViewModal'
+import EventExportWizard from './event/EventExportWizard'
 
 export default {
     name: 'Events',
@@ -449,7 +458,8 @@ export default {
       EventCard,
       ObservablePopover,
       SaveViewModal,
-      LoadViewModal
+      LoadViewModal,
+      EventExportWizard
     },
     props: {
     items: Array,
@@ -591,10 +601,14 @@ export default {
         event_comment_target: {},
         popover_data: {},
         popover_organization: "",
-        show_observable_popover: false
+        show_observable_popover: false,
+        show_export_wizard: false
       }
     },
     methods: {
+      showExportWizard() {
+        this.show_export_wizard = true;
+      },
       setPopoverData(data, organization) {
         this.popover_data = data
         this.popover_organization = organization

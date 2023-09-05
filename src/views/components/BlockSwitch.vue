@@ -58,7 +58,7 @@ input:checked + .slider .label-off {
 
 input:checked + .slider .label-on {
     font-weight: inherit;
-    color: white;
+    /*color: white;*/
 }
 
 .slider {
@@ -93,10 +93,11 @@ input[type="checkbox"] + .slider:after {
     font-weight: normal;
 }
 
+/*
 input:checked + .slider:before {    
     border: 1px solid #248f48; 
     background-color: #2eb85c;
-}
+}*/
 
 input:checked + .slider:before {
     -webkit-transform: translateX(24px);

@@ -16,13 +16,25 @@
           placeholder=""
         />
         <li v-for="item in filtered_items" :key="item.value">
-          <CInputCheckbox
-            :key="item.value"
-            :value="item.value"
-            :label="item.label"
-            @change="select"
-            :checked="selected.includes(item.value)"
-          />
+          <CRow>
+            <CCol>
+            <CInputCheckbox
+              :inline="true"
+              :key="item.value"
+              :value="item.value"
+              :label="item.label"
+              @change="select"
+              :checked="selected.includes(item.value)"
+            >
+              <template #label>
+                <label class="form-check-label">{{item.label}}<small v-if="item.description">&nbsp;-&nbsp;<span class="muted">{{ item.description }}</span></small></label>
+              </template>
+            </CInputCheckbox>
+            </CCol>
+            <CCol v-if="showCount" class="text-right">
+            <CBadge class="text-right" style="margin-top: 0px" color="primary">{{ item.count ? item.count : 0 }}</CBadge>
+            </CCol>
+          </CRow>
         </li>
       </ul>
     </div>
@@ -41,6 +53,7 @@
 
 .multiselect {
   width: auto;
+  max-width: 90%;
   z-index: 1000;
   background-clip: padding-box;
   border: 1px solid;
@@ -51,8 +64,7 @@
   box-shadow: 0 0.5rem 1rem rgb(0 0 21 / 18%);
   border-color: #d8dbe0;
   overflow-y: scroll;
-  max-height: 150px;
-  max-width: 300px;
+  max-height: 300px;
   overflow-x: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -95,6 +107,10 @@ export default {
     size: {
       type: String,
       default: "md",
+    },
+    showCount: {
+      type: Boolean,
+      default: false,
     },
     value: {
       type: Array,
