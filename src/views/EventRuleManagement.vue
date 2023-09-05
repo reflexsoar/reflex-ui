@@ -5,8 +5,7 @@
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
     /><CRow class="page-heading page-heading-row page-heading-no-nav"
       ><CCol>
-        <h1>Event Rules</h1>
-        {{ picker_filters }}</CCol
+        <h1>Event Rules</h1></CCol
       ><CCol class="text-right">
         <label class="text-muted">Total Rules</label>
         <h4>{{ event_rules.length }}</h4></CCol
