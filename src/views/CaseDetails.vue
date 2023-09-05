@@ -26,8 +26,8 @@
             <TagList style="padding-left: 15px" :tags="case_data.tags" label="name"
           /></CCol>
           <CCol col="2" class="text-right">
-            <label class="text-muted" style="text-transform: uppercase"
-              ><small><b>Status</b></small></label
+            <label class="text-muted"
+              ><b>Status</b></label
             >
             <CSelect
               id="status-select"
@@ -48,8 +48,8 @@
             </h4>
           </CCol>
           <CCol col="2" class="text-right">
-            <label class="text-muted" style="text-transform: uppercase"
-              ><small><b>Severity</b></small></label
+            <label class="text-muted"
+              ><b>Severity</b></label
             >
             <CSelect
               id="severity-select"
@@ -71,8 +71,8 @@
             </h4>
           </CCol>
           <CCol col="2" class="text-right">
-            <label class="text-muted" style="text-transform: uppercase"
-              ><small><b>Owner</b></small></label
+            <label class="text-muted"
+              ><b>Owner</b></label
             >
             <div role="group" class="form-group">
               <multiselect

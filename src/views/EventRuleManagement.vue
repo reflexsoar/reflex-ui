@@ -3,74 +3,67 @@
     <link
       rel="stylesheet"
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
-    /><CRow
-      ><CCol xs="12" lg="12">
-        <h2>
-          Event Rules<button
-            type="button"
-            class="kb"
-            onclick="window.open('https://docs.reflexsoar.com/en/latest/event-rules/')"
-          >
-            <CIcon name="cil-book" size="lg" />
-          </button>
-        </h2>
-        <br />
+    /><CRow class="page-heading page-heading-row page-heading-no-nav"
+      ><CCol>
+        <h1>Event Rules</h1>
+        {{ picker_filters }}</CCol
+      ><CCol class="text-right">
+        <label class="text-muted">Total Rules</label>
+        <h4>{{ event_rules.length }}</h4></CCol
+      >
+      <CCol class="text-right">
+        <label class="text-muted">Active Rules</label>
+        <h4>{{ event_rules.filter((rule) => rule.active).length }}</h4></CCol
+      >
+      <CCol class="text-right">
+        <label class="text-muted">Disabled Rules</label>
+        <h4>{{ event_rules.filter((rule) => !rule.active).length }}</h4></CCol
+      >
+      <CCol class="text-right">
+        <button
+          type="button"
+          class="kb"
+          onclick="window.open('https://docs.reflexsoar.com/en/latest/event-rules/')"
+        >
+          <CIcon name="cil-book" size="lg" />
+        </button>
+      </CCol>
+    </CRow>
+    <CRow
+      ><CCol>
+        <CRow class="page-sub-header">
+          <CCol>
+            <h2>Rules</h2>
+          </CCol>
+          <CCol class="text-right">
+            <CDropdown color="primary" toggler-text="Manage Rules">
+              <CDropdownItem color="primary" @click="createEventRule()"
+                >New Event Rule</CDropdownItem
+              >
+              <CDropdownDivider />
+              <CDropdownItem disabled color="secondary"
+                ><CIcon name="cilCloudDownload" size="sm"></CIcon>&nbsp; Export
+                Rules</CDropdownItem
+              >
+              <CDropdownItem disabled color="secondary"
+                ><CIcon name="cilCloudUpload" size="sm"></CIcon>&nbsp; Import
+                Rules</CDropdownItem
+              >
+            </CDropdown>
+          </CCol>
+        </CRow>
         <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
           {{ alert.message }}
         </CAlert>
 
-        <!--<CRow>
-          <CCol>
-            <CCard>
-              <CCardHeader color="secondary">Event Rule Summary</CCardHeader>
-              <CCardBody><CRow>
-                <CCol class="text-center">
-                  <h1>{{event_rules.length}}</h1>
-                  <small>TOTAL RULES</small>
-                </CCol>
-                <CCol class="text-center" style="border-left:1px solid #cfcfcf">
-                  <h1>{{event_rules.filter(rule => rule.active).length}}</h1>
-                  <small>ACTIVE RULES</small>
-                </CCol>
-                <CCol class="text-center" style="border-left:1px solid #cfcfcf">
-                  <h1>{{event_rules.filter(rule => !rule.active).length}}</h1>
-                  <small>DISABLED RULES</small>
-                </CCol>
-              </CRow></CCardBody>
-              </CCard>
-          </CCol>
-          </CRow>-->
-
         <CCard>
-          <CCardHeader style="border-bottom: 0px">
-            <CRow>
-              <CCol>
-                <CButton color="primary" @click="createEventRule()"
-                  >New Event Rule</CButton
-                >
-              </CCol>
-              <CCol class="text-right">
-                <CButtonGroup>
-                  <CButton disabled color="secondary"
-                    ><CIcon name="cilCloudDownload" size="sm"></CIcon>&nbsp; Export
-                    Rules</CButton
-                  >
-                  <CButton disabled color="secondary"
-                    ><CIcon name="cilCloudUpload" size="sm"></CIcon>&nbsp; Import
-                    Rules</CButton
-                  >
-                </CButtonGroup>
-              </CCol>
-            </CRow>
-          </CCardHeader>
           <CDataTable
-            :items="computed_event_rules"
+            :items="filtered_items"
             :fields="fields"
             :loading="loading"
             :items-per-page="10"
             :responsive="false"
             pagination
-            hover
             column-filter
             :sorter="{ external: false, resetable: true }"
           >
@@ -78,6 +71,20 @@
               <RMultiCheck
                 :items="formatted_organizations"
                 @checked="set_picker_filters($event, 'organization')"
+                size="sm"
+              ></RMultiCheck>
+            </template>
+            <template #created_by-filter="{ item }">
+              <RMultiCheck
+                :items="event_rule_users"
+                @checked="set_picker_filters($event, 'created_by')"
+                size="sm"
+              ></RMultiCheck>
+            </template>
+            <template #updated_by-filter="{ item }">
+              <RMultiCheck
+                :items="event_rule_users"
+                @checked="set_picker_filters($event, 'updated_by')"
                 size="sm"
               ></RMultiCheck>
             </template>
@@ -98,7 +105,6 @@
                         v-if="item.tags && item.tags.length > 0"
                         :tags="item.tags"
                       />
-                      
                     </div>
                     <div style="display: inline-block">
                       <TagBucket
@@ -113,7 +119,7 @@
               </td>
             </template>
             <template #organization="{ item }">
-              <td style="vertical-align: top;">
+              <td style="vertical-align: top">
                 <OrganizationBadge :uuid="item.organization" />
               </td>
             </template>
@@ -125,7 +131,7 @@
             </template>
             <template #hits="{ item }">
               <td>
-                {{ item.hits.toLocaleString("en-US") }}
+                {{ item.hits ? item.hits.toLocaleString("en-US") : 0 }}
               </td>
             </template>
             <template #manage="{ item }">
@@ -351,6 +357,7 @@ import CreateEventRuleModal from "./CreateEventRuleModal";
 import OrganizationBadge from "./OrganizationBadge";
 import RMultiCheck from "./components/MultiCheck";
 import TagBucket from "./components/TagBucket";
+import ObjectAttribute from "./components/ObjectAttribute";
 
 export default {
   components: {
@@ -360,6 +367,7 @@ export default {
     OrganizationBadge,
     RMultiCheck,
     TagBucket,
+    ObjectAttribute,
   },
   name: "EventRuleManagement",
   data() {
@@ -372,9 +380,9 @@ export default {
         "name",
         "priority",
         "hits",
-        { key: "last_matched_date", label: "Last Matched", filter: false},
-        "created_by",
-        "updated_by",
+        { key: "last_matched_date", label: "Last Matched", filter: false,_style: "width: 10%" },
+        {key: "created_by", _style: "width: 10%"},
+        {key: "updated_by", _style: "width: 10%"},
         { key: "manage", label: "", filter: false },
       ],
       modal_mode: "create",
@@ -492,27 +500,27 @@ export default {
   },
   methods: {
     event_rule_actions(rule) {
-      let actions = []
+      let actions = [];
       if (rule.dismiss) {
-        actions.push("Dismisses")
+        actions.push("Dismisses");
       }
       if (rule.create_new_case) {
-        actions.push("Creates New Case")
+        actions.push("Creates New Case");
       }
       if (rule.merge_into_case) {
-        actions.push("Merges Into Case")
+        actions.push("Merges Into Case");
       }
       if (rule.run_retroactively) {
-        actions.push("Runs Retroactively")
+        actions.push("Runs Retroactively");
       }
       if (rule.global_rule) {
-        actions.push("Global Rule")
+        actions.push("Global Rule");
       }
       if (rule.expire) {
-        actions.push("Expires")
+        actions.push("Expires");
       }
 
-      return actions
+      return actions;
     },
     sort(event) {
       this.sort_direction = event.asc ? "asc" : "desc";
@@ -721,6 +729,52 @@ export default {
     },
   },
   computed: {
+    filtered_items() {
+      let items = this.computed_event_rules;
+      let _items = [];
+      if (Object.keys(this.picker_filters).length == 0) {
+        return items;
+      }
+      for (let i in items) {
+        let item = items[i];
+        let match = true;
+        for (let key in this.picker_filters) {
+          if (this.picker_filters[key].length > 0) {
+            if (typeof item[key] == "boolean") {
+              if (!this.picker_filters[key].includes(item[key].toString())) {
+                match = false;
+              }
+            } else if (typeof item[key] == "object") {
+              // If the object has the uuid property, use that
+              if (item[key].uuid) {
+                if (!this.picker_filters[key].includes(item[key].uuid)) {
+                  match = false;
+                }
+              } else if (item[key]) {
+                if (
+                  typeof item[key] == "array" &&
+                  !item[key].some((r) => this.picker_filters[key].includes(r))
+                ) {
+                  match = false;
+                } else {
+                  match = false;
+                }
+              } else {
+                match = false;
+              }
+            } else {
+              if (!this.picker_filters[key].includes(item[key])) {
+                match = false;
+              }
+            }
+          }
+        }
+        if (match) {
+          _items.push(item);
+        }
+      }
+      return _items;
+    },
     computed_event_rules: function () {
       return this.event_rules.map((item) => {
         return {
@@ -738,11 +792,24 @@ export default {
     event_rule_users() {
       let users = [];
       this.computed_event_rules.forEach((rule) => {
-        if (!users.find((u) => u.value == rule.created_by.username)) {
-          users.push({
-            label: rule.created_by.username,
-            value: rule.created_by.username,
-          });
+        if (!users.find((u) => u.value == rule.created_by.uuid)) {
+          if (rule.updated_by.username) {
+            users.push({
+              label: rule.created_by.username,
+              value: rule.created_by.uuid,
+            });
+          }
+        }
+      });
+
+      this.computed_event_rules.forEach((rule) => {
+        if (!users.find((u) => u.value == rule.updated_by.uuid)) {
+          if (rule.updated_by.username) {
+            users.push({
+              label: rule.updated_by.username,
+              value: rule.updated_by.uuid,
+            });
+          }
         }
       });
       return users;
