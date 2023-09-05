@@ -77,8 +77,8 @@ const state = {
   event_rules: [],
   plugin_configs: [],
   plugin_config: {},
-  inputs:[],
-  input:{},
+  inputs: [],
+  input: {},
   orguuid: '',
   tag_list: [],
   list: {},
@@ -106,8 +106,8 @@ const state = {
     active: true,
   },
   selected_detection_filters: {},
-  observable_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
-  case_filters: [{'filter_type':'status','data_type':'status','value':'New'}],
+  observable_filters: [{ 'filter_type': 'status', 'data_type': 'status', 'value': 'New' }],
+  case_filters: [{ 'filter_type': 'status', 'data_type': 'status', 'value': 'New' }],
   alert: {
     'show': false,
     'message': '',
@@ -141,9 +141,9 @@ const state = {
   field_template: {},
   field_templates: [],
   source_field_template: {},
-  valid_data_types: ["none","url","user","sid","sha256hash","sha1hash","process","port",
-  "pid","md5hash","mac","ip","imphash","host","generic","fqdn","filepath",
-  "email_subject","email","domain","detection_id","command"],
+  valid_data_types: ["none", "url", "user", "sid", "sha256hash", "sha1hash", "process", "port",
+    "pid", "md5hash", "mac", "ip", "imphash", "host", "generic", "fqdn", "filepath",
+    "email_subject", "email", "domain", "detection_id", "command"],
   detection_repository: {},
   detection_repositories: [],
   event_views: [],
@@ -175,7 +175,7 @@ const mutations = {
     state.sso_role_mappings = mappings
   },
   add_sso_role_mapping(state, mapping) {
-    if(state.sso_role_mappings.length == 0) {
+    if (state.sso_role_mappings.length == 0) {
       state.sso_role_mappings = [mapping]
     } else {
       state.sso_role_mappings.push(mapping)
@@ -196,29 +196,29 @@ const mutations = {
   save_event_views(state, event_views) {
     state.event_views = event_views
   },
-  add_task (state, task) {
+  add_task(state, task) {
     state.running_tasks.push(task)
   },
-  delete_task (state, task) {
+  delete_task(state, task) {
     state.running_tasks = state.running_tasks.filter(item => item != task)
   },
-  add_toast (state, toast) {
-    if(!state.toasts.find(o => o.key === toast.key))  {
+  add_toast(state, toast) {
+    if (!state.toasts.find(o => o.key === toast.key)) {
       state.toasts.push(toast)
     }
   },
-  toggleSidebarDesktop (state) {
+  toggleSidebarDesktop(state) {
     const sidebarOpened = [true, 'responsive'].includes(state.sidebarShow)
     state.sidebarShow = sidebarOpened ? false : 'responsive'
   },
-  toggleSidebarMobile (state) {
+  toggleSidebarMobile(state) {
     const sidebarClosed = [false, 'responsive'].includes(state.sidebarShow)
     state.sidebarShow = sidebarClosed ? true : 'responsive'
   },
-  set (state, [variable, value]) {
+  set(state, [variable, value]) {
     state[variable] = value
   },
-  auth_request(state){
+  auth_request(state) {
     state.status = 'loading'
   },
   loading_status(state, status) {
@@ -232,7 +232,7 @@ const mutations = {
   auth_mfa_check(state) {
     state.status = 'mfa_check'
   },
-  auth_error(state){
+  auth_error(state) {
     state.status = 'error'
   },
   refresh_error(state) {
@@ -248,32 +248,32 @@ const mutations = {
   },
   save_current_user(state, user) {
     state.current_user = user
-    state.success ='success'
+    state.success = 'success'
   },
-  save_credentials(state, credentials){
+  save_credentials(state, credentials) {
     state.credentials = credentials
   },
   save_case_template_list(state, templates) {
     state.case_template_list = templates
   },
-  save_playbooks(state, credentials){
+  save_playbooks(state, credentials) {
     state.playbooks = credentials
   },
   save_events(state, events) {
     state.events = events
   },
   save_multiple_events(state, events) {
-    for(let evt in events) {
+    for (let evt in events) {
       state.events = [...state.events.filter(e => e.uuid != evt.uuid)]
     }
   },
   save_event(state, event) {
     state.event = event
-    if(state.events.length > 0) {
+    if (state.events.length > 0) {
       state.events = [...state.events.filter(e => e.uuid != event.uuid), event]
     } else {
       state.events = [event]
-    }    
+    }
   },
   save_list_values(state, values) {
     state.list_values = values
@@ -285,7 +285,7 @@ const mutations = {
   },
   save_agent_policy(state, policy) {
     state.agent_policy = policy
-    if(state.agent_policies.length > 0) {
+    if (state.agent_policies.length > 0) {
       state.agent_policies = [...state.agent_policies.filter(p => p.uuid != policy.uuid), policy]
     } else {
       state.agent_policies = [policy]
@@ -296,7 +296,7 @@ const mutations = {
   },
   save_field_template(state, template) {
     state.field_template = template
-    if(state.field_templates.length > 0) {
+    if (state.field_templates.length > 0) {
       state.field_templates = [...state.field_templates.filter(t => t.uuid != template.uuid), template]
       console.log(state.field_templates)
     } else {
@@ -323,25 +323,25 @@ const mutations = {
   },
   save_list(state, list) {
     state.list = list
-    if(state.lists.length > 0 ){
+    if (state.lists.length > 0) {
       state.lists = [...state.lists.filter(l => l.uuid != list.uuid), list]
     } else {
       state.lists = [list]
-    }    
+    }
   },
   add_list(state, list) {
-    if(state.lists.length == 0) {
+    if (state.lists.length == 0) {
       state.lists = [list]
     } else {
       state.lists.push(list)
-    }    
+    }
     state.list = list
   },
   save_case_task_notes(state, notes) {
     state.case_task_notes = notes
   },
   add_case_task_note(state, note) {
-    if(state.case_task_notes.length == 0) {
+    if (state.case_task_notes.length == 0) {
       state.case_task_notes = [note]
     } else {
       state.case_task_notes.push(note)
@@ -361,11 +361,11 @@ const mutations = {
     state.event_comments = comments
   },
   add_event_comment(state, comment) {
-    if(state.event_comments.length == 0) {
+    if (state.event_comments.length == 0) {
       state.event_comments = [comment]
     } else {
       state.event_comments = [comment, ...state.event_comments]
-    }    
+    }
   },
   update_selected_detection_filters(state, filters) {
     state.selected_detection_filters = filters
@@ -464,7 +464,7 @@ const mutations = {
   },
   update_case(state, c) {
     state.case = c
-    state.cases = state.cases.map(x => x.uuid == c.uuid ? c : x )
+    state.cases = state.cases.map(x => x.uuid == c.uuid ? c : x)
   },
   save_related_cases(state, data) {
     state.related_cases = data
@@ -487,14 +487,14 @@ const mutations = {
     state.observables = state.observables.map(o => o.value == observable.value ? observable : o)
   },
   update_observables(state, observables) {
-    for(let obs in observables) {
+    for (let obs in observables) {
       let observable = observables[obs]
       state.observables = state.observables.map(o => o.value == observable.value ? observable : o)
-    }    
+    }
   },
   save_agent_group(state, agent_group) {
     state.agent_group = agent_group
-    if(state.agent_groups.length > 0) {
+    if (state.agent_groups.length > 0) {
       state.agent_groups = [...state.agent_groups.filter(g => g.uuid != agent_group.uuid), agent_group]
     } else {
       state.agent_groups = [agent_group]
@@ -506,7 +506,7 @@ const mutations = {
   },
   update_agent(state, agent) {
     state.agent = agent
-    state.agents = state.agents.map(a => a.uuid == agent.uuid ? agent : a )
+    state.agents = state.agents.map(a => a.uuid == agent.uuid ? agent : a)
   },
   remove_agent(state, uuid) {
     state.agents = state.agents.filter(a => a.uuid !== uuid)
@@ -541,7 +541,7 @@ const mutations = {
     state.organization = organization
   },
   update_organization(state, org) {
-    state.organizations = state.organizations.map(x => x.uuid == org.uuid ? org : x )
+    state.organizations = state.organizations.map(x => x.uuid == org.uuid ? org : x)
     state.organization = org
   },
   remove_list(state, uuid) {
@@ -589,7 +589,7 @@ const mutations = {
     state.inputs = inputs
   },
   save_inputs_list(state, inputs) {
-    state.input_list = inputs.map(item => { return {'name': item.name, 'uuid': item.uuid, 'signature_fields': item.config.signature_fields}})
+    state.input_list = inputs.map(item => { return { 'name': item.name, 'uuid': item.uuid, 'signature_fields': item.config.signature_fields } })
   },
   save_input(state, input) {
     state.input = input
@@ -604,10 +604,10 @@ const mutations = {
   save_index_fields(state, fields) {
     state.index_fields = fields
   },
-  add_detection(state, detection){
+  add_detection(state, detection) {
     state.detection = detection
 
-    if(state.detections.length == 0) {
+    if (state.detections.length == 0) {
       state.detections = [detection]
     } else {
       state.detections.push(detection)
@@ -618,7 +618,7 @@ const mutations = {
     state.detections = detections
   },
   save_detections_list(state, detections) {
-    state.detections_list = detections.map(item => { return {'name': item.name, 'uuid': item.uuid}})
+    state.detections_list = detections.map(item => { return { 'name': item.name, 'uuid': item.uuid } })
   },
   save_detection(state, detection) {
     state.detection = detection
@@ -628,7 +628,7 @@ const mutations = {
     state.detections = [...state.detections.filter(d => d.uuid != detection.uuid), detection]
   },
   update_detections(state, detections) {
-    for(let det in detections) {
+    for (let det in detections) {
       let detection = detections[det]
       state.detections = [...state.detections.filter(d => d.uuid != detection.uuid), detection]
     }
@@ -657,20 +657,20 @@ const mutations = {
       state.agent_groups = [agent_group]
     } else {
       state.agent_groups.push(agent_group)
-    }    
+    }
     state.agent_group = agent_group
     state.status = 'success'
   },
-  add_credential(state, credential){
+  add_credential(state, credential) {
     if (state.credentials.length == 0) {
       state.credentials = [credential]
     } else {
       state.credentials.push(credential)
-    }    
+    }
     state.credential = credential
     state.status = 'success'
   },
-  add_notification_channel(state, channel){
+  add_notification_channel(state, channel) {
     if (state.notification_channels.length == 0) {
       state.notification_channels = [channel]
     } else {
@@ -728,7 +728,7 @@ const mutations = {
     state.event = {}
   },
   remove_events(state, events) {
-    for(let event in events) {
+    for (let event in events) {
       state.events = state.events.filter(e => e.uuid != event)
     }
   },
@@ -740,14 +740,14 @@ const mutations = {
     state.status = 'success'
   },
   add_case_template(state, data) {
-    if(state.case_templates.length == 0) {
+    if (state.case_templates.length == 0) {
       state.case_templates = [data]
     } else {
       state.case_templates.push(data)
     }
     state.case_template = data
     state.status = 'success'
-    state.case_template_list.push({title:data.title, description:data.description, uuid:data.uuid, tags:data.tags, severity:data.severity, task_count: data.task_count, tlp:data.tlp})
+    state.case_template_list.push({ title: data.title, description: data.description, uuid: data.uuid, tags: data.tags, severity: data.severity, task_count: data.task_count, tlp: data.tlp })
     state.tags.concat(data.tags)
   },
   update_case_template(state, data) {
@@ -765,17 +765,17 @@ const mutations = {
   add_case_observables(state, data) {
     state.case.observables = data
   },
-  add_playbook(state, playbook){
+  add_playbook(state, playbook) {
     state.playbooks.push(playbook)
     state.playbook = playbook
     state.status = 'success'
   },
-  add_input(state, input){
-    if(state.inputs.length == 0) {
+  add_input(state, input) {
+    if (state.inputs.length == 0) {
       state.inputs = [...state.inputs.filter(i => i.uuid != input.uuid), input]
     } else {
       state.inputs.push(input)
-    }    
+    }
     state.input = input
     state.status = 'success'
   },
@@ -785,9 +785,9 @@ const mutations = {
     state.status = 'success'
   },
   add_user(state, user) {
-    if(state.users.length == 0) {
+    if (state.users.length == 0) {
       state.users = [user]
-    } else { 
+    } else {
       state.users.push(user)
     }
     state.user = user
@@ -803,7 +803,7 @@ const mutations = {
     state.roles = state.roles.map(r => r.uuid == role.uuid ? role : r)
   },
   add_detection_repository(state, repo) {
-    if(state.detection_repositories.length == 0) {
+    if (state.detection_repositories.length == 0) {
       state.detection_repositories = [repo]
     } else {
       state.detection_repositories.push(repo)
@@ -859,11 +859,11 @@ const mutations = {
   tags_error(state) {
     state.tag_list = []
   },
-  logout(state){
+  logout(state) {
     state.status = ''
     state.access_token = ''
   },
-  mfa_enabled(state, status){
+  mfa_enabled(state, status) {
     state.mfa_enabled = status
   },
   save_network_data(state, data) {
@@ -903,7 +903,7 @@ const mutations = {
     state.integration_configs = configs
   },
   add_integration_configuration(state, config) {
-    if(state.integration_configs.length == 0) {
+    if (state.integration_configs.length == 0) {
       state.integration_configs = [config]
     } else {
       state.integration_configs.push(config)
@@ -931,28 +931,28 @@ const getters = {
   running_tasks: state => { return state.running_tasks },
   list_values: state => { return state.list_values },
   pagination: state => { return state.pagination },
-  list_name: state => function(uuid) {
+  list_name: state => function (uuid) {
     return state.list_names[uuid]
   },
-  severity_color: state => function(severity) {
-      switch(severity) {
-        case 1: return 'dark';
-        case 2: return 'info';
-        case 3: return 'warning';
-        case 4: return 'danger';
-        default: return 'danger';
-      }
-  },
-  severity_text: state => function(severity) {
-    switch(severity) {
-        case 1: return 'Low';
-        case 2: return 'Medium';
-        case 3: return 'High';
-        case 4: return 'Critical';
-        default: return 'Unknown';
+  severity_color: state => function (severity) {
+    switch (severity) {
+      case 1: return 'dark';
+      case 2: return 'info';
+      case 3: return 'warning';
+      case 4: return 'danger';
+      default: return 'danger';
     }
   },
-  org_name: state => function(uuid) {
+  severity_text: state => function (severity) {
+    switch (severity) {
+      case 1: return 'Low';
+      case 2: return 'Medium';
+      case 3: return 'High';
+      case 4: return 'Critical';
+      default: return 'Unknown';
+    }
+  },
+  org_name: state => function (uuid) {
     let org = state.organizations.filter(o => o.uuid === uuid)
     if (org.length > 0) {
       return org[0].name
@@ -961,7 +961,7 @@ const getters = {
     }
   },
   agent_policies_list: state => {
-    return state.agent_policies.map(p => { return {name: p.name, uuid: p.uuid} })
+    return state.agent_policies.map(p => { return { name: p.name, uuid: p.uuid } })
   },
   observable_filters_state: state => {
     return state.observable_filters
@@ -973,22 +973,22 @@ const getters = {
   source_input: state => { return state.source_input },
   lists: state => { return state.lists },
   quick_filters: state => { return state.quick_filters },
-  loading: state => {return state.loading},
+  loading: state => { return state.loading },
   intel_filters: state => { return state.intel_filters },
   case_filters: state => { return state.case_filters },
   observable_filters: state => { return state.observable_filters },
   organization: state => { return state.organization },
-  organizations: state => {return state.organizations},
-  formatted_organizations: state => { return state.organizations.map((o) => { return {label: o.name, value: o.uuid}})},
+  organizations: state => { return state.organizations },
+  formatted_organizations: state => { return state.organizations.map((o) => { return { label: o.name, value: o.uuid } }) },
   network_data: state => { return state.network_data },
   case_stats: state => { return state.case_stats },
   event_stats: state => { return state.event_stats },
   dashboard_metrics: state => { return state.dashboard_metrics },
   list_stats: state => { return state.list_stats },
-  eventDrawerShow: state => { return state.eventDrawerShow},
-  eventDrawerMinimize: state => { return state.eventDrawerMinimize},
-  mitreDrawerShow: state => { return state.mitreDrawerShow},
-  mitreDrawerMinimize: state => { return state.mitreDrawerMinimize},
+  eventDrawerShow: state => { return state.eventDrawerShow },
+  eventDrawerMinimize: state => { return state.eventDrawerMinimize },
+  mitreDrawerShow: state => { return state.mitreDrawerShow },
+  mitreDrawerMinimize: state => { return state.mitreDrawerMinimize },
   mfa_enabled: state => { return state.mfa_enabled },
   isLoggedIn: state => !!state.access_token,
   authStatus: state => state.status,
@@ -1003,7 +1003,7 @@ const getters = {
   case_template_list: state => { return state.case_template_list },
   date_types: state => state.data_types,
   case_history: state => { return state.case_history },
-  comments: state => { return state.comments},
+  comments: state => { return state.comments },
   comment: (state) => function (uuid) { state.comments.find(comment => comment.uuid == uuid) },
   task_notes: (state) => { return state.case_task_notes },
   case_tasks: state => { return state.case_tasks },
@@ -1021,29 +1021,29 @@ const getters = {
   related_cases: state => { return state.related_cases },
   events: state => { return state.events },
   close_reasons: state => { return state.close_reasons },
-  agent_group : state => { return state.agent_group },
+  agent_group: state => { return state.agent_group },
   event: state => { return state.event },
-  events: state =>  { return state.events },
+  events: state => { return state.events },
   event_rule: state => { return state.event_rule },
   event_rules: state => { return state.event_rules },
-  related_events: state => {return state.related_events },
+  related_events: state => { return state.related_events },
   related_cases: state => { return state.related_cases },
   audit_logs: state => { return state.audit_logs },
-  data_types_list: function() { return state.data_types.map(item => { return {'label': item.name, 'value': item.uuid}}) },
-  user_has_permission: state => function(permission) {
-    if(Object.keys(state.current_user.permissions).includes(permission)) {
-      
-      if(!state.current_user.permissions[permission] || state.current_user.permissions[permission] === null) {
+  data_types_list: function () { return state.data_types.map(item => { return { 'label': item.name, 'value': item.uuid } }) },
+  user_has_permission: state => function (permission) {
+    if (Object.keys(state.current_user.permissions).includes(permission)) {
+
+      if (!state.current_user.permissions[permission] || state.current_user.permissions[permission] === null) {
         return false
       }
       return true
-      
+
     } else {
       return false
     }
-    
+
   },
-  user_has: state => function(permission) {
+  user_has: state => function (permission) {
     return Object.keys(state.current_user.permissions).includes(permission)
   },
   tags: state => state.tags,
@@ -1053,170 +1053,170 @@ const getters = {
 
 let BASE_URL = ""
 if (process.env.NODE_ENV == 'development') {
-  BASE_URL = location.protocol+'//'+window.location.hostname+'/api/v2.0'
+  BASE_URL = location.protocol + '//' + window.location.hostname + '/api/v2.0'
 } else {
-  BASE_URL = location.protocol+'//'+window.location.host+'/api/v2.0'
+  BASE_URL = location.protocol + '//' + window.location.host + '/api/v2.0'
 }
 
 const actions = {
-  login({commit}, user) {
+  login({ commit }, user) {
     return new Promise((resolve, reject) => {
       commit('auth_request')
-      Axios({url: `${BASE_URL}/auth/login`, data: user, method: 'POST'})
-      .then(resp => {
-        if(resp.data['mfa_challenge_token'] !== undefined) {
-          const mfa_challenge_token = resp.data['mfa_challenge_token']
-          localStorage.setItem('mfa_challenge_token', mfa_challenge_token)
-          commit('auth_mfa_check')
+      Axios({ url: `${BASE_URL}/auth/login`, data: user, method: 'POST' })
+        .then(resp => {
+          if (resp.data['mfa_challenge_token'] !== undefined) {
+            const mfa_challenge_token = resp.data['mfa_challenge_token']
+            localStorage.setItem('mfa_challenge_token', mfa_challenge_token)
+            commit('auth_mfa_check')
+            resolve(resp)
+          } else {
+            const access_token = resp.data['access_token']
+            const refresh_token = resp.data['refresh_token']
+            localStorage.setItem('access_token', access_token)
+            localStorage.setItem('refresh_token', refresh_token)
+            Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+            commit('auth_success', { access_token, refresh_token })
+            resolve(resp)
+          }
+        })
+        .catch(err => {
+          commit('auth_error')
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          reject(err)
+        })
+    })
+  },
+  loginWithSAML({ commit }, user) {
+    return new Promise((resolve, reject) => {
+      commit('auth_request')
+      Axios({ url: `${BASE_URL}/auth/ssostart`, data: user, method: 'POST' })
+        .then(resp => {
           resolve(resp)
-        } else {
+        }).catch(err => {
+
+          reject(err)
+        })
+    })
+  },
+  checkMFA({ commit }, user) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/auth/mfa`, data: user, method: 'POST' })
+        .then(resp => {
           const access_token = resp.data['access_token']
           const refresh_token = resp.data['refresh_token']
           localStorage.setItem('access_token', access_token)
           localStorage.setItem('refresh_token', refresh_token)
           Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
-          commit('auth_success', {access_token, refresh_token})
+          commit('auth_success', { access_token, refresh_token })
           resolve(resp)
-        }
-      })
-      .catch(err => {
-        commit('auth_error')
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')        
-        reject(err)
-      })
+        })
+        .catch(err => {
+          commit('auth_error')
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          reject(err)
+        })
     })
   },
-  loginWithSAML({commit}, user) {
+  forgotPassword({ commit }, username) {
     return new Promise((resolve, reject) => {
-      commit('auth_request')
-      Axios({url: `${BASE_URL}/auth/ssostart`, data: user, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      }).catch(err => {
-        
-        reject(err)
-      })
-    })
-  },
-  checkMFA({commit}, user) {
-    return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/auth/mfa`, data: user, method: 'POST'})
-      .then(resp => {
-          const access_token = resp.data['access_token']
-          const refresh_token = resp.data['refresh_token']
-          localStorage.setItem('access_token', access_token)
-          localStorage.setItem('refresh_token', refresh_token)
-          Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
-          commit('auth_success', {access_token, refresh_token})
+      Axios({ url: `${BASE_URL}/auth/forgot_password`, data: username, method: 'POST' })
+        .then(resp => {
           resolve(resp)
-      })
-      .catch(err => {
-        commit('auth_error')
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')        
-        reject(err)
-      })
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  forgotPassword({commit}, username) {
+  resetPassword({ commit }, { token, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/auth/forgot_password`, data: username, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/auth/reset_password/${token}`, data, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  resetPassword({commit}, {token, data}) {
-    return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/auth/reset_password/${token}`, data, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
-    })
-  },
-  refresh_token({commit}) {
-    data = {'refresh_token': this.$store.refresh_token}
+  refresh_token({ commit }) {
+    data = { 'refresh_token': this.$store.refresh_token }
     commit('refresh_request')
-    Axios({url: `${BASE_URL}/auth/refresh`, data: data, method: 'POST'})
-    .then(resp => {
+    Axios({ url: `${BASE_URL}/auth/refresh`, data: data, method: 'POST' })
+      .then(resp => {
         const access_token = resp.data['access_token']
         const refresh_token = resp.data['refresh_token']
         const user = resp.data['user']
         localStorage.setItem('access_token', access_token)
         localStorage.setItem('refresh_token', refresh_token)
         Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
-        commit('refresh_success', {access_token, refresh_token})
+        commit('refresh_success', { access_token, refresh_token })
         resolve(resp)
-    })
-    .catch(err => {
+      })
+      .catch(err => {
         commit('refresh_error')
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
         reject(err)
-    })
+      })
   },
-  logout({commit}) {
+  logout({ commit }) {
     return new Promise((resolve, reject) => {
       commit('logout')
       localStorage.removeItem('access_token')
       localStorage.removeItem('mfa_challenge_token')
       delete Axios.defaults.headers.common['Authorization']
-      resolve()      
+      resolve()
     })
   },
-  getMe({commit}) {
+  getMe({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/me`, method: 'GET'})
-      .then(resp => {
-        commit('add_start')
-        commit('save_current_user', resp.data)
-        commit('add_success')
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('tags_error')
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user/me`, method: 'GET' })
+        .then(resp => {
+          commit('add_start')
+          commit('save_current_user', resp.data)
+          commit('add_success')
+          resolve(resp)
+        })
+        .catch(err => {
+          commit('tags_error')
+          reject(err)
+        })
     })
   },
-  getTags({commit}) {
+  getTags({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/tag`, method: 'GET'})
-      .then(resp => {
-        commit('save_tags', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('tags_error')
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/tag`, method: 'GET' })
+        .then(resp => {
+          commit('save_tags', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          commit('tags_error')
+          reject(err)
+        })
     })
   },
-  getDataTypes({commit}, {organization}) {
+  getDataTypes({ commit }, { organization }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/data_type`
-      if(organization){
+      if (organization) {
         url += `?organization=${organization}`
       }
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_data_types', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_data_types', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getLists({commit}, {data_type=[], organization=null, name__like=null, page=1, page_size=10}) {
+  getLists({ commit }, { data_type = [], organization = null, name__like = null, page = 1, page_size = 10 }) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/list?page=${page}&page_size=${page_size}`
@@ -1225,271 +1225,275 @@ const actions = {
         base_url += `&data_type=${data_type}`
       }
 
-      if(organization) {
+      if (organization) {
         base_url += `&organization=${organization}`
       }
 
-      if(name__like) {
+      if (name__like) {
         base_url += `&name__like=${name__like}`
       }
 
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        commit('save_lists', resp.data.lists)
-        commit('save_pagination', resp.data.pagination)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          commit('save_lists', resp.data.lists)
+          commit('save_pagination', resp.data.pagination)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createList({commit}, data) {
+  createList({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/list`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_list', resp.data)
-        commit('show_alert', {message: 'Successfully created list.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/list`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_list', resp.data)
+          commit('show_alert', { message: 'Successfully created list.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateList({commit}, {uuid, data}) {
+  updateList({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/list/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('save_list', resp.data)
-        commit('show_alert', {message: 'Successfully updated list.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/list/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('save_list', resp.data)
+          commit('show_alert', { message: 'Successfully updated list.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteList({commit}, uuid) {
+  deleteList({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/list/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_list', uuid)
-        commit('show_alert', {message: 'Successfully deleted list.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/list/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_list', uuid)
+          commit('show_alert', { message: 'Successfully deleted list.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  addItemToList({commit}, {uuid, value}) {
+  addItemToList({ commit }, { uuid, value }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/list/${uuid}/add_value`, data: value, method: 'PUT'})
-      .then(resp => {
-        commit('show_alert', {message: 'Successfully added value to list.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/list/${uuid}/add_value`, data: value, method: 'PUT' })
+        .then(resp => {
+          commit('show_alert', { message: 'Successfully added value to list.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  removeItemFromList({commit}, {uuid, value}) {
+  removeItemFromList({ commit }, { uuid, value }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/list/${uuid}/remove_value`, data: value, method: 'PUT'})
-      .then(resp => {
-        commit('show_alert', {message: 'Successfully removed value from list.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/list/${uuid}/remove_value`, data: value, method: 'PUT' })
+        .then(resp => {
+          commit('show_alert', { message: 'Successfully removed value from list.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getIntelListValues({commit}, {page=1, page_size=25, list=[], value=[], data_type=[], from_poll=null, record_id=null, sort_by='created_at', list_name__like=null, sort_direction='desc', start=null, end=null, organization=null}) {
+  getIntelListValues({ commit }, { page = 1, page_size = 25, list = [], value = [], data_type = [], from_poll = null, record_id = null, sort_by = 'created_at', list_name__like = null, sort_direction = 'desc', start = null, end = null, organization = null }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/list/values?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
-      if(list.length > 0) {
-        url = url+`&list=${list}`
+      if (list.length > 0) {
+        url = url + `&list=${list}`
       }
 
-      if(value.length > 0) {
-        url = url+`&value=${value}`
+      if (value.length > 0) {
+        url = url + `&value=${value}`
       }
 
-      if(data_type.length > 0) {
-        url = url+`&data_type=${data_type}`
-      }
-      
-      if(start && end) {
-        url = url+`&start=${start}&end=${end}`
+      if (data_type.length > 0) {
+        url = url + `&data_type=${data_type}`
       }
 
-      if(organization) {
-        url = url+`&organization=${organization}`
+      if (start && end) {
+        url = url + `&start=${start}&end=${end}`
       }
 
-      if(record_id) {
-        url = url+`&record_id=${record_id}`
+      if (organization) {
+        url = url + `&organization=${organization}`
       }
 
-      if(list_name__like) {
-        url = url+`&list_name__like=${list_name__like}`
+      if (record_id) {
+        url = url + `&record_id=${record_id}`
       }
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_list_values', resp.data.values)
-        commit('save_pagination', resp.data.pagination)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      if (list_name__like) {
+        url = url + `&list_name__like=${list_name__like}`
+      }
+
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_list_values', resp.data.values)
+          commit('save_pagination', resp.data.pagination)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getIntelListStats({commit}, {list_name__like=null, value__like=null, top=10, list=[], value=[], from_poll=null, record_id=null, data_type=[], metrics=['list','value','data_type','from_poll'],start=null, end=null, organization=[]}) {
-    commit('loading_status',true)
+  getIntelListStats({ commit }, { list_name__like = null, value__like = null, top = 10, list = [], value = [], from_poll = null, record_id = null, data_type = [], metrics = ['list', 'value', 'data_type', 'from_poll'], start = null, end = null, organization = [] }) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/list/stats?q=`
 
-      if(list.length > 0) {
-        url = url+`&list=${list}`
+      if (list.length > 0) {
+        url = url + `&list=${list}`
       }
 
-      if(value.length > 0) {
-        url = url+`&value=${value}`
+      if (value.length > 0) {
+        url = url + `&value=${value}`
       }
 
-      if(data_type.length > 0) {
-        url = url+`&data_type=${data_type}`
+      if (data_type.length > 0) {
+        url = url + `&data_type=${data_type}`
       }
 
-      if(from_poll === true) {
-        url = url+`&from_poll=true`
+      if (from_poll === true) {
+        url = url + `&from_poll=true`
       }
 
-      if(from_poll === false) {
-        url = url+`&from_poll=false`
+      if (from_poll === false) {
+        url = url + `&from_poll=false`
       }
 
-      if(record_id) {
-        url = url+`&record_id=${record_id}`
+      if (record_id) {
+        url = url + `&record_id=${record_id}`
       }
 
-      if(list_name__like) {
-        url = url+`&list_name__like=${list_name__like}`
+      if (list_name__like) {
+        url = url + `&list_name__like=${list_name__like}`
       }
 
-      if(value__like) {
-        url = url+`&value__like=${value__like}`
+      if (value__like) {
+        url = url + `&value__like=${value__like}`
       }
 
-      if(top) {
-        url = url+`&top=${top}`
+      if (top) {
+        url = url + `&top=${top}`
       }
 
-      if(metrics) {
-        url = url+`&metrics=${metrics}`
+      if (metrics) {
+        url = url + `&metrics=${metrics}`
       }
 
-      if(start && end) {
-        url = url+`&start=${start}&end=${end}`
+      if (start && end) {
+        url = url + `&start=${start}&end=${end}`
       }
-      if(organization && organization.length > 0) {
-        url = url+`&organization=${organization}`
-      }      
+      if (organization && organization.length > 0) {
+        url = url + `&organization=${organization}`
+      }
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_list_stats', resp.data)
-        commit('loading_status',false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_list_stats', resp.data)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getDetectionMitreMapping({commit}, {organization=null}) {
+  getDetectionMitreMapping({ commit }, { organization = null }) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/mitre/detections`
 
-      if(organization) {
-        url = url+`?organization=${organization}`
+      if (organization) {
+        url = url + `?organization=${organization}`
       }
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_detection_mitre_mapping', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_detection_mitre_mapping', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getDetectionFilters({commit}, {warnings=[], min_average_hits_per_day=0, max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, organization=[], status=[], tags=[], techniques=[], tactics=[], repository=[], active=[], assess_rule=[], repo_synced=true}) {
-    commit('loading_status',true)
+  getDetectionFilters({ commit }, { warnings = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, organization = [], status = [], tags = [], techniques = [], tactics = [], repository = [], active = [], assess_rule = [], severity = [], repo_synced = true }) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}&repository=${repository}&status=${status}`
 
-      url = url+`&repo_synced=${repo_synced}`
+      url = url + `&repo_synced=${repo_synced}`
 
-      if(active.length > 0) {
-        url = url+`&active=${active}`
+      if (active.length > 0) {
+        url = url + `&active=${active}`
       }
 
-      if(assess_rule.length > 0) {
-        url = url+`&assess_rule=${assess_rule}`
+      if (assess_rule.length > 0) {
+        url = url + `&assess_rule=${assess_rule}`
       }
 
-      if(name__like) {
-        url = url+`&name__like=${name__like}`
+      if (severity.length > 0) {
+        url = url + `&severity=${severity}`
       }
 
-      if(description__like) {
-        url = url+`&description__like=${description__like}`
+      if (name__like) {
+        url = url + `&name__like=${name__like}`
       }
 
-      if(query__like) {
-        url = url+`&query__like=${query__like}`
+      if (description__like) {
+        url = url + `&description__like=${description__like}`
       }
 
-      if(rule_type.length > 0) {
-        url = url+`&rule_type=${rule_type}`
+      if (query__like) {
+        url = url + `&query__like=${query__like}`
       }
 
-      if(max_average_hits_per_day > 0) {
-        url = url+`&max_average_hits_per_day=${max_average_hits_per_day}`
+      if (rule_type.length > 0) {
+        url = url + `&rule_type=${rule_type}`
       }
 
-      if(min_average_hits_per_day > 0) {
-        url = url+`&min_average_hits_per_day=${min_average_hits_per_day}`
+      if (max_average_hits_per_day > 0) {
+        url = url + `&max_average_hits_per_day=${max_average_hits_per_day}`
       }
 
-      if(warnings.length > 0) {
-        url = url+`&warnings=${warnings}`
+      if (min_average_hits_per_day > 0) {
+        url = url + `&min_average_hits_per_day=${min_average_hits_per_day}`
       }
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('loading_status',false)
-        commit('update_detection_filters', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('loading_status',false)
-        reject(err)
-      })
+      if (warnings.length > 0) {
+        url = url + `&warnings=${warnings}`
+      }
+
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('loading_status', false)
+          commit('update_detection_filters', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          commit('loading_status', false)
+          reject(err)
+        })
     })
   },
-  getDetectionsByFilter({commit}, {warnings=[], min_average_hits_per_day=0, max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], assess_rule=[], save=true, organization=null, repo_synced=true}) {
-    commit('loading_status',true)
+  getDetectionsByFilter({ commit }, { warnings = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
 
       if (max_average_hits_per_day == 0) {
@@ -1503,243 +1507,253 @@ const actions = {
       let url = `${BASE_URL}/detection/select_by_filter?max_average_hits_per_day=${max_average_hits_per_day}&min_average_hits_per_day=${min_average_hits_per_day}`
 
 
-      if(techniques.length > 0) {
-        url = url+`&techniques=${techniques}`
+      if (techniques.length > 0) {
+        url = url + `&techniques=${techniques}`
       }
 
-      if(tactics.length > 0) {
-        url = url+`&tactics=${tactics}`
+      if (tactics.length > 0) {
+        url = url + `&tactics=${tactics}`
       }
 
-      if(organization) { 
-        url = url+`&organization=${organization}`
+      if (organization) {
+        url = url + `&organization=${organization}`
       }
 
-      if(phase_names.length > 0) {
-        url = url+`&phase_names=${phase_names}`
+      if (phase_names.length > 0) {
+        url = url + `&phase_names=${phase_names}`
       }
 
-      if(active.length > 0) {
-        url = url+`&active=${active}`
+      if (active.length > 0) {
+        url = url + `&active=${active}`
       }
 
-      if(assess_rule.length > 0) {
-        url = url+`&assess_rule=${assess_rule}`
+      if (assess_rule.length > 0) {
+        url = url + `&assess_rule=${assess_rule}`
       }
 
-      if(tags.length > 0) {
-        url = url+`&tags=${tags}`
+      if (tags.length > 0) {
+        url = url + `&tags=${tags}`
       }
 
-      if(name__like) {
-        url = url+`&name__like=${name__like}`
+      if (name__like) {
+        url = url + `&name__like=${name__like}`
       }
 
-      if(description__like) {
-        url = url+`&description__like=${description__like}`
+      if (description__like) {
+        url = url + `&description__like=${description__like}`
       }
 
-      if(query__like) {
-        url = url+`&query__like=${query__like}`
+      if (query__like) {
+        url = url + `&query__like=${query__like}`
       }
 
-      if(rule_type.length > 0) {
-        url = url+`&rule_type=${rule_type}`
+      if (rule_type.length > 0) {
+        url = url + `&rule_type=${rule_type}`
       }
 
-      if(warnings.length > 0) {
-        url = url+`&warnings=${warnings}`
+      if (warnings.length > 0) {
+        url = url + `&warnings=${warnings}`
       }
-    
-      url = url+`&repo_synced=${repo_synced}`
-      
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('loading_status',false)
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('loading_status',false)
-        reject(err)
-      })
+      if (severity.length > 0) {
+
+        url = url + `&severity=${severity}`
+      }
+
+      url = url + `&repo_synced=${repo_synced}`
+
+
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          commit('loading_status', false)
+          reject(err)
+        })
     })
   },
-  getDetections({commit}, {warnings=[], min_average_hits_per_day=0, max_average_hits_per_day=0, rule_type=[], name__like=null, description__like=null, query__like=null, page=1, page_size=10000, sort_by="created_at", sort_direction="asc", status=[], repository=[], phase_names=[], techniques=[], tactics=[], tags=[], active=[], assess_rule=[], save=true, organization=null, repo_synced=true}) {
-    commit('loading_status',true)
+  getDetections({ commit }, { warnings = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}&repository=${repository}&status=${status}`
 
-      if(techniques.length > 0) {
-        url = url+`&techniques=${techniques}`
+      if (techniques.length > 0) {
+        url = url + `&techniques=${techniques}`
       }
 
-      if(tactics.length > 0) {
-        url = url+`&tactics=${tactics}`
+      if (tactics.length > 0) {
+        url = url + `&tactics=${tactics}`
       }
 
-      if(organization) { 
-        url = url+`&organization=${organization}`
+      if (organization) {
+        url = url + `&organization=${organization}`
       }
 
-      if(phase_names.length > 0) {
-        url = url+`&phase_names=${phase_names}`
+      if (phase_names.length > 0) {
+        url = url + `&phase_names=${phase_names}`
       }
 
-      if(active.length > 0) {
-        url = url+`&active=${active}`
+      if (active.length > 0) {
+        url = url + `&active=${active}`
       }
 
-      if(assess_rule.length > 0) {
-        url = url+`&assess_rule=${assess_rule}`
+      if (assess_rule.length > 0) {
+        url = url + `&assess_rule=${assess_rule}`
       }
 
-      if(tags.length > 0) {
-        url = url+`&tags=${tags}`
+      if (severity.length > 0) {
+
+        url = url + `&severity=${severity}`
       }
 
-      if(name__like) {
-        url = url+`&name__like=${name__like}`
+      if (tags.length > 0) {
+        url = url + `&tags=${tags}`
       }
 
-      if(description__like) {
-        url = url+`&description__like=${description__like}`
+      if (name__like) {
+        url = url + `&name__like=${name__like}`
       }
 
-      if(query__like) {
-        url = url+`&query__like=${query__like}`
+      if (description__like) {
+        url = url + `&description__like=${description__like}`
       }
 
-      if(rule_type.length > 0) {
-        url = url+`&rule_type=${rule_type}`
+      if (query__like) {
+        url = url + `&query__like=${query__like}`
       }
 
-      if(max_average_hits_per_day > 0) {
-        url = url+`&max_average_hits_per_day=${max_average_hits_per_day}`
+      if (rule_type.length > 0) {
+        url = url + `&rule_type=${rule_type}`
       }
 
-      if(min_average_hits_per_day > 0) {
-        url = url+`&min_average_hits_per_day=${min_average_hits_per_day}`
+      if (max_average_hits_per_day > 0) {
+        url = url + `&max_average_hits_per_day=${max_average_hits_per_day}`
       }
 
-      if(warnings.length > 0) {
-        url = url+`&warnings=${warnings}`
+      if (min_average_hits_per_day > 0) {
+        url = url + `&min_average_hits_per_day=${min_average_hits_per_day}`
       }
 
-    
-      url = url+`&repo_synced=${repo_synced}`
-      
+      if (warnings.length > 0) {
+        url = url + `&warnings=${warnings}`
+      }
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        if(save) {
-          commit('save_detections', resp.data.detections)
-          commit('save_pagination', resp.data.pagination)
-        }
-        commit('loading_status',false)
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('loading_status',false)
-        reject(err)
-        
-      })
+
+      url = url + `&repo_synced=${repo_synced}`
+
+
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          if (save) {
+            commit('save_detections', resp.data.detections)
+            commit('save_pagination', resp.data.pagination)
+          }
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          commit('loading_status', false)
+          reject(err)
+
+        })
     })
   },
-  flagDetectionAssess({commit}, {uuid}) {
+  flagDetectionAssess({ commit }, { uuid }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/${uuid}/assess`, method: 'PUT'})
-      .then(resp => {
-        commit('save_detection', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/${uuid}/assess`, method: 'PUT' })
+        .then(resp => {
+          commit('save_detection', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createDetection({commit}, detection) {
+  createDetection({ commit }, detection) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection`, data: detection, method: 'POST'})
-      .then(resp => {
-        commit('add_detection', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection`, data: detection, method: 'POST' })
+        .then(resp => {
+          commit('add_detection', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteDetection({commit}, {uuid}) {
+  deleteDetection({ commit }, { uuid }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_detection', uuid)
-        commit('loading_status', false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_detection', uuid)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getDetectionHits({commit}, {uuid}) {
+  getDetectionHits({ commit }, { uuid }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/${uuid}/hits`, method: 'GET'})
-      .then(resp => {
-        commit('save_detection_hits', resp.data.events)
-        commit('loading_status', false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/${uuid}/hits`, method: 'GET' })
+        .then(resp => {
+          commit('save_detection_hits', resp.data.events)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createFieldTemplate({commit}, field_template) {
+  createFieldTemplate({ commit }, field_template) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/field_template`, data: field_template, method: 'POST'})
-      .then(resp => {
-        commit('save_field_template', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/field_template`, data: field_template, method: 'POST' })
+        .then(resp => {
+          commit('save_field_template', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateFieldTemplate({commit}, {uuid, template}) {
+  updateFieldTemplate({ commit }, { uuid, template }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/field_template/${uuid}`, data: template, method: 'PUT'})
-      .then(resp => {
-        commit('save_field_template', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/field_template/${uuid}`, data: template, method: 'PUT' })
+        .then(resp => {
+          commit('save_field_template', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getFieldTemplates({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null}) {
+  getFieldTemplates({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc", organization = null }) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/field_template?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       if (organization) {
         url += `&organization=${organization}`
       }
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_field_templates', resp.data.templates)
-        commit('save_pagination', resp.data.pagination)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_field_templates', resp.data.templates)
+          commit('save_pagination', resp.data.pagination)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getInputs({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null, mitre_data_sources=[]}) {
+  getInputs({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc", organization = null, mitre_data_sources = [] }) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/input?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       if (organization) {
@@ -1748,274 +1762,274 @@ const actions = {
       if (mitre_data_sources.length > 0) {
         url += `&mitre_data_sources=${mitre_data_sources}`
       }
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_inputs', resp.data.inputs)
-        commit('save_pagination', resp.data.pagination)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_inputs', resp.data.inputs)
+          commit('save_pagination', resp.data.pagination)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getAgents({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+  getAgents({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc" }) {
 
     let url = `${BASE_URL}/agent?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
     return new Promise((resolve, reject) => {
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_agents', resp.data.agents)
-        commit('save_pagination', resp.data.pagination)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_agents', resp.data.agents)
+          commit('save_pagination', resp.data.pagination)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getAgentGroups({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+  getAgentGroups({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc" }) {
 
     let url = `${BASE_URL}/agent_group?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
     return new Promise((resolve, reject) => {
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_agent_groups', resp.data.groups)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_agent_groups', resp.data.groups)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getAgentGroup({commit}, uuid) {
+  getAgentGroup({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent_group/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_agent_group', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent_group/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_agent_group', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteAgent({commit}, uuid) {
+  deleteAgent({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_agent', uuid)
-        commit('show_alert', {message: `Successfully deleted agent.`, 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_agent', uuid)
+          commit('show_alert', { message: `Successfully deleted agent.`, 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateAgent({commit}, {uuid, data}) {
+  updateAgent({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_agent', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_agent', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateAgentGroup({commit}, {uuid, data}) {
+  updateAgentGroup({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent_group/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_agent_group', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent_group/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_agent_group', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getPairingToken({commit}) {
+  getPairingToken({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent/pair_token`, method: 'GET'})
-      .then(resp => {
-        commit('save_pairing_token', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent/pair_token`, method: 'GET' })
+        .then(resp => {
+          commit('save_pairing_token', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createInput({commit}, input) {
+  createInput({ commit }, input) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/input`, data: input, method: 'POST'})
-      .then(resp => {
-        commit('add_input', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/input`, data: input, method: 'POST' })
+        .then(resp => {
+          commit('add_input', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createAgentGroup({commit}, agent_group) {
+  createAgentGroup({ commit }, agent_group) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent_group`, data: agent_group, method: 'POST'})
-      .then(resp => {
-        commit('add_agent_group', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent_group`, data: agent_group, method: 'POST' })
+        .then(resp => {
+          commit('add_agent_group', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getDetection({commit}, uuid) {
+  getDetection({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_detection', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_detection', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateDetection({commit}, {uuid, data}) {
+  updateDetection({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_detection', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_detection', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getInputIndexFields({commit}, {uuid, limit=25, organization=null, name__like=null}) {
+  getInputIndexFields({ commit }, { uuid, limit = 25, organization = null, name__like = null }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/input/${uuid}/index_fields?limit=${limit}`
 
-      if(organization) {
+      if (organization) {
         url += `&organization=${organization}`
       }
 
-      if(name__like) {
+      if (name__like) {
         url += `&name__like=${name__like}`
       }
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_index_fields', resp.data.index_fields)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_index_fields', resp.data.index_fields)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteInput({commit}, uuid) {
+  deleteInput({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/input/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_input', uuid)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/input/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_input', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getInput({commit}, uuid) {
+  getInput({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/input/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_input', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/input/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_input', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateInput({commit}, {uuid, data}) {
+  updateInput({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/input/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_input', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/input/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_input', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getAgent({commit}, uuid) {
+  getAgent({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_agent', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_agent', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  setAgentGroups({commit}, {uuid, groups}) {
+  setAgentGroups({ commit }, { uuid, groups }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent/${uuid}`, data: groups, method: 'PUT'})
-      .then(resp => {
-        commit('save_agent_groups', resp.data)
-        resolve(resp)
-      })
-      .catch(err => { 
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent/${uuid}`, data: groups, method: 'PUT' })
+        .then(resp => {
+          commit('save_agent_groups', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  setAgentGroupInputs({commit}, {uuid, inputs}) {
+  setAgentGroupInputs({ commit }, { uuid, inputs }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent_group/${uuid}`, data: inputs, method: 'PUT'})
-      .then(resp => {
-        //commit('save_inputs', resp.data)
-        resolve(resp)
-      })
-      .catch(err => { 
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent_group/${uuid}`, data: inputs, method: 'PUT' })
+        .then(resp => {
+          //commit('save_inputs', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  setAgentInputs({commit}, {uuid, inputs}) {
+  setAgentInputs({ commit }, { uuid, inputs }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent/${uuid}`, data: inputs, method: 'PUT'})
-      .then(resp => {
-        commit('save_inputs', resp.data)
-        resolve(resp)
-      })
-      .catch(err => { 
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent/${uuid}`, data: inputs, method: 'PUT' })
+        .then(resp => {
+          commit('save_inputs', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  addTagsToInput({commit}, postData) {
+  addTagsToInput({ commit }, postData) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/input/${postData.uuid}/bulktag`, data: postData.data, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/input/${postData.uuid}/bulktag`, data: postData.data, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCredentialList({commit}, {organization}) {
+  getCredentialList({ commit }, { organization }) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/credential`
@@ -2024,74 +2038,74 @@ const actions = {
         base_url += `?organization=${organization}`
       }
 
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        let credentials = []
-        resp.data.credentials.forEach(cred => credentials.push({'value':cred.uuid, 'label':cred.name+" - "+cred.description}))
-        commit('creds_success', credentials)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          let credentials = []
+          resp.data.credentials.forEach(cred => credentials.push({ 'value': cred.uuid, 'label': cred.name + " - " + cred.description }))
+          commit('creds_success', credentials)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getInputList({commit}, {organization=null, name=null}) {
+  getInputList({ commit }, { organization = null, name = null }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/input`
-      if(organization) {
+      if (organization) {
         url += `?organization=${organization}`
       }
-      if(name) {
+      if (name) {
         url += `&name=${name}`
       }
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        let credentials = []
-        commit('save_inputs_list', resp.data.inputs)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          let credentials = []
+          commit('save_inputs_list', resp.data.inputs)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getDashboardMetrics({commit}) {
+  getDashboardMetrics({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/dashboard`, method: 'GET'})
-      .then(resp => {
-        commit('save_dashboard_metrics', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/dashboard`, method: 'GET' })
+        .then(resp => {
+          commit('save_dashboard_metrics', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createNotificationChannel({commit}, {data}) {
+  createNotificationChannel({ commit }, { data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/notification/channel`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('save_notification_channel', resp.data)
-        resolve(resp)
-      }).catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/notification/channel`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('save_notification_channel', resp.data)
+          resolve(resp)
+        }).catch(err => {
+          reject(err)
+        })
     })
   },
-  editNotificationChannel({commit}, {uuid, data}) {
+  editNotificationChannel({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/notification/channel/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_notification_channel', resp.data)
-        resolve(resp)
-      }).catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/notification/channel/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_notification_channel', resp.data)
+          resolve(resp)
+        }).catch(err => {
+          reject(err)
+        })
     })
   },
-  getNotificationChannels({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc", organization=null, name__like=null}) {
+  getNotificationChannels({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc", organization = null, name__like = null }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/notification/channel?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -2104,994 +2118,994 @@ const actions = {
         url += `&name__like=${name__like}`
       }
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_notification_channels', resp.data.channels)
-        commit('save_pagination', resp.data.pagination)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_notification_channels', resp.data.channels)
+          commit('save_pagination', resp.data.pagination)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCredentials({commit}, {page=1, page_size=10, sort_by="created_at", sort_direction="asc"}) {
+  getCredentials({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc" }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/credential?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_credentials', resp.data.credentials)
-        commit('save_pagination', resp.data.pagination)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_credentials', resp.data.credentials)
+          commit('save_pagination', resp.data.pagination)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCredential({commit}, uuid) {
+  getCredential({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/credential/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_credential', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/credential/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_credential', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteCredential({commit}, uuid) {
+  deleteCredential({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/credential/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_credential', uuid)
-        commit('show_alert', {'message':'Successfully deleted credential', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/credential/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_credential', uuid)
+          commit('show_alert', { 'message': 'Successfully deleted credential', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateCredential({commit}, {uuid, credential}) {
+  updateCredential({ commit }, { uuid, credential }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/credential/${uuid}`, data: credential, method: 'PUT'})
-      .then(resp => {
-        commit('update_credential', resp.data)
-        commit('show_alert', {'message':'Successfully updated credential', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/credential/${uuid}`, data: credential, method: 'PUT' })
+        .then(resp => {
+          commit('update_credential', resp.data)
+          commit('show_alert', { 'message': 'Successfully updated credential', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createCredential({commit}, credential) {
+  createCredential({ commit }, credential) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/credential/encrypt`, data: credential, method: 'POST'})
-      .then(resp => {
-        commit('add_credential', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/credential/encrypt`, data: credential, method: 'POST' })
+        .then(resp => {
+          commit('add_credential', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getPlaybooks({commit}) {
+  getPlaybooks({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/playbook`, method: 'GET'})
-      .then(resp => {
-        commit('save_playbooks', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/playbook`, method: 'GET' })
+        .then(resp => {
+          commit('save_playbooks', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseFiles({commit}, {uuid, page=1, page_size=25}) {
+  getCaseFiles({ commit }, { uuid, page = 1, page_size = 25 }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}/files?page=${page}&page_size=${page_size}`})
-      .then(resp => {
-        commit('add_start')
-        commit('save_case_files', resp.data.files)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}/files?page=${page}&page_size=${page_size}` })
+        .then(resp => {
+          commit('add_start')
+          commit('save_case_files', resp.data.files)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getRelatedEvents({commit}, uuid) {
+  getRelatedEvents({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/${uuid}/new_related_events`, method:'GET'})
-      .then(resp => {
-        commit('save_related_events', resp.data.events)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/${uuid}/new_related_events`, method: 'GET' })
+        .then(resp => {
+          commit('save_related_events', resp.data.events)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getObservableNetwork({commit}) {
+  getObservableNetwork({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/observable/network`, method: 'GET'})
-      .then(resp => {
-        commit('save_network_data', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/observable/network`, method: 'GET' })
+        .then(resp => {
+          commit('save_network_data', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getBulkEvents({commit}, {signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], start=null, end=null, organization=[], title__like=null}) {
+  getBulkEvents({ commit }, { signature = null, status = [], severity = [], source = [], tags = [], title = [], observables = [], start = null, end = null, organization = [], title__like = null }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/bulk_select_all?q=`
 
-      if(signature) {
-        url = url+`&signature=${signature}`
-      } 
-      if(status) {
-        url = url+`&status=${status}`
+      if (signature) {
+        url = url + `&signature=${signature}`
       }
-      if(severity.length > 0) {
-        url = url+`&severity=${severity}`
-      } 
-      if(tags.length > 0) {
-        url = url+`&tags=${tags}`
+      if (status) {
+        url = url + `&status=${status}`
       }
-      if(title.length > 0) {
-        url = url+`&title=${title}`
+      if (severity.length > 0) {
+        url = url + `&severity=${severity}`
       }
-      if(source.length >0) {
-        url = url+`&source=${source}`
+      if (tags.length > 0) {
+        url = url + `&tags=${tags}`
       }
-      if(observables.length > 0) {
-        url = url+`&observables=${observables}`
+      if (title.length > 0) {
+        url = url + `&title=${title}`
       }
-      if(start && end) {
-        url = url+`&start=${start}&end=${end}`
+      if (source.length > 0) {
+        url = url + `&source=${source}`
       }
-      if(organization && organization.length > 0) {
-        url = url+`&organization=${organization}`
+      if (observables.length > 0) {
+        url = url + `&observables=${observables}`
       }
-      if(title__like) {
-        url = url+`&title__like=${title__like}`
+      if (start && end) {
+        url = url + `&start=${start}&end=${end}`
       }
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      if (organization && organization.length > 0) {
+        url = url + `&organization=${organization}`
+      }
+      if (title__like) {
+        url = url + `&title__like=${title__like}`
+      }
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getEventExport({commit}, report_params) {
+  getEventExport({ commit }, report_params) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/export`, data: report_params, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/export`, data: report_params, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getEventComments({commit}, uuid) {
+  getEventComments({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/${uuid}/comment`, method: 'GET'})
-      .then(resp => {
-        commit('save_event_comments', resp.data.comments)
-        resolve(resp)
-      }).catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/${uuid}/comment`, method: 'GET' })
+        .then(resp => {
+          commit('save_event_comments', resp.data.comments)
+          resolve(resp)
+        }).catch(err => {
+          reject(err)
+        })
     })
   },
-  getEventStats({commit}, {title__like=null, signature=null, status=[], severity=[], source=[], tags=[], title=[], observables=[], top=null, metrics=['title','observable','source','tag','status','severity','data_type','organization','event_rule','signature'],start=null, end=null, organization=[], event_rules=[]}) {
-    commit('loading_status',true)
+  getEventStats({ commit }, { title__like = null, signature = null, status = [], severity = [], source = [], tags = [], title = [], observables = [], top = null, metrics = ['title', 'observable', 'source', 'tag', 'status', 'severity', 'data_type', 'organization', 'event_rule', 'signature'], start = null, end = null, organization = [], event_rules = [] }) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/stats?q=`
 
-      if(signature) {
-        url = url+`&signature=${signature}`
-      } 
-      if(status) {
-        url = url+`&status=${status}`
+      if (signature) {
+        url = url + `&signature=${signature}`
       }
-      if(severity.length > 0) {
-        url = url+`&severity=${severity}`
-      } 
-      if(tags.length > 0) {
-        url = url+`&tags=${tags}`
+      if (status) {
+        url = url + `&status=${status}`
       }
-      if(title.length > 0) {
-        url = url+`&title=${title}`
+      if (severity.length > 0) {
+        url = url + `&severity=${severity}`
       }
-      if(source.length >0) {
-        url = url+`&source=${source}`
+      if (tags.length > 0) {
+        url = url + `&tags=${tags}`
       }
-      if(observables.length > 0) {
-        url = url+`&observables=${observables}`
+      if (title.length > 0) {
+        url = url + `&title=${title}`
       }
-      if(top) {
-        url = url+`&top=${top}`
+      if (source.length > 0) {
+        url = url + `&source=${source}`
       }
-      if(metrics) {
-        url = url+`&metrics=${metrics}`
+      if (observables.length > 0) {
+        url = url + `&observables=${observables}`
       }
-      if(start && end) {
-        url = url+`&start=${start}&end=${end}`
+      if (top) {
+        url = url + `&top=${top}`
       }
-      if(organization && organization.length > 0) {
-        url = url+`&organization=${organization}`
+      if (metrics) {
+        url = url + `&metrics=${metrics}`
       }
-      if(event_rules && event_rules.length > 0) {
-        url = url+`&event_rule=${event_rules}`
+      if (start && end) {
+        url = url + `&start=${start}&end=${end}`
       }
-      if(title__like) {
-        url = url+`&title__like=${title__like}`
+      if (organization && organization.length > 0) {
+        url = url + `&organization=${organization}`
+      }
+      if (event_rules && event_rules.length > 0) {
+        url = url + `&event_rule=${event_rules}`
+      }
+      if (title__like) {
+        url = url + `&title__like=${title__like}`
       }
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_event_stats', resp.data)
-        commit('loading_status',false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_event_stats', resp.data)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseEvents({commit}, {uuid, title__like=null, signature=null, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='created_at', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null}) {
+  getCaseEvents({ commit }, { uuid, title__like = null, signature = null, status = [], search, rql, severity = [], page, source = [], tags = [], title = [], observables = [], page_size = 25, sort_by = 'created_at', grouped = true, fields = '', sort_direction = 'desc', start = null, end = null, organization = null }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/case_events/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_events', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/case_events/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_events', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getEvents({commit}, {title__like=null, signature=null, case_uuid, status=[], search, rql, severity=[], page, source=[], tags=[], title=[], observables=[], page_size=25, sort_by='original_date', grouped=true, fields='', sort_direction='desc', start=null, end=null, organization=null, event_rules=null}) {
+  getEvents({ commit }, { title__like = null, signature = null, case_uuid, status = [], search, rql, severity = [], page, source = [], tags = [], title = [], observables = [], page_size = 25, sort_by = 'original_date', grouped = true, fields = '', sort_direction = 'desc', start = null, end = null, organization = null, event_rules = null }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event?grouped=${grouped}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
-      if(signature) {
-        url = url+`&signature=${signature}`
-      } 
-      if(status) {
-        url = url+`&status=${status}`
-      } 
-      if(case_uuid) {
-        url = url+`&case_uuid=${case_uuid}`
-      } 
-      if(search) {
-        url = url+`&search=${search}`
+      if (signature) {
+        url = url + `&signature=${signature}`
       }
-      if(rql) {
-        url = url+`&rql=${rql}`
+      if (status) {
+        url = url + `&status=${status}`
       }
-      if(severity.length > 0) {
-        url = url+`&severity=${severity}`
-      } 
-      if(page) {
-        url = url+`&page=${page}`
+      if (case_uuid) {
+        url = url + `&case_uuid=${case_uuid}`
       }
-      if(page_size) {
-        url = url+`&page_size=${page_size}`
+      if (search) {
+        url = url + `&search=${search}`
       }
-      if(tags.length > 0) {
-        url = url+`&tags=${tags}`
+      if (rql) {
+        url = url + `&rql=${rql}`
       }
-      if(observables.length > 0) {
-        url = url+`&observables=${observables}`
+      if (severity.length > 0) {
+        url = url + `&severity=${severity}`
       }
-      if(title.length > 0) {
-        url = url+`&title=${title}`
+      if (page) {
+        url = url + `&page=${page}`
       }
-      
-      if(source.length >0) {
-        url = url+`&source=${source}`
+      if (page_size) {
+        url = url + `&page_size=${page_size}`
+      }
+      if (tags.length > 0) {
+        url = url + `&tags=${tags}`
+      }
+      if (observables.length > 0) {
+        url = url + `&observables=${observables}`
+      }
+      if (title.length > 0) {
+        url = url + `&title=${title}`
       }
 
-      if(organization && organization.length > 0) {
-        url = url+`&organization=${organization}`
+      if (source.length > 0) {
+        url = url + `&source=${source}`
       }
 
-      if(event_rules && event_rules.length > 0) {
-        url = url+`&event_rule=${event_rules}`
+      if (organization && organization.length > 0) {
+        url = url + `&organization=${organization}`
       }
 
-      if(start && end) {
-        url = url+`&start=${start}&end=${end}`
+      if (event_rules && event_rules.length > 0) {
+        url = url + `&event_rule=${event_rules}`
       }
 
-      if(title__like) {
-        url = url+`&title__like=${title__like}`
+      if (start && end) {
+        url = url + `&start=${start}&end=${end}`
       }
 
-      Axios({url: url, method: 'GET', headers:{'X-Fields': fields}})
-      .then(resp => {
-        commit('add_start')
-        commit('save_events', resp.data.events)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      if (title__like) {
+        url = url + `&title__like=${title__like}`
+      }
+
+      Axios({ url: url, method: 'GET', headers: { 'X-Fields': fields } })
+        .then(resp => {
+          commit('add_start')
+          commit('save_events', resp.data.events)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getEvent({commit}, uuid) {
+  getEvent({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_event', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_event', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getEventIndex({commit}, uuid) {
+  getEventIndex({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/${uuid}/indexed`, method: 'GET'})
-      .then(resp => {
-        //commit('save_event_index', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/${uuid}/indexed`, method: 'GET' })
+        .then(resp => {
+          //commit('save_event_index', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateEvent({commit}, {uuid, data}) {
+  updateEvent({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('save_event', resp.data)
-        commit('show_alert', {message: `Successfully updated Event.`, 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('save_event', resp.data)
+          commit('show_alert', { message: `Successfully updated Event.`, 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  dismissEventsByFilter({commit}, data) {
+  dismissEventsByFilter({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/dismiss_by_filter`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('save_multiple_events', resp.data)
-        //commit('add_toast', {message:`Dismiss task submitted.`, header:'Bulk Dismiss', color: 'success', key: resp.data.task_id, refresh: false})
-        //commit('add_task', resp.data.task_id)
-        resolve(resp)
-      })
-      .catch(err => {
-        console.log(err)
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/dismiss_by_filter`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('save_multiple_events', resp.data)
+          //commit('add_toast', {message:`Dismiss task submitted.`, header:'Bulk Dismiss', color: 'success', key: resp.data.task_id, refresh: false})
+          //commit('add_task', resp.data.task_id)
+          resolve(resp)
+        })
+        .catch(err => {
+          console.log(err)
+          reject(err)
+        })
     })
   },
-  dismissEvents({commit}, data) {
+  dismissEvents({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/bulk_dismiss`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('save_multiple_events', resp.data)
-        //commit('show_alert', {message: `Successfully updated ${data.events.length} Events.`, 'type': 'success'})
-        commit('add_toast', {message:`Dismiss task submitted.`, header:'Bulk Dismiss', color: 'success', key: resp.data.task_id, refresh: false})
-        commit('add_task', resp.data.task_id)
-        resolve(resp)
-      })
-      .catch(err => {
-        console.log(err)
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/bulk_dismiss`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('save_multiple_events', resp.data)
+          //commit('show_alert', {message: `Successfully updated ${data.events.length} Events.`, 'type': 'success'})
+          commit('add_toast', { message: `Dismiss task submitted.`, header: 'Bulk Dismiss', color: 'success', key: resp.data.task_id, refresh: false })
+          commit('add_task', resp.data.task_id)
+          resolve(resp)
+        })
+        .catch(err => {
+          console.log(err)
+          reject(err)
+        })
     })
   },
-  getEventViews({commit}) {
+  getEventViews({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event_view`, method: 'GET'})
-      .then(resp => {
-        commit('save_event_views', resp.data['views'])
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event_view`, method: 'GET' })
+        .then(resp => {
+          commit('save_event_views', resp.data['views'])
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createEventView({commit}, data) {
+  createEventView({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event_view`, data: data, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event_view`, data: data, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateEventView({commit}, {uuid, data}) {
+  updateEventView({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event_view/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event_view/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createEventComment({commit}, {uuid, data}) {
+  createEventComment({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/${uuid}/comment`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_event_comment', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/${uuid}/comment`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_event_comment', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createEventRule({commit}, rule) {
+  createEventRule({ commit }, rule) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event_rule`, data: rule, method: 'POST'})
-      .then(resp => {
-        commit('save_event_rule', resp.data)
-        commit('show_alert', {message: 'Successfully created the Event Rule.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event_rule`, data: rule, method: 'POST' })
+        .then(resp => {
+          commit('save_event_rule', resp.data)
+          commit('show_alert', { message: 'Successfully created the Event Rule.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  editEventRule({commit}, {uuid, rule}) {
-    commit('loading_status',true)
+  editEventRule({ commit }, { uuid, rule }) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event_rule/${uuid}`, data: rule, method: 'PUT'})
-      .then(resp => {
-        commit('update_event_rule', resp.data)
-        commit('show_alert', {message: 'Successfully updated the Event Rule.', 'type': 'success'})
-        commit('loading_status',false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event_rule/${uuid}`, data: rule, method: 'PUT' })
+        .then(resp => {
+          commit('update_event_rule', resp.data)
+          commit('show_alert', { message: 'Successfully updated the Event Rule.', 'type': 'success' })
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getPlugins({commit}) {
+  getPlugins({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/plugin`, method: 'GET'})
-      .then(resp => {
-        commit('save_plugins', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/plugin`, method: 'GET' })
+        .then(resp => {
+          commit('save_plugins', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getPlugin({commit}, uuid) {
+  getPlugin({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/plugin/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_plugin', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/plugin/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_plugin', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  uploadPlugin({commit}, formData) {
+  uploadPlugin({ commit }, formData) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/plugin/upload`, data: formData, method: 'POST', config:{headers: {'Content-Type': 'multipart/form-data'}}})
-      .then(resp => resp.data)
-      .then(resp => resp.map(plugin => Object.assign({}, plugin, { name: plugin.name })))
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/plugin/upload`, data: formData, method: 'POST', config: { headers: { 'Content-Type': 'multipart/form-data' } } })
+        .then(resp => resp.data)
+        .then(resp => resp.map(plugin => Object.assign({}, plugin, { name: plugin.name })))
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getPluginConfig({commit}, uuid) {
+  getPluginConfig({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/plugin_config/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_plugin_config', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/plugin_config/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_plugin_config', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getPluginConfigs({commit}, uuid) {
+  getPluginConfigs({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/plugin_config`, method: 'GET'})
-      .then(resp => {
-        commit('save_plugin_configs', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/plugin_config`, method: 'GET' })
+        .then(resp => {
+          commit('save_plugin_configs', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createPluginConfig({commit}, config) {
+  createPluginConfig({ commit }, config) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/plugin_config`, data: config, method: 'POST'})
-      .then(resp => {
-        commit('add_plugin_config', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/plugin_config`, data: config, method: 'POST' })
+        .then(resp => {
+          commit('add_plugin_config', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getOrganization({commit}, uuid) {
+  getOrganization({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/organization/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_organization', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/organization/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_organization', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateOrganization({commit}, {uuid, data}) {
+  updateOrganization({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/organization/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_organization', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/organization/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_organization', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createOrganization({commit}, organization) {
+  createOrganization({ commit }, organization) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/organization`, data: organization, method: 'POST'})
-      .then(resp => {
-        commit('add_organization', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/organization`, data: organization, method: 'POST' })
+        .then(resp => {
+          commit('add_organization', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getOrganizations({commit}, {page=1, page_size=50, sort_by="created_at", sort_direction="asc"}) {
+  getOrganizations({ commit }, { page = 1, page_size = 50, sort_by = "created_at", sort_direction = "asc" }) {
     return new Promise((resolve, reject) => {
       let base_url = `${BASE_URL}/organization?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        commit('save_organizations', resp.data.organizations)
-        commit('save_pagination', resp.data.pagination)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          commit('save_organizations', resp.data.organizations)
+          commit('save_pagination', resp.data.pagination)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getUsers({commit}, {page=1,page_size=10,organization=null,sort_by="created_at",sort_direction="asc"}) {
+  getUsers({ commit }, { page = 1, page_size = 10, organization = null, sort_by = "created_at", sort_direction = "asc" }) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/user?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
-      if(organization) {
+      if (organization) {
         base_url += `&organization=${organization}`
       }
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        commit('save_users', resp.data.users)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          commit('save_users', resp.data.users)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getGroups({commit}) {
+  getGroups({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user_group`, method: 'GET'})
-      .then(resp => {
-        commit('save_users', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user_group`, method: 'GET' })
+        .then(resp => {
+          commit('save_users', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getUserGroupsByName({commit}, name) {
+  getUserGroupsByName({ commit }, name) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user_groups?name={name}`, method: 'GET'})
-      .then(resp => {
-        commit('save_user_groups', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user_groups?name={name}`, method: 'GET' })
+        .then(resp => {
+          commit('save_user_groups', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  unlockUser({commit}, uuid) {
+  unlockUser({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/${uuid}/unlock`, method: 'PUT'})
-      .then(resp => {
-        commit('save_user', resp.data.user)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user/${uuid}/unlock`, method: 'PUT' })
+        .then(resp => {
+          commit('save_user', resp.data.user)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateUser({commit}, {uuid, user}) {
+  updateUser({ commit }, { uuid, user }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/${uuid}`, data: user, method: 'PUT'})
-      .then(resp => {
-        commit('save_user', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user/${uuid}`, data: user, method: 'PUT' })
+        .then(resp => {
+          commit('save_user', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateUserPassword({commit}, data) {
+  updateUserPassword({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/set_password`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('save_user', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user/set_password`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('save_user', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteUser({commit}, uuid) {
+  deleteUser({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_user', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_user', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getUser({commit}, uuid) {
+  getUser({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_user', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_user', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createUser({commit}, user) {
+  createUser({ commit }, user) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user`, data: user, method: 'POST'})
-      .then(resp => {
-        commit('add_user', resp.data.user)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user`, data: user, method: 'POST' })
+        .then(resp => {
+          commit('add_user', resp.data.user)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getRoles({commit}, {organization=null, page=1, page_size=10, sort_by="created_at",sort_direction="asc"}) {
+  getRoles({ commit }, { organization = null, page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc" }) {
 
-    let url =`${BASE_URL}/role?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+    let url = `${BASE_URL}/role?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
     if (organization) {
       url += `&organization=${organization}`
     }
 
     return new Promise((resolve, reject) => {
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_roles', resp.data.roles)
-        commit('save_pagination', resp.data.pagination)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_roles', resp.data.roles)
+          commit('save_pagination', resp.data.pagination)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createPlaybook({commit}, playbook) {
+  createPlaybook({ commit }, playbook) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/playbook`, data: playbook, method: 'POST'})
-      .then(resp => {
-        commit('add_playbook', playbook)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/playbook`, data: playbook, method: 'POST' })
+        .then(resp => {
+          commit('add_playbook', playbook)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getPlaybook({commit}, uuid) {
+  getPlaybook({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/playbook/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_playbook', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/playbook/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_playbook', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  addTagsToPlaybook({commit}, postData) {
+  addTagsToPlaybook({ commit }, postData) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/playbook/${postData.uuid}/bulktag`, data: postData.data, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/playbook/${postData.uuid}/bulktag`, data: postData.data, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseTemplates({commit}) {
+  getCaseTemplates({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_template`, method: 'GET'})
-      .then(resp => {
-        commit('save_case_templates', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_template`, method: 'GET' })
+        .then(resp => {
+          commit('save_case_templates', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createCaseTemplate({commit}, data) {
+  createCaseTemplate({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_template`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_case_template', data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_template`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_case_template', data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateCaseTemplate({commit}, {uuid, data}) {
+  updateCaseTemplate({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_template/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_case_template', data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_template/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_case_template', data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseTemplateList({commit}, {title, organization}) {
+  getCaseTemplateList({ commit }, { title, organization }) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/case_template?title=${title}`
 
-      if(organization) {
+      if (organization) {
         base_url += `&organization=${organization}`
       }
 
-      Axios({url: base_url, method: 'GET', headers: {'X-Fields': 'uuid,title,description,tlp,severity,tags,task_count'}})
-      .then(resp => {
-        commit('save_case_template_list', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET', headers: { 'X-Fields': 'uuid,title,description,tlp,severity,tags,task_count' } })
+        .then(resp => {
+          commit('save_case_template_list', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCases({commit}, {status=[], search=[], severity=[], tag=[], owner=[], organization=[], close_reason=[], my_cases=false, my_tasks=false, page=1, page_size=25, start=null, end=null, sort_by="created_at", sort_direction="asc", escalated=null, title__like=null, observables=[], comments__like=null, description__like=null}) {
+  getCases({ commit }, { status = [], search = [], severity = [], tag = [], owner = [], organization = [], close_reason = [], my_cases = false, my_tasks = false, page = 1, page_size = 25, start = null, end = null, sort_by = "created_at", sort_direction = "asc", escalated = null, title__like = null, observables = [], comments__like = null, description__like = null }) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/case?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
-      if(title__like) {
+      if (title__like) {
         base_url += `&title__like=${title__like}`
       }
 
-      if(comments__like) {
+      if (comments__like) {
         base_url += `&comments__like=${comments__like}`
       }
 
-      if(description__like) {
+      if (description__like) {
         base_url += `&description__like=${description__like}`
       }
 
-      if(observables.length > 0) {
+      if (observables.length > 0) {
         base_url += `&observables=${observables.join(',')}`
       }
-      
-      if(status.length > 0 ) {
+
+      if (status.length > 0) {
         base_url += `&status=${status}`
       }
 
-      if(search.length > 0 ) {
+      if (search.length > 0) {
         base_url += `&search=${search}`
       }
 
-      if(severity.length > 0 ) {
+      if (severity.length > 0) {
         base_url += `&severity=${severity}`
       }
 
-      if(owner.length > 0 ) {
+      if (owner.length > 0) {
         base_url += `&owner=${owner}`
       }
 
-      if(tag.length > 0 ) {
+      if (tag.length > 0) {
         base_url += `&tag=${tag}`
       }
 
-      if(my_tasks) {
+      if (my_tasks) {
         base_url += `&my_tasks=${my_tasks}`
       }
 
-      if(my_cases) {
+      if (my_cases) {
         base_url += `&my_cases=${my_cases}`
       }
 
-      if(organization.length > 0) {
+      if (organization.length > 0) {
         base_url += `&organization=${organization}`
       }
 
-      if(close_reason.length > 0) {
+      if (close_reason.length > 0) {
         base_url += `&close_reason=${close_reason}`
       }
 
-      if(start && end) {
+      if (start && end) {
         base_url += `&start=${start}&end=${end}`
       }
 
-      if(escalated != null) {
+      if (escalated != null) {
         base_url += `&escalated=${escalated}`
       }
 
-      Axios({url: base_url, method: 'GET', headers: {'Content-Type': 'application/json'}})
-      .then(resp => {
-        commit('save_cases', resp.data.cases)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(resp => {
+          commit('save_cases', resp.data.cases)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseStats({commit}, {status=[], severity=[], tags=[], title=[], close_reason=[], owner=[], top=null, my_cases=false, metrics=['title','tag','status','severity','close_reason','organization','escalated'], start=null, end=null, organization=[], escalated=null}) {
+  getCaseStats({ commit }, { status = [], severity = [], tags = [], title = [], close_reason = [], owner = [], top = null, my_cases = false, metrics = ['title', 'tag', 'status', 'severity', 'close_reason', 'organization', 'escalated'], start = null, end = null, organization = [], escalated = null }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/case/stats?q=`
 
-      if(status) {
-        url = url+`&status=${status}`
+      if (status) {
+        url = url + `&status=${status}`
       }
-      if(severity.length > 0) {
-        url = url+`&severity=${severity}`
-      } 
-      if(tags.length > 0) {
-        url = url+`&tags=${tags}`
+      if (severity.length > 0) {
+        url = url + `&severity=${severity}`
       }
-      if(title.length > 0) {
-        url = url+`&title=${title}`
+      if (tags.length > 0) {
+        url = url + `&tags=${tags}`
       }
-      if(top) {
-        url = url+`&top=${top}`
+      if (title.length > 0) {
+        url = url + `&title=${title}`
       }
-      if(metrics) {
-        url = url+`&metrics=${metrics}`
+      if (top) {
+        url = url + `&top=${top}`
       }
-      if(start && end) {
-        url = url+`&start=${start}&end=${end}`
+      if (metrics) {
+        url = url + `&metrics=${metrics}`
       }
-      if(organization && organization.length > 0) {
-        url = url+`&organization=${organization}`
+      if (start && end) {
+        url = url + `&start=${start}&end=${end}`
       }
-      if(close_reason.length > 0) {
-        url = url+`&close_reason=${close_reason}`
+      if (organization && organization.length > 0) {
+        url = url + `&organization=${organization}`
       }
-      if(owner.length > 0) {
+      if (close_reason.length > 0) {
+        url = url + `&close_reason=${close_reason}`
+      }
+      if (owner.length > 0) {
         url += `&owner=${owner}`
       }
-      if(my_cases) {
+      if (my_cases) {
         url += `&my_cases=${my_cases}`
       }
-      if(escalated != null) {
+      if (escalated != null) {
         url += `&escalated=${escalated}`
       }
 
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_case_stats', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_case_stats', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getRelatedCases({commit}, uuid) {
+  getRelatedCases({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}/relate_cases`, method: 'GET'})
-      .then(resp => {
-        commit('save_related_cases', resp.data.related_cases)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}/relate_cases`, method: 'GET' })
+        .then(resp => {
+          commit('save_related_cases', resp.data.related_cases)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  relateCases({commit}, {uuid, data}) {
+  relateCases({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}/relate_cases`, data:data, method: 'PUT'})
-      .then(resp => {
-        commit('save_related_cases', resp.data.related_cases)
-        commit('show_alert', {message:'Successfully linked cases.', type:'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}/relate_cases`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('save_related_cases', resp.data.related_cases)
+          commit('show_alert', { message: 'Successfully linked cases.', type: 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  unlinkCases({commit}, {uuid, data}) {
+  unlinkCases({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}/relate_cases`, data:data, method: 'DELETE'})
-      .then(resp => {
-        commit('save_related_cases', resp.data.related_cases)
-        commit('show_alert', {message:'Successfully unlinked cases.', type:'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}/relate_cases`, data: data, method: 'DELETE' })
+        .then(resp => {
+          commit('save_related_cases', resp.data.related_cases)
+          commit('show_alert', { message: 'Successfully unlinked cases.', type: 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseObservablesFromEvents({commit}, {uuid, page=1, page_size=25}) {
+  getCaseObservablesFromEvents({ commit }, { uuid, page = 1, page_size = 25 }) {
     return new Promise((resolve, reject) => {
       let base_url = `${BASE_URL}/event/observables_by_case/${uuid}?page=${page}&page_size=${page_size}`
 
-      Axios({url: base_url, method: 'GET'}).then(resp => {
+      Axios({ url: base_url, method: 'GET' }).then(resp => {
         commit('save_observables', resp.data.observables)
         resolve(resp)
       }).catch(err => {
@@ -3099,95 +3113,95 @@ const actions = {
       })
     })
   },
-  getCaseObservables({commit}, {uuid, page=1, page_size=25, observable=[], dataType=[], search=[], tags=[]}) {
+  getCaseObservables({ commit }, { uuid, page = 1, page_size = 25, observable = [], dataType = [], search = [], tags = [] }) {
     return new Promise((resolve, reject) => {
-      
+
       let base_url = `${BASE_URL}/case/${uuid}/observables?page=${page}&page_size=${page_size}`
 
-      if(observable.length > 0) {
+      if (observable.length > 0) {
         base_url += `&observables=${observables}`
       }
 
-      if(dataType.length > 0) {
+      if (dataType.length > 0) {
         base_url += `&dataType=${dataType}`
       }
 
-      if(search.length > 0) {
+      if (search.length > 0) {
         base_url += `&search=${search}`
       }
 
-      if(tags.length > 0) {
+      if (tags.length > 0) {
         base_url += `&tags=${tag}`
       }
 
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        commit('save_observables', resp.data.observables)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          commit('save_observables', resp.data.observables)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateObservable({commit}, {uuid, observable_value, data}) {
+  updateObservable({ commit }, { uuid, observable_value, data }) {
     return new Promise((resolve, reject) => {
       observable_value = Buffer.from(observable_value).toString('base64')
-      Axios({url: `${BASE_URL}/case/${uuid}/observables/${observable_value}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_observable', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}/observables/${observable_value}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_observable', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateEventObservable({commit}, {uuid, observable_value, data}) {
+  updateEventObservable({ commit }, { uuid, observable_value, data }) {
     return new Promise((resolve, reject) => {
       observable_value = Buffer.from(observable_value).toString('base64')
-      Axios({url: `${BASE_URL}/event/${uuid}/observables/${observable_value}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_observable', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/${uuid}/observables/${observable_value}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_observable', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  bulkUpdateObservables({commit}, data) {
+  bulkUpdateObservables({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/observable/_bulk`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_observables', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/observable/_bulk`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_observables', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCloseReasons({commit}, {organization=null}) {
+  getCloseReasons({ commit }, { organization = null }) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/close_reason`
 
-      if(organization) {        
+      if (organization) {
         base_url += `?organization=${organization}`
       }
 
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        commit('save_close_reasons', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          commit('save_close_reasons', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCasesByTitle({commit}, {title, organization=null, fields='uuid,title,id,event_count,owner,severity'}) {
+  getCasesByTitle({ commit }, { title, organization = null, fields = 'uuid,title,id,event_count,owner,severity' }) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/case?title__like=${title}`
@@ -3196,77 +3210,77 @@ const actions = {
         base_url += `&organization=${organization}`
       }
 
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        commit('save_cases', resp.data.cases)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          commit('save_cases', resp.data.cases)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseComments({commit}, uuid) {
+  getCaseComments({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_comment?case_uuid=${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_comments', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_comment?case_uuid=${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_comments', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseHistory({commit}, uuid) {
+  getCaseHistory({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_history?case_uuid=${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_case_history', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_history?case_uuid=${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_case_history', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseTasks({commit}, uuid) {
+  getCaseTasks({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_task?case_uuid=${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_case_tasks', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_task?case_uuid=${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_case_tasks', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  addTaskNote({commit}, {uuid, data}) {
+  addTaskNote({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_task/${uuid}/add_note`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_case_task_note', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_task/${uuid}/add_note`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_case_task_note', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getTaskNotes({commit}, uuid) {
+  getTaskNotes({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/task_note?task_uuid=${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_case_task_notes', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/task_note?task_uuid=${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_case_task_notes', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCaseStatus({commit}, {organization=null}) {
+  getCaseStatus({ commit }, { organization = null }) {
 
     let base_url = `${BASE_URL}/case_status`
 
@@ -3275,17 +3289,17 @@ const actions = {
     }
 
     return new Promise((resolve, reject) => {
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        commit('save_case_status', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          commit('save_case_status', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getUsersByName({commit}, {username, organization=null}) {
+  getUsersByName({ commit }, { username, organization = null }) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/user?username=${username}`
@@ -3294,1262 +3308,1262 @@ const actions = {
         base_url += `&organization=${organization}`
       }
 
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        commit('save_users', resp.data.users)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          commit('save_users', resp.data.users)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getGroupsByName({commit}, name) {
+  getGroupsByName({ commit }, name) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user_group?name=${name}`, method: 'GET'})
-      .then(resp => {
-        commit('save_user_groups', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user_group?name=${name}`, method: 'GET' })
+        .then(resp => {
+          commit('save_user_groups', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getCase({commit}, uuid) {
+  getCase({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('save_case', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_case', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createCase({commit}, data) {
+  createCase({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_case', data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_case', data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createCaseTask({commit}, data) {
+  createCaseTask({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_task`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_case_task', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_task`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_case_task', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  addEventsToCase({commit}, {uuid, include_related_events=false, events}) {
+  addEventsToCase({ commit }, { uuid, include_related_events = false, events }) {
 
     let data = {
       'events': events,
       'include_related_events': include_related_events
     }
-    
+
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}/add_events`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('save_case', resp.data.case)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}/add_events`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('save_case', resp.data.case)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateComment({commit}, {uuid, data}) {
+  updateComment({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_comment/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_case_comment', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_comment/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_case_comment', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateCaseTask({commit}, {uuid, data}) {
+  updateCaseTask({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_task/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_case_task', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_task/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_case_task', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteCaseTask({commit}, uuid) {
+  deleteCaseTask({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_task/${uuid}`,method: 'DELETE'})
-      .then(resp => {
-        commit('remove_case_task', uuid)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_task/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_case_task', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteCaseTemplate({commit}, uuid) {
+  deleteCaseTemplate({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_template/${uuid}`,method: 'DELETE'})
-      .then(resp => {
-        commit('remove_case_template', uuid)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_template/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_case_template', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateCase({commit}, {uuid, data}) {
+  updateCase({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_case', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_case', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createCaseComment({commit}, data) {
+  createCaseComment({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_comment`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_case_comment', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_comment`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_case_comment', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteAgent({commit}, uuid) {
+  deleteAgent({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_agent', uuid)
-        commit('show_alert', {message: 'Successfully deleted the agent.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_agent', uuid)
+          commit('show_alert', { message: 'Successfully deleted the agent.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteAgentGroup({commit}, uuid) {
+  deleteAgentGroup({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent_group/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_agent_group', uuid)
-        commit('show_alert', {message: 'Successfully deleted the agent group.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent_group/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_agent_group', uuid)
+          commit('show_alert', { message: 'Successfully deleted the agent group.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteEvent({commit}, uuid) {
+  deleteEvent({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_event', uuid)
-        commit('show_alert', {message: 'Successfully deleted the event.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_event', uuid)
+          commit('show_alert', { message: 'Successfully deleted the event.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteEvents({commit}, events) {
+  deleteEvents({ commit }, events) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event/bulk_delete`, data: {events: events}, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_events', events)
-        commit('show_alert', {message: 'Successfully deleted the events.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event/bulk_delete`, data: { events: events }, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_events', events)
+          commit('show_alert', { message: 'Successfully deleted the events.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteCase({commit}, uuid) {
+  deleteCase({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_case', uuid)
-        commit('show_alert', {message: 'Successfully deleted the case.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_case', uuid)
+          commit('show_alert', { message: 'Successfully deleted the case.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteCaseComment({commit}, uuid) {
+  deleteCaseComment({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case_comment/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_comment', uuid)
-        commit('show_alert', {message: 'Successfully deleted the comment.', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case_comment/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_comment', uuid)
+          commit('show_alert', { message: 'Successfully deleted the comment.', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  bulkAddObservablesToCase({commit}, {uuid, data}) {
+  bulkAddObservablesToCase({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/case/${uuid}/add_observables/_bulk`, data: data, method: 'POST'})
-      .then(resp => {
-        //commit('add_case_observables', resp.data.observables)
-        commit('save_observables', resp.data.observables)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/case/${uuid}/add_observables/_bulk`, data: data, method: 'POST' })
+        .then(resp => {
+          //commit('add_case_observables', resp.data.observables)
+          commit('save_observables', resp.data.observables)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getSettings({commit}, {uuid=null, store=true}) {
+  getSettings({ commit }, { uuid = null, store = true }) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/settings`
-      if(uuid) {
+      if (uuid) {
         url += `?organization=${uuid}`
       }
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('add_start')
-        if(store) {
-          commit('save_settings', resp.data)
-        }
-        commit('add_success')
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('add_start')
+          if (store) {
+            commit('save_settings', resp.data)
+          }
+          commit('add_success')
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateSettings({commit}, data) {
+  updateSettings({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/settings`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('show_alert', {message: 'Successfully updated config', 'type': 'success'})
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('show_alert', {message: err.response.data.message, 'type': 'danger'})
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/settings`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('show_alert', { message: 'Successfully updated config', 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          commit('show_alert', { message: err.response.data.message, 'type': 'danger' })
+          reject(err)
+        })
     })
   },
-  getMitreDataSources({commit}) {
+  getMitreDataSources({ commit }) {
     let url = `${BASE_URL}/mitre/data_sources`
     return new Promise((resolve, reject) => {
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('set_mitre_data_sources', resp.data.data_sources)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('set_mitre_data_sources', resp.data.data_sources)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getMitreTactics({commit}, {page=1, page_size=10, name__like=null, external_id__like=null}) {
+  getMitreTactics({ commit }, { page = 1, page_size = 10, name__like = null, external_id__like = null }) {
 
     let url = `${BASE_URL}/mitre/tactic?page=${page}&page_size=${page_size}`
 
-    if(name__like) {
+    if (name__like) {
       url += `&name__like=${name__like}`
     }
 
-    if(external_id__like) {
+    if (external_id__like) {
       url += `&external_id__like=${external_id__like}`
     }
-    
+
     return new Promise((resolve, reject) => {
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_tactics', resp.data.tactics)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_tactics', resp.data.tactics)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getMitreTechniques({commit}, {page=1, page_size=10, name__like=null, external_id__like=null, phase_names=null}) {
+  getMitreTechniques({ commit }, { page = 1, page_size = 10, name__like = null, external_id__like = null, phase_names = null }) {
 
     let url = `${BASE_URL}/mitre/technique?page=${page}&page_size=${page_size}`
 
-    if(name__like) {
+    if (name__like) {
       url += `&name__like=${name__like}`
     }
 
-    if(external_id__like) {
+    if (external_id__like) {
       url += `&external_id__like=${external_id__like}`
     }
 
-    if(phase_names) {
+    if (phase_names) {
       url += `&phase_names=${phase_names}`
     }
 
     return new Promise((resolve, reject) => {
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_techniques', resp.data.techniques)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_techniques', resp.data.techniques)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getMitreTechnique({commit}, {page=1, page_size=10, name__like=null, external_id=null, external_id__like=null, phase_names=null}) {
+  getMitreTechnique({ commit }, { page = 1, page_size = 10, name__like = null, external_id = null, external_id__like = null, phase_names = null }) {
 
     let url = `${BASE_URL}/mitre/technique?page=${page}&page_size=${page_size}`
 
-    if(name__like) {
+    if (name__like) {
       url += `&name__like=${name__like}`
     }
 
-    if(external_id__like) {
+    if (external_id__like) {
       url += `&external_id__like=${external_id__like}`
     }
 
-    if(external_id) {
+    if (external_id) {
       url += `&external_id=${external_id}`
     }
 
-    if(phase_names) {
+    if (phase_names) {
       url += `&phase_names=${phase_names}`
     }
 
     return new Promise((resolve, reject) => {
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        commit('save_technique', resp.data.techniques[0])
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_technique', resp.data.techniques[0])
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getPersistentPairingToken({commit}, organization=null) {
+  getPersistentPairingToken({ commit }, organization = null) {
 
     let url = `${BASE_URL}/settings/generate_persistent_pairing_token`
-    if(organization) {
+    if (organization) {
       url += `?organization=${organization}`
     }
     return new Promise((resolve, reject) => {
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
-    })
-  },
-  getAuditLogs({commit}, {selected_status,selected_event_type, page}) {
-    return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/audit_log?status=${selected_status}&event_type=${selected_event_type}&page=${page}`, method: 'GET'})
-      .then(resp => {
-        commit('save_audit_logs', resp.data.logs)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
-    })
-  },
-  fetchObservableHistory({commit}, value) {
-    return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/observable/history/${value}`, method: 'GET'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
-    })
-  },
-  fetchMFAQRCode({commit}) {
-    return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/generate_mfa_qr`, method: 'GET'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
-    })
-  },
-  validateMFASetup({commit}, token) {
-    return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/validate_mfa_setup`, data: token, method: 'POST'})
-      .then(resp => {
-        commit('mfa_enabled', true)
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('mfa_enabled', false)
-        reject(err)
-      })
-    })
-  },
-  enableMFA({commit}) {
-    return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/enable_mfa`, method: 'GET'})
-      .then(resp => {
-        commit('mfa_enabled', true)
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('mfa_enabled', false)
-        reject(err)
-      })
-    })
-  },
-  disableMFA({commit}) {
-    return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/disable_mfa`, method: 'GET'})
-      .then(resp => {
-        if (resp.status == 200) {
-          commit('mfa_enabled', false)
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
           resolve(resp)
-        } else {
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getAuditLogs({ commit }, { selected_status, selected_event_type, page }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/audit_log?status=${selected_status}&event_type=${selected_event_type}&page=${page}`, method: 'GET' })
+        .then(resp => {
+          commit('save_audit_logs', resp.data.logs)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  fetchObservableHistory({ commit }, value) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/observable/history/${value}`, method: 'GET' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  fetchMFAQRCode({ commit }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/user/generate_mfa_qr`, method: 'GET' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  validateMFASetup({ commit }, token) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/user/validate_mfa_setup`, data: token, method: 'POST' })
+        .then(resp => {
           commit('mfa_enabled', true)
           resolve(resp)
-        }                
-      })
-      .catch(err => {
-        reject(err)
-      })
+        })
+        .catch(err => {
+          commit('mfa_enabled', false)
+          reject(err)
+        })
     })
   },
-  toggleMFA({commit}, data) {
+  enableMFA({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/user/toggle_mfa`, data: data, method: 'PUT'})
-      .then(resp => {
-        if (resp.status == 200) {
+      Axios({ url: `${BASE_URL}/user/enable_mfa`, method: 'GET' })
+        .then(resp => {
+          commit('mfa_enabled', true)
           resolve(resp)
-        } else {
-          resolve(resp)
-        }                
-      })
-      .catch(err => {
-        reject(err)
-      })
+        })
+        .catch(err => {
+          commit('mfa_enabled', false)
+          reject(err)
+        })
     })
   },
-  runThreatHunt({commit}, query) {
+  disableMFA({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/hunting/query`, data: query, method: 'POST'})
-      .then(resp => {
-        if (resp.status == 200) {
-          resolve(resp)
-        } else {
-          resolve(resp)
-        }                
-      })
-      .catch(err => {
-        console.log(err)
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user/disable_mfa`, method: 'GET' })
+        .then(resp => {
+          if (resp.status == 200) {
+            commit('mfa_enabled', false)
+            resolve(resp)
+          } else {
+            commit('mfa_enabled', true)
+            resolve(resp)
+          }
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  testEventRuleQuery({commit}, data) {
+  toggleMFA({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event_rule/test_rule_rql`, data: data, method: 'POST'})
-      .then(resp => {
-          resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/user/toggle_mfa`, data: data, method: 'PUT' })
+        .then(resp => {
+          if (resp.status == 200) {
+            resolve(resp)
+          } else {
+            resolve(resp)
+          }
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getEventRuleStats({commit}, {metrics=['hits'], rules=[], save=false}) {
+  runThreatHunt({ commit }, query) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/hunting/query`, data: query, method: 'POST' })
+        .then(resp => {
+          if (resp.status == 200) {
+            resolve(resp)
+          } else {
+            resolve(resp)
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          reject(err)
+        })
+    })
+  },
+  testEventRuleQuery({ commit }, data) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/event_rule/test_rule_rql`, data: data, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getEventRuleStats({ commit }, { metrics = ['hits'], rules = [], save = false }) {
 
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/event_rule/stats?metrics=${metrics}`
 
-      if(rules) {
+      if (rules) {
         base_url += `&rules=${rules}`
       }
 
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        if(save) {
-          commit('save_event_rule_stats', resp.data)
-        }
-        commit('loading_status', false)
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          if (save) {
+            commit('save_event_rule_stats', resp.data)
+          }
+          commit('loading_status', false)
           resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  loadEventRules({commit}, {page=1, page_size=25, sort_by="created_at", sort_direction="asc", rules=null, save=true}) {
+  loadEventRules({ commit }, { page = 1, page_size = 25, sort_by = "created_at", sort_direction = "asc", rules = null, save = true }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/event_rule?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
-      if(rules) {
+      if (rules) {
         base_url += `&rules=${rules}`
       }
 
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        if(save) {
-          commit('save_event_rules', resp.data.event_rules)
-        }
-        commit('loading_status', false)
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          if (save) {
+            commit('save_event_rules', resp.data.event_rules)
+          }
+          commit('loading_status', false)
           resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateEventRule({commit}, {uuid, data}) {
+  updateEventRule({ commit }, { uuid, data }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event_rule/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_event_rule', resp.data)
-        commit('loading_status', false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event_rule/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_event_rule', resp.data)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteEventRule({commit}, {uuid}) {
+  deleteEventRule({ commit }, { uuid }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/event_rule/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('loading_status', false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/event_rule/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createRole({commit}, data) {
+  createRole({ commit }, data) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/role`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_role', resp.data)
-        commit('loading_status', false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/role`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_role', resp.data)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateRole({commit}, {uuid, data}) {
+  updateRole({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/role/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_role', resp.data)
-        commit('loading_status', false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/role/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_role', resp.data)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteRole({commit}, {uuid}) {
+  deleteRole({ commit }, { uuid }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/role/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_role', uuid)
-        commit('loading_status', false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/role/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_role', uuid)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  checkTaskStatus({commit}, {uuid=null, complete=true, broadcast=false}) {
+  checkTaskStatus({ commit }, { uuid = null, complete = true, broadcast = false }) {
     return new Promise((resolve, reject) => {
 
       let base_url = `${BASE_URL}/task?complete=${complete}`
 
-      if(uuid) {
+      if (uuid) {
         base_url += `&uuid=${uuid}`
       }
 
-      if(broadcast) {
+      if (broadcast) {
         base_url += `&broadcast=${broadcast}`
       }
 
-      Axios({url: base_url, method: 'GET'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: base_url, method: 'GET' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  importSigmaRule({commit}, data) {
+  importSigmaRule({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/parse_sigma`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('loading_status', false)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/parse_sigma`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getAgentPolicies({commit}, {page=1, page_size=500, sort_by="created_at", sort_direction="asc", organization=null, save=true}) {
+  getAgentPolicies({ commit }, { page = 1, page_size = 500, sort_by = "created_at", sort_direction = "asc", organization = null, save = true }) {
     let url = `${BASE_URL}/agent_policy?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
 
-    if(organization) {
+    if (organization) {
       url += `&organization=${organization}`
     }
     return new Promise((resolve, reject) => {
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        if(save) {
-          commit('save_agent_policies', resp.data.policies)
-        }
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          if (save) {
+            commit('save_agent_policies', resp.data.policies)
+          }
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createAgentPolicy({commit}, data) {
+  createAgentPolicy({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent_policy`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('save_agent_policy', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent_policy`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('save_agent_policy', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateAgentPolicy({commit}, {uuid, data}) {
+  updateAgentPolicy({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/agent_policy/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('save_agent_policy', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/agent_policy/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('save_agent_policy', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getServiceAccounts({commit}, {}) {
+  getServiceAccounts({ commit }, { }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/service_account`, method: 'GET'})
-      .then(resp => {
-        commit('save_service_accounts', resp.data.service_accounts)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/service_account`, method: 'GET' })
+        .then(resp => {
+          commit('save_service_accounts', resp.data.service_accounts)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createServiceAccount({commit}, data) {
+  createServiceAccount({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/service_account`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_service_account', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/service_account`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_service_account', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getObservableMetric({commit}, {value, data_type='general', organization}) {
+  getObservableMetric({ commit }, { value, data_type = 'general', organization }) {
     return new Promise((resolve, reject) => {
       value = encodeURI(encodeURIComponent(value))
       let url = `${BASE_URL}/observable/${value}/hits`
-      if(data_type) {
+      if (data_type) {
         url += `?data_type=${data_type}`
       }
-      if(organization) {
+      if (organization) {
         url += `&organization=${organization}`
       }
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getAssetDetails({commit}, {hostname=null, organization=null, host__ip=null}) {
+  getAssetDetails({ commit }, { hostname = null, organization = null, host__ip = null }) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/asset?organization=${organization}`
-      if(hostname) {
+      if (hostname) {
         url += `&host__name=${hostname}`
       }
 
-      if(host__ip) {
+      if (host__ip) {
         url += `&host__ip=${host__ip}`
       }
-      
-      Axios({url: url, method: 'GET'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  exportDetection({commit}, {uuid, format='json'}) {
+  exportDetection({ commit }, { uuid, format = 'json' }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/${uuid}/export?format=${format}`, method: 'GET'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/${uuid}/export?format=${format}`, method: 'GET' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  exportSelectedDetections({commit}, {uuids, format='json'}) {
+  exportSelectedDetections({ commit }, { uuids, format = 'json' }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/export?format=${format}`, data: {detections: uuids}, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/export?format=${format}`, data: { detections: uuids }, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  disableSelectedDetections({commit}, {uuids}) {
+  disableSelectedDetections({ commit }, { uuids }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/disable`, data: {detections: uuids}, method: 'POST'})
-      .then(resp => {
-        for(let detection in resp.data) {
-          commit('update_detection', resp.data[detection])
-        }
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/disable`, data: { detections: uuids }, method: 'POST' })
+        .then(resp => {
+          for (let detection in resp.data) {
+            commit('update_detection', resp.data[detection])
+          }
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  assessSelectedDetections({commit}, {uuids}) {
+  assessSelectedDetections({ commit }, { uuids }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/assess`, data: {detections: uuids}, method: 'POST'})
-      .then(resp => {
-        for(let detection in resp.data) {
-          commit('update_detection', resp.data[detection])
-        }
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/assess`, data: { detections: uuids }, method: 'POST' })
+        .then(resp => {
+          for (let detection in resp.data) {
+            commit('update_detection', resp.data[detection])
+          }
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  enableSelectedDetections({commit}, {uuids}) {
+  enableSelectedDetections({ commit }, { uuids }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/enable`, data: {detections: uuids}, method: 'POST'})
-      .then(resp => {
-        for(let detection in resp.data) {
-          commit('update_detection', resp.data[detection])
-        }
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/enable`, data: { detections: uuids }, method: 'POST' })
+        .then(resp => {
+          for (let detection in resp.data) {
+            commit('update_detection', resp.data[detection])
+          }
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteSelectedDetections({commit}, {uuids}) {
+  deleteSelectedDetections({ commit }, { uuids }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/delete`, data: {detections: uuids}, method: 'DELETE'})
-      .then(resp => {
-        for(let detection in resp.data.detections) {
-          commit('remove_detection', resp.data.detections[detection])
-        }
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/delete`, data: { detections: uuids }, method: 'DELETE' })
+        .then(resp => {
+          for (let detection in resp.data.detections) {
+            commit('remove_detection', resp.data.detections[detection])
+          }
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  clearDetectionWarnings({commit}, {uuids}) {
+  clearDetectionWarnings({ commit }, { uuids }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/clear_warnings`, data: {detections: uuids}, method: 'POST'})
-      .then(resp => {
-        commit('update_detections', resp.data)
-        resolve(resp)
-        commit('loading_status', false)
-      })
-      .catch(err => {
-        reject(err)
-        commit('loading_status', false)
-      })
+      Axios({ url: `${BASE_URL}/detection/clear_warnings`, data: { detections: uuids }, method: 'POST' })
+        .then(resp => {
+          commit('update_detections', resp.data)
+          resolve(resp)
+          commit('loading_status', false)
+        })
+        .catch(err => {
+          reject(err)
+          commit('loading_status', false)
+        })
     })
   },
-  importDetections({commit}, {data}) {
+  importDetections({ commit }, { data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection/import`, data: data, method: 'POST'})
-      .then(resp => {
-        for(let detection in resp.data) {
-          commit('update_detection', resp.data[detection])
-        }
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection/import`, data: data, method: 'POST' })
+        .then(resp => {
+          for (let detection in resp.data) {
+            commit('update_detection', resp.data[detection])
+          }
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  downloadSOCReport({commit}, {organization, days=null, soc_start_hour=null, soc_end_hour=null, utc_offset=null}) {
+  downloadSOCReport({ commit }, { organization, days = null, soc_start_hour = null, soc_end_hour = null, utc_offset = null }) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/reporting/${organization}`
-      Axios({url: url, method: 'GET', params: { days: days, soc_start_hour: soc_start_hour, soc_end_hour: soc_end_hour, utc_offset: utc_offset }})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET', params: { days: days, soc_start_hour: soc_start_hour, soc_end_hour: soc_end_hour, utc_offset: utc_offset } })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getDetectionRepositories({commit}, {page=1, page_size=10000, sort_by="created_at", sort_direction="asc", techniques=[], tactics=[], save=true, organization=null}) {
+  getDetectionRepositories({ commit }, { page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", techniques = [], tactics = [], save = true, organization = null }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection_repository`, method: 'GET'})
-      .then(resp => {
-        commit('save_detection_repositories', resp.data.repositories)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection_repository`, method: 'GET' })
+        .then(resp => {
+          commit('save_detection_repositories', resp.data.repositories)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createDetectionRepositorySubscription({commit}, {repository_uuid, data}) {
+  createDetectionRepositorySubscription({ commit }, { repository_uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection_repository/${repository_uuid}/subscribe`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('update_detection_repository', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection_repository/${repository_uuid}/subscribe`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('update_detection_repository', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteDetectionRepositorySubscription({commit}, {repository_uuid}) {
+  deleteDetectionRepositorySubscription({ commit }, { repository_uuid }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection_repository/${repository_uuid}/unsubscribe`, method: 'POST'})
-      .then(resp => {
-        commit('update_detection_repository', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection_repository/${repository_uuid}/unsubscribe`, method: 'POST' })
+        .then(resp => {
+          commit('update_detection_repository', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  synchronizeDetectionRepository({commit}, {repository_uuid}) {
+  synchronizeDetectionRepository({ commit }, { repository_uuid }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection_repository/${repository_uuid}/sync`, method: 'POST'})
-      .then(resp => {
-        commit('update_detection_repository', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection_repository/${repository_uuid}/sync`, method: 'POST' })
+        .then(resp => {
+          commit('update_detection_repository', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  addDetectionToRepository({commit}, {uuid, detections}) {
+  addDetectionToRepository({ commit }, { uuid, detections }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection_repository/${uuid}/add_detections`, data: {detections: detections}, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection_repository/${uuid}/add_detections`, data: { detections: detections }, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  removeDetectionFromRepository({commit}, {uuid, detections}) {
+  removeDetectionFromRepository({ commit }, { uuid, detections }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection_repository/${uuid}/remove_detections`, data: {detections: detections}, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection_repository/${uuid}/remove_detections`, data: { detections: detections }, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createDetectionRepository({commit}, {data}) {
+  createDetectionRepository({ commit }, { data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection_repository`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_detection_repository', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection_repository`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_detection_repository', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateDetectionRepository({commit}, {uuid, data}) {
+  updateDetectionRepository({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection_repository/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_detection_repository', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection_repository/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_detection_repository', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteDetectionRepository({commit}, {uuid}) {
+  deleteDetectionRepository({ commit }, { uuid }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/detection_repository/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_detection_repository', uuid)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/detection_repository/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_detection_repository', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getIntegrations({commit}) {
+  getIntegrations({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration`, method: 'GET'})
-      .then(resp => {
-        commit('store_integrations', resp.data.integrations)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/integration`, method: 'GET' })
+        .then(resp => {
+          commit('store_integrations', resp.data.integrations)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getIntegration({commit}, uuid) {
+  getIntegration({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration/${uuid}`, method: 'GET'})
-      .then(resp => {
-        commit('store_integration', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/integration/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('store_integration', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getIntegrationConfigurations({commit}, uuid) {
+  getIntegrationConfigurations({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration/${uuid}/configurations`, method: 'GET'})
-      .then(resp => {
-        commit('store_integration_configurations', resp.data['configurations'])
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/integration/${uuid}/configurations`, method: 'GET' })
+        .then(resp => {
+          commit('store_integration_configurations', resp.data['configurations'])
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createIntegrationConfiguration({commit}, {uuid, data}) {
+  createIntegrationConfiguration({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration/${uuid}/configurations`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_integration_configuration', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/integration/${uuid}/configurations`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_integration_configuration', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateIntegrationConfiguration({commit}, {uuid, configuration_uuid, data}) {
+  updateIntegrationConfiguration({ commit }, { uuid, configuration_uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_integration_configuration', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_integration_configuration', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteIntegrationConfiguration({commit}, {uuid, configuration_uuid}) {
+  deleteIntegrationConfiguration({ commit }, { uuid, configuration_uuid }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_integration_configuration', configuration_uuid)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_integration_configuration', configuration_uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  enableIntegrationConfiguration({commit}, {uuid, configuration_uuid}) {
+  enableIntegrationConfiguration({ commit }, { uuid, configuration_uuid }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/enable`, method: 'POST'})
-      .then(resp => {
-        commit('update_integration_configuration', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/enable`, method: 'POST' })
+        .then(resp => {
+          commit('update_integration_configuration', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  disableIntegrationConfiguration({commit}, {uuid, configuration_uuid}) {
+  disableIntegrationConfiguration({ commit }, { uuid, configuration_uuid }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/disable`, method: 'POST'})
-      .then(resp => {
-        commit('update_integration_configuration', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/integration/${uuid}/configurations/${configuration_uuid}/disable`, method: 'POST' })
+        .then(resp => {
+          commit('update_integration_configuration', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getConfiguredActions({commit}, {source_object_type=[], observable_type=[], trigger='manual'}) {
+  getConfiguredActions({ commit }, { source_object_type = [], observable_type = [], trigger = 'manual' }) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/integration/configured_actions?trigger=${trigger}`
-      if(source_object_type && source_object_type.length > 0) {
+      if (source_object_type && source_object_type.length > 0) {
         url += `&source_object_type=${source_object_type}`
       }
 
-      if(observable_type && observable_type.length > 0) {
+      if (observable_type && observable_type.length > 0) {
         url += `&observable_type=${observable_type}`
       }
 
-      Axios({url: url, method: 'GET', params: {source_object_type: source_object_type, observable_type: observable_type}})
-      .then(resp => {
-        commit('store_configured_actions', resp.data['actions'])
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: url, method: 'GET', params: { source_object_type: source_object_type, observable_type: observable_type } })
+        .then(resp => {
+          commit('store_configured_actions', resp.data['actions'])
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  runAction({commit}, payload) {
+  runAction({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/integration/run_action`, data: payload, method: 'POST'})
-      .then(resp => {
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/integration/run_action`, data: payload, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createRoleMappingPolicy({commit}, data) {
+  createRoleMappingPolicy({ commit }, data) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/mapping_policy`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_sso_role_mapping', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/mapping_policy`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_sso_role_mapping', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  getRoleMappingPolicies({commit}) {
+  getRoleMappingPolicies({ commit }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/mapping_policy`, method: 'GET'})
-      .then(resp => {
-        commit('save_sso_role_mappings', resp.data.policies)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/mapping_policy`, method: 'GET' })
+        .then(resp => {
+          commit('save_sso_role_mappings', resp.data.policies)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  updateRoleMappingPolicy({commit}, {uuid, data}) {
+  updateRoleMappingPolicy({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/mapping_policy/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_sso_role_mapping', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/mapping_policy/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_sso_role_mapping', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteRoleMappingPolicy({commit}, {uuid}) {
+  deleteRoleMappingPolicy({ commit }, { uuid }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/mapping_policy/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('delete_sso_role_mapping', uuid)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/mapping_policy/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('delete_sso_role_mapping', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  activateRoleMappingPolicy({commit}, uuid) {
+  activateRoleMappingPolicy({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/mapping_policy/${uuid}/activate`, method: 'PUT'})
-      .then(resp => {
-        commit('update_sso_role_mapping', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/mapping_policy/${uuid}/activate`, method: 'PUT' })
+        .then(resp => {
+          commit('update_sso_role_mapping', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deactivateRoleMappingPolicy({commit}, uuid) {
+  deactivateRoleMappingPolicy({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/mapping_policy/${uuid}/deactivate`, method: 'PUT'})
-      .then(resp => {
-        commit('update_sso_role_mapping', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/mapping_policy/${uuid}/deactivate`, method: 'PUT' })
+        .then(resp => {
+          commit('update_sso_role_mapping', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  createSSOProvider({commit}, data) {
-    commit('loading_status',true)
+  createSSOProvider({ commit }, data) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/provider`, data: data, method: 'POST'})
-      .then(resp => {
-        commit('add_sso_provider', resp.data)
-        commit('loading_status',false)
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('loading_status',false)
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/provider`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_sso_provider', resp.data)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          commit('loading_status', false)
+          reject(err)
+        })
     })
   },
-  getSSOProviders({commit}) {
-    commit('loading_status',true)
+  getSSOProviders({ commit }) {
+    commit('loading_status', true)
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/provider`, method: 'GET'})
-      .then(resp => {
-        commit('save_sso_providers', resp.data.providers)
-        commit('loading_status',false)
-        resolve(resp)
-      })
-      .catch(err => {
-        commit('loading_status',false)
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/provider`, method: 'GET' })
+        .then(resp => {
+          commit('save_sso_providers', resp.data.providers)
+          commit('loading_status', false)
+          resolve(resp)
+        })
+        .catch(err => {
+          commit('loading_status', false)
+          reject(err)
+        })
     })
   },
-  updateSSOProvider({commit}, {uuid, data}) {
+  updateSSOProvider({ commit }, { uuid, data }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/provider/${uuid}`, data: data, method: 'PUT'})
-      .then(resp => {
-        commit('update_sso_provider', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/provider/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_sso_provider', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  activateSSOProvider({commit}, uuid) {
+  activateSSOProvider({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/provider/${uuid}/activate`, method: 'PUT'})
-      .then(resp => {
-        commit('update_sso_provider', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/provider/${uuid}/activate`, method: 'PUT' })
+        .then(resp => {
+          commit('update_sso_provider', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deactivateSSOProvider({commit}, uuid) {
+  deactivateSSOProvider({ commit }, uuid) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/provider/${uuid}/deactivate`, method: 'PUT'})
-      .then(resp => {
-        commit('update_sso_provider', resp.data)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/provider/${uuid}/deactivate`, method: 'PUT' })
+        .then(resp => {
+          commit('update_sso_provider', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
-  deleteSSOProvider({commit}, {uuid}) {
+  deleteSSOProvider({ commit }, { uuid }) {
     return new Promise((resolve, reject) => {
-      Axios({url: `${BASE_URL}/sso/provider/${uuid}`, method: 'DELETE'})
-      .then(resp => {
-        commit('remove_sso_provider', uuid)
-        resolve(resp)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      Axios({ url: `${BASE_URL}/sso/provider/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_sso_provider', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   }
 }
@@ -4561,6 +4575,6 @@ export default new Vuex.Store({
   getters,
   plugins: [createPersistedState({
     key: 'reflex-state',
-    paths: ['observable_filters','case_filters','intel_filters','current_user','case_templates','quick_filters','selected_detection_filters']
+    paths: ['observable_filters', 'case_filters', 'intel_filters', 'current_user', 'case_templates', 'quick_filters', 'selected_detection_filters']
   })]
 })

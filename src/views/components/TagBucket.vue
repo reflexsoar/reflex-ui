@@ -27,15 +27,17 @@
 .bucket {
   padding-left: 8px;
   padding-right: 8px;
-  padding-bottom: 1px;
+  padding-bottom: 2px;
+  padding-top: 1px;
   display: inline;
   cursor: pointer;
   text-align: center;
+  font-size: 11.5px;
 }
 
 .tag-list {
   position: absolute;
-  width: 250px;
+  min-width: 250px;
   text-align: left;
   margin-top: 5px;
   display: block;

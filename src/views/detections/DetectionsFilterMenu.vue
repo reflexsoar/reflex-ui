@@ -204,8 +204,13 @@
 <script>
 import { mapState } from "vuex";
 
+import RMultiCheck from "../components/MultiCheck.vue";
+
 export default {
   name: "DetectionsFilterMenu",
+  components: {
+    RMultiCheck,
+  },
   props: {
     total_detections: {
       type: Number,

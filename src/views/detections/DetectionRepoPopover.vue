@@ -19,10 +19,12 @@
   width: 200px;
   padding-left: 8px;
   padding-right: 8px;
-  padding-bottom: 1px;
+  padding-bottom: 2px;
+  padding-top: 1px;
   display: inline;
   cursor: pointer;
   text-align: center;
+  font-size: 11.5px;
 }
 
 .info {

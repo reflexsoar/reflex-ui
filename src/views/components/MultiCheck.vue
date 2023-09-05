@@ -1,44 +1,98 @@
 <template>
   <div>
-    <label v-if="label">{{ label }}</label>
-    <div class="dropdown" @click.prevent="showDropDown">
-      <div class="overselect"></div>
-      <select :class="{ 'form-control-sm': size === 'sm', 'form-control': true }">
-        <option value="">{{ prompt }}</option>
-      </select>
-    </div>
-    <div class="multiselect" v-if="show">
-      <ul>
-        <input
-          type="text"
-          :class="{ 'form-control-sm': size === 'sm', 'form-control': true }"
-          v-model="search"
-          placeholder=""
-        />
+    {{ filtered_items }}
+    <div v-if="expanded">
+      <input
+        v-if="searchable"
+        type="text"
+        :class="{ 'form-control-sm': size === 'sm', 'form-control': true }"
+        v-model="search"
+        placeholder=""
+      />
+      <ul class="select-list">
         <li v-for="item in filtered_items" :key="item.value">
           <CRow>
             <CCol>
-            <CInputCheckbox
-              :inline="true"
-              :key="item.value"
-              :value="item.value"
-              :label="item.label"
-              @change="select"
-              :checked="selected.includes(item.value)"
-            >
-              <template #label>
-                <label class="form-check-label">{{item.label}}<small v-if="item.description">&nbsp;-&nbsp;<span class="muted">{{ item.description }}</span></small></label>
-              </template>
-            </CInputCheckbox>
+              <CInputCheckbox
+                :inline="true"
+                :key="item.value"
+                :value="item.value"
+                :label="item[labelField]"
+                @change="select"
+                :checked="selected.includes(item.value)"
+              >
+                <template #label>
+                  <label class="form-check-label"
+                    >{{ item[labelField]
+                    }}<small v-if="item.description"
+                      >&nbsp;-&nbsp;<span class="muted">{{
+                        item.description
+                      }}</span></small
+                    ></label
+                  >
+                </template>
+              </CInputCheckbox>
             </CCol>
             <CCol v-if="showCount" class="text-right">
-            <CBadge class="text-right" style="margin-top: 0px" color="primary">{{ item.count ? item.count : 0 }}</CBadge>
-            </CCol>
+                <CBadge class="text-right" style="margin-top: 0px" color="primary">{{
+                  item.count ? item.count : 0
+                }}</CBadge>
+              </CCol>
           </CRow>
         </li>
       </ul>
     </div>
-    <br v-if="label" />
+    <div v-else>
+      <label v-if="label">{{ label }}</label>
+      <div class="dropdown" @click.prevent="showDropDown">
+        <div class="overselect"></div>
+        <select :class="{ 'form-control-sm': size === 'sm', 'form-control': true }">
+          <option value="">{{ prompt }}</option>
+        </select>
+      </div>
+      <div class="multiselect" v-if="show">
+        <ul>
+          <input
+            v-if="searchable"
+            type="text"
+            :class="{ 'form-control-sm': size === 'sm', 'form-control': true }"
+            v-model="search"
+            placeholder=""
+          />
+          <li v-for="item in filtered_items" :key="item.value">
+            <CRow>
+              <CCol>
+                <CInputCheckbox
+                  :inline="true"
+                  :key="item.value"
+                  :value="item.value"
+                  :label="item.label"
+                  @change="select"
+                  :checked="selected.includes(item.value)"
+                >
+                  <template #label>
+                    <label class="form-check-label"
+                      >{{ item.label
+                      }}<small v-if="item.description"
+                        >&nbsp;-&nbsp;<span class="muted">{{
+                          item.description
+                        }}</span></small
+                      ></label
+                    >
+                  </template>
+                </CInputCheckbox>
+              </CCol>
+              <CCol v-if="showCount" class="text-right">
+                <CBadge class="text-right" style="margin-top: 0px" color="primary">{{
+                  item.count ? item.count : 0
+                }}</CBadge>
+              </CCol>
+            </CRow>
+          </li>
+        </ul>
+      </div>
+      <br v-if="label" />
+    </div>
   </div>
 </template>
 
@@ -68,6 +122,12 @@
   overflow-x: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.select-list {
+  list-style-type: none; /* Remove bullets */
+  padding: 5px;
+  margin-bottom: 5px;
 }
 
 .multiselect ul {
@@ -120,19 +180,31 @@ export default {
       type: String,
       default: "Select...",
     },
+    expanded: {
+      type: Boolean,
+      default: false,
+    },
+    labelField: {
+      type: String,
+      default: "label",
+    },
+    searchable: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
       show: false,
       selected: [],
       prompt: "Select...",
-      search: ""
+      search: "",
     };
   },
   created() {
     window.addEventListener("click", this.close);
-    if(this.value.length > 0) {
-      this.selected = this.value
+    if (this.value.length > 0) {
+      this.selected = this.value;
       this.prompt = "Selected: " + this.selected_count + " of " + this.items.length;
     } else {
       this.prompt = this.default_prompt;
@@ -143,14 +215,13 @@ export default {
   },
   watch: {
     value() {
-      this.selected = this.value
+      this.selected = this.value;
       if (this.selected.length > 0) {
-        this.prompt =
-          "Selected: " + this.selected_count + " of " + this.items.length;
+        this.prompt = "Selected: " + this.selected_count + " of " + this.items.length;
       } else {
         this.prompt = this.default_prompt;
       }
-    }
+    },
   },
   computed: {
     filtered_items() {
@@ -162,8 +233,8 @@ export default {
       });
     },
     selected_count() {
-      return this.selected.filter(o => this.items.find(i => i.value === o)).length;
-    }
+      return this.selected.filter((o) => this.items.find((i) => i.value === o)).length;
+    },
   },
   methods: {
     close(e) {
@@ -187,14 +258,14 @@ export default {
         this.prompt = "Select...";
       }
       this.$emit("checked", this.selected);
-      this.$emit("update:value", this.selected)
+      this.$emit("update:value", this.selected);
     },
     clear() {
       for (let item of this.items) {
         item.selected = false;
       }
       this.$emit("checked", null);
-      this.$emit("update:value", null)
+      this.$emit("update:value", null);
     },
   },
 };

@@ -161,56 +161,73 @@
                       <CCol>
                         <CRow>
                           <CCol>
-                            <CBadge class="tag tag-sm" color="success" v-if="item.active"
-                              >Active</CBadge
-                            ><CBadge class="tag tag-sm" color="danger" v-else
-                              >Inactive</CBadge
-                            >&nbsp;<b>{{ item.name }}</b
-                            >
+                            <b>{{ item.name }}</b>
                           </CCol>
-                          
                         </CRow>
                         <CRow>
-                          <CCol style="margin-left: 5px"
+                          <CCol class="detection-attributes">
+                            <CBadge class="tag tag-sm" size="sm" color="success" v-if="item.active"
+                              >Active</CBadge
+                            ><CBadge class="tag tag-sm" size="sm" color="danger" v-else
+                              >Inactive</CBadge
                             >
+                            <CBadge class="tag tag-sm" color="info" v-if="item.status"
+                              ><b>Status:</b> {{ item.status }}</CBadge
+                            >
+                            <CBadge class="tag tag-sm" color="danger" v-else
+                              ><b>Status:</b> Unknown</CBadge
+                            ><CBadge
+                              class="tag tag-sm"
+                              :color="getSeverityColor(item.severity)"
+                              ><b>Severity:</b
+                              > {{ getSeverityText(item.severity) }}</CBadge
+                            ><CBadge
+                              v-if="item.risk_score"
+                              class="tag tag-sm"
+                              color="warning"
+                              size="sm"
+                              ><b>Risk Score:</b> {{ item.risk_score }}</CBadge
+                            >
+                            <div v-if="item.tags && item.tags.length > 0">
+                              <TagBucket :tags="item.tags" />
+                            </div>
+                            <div v-if="item.repository && item.repository.length > 0">
+                              <DetectionRepoPopover :repositories="item.repository" />
+                            </div>
+                            <div v-if="item.assess_rule" style="">
+                              <TagBucket
+                                iconName="cil-speedometer"
+                                label="Flagged for Assessment"
+                                :noCount="true"
+                                tagColor="primary"
+                              />
+                            </div>
+                            <div v-if="item.warnings && item.warnings.length > 0">
+                              <TagBucket
+                                :tags="item.warnings"
+                                iconName="cil-warning"
+                                label="Warnings"
+                                tagColor="danger"
+                              />
+                            </div>
+                            <div v-if="item.status == 'Production - Enterprise'">
+                              <CBadge
+                                class="tag tag-sm"
+                                color="warning"
+                                size="sm"
+                                v-c-tooltip="{ content: '24/7 Eligible' }"
+                                ><i class="fas fas-small fa-star"></i
+                              ></CBadge>
+                            </div>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CCol style="margin-top: 2px">
                             <span class="small rule_description">{{
                               item.description
                             }}</span></CCol
                           >
                         </CRow>
-                      </CCol>
-                      <CCol col="3" class="detection-attributes">
-                        <div v-if="item.tags && item.tags.length > 0">
-                          <TagBucket :tags="item.tags" />
-                        </div>
-                        <div v-if="item.repository && item.repository.length > 0">
-                          <DetectionRepoPopover :repositories="item.repository" />
-                        </div>
-                        <div v-if="item.assess_rule" style="">
-                          <TagBucket
-                            iconName="cil-speedometer"
-                            label="Flagged for Assessment"
-                            :noCount="true"
-                            tagColor="primary"
-                          />
-                        </div>
-                        <div v-if="item.warnings && item.warnings.length > 0">
-                          <TagBucket
-                            :tags="item.warnings"
-                            iconName="cil-warning"
-                            label="Warnings"
-                            tagColor="danger"
-                          />
-                        </div>
-                        <div v-if="item.status == 'Production - Enterprise'">
-                          <CBadge
-                            class="tag"
-                            color="warning"
-                            size="sm"
-                            v-c-tooltip="{ content: '24/7 Eligible' }"
-                            ><i class="fas fas-small fa-star"></i
-                          ></CBadge>
-                        </div>
                       </CCol>
                     </CRow>
                   </td>
@@ -452,9 +469,14 @@
 </template>
 
 <style scoped>
+
+.detection-attributes > span {
+  margin-right: 4px;
+}
+
 .detection-attributes > div {
   display: inline-block;
-  padding-right: 2px;
+  margin-right: 4px;
   padding-bottom: 3px;
 }
 
@@ -522,11 +544,9 @@ export default {
       detection_list_fields: [
         { key: "select", label: "", filter: false },
         "name",
-        "status",
         "last_run",
         "last_hit",
-
-        { key: "average_hits_per_day", label: "Estimated Hits" },
+        { key: "average_hits_per_day", label: "Est. Hits", _style: "width: 125px" },
         { key: "total_hits", label: "Hits" },
         { key: "actions", filter: false },
       ],
@@ -618,6 +638,34 @@ export default {
     };
   },
   methods: {
+    getSeverityColor(severity) {
+      switch (severity) {
+        case 1:
+          return "dark";
+        case 2:
+          return "info";
+        case 3:
+          return "warning";
+        case 4:
+          return "danger";
+        default:
+          return "danger";
+      }
+    },
+    getSeverityText(severity) {
+      switch (severity) {
+        case 1:
+          return "Low";
+        case 2:
+          return "Medium";
+        case 3:
+          return "High";
+        case 4:
+          return "Critical";
+        default:
+          return "Unknown";
+      }
+    },
     getDetections() {
       let filters = JSON.parse(JSON.stringify(this.selected_detection_filters));
       filters["page_size"] = this.page_size;
