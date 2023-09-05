@@ -1,71 +1,79 @@
 <template>
-  <CRow>
-    <CCol>
-      <div style="padding: 10px">
+  <div>
+    <CRow class="page-sub-header">
+      <CCol>
+        <h2>Inputs</h2>
+      </CCol>
+      <CCol class="text-right">
         <CButton color="primary" @click="newInput()">New Input</CButton>
-      </div>
+      </CCol>
+    </CRow>
 
-      <CDataTable
-        :hover="hover"
-        :items="filtered_inputs"
-        :fields="fields"
-        :loading="loading"
-        :items-per-page="small ? 25 : 10"
-        :sorter="{ external: false, resetable: true }"
-        column-filter
-        pagination
-        style="border-top: 1px solid #cfcfcf"
-        @update:sorter-value="sort($event)"
-        :column-filter-value.sync="column_filters"
-      >
-        <template #organization-filter="{ item }">
-          <RMultiCheck
-            :items="organizations"
-            @checked="set_picker_filters($event, 'organization')"
-            size="sm"
-          ></RMultiCheck>
-        </template>
-        <template #tags-filter="{ item }">
-          <RMultiCheck
-            :items="input_tags"
-            @checked="set_picker_filters($event, 'tags')"
-            size="sm"
-          ></RMultiCheck>
-        </template>
-        <template #name="{ item }">
-          <td>
-            <b>{{ item.name }}</b>
-          </td>
-        </template>
-        <template #organization="{ item }">
-          <td>
-            <OrganizationBadge :uuid="item.organization" />
-          </td>
-        </template>
-        <template #tags="{ item }">
-          <td>
-            <li
-              style="display: inline; margin-right: 2px"
-              v-for="tag in item.tags"
-              :key="tag"
-            >
-              <CButton color="primary" size="sm" disabled>{{ tag }}</CButton>
-            </li>
-          </td>
-        </template>
-        <template #actions="{ item }">
-          <td class="text-right">
-            <CButton color="info" size="sm" :to="item.uuid"
-              ><CIcon name="cilPencil" /></CButton
-            >&nbsp;
-            <CButton color="secondary" size="sm" @click="cloneInput(item.uuid)"
-              ><CIcon name="cilCopy"
-            /></CButton>
-          </td>
-        </template>
-      </CDataTable>
-    </CCol>
-  </CRow>
+    <CRow>
+      <CCol>
+        <CCard>
+          <CDataTable
+            :hover="hover"
+            :items="filtered_inputs"
+            :fields="fields"
+            :loading="loading"
+            :items-per-page="small ? 25 : 10"
+            :sorter="{ external: false, resetable: true }"
+            column-filter
+            pagination
+            @update:sorter-value="sort($event)"
+            :column-filter-value.sync="column_filters"
+          >
+            <template #organization-filter="{ item }">
+              <RMultiCheck
+                :items="organizations"
+                @checked="set_picker_filters($event, 'organization')"
+                size="sm"
+              ></RMultiCheck>
+            </template>
+            <template #tags-filter="{ item }">
+              <RMultiCheck
+                :items="input_tags"
+                @checked="set_picker_filters($event, 'tags')"
+                size="sm"
+              ></RMultiCheck>
+            </template>
+            <template #name="{ item }">
+              <td>
+                <b>{{ item.name }}</b>
+              </td>
+            </template>
+            <template #organization="{ item }">
+              <td>
+                <OrganizationBadge :uuid="item.organization" />
+              </td>
+            </template>
+            <template #tags="{ item }">
+              <td>
+                <li
+                  style="display: inline; margin-right: 2px"
+                  v-for="tag in item.tags"
+                  :key="tag"
+                >
+                  <CButton color="primary" size="sm" disabled>{{ tag }}</CButton>
+                </li>
+              </td>
+            </template>
+            <template #actions="{ item }">
+              <td class="text-right">
+                <CButton color="info" size="sm" :to="item.uuid"
+                  ><CIcon name="cilPencil" /></CButton
+                >&nbsp;
+                <CButton color="secondary" size="sm" @click="cloneInput(item.uuid)"
+                  ><CIcon name="cilCopy"
+                /></CButton>
+              </td>
+            </template>
+          </CDataTable>
+        </CCard>
+      </CCol>
+    </CRow>
+  </div>
 </template>
 
 <style scoped>

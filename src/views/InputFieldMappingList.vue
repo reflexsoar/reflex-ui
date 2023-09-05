@@ -1,5 +1,15 @@
 <template>
   <div>
+  <CRow class="page-sub-header">
+      <CCol>
+        <h2>Field Templates</h2>
+      </CCol>
+      <CCol class="text-right">
+        <CButton color="primary" @click="newFieldMappingTemplate()"
+            >New Field Template</CButton
+          >
+      </CCol>
+    </CRow>
     <CRow>
       <CCol>
         <div style="padding: 10px">
@@ -7,11 +17,9 @@
             ><b>Beta Feature</b>: This feature is in beta and requires specific
             conditions.</CAlert
           >
-          <CButton color="primary" @click="newFieldMappingTemplate()"
-            >New Field Template</CButton
-          >
+          
         </div>
-        <CCardBody
+        <CCard
           ><CDataTable
             :hover="hover"
             :items="field_templates"
@@ -57,7 +65,7 @@
               </td>
             </template>
           </CDataTable>
-        </CCardBody>
+        </CCard>
       </CCol> </CRow
     ><FieldMappingModal
       :show.sync="show_modal"
