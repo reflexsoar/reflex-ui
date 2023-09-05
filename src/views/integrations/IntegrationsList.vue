@@ -1,18 +1,26 @@
 <template>
   <div>
-    <h2>Integration Management</h2>
-    <br />
+    <CRow class="page-heading page-heading-row page-heading-no-nav page-heading-pb-10">
+      <CCol>
+        <h1>Integrations</h1>
+      </CCol>
+      <CCol>
+        <CInput v-model="search" placeholder="Search for an Integration" />
+      </CCol>
+      <CCol>
+        <h1>
+          <button
+            type="button"
+            class="kb"
+            onclick="window.open('https://docs.reflexsoar.com/en/latest/integrations')"
+          >
+            <CIcon name="cil-book" size="lg" />
+          </button>
+        </h1>
+      </CCol>
+    </CRow>
     <CRow>
       <CCol col="2">
-        <CRow>
-          <CCol>
-            <CInput
-              v-model="search"
-              placeholder="Search for an Integration"
-              label="Search"
-            />
-          </CCol>
-        </CRow>
         <CRow>
           <CCol>
             <h3>Categories</h3>
@@ -22,12 +30,13 @@
                 color="secondary"
                 :active="category_filter == null"
                 @click="category_filter = null"
+                style="cursor: pointer"
               >
                 <!-- Align the badge to the right of the list item -->
                 <CRow>
                   <CCol> All </CCol>
                   <CCol class="text-right" col="3">
-                    <span class="badge badge-primary badge-pill">
+                    <span class="badge badge-primary">
                       {{ integrations.length }}</span
                     >
                   </CCol>
@@ -39,13 +48,14 @@
                 :key="category.name"
                 :active="category_filter == category.name"
                 @click="category_filter = category.name"
+                style="cursor: pointer"
               >
                 <CRow>
                   <CCol>
                     {{ category.name }}
                   </CCol>
                   <CCol class="text-right" col="3">
-                    <span class="badge badge-primary badge-pill">
+                    <span class="badge badge-primary">
                       {{ category.count }}</span
                     >
                   </CCol>
@@ -58,37 +68,7 @@
       <CCol>
         <CRow>
           <CCol v-for="integration in filtered_results" col="3">
-            <CCard>
-              <CCardBody>
-                <CRow>
-                  <CCol col="4">
-                    <img :src="integration.logo" style="width: 100%" />
-                  </CCol>
-                  <CCol>
-                    <h4>{{ integration.name }}</h4>
-                  </CCol>
-                </CRow>
-                <CRow>
-                  <CCol>
-                    <p style="min-height: 100px; max-height: 100px; overflow-y: scroll">
-                      {{ integration.brief_description }}
-                    </p>
-                  </CCol>
-                </CRow>
-              </CCardBody>
-              <CCardFooter>
-                <CRow>
-                  <CCol> </CCol>
-                  <CCol class="text-right">
-                    <!-- On click send the user to the Integration details page where they 
-                can set up new action configurations -->
-                    <CButton color="primary" :to="`${integration.product_identifier}`" size="sm"
-                      >Configure</CButton
-                    >
-                  </CCol>
-                </CRow>
-              </CCardFooter>
-            </CCard>
+            <IntegrationCard :integration="integration" />
           </CCol>
         </CRow>
       </CCol>
@@ -99,8 +79,13 @@
 <script>
 import { mapState } from "vuex";
 
+import IntegrationCard from "./IntegrationCard";
+
 export default {
   name: "IntegrationsList",
+  components: {
+    IntegrationCard,
+  },
   computed: {
     ...mapState(["integrations", "current_user"]),
     filtered_results: function () {

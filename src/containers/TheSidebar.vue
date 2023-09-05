@@ -14,7 +14,7 @@
       <CSidebarNavItem name="Dashboard" to="/dashboard" icon="cil-speedometer"></CSidebarNavItem>
       <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_cases')" name="Cases" to="/cases" icon="cil-briefcase"></CSidebarNavItem>
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt">
-        <CSidebarNavItem name="Detections" to="/detections" :badge="beta_badge"></CSidebarNavItem>
+        <CSidebarNavItem name="Detections" to="/detections"></CSidebarNavItem>
         <CSidebarNavItem name="MITRE ATT&CK" to="/mitre_coverage" :badge="beta_badge"></CSidebarNavItem>
       </CSidebarNavDropdown>
       <!--<CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt" to="/detections" :badge="beta_badge"></CSidebarNavItem>-->
@@ -27,6 +27,7 @@
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="Intel Explorer" to="/lists/explore"></CSidebarNavItem>
       </CSidebarNavDropdown>
       <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_events')" name="Integrations" to="/integrations" icon="cil-applications" :badge="beta_badge"></CSidebarNavItem>
+      <CSidebarNavItem name="Assets" to="/assets" icon="cil-layers" :badge="beta_badge"></CSidebarNavItem>
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='System' icon="cil-settings">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_settings')" name="Settings" to="/settings"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_notification_channel')" name='Notifications' to="/notifications" :badge="beta_badge"></CSidebarNavItem>

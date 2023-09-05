@@ -204,8 +204,13 @@
 <script>
 import { mapState } from "vuex";
 
+import RMultiCheck from "../components/MultiCheck.vue";
+
 export default {
   name: "DetectionsFilterMenu",
+  components: {
+    RMultiCheck,
+  },
   props: {
     total_detections: {
       type: Number,
@@ -351,7 +356,7 @@ export default {
       this.selected_filters = {};
       this.getFilters();
       this.$store.commit("update_selected_detection_filters", this.selected_filters);
-      this.$emit("filter_changed", filters);
+      this.$emit("filter_changed", this.filters);
     },
   },
 };

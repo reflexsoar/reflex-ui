@@ -1,6 +1,7 @@
 <template>
     <div>
     <CRow>
+    <CCol col="1"><CBadge class="tag" color="primary" size="sm">{{task_data.status | statusIcon}}</CBadge></CCol>
         <CCol col="8">
         <b>{{task_data.title}}</b>
         <br />
@@ -35,8 +36,7 @@
                 <span v-if="task_data.finish_date" v-c-tooltip="task_data.finish_date"><small><b>Finished:</b> {{task_data.finish_date | moment('from','now')}}</small></span>
             </div>
         </CCol>
-        <CCol col="1"><CButton color="primary" size="sm" disabled>{{task_data.status | statusIcon}}</CButton></CCol>
-        <CCol col="1" class="text-right">
+        <CCol class="text-right">
         <CButtonGroup>
             <CButton size="sm" v-if="task_data.status == 1" color="success" @click="showCloseTaskModal(task_data.uuid)" v-c-tooltip="'Complete task'"><CIcon name="cilCheckCircle"/></CButton>
             <CButton size="sm" v-if="task_data.status == 0" color="success" @click="startTask(task_data.uuid)" v-c-tooltip="'Start Task'"><CIcon name="cilMediaPlay"/></CButton>

@@ -1,23 +1,28 @@
 <template>
   <CRow>
     <CCol col>
-      <div style="padding: 10px" v-if="userHas('add_user')">
-        <CButton color="primary" @click="createUserModal()">New User</CButton>
-      </div>
+      <CRow class="page-sub-header">
+        <CCol>
+          <h2>Users</h2>
+        </CCol>
+        <CCol class="text-right">
+            <CButton v-if="userHas('add_user')" color="primary" @click="createUserModal()">New User</CButton>
+        </CCol>
+      </CRow>
+      <CCard>
+      
       <CDataTable
         :hover="hover"
         :striped="striped"
         :bordered="bordered"
-        :small="small"
         :fixed="fixed"
         :items="filtered_items"
         :fields="fields"
-        :items-per-page="small ? 25 : 5"
+        :items-per-page="15"
         :dark="dark"
         :loading="loading"
         column-filter
         :sorter="{ external: false, resetable: true }"
-        style="border-top: 1px solid #cfcfcf; overflow-x: auto"
         pagination
       >
         <template #organization-filter="{ item }">
@@ -34,7 +39,7 @@
         </template>
         <template #role="{ item }">
           <td>
-            {{ item.role.name }}
+            <TagList :tags="item.role" label="name" :tagIcon="false" />
           </td>
         </template>
         <template #last_logon="{ item }">
@@ -78,6 +83,7 @@
           </td>
         </template>
       </CDataTable>
+      </CCard>
     </CCol>
 
     <CModal :title="modal_title" :centered="true" size="lg" :show.sync="modal_status">
@@ -124,13 +130,14 @@
           placeholder="user@reflexsoar.com"
           required
         />
-        <CSelect
+        <label>Roles</label>
+        <multiselect 
+          v-model="user.role_uuid"
+          track-by="value"
+          label="name"
           :options="roles"
-          required
-          label="Role"
-          :value.sync="user.role_uuid"
-          placeholder="Select a role"
-        />
+          :multiple="true"
+        /><br>
         <CInput
           v-model="user.password"
           type="password"
@@ -174,6 +181,7 @@
         }}</CButton>
       </template>
     </CModal>
+    
     <CModal title="Unlock User" color="danger" :centered="true" :show.sync="unlock_modal">
       <CForm id="unlockForm" @submit.prevent="unlockUser(user.uuid)">
         Are you sure you want to unlock <b>{{ user.username }}</b
@@ -197,6 +205,7 @@
         <CButton type="submit" form="deleteForm" color="danger">Yes</CButton>
       </template>
     </CModal>
+    
   </CRow>
 </template>
 
@@ -210,11 +219,13 @@
 import { mapState } from "vuex";
 import OrganizationBadge from "./OrganizationBadge";
 import RMultiCheck from "./components/MultiCheck";
+import TagList from './components/TagList'
 export default {
   name: "UsersList",
   components: {
     OrganizationBadge,
     RMultiCheck,
+    TagList
   },
   props: {
     items: Array,
@@ -267,7 +278,7 @@ export default {
         email: "",
         locked: false,
         password: "",
-        role_uuid: "",
+        role_uuid: [],
         confirm_password: "",
       },
       roles: [],
@@ -278,7 +289,7 @@ export default {
         email: "",
         locked: false,
         password: "",
-        role_uuid: "",
+        role_uuid: [],
         confirm_password: "",
       },
       user_original_data: {},
@@ -309,16 +320,7 @@ export default {
     filtered_items() {
       let items = this.users;
       let action = "getUsers";
-      if (items.length == 0) {
-        this.$store.dispatch(action, {});
-        if (this.tags !== undefined) {
-          this.tags = items.map((item) => {
-            if (item.tags !== undefined && item.tags.length > 0) {
-              return item.tags;
-            }
-          });
-        }
-      }
+      
       let _items = [];
       if (Object.keys(this.picker_filters).length == 0) {
         return items;
@@ -379,7 +381,7 @@ export default {
       this.$store.dispatch("toggleMFA", data);
     },
     userHas(permission) {
-      return this.current_user.role.permissions[permission];
+      return this.current_user.permissions[permission];
     },
     createUserModal() {
       this.modal_title = "Create User";
@@ -393,12 +395,15 @@ export default {
       this.modal_submit_text = "Edit";
       this.modal_mode = "edit";
       this.modal_action = this.editUser;
+      let target_user = this.users.find((user) => user.uuid === uuid)
       Object.assign(
         this.user,
-        this.users.find((user) => user.uuid === uuid)
+        target_user
       );
       this.loadRoles(this.user.organization);
-      this.user.role_uuid = this.user.role.uuid;
+      this.user.role_uuid = target_user.role.map((r) => {
+        return { name: r.name, value: r.uuid };
+      });
       this.modal_status = true;
     },
     unlockUserModal(uuid) {
@@ -440,19 +445,23 @@ export default {
         first_name: this.user.first_name,
         last_name: this.user.last_name,
         email: this.user.email,
-        role_uuid: this.user.role_uuid,
+        role_uuid: this.user.role_uuid.map((r) => r.value),
         locked: this.user.locked,
       };
+      
       if (this.user.password != "" && this.user.confirm_password == this.user.password) {
         user["password"] = this.user.password;
+      }
+
+      if (this.user.password == "" && this.user.confirm_password == "") {
+        delete user["password"];
+        delete user["confirm_password"];
       }
 
       let uuid = this.user.uuid;
       this.$store
         .dispatch("updateUser", { uuid, user })
         .then((resp) => {
-          let userIndex = this.users.findIndex((user) => user.uuid == uuid);
-          Object.assign(this.users[userIndex], resp.data);
           this.modal_status = false;
         })
         .catch((err) => {
@@ -512,7 +521,7 @@ export default {
       this.loadUsers();
     },
     reset() {
-      this.user = {};
+      this.user = Object.assign({}, this.empty_user);
       this.error = false;
       this.error_message = "";
     },
@@ -545,7 +554,7 @@ export default {
     loadRoles(organization = null) {
       this.$store.dispatch("getRoles", { organization: organization }).then((resp) => {
         this.roles = this.$store.getters.roles.map((item) => {
-          return { label: item.name, value: item.uuid };
+          return { name: item.name, value: item.uuid };
         });
       });
     },

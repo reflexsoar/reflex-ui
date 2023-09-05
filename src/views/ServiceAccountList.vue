@@ -1,78 +1,85 @@
 <template>
   <CRow>
     <CCol col>
-      <div style="padding: 10px" v-if="userHas('create_service_account')">
-        <CButton color="primary" @click="newServiceAccount()">
-          New Service Account
-        </CButton>
-      </div>
-      <CDataTable
-        :fields="fields"
-        :items="filtered_service_accounts"
-        column-filter
-        pagination
-        :sorter="{ external: false, resetable: true }"
-      >
-        <template #organization-filter="{ item }">
-          <RMultiCheck
-            :items="formatted_organizations"
-            @checked="set_picker_filters($event, 'organization')"
-            size="sm"
-          ></RMultiCheck>
-        </template>
-        <template #tags-filter="{ item }">
-          <RMultiCheck
-            :items="account_tags"
-            @checked="set_picker_filters($event, 'tags')"
-            size="sm"
-          ></RMultiCheck>
-        </template>
-        <template #organization="{ item }">
-          <td>
-            <OrganizationBadge :uuid="item.organization" />
-          </td>
-        </template>
-        <template #tags="{ item }">
-          <td>
-            <li
-              style="display: inline; margin-right: 2px"
-              v-for="tag in item.tags"
-              :key="tag"
-            >
-              <CBadge class="tag tag-list" color="info" size="sm" disabled>
-                {{ tag }}
-              </CBadge>
-            </li>
-          </td>
-        </template>
-        <template #created_at="{item}">
-          <td>
-            
-              {{item.created_at | moment('from','now')}}
+        <CRow class="page-sub-header">
+        <CCol>
+          <h2>Service Accounts</h2>
+        </CCol>
+        <CCol class="text-right">
+            <CButton v-if="userHas('create_service_account')" color="primary" @click="newServiceAccount()">
+            New Service Account
+          </CButton>
+        </CCol>
+      </CRow>
+      <CCard>
+        <CDataTable
+          :fields="fields"
+          :items="filtered_service_accounts"
+          column-filter
+          pagination
+          :sorter="{ external: false, resetable: true }"
+        >
+          <template #organization-filter="{ item }">
+            <RMultiCheck
+              :items="formatted_organizations"
+              @checked="set_picker_filters($event, 'organization')"
+              size="sm"
+            ></RMultiCheck>
+          </template>
+          <template #tags-filter="{ item }">
+            <RMultiCheck
+              :items="account_tags"
+              @checked="set_picker_filters($event, 'tags')"
+              size="sm"
+            ></RMultiCheck>
+          </template>
+          <template #organization="{ item }">
+            <td>
+              <OrganizationBadge :uuid="item.organization" />
             </td>
           </template>
-        <template #expires_at="{item}">
-          <td>
-            <span v-if="item.expires_at">
-              {{ item.expires_at | moment('from','now') }}
-            </span>
+          <template #tags="{ item }">
+            <td>
+              <li
+                style="display: inline; margin-right: 2px"
+                v-for="tag in item.tags"
+                :key="tag"
+              >
+                <CBadge class="tag tag-list" color="info" size="sm" disabled>
+                  {{ tag }}
+                </CBadge>
+              </li>
             </td>
           </template>
-        <template #actions="{ item }">
-          <td class="text-right">
-            <CButton color="info" size="sm" @click="editServiceAccount(item.uuid)">
-              <CIcon name="cilPencil" />
-            </CButton>
-            &nbsp;
-            <CButton color="secondary" size="sm" @click="cloneServiceAccount(item.uuid)">
-              <CIcon name="cilCopy" /> </CButton
-            >&nbsp;
-            <CButton color="danger" size="sm" @click="removeServiceAccount(item.uuid)">
-              <CIcon name="cilTrash" />
-            </CButton>
-          </td>
-        </template>
-      </CDataTable>
+          <template #created_at="{item}">
+            <td>
+              
+                {{item.created_at | moment('from','now')}}
+              </td>
+            </template>
+          <template #expires_at="{item}">
+            <td>
+              <span v-if="item.expires_at">
+                {{ item.expires_at | moment('from','now') }}
+              </span>
+              </td>
+            </template>
+          <template #actions="{ item }">
+            <td class="text-right">
+              <CButton color="info" size="sm" @click="editServiceAccount(item.uuid)">
+                <CIcon name="cilPencil" />
+              </CButton>
+              &nbsp;
+              <CButton color="secondary" size="sm" @click="cloneServiceAccount(item.uuid)">
+                <CIcon name="cilCopy" /> </CButton
+              >&nbsp;
+              <CButton color="danger" size="sm" @click="removeServiceAccount(item.uuid)">
+                <CIcon name="cilTrash" />
+              </CButton>
+            </td>
+          </template>
+        </CDataTable>
+        </CCard>
     </CCol>
     <ServiceAccountWizard
       :show.sync="show_wizard"
@@ -221,7 +228,7 @@ export default {
   },
   methods: {
     userHas(permission) {
-      return this.current_user.role.permissions[permission];
+      return this.current_user.permissions[permission];
     },
     set_picker_filters(val, key) {
       if (!this.picker_filters.hasOwnProperty(key)) {

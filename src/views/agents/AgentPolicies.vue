@@ -5,45 +5,17 @@
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
     />
     <CCol col>
-      <div style="padding: 10px">
-        <CButton color="primary" @click="newAgentPolicy()">New Agent Policy</CButton>
-      </div>
-      <!--<RDataTable :items="agent_policies" :fields="fields" :checkbox="true" checkbox_key_field="uuid" :show_controls="false">
-        <template #actions="{item}">
-          test
-        </template>
-        <template #tags="{item}">
-          <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
-          <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge></li>
-        </template>
-        <template #roles="{item}">
-          <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role"><CButton color="primary" style="cursor: auto" size="sm" disabled>{{ role }}</CButton></li>
-        </template>
-        <template #organization="{item}">
-          <OrganizationBadge :uuid="item.organization" />
-        </template>
-        <template #group-field-organization="{item}">
-          <OrganizationBadge :uuid="item" />&nbsp;
-        </template>
-        <template #updated_by="{ item }">
-            {{ item.updated_by ? item.updated_by.username : "" }}
-        </template>
-        <template #created_at="{ item }">
-            {{ item.created_at | moment("from", "now") }}
-        </template>
-        <template #updated_at="{ item }">
-            {{ item.updated_at | moment("from", "now") }}
-        </template>
-        <template #actions="{ item }">
-        <div class='text-right'>
-            <CButton @click="editAgentPolicy(item.uuid)" color="info" size="sm"
-              ><CIcon name="cilPencil" /></CButton
-            >&nbsp;
-            <CButton @click="deleteAgentPolicy(item.uuid)" color="danger" size="sm"
-              ><CIcon name="cilTrash"
-            /></CButton></div>
-        </template>
-      </RDataTable>-->
+      <CRow class="page-sub-header page-header-row">
+        <CCol>
+          <h2>Agent Policies</h2>
+        </CCol>
+        <CCol class="text-right">
+     
+          <CButton color="primary" @click="newAgentPolicy()">New Agent Policy</CButton>
+        </CCol>
+      </CRow>
+      <CCard>
+      
       <CDataTable
         :items="agent_policies"
         :fields="fields"
@@ -59,9 +31,7 @@
         </template>
         <template #tags="{item}">
           <td>
-            <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
-            <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
-          </li>
+            <TagBucket :tags="item.tags" />
           </td>
           </template>
         <template #created_at="{ item }">
@@ -81,7 +51,7 @@
         </template>
         <template #roles="{item}">
             <td>
-            <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role"><CButton color="primary" style="cursor: auto" size="sm" disabled>{{ role }}</CButton></li>
+            <TagBucket :tags="item.roles" label="Roles" iconName="cilSettings" />
             </td>
         </template>
         <template #created_by="{ item }">
@@ -100,6 +70,7 @@
           </td>
         </template>
       </CDataTable>
+      </CCard>
       <AgentPolicyWizard :show.sync="show_agent_wizard" :modal_mode="modal_mode" :policy="agent_policy" />
     </CCol>
   </CRow>
@@ -109,6 +80,7 @@ import { mapState } from "vuex";
 import OrganizationBadge from "../OrganizationBadge.vue";
 import AgentPolicyWizard from "./AgentPolicyWizard.vue";
 import RDataTable from "../components/DataTable.vue";
+import TagBucket from "../components/TagBucket.vue"
 
 export default {
   name: "AgentPolicies",
@@ -116,6 +88,7 @@ export default {
     OrganizationBadge,
     AgentPolicyWizard,
     RDataTable,
+    TagBucket
   },
   data() {
     return {

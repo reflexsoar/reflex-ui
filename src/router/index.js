@@ -35,6 +35,8 @@ const PluginDetails = () => import('@/views/PluginDetails')
 const Integrations = () => import('@/views/integrations/Integrations')
 const IntegrationsList = () => import('@/views/integrations/IntegrationsList')
 const IntegrationDetails = () => import('@/views/integrations/IntegrationDetails')
+const AssetManager = () => import('@/views/asset/AssetManager')
+const AssetDetails = () => import('@/views/asset/AssetDetails')
 const Cases = () => import('@/views/Cases')
 const CaseManagement = () => import('@/views/CaseManagement')
 const CaseDetails = () => import('@/views/CaseDetails')
@@ -64,6 +66,8 @@ const ForgotPassword = () => import('@/views/ForgotPassword')
 const ResetPassword = () => import('@/views/ResetPassword')
 const Register = () => import('@/views/pages/Register')
 
+import Axios from 'axios'
+
 Vue.use(Router)
 
 Vue.component('v-select', vSelect)
@@ -77,6 +81,24 @@ let router = new Router({
 
 router.beforeEach((to, from, next) => {
 
+  /* Check to see if the access_token and refresh_token cookies exist
+  and if they are move them to local storage */
+  if (localStorage.getItem('access_token') === null) {
+    if (document.cookie.split(';').some((item) => item.trim().startsWith('access_token='))) {
+      let access_token = document.cookie.replace(/(?:(?:^|.*;\s*)access_token\s*\=\s*([^;]*).*$)|^.*$/, "$1")
+      let refresh_token = document.cookie.replace(/(?:(?:^|.*;\s*)refresh_token\s*\=\s*([^;]*).*$)|^.*$/, "$1")
+      localStorage.setItem('access_token', access_token)
+      localStorage.setItem('refresh_token', refresh_token)
+      Axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+      store.commit('auth_success', {access_token, refresh_token})
+      // Null out the cookies
+      document.cookie = "access_token =; Max-Age=0"
+      document.cookie = "refresh_token =; Max-Age=0"
+      store.dispatch('getMe');
+    }
+  }
+
+
   // Clear any alerts before moving on to the next page
   store.commit('clear_alert')
 
@@ -85,10 +107,9 @@ router.beforeEach((to, from, next) => {
     //store.dispatch('getMe').then(() => {
     if(to.matched.some(record => {
         let current_user = store.getters.current_user
-        if(record.meta.requiresPermission && !current_user.role.permissions[record.meta.requiresPermission]) {
+        if(record.meta.requiresPermission && !current_user.permissions[record.meta.requiresPermission]) {
           next('/401')
         } else {
-          
           next()
           return
         }
@@ -384,6 +405,27 @@ function configRoutes () {
                 fetchSettings: true,
                 requiresAuth: true,
                 requiresPermission: 'view_plugins'
+              }
+            }
+          ]
+        },
+        {
+          path: 'assets',
+          name: 'Assets',
+          component: AssetManager,
+          meta: {
+            requiresAuth: true,
+            //requiresPermission: 'view_assets'
+          },
+          children: [
+            {
+              path: ':uuid',
+              name: 'View Asset',
+              component: AssetDetails,
+              meta: {
+                requiresAuth: true,
+                //requiresPermission: 'view_assets'
+                fetchsettings: true
               }
             }
           ]

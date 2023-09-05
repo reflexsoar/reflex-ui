@@ -1,81 +1,87 @@
 <template>
   <CRow>
     <CCol>
-      <div style="padding: 10px">
-        <CButton color="primary" @click="showOrganizationModal()"
-          >New Organization</CButton
-        >
-      </div>
-      <CDataTable
-        :hover="hover"
-        :striped="striped"
-        :bordered="bordered"
-        :small="small"
-        :fixed="fixed"
-        :items="filtered_organizations"
-        :fields="fields"
-        :items-per-page="small ? 25 : 10"
-        :dark="dark"
-        :sorter="{ external: false, resetable: true }"
-        :loading="loading"
-        column-filter
-        style="border-top: 1px solid #cfcfcf"
-      >
-        <template #name-filter="{ item }">
-          <RMultiCheck
-            :items="names"
-            @checked="set_picker_filters($event, 'name')"
-            size="sm"
-          ></RMultiCheck>
-        </template>
-        <template #name="{ item }">
-          <td>
-            <b>{{ item.name }}</b>
-          </td>
-        </template>
-        <template #actions="{ item }">
-          <td style="max-width: 150px" class="text-right">
-            <CButton
-              @click="editOrganization(item.uuid)"
-              size="sm"
-              color="info"
-              v-c-tooltip="{ content: 'Edit Organization', placement: 'left' }"
-              ><CIcon name="cilPencil" /></CButton
-            >&nbsp;
-            <CButton
-              :to="`/organization/${item.uuid}`"
-              size="sm"
-              color="primary"
-              v-c-tooltip="{ content: 'Edit Settings', placement: 'left' }"
-              ><CIcon name="cilSettings"
-            /></CButton>&nbsp;
-            <CButton size="sm" color="secondary" @click="downloadSOCReport(item.uuid)">SOC Report</CButton>
-          </td>
-        </template>
-        <template #logon_domains="{item}">
-          <td>
-            <li
-            style="display: inline; margin-right: 2px"
-            v-for="domain,i in item.logon_domains.split('\n')"
-            :key="i"
-          >
-            <CButton color="primary" size="sm" disabled>{{ domain }}</CButton>
-          </li>
-          </td>
-          </template>
-      </CDataTable>
-      <CRow>
+      <CRow class="page-sub-header">
         <CCol>
-          <CCardBody
-            ><CPagination :pages="pagination.pages" :activePage.sync="active_page"
-          /></CCardBody>
+          <h2>Organizations</h2>
+        </CCol>
+        <CCol class="text-right">
+            <CButton color="primary" @click="showOrganizationModal()"
+              >New Organization</CButton
+            >
         </CCol>
       </CRow>
-      <CreateOrganizationWizard :show.sync="organizationModal" />
-      <EditOrganizationWizard
-        :show.sync="editOrganizationModal"
-        :uuid="target_organization"
-      />
+      <CCard>
+        <CDataTable
+          :hover="hover"
+          :striped="striped"
+          :bordered="bordered"
+          :small="small"
+          :fixed="fixed"
+          :items="filtered_organizations"
+          :fields="fields"
+          :items-per-page="small ? 25 : 10"
+          :dark="dark"
+          :sorter="{ external: false, resetable: true }"
+          :loading="loading"
+          column-filter
+        >
+          <template #name-filter="{ item }">
+            <RMultiCheck
+              :items="names"
+              @checked="set_picker_filters($event, 'name')"
+              size="sm"
+            ></RMultiCheck>
+          </template>
+          <template #name="{ item }">
+            <td>
+              <b>{{ item.name }}</b>
+            </td>
+          </template>
+          <template #actions="{ item }">
+            <td style="max-width: 150px" class="text-right">
+              <CButton
+                @click="editOrganization(item.uuid)"
+                size="sm"
+                color="info"
+                v-c-tooltip="{ content: 'Edit Organization', placement: 'left' }"
+                ><CIcon name="cilPencil" /></CButton
+              >&nbsp;
+              <CButton
+                :to="`/organization/${item.uuid}`"
+                size="sm"
+                color="primary"
+                v-c-tooltip="{ content: 'Edit Settings', placement: 'left' }"
+                ><CIcon name="cilSettings"
+              /></CButton>&nbsp;
+              <CButton size="sm" color="secondary" @click="downloadSOCReport(item.uuid)">SOC Report</CButton>
+            </td>
+          </template>
+          <template #logon_domains="{item}">
+            <td>
+              <li
+              style="display: inline; margin-right: 2px"
+              v-for="domain,i in item.logon_domains.split('\n')"
+              :key="i"
+            >
+              <CButton color="primary" size="sm" disabled>{{ domain }}</CButton>
+            </li>
+            </td>
+            </template>
+        </CDataTable>
+        <CRow>
+          <CCol>
+            <CCardBody
+              ><CPagination :pages="pagination.pages" :activePage.sync="active_page"
+            /></CCardBody>
+          </CCol>
+        </CRow>
+        <CreateOrganizationWizard :show.sync="organizationModal" />
+        <EditOrganizationWizard
+          :show.sync="editOrganizationModal"
+          :uuid="target_organization"
+        />
+      </CCard>
     </CCol>
   </CRow>
 </template>

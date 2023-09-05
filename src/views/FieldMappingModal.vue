@@ -51,7 +51,7 @@
                   <CSelect
                     label="Organization"
                     placeholder="Select an organization"
-                    v-if="current_user.role.permissions.view_organizations"
+                    v-if="current_user.permissions.view_organizations"
                     :value.sync="template.organization"
                     :options="
                       organizations.map((o) => {

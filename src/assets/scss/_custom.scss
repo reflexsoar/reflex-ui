@@ -17,15 +17,20 @@ button.kb {
 
 code {
     color: #fff;
-     background-color: #636f83 !important;
-     padding: 2px !important;
-     border-radius: 3px !important;
-     border: 1px solid #636f83 !important;
-     margin-right: 1px !important;
- }
+    background-color: #636f83 !important;
+    padding: 2px !important;
+    border-radius: 3px !important;
+    border: 1px solid #636f83 !important;
+    margin-right: 1px !important;
+}
+
+table th { 
+    border-top: 0px !important;
+}
 
 .kb {
     float: right;
+    margin-right: 30px;
     font-size: 1.3125rem;
     font-weight: 700;
     line-height: 1;
@@ -337,6 +342,16 @@ a {
     word-wrap: unset;
 }
 
+.status-tag {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-weight: 500;
+    font-size: inherit;
+    word-wrap: unset;
+}
+
 .tag-clickable {
     cursor: pointer;
 }
@@ -366,8 +381,17 @@ a {
     font-size: 0.76563rem
 }
 
+.horizontal-separator {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-color: #dfdfdf;
+}
+
 label {
-    font-weight: 500;
+    /* muted text */
+    color: #6B7485;
+    //font-size: 90%;
+    font-weight: 500 !important;
 }
 
 .danger-accent {
@@ -618,4 +642,194 @@ html:not([dir="rtl"]) nav>.pagination {
 .table-view-value {
     overflow-y: visible;
     overflow-wrap: anywhere;
+}
+
+.page-nav {
+    background-color: #fff;
+    border-bottom: 1px solid #cfcfcf;
+    margin-top: -32px;
+    margin-left: -30px;
+    margin-right: -30px;
+    padding-left: 30px;
+    margin-bottom: 10px;
+}
+
+.page-nav .nav-tabs {
+    border-bottom: 0px;
+}
+
+.page-nav .nav-tabs .nav-link {
+    background-color: transparent;
+    border: 0px;
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+
+.page-nav .nav-tabs .nav-link:hover {
+
+    border-bottom: 3px solid $info !important;
+}
+
+.page-nav .nav-tabs .nav-link.active {
+    color: $secondary;
+
+    border-bottom: 3px solid #636f83 !important;
+
+}
+
+.page-nav-tab-body {
+    //border-radius: 5px;
+    //margin-right: 5px;
+    //margin-left: 5px;
+    padding: 5px;
+    //background-color: #fff;
+    //border: 1px solid #d8dbe0;
+}
+
+.page-sub-header {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.page-heading {
+    padding-left: 30px;
+    padding-top: 20px;
+    margin-top: -35px;
+    margin-bottom: 30px;
+    background-color: #fff;
+    margin-left: -30px;
+    margin-right: -30px;
+}
+
+.page-heading-row {
+    padding-left: 15px;
+    padding-right: 15px
+}
+
+.page-heading-no-nav {
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #cfcfcf;
+}
+
+.page-heading-pb-10 {
+    padding-bottom: 10px;
+}
+
+.card-header-button {
+    line-height: 2;
+}
+
+.callout-card .c-callout {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.profile-photo {
+    /* A circular crop of the image */
+    border-radius: 50%;
+    object-fit: cover;
+    width: 125px;
+    height: 125px;
+    border: 5px solid $dark;
+    float: left;
+}
+
+.user-profile-name {
+    margin-left: 150px;
+}
+
+.task-list .card {
+    max-height: calc(100vh - 275px);
+    overflow-y: auto;
+}
+
+
+.reflex-card {
+    border-radius: 5px;
+    border: 1px solid #d8dbe0;
+    background-color: white;
+    padding: 10px;
+}
+
+.field-group-header {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #6c757d;
+    margin-left: -10px;
+    margin-right: -10px;
+    padding: 5px 5px 5px 15px;
+}
+
+.field-picker-item {
+    font-size: 0.8rem;
+    font-weight: 400;
+    margin-bottom: 5px;
+    color: #6c757d;
+    margin-left: -10px;
+    margin-right: -10px;
+    padding: 5px 5px 5px 15px;
+    cursor: pointer;
+}
+
+.reflex-badge {
+    padding: 0.25rem 0.4rem;
+    border-radius: 0.25rem;
+    font-weight: 400;
+    line-height: 1;
+    font-size: 0.7rem;
+    text-align: center;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: baseline;
+    font-family: inherit;
+}
+
+.field-picker-show,
+.field-picker-hide {
+    float: right;
+    padding-right: 10px;
+    visibility: hidden;
+}
+
+.field-picker-item:hover .field-picker-show {
+    visibility: visible;
+}
+
+.field-picker-item:hover .field-picker-hide {
+    visibility: visible;
+}
+
+.reflex-badge-info {
+    color: #fff;
+    background-color: $info;
+}
+
+.reflex-badge-secondary {
+    color: #494949;
+    background-color: #cfcfcf;
+}
+
+.card-header-icon {
+    padding: 5px;
+    border: 1px solid #d8dbe0;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    margin-right: 10px;
+    line-height: normal;
+    font-size: 60% !important;
+}
+
+.integration-card-logo {
+    max-width: 100%;
+    height: 100%;
+    object-fit: scale-down;
+    left: 0;
+}
+
+.integration-logo-wrapper {
+    height: 50px;
 }

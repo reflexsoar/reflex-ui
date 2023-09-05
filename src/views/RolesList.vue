@@ -2,13 +2,19 @@
   <div>
     <CRow>
       <CCol col>
+        <CRow class="page-sub-header">
+        <CCol>
+          <h2>Roles</h2>
+        </CCol>
+        <CCol class="text-right">
+            <CButton v-if="current_user.permissions.add_role" color="primary" @click="newRole()">New Role</CButton>
+        </CCol>
+      </CRow>
+        <CCard>
         <div style="padding: 10px;">
           <CRow>
-            <CCol>
-              <CButton v-if="current_user.role.permissions.add_role" color="primary" @click="newRole()">New Role</CButton>
-            </CCol>
-            <CCol col=4>
-              <CSelect v-if="current_user.default_org" :horizontal="{label: 'col-sm-4', input: 'col-sm-8'}" label="Filter by Organization:" class="text-right" :options="organizationList(false)" @change="filterByOrganization($event)"/>
+            <CCol class="text-right">
+              <CSelect v-if="current_user.default_org" :horizontal="{label: 'col-sm-4', input: 'col-sm-2'}" :options="organizationList(false)" @change="filterByOrganization($event)"/>
             </CCol>
           </CRow>
         </div>
@@ -45,14 +51,14 @@
           </template>
           <template #created_by="{item}">
             <td>
-              {{item.created_by.username ? item.created_by.username : 'System'}}<OrganizationBadge v-if="current_user.default_org" :uuid="item.created_by.organization"/>
+              {{item.created_by.username ? item.created_by.username : 'System'}}&nbsp;<OrganizationBadge v-if="current_user.default_org" :uuid="item.created_by.organization"/>
             </td>
           </template>
           <template #actions="{item}">
             <td class="text-right">
-              <CButton :disabled="!current_user.role.permissions.add_role" size="sm" color="secondary" @click="cloneRole(item.uuid)"><CIcon name="cil-copy"/></CButton>&nbsp;
-              <CButton :disabled="!current_user.role.permissions.update_role" size="sm" color="primary" @click="editRole(item.uuid)"><CIcon name="cilPencil"/></CButton>&nbsp;
-              <CButton v-if="item.system_generated === null || item.system_generated === false" :disabled="!current_user.role.permissions.delete_role || (item.members ? item.members.length : 0) > 0" size="sm" color="danger" @click="promptDelete(item.uuid)"><CIcon name="cilTrash"/></CButton>
+              <CButton :disabled="!current_user.permissions.add_role" size="sm" color="secondary" @click="cloneRole(item.uuid)"><CIcon name="cil-copy"/></CButton>&nbsp;
+              <CButton :disabled="!current_user.permissions.update_role" size="sm" color="primary" @click="editRole(item.uuid)"><CIcon name="cilPencil"/></CButton>&nbsp;
+              <CButton v-if="item.system_generated === null || item.system_generated === false" :disabled="!current_user.permissions.delete_role || (item.members ? item.members.length : 0) > 0" size="sm" color="danger" @click="promptDelete(item.uuid)"><CIcon name="cilTrash"/></CButton>
             </td>
           </template>
         </CDataTable>
@@ -61,58 +67,51 @@
             <CCardBody><CPagination :pages="pagination.pages" :activePage.sync="active_page"/></CCardBody>
           </CCol>
         </CRow>
+      </CCard>
       </CCol>
     </CRow>
-    <CModal size="xl" :closeOnBackdrop="false" :centered="true" :show.sync="role_modal">
+    <CModal size="xl" :closeOnBackdrop="false" :centered="false" :show.sync="role_modal">
         <template #header>
-            <h5>{{modal_mode == 'create' ? 'Create Role' : 'Edit Role'}}</h5>
+            <h5 class="modal-title">{{modal_mode == 'create' ? 'Create Role' : 'Edit Role'}}</h5>
             <span class='text-right'>
                 <button type="button" aria-label="Close" class="close" @click="dismiss()">×</button>
                 <button type="button" class="kb" onclick="window.open('http://docs.reflexsoar.com/en/latest/role-based-access/roles/')"><CIcon name='cil-book' size="lg"/></button>
             </span>
         </template>
-        <h3>Role Details</h3>
-        <CSelect v-if="current_user.default_org" label="Organization" :options="organizationList()" :value.sync="role.organization"/>
-        <CInput label="Role Name" placeholder="Enter a name for this role" :value.sync="role.name"/>
-        <CTextarea rows="3" label="Description" placeholder="Enter a description for the role so it is understood what it is used for" :value.sync="role.description"/>
-        <h3>Role Permissions</h3>
-        <div v-if="role.permissions">
-          <CListGroup>
-            <CListGroupItem v-for="permissions, category in filteredPermissionMap" :key="category">
-            <b style="cursor: pointer;" @click="toggleCollapse(category)"><CIcon name="cilMinus" v-if="collapseStatus(category)"/><CIcon v-else name="cilPlus"/>&nbsp;{{category}}</b> ({{activePermissions(category)}})
-            <CCollapse :show="collapseStatus(category)"><br>
-            <CCol>
-              <CRow>
-                <CCol col="3" v-for="permission in permissions" :key="permission">
-                  <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label><br>
-                  <CSwitch :checked.sync="role.permissions[permission]" label-on="Yes" label-off="No" color="success"></CSwitch><br><br>
-                </CCol>
-              </CRow>
-            </CCol>
-            </CCollapse>            
-          </CListGroupItem>
-          </CListGroup>
-          
-          <!--<CTabs :fade="true"
+        <CTabs :fade="true"
               variant="pills"
               :activeTab.sync="active_tab"
-:vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
-<div v-for="permissions, category in filteredPermissionMap" :key="category" >
-            
-            <CTab :title="category"><CCol col="3">
-              <h5>{{category}}</h5>
-            </CCol>
-            <CCol >
-              <CRow>
-                <CCol col="3" v-for="permission in permissions" :key="permission">
-                  <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label><br>
-                  <CSwitch :checked.sync="role.permissions[permission]" label-on="Yes" label-off="No" color="success"></CSwitch><br><br>
-                </CCol>
-              </CRow>
-              <br>
-            </CCol></CTab></div>
-          </CTabs>-->
+              :vertical="{ navs: 'col-md-2', content: 'col-md-10' }">
+        
+        <CTab title="Role Details">
+          <h3>Role Details</h3>
+          <CSelect v-if="current_user.default_org" label="Organization" :options="organizationList()" :value.sync="role.organization"/>
+          <CInput label="Role Name" placeholder="Enter a name for this role" :value.sync="role.name"/>
+          <CTextarea rows="3" label="Description" placeholder="Enter a description for the role so it is understood what it is used for" :value.sync="role.description"/>
+        </CTab>
+        <CTab title="Permissions" style="overflow-y: auto; max-height: 650px;">
+          <h3>Role Permissions</h3>
+          <div v-if="role.permissions">
+            <CCard v-for="permission, category in filteredPermissionMap" :key="category" style="margin-bottom: 5px; border-bottom: 1px">
+              <CCardHeader @click="toggleCollapse(category)" style="padding-top: 5px; padding-bottom: 5px; cursor: pointer;">
+                <i v-if="collapseStatus(category)" class="fas fa-chevron-down"/>
+                <i v-else class="fas fa-chevron-up"/>
+                &nbsp;&nbsp;<b>{{ category }}</b>
+              </CCardHeader>
+              <CCollapse :show="collapseStatus(category)">
+                <CCardBody>
+                <CRow>
+                  <CCol col="3" v-for="permission in permission" :key="permission">
+                    <label style="text-transform: capitalize;">{{permission.replaceAll('_',' ')}}</label><br>
+                    <CSwitch :checked.sync="role.permissions[permission]" label-on="Yes" label-off="No" color="success"></CSwitch><br><br>
+                  </CCol>
+                </CRow>
+                </CCardBody>
+              </CCollapse>
+            </CCard>
         </div>
+        </CTab>
+        </CTabs>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
         <CButton v-if="modal_mode === 'edit'" @click="updateRole()" color="primary">Edit</CButton>

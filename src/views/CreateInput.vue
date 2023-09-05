@@ -1,7 +1,7 @@
 <template>
   <CRow>
     <CCol col>
-      <h1>
+      <h1 class="page-heading page-heading-no-nav">
         Create Input<button
           type="button"
           class="kb"
@@ -10,15 +10,7 @@
           <CIcon name="cil-book" size="lg" />
         </button>
       </h1>
-      <p class="text-muted">Complete the wizard below to create a new input.</p>
-      <CAlert :show.sync="from_source_input" color="warning">
-        <b>WARNING: </b>This input has been cloned from another input. Please verify all
-        fields before submitting. The following fields are not copied:<br />
-        <ul style="margin-bottom: 0px">
-          <li>Organization</li>
-          <li>Credential</li>
-        </ul>
-      </CAlert>
+
       <CForm @submit.prevent="createInput">
         <CCard
           ><link
@@ -34,9 +26,18 @@
                   :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
                 >
                   <CTab title="1. Input Overview">
-                    <h3>Input Overview</h3>
+                    <h2>Input Overview</h2>
+                    <CAlert :show.sync="from_source_input" color="warning">
+                      <b>WARNING: </b>This input has been cloned from another input.
+                      Please verify all fields before submitting. The following fields are
+                      not copied:<br />
+                      <ul style="margin-bottom: 0px">
+                        <li>Organization</li>
+                        <li>Credential</li>
+                      </ul>
+                    </CAlert>
                     <CSelect
-                      v-if="current_user.role.permissions.view_organizations"
+                      v-if="current_user.permissions.view_organizations"
                       placeholder="Select an Organization..."
                       required
                       :value.sync="organization"
@@ -81,7 +82,7 @@
                     </CRow>
                     <CRow>
                       <CCol>
-                        <h4>Tags</h4>
+                        <h3>Tags</h3>
                         <multiselect
                           v-model="selected"
                           :close-on-select="false"
@@ -102,7 +103,7 @@
                   <CTab title="2. Plugin Configuration">
                     <CRow>
                       <CCol>
-                        <h3>Plugin Configuration</h3>
+                        <h2>Plugin Configuration</h2>
                         <p>
                           The input requires specific configurations in order for it to
                           work. Enter them below.
@@ -331,12 +332,23 @@
                   <CTab title="3. Field Mappings">
                     <CRow>
                       <CCol>
-                        <h3>
+                        <h2>
                           Field Mappings
                           <CButton size="sm" color="success" @click="addField()"
                             >+</CButton
                           >
-                        </h3>
+                        </h2>
+                        <CAlert color="warning">
+                          <b>Deprecation Warning:</b> Directly defining field mappings on
+                          Inputs will be removed in a future release. It is recommended to
+                          use
+                          <a
+                            target="_blank"
+                            href="https://docs.reflexsoar.com/en/latest/field-templates/"
+                            >Field Templates</a
+                          >
+                          instead.
+                        </CAlert>
                         <p>
                           Field mappings control how source data is mapped to a data type
                           in Reflex. Assigning a source log field to a data type allows

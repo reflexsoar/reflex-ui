@@ -76,7 +76,7 @@
                   label="Organization"
                   placeholder="Select an organization"
                   v-if="
-                    current_user.role.permissions.view_organizations &&
+                    current_user.permissions.view_organizations &&
                     !from_card
                   "
                   :value.sync="organization"
@@ -415,7 +415,7 @@
                     :show-no-results="false"
                     placeholder="Select a case template..."
                     @search-change="caseTemplateFind"
-                    v-bind:disabled="(current_user.role.permissions.view_organizations && organization == null) || !create_new_case">
+                    v-bind:disabled="(current_user.permissions.view_organizations && organization == null) || !create_new_case">
                     <template slot="option" slot-scope="props">
                         {{props.option.title}}<br>
                         <small>{{props.option.description}}<br>Contains {{props.option.task_count}} tasks.</small>
@@ -491,7 +491,42 @@
                       
                     ></multiselect>
               </CTab>
-              <CTab title="7. Review" :disabled="test_failed && from_card">
+              <CTab title="7. Integrations" :disabled="test_failed && from_card">
+                <h4>Integration Actions</h4>
+                <p>Integration Actions allow Event Rules to perform actions from configuration Integrations.  One or more actions can be added to an Event Rule.</p>
+                <CRow>
+                  <CCol>
+                    <h5>Actions</h5>
+                  </CCol>
+                  <CCol class="text-right">
+                    <CButton @click="show_add_action = true" color="primary"
+                      >Add Action</CButton>
+                    </CCol>
+                  </CRow>
+                <CRow>
+                <CCol><br>
+                <CDataTable
+                  :items="integration_actions"
+                  :fields="action_fields"
+                  >
+                    <template #parameters="{item}">
+                      <td>
+                        <!-- Show the key, value pairs of the parameters -->
+                        <div v-for="(value, key) in item.parameters">
+                          <b>{{ key }}:</b> {{ value }}
+                        </div>
+                      </td>
+                    </template>
+                    <template #manage="{item}">
+                      <td class="text-right">
+                        <CButton @click="removeIntegrationAction(item.uuid)" color="danger" size="sm"><i class="fas fa-trash-can"/></CButton>
+                      </td>
+                    </template>
+                  </CDataTable>
+                </CCol>
+                </CRow>
+              </CTab>
+              <CTab title="8. Review" :disabled="test_failed && from_card">
                 <h4>Review</h4>
                 <b>Rule Name: </b> {{ name }}<br />
                 <b>Description: </b><br />{{ description }}<br /><br />
@@ -565,6 +600,11 @@
         {{ test_results }}
       </div>
     </CModal>
+    <RunActionModal
+      :show.sync="show_add_action"
+      mode="add_to_eventrule"
+      @addToEventRule="addIntegrationAction"
+      />
   </div>
 </template>
 
@@ -604,11 +644,14 @@ import "prismjs/components/prism-python";
 import "../assets/js/prism-rql";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
 
+import RunActionModal from "./RunActionModal";
+
 import { mapState } from "vuex";
 
 export default {
   components: {
     PrismEditor,
+    RunActionModal
   },
   name: "CreateEventRuleModal",
   props: {
@@ -641,6 +684,7 @@ export default {
     return {
       name: "",
       cases: [],
+      show_add_action: false,
       description: "",
       modalStatus: this.show,
       merge_into_case: false,
@@ -653,8 +697,10 @@ export default {
       dismiss_event: false,
       expire_days: 1,
       observables: [],
+      action_fields: ["action", "parameters", {key: 'manage', label: ''}],
+      integration_actions: [],
       expire: false,
-      final_step: 6,
+      final_step: 7,
       test_running: false,
       test_result: "",
       test_failed: true,
@@ -782,6 +828,16 @@ export default {
     //this.$store.dispatch('getSettings')
   },
   methods: {
+    addIntegrationAction(action) {
+      // If integration actions is null, create an empty array
+      if (!this.integration_actions) {
+        this.integration_actions = [];
+      }
+      // If  the actions UUID is not already in the list, add it
+      if (!this.integration_actions.includes(action.uuid)) {
+        this.integration_actions.push(action);
+      }
+    },
     today() {
       let d = new Date();
       d.setHours(23, 59, 59, 0);
@@ -819,6 +875,7 @@ export default {
           this.global_rule = this.event_rule.global_rule;
           this.update_severity = this.event_rule.update_severity;
           this.target_severity = this.event_rule.target_severity;
+          this.integration_actions = this.event_rule.integration_actions;
           this.selected_tags = this.event_rule.tags_to_add;
           this.dismiss_event = this.event_rule.dismiss_event;
           this.expire_days = this.event_rule.expire_days;
@@ -968,6 +1025,7 @@ export default {
         target_case_uuid: this.target_case.uuid,
         update_severity: this.update_severity,
         target_severity: this.target_severity,
+        integration_actions: this.integration_actions,
         add_tags: this.tag_event,
         tags_to_add: Array(),
         expire: this.expire,
@@ -1022,6 +1080,7 @@ export default {
         update_severity: this.update_severity,
         target_severity: this.target_severity,
         add_tags: this.tag_event,
+        integration_actions: this.integration_actions,
         tags_to_add: Array(),
         expire: this.expire,
         expire_days: parseInt(this.expire_days),
@@ -1106,6 +1165,7 @@ export default {
       this.expire = true;
       this.expire_days = 1;
       this.observables = [];
+      this.integration_actions = [];
       this.merge_into_case = false;
       this.dismiss_event = false;
       this.target_case = {};

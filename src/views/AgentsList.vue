@@ -2,9 +2,17 @@
   <CRow>
     <CCol col
       >
-      <div style="padding: 10px">
-        <CButton color="primary" @click="generateToken()">New Agent</CButton>
-      </div>
+      
+      <CRow class="page-sub-header page-header-row">
+        <CCol>
+          <h2>Agents</h2>
+        </CCol>
+        <CCol class="text-right">
+          <CButton color="primary" @click="generateToken()">New Agent</CButton>
+        
+        </CCol>
+      </CRow>
+      <CCard>
       <CDataTable
         :hover="hover"
         :striped="striped"
@@ -17,7 +25,6 @@
         :sorter="{ external: false, resetable: false }"
         :loading="loading"
         :responsive="true"
-        style="border-top: 1px solid #cfcfcf"
         column-filter
         pagination
         :column-filter-value.sync="column_filters"
@@ -38,7 +45,7 @@
         </template>
         <template #health_issues-filter="{ item }">
           <RMultiCheck
-            :items="agent_versions"
+            :items="health_issues"
             @checked="set_picker_filters($event, 'health_issues')"
             size="sm"
           ></RMultiCheck>
@@ -113,7 +120,7 @@
             </li>
           </td>
         </template>
-      </CDataTable>
+      </CDataTable></CCard>
       <CRow> </CRow>
     </CCol>
     <CModal
@@ -190,9 +197,18 @@ export default {
         let match = true;
         for (let key in this.picker_filters) {
           if (this.picker_filters[key].length > 0) {
+            console.log(typeof agent[key]);
             if (typeof agent[key] == "boolean") {
               if (!this.picker_filters[key].includes(agent[key].toString())) {
                 match = false;
+              }
+            } else if (typeof agent[key] == "object") {
+              // If any of the values from picker_filters[key] is in agent[key] then it's a match
+              let found = false;
+              for (let i in this.picker_filters[key]) {
+                if (agent[key].includes(this.picker_filters[key][i])) {
+                  found = true;
+                }
               }
             } else {
               if (!this.picker_filters[key].includes(agent[key])) {
@@ -215,6 +231,17 @@ export default {
         }
       });
       return versions;
+    },
+    health_issues() {
+      let issues = [];
+      this.agents.forEach((agent) => {
+        agent.health_issues.forEach((issue) => {
+          if (!issues.find((i) => i.value == issue)) {
+            issues.push({ value: issue, label: issue });
+          }
+        });
+      });
+      return issues;
     },
     health_statuses() {
       let healths = [];

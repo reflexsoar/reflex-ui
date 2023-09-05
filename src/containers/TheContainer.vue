@@ -18,6 +18,7 @@
                 </CToast>
               
             </CToaster>
+            <WhatsNewModal/>
             <router-view></router-view>
           </CContainer>
         </main>
@@ -33,12 +34,16 @@ import TheHeader from "./TheHeader";
 import TheFooter from "./TheFooter";
 import { mapState } from "vuex";
 
+import WhatsNewModal from "../views/whatsnew/WhatsNewModal.vue";
+
+
 export default {
   name: "TheContainer",
   components: {
     TheSidebar,
     TheHeader,
     TheFooter,
+    WhatsNewModal
   },
   computed: mapState(["alert", "toasts", "running_tasks"]),
   created: function() {

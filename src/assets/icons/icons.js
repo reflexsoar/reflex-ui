@@ -23,6 +23,7 @@ import {
   cibGooglePay, 
   cibCcAmex
 } from '@coreui/icons'
+
 import {
   cifUs,
   cifBr,

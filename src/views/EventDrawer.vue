@@ -13,14 +13,7 @@
         <CRow style="padding: 10px 10px 0px 10px">
           <CCol>
             <h2>{{ event_data.title }}</h2>
-            <CIcon name="cilTags" />&nbsp;
-            <li
-              style="display: inline; margin-right: 2px"
-              v-for="tag in event_data.tags"
-              :key="tag"
-            >
-              <CBadge color="dark" class="tag tag-list" size="sm">{{ tag }}</CBadge>
-            </li>
+            <TagBucket :tags="event_data.tags" />
           </CCol>
           <CCol col="2" style="border-left: 1px solid #cfcfcf" class="text-right">
             <CButton
@@ -135,16 +128,7 @@
                 </template>
                 <template #tags="{ item }">
                   <td>
-                    <CIcon name="cilTags" />&nbsp;
-                    <li
-                      style="display: inline; margin-right: 2px"
-                      v-for="(tag, i) in item.tags"
-                      :key="i"
-                    >
-                      <CBadge class="tag tag-list" color="info" size="sm">{{
-                        tag
-                      }}</CBadge>
-                    </li>
+                    <TagBucket :tags="item.tags" />
                   </td>
                 </template>
               </CDataTable>
@@ -436,28 +420,10 @@
                 >{{ event_data.total_comments }}</CBadge
               >
             </template>
+            
             <CCardBody class="tab-container">
-              <CCard v-if="event_data.dismiss_comment"
-                ><CCardHeader
-                  >Dismissed By <b>{{ event_data.dismissed_by.username }}</b> -
-                  {{ event_data.dismissed_at | moment("from", "now") }}</CCardHeader
-                >
-                <CCardBody
-                  ><vue-markdown>{{
-                    event_data.dismiss_comment
-                  }}</vue-markdown></CCardBody
-                >
-              </CCard>
               <div v-if="!comments_loading">
-                <CCard v-for="comment in comments" :key="comment.uuid">
-                  <CCardHeader
-                    >By <b>{{ comment.created_by }}</b> -
-                    {{ comment.created_at | moment("from", "now") }}</CCardHeader
-                  >
-                  <CCardBody>
-                    <vue-markdown>{{ comment.comment }}</vue-markdown>
-                  </CCardBody>
-                </CCard>
+                <CommentList :event_uuid="event_data.uuid"/>
               </div>
               <div v-else class="text-center">
                 <CSpinner color="primary" size="xl"></CSpinner>
@@ -592,6 +558,8 @@ import MatchedEventRule from "./event/MatchedEventRule";
 import { Viewer } from "@toast-ui/vue-editor";
 import TagBucket from "./components/TagBucket";
 import DetectionExclusionModal from "./DetectionExclusionModal";
+import CommentList from './collaboration/CommentList'
+import ObjectAttribute from "./components/ObjectAttribute";
 
 export default {
   name: "EventDrawer",
@@ -607,6 +575,8 @@ export default {
     Viewer,
     TagBucket,
     DetectionExclusionModal,
+    CommentList,
+    ObjectAttribute
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
@@ -632,6 +602,15 @@ export default {
         });
         this.$store.dispatch("getEventComments", this.event_data.uuid).then(() => {
           this.comments = this.$store.state.event_comments;
+          if(this.event_data.dismiss_comment) {
+            let dismiss_comment = {
+              comment: this.event_data.dismiss_comment,
+              created_at: this.event_data.dismissed_at,
+              created_by: this.event_data.dismissed_by.username,
+              is_closure_comment: true
+            }
+            this.comments.push(dismiss_comment)
+          }
           this.comments_loading = false;
         }).catch(() => {
           this.comments_loading = false;

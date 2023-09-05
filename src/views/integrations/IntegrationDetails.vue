@@ -1,31 +1,40 @@
 <template>
   <CRow>
-    <CCol v-if="loading">
-      <CSpinner color="primary" />
-    </CCol>
-    <CCol v-else>
-      <CRow>
-        <CCol col=2>
-            <CCard>
-            <CCardBody class="text-center" style="height: 125px; line-height: 80px;">
-                <img :src="integration.logo" :alt="integration.name" width="100%" />
-            </CCardBody>
-            </CCard>
-        </CCol>
+    <CCol>
+      <CRow class="page-heading page-heading-row">
         <CCol>
-          <h2>{{ integration.name }}</h2>
-          <TagList :tags="integration.category" />
+          <img :src="integration.logo" :alt="integration.name" class="integration-card-logo"  style="max-height: 50px" />
         </CCol>
       </CRow>
       <CRow>
+    <CCol>
+      <CRow>
         <CCol>
-            <CTabs variant="pills"><br>
+          
+            <CTabs 
+          addNavWrapperClasses="page-nav"
+          addTabClasses="page-nav-tab-body"
+          addNavClasses="page-nav-tab">
                 <CTab title="Overview">
+                
+                <CRow>
+                  <CCol>
+                      <h2 class="page-sub-header">Overview</h2>
+                  </CCol>
+                  </CRow>
+                  
+                  <CRow>
+                    <CCol>
                     <CCard>
                         <CCardBody>
-                          <CRow>
+                        <CRow v-if="loading">
+                  <CCardBody style="text-align: center">
+                    <CSpinner />
+                  </CCardBody>
+                </CRow>
+                          <CRow v-else>
                             <CCol col=8>
-                              <p><vue-markdown>{{ integration.description }}</vue-markdown></p>
+                              <p><vue-markdown :source="integration.description"></vue-markdown></p>
                             </CCol>
                             <CCol>
                               <table style="border: 0px">
@@ -50,15 +59,24 @@
         </CRow>
                         </CCardBody>
                     </CCard>
+                      </CCol>
+                      </CRow>
+                      
                 </CTab>
                 <CTab title="Configurations">
-                    
-                    <CCard>
-                        <CCardHeader>
-                            <CButton color="primary" @click="newConfiguration()">New Configuration</CButton>
-                        </CCardHeader>
+                <CRow>
+                      <CCol>
+                      <CRow  class="page-sub-header">
+                  <CCol>
+                      <h2>Configurations</h2>
+                  </CCol>
+                  <CCol class="text-right">
+                    <CButton color="primary" @click="newConfiguration()">New Configuration</CButton>
+                  </CCol>
+                  </CRow>
+                      <CCard>
+                        
                         <CCardBody>
-                            <h3>Configurations</h3>
                             <div v-if="configurations_loading">
                                 <CSpinner color="primary" />
                             </div>
@@ -118,8 +136,11 @@
                                 </div>
                         </CCardBody>
                     </CCard>
-                </CTab>
+                    </CCol>
+                    </CRow>
+                    </CTab>
                 <CTab title="Documentation">
+                  <h2 class="page-sub-header">Documentation</h2>
                     <CCard><CCardBody>
                     <h3>Global Parameters</h3>
                     <p>
@@ -142,6 +163,11 @@
                             <CBadge class="tag" color="dark">{{ item.type ? item.type : 'unknown' }}</CBadge>
                           </td>
                         </template>
+                        <template #run_from="{item}">
+                          <td style="text-transform: capitalize">
+                            <CBadge class="tag" color="dark">{{ item.run_from ? item.run_from : 'unknown' }}</CBadge>
+                          </td>
+                        </template>
                         <template #description="{item}">
                           <td>
                            <vue-markdown>{{item.description}}</vue-markdown><span v-if="item.configuration"><br><i><b>Note</b>: Requires specific action configuration when setting up for the first time.</i></span>
@@ -151,10 +177,11 @@
                     </CCard>
                 </CTab>
                 <CTab title="Manifest">
+                  <h2 class="page-sub-header">Manifest</h2>
                     <CCard>
-                        <CCardBody> <h3>Manifest File</h3>
+                        <CCardBody>
                         <p>The manifest file defines exactly what this integration expects from a configuration perspective</p>
-                            <code><pre>{{ integration.manifest }}</pre></code>
+                            <pre style="overflow-x: auto; word-wrap: none; max-height: calc(100vh - 450px)">{{ integration.manifest }}</pre>
                         </CCardBody>
                     </CCard>
                 </CTab>
@@ -162,6 +189,9 @@
         </CCol>
       </CRow>
     </CCol>
+    </CRow>
+    </CCol>
+    
     <IntegrationConfigModal :show.sync="showConfigModal" :integration="integration" :configuration="configuration" :mode="modal_mode"/>
     <!-- Delete warning modal -->
     <CModal
@@ -210,9 +240,10 @@ export default {
       loading: false,
       configurations_loading: false,
       action_fields: [
-        {key: "friendly_name", label: "Action Name"},
-        {key: "description", label: "Description", _style: "width: 70%"},
-        {key: "type", label: "Action Type", _style: "width: 10%"}
+        {key: "friendly_name", label: "Action Name", _style: "width: 20%"},
+        {key: "description", label: "Description", _style: "width: 60%"},
+        {key: "type", label: "Action Type", _style: "width: 10%"},
+        {key: "run_from", label: "Runs From", _style: "width: 10%"}
       ],
       showConfigModal: false,
       modal_mode: "create",
@@ -334,14 +365,32 @@ export default {
                         action.configuration[field].default = false
                     } else if(action.configuration[field].type == "int") {
                         action.configuration[field].default = 0
+                    } else if (action.configuration[field].type == "str-multiple") {
+                      action.configuration[field].default = []
                     }
                 }
 
                 if(action.configuration[field].default) {
-                  console.log("SETTING DEFAULT", field, action.configuration[field].default)
                     configuration.actions[action.name][field] = action.configuration[field].default
                 }
                 
+            }
+        }
+
+        // Build the default global options
+        for (let field in this.integration.manifest.configuration) {
+            if(this.integration.manifest.configuration[field].default == null && this.integration.manifest.configuration[field].required) {
+                if(this.integration.manifest.configuration[field].type == "str") {
+                    this.integration.manifest.configuration[field].default = ""
+                } else if(this.integration.manifest.configuration[field].type == "bool") {
+                    this.integration.manifest.configuration[field].default = false
+                } else if(this.integration.manifest.configuration[field].type == "int") {
+                    this.integration.manifest.configuration[field].default = 0
+                }
+            }
+
+            if(this.integration.manifest.configuration[field].default) {
+                configuration.global_settings[field] = this.integration.manifest.configuration[field].default
             }
         }
         return configuration

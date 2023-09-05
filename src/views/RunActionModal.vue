@@ -4,7 +4,12 @@
       rel="stylesheet"
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
     />
-    <CModal title="Run Action" :centered="true" size="lg" :show.sync="modalStatus">
+    <CModal title="Run Action" :centered="true" size="lg" :show.sync="modalStatus" 
+      :closeOnBackdrop="false">
+      <template #header>
+        <h5 v-if="mode == 'run'" class="modal-title">Run Action</h5>
+        <h5 v-if="mode == 'add_to_eventrule'" class="modal-title">Add to Event Rule</h5>
+      </template>
         <CAlert :show.sync="error" color="danger">
             {{ error_message }}
         </CAlert>
@@ -15,7 +20,12 @@
         label="Action to Run"
         :placeholder="'Select Action'"
         @change="selectAction"
-      />
+      >
+        <template #label>
+          <label v-if="mode == 'run'">Action to Run</label>
+          <label v-if="mode == 'add_to_eventrule'">Action to Add</label>
+        </template>
+      </CSelect>
       <CRow v-if="action.parameters && !!Object.keys(action.parameters).length">
         <CCol>
           <h3>Parameters</h3>
@@ -28,13 +38,13 @@
                 :description="field.description"
               />
               <div v-if="field.type == 'str-multiple'">
-                <label style="text-transform: capitalize">{{ name }}</label
+                <label style="text-transform: capitalize">{{ field.label }}</label
                 ><br />
                 <multiselect
                   v-model="action_payload.parameters[name]"
                   @tag="addMultiOption(name, $event)"
                   @remove="removeMultiOption(name, $event)"
-                  :options="action_payload.parameters[name]"
+                  :options="getSelectOptions(field, field.default_options_from)"
                   :multiple="true"
                   :close-on-select="false"
                   :placeholder="field.description"
@@ -44,7 +54,7 @@
                 <small class="text-muted">{{ field.description }}</small>
               </div>
               <div v-if="field.type == 'bool'">
-                <label>{{ name }}</label
+                <label>{{ field.label }}</label
                 ><br />
                 <CSwitch
                   :checked.sync="action_payload.parameters[name]"
@@ -62,7 +72,7 @@
                 "
                 :options="getSelectOptions(field, field.default_options_from)"
                 :value.sync="action_payload.parameters[name]"
-                :label="name"
+                :label="field.label"
                 placeholder="Please select one"
                 :description="field.description"
               />
@@ -70,10 +80,12 @@
           </CRow>
         </CCol>
       </CRow>
-
+      {{action_payload}}
+      {{ mode }}
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Cancel</CButton>
-        <CButton @click="runAction()" color="primary">Execute</CButton>
+        <CButton v-if="mode == 'run'" @click="runByMode()" color="primary">Execute</CButton>
+        <CButton v-if="mode == 'add_to_eventrule'" @click="runByMode()" color="primary">Add</CButton>
       </template>
     </CModal>
   </div>
@@ -82,12 +94,23 @@
 <script>
 import { vSelect } from "vue-select";
 import { mapState } from "vuex";
+import {v4 as uuidv4} from 'uuid';
 export default {
   name: "RunActionModal",
   props: {
     show: Boolean,
-    events: Array,
-    events_data: Array,
+    events: {
+      type: Array,
+      default: () => [],
+    },
+    events_data: {
+      type: Array,
+      default: () => [],
+    },
+    mode: {
+      type: String,
+      default: "run",
+    }
   },
   computed: {
     ...mapState(["settings", "current_user", "configured_actions"]),
@@ -136,6 +159,9 @@ export default {
   methods: {
     getSelectOptions(field_config, field) {
       let values = [];
+      if (field == "intel_list") {
+        values = this.$store.getters.intel
+      }
       if (this.events_data.length > 0) {
         // Fetch the values of the field from all the events in event_data
         // Return the unique values
@@ -148,12 +174,11 @@ export default {
               let observable = event.observables[o];
               console.log(observable.data_type, field_config.observable_data_type);
               if (observable.data_type === field_config.observable_data_type) {
-                values.push({ label: observable.value, value: observable.value });
+                values.push(observable.value);
               }
             }
           }
         }
-        //values = this.events_data.map(event => event[field])
       }
       return [...new Set(values)];
     },
@@ -161,11 +186,15 @@ export default {
       if (!this.action_payload.parameters[name]) {
         this.$set(this.action_payload.parameters, name, []);
       }
-
       if (this.action_payload.parameters[name].includes($event)) {
         return;
       } else {
-        this.action_payload.parameters[name].push($event);
+        // If the $event has a value property, use that, otherwise use the $event
+        if ($event.value) {
+          this.action_payload.parameters[name].push($event.value);
+        } else {
+            this.action_payload.parameters[name].push($event);
+        }
       }
     },
     removeMultiOption(name, $event) {
@@ -225,6 +254,19 @@ export default {
           }
         }
       }
+    },
+    runByMode() {
+        if (this.mode == "run") {
+            this.runAction();
+        } else if (this.mode == "add_to_eventrule") {
+            this.addToEventRule();
+            this.dismiss();
+        }
+    },
+    addToEventRule() {
+      // Give the payload a unique ID
+      this.action_payload.uuid = uuidv4();
+      this.$emit("addToEventRule", this.action_payload);
     },
     runAction() {
       this.$store.dispatch("runAction", this.action_payload).then(() => {

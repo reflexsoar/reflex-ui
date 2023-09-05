@@ -6,375 +6,415 @@
     />
     <CRow
       ><CCol xs="12" lg="12">
-        <h2 id="detections-page-header">
-          <CBadge color="primary">BETA</CBadge>&nbsp;Detection Management&nbsp;<button
-            type="button"
-            class="kb"
-            onclick="window.open('https://docs.reflexsoar.com/en/latest/detections')"
+        <CRow class="page-heading page-heading-row">
+          <CCol>
+            <h1>Detection Management</h1>
+          </CCol>
+          <CCol>
+            <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
+              {{ alert.message }}
+            </CAlert></CCol
           >
-            <CIcon name="cil-book" size="lg" />
-          </button>
-        </h2>
-        <br />
-        <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
-          {{ alert.message }}
-        </CAlert>
-        <CAlert :show="true" color="info"
-          ><b>Beta Feature</b>: This feature is in beta and requires a specific agent
-          version and API version.</CAlert
+        </CRow>
+
+        <CTabs
+          :activeTab.sync="current_tab"
+          addNavWrapperClasses="page-nav"
+          addTabClasses="page-nav-tab-body"
+          addNavClasses="page-nav-tab"
         >
-        <span v-if="current_tab == 0"></span>
-        <CCard>
-          <CCardBody class="tabbed">
-            <CTabs :activeTab.sync="current_tab">
-              <CTab title="Detection Rules" active>
-                <DetectionsFilterMenu
-                  :total_detections="filtered_items.length"
-                  @filter_changed="getDetections()"
-                ></DetectionsFilterMenu>
-                <CRow style="padding: 10px">
-                  <CCol>
-                    <CButton
-                      v-if="current_user.role.permissions['create_detection']"
-                      color="primary"
-                      size="sm"
-                      @click="createDetectionModal()"
-                      >New Detection</CButton
-                    >
-                  </CCol>
-                  <CCol col="11" class="text-right">
-                    <CDropdown color="secondary" toggler-text="Bulk Actions" size="sm">
-                     <CDropdownItem
-                        @click="selectAllByFilter()"
-                        >Select All {{ total_items }} Detections</CDropdownItem>
-                        <CDropdownItem
-                        @click="clearSelection()"
-                        >Clear Selection</CDropdownItem>
-                      <CDropdownDivider></CDropdownDivider>
-                      <CDropdownItem
-                        v-bind:disabled="selected_items.length == 0"
-                        @click="enableDetections()"
-                        ><CIcon name="cilCheck" />&nbsp;&nbsp;Enable
-                        {{ selected_items.length }} Detections</CDropdownItem
-                      >
-                      <CDropdownItem
-                        v-bind:disabled="selected_items.length == 0"
-                        @click="disableDetections()"
-                        ><CIcon name="cilBan" />&nbsp;&nbsp;Disable
-                        {{ selected_items.length }} Detections</CDropdownItem
-                      >
-                      <CDropdownItem
-                        v-bind:disabled="selected_items.length == 0"
-                        @click="assessDetections()"
-                        ><i class="fas fa-flag"/>&nbsp;&nbsp;Assess
-                        {{ selected_items.length }} Detections</CDropdownItem
-                      >
-                      <CDropdownItem
-                          aria-label="Clear Warnings"
-                          @click="clearWarnings()"
-                          size="sm"
-                          color="success"
-                          v-bind:disabled="selected_items.length == 0"
-                          v-c-tooltip="{ content: 'Clear Warnings', placement: 'left' }"
-                        ><i class="fas fa-soap" />&nbsp;&nbsp;Clear Warnings</CDropdownItem>
-                      <CDropdownItem
-                        v-bind:disabled="selected_items.length == 0"
-                        @click="addToRepository()"
-                        ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;&nbsp;Add to
-                        Repository</CDropdownItem
-                      >
-                      <CDropdownItem
-                        v-bind:disabled="selected_items.length == 0"
-                        @click="removeFromRepository()"
-                        ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;&nbsp;Remove from
-                        Repository</CDropdownItem
-                      >
-                      <CDropdownItem
-                        v-bind:disabled="selected_items.length == 0"
-                        @click="exportDetections()"
-                        ><i class="fas fa-file-export" />&nbsp;&nbsp;Export
-                        {{ selected_items.length }} Detections</CDropdownItem
-                      >
-                      <CDropdownItem @click="import_wizard = !import_wizard"
-                        ><i class="fas fa-file-import" />&nbsp;&nbsp;Import
-                        Detections</CDropdownItem
-                      >
-                      <CDropdownDivider></CDropdownDivider>
-                       
-                      <CDropdownItem
-                        v-bind:disabled="selected_items.length == 0"
-                        @click="deleteDetectionModal()"
-                        ><CIcon name="cilTrash" size="sm" />&nbsp;Delete
-                        {{ selected_items.length }} Detections</CDropdownItem
-                      >
-                    </CDropdown>
-                  </CCol>
-                </CRow>
-                <CDataTable
-                  :items="filtered_items"
-                  :fields="detection_list_fields"
-                  :items-per-page="10"
-                  :sorter="{ external: true, resetable: true }"
-                  :sorterValue.sync="sorter_value"
-                  :loading="loading"
-                  style="border-top: 1px solid #cfcfcf"
-                  :responsive="false"
+          <CTab title="Detection Rules" active>
+            <CRow>
+              <CCol>
+                <h2 class="page-sub-header">Detection Rules</h2>
+              </CCol>
+              <CCol class="text-right">
+                <CButton
+                  v-if="current_user.permissions['create_detection']"
+                  color="primary"
+                  @click="createDetectionModal()"
+                  >New Detection</CButton
                 >
-                  <template #organization-filter="{ item }">
-                    <RMultiCheck
-                      :items="organizations_pick_list"
-                      @checked="set_picker_filters($event, 'organization')"
+              </CCol>
+            </CRow>
+            <DetectionsFilterMenu
+              :total_detections="filtered_items.length"
+              @filter_changed="getDetections()"
+            ></DetectionsFilterMenu>
+            <CCard style="margin-top: 5px">
+              <CRow style="padding: 10px">
+                <CCol class="text-right">
+                  <CDropdown color="secondary" toggler-text="Bulk Actions" size="sm">
+                    <CDropdownItem @click="selectAllByFilter()"
+                      >Select All {{ total_items }} Detections</CDropdownItem
+                    >
+                    <CDropdownItem @click="clearSelection()"
+                      >Clear Selection</CDropdownItem
+                    >
+                    <CDropdownDivider></CDropdownDivider>
+                    <CDropdownItem
+                      v-bind:disabled="selected_items.length == 0"
+                      @click="enableDetections()"
+                      ><CIcon name="cilCheck" />&nbsp;&nbsp;Enable
+                      {{ selected_items.length }} Detections</CDropdownItem
+                    >
+                    <CDropdownItem
+                      v-bind:disabled="selected_items.length == 0"
+                      @click="disableDetections()"
+                      ><CIcon name="cilBan" />&nbsp;&nbsp;Disable
+                      {{ selected_items.length }} Detections</CDropdownItem
+                    >
+                    <CDropdownItem
+                      v-bind:disabled="selected_items.length == 0"
+                      @click="assessDetections()"
+                      ><i class="fas fa-flag" />&nbsp;&nbsp;Assess
+                      {{ selected_items.length }} Detections</CDropdownItem
+                    >
+                    <CDropdownItem
+                      aria-label="Clear Warnings"
+                      @click="clearWarnings()"
                       size="sm"
-                    ></RMultiCheck>
-                  </template>
-                  <template #status="{ item }">
-                    <td>
-                      <CBadge class="tag tag-sm" color="info" v-if="item.status">{{
-                        item.status
-                      }}</CBadge
-                      ><CBadge class="tag tag-sm" color="danger" v-else>Unknown</CBadge>
-                    </td>
-                  </template>
-                  <template #select-header="{ item }">
-                    <span style="text-align: center">
-                      <input
-                        type="checkbox"
-                        :checked="selected_items.length > 0"
-                        @click="selectAll()"
-                        style="margin-left: 7px"
-                    /></span>
-                  </template>
-                  <template #select="{ item }">
-                    <td style="text-align: center">
-                      <input
-                        type="checkbox"
-                        :checked="item_is_selected(item.uuid)"
-                        @click="select_item(item.uuid)"
-                      />
-                    </td>
-                  </template>
-                  <template #name="{ item }">
-                    <td>
-                      <CRow>
-                        <CCol>
-                          <CBadge class="tag tag-sm" color="success" v-if="item.active"
-                            >Active</CBadge
-                          ><CBadge class="tag tag-sm" color="danger" v-else
-                            >Inactive</CBadge
-                          >&nbsp;<b>{{ item.name }}</b>
-                        </CCol>
-                        <CCol col="3">
-                          <div style="display: inline-block; padding-right: 2px">
-                            <TagBucket
-                              v-if="item.tags && item.tags.length > 0"
-                              :tags="item.tags"
-                            />
-                          </div>
-                          <div style="display: inline-block">
-                            <DetectionRepoPopover
-                              v-if="item.repository && item.repository.length > 0"
-                              :repositories="item.repository"
-                            />
-                          </div>
-                          <div v-if="item.assess_rule" style="display: inline-block; padding-left: 2px;">
-                            <TagBucket iconName="cil-speedometer" label="Flagged for Assessment" :noCount="true" tagColor="primary" />
+                      color="success"
+                      v-bind:disabled="selected_items.length == 0"
+                      v-c-tooltip="{ content: 'Clear Warnings', placement: 'left' }"
+                      ><i class="fas fa-soap" />&nbsp;&nbsp;Clear Warnings</CDropdownItem
+                    >
+                    <CDropdownItem
+                      v-bind:disabled="selected_items.length == 0"
+                      @click="addToRepository()"
+                      ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;&nbsp;Add to
+                      Repository</CDropdownItem
+                    >
+                    <CDropdownItem
+                      v-bind:disabled="selected_items.length == 0"
+                      @click="removeFromRepository()"
+                      ><CIcon name="cilStorage" size="sm"></CIcon>&nbsp;&nbsp;Remove from
+                      Repository</CDropdownItem
+                    >
+                    <CDropdownItem
+                      v-bind:disabled="selected_items.length == 0"
+                      @click="exportDetections()"
+                      ><i class="fas fa-file-export" />&nbsp;&nbsp;Export
+                      {{ selected_items.length }} Detections</CDropdownItem
+                    >
+                    <CDropdownItem @click="import_wizard = !import_wizard"
+                      ><i class="fas fa-file-import" />&nbsp;&nbsp;Import
+                      Detections</CDropdownItem
+                    >
+                    <CDropdownDivider></CDropdownDivider>
+
+                    <CDropdownItem
+                      v-bind:disabled="selected_items.length == 0"
+                      @click="deleteDetectionModal()"
+                      ><CIcon name="cilTrash" size="sm" />&nbsp;Delete
+                      {{ selected_items.length }} Detections</CDropdownItem
+                    >
+                  </CDropdown>
+                </CCol>
+              </CRow>
+              <CDataTable
+                :items="filtered_items"
+                :fields="detection_list_fields"
+                :items-per-page="10"
+                :sorter="{ external: true, resetable: true }"
+                :sorterValue.sync="sorter_value"
+                :loading="loading"
+                style="border-top: 1px solid #cfcfcf"
+                :responsive="false"
+              >
+                <template #organization-filter="{ item }">
+                  <RMultiCheck
+                    :items="organizations_pick_list"
+                    @checked="set_picker_filters($event, 'organization')"
+                    size="sm"
+                  ></RMultiCheck>
+                </template>
+                <template #status="{ item }">
+                  <td>
+                    <CBadge class="tag tag-sm" color="info" v-if="item.status">{{
+                      item.status
+                    }}</CBadge
+                    ><CBadge class="tag tag-sm" color="danger" v-else>Unknown</CBadge>
+                  </td>
+                </template>
+                <template #select-header="{ item }">
+                  <span style="text-align: center">
+                    <input
+                      type="checkbox"
+                      :checked="selected_items.length > 0"
+                      @click="selectAll()"
+                      style="margin-left: 7px"
+                  /></span>
+                </template>
+                <template #select="{ item }">
+                  <td style="text-align: center">
+                    <input
+                      type="checkbox"
+                      :checked="item_is_selected(item.uuid)"
+                      @click="select_item(item.uuid)"
+                    />
+                  </td>
+                </template>
+                <template #name="{ item }">
+                  <td>
+                    <CRow>
+                      <CCol>
+                        <CRow>
+                          <CCol>
+                            <b>{{ item.name }}</b>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CCol class="detection-attributes">
+                            <CBadge class="tag tag-sm" size="sm" color="success" v-if="item.active"
+                              >Active</CBadge
+                            ><CBadge class="tag tag-sm" size="sm" color="danger" v-else
+                              >Inactive</CBadge
+                            >
+                            <CBadge class="tag tag-sm" color="info" v-if="item.status"
+                              ><b>Status:</b> {{ item.status }}</CBadge
+                            >
+                            <CBadge class="tag tag-sm" color="danger" v-else
+                              ><b>Status:</b> Unknown</CBadge
+                            ><CBadge
+                              class="tag tag-sm"
+                              :color="getSeverityColor(item.severity)"
+                              ><b>Severity:</b
+                              > {{ getSeverityText(item.severity) }}</CBadge
+                            ><CBadge
+                              v-if="item.risk_score"
+                              class="tag tag-sm"
+                              color="warning"
+                              size="sm"
+                              ><b>Risk Score:</b> {{ item.risk_score }}</CBadge
+                            >
+                            <div v-if="item.tags && item.tags.length > 0">
+                              <TagBucket :tags="item.tags" />
                             </div>
-                        </CCol>
-                      </CRow>
-                      <br />
-                      <span v-if="item.warnings && item.warnings.length > 0">
-                        <li
-                          style="display: inline; margin-right: 2px"
-                          v-for="(warning, i) in item.warnings"
-                          :key="i"
-                        >
-                          <CButton color="warning" class="tag" size="sm">{{
-                            warning
-                          }}</CButton>
-                        </li>
-                      </span>
-                    </td>
-                  </template>
-                  <template #organization="{ item }">
-                    <td>
-                      <OrganizationBadge :uuid="item.organization" />
-                    </td>
-                  </template>
-                  <template #last_run="{ item }">
-                    <td style="width: 125px">
-                      <span v-if="neverRun(item.last_run)"> Never</span>
-                      <span v-else>
-                        {{ item.last_run | moment("from", "now") }}
-                      </span>
-                    </td>
-                  </template>
-                  <template #last_hit="{ item }">
-                    <td style="width: 125px">
-                      <span v-if="item.last_hit">
-                        {{ item.last_hit | moment("from", "now") }}
-                      </span>
-                      <span v-else> Never </span>
-                    </td>
-                  </template>
-                  <template #total_hits="{ item }">
-                    <td style="width: 75px" class="text-center">
-                      {{ item.total_hits ? item.total_hits : 0 }}
-                    </td>
-                  </template>
-                  <template #tags="{ item }">
-                    <td>
-                      <TagBucket :tags="item.tags" />
-                    </td>
-                  </template>
-                  <template #performance="{ item }">
-                    <td class="small">
-                      Query Time:
-                      {{
-                        item.query_time_taken ? item.query_time_taken.toLocaleString() : 0
-                      }}
-                      ms<br />
-                      Total Time:
-                      {{ item.time_taken ? item.time_taken.toLocaleString() : 0 }} ms
-                      <br>
-                      Estimated Hits Per Day:
-                      <span v-if="item.average_hits_per_day != null">
-                        {{ item.average_hits_per_day ? item.average_hits_per_day.toLocaleString() : 0 }}
-                      </span>
-                      <span v-else>-</span>
-                    </td>
-                  </template>
-                  <template #actions="{ item }">
-                    <td style="min-width: 25px" class="text-right">
-                      <CDropdown color="secondary" toggler-text="Manage" size="sm">
-                        <CDropdownItem
-                          aria-label="View Detection"
-                          :to="`detections/${item.uuid}`"
-                          size="sm"
-                          color="primary"
-                          v-c-tooltip="{ content: 'View Detection', placement: 'left' }"
-                          ><CIcon name="cilMagnifyingGlass" />&nbsp;&nbsp;View
-                          Detection</CDropdownItem
-                        >
-                        <CDropdownItem 
-                          aria-label="Flag for Assessment"
-                          @click="flagForAssessment(item.uuid)"
-                          size="sm"
-                          color="warning"
-                          v-if="!item.assess_rule"
-                          v-c-tooltip="{ content: 'Flag for Assessment', placement: 'left' }"
-                          ><i class="fas fa-flag"/>&nbsp;&nbsp;Flag for Assessment</CDropdownItem
-                        >
-                        <CDropdownItem
-                          aria-label="Clear Warnings"
-                          @click="clearWarnings(item.uuid)"
-                          size="sm"
-                          color="success"
-                          v-if="item.warnings && item.warnings.length > 0"
-                          v-c-tooltip="{ content: 'Clear Warnings', placement: 'left' }"
-                        ><i class="fas fa-soap" />&nbsp;&nbsp;Clear Warnings</CDropdownItem>
-                        <CDropdownItem
-                          aria-label="Edit Detection"
-                          @click="editDetectionModal(item.uuid)"
-                          size="sm"
-                          color="info"
-                          v-c-tooltip="{ content: 'Edit Detection', placement: 'left' }"
-                        >
-                          <CIcon name="cilPencil" />&nbsp;&nbsp;Edit Detection
-                        </CDropdownItem>
-                        <CDropdownItem
-                          v-if="item.active"
-                          aria-label="Disable Detection"
-                          @click="disableDetection(item.uuid)"
-                          size="sm"
-                          color="warning"
-                          v-c-tooltip="{
-                            content: 'Disable Detection',
-                            placement: 'left',
-                          }"
-                        >
-                          <CIcon name="cilBan" />&nbsp;&nbsp;Disable Detection
-                        </CDropdownItem>
-                        <CDropdownItem
-                          v-if="!item.active"
-                          aria-label="Enable Detection"
-                          @click="enableDetection(item.uuid)"
-                          size="sm"
-                          color="success"
-                          v-c-tooltip="{ content: 'Enable Detection', placement: 'left' }"
-                        >
-                          <i class="fas fa-circle-check" />&nbsp;&nbsp;Enable Detection
-                        </CDropdownItem>
-                        <CDropdownItem
-                          aria-label="Clone Detection"
-                          size="sm"
-                          color="secondary"
-                          @click="cloneDetection(item.uuid)"
-                          v-c-tooltip="{ content: 'Clone Detection', placement: 'left' }"
-                        >
-                          <CIcon name="cilCopy" />&nbsp;&nbsp;Clone Detection
-                        </CDropdownItem>
-                        <CDropdownItem
-                          v-if="!item.from_repo_sync"
-                          aria-label="Add To Repository"
-                          @click="addToRepository(item.uuid)"
-                          size="sm"
-                          color="primary"
-                          v-c-tooltip="{
-                            content: 'Add to Repository',
-                            placement: 'left',
-                          }"
-                        >
-                          <CIcon name="cilStorage" />&nbsp;&nbsp;Add To Repository
-                        </CDropdownItem>
-                        <CDropdownItem
-                          v-if="!item.from_repo_sync"
-                          aria-label="Remove From Repository"
-                          @click="removeFromRepository(item.uuid)"
-                          size="sm"
-                          color="primary"
-                          v-c-tooltip="{
-                            content: 'Remove from Repository',
-                            placement: 'left',
-                          }"
-                        >
-                          <CIcon name="cilStorage" />&nbsp;&nbsp;Remove from Repository
-                        </CDropdownItem>
-                        <CDropdownItem
-                          aria-label="Export Detection"
-                          @click="exportDetection(item.uuid)"
-                          size="sm"
-                          color="info"
-                          v-c-tooltip="{
-                            content: 'Export Detection',
-                            placement: 'left',
-                          }"
-                        >
-                          <i class="fas fa-file-export" />&nbsp;&nbsp;Export Detection
-                        </CDropdownItem>
-                        <CDropdownItem
-                          v-if="!item.active && !item.from_repo_sync"
-                          aria-label="Delete Detection"
-                          @click="deleteDetectionModal(item.uuid)"
-                          size="sm"
-                          color="danger"
-                          v-c-tooltip="{ content: 'Delete Detection', placement: 'left' }"
-                        >
-                          <CIcon name="cilTrash" />&nbsp;&nbsp;Delete Detection
-                        </CDropdownItem>
-                      </CDropdown>
-                    </td>
-                  </template>
-                </CDataTable>
-                <CPagination :active-page.sync="current_page" :pages="total_pages" />
-                <!--<DetectionRules></DetectionRules>-->
-              </CTab>
-              <CTab title="Detection Repositories">
-                <DetectionRepositoryList />
-              </CTab>
-              <!--<CTab title="Detection Bundles"> </CTab>-->
-            </CTabs>
-          </CCardBody>
-        </CCard>
+                            <div v-if="item.repository && item.repository.length > 0">
+                              <DetectionRepoPopover :repositories="item.repository" />
+                            </div>
+                            <div v-if="item.assess_rule" style="">
+                              <TagBucket
+                                iconName="cil-speedometer"
+                                label="Flagged for Assessment"
+                                :noCount="true"
+                                tagColor="primary"
+                              />
+                            </div>
+                            <div v-if="item.warnings && item.warnings.length > 0">
+                              <TagBucket
+                                :tags="item.warnings"
+                                iconName="cil-warning"
+                                label="Warnings"
+                                tagColor="danger"
+                              />
+                            </div>
+                            <div v-if="item.status == 'Production - Enterprise'">
+                              <CBadge
+                                class="tag tag-sm"
+                                color="warning"
+                                size="sm"
+                                v-c-tooltip="{ content: '24/7 Eligible' }"
+                                ><i class="fas fas-small fa-star"></i
+                              ></CBadge>
+                            </div>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CCol style="margin-top: 2px">
+                            <span class="small rule_description">{{
+                              item.description
+                            }}</span></CCol
+                          >
+                        </CRow>
+                      </CCol>
+                    </CRow>
+                  </td>
+                </template>
+                <template #organization="{ item }">
+                  <td>
+                    <OrganizationBadge :uuid="item.organization" />
+                  </td>
+                </template>
+                <template #last_run="{ item }">
+                  <td style="width: 125px">
+                    <span v-if="neverRun(item.last_run)"> Never</span>
+                    <span v-else>
+                      {{ item.last_run | moment("from", "now") }}
+                    </span>
+                  </td>
+                </template>
+                <template #last_hit="{ item }">
+                  <td style="width: 125px">
+                    <span v-if="item.last_hit">
+                      {{ item.last_hit | moment("from", "now") }}
+                    </span>
+                    <span v-else> Never </span>
+                  </td>
+                </template>
+                <template #total_hits="{ item }">
+                  <td style="width: 75px" class="text-center">
+                    {{ item.total_hits ? item.total_hits : 0 }}
+                  </td>
+                </template>
+                <template #average_hits_per_day="{ item }">
+                  <td style="width: 75px" class="text-center">
+                    {{ item.average_hits_per_day ? item.average_hits_per_day : 0 }}
+                  </td>
+                </template>
+                <template #tags="{ item }">
+                  <td>
+                    <TagBucket :tags="item.tags" />
+                  </td>
+                </template>
+                <template #performance="{ item }">
+                  <td class="small">
+                    Query Time:
+                    {{
+                      item.query_time_taken ? item.query_time_taken.toLocaleString() : 0
+                    }}
+                    ms<br />
+                    Total Time:
+                    {{ item.time_taken ? item.time_taken.toLocaleString() : 0 }} ms
+                  </td>
+                </template>
+                <template #actions="{ item }">
+                  <td style="min-width: 25px" class="text-right">
+                    <CDropdown color="secondary" toggler-text="Manage" size="sm">
+                      <CDropdownItem
+                        aria-label="View Detection"
+                        :to="`detections/${item.uuid}`"
+                        size="sm"
+                        color="primary"
+                        v-c-tooltip="{ content: 'View Detection', placement: 'left' }"
+                        ><CIcon name="cilMagnifyingGlass" />&nbsp;&nbsp;View
+                        Detection</CDropdownItem
+                      >
+                      <CDropdownItem
+                        aria-label="Flag for Assessment"
+                        @click="flagForAssessment(item.uuid)"
+                        size="sm"
+                        color="warning"
+                        v-if="!item.assess_rule"
+                        v-c-tooltip="{
+                          content: 'Flag for Assessment',
+                          placement: 'left',
+                        }"
+                        ><i class="fas fa-flag" />&nbsp;&nbsp;Flag for
+                        Assessment</CDropdownItem
+                      >
+                      <CDropdownItem
+                        aria-label="Clear Warnings"
+                        @click="clearWarnings(item.uuid)"
+                        size="sm"
+                        color="success"
+                        v-if="item.warnings && item.warnings.length > 0"
+                        v-c-tooltip="{ content: 'Clear Warnings', placement: 'left' }"
+                        ><i class="fas fa-soap" />&nbsp;&nbsp;Clear
+                        Warnings</CDropdownItem
+                      >
+                      <CDropdownItem
+                        aria-label="Edit Detection"
+                        @click="editDetectionModal(item.uuid)"
+                        size="sm"
+                        color="info"
+                        v-c-tooltip="{ content: 'Edit Detection', placement: 'left' }"
+                      >
+                        <CIcon name="cilPencil" />&nbsp;&nbsp;Edit Detection
+                      </CDropdownItem>
+                      <CDropdownItem
+                        v-if="item.active"
+                        aria-label="Disable Detection"
+                        @click="disableDetection(item.uuid)"
+                        size="sm"
+                        color="warning"
+                        v-c-tooltip="{
+                          content: 'Disable Detection',
+                          placement: 'left',
+                        }"
+                      >
+                        <CIcon name="cilBan" />&nbsp;&nbsp;Disable Detection
+                      </CDropdownItem>
+                      <CDropdownItem
+                        v-if="!item.active"
+                        aria-label="Enable Detection"
+                        @click="enableDetection(item.uuid)"
+                        size="sm"
+                        color="success"
+                        v-c-tooltip="{ content: 'Enable Detection', placement: 'left' }"
+                      >
+                        <i class="fas fa-circle-check" />&nbsp;&nbsp;Enable Detection
+                      </CDropdownItem>
+                      <CDropdownItem
+                        aria-label="Clone Detection"
+                        size="sm"
+                        color="secondary"
+                        @click="cloneDetection(item.uuid)"
+                        v-c-tooltip="{ content: 'Clone Detection', placement: 'left' }"
+                      >
+                        <CIcon name="cilCopy" />&nbsp;&nbsp;Clone Detection
+                      </CDropdownItem>
+                      <CDropdownItem
+                        v-if="!item.from_repo_sync"
+                        aria-label="Add To Repository"
+                        @click="addToRepository(item.uuid)"
+                        size="sm"
+                        color="primary"
+                        v-c-tooltip="{
+                          content: 'Add to Repository',
+                          placement: 'left',
+                        }"
+                      >
+                        <CIcon name="cilStorage" />&nbsp;&nbsp;Add To Repository
+                      </CDropdownItem>
+                      <CDropdownItem
+                        v-if="!item.from_repo_sync"
+                        aria-label="Remove From Repository"
+                        @click="removeFromRepository(item.uuid)"
+                        size="sm"
+                        color="primary"
+                        v-c-tooltip="{
+                          content: 'Remove from Repository',
+                          placement: 'left',
+                        }"
+                      >
+                        <CIcon name="cilStorage" />&nbsp;&nbsp;Remove from Repository
+                      </CDropdownItem>
+                      <CDropdownItem
+                        aria-label="Export Detection"
+                        @click="exportDetection(item.uuid)"
+                        size="sm"
+                        color="info"
+                        v-c-tooltip="{
+                          content: 'Export Detection',
+                          placement: 'left',
+                        }"
+                      >
+                        <i class="fas fa-file-export" />&nbsp;&nbsp;Export Detection
+                      </CDropdownItem>
+                      <CDropdownItem
+                        v-if="!item.active && !item.from_repo_sync"
+                        aria-label="Delete Detection"
+                        @click="deleteDetectionModal(item.uuid)"
+                        size="sm"
+                        color="danger"
+                        v-c-tooltip="{ content: 'Delete Detection', placement: 'left' }"
+                      >
+                        <CIcon name="cilTrash" />&nbsp;&nbsp;Delete Detection
+                      </CDropdownItem>
+                    </CDropdown>
+                  </td>
+                </template>
+              </CDataTable>
+              <CPagination :active-page.sync="current_page" :pages="total_pages" />
+            </CCard>
+          </CTab>
+          <CTab title="Detection Repositories">
+            <DetectionRepositoryList />
+          </CTab>
+          <!--<CTab title="Detection Bundles"> </CTab>-->
+        </CTabs>
         <AddToRepositoryModal
           :show.sync="show_add_to_repository_modal"
           :detection_ids.sync="selected_items"
@@ -428,6 +468,31 @@
   </div>
 </template>
 
+<style scoped>
+
+.detection-attributes > span {
+  margin-right: 4px;
+}
+
+.detection-attributes > div {
+  display: inline-block;
+  margin-right: 4px;
+  padding-bottom: 3px;
+}
+
+.rule_description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.rule_description:hover {
+  display: block;
+}
+</style>
+
 <script>
 import { mapState } from "vuex";
 import "prismjs/components/prism-yaml";
@@ -474,16 +539,15 @@ export default {
       selected_items: [],
       selected_item_repos: [],
       picker_filters: {},
-      sorter_value: { column: 'name', asc: true },
+      sorter_value: { column: "name", asc: true },
       //loading: false,
       detection_list_fields: [
         { key: "select", label: "", filter: false },
         "name",
-        "status",
         "last_run",
         "last_hit",
+        { key: "average_hits_per_day", label: "Est. Hits", _style: "width: 125px" },
         { key: "total_hits", label: "Hits" },
-        { key: "performance", label: "Performance" },
         { key: "actions", filter: false },
       ],
       modal_mode: "Create",
@@ -548,7 +612,7 @@ export default {
         },
         indicator_match_config: {
           intel_list: {},
-          key_field: ""
+          key_field: "",
         },
         source_monitor_config: {
           data_sources: [],
@@ -559,9 +623,10 @@ export default {
           delta_window: 7,
           operator: "==",
           threshold: 0,
-          threshold_as_percent: false
+          threshold_as_percent: false,
         },
         daily_schedule: false,
+        schedule_timezone: "Etc/GMT",
         schedule: this.defaultSchedule(),
       },
       current_page: 1,
@@ -569,10 +634,38 @@ export default {
       total_pages: 1,
       sort_by: "name",
       sort_direction: "asc",
-      total_items: 0
+      total_items: 0,
     };
   },
   methods: {
+    getSeverityColor(severity) {
+      switch (severity) {
+        case 1:
+          return "dark";
+        case 2:
+          return "info";
+        case 3:
+          return "warning";
+        case 4:
+          return "danger";
+        default:
+          return "danger";
+      }
+    },
+    getSeverityText(severity) {
+      switch (severity) {
+        case 1:
+          return "Low";
+        case 2:
+          return "Medium";
+        case 3:
+          return "High";
+        case 4:
+          return "Critical";
+        default:
+          return "Unknown";
+      }
+    },
     getDetections() {
       let filters = JSON.parse(JSON.stringify(this.selected_detection_filters));
       filters["page_size"] = this.page_size;
@@ -644,7 +737,7 @@ export default {
         threshold_config: {
           threshold: 0,
           max_events: 10,
-          key_field: "",
+          key_field: [],
           operator: "==",
           dynamic: false,
           per_field: false,
@@ -667,6 +760,7 @@ export default {
           window_size: 30,
         },
         daily_schedule: false,
+        schedule_timezone: "Etc/GMT",
         schedule: this.defaultSchedule(),
       };
     },
@@ -698,7 +792,7 @@ export default {
         threshold_config: {
           threshold: 0,
           max_events: 10,
-          key_field: "",
+          key_field: [],
           operator: "==",
           dynamic: false,
           per_field: false,
@@ -722,7 +816,7 @@ export default {
         },
         indicator_match_config: {
           intel_list: {},
-          key_field: ""
+          key_field: "",
         },
         source_monitor_config: {
           data_sources: [],
@@ -733,9 +827,10 @@ export default {
           delta_window: 7,
           operator: "==",
           threshold: 0,
-          threshold_as_percent: false
+          threshold_as_percent: false,
         },
         daily_schedule: false,
+        schedule_timezone: "Etc/GMT",
         schedule: this.defaultSchedule(),
       };
       this.show_detection_rule_modal = true;
@@ -892,17 +987,20 @@ export default {
     },
     clearWarnings(uuid) {
       let uuids = [];
-      if(typeof(uuid) === "string") {
+      if (typeof uuid === "string") {
         uuids = [uuid];
       } else {
         uuids = this.selected_items;
       }
-      this.$store.dispatch("clearDetectionWarnings", { uuids: uuids }).then((resp) => {
-        this.selected_items = [];
-      }).catch((err) => {
-        this.selected_items = [];
-        this.alert = { message: err.response.data.message, type: "danger" };
-      });
+      this.$store
+        .dispatch("clearDetectionWarnings", { uuids: uuids })
+        .then((resp) => {
+          this.selected_items = [];
+        })
+        .catch((err) => {
+          this.selected_items = [];
+          this.alert = { message: err.response.data.message, type: "danger" };
+        });
     },
     enableDetections() {
       this.$store
@@ -915,13 +1013,13 @@ export default {
       if (item) {
         this.selected_items = [item];
       }
-      if(this.show_add_to_repository_modal) {
+      if (this.show_add_to_repository_modal) {
         this.show_add_to_repository_modal = false;
       }
       this.show_add_to_repository_modal = true;
     },
     flagForAssessment(item) {
-      this.$store.dispatch("flagDetectionAssess", { uuid: item })
+      this.$store.dispatch("flagDetectionAssess", { uuid: item });
     },
     assessDetections() {
       this.$store
@@ -1035,13 +1133,13 @@ export default {
     ]),
   },
   watch: {
-    current_page: function(){
-        this.getDetections()
-      },
-    sorter_value: function(){
-      this.sort_by = this.sorter_value.column
-      this.sort_direction = this.sorter_value.asc ? 'asc' : 'desc'
-      this.getDetections()
+    current_page: function () {
+      this.getDetections();
+    },
+    sorter_value: function () {
+      this.sort_by = this.sorter_value.column;
+      this.sort_direction = this.sorter_value.asc ? "asc" : "desc";
+      this.getDetections();
     },
   },
   created() {
