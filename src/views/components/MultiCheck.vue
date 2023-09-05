@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{ filtered_items }}
     <div v-if="expanded">
       <input
         v-if="searchable"
