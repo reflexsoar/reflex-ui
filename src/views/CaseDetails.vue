@@ -49,6 +49,29 @@
           </CCol>
           <CCol col="2" class="text-right">
             <label class="text-muted" style="text-transform: uppercase"
+              ><small><b>Severity</b></small></label
+            >
+            <CSelect
+              id="severity-select"
+              v-if="edit_severity"
+              :value.sync="case_data.severity"
+              :options="severities"
+              @change="updateSeverity()"
+              v-bind:disabled="case_data.status && case_data.status.closed"
+            ></CSelect>
+            <h4
+              v-if="!edit_severity"
+              style="cursor: pointer"
+              id="severity-label"
+              @click="editSeverity"
+            >
+              <CBadge size="sm" :color="getSeverityColor(case_data.severity)"
+                >&nbsp;&nbsp;&nbsp;</CBadge
+              >&nbsp;{{ getSeverityText(case_data.severity) }}
+            </h4>
+          </CCol>
+          <CCol col="2" class="text-right">
+            <label class="text-muted" style="text-transform: uppercase"
               ><small><b>Owner</b></small></label
             >
             <div role="group" class="form-group">
@@ -78,29 +101,7 @@
               </h4>
             </div>
           </CCol>
-          <CCol col="1" class="text-right">
-            <label class="text-muted" style="text-transform: uppercase"
-              ><small><b>Severity</b></small></label
-            >
-            <CSelect
-              id="severity-select"
-              v-if="edit_severity"
-              :value.sync="case_data.severity"
-              :options="severities"
-              @change="updateSeverity()"
-              v-bind:disabled="case_data.status && case_data.status.closed"
-            ></CSelect>
-            <h4
-              v-if="!edit_severity"
-              style="cursor: pointer"
-              id="severity-label"
-              @click="editSeverity"
-            >
-              <CBadge size="sm" :color="getSeverityColor(case_data.severity)"
-                >&nbsp;&nbsp;&nbsp;</CBadge
-              >&nbsp;{{ getSeverityText(case_data.severity) }}
-            </h4>
-          </CCol>
+          
           <CCol col="2" class="text-right">
             <CDropdown
               toggler-text="Actions"
