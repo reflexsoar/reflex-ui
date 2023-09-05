@@ -31,9 +31,7 @@
         </template>
         <template #tags="{item}">
           <td>
-            <li style="display: inline; margin-right: 2px;" v-for="tag in item.tags" :key="tag">
-            <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
-          </li>
+            <TagBucket :tags="item.tags" />
           </td>
           </template>
         <template #created_at="{ item }">
@@ -53,7 +51,7 @@
         </template>
         <template #roles="{item}">
             <td>
-            <li style="display: inline; margin-right: 2px;" v-for="role in item.roles" :key="role"><CButton color="primary" style="cursor: auto" size="sm" disabled>{{ role }}</CButton></li>
+            <TagBucket :tags="item.roles" label="Roles" iconName="cilSettings" />
             </td>
         </template>
         <template #created_by="{ item }">
@@ -82,6 +80,7 @@ import { mapState } from "vuex";
 import OrganizationBadge from "../OrganizationBadge.vue";
 import AgentPolicyWizard from "./AgentPolicyWizard.vue";
 import RDataTable from "../components/DataTable.vue";
+import TagBucket from "../components/TagBucket.vue"
 
 export default {
   name: "AgentPolicies",
@@ -89,6 +88,7 @@ export default {
     OrganizationBadge,
     AgentPolicyWizard,
     RDataTable,
+    TagBucket
   },
   data() {
     return {

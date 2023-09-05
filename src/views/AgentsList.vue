@@ -45,7 +45,7 @@
         </template>
         <template #health_issues-filter="{ item }">
           <RMultiCheck
-            :items="agent_versions"
+            :items="health_issues"
             @checked="set_picker_filters($event, 'health_issues')"
             size="sm"
           ></RMultiCheck>
@@ -197,9 +197,18 @@ export default {
         let match = true;
         for (let key in this.picker_filters) {
           if (this.picker_filters[key].length > 0) {
+            console.log(typeof agent[key]);
             if (typeof agent[key] == "boolean") {
               if (!this.picker_filters[key].includes(agent[key].toString())) {
                 match = false;
+              }
+            } else if (typeof agent[key] == "object") {
+              // If any of the values from picker_filters[key] is in agent[key] then it's a match
+              let found = false;
+              for (let i in this.picker_filters[key]) {
+                if (agent[key].includes(this.picker_filters[key][i])) {
+                  found = true;
+                }
               }
             } else {
               if (!this.picker_filters[key].includes(agent[key])) {
@@ -222,6 +231,17 @@ export default {
         }
       });
       return versions;
+    },
+    health_issues() {
+      let issues = [];
+      this.agents.forEach((agent) => {
+        agent.health_issues.forEach((issue) => {
+          if (!issues.find((i) => i.value == issue)) {
+            issues.push({ value: issue, label: issue });
+          }
+        });
+      });
+      return issues;
     },
     health_statuses() {
       let healths = [];
