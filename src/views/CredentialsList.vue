@@ -1,70 +1,69 @@
 <template>
-  <CRow>
-    <CCol col>
-      <h2>
-        Credentials<button
+  <div>
+    <CRow class="page-heading page-heading-row page-heading-no-nav">
+      <CCol>
+        <h1>Credential Management<button
           type="button"
           class="kb"
           onclick="window.open('https://docs.reflexsoar.com/en/latest/credentials')"
         >
           <CIcon name="cil-book" size="lg" />
         </button>
-      </h2>
-      <br />
-      <CButton color="primary" @click="newCredential()">New Credential</CButton
-      ><br /><br />
+      </h1>
+      </CCol>
+    </CRow>
+  <CRow>
+    <CCol col>
+      
+      <CRow class="page-sub-header page-header-row">
+        <CCol>
+          <h2>Credentials</h2>
+        </CCol>
+        <CCol class="text-right">
+          <CButton color="primary" @click="newCredential()">New Credential</CButton>
+        </CCol>
+      </CRow>
       <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
         {{ alert.message }}
       </CAlert>
       <CCard>
-        <CCardHeader>
-          <b>Credentials</b>
-        </CCardHeader>
-        <CCardBody>
-          <CDataTable
-            :hover="hover"
-            :striped="striped"
-            :bordered="bordered"
-            :small="small"
-            :fixed="fixed"
-            :items="filtered_credentials"
-            :fields="fields"
-            :items-per-page="small ? 25 : 10"
-            :dark="dark"
-            pagination
-            items-per-page-select
-            column-filter
-            :sorter="{ external: false, resetable: true }"
-          >
-            <template #organization-filter="{ item }">
-              <RMultiCheck
-                :items="organizations"
-                @checked="set_picker_filters($event, 'organization')"
-                size="sm"
-              ></RMultiCheck>
-            </template>
-            <template #name="{ item }">
-              <td>
-                <b>{{ item.name }}</b>
-              </td>
-            </template>
-            <template #organization="{ item }">
-              <td>
-                <OrganizationBadge :uuid="item.organization" />
-              </td>
-            </template>
-            <template #actions="{ item }">
-              <td class="text-right" style="width: 10%">
-                <CButton color="info" size="sm" @click="getCredentialDetails(item.uuid)"
-                  ><CIcon name="cilPencil" /></CButton
-                >&nbsp;
-                <CButton color="danger" size="sm" @click="removeCredential(item.uuid)"
-                  ><CIcon name="cilTrash"
-                /></CButton>
-              </td>
-            </template>
-          </CDataTable>
-        </CCardBody>
+        <CDataTable
+          :hover="hover"
+          :items="filtered_credentials"
+          :fields="fields"
+          :items-per-page="small ? 25 : 10"
+          pagination
+          column-filter
+          :sorter="{ external: false, resetable: true }"
+        >
+          <template #organization-filter="{ item }">
+            <RMultiCheck
+              :items="organizations"
+              @checked="set_picker_filters($event, 'organization')"
+              size="sm"
+            ></RMultiCheck>
+          </template>
+          <template #name="{ item }">
+            <td>
+              <b>{{ item.name }}</b>
+            </td>
+          </template>
+          <template #organization="{ item }">
+            <td>
+              <OrganizationBadge :uuid="item.organization" />
+            </td>
+          </template>
+          <template #actions="{ item }">
+            <td class="text-right" style="width: 10%">
+              <CButton color="info" size="sm" @click="getCredentialDetails(item.uuid)"
+                ><CIcon name="cilPencil" /></CButton
+              >&nbsp;
+              <CButton color="danger" size="sm" @click="removeCredential(item.uuid)"
+                ><CIcon name="cilTrash"
+              /></CButton>
+            </td>
+          </template>
+        </CDataTable>
       </CCard>
     </CCol>
     <CModal
@@ -158,6 +157,7 @@
       </template>
     </CModal>
   </CRow>
+  </div>
 </template>
 
 <script>
