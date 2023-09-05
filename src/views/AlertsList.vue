@@ -35,7 +35,7 @@
                     <CDropdownItem @click="loadFilter()" color="primary" size="sm">Edit View</CDropdownItem>
                     <CDropdownItem @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filter Menu</CDropdownItem>
                     <CDropdownItem @click="resetFilters()" color="secondary" size="sm">Reset Filter</CDropdownItem>
-                    <CDropdownItem @click="showExportWizard()" color="secondary" size="sm"><i class="fas fa-download"/>&nbsp;Export</CDropdownItem>
+                    <CDropdownItem @click="showExportWizard()" color="secondary" size="sm"><i class="fas fa-download"/>&nbsp;Export Events</CDropdownItem>
                   </CDropdown>
                 </CCol>
                 

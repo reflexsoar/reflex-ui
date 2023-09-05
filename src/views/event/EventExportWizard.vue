@@ -67,9 +67,8 @@
     </BlockSwitch>
     <template #footer>
       <CButton color="secondary" @click="dismiss()">Cancel</CButton>
-      <CButton color="primary" @click="generateReport()">Export</CButton>
+      <CButton color="primary" @click="generateReport()" v-bind:disabled="submitted"><span v-if="submitted"><CSpinner size="sm"/>&nbsp;</span>Export</CButton>
     </template>
-    {{ report_params }}
   </CModal>
 </template>
 
@@ -106,6 +105,7 @@ export default {
     return {
       error: false,
       error_message: "",
+      submitted: false,
       modalStatus: this.show,
       available_fields: [
         {
@@ -298,6 +298,7 @@ export default {
       this.modalStatus = false;
     },
     generateReport() {
+      this.submitted = true;
       this.$store
         .dispatch("getEventExport", this.report_params)
         .then((resp) => {
@@ -312,10 +313,13 @@ export default {
             link.download = this.report_params.report_name+".csv";
           }
           link.click();
+          this.submitted = false;
+          this.dismiss();
         })
         .catch((err) => {
           this.error = true;
           this.error_message = err.response.data.message;
+          this.submitted = false;
         });
     },
   },
