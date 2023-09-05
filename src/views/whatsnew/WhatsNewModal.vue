@@ -1,14 +1,14 @@
 <template>
-  <CModal :show="show" size="lg" :title="title">
+  <CModal :show.sync="show" size="lg" :title="title">
     <div class="text-center" v-if="loading">
       <CSpinner />
     </div>
-    <div v-else>
+    <div v-else  style="max-height: 50vh; overflow-y: auto;">
       <h1>{{ title }}</h1>
       <div v-for="section in release_notes.sections" :key="section.title">
         <h2>{{ section.title }}</h2>
         <div v-for="item in section.items" :key="item.title">
-          <h3>{{ item.title }}</h3>
+          <h4>{{ item.title }}</h4>
           <div><vue-markdown>{{ item.description }}</vue-markdown></div>
         </div>
       </div>
@@ -29,7 +29,7 @@ export default {
   name: "WhatsNewModal",
   data() {
     return {
-      show: true,
+      show: false,
       dont_show_again: false,
       release_notes: {},
       title: "What's New in ",
@@ -50,7 +50,11 @@ export default {
 
     // If the user has already dismissed the modal, then we don't want to show it again
     this.dont_show_again = localStorage.getItem(this.dont_show_key) === "true";
-    this.show = this.dont_show_again === true ? false : true;
+    if(this.release_notes === null) {
+        this.show = false;
+    } else {
+        this.show = this.dont_show_again === true ? false : true;
+    }    
   },
   methods: {
     dismiss() {
