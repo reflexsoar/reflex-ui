@@ -439,7 +439,11 @@ export default {
             
           }
       } else {
-        return field_config.options;
+        if (field_config.options) {
+          values = field_config.options;
+        } else {
+          values = [];
+        }
       }
 
       return [...new Set(values)];
