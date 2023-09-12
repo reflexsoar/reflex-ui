@@ -20,7 +20,7 @@
               <CDropdownItem @click="google_search()">Google Search</CDropdownItem>
               <CDropdownItem>Copy Value</CDropdownItem>
               <CDropdownItem @click="addToFilter()">Filter for Value</CDropdownItem>
-              <CDropdownItem>Add To List</CDropdownItem>
+              <CDropdownItem @click="show_list_adder = true">Add To List</CDropdownItem>
               <CDropdownItem disabled>Run Action</CDropdownItem>
             </CDropdown> </CCol
           ><CCol col="2">
@@ -213,6 +213,7 @@
         </CCol>
       </CRow>
     </CCard>
+    <ListAdderModal :show.sync="show_list_adder" :observable="observable"></ListAdderModal>
   </div>
 </template>
 
@@ -225,8 +226,13 @@
 <script>
 import { mapState } from "vuex";
 
+import ListAdderModal from '../ListAdderModal.vue'
+
 export default {
   name: "ObservablePopover",
+  components: {
+    ListAdderModal,
+  },
   props: {
     observable: {
       type: Object,
@@ -261,6 +267,7 @@ export default {
       active_tab: 0,
       show_asset_tab: false,
       current_asset: 0,
+      show_list_adder: false,
     };
   },
   watch: {
