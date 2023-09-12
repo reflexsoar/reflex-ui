@@ -142,6 +142,7 @@
                 <CTab title="Documentation">
                   <h2 class="page-sub-header">Documentation</h2>
                     <CCard><CCardBody>
+                    <div v-if="integration.manifest.configuration">
                     <h3>Global Parameters</h3>
                     <p>
                         <ul>
@@ -150,6 +151,7 @@
                         </li>
                         </ul>
                     </p>
+                    </div>
                     <h3>Supported Actions</h3>
                         <CDataTable
                             :items="integration.manifest.actions"
