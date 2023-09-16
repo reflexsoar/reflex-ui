@@ -26,7 +26,16 @@
       >
       <template #name="{item}">
           <td>
-              <b>{{item.name}}</b>
+              <span v-if="item.active"><CBadge class="tag tag-sm" color="success">Active</CBadge>&nbsp;</span>
+              <span v-if="!item.active"><CBadge class="tag tag-sm" color="danger">Inactive</CBadge>&nbsp;</span>
+              <b>{{item.name}}</b><br>
+              <span class="list-attributes">
+                <span v-if="item.global_list"><CBadge color="secondary" class="tag tag-sm"><i class="fas fa-globe"></i> Global List</CBadge></span>
+                <span v-if="item.tag_on_match"><CBadge color="secondary" class="tag tag-sm"><i class="fas fa-tag"></i> Tag On Match</CBadge></span>
+                <span v-if="item.flag_ioc"><CBadge color="danger" class="tag tag-sm"><i class="fas fa-flag"></i> IOC</CBadge></span>
+                <span v-if="item.flag_safe"><CBadge color="success" class="tag tag-sm"><i class="fas fa-flag"></i> Safe</CBadge></span>
+                <span v-if="item.flag_spotted"><CBadge color="warning" class="tag tag-sm"><i class="fas fa-flag"></i> Spotted</CBadge></span>
+              </span>
           </td>
       </template>
       <template #organization="{item}">
@@ -34,9 +43,14 @@
           <OrganizationBadge :uuid="item.organization"/>
         </td>
       </template>
-      <template #data_type="{item}">
+      <template #list_type="{item}">
         <td>
-          {{item.data_type.name}}
+          <CBadge class="tag" color="secondary">{{item.list_type}}</CBadge>
+        </td>
+      </template>
+      <template #data_type_name="{item}">
+        <td>
+          <CBadge class="tag" color="secondary">{{item.data_type_name}}</CBadge>
         </td>
       </template>
       <template #value_count="{item}">
@@ -56,8 +70,8 @@
       </template>
       <template #actions="{item}">
           <td style="min-width:25px" class="text-right">
-            <CButton aria-label="Edit List" @click="editListModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit List', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
-            <CButton aria-label="Delete List" @click="deleteListModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete List', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
+            <CButton v-bind:hidden="!current_user.default_org && item.organization != current_user.organization" aria-label="Edit List" @click="editListModal(item.uuid)" size="sm" color="info" v-c-tooltip="{content:'Edit List', placement:'left'}"><CIcon name='cilPencil'/></CButton>&nbsp;
+            <CButton v-bind:hidden="!current_user.default_org && item.organization != current_user.organization" aria-label="Delete List" @click="deleteListModal(item.uuid)" size="sm" color="danger" v-c-tooltip="{content:'Delete List', placement:'left'}"><CIcon name='cilTrash'/></CButton>&nbsp;
           </td>
         </template>      
       </CDataTable>
@@ -112,9 +126,11 @@
             
           </CCol>
           <CCol>
-          <div class="form-input">  
+          <div class="form-input">
+            <span v-if="current_user.default_org">
               <label>Global List</label><br>
               <CSwitch color="success" label-on="Yes" label-off="No" :checked.sync="list_data.global_list"/>
+            </span>
             </div>
             </CCol>
           <!--<CCol>
@@ -235,6 +251,18 @@
   </CCol>
 </template>
 
+<style scoped>
+.list-attributes > span {
+  margin-right: 4px;
+}
+
+.list-attributes > div {
+  display: inline-block;
+  margin-right: 4px;
+  padding-bottom: 3px;
+}
+</style>
+
 <script>
 import {mapState} from "vuex";
 import OrganizationBadge from './OrganizationBadge'
@@ -248,7 +276,7 @@ export default {
     fields: {
       type: Array,
       default () {
-        return ['name', 'list_type', 'data_type', 'value_count', 'tag_on_match', 'active', 'actions']
+        return ['name', 'list_type', {key: 'data_type_name', label: 'Data Type'}, 'value_count', {key: 'actions', label: ''}]
       }
     },
     caption: {
