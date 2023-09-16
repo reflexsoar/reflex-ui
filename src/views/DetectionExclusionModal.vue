@@ -32,7 +32,7 @@
         </div>
       </CCol>
       <CCol>
-        <CSelect :value.sync="exclusion.condition" :options='["is","one of","wildcard"]' @change="checkValues" label="Condition"/>
+        <CSelect :value.sync="exclusion.condition" :options='["is","one of","wildcard","regexp","exists"]' @change="checkValues" label="Condition"/>
       </CCol>
     </CRow>
     <CRow>
