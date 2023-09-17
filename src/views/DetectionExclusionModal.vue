@@ -38,7 +38,7 @@
     <CRow>
       <CCol>
         <label for="exclusion_values">Values</label><br>
-        <multiselect id="exclusion_values" :multiple="allow_multiple" @tag="addExclusionValue"  v-model="exclusion.values" placeholder="Enter the values to exclude" :taggable="true" :close-on-select="!allow_multiple" :options="exclusion_values"/><br>
+        <multiselect v-bind:disabled="exclusion.condition == 'exists'" id="exclusion_values" :multiple="allow_multiple" @tag="addExclusionValue"  v-model="exclusion.values" placeholder="Enter the values to exclude" :taggable="true" :close-on-select="!allow_multiple" :options="exclusion_values"/><br>
       </CCol>
     </CRow>
     <CRow>
@@ -48,7 +48,8 @@
                   :internal-search="false"
                   :searchable="true"
                   @search-change="getThreatList"
-                  @select="setList"/>
+                  @select="setList"
+                  v-bind:disabled="exclusion.condition == 'exists'"/>
         <small class="form-text text-muted w-100">Optional - If selected the values in this list will be excluded along with any manually provided values</small><br>
       </CCol>
     </CRow>
