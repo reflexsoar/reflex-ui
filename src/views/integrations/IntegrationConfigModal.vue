@@ -105,6 +105,7 @@
             <CTab
               v-for="(action, i) in integration.manifest.actions"
               :title="action.friendly_name"
+              style="max-height: 500px; overflow-x: hidden; overflow-y: auto;"
             >
               <h3>Configure {{ action.friendly_name }}</h3>
               <vue-markdown>{{ action.description }}</vue-markdown>
@@ -155,7 +156,20 @@
                       v-bind:required="
                         field.required && configuration.actions[action.name].enabled
                       "
-                    />
+                      :type="isSecret(field)"
+                    >
+                      <template
+                        v-if="field.secret !== undefined && field.secret == true"
+                        #append-content
+                      >
+                        <span
+                          style="cursor: pointer"
+                          @click="show_secrets = !show_secrets"
+                          ><i v-if="show_secrets" class="fas fa-eye-slash"></i
+                          ><i v-else class="fas fa-eye"></i
+                        ></span>
+                      </template>
+                    </CInput>
                     <CTextarea
                       v-model="configuration.actions[action.name][data]"
                       v-if="field.type == 'text'"
@@ -197,10 +211,10 @@
                         label-off="No"
                         color="success"
                       /><br />
-                      <small>{{ field.description }}</small>
+                      <small>{{ field.description }}</small><br>
                     </div>
                     <div v-if="field.type == 'str-multiple'">
-                      <label style="text-transform: capitalize">{{ field.label }}</label
+                      <label>{{ field.label }}</label
                       ><br />
                       <multiselect
                         v-model="configuration.actions[action.name][data]"
@@ -211,6 +225,18 @@
                         :close-on-select="false"
                         :placeholder="field.description"
                         :taggable="true"
+                        v-if="field.default_options_from === undefined"
+                      >
+                      </multiselect>
+                      <multiselect
+                        v-model="configuration.actions[action.name][data]"
+                        :options="getSelectOptions(field)"
+                        :multiple="true"
+                        :close-on-select="false"
+                        :placeholder="field.description"
+                        label="label"
+                        track-by="value"
+                        v-else
                       >
                       </multiselect>
                       <small class="text-muted">{{ field.description }}</small
@@ -276,7 +302,8 @@ export default {
     ...mapState(["current_user"]),
   },
   created() {
-    this.$store.dispatch("getCloseReasons", {})
+    this.$store.dispatch("getCloseReasons", {});
+    this.$store.dispatch("getConfiguredOutputs");
   },
   data() {
     return {
@@ -290,7 +317,7 @@ export default {
       title: "Integration Configuration",
       uuid: null,
       show_secrets: false,
-      close_reasons: []
+      close_reasons: [],
     };
   },
   watch: {
@@ -425,19 +452,22 @@ export default {
     },
     getSelectOptions(field_config) {
       let values = [];
-      if(field_config.default_options_from) {
-        let options_field = field_config.default_options_from
-          if (options_field == "intel_list") {
-            values = this.$store.getters.intel
-          }
-          if (options_field == "close_reasons") {
-            values = this.$store.getters.close_reasons.map((reason) => {
-              return { label: reason.title, value: reason.uuid }
-            })
+      if (field_config.default_options_from) {
+        let options_field = field_config.default_options_from;
+        if (options_field == "intel_list") {
+          values = this.$store.getters.intel;
+        }
+        if (options_field == "close_reasons") {
+          values = this.$store.getters.close_reasons.map((reason) => {
+            return { label: reason.title, value: reason.uuid };
+          });
 
-            return values;
-            
-          }
+          return values;
+        }
+        if (options_field == "integration_outputs") {
+          console.log(this.$store.getters.integration_outputs_select);
+          return this.$store.getters.integration_outputs_select;
+        }
       } else {
         if (field_config.options) {
           values = field_config.options;
@@ -459,7 +489,7 @@ export default {
         if ($event.value) {
           this.configuration.actions[action][field].push($event.value);
         } else {
-            this.configuration.actions[action][field].push($event);
+          this.configuration.actions[action][field].push($event);
         }
       }
     },
