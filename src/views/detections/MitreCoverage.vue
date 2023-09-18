@@ -30,7 +30,7 @@
                 <CSpinner color="primary" size="xl" />
             </CCol>
         </CRow>
-        <div v-else-if="!loading" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 420px)">
+        <div v-else-if="!loading" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 380px)">
             <CRow style="width: 200%; border-bottom:1px solid #cfcfcf; padding-bottom:5px; margin-bottom:5px;">
                 <CCol v-for="tactic in mitre_tactics" :key="tactic.shortname" class="text-center"
                     style="font-size: 12px; margin-left: 4px;"><b>{{ tactic.name }}</b>
