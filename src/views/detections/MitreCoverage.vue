@@ -180,7 +180,6 @@ export default {
             }
         },
         getTechniquesPerPhase(tactic) {
-            //console.log(this.filtered_techniques)
             return this.filtered_techniques.filter(technique => technique.phase_names.includes(tactic.shortname))
         },
         getDetectionCount(technique, tactic) {
@@ -200,7 +199,7 @@ export default {
         getInputColorFromScale(count) {
             /* Create a color gradient based on the number of detections for a technique, the should 
             be based on shades of green. */
-            console.log(count);
+            
             let max = 10;
             let min = 1;
             let scale = chroma.scale(['#b2ffb2', '#00ff00']).domain([min, max]).colors(10);
@@ -208,7 +207,7 @@ export default {
             if (index > 9) {
                 index = 9;
             }
-            console.log(count, index, scale[index])
+            
             if (count == 0) {
                 return '#ff0000'
             }
