@@ -30,12 +30,26 @@
         <CCol>
           <h3>Parameters</h3>
           <CRow v-for="(field, name) in action.parameters">
-            <CCol>
+            <CCol
+            v-if="
+                      !field.conditions ||
+                      (field.conditions &&
+                        field.conditions &&
+                        field.conditions.every((c) =>
+                          evaluateFieldValue(
+                            action_payload.parameters[c.field],
+                            c.operator,
+                            c.value
+                          )
+                        ))
+                    "
+                    >
               <CInput
-                v-if="field.type == 'string'"
+                v-if="field.type == 'str'"
                 v-model="action_payload.parameters[name]"
                 :placeholder="field.description"
                 :description="field.description"
+                :label="field.label"
               />
               <div v-if="field.type == 'str-multiple'">
                 <label style="text-transform: capitalize">{{ field.label }}</label
@@ -172,7 +186,6 @@ export default {
             event = this.events_data[i];
             for (let o in event.observables) {
               let observable = event.observables[o];
-              console.log(observable.data_type, field_config.observable_data_type);
               if (observable.data_type === field_config.observable_data_type) {
                 values.push(observable.value);
               }
@@ -238,19 +251,23 @@ export default {
             );
           }
           if (param_config.type == "str-select") {
-            this.action_payload.parameters[param] = "";
+            this.action_payload.parameters[param] = this.$set(
+              this.action_payload.parameters,
+              param,
+              ""
+            );
           }
-          if (param_config.type == "string") {
-            this.action_payload.parameters[param] = "";
+          if (param_config.type == "str") {
+            this.$set(this.action_payload.parameters, param, "");
           }
           if (param_config.type == "bool") {
-            this.action_payload.parameters[param] = false;
+            this.$set(this.action_payload.parameters, param, false);
           }
           if (param_config.type == "integer") {
-            this.action_payload.parameters[param] = 0;
+            this.$set(this.action_payload.parameters, param, 0);
           }
           if (param_config.default) {
-            this.action_payload.parameters[param] = param_config.default;
+            this.$set(this.action_payload.parameters, param, param_config.default);
           }
         }
       }
@@ -278,6 +295,38 @@ export default {
     },
     findActions() {
       console.log("FIND ACTIONS");
+    },
+    evaluateFieldValue(target, operator, value) {
+      if (operator == "eq") {
+        return target == value;
+      }
+      if (operator == "ne") {
+        return target != value;
+      }
+      if (operator == "gt") {
+        return target > value;
+      }
+      if (operator == "lt") {
+        return target < value;
+      }
+      if (operator == "gte") {
+        return target >= value;
+      }
+      if (operator == "lte") {
+        return target <= value;
+      }
+      if (operator == "contains") {
+        return target.includes(value);
+      }
+      if (operator == "startswith") {
+        return target.startsWith(value);
+      }
+      if (operator == "endswith") {
+        return target.endsWith(value);
+      }
+      if (operator == "regex") {
+        return target.match(value);
+      }
     },
     reset() {
       this.selected_action = "";

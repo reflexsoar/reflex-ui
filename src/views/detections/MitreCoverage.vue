@@ -30,7 +30,7 @@
                 <CSpinner color="primary" size="xl" />
             </CCol>
         </CRow>
-        <div v-else-if="!loading" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 420px)">
+        <div v-else-if="!loading" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 380px)">
             <CRow style="width: 200%; border-bottom:1px solid #cfcfcf; padding-bottom:5px; margin-bottom:5px;">
                 <CCol v-for="tactic in mitre_tactics" :key="tactic.shortname" class="text-center"
                     style="font-size: 12px; margin-left: 4px;"><b>{{ tactic.name }}</b>
@@ -38,22 +38,54 @@
             </CRow>
             <CRow style="width: 200%">
                 <CCol v-for="tactic in mitre_tactics" :key="tactic.shortname">
-                    <CRow v-for="technique in getTechniquesPerPhase(tactic)" :key="technique.id">
+                    <CRow v-for="technique in getTechniquesPerPhase(tactic)" :key="technique.id" class="technique-row">
                         <CCol class="technique-col"
                             v-if="((hide_empty_techniques && getDetectionCount(technique, tactic.shortname) > 0) || !hide_empty_techniques) && (hide_empty_data_sources && getInputCount(technique.data_sources) || ! hide_empty_data_sources)">
                             <CCard class="technique-card"
                                 v-if="getDetectionCount(technique, tactic.shortname) == 0"
                                 @click="showDrawer(technique.external_id)">
                                 <CCardBody class="technique-card-body">
-                                    <span class="text-muted"><b>{{ technique.name }}</b>&nbsp;(I: {{ getInputCount(technique.data_sources) }})<br>{{ technique.external_id }}</span>
+                                
+                                    <CRow>
+                                        <CCol><b>{{ technique.name }}</b></CCol>
+                                    </CRow>
+                                    <CRow>
+                                        <CCol>{{ technique.external_id }}</CCol>
+                                        <CCol class="text-right" style="font-size: 14px;">
+                                        <CBadge class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(getDetectionCount(technique, tactic.shortname)), 'color': getFontColorFromScale(getDetectionCount(technique,
+                                            tactic.shortname))}"><i class="fas fa-shield"></i> {{ getDetectionCount(technique,
+                                            tactic.shortname)}}</CBadge>&nbsp;
+                                        <CBadge 
+                                            class="tag tag-sm" 
+                                            :style="{'background-color': getInputColorFromScale(getInputCount(technique.data_sources)), 'color': getFontColorFromScale(getInputCount(technique.data_sources))}"
+                                        >
+                                            <i class="fas fa-database"></i> {{ getInputCount(technique.data_sources)}}
+                                        </CBadge>
+                                        </CCol>
+                                    </CRow>
                                 </CCardBody>
                             </CCard>
-                            <CCard class="technique-card has-detections" v-else>
+                            <CCard class="technique-card"  v-else>
                                 <CCardBody class="technique-card-body"
                                     @click="showDrawer(technique.external_id)">
-                                    <span><b>{{ technique.name }}</b>&nbsp;(D: {{ getDetectionCount(technique,
-                                            tactic.shortname)}}) (I: {{ getInputCount(technique.data_sources) }})<br>{{ technique.external_id }}
-                                        </span>
+                                    <CRow>
+                                        <CCol><b>{{ technique.name }}</b></CCol>
+                                    </CRow>
+                                    <CRow>
+                                        <CCol>{{ technique.external_id }}</CCol>
+                                        <CCol class="text-right" style="font-size: 14px;">
+                                        <CBadge class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(getDetectionCount(technique, tactic.shortname)), 'color': getFontColorFromScale(getDetectionCount(technique,
+                                            tactic.shortname))}"><i class="fas fa-shield"></i> {{ getDetectionCount(technique,
+                                            tactic.shortname)}}</CBadge>&nbsp;
+                                        <CBadge 
+                                            class="tag tag-sm" 
+                                            :style="{'background-color': getInputColorFromScale(getInputCount(technique.data_sources)), 'color': getFontColorFromScale(getInputCount(technique.data_sources))}"
+                                        >
+                                            <i class="fas fa-database"></i> {{ getInputCount(technique.data_sources)}}
+                                        </CBadge>
+                                        </CCol>
+                                    </CRow>
+                                    
                                 </CCardBody>
                             </CCard>
                         </CCol>
@@ -74,6 +106,7 @@
 
 .technique-col {
     font-size: 11px;
+    padding-right:0px !important;
 }
 
 .technique-card-body {
@@ -92,6 +125,8 @@
 import { mapState } from "vuex";
 import MitreTechniqueDrawer from "./MitreTechniqueDrawer";
 import CRightDrawer from '../CRightDrawer.vue';
+// Import chroma.js
+import chroma from 'chroma-js';
 
 export default {
     name: "MitreCoverage",
@@ -105,7 +140,7 @@ export default {
                 return this.mitre_techniques;
             }
         },
-        ...mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations', 'inputs', 'mitre_mapping'])
+        ...mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations', 'mitre_mapping'])
     },
     components: {
         MitreTechniqueDrawer,
@@ -117,7 +152,8 @@ export default {
             hide_empty_techniques: false,
             hide_empty_data_sources: false,
             organization: '',
-            search: null
+            search: null,
+            inputs: []
         };
     },
     reloadDetections() {
@@ -144,7 +180,6 @@ export default {
             }
         },
         getTechniquesPerPhase(tactic) {
-            //console.log(this.filtered_techniques)
             return this.filtered_techniques.filter(technique => technique.phase_names.includes(tactic.shortname))
         },
         getDetectionCount(technique, tactic) {
@@ -152,6 +187,48 @@ export default {
                 return this.mitre_mapping['techniques'][technique.external_id]
             }
             return 0
+        },
+        getFontColorFromScale(count) {
+            /* Create a color gradient based on the number of detections for a technique, the should 
+            be based on shades of black. */
+            if (count == 0) {
+                return '#fff'
+            } 
+            return "#3c4b64"
+        },
+        getInputColorFromScale(count) {
+            /* Create a color gradient based on the number of detections for a technique, the should 
+            be based on shades of green. */
+            
+            let max = 10;
+            let min = 1;
+            let scale = chroma.scale(['#b2ffb2', '#00ff00']).domain([min, max]).colors(10);
+            let index = Math.round((count - min) / (max - min) * 10);
+            if (index > 9) {
+                index = 9;
+            }
+            
+            if (count == 0) {
+                return '#ff0000'
+            }
+            return scale[index];
+        },
+        getDetectionColorFromScale(count) {
+            /* Create a color gradient based on the number of detections for a technique, the should 
+            be based on shades of green. */
+            let techniques = this.mitre_mapping['techniques'];
+            let max = Math.max(...Object.values(techniques));
+            let min = 1;
+            let scale = chroma.scale(['#b2ffb2', '#00ff00']).domain([min, max]).colors(10);
+            let index = Math.round((count - min) / (max - min) * 10);
+            if (index > 9) {
+                index = 9;
+            }
+            if (count == 0) {
+                return '#ff0000'
+            }
+            return scale[index];
+
         },
         getInputCount(data_sources) {
             let count = 0
@@ -191,9 +268,13 @@ export default {
         },
         getInputs() {
             if(this.current_user.default_org) {
-                this.$store.dispatch('getInputs', { page_size: 1000, organization: this.organization })
+                this.$store.dispatch('getInputs', { page_size: 1000, organization: this.organization }).then(() => {
+                    this.inputs = this.$store.getters.inputs
+                })
             } else {
-                this.$store.dispatch('getInputs', { page_size: 1000 })
+                this.$store.dispatch('getInputs', { page_size: 1000 }).then(() => {
+                    this.inputs = this.$store.getters.inputs
+                })
             }
         },
         getMitreTechniques() {
