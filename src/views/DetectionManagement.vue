@@ -184,7 +184,7 @@
                             ><CBadge
                               v-if="item.risk_score"
                               class="tag tag-sm"
-                              color="warning"
+                              :color="getSeverityColor(item.severity)"
                               size="sm"
                               ><b>Risk Score:</b> {{ item.risk_score }}</CBadge
                             >
