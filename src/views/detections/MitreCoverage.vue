@@ -122,12 +122,17 @@
 }
 
 .coverage-bar {
-    height: auto;
+    height: 1.2rem;
     border: 1px solid #cfcfcf;
     position: relative;
     border-radius: 0.25rem;
     width: 100%;
     padding: 2px;
+    font-size: 12px;
+    line-height: 12px;
+    font-weight: 500;
+    color: #000;
+    background-color: #efefef;
 }
 
 .coverage-bar-active {
@@ -142,7 +147,7 @@
 }
 
 .coverage-bar-total {
-    background-color: #cfcfcf;
+    background-color: #b2ffb2;
     position: absolute;
     height: 100%;
     top: 0rem;
