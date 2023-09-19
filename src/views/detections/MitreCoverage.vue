@@ -227,8 +227,6 @@ export default {
         this.$store.commit('set', ['mitreDrawerMinimize', true])
         this.loading = true
         this.getDetectionMapping()
-        //this.getDetections()
-        this.getInputs()
         this.getMitreTactics()
         this.getMitreTechniques()
     },
@@ -345,6 +343,7 @@ export default {
             return count
         },
         getDetectionMapping() {
+            this.getInputs();
             
             if(this.current_user.default_org) {
                 this.$store.dispatch('getDetectionMitreMapping', { organization: this.organization })
