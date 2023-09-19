@@ -1,28 +1,33 @@
 <template>
     <div>
-        <h2>
-            <CBadge color="primary">BETA</CBadge>&nbsp;MITRE ATT&CK Coverage Map
-        </h2>
-        <p>See how your detection rules align with MITRE ATT&CK. This will help identify gaps in your detection rules.
+        <CRow class="page-heading page-heading-row">
+            <CCol col=4>
+                <h1>MITRE ATT&CK Coverage Map</h1><p>See how your detection rules align with MITRE ATT&CK. This will help identify gaps in your detection rules.
         </p>
-        <CAlert :show="true" color="info"><b>Beta Feature</b>: This feature is in beta and may not function as intended
-            under all conditions.</CAlert>
-        <CRow>
-            <CCol>
-                <label>Hide Techniques with no Detections:</label><br>
-                <CSwitch :checked.sync="hide_empty_techniques" label-on="Yes" label-off="No" color="success"></CSwitch>
             </CCol>
             <CCol>
-                <label>Hide Techniques with no Data Source:</label><br>
-                <CSwitch :checked.sync="hide_empty_data_sources" label-on="Yes" label-off="No" color="success"></CSwitch>
-            </CCol>
-            <CCol>
-                <CInput label="Search" v-model="search" placeholder="Search"></CInput>
-            </CCol>
-            <CCol>
-                <CSelect v-if="current_user.default_org" placeholder="Select an Organization..." required
-                    :value.sync="organization" :options="formattedOrganizations()" @change="getDetectionMapping()"
-                    label="Organization" />
+                <CRow>
+                    <CCol>
+                        <label>Only Detections:</label><br>
+                        <CSwitch :checked.sync="hide_empty_techniques" label-on="Yes" label-off="No" color="success"></CSwitch>
+                    </CCol>
+                    <CCol>
+                        <label>Only Data Sources:</label><br>
+                        <CSwitch :checked.sync="hide_empty_data_sources" label-on="Yes" label-off="No" color="success"></CSwitch>
+                    </CCol>
+                    <CCol>
+                        <label>Sub-Techniques:</label><br>
+                        <CSwitch :checked.sync="show_subs" label-on="Yes" label-off="No" color="success"></CSwitch>
+                    </CCol>
+                    <CCol>
+                        <CInput label="Search" v-model="search" placeholder="Search"></CInput>
+                    </CCol>
+                    <CCol v-if="current_user.default_org" >
+                        <CSelect placeholder="Select an Organization..." required
+                            :value.sync="organization" :options="formattedOrganizations()" @change="getDetectionMapping()"
+                            label="Organization" />
+                    </CCol>
+                </CRow>
             </CCol>
         </CRow>
         <CRow v-if="loading" class="text-center" style="line-height: calc(50vh)">
@@ -30,42 +35,23 @@
                 <CSpinner color="primary" size="xl" />
             </CCol>
         </CRow>
-        <div v-else-if="!loading" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 380px)">
-            <CRow style="width: 200%; border-bottom:1px solid #cfcfcf; padding-bottom:5px; margin-bottom:5px;">
+        <div v-else-if="!loading" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 280px)">
+            <CRow class="tactic-header">
                 <CCol v-for="tactic in mitre_tactics" :key="tactic.shortname" class="text-center"
-                    style="font-size: 12px; margin-left: 4px;"><b>{{ tactic.name }}</b>
+                    style="font-size: 14px; margin-left: 4px;"><b>{{ tactic.name }}</b>
+                    <div class="coverage-bar">
+                        <div class="coverage-bar-active" :style="{'max-width': getActiveCoverage(tactic)+'%', 'width': getActiveCoverage(tactic)+'%'}">{{ getTechniquesWithDetectionsPerPhase(tactic) }}</div>
+                        <div class="coverage-bar-total" :style="{'max-width': getPossibleCoverage(tactic)+'%', 'width': getPossibleCoverage(tactic)+'%'}">&nbsp;</div>
+                        <div class="text-right total-techniques">{{getTechniqueCountPerPhase(tactic)}}</div>
+                    </div>
                 </CCol>
             </CRow>
             <CRow style="width: 200%">
                 <CCol v-for="tactic in mitre_tactics" :key="tactic.shortname">
-                    <CRow v-for="technique in getTechniquesPerPhase(tactic)" :key="technique.id" class="technique-row">
+                    <CRow v-for="technique in getTechniquesPerPhase(tactic)" :key="technique.id" class="technique-row" v-if="!technique.external_id.includes('.') || (show_subs && technique.external_id.includes('.'))">
                         <CCol class="technique-col"
                             v-if="((hide_empty_techniques && getDetectionCount(technique, tactic.shortname) > 0) || !hide_empty_techniques) && (hide_empty_data_sources && getInputCount(technique.data_sources) || ! hide_empty_data_sources)">
-                            <CCard class="technique-card"
-                                v-if="getDetectionCount(technique, tactic.shortname) == 0"
-                                @click="showDrawer(technique.external_id)">
-                                <CCardBody class="technique-card-body">
-                                
-                                    <CRow>
-                                        <CCol><b>{{ technique.name }}</b></CCol>
-                                    </CRow>
-                                    <CRow>
-                                        <CCol>{{ technique.external_id }}</CCol>
-                                        <CCol class="text-right" style="font-size: 14px;">
-                                        <CBadge class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(getDetectionCount(technique, tactic.shortname)), 'color': getFontColorFromScale(getDetectionCount(technique,
-                                            tactic.shortname))}"><i class="fas fa-shield"></i> {{ getDetectionCount(technique,
-                                            tactic.shortname)}}</CBadge>&nbsp;
-                                        <CBadge 
-                                            class="tag tag-sm" 
-                                            :style="{'background-color': getInputColorFromScale(getInputCount(technique.data_sources)), 'color': getFontColorFromScale(getInputCount(technique.data_sources))}"
-                                        >
-                                            <i class="fas fa-database"></i> {{ getInputCount(technique.data_sources)}}
-                                        </CBadge>
-                                        </CCol>
-                                    </CRow>
-                                </CCardBody>
-                            </CCard>
-                            <CCard class="technique-card"  v-else>
+                            <CCard class="technique-card" :class="technique.is_sub ? 'sub-technique': technique.has_subs ? 'has-subs': null">
                                 <CCardBody class="technique-card-body"
                                     @click="showDrawer(technique.external_id)">
                                     <CRow>
@@ -74,9 +60,9 @@
                                     <CRow>
                                         <CCol>{{ technique.external_id }}</CCol>
                                         <CCol class="text-right" style="font-size: 14px;">
-                                        <CBadge class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(getDetectionCount(technique, tactic.shortname)), 'color': getFontColorFromScale(getDetectionCount(technique,
-                                            tactic.shortname))}"><i class="fas fa-shield"></i> {{ getDetectionCount(technique,
-                                            tactic.shortname)}}</CBadge>&nbsp;
+                                        <CBadge v-if="getDetectionCount(technique) > 0" class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(getDetectionActiveCount(technique), technique), 'color': getDetectionFontColorFromScale(getDetectionActiveCount(technique), technique)}"><i class="fas fa-shield"></i> {{getDetectionActiveCount(technique)}}/{{ getDetectionCount(technique,
+                                            tactic.shortname)}}</CBadge>
+                                        <CBadge v-else class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(0), 'color': getFontColorFromScale(0)}"><i class="fas fa-shield"></i> 0</CBadge>&nbsp;
                                         <CBadge 
                                             class="tag tag-sm" 
                                             :style="{'background-color': getInputColorFromScale(getInputCount(technique.data_sources)), 'color': getFontColorFromScale(getInputCount(technique.data_sources))}"
@@ -85,7 +71,6 @@
                                         </CBadge>
                                         </CCol>
                                     </CRow>
-                                    
                                 </CCardBody>
                             </CCard>
                         </CCol>
@@ -98,6 +83,15 @@
 </template>
 
 <style scoped>
+
+.tactic-header {
+    width: 200%;
+    border-bottom:1px solid #cfcfcf;
+    padding-bottom:5px;
+    margin-bottom:5px;
+    margin-left: -10px;
+    
+}
 
 .technique-card {
     margin: 2px;
@@ -116,6 +110,60 @@
 .has-detections {
     background-color: lightgreen;
     border: 1px solid green;
+}
+
+.progress {
+    border: 1px solid #cfcfcf;
+    
+}
+
+.progress-bar {
+    color: #000 !important;
+}
+
+.coverage-bar {
+    height: auto;
+    border: 1px solid #cfcfcf;
+    position: relative;
+    border-radius: 0.25rem;
+    width: 100%;
+    padding: 2px;
+}
+
+.coverage-bar-active {
+    background-color: #2eb85c;
+    position: absolute;
+    height: 100%;
+    top: 0rem;
+    left: 0rem;
+    z-index: 2;
+    overflow: hidden;
+    padding: 2px;
+}
+
+.coverage-bar-total {
+    background-color: #cfcfcf;
+    position: absolute;
+    height: 100%;
+    top: 0rem;
+    left: 0rem;
+    z-index: 1;
+    padding: 2px;
+}
+
+.total-techniques {
+    padding-right: 5px;
+    z-index: 3
+}
+
+.has-subs {
+    border-left: 2px solid #333333;
+}
+
+.sub-technique {
+    border-left: 2px solid #999999;
+    left: 5px;
+    width: calc(100% - 9px);
 }
 
 </style>
@@ -153,7 +201,15 @@ export default {
             hide_empty_data_sources: false,
             organization: '',
             search: null,
-            inputs: []
+            inputs: [],
+            show_subs: false,
+            max_detections: 0,
+            max_green: "#2eb85c",
+            none_red: "#ff0000",
+            min_green: "#b2ffb2",
+            white: "#fff",
+            dark: "#3c4b64",
+            techniques_subs: {}
         };
     },
     reloadDetections() {
@@ -182,51 +238,91 @@ export default {
         getTechniquesPerPhase(tactic) {
             return this.filtered_techniques.filter(technique => technique.phase_names.includes(tactic.shortname))
         },
+        getDetectionActiveCount(technique) {
+            if (technique.external_id in this.mitre_mapping['techniques']) {
+                return this.mitre_mapping['techniques'][technique.external_id]['active']
+            }
+            return 0
+        },
+        getTechniqueCountPerPhase(tactic) {
+            return this.filtered_techniques.filter(technique => technique.phase_names.includes(tactic.shortname)).length
+        },
+        getTechniquesWithDetectionsPerPhase(tactic) {
+            return this.filtered_techniques.filter(technique => technique.phase_names.includes(tactic.shortname) && this.getDetectionActiveCount(technique, tactic.shortname) > 0).length
+        },
+        getTechniquesTotalDetections(tactic) {
+            return this.filtered_techniques.filter(technique => technique.phase_names.includes(tactic.shortname) && this.getDetectionCount(technique, tactic.shortname) > 0).length
+        },
+        getActiveCoverage(tactic) {
+            return Math.round(this.getTechniquesWithDetectionsPerPhase(tactic) / this.getTechniqueCountPerPhase(tactic) * 100)
+        },
+        getPossibleCoverage(tactic) {
+            let active = this.getTechniquesWithDetectionsPerPhase(tactic)
+            let possible = this.getTechniquesTotalDetections(tactic)
+            let total = this.getTechniqueCountPerPhase(tactic)
+            return Math.round(possible / total * 100)
+        },
         getDetectionCount(technique, tactic) {
             if (technique.external_id in this.mitre_mapping['techniques']) {
-                return this.mitre_mapping['techniques'][technique.external_id]
+                return this.mitre_mapping['techniques'][technique.external_id]['total']
             }
             return 0
         },
         getFontColorFromScale(count) {
             /* Create a color gradient based on the number of detections for a technique, the should 
             be based on shades of black. */
-            if (count == 0) {
-                return '#fff'
-            } 
-            return "#3c4b64"
+            return "#fff";
         },
         getInputColorFromScale(count) {
             /* Create a color gradient based on the number of detections for a technique, the should 
             be based on shades of green. */
             
-            let max = 10;
-            let min = 1;
-            let scale = chroma.scale(['#b2ffb2', '#00ff00']).domain([min, max]).colors(10);
-            let index = Math.round((count - min) / (max - min) * 10);
-            if (index > 9) {
-                index = 9;
+            if (count == 0) {
+                return this.none_red;
             }
             
+            return this.max_green;
+            
+        },
+        getDetectionFontColorFromScale(count, technique=null) {
             if (count == 0) {
-                return '#ff0000'
+                return this.white;
             }
+
+            let max = this.max_detections;
+            let min = 1;
+            if(technique) {
+                max = this.mitre_mapping['techniques'][technique.external_id]['total']
+            }
+
+            if (count == max) {
+                return this.white;
+            }
+
+            let scale = chroma.scale([this.dark, this.white]).domain([min, max]).colors(Math.round(max/2));
+            let index = Math.round((count - min) / (max - min) * (max/2));            
             return scale[index];
         },
-        getDetectionColorFromScale(count) {
+        getDetectionColorFromScale(count, technique=null) {
             /* Create a color gradient based on the number of detections for a technique, the should 
             be based on shades of green. */
-            let techniques = this.mitre_mapping['techniques'];
-            let max = Math.max(...Object.values(techniques));
-            let min = 1;
-            let scale = chroma.scale(['#b2ffb2', '#00ff00']).domain([min, max]).colors(10);
-            let index = Math.round((count - min) / (max - min) * 10);
-            if (index > 9) {
-                index = 9;
-            }
+
             if (count == 0) {
-                return '#ff0000'
+                return this.none_red;
             }
+
+            let max = this.max_detections;
+            let min = 1;
+            if(technique) {
+                max = this.mitre_mapping['techniques'][technique.external_id]['total']
+            }
+
+            if (min == max) {
+                return this.max_green;
+            }
+
+            let scale = chroma.scale([this.min_green, this.max_green]).domain([min, max]).colors(Math.round(max/2));
+            let index = Math.round((count - min) / (max - min) * (max/2));            
             return scale[index];
 
         },
@@ -244,19 +340,11 @@ export default {
             return count
         },
         getDetectionMapping() {
-            this.loading = true
+            
             if(this.current_user.default_org) {
-                this.$store.dispatch('getDetectionMitreMapping', { organization: this.organization }).then(() => {
-                    this.loading = false
-                }).catch(() => {
-                    this.loading = false
-                })
+                this.$store.dispatch('getDetectionMitreMapping', { organization: this.organization })
             } else {
-                this.$store.dispatch('getDetectionMitreMapping', {}).then(() => {
-                    this.loading = false
-                }).catch(() => {
-                    this.loading = false
-                })
+                this.$store.dispatch('getDetectionMitreMapping', {})
             }
         },
         getDetections() {
