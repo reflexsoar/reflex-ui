@@ -50,12 +50,29 @@
               <div v-else>
                 <CDataTable
                   :items="associated_detections"
-                  :fields="[{key: 'name', label:'Name', _style:'width:40%;'},'description']"
+                  :fields="[{key: 'name', label:'Name', _style:'width: 60%'},'severity','risk_score','active']"
                   pagination
                   >
                   <template #name="{item}">
                     <td>
-                      <router-link :to="`/detections/${item.uuid}`">{{item.name}}</router-link>
+                      <b><router-link :to="`/detections/${item.uuid}`">{{item.name}}</router-link></b><br>
+                      {{ item.description }}
+                    </td>
+                  </template>
+                  <template #severity="{item}">
+                    <td>
+                      <CBadge class="tag" size="sm" :color="getSeverityColor(item.severity)">{{getSeverityText(item.severity)}}</CBadge>
+                    </td>
+                  </template>
+                  <template #risk_score="{item}">
+                    <td>
+                      <CBadge class="tag" size="sm" :color="getSeverityColor(item.severity)">{{ item.risk_score }}</CBadge>
+                    </td>
+                  </template>
+                  <template #active="{item}">
+                    <td>
+                      <CBadge class="tag" size="sm" v-if="item.active" color="success">Active</CBadge>
+                      <CBadge class="tag" size="sm" v-else color="danger">Inactive</CBadge>
                     </td>
                   </template>
                 </CDataTable>
@@ -170,10 +187,41 @@ export default {
     ...mapState(['mitre_technique','current_user'])
   },
   methods: {
+    getSeverityColor(severity) {
+      switch (severity) {
+        case 1:
+          return "dark";
+        case 2:
+          return "info";
+        case 3:
+          return "warning";
+        case 4:
+          return "danger";
+        default:
+          return "danger";
+      }
+    },
+    getSeverityText(severity) {
+      switch (severity) {
+        case 1:
+          return "Low";
+        case 2:
+          return "Medium";
+        case 3:
+          return "High";
+        case 4:
+          return "Critical";
+        default:
+          return "Unknown";
+      }
+    },
     getDetections(tech,tactics){
       this.detections_loading = true
       this.$store.dispatch('getDetections', { phase_names: tactics, techniques: tech, save: false, organization: this.organization }).then(resp => {
         this.associated_detections = resp.data.detections
+
+        // Sort the detections by their external_id in alphabetical order
+        
         this.detections_loading = false
       }).catch(err => {
         this.detections_loading = false
