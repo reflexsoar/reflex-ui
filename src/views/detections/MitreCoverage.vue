@@ -354,10 +354,12 @@ export default {
             if(index >= scale.length) {
                 index = scale.length - 1
             }
-            
             return scale[index];
         },
         getDetectionFontColorFromScale(count, technique=null) {
+
+            let total_colors = 10;
+
             if (count == 0) {
                 return this.white;
             }
@@ -372,8 +374,8 @@ export default {
                 return this.white;
             }
 
-            let scale = chroma.scale([this.dark, this.white]).domain([min, max]).colors(Math.round(max/2));
-            let index = Math.round((count - min) / (max - min) * (max/2));            
+            let scale = chroma.scale([this.dark, this.white]).domain([min, max]).colors(Math.round(max/total_colors));
+            let index = Math.round((count - min) / (max - min) * (max/total_colors));            
             return scale[index];
         },
         getDetectionColorFromScale(count, technique=null) {
