@@ -393,12 +393,55 @@
                 <CRow
                     ><CCol>
                       
-                      <h3>Data Source Mapping</h3></CCol
+                      <h3>Data Source Mapping</h3>
+                      <p>Data Sources provide a mechanism for establishing exactly what data an input may contain.  Detection rules will automatically target inputs to run against by the data sources available within the input.</p></CCol
                     ></CRow
-                  ><CRow>
+                  >
+                    <CRow>
+                      <CCol>
+                        <h4>Data Source Templates</h4>
+                        <p>Data Source Templates provide a mechanism for automatically discovering what data sources are available in the input.  More than one Data Source Template can be selected.  Periodically the index will be queried to see if the criteria is met for each Data Source and the data sources will be updated.</p>
+                        <label>Data Source Templates</label><br />
+                        
+                        <div v-if="!edit_config">
+                          <div v-if="input.data_source_templates.length == 0">
+                            <p>No data source templates mapped to this input.</p>
+                          </div>
+                          <li
+                            style="display: inline; margin-right: 2px"
+                            v-for="(field, i) in input.data_source_templates"
+                            :key="i"
+                          >
+                            <CBadge class="tag tag-list" color="info" size="sm">{{
+                              field
+                            }}</CBadge>
+                          </li>
+                          <br /><br />
+                        </div>
+                        <div v-else>
+                          <multiselect
+                            v-model="input.data_source_templates"
+                            :taggable="true"
+                            @tag="addMultiSelectValue(input.data_source_templates, $event)"
+                            :options="data_source_templates"
+                            :multiple="true"
+                            :close-on-select="false"
+                            placeholder="Select"
+                            :preselect-first="true"
+                          ></multiselect
+                          ><br />
+                        </div>
+                      </CCol>
+                    </CRow>
+                    <CRow>
                     <CCol>
+                      <h4>Manual Data Sources</h4>
                       <label>Data Sources</label><br />
+                      
                       <div v-if="!edit_config">
+                        <div v-if="input.mitre_data_sources.length == 0">
+                        <p>No data sources mapped to this input.</p>
+                      </div>
                         <li
                           style="display: inline; margin-right: 2px"
                           v-for="(field, i) in input.mitre_data_sources"
@@ -418,8 +461,7 @@
                           :options="mitre_data_sources"
                           :multiple="true"
                           :close-on-select="false"
-                          placeholder="Select"
-                          :preselect-first="true"
+                          placeholder="Select one"
                         ></multiselect
                         ><br />
                       </div>
@@ -653,6 +695,8 @@ export default {
       changes_made: false,
       hosts: [],
       distros: ["elasticsearch", "opensearch"],
+      activeTab: 0,
+      data_source_templates: []
     };
   },
   computed: mapState(["input", "mitre_data_sources"]),
@@ -768,8 +812,6 @@ export default {
     updateConfig() {
       let uuid = this.uuid;
       let config = null;
-      
-      
       try {
         config = JSON.parse(JSON.stringify(this.input.config));
         this.config_json_error = false;
