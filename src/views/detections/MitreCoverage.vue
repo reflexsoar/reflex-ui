@@ -8,16 +8,29 @@
             <CCol>
                 <CRow>
                     <CCol>
-                        <label>Only Detections:</label><br>
-                        <CSwitch :checked.sync="hide_empty_techniques" label-on="Yes" label-off="No" color="success"></CSwitch>
+                        <CRow>
+                            <CCol>
+                                <CInputCheckbox label="Techniques with Detections" :checked.sync="hide_empty_techniques" />
+                            </CCol>
+                            
+                        </CRow>
+                        <CRow>
+                        <CCol>
+                                <CInputCheckbox label="Techniques with Data Sources" :checked.sync="hide_empty_data_sources" />
+                            </CCol>
+                            </CRow>
                     </CCol>
                     <CCol>
-                        <label>Only Data Sources:</label><br>
-                        <CSwitch :checked.sync="hide_empty_data_sources" label-on="Yes" label-off="No" color="success"></CSwitch>
-                    </CCol>
-                    <CCol>
-                        <label>Sub-Techniques:</label><br>
-                        <CSwitch :checked.sync="show_subs" label-on="Yes" label-off="No" color="success"></CSwitch>
+                        <CRow>
+                            <CCol>
+                                <CInputCheckbox label="Show Sub-Techniques" :checked.sync="show_subs" />
+                            </CCol>
+                        </CRow>
+                        <CRow>
+                            <CCol>
+                                <CInputCheckbox label="Show Deprecated" :checked.sync="show_deprecated" />
+                            </CCol>
+                        </CRow>
                     </CCol>
                     <CCol>
                         <CInput label="Search" v-model="search" placeholder="Search"></CInput>
@@ -50,7 +63,7 @@
                 <CCol v-for="tactic in mitre_tactics" :key="tactic.shortname">
                     <CRow v-for="technique in getTechniquesPerPhase(tactic)" :key="technique.id" class="technique-row" v-if="!technique.external_id.includes('.') || (show_subs && technique.external_id.includes('.'))">
                         <CCol class="technique-col"
-                            v-if="((hide_empty_techniques && getDetectionCount(technique, tactic.shortname) > 0) || !hide_empty_techniques) && (hide_empty_data_sources && getInputCount(technique.data_sources) || ! hide_empty_data_sources)">
+                            v-if="((hide_empty_techniques && getDetectionCount(technique, tactic.shortname) > 0) || !hide_empty_techniques) && (hide_empty_data_sources && getInputCount(technique.data_sources) || !hide_empty_data_sources ) && (!technique.is_deprecated || (technique.is_deprecated && show_deprecated))">
                             <CCard class="technique-card" :class="technique.is_sub ? 'sub-technique': technique.has_subs ? 'has-subs': null">
                                 <CCardBody class="technique-card-body"
                                     @click="showDrawer(technique.external_id)">
@@ -58,16 +71,17 @@
                                         <CCol><b>{{ technique.name }}</b></CCol>
                                     </CRow>
                                     <CRow>
-                                        <CCol>{{ technique.external_id }}</CCol>
+                                        <CCol col=4>{{ technique.external_id }}</CCol>
                                         <CCol class="text-right" style="font-size: 14px;">
                                         <CBadge v-if="getDetectionCount(technique) > 0" class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(getDetectionActiveCount(technique), technique), 'color': getDetectionFontColorFromScale(getDetectionActiveCount(technique), technique)}"><i class="fas fa-shield"></i> {{getDetectionActiveCount(technique)}}/{{ getDetectionCount(technique,
                                             tactic.shortname)}}</CBadge>
                                         <CBadge v-else class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(0), 'color': getFontColorFromScale(0)}"><i class="fas fa-shield"></i> 0</CBadge>&nbsp;
-                                        <CBadge 
-                                            class="tag tag-sm" 
-                                            :style="{'background-color': getInputColorFromScale(getInputCount(technique.data_sources)), 'color': getFontColorFromScale(getInputCount(technique.data_sources))}"
+                                        <CBadge
+                                            v-if="technique.data_sources && technique.data_sources.length > 0"
+                                            class="tag tag-sm"
+                                            :style="{'background-color': getDataSourceColorFromScale(getInputCount(technique.data_sources), technique), 'color': getDataSourceFontColorFromScale(getInputCount(technique.data_sources), technique)}"
                                         >
-                                            <i class="fas fa-database"></i> {{ getInputCount(technique.data_sources)}}
+                                            <i class="fas fa-database"></i> {{ getInputCount(technique.data_sources)}}/{{ technique.data_sources ? technique.data_sources.length : 0 }}
                                         </CBadge>
                                         </CCol>
                                     </CRow>
@@ -204,6 +218,7 @@ export default {
             loading: true,
             hide_empty_techniques: false,
             hide_empty_data_sources: false,
+            show_deprecated: false,
             organization: '',
             search: null,
             inputs: [],
@@ -287,6 +302,61 @@ export default {
             return this.max_green;
             
         },
+        getDataSourceColorFromScale(count, technique) {
+
+            let total_colors = 10;
+
+            if (!technique.data_sources) {
+                return this.none_red;
+            }
+
+            if (count == 0) {
+                return this.none_red;
+            }
+
+            let max = technique.data_sources.length;
+            let min = 1;
+
+            if (count == max) {
+                return this.max_green;
+            }
+
+            let scale = chroma.scale([this.min_green, this.max_green]).domain([min, max]).colors(Math.round(max/total_colors));
+            let index = Math.round((count - min) / (max - min) * (max/total_colors));
+            if(index >= scale.length) {
+                index = scale.length - 1
+            }
+
+            return scale[index];
+
+        },
+        getDataSourceFontColorFromScale(count, technique=null) {
+
+            let total_colors = 10;
+
+            if (count == 0) {
+                return this.white;
+            }
+
+            if (!technique.data_sources) {
+                return this.white;
+            }
+
+            let max = technique.data_sources.length;
+            let min = 1;
+
+            if (count == max) {
+                return this.white;
+            }
+
+            let scale = chroma.scale([this.dark, this.white]).domain([min, max]).colors(Math.round(max/total_colors));
+            let index = Math.round((count - min) / (max - min) * (max/total_colors));
+            if(index >= scale.length) {
+                index = scale.length - 1
+            }
+            
+            return scale[index];
+        },
         getDetectionFontColorFromScale(count, technique=null) {
             if (count == 0) {
                 return this.white;
@@ -310,6 +380,8 @@ export default {
             /* Create a color gradient based on the number of detections for a technique, the should 
             be based on shades of green. */
 
+            let total_colors = 10
+
             if (count == 0) {
                 return this.none_red;
             }
@@ -324,8 +396,11 @@ export default {
                 return this.max_green;
             }
 
-            let scale = chroma.scale([this.min_green, this.max_green]).domain([min, max]).colors(Math.round(max/2));
-            let index = Math.round((count - min) / (max - min) * (max/2));            
+            let scale = chroma.scale([this.min_green, this.max_green]).domain([min, max]).colors(Math.round(max/total_colors));
+            let index = Math.round((count - min) / (max - min) * (max/total_colors));
+            if(index >= scale.length) {
+                index = scale.length - 1
+            }
             return scale[index];
 
         },
