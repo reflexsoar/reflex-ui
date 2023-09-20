@@ -1922,12 +1922,16 @@ export default {
     },
     findTechnique(external_id) {
       /* Return a list of techniques from the API based on the tactics that are currently selected */
+      let phase_names = [];
+      if (this.rule.tactics.length > 0) {
+        phase_names = this.rule.tactics.map((t) => {
+          return t.shortname;
+        });
+      }
       this.$store.dispatch("getMitreTechniques", {
         external_id__like: external_id,
         name__like: external_id,
-        phase_names: this.rule.tactics.map((t) => {
-          return t.shortname;
-        }),
+        phase_names: phase_names,
       });
     },
     searchInputs(name) {
