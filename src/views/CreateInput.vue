@@ -209,7 +209,7 @@
                               </CCol>
                               <CCol col="2">
                                 <CSelect
-                                  :options="['required', 'none', 'certificate']"
+                                  :options="['none', 'certificate', 'required']"
                                   :value.sync="config['cert_verification']"
                                   label="TLS Verification Mode"
                                 />
