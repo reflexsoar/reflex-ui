@@ -152,10 +152,14 @@ const state = {
   sso_providers: [],
   sso_provider: {},
   sso_role_mappings: [],
-  sso_role_mapping: {}
+  sso_role_mapping: {},
+  integration_outputs: []
 }
 
 const mutations = {
+  save_outputs(state, outputs) {
+    state.integration_outputs = outputs
+  },
   save_sso_providers(state, providers) {
     state.sso_providers = providers
   },
@@ -928,6 +932,12 @@ const mutations = {
 }
 
 const getters = {
+  integration_outputs_select: state => {
+    return state.integration_outputs.map(output => { return { label: output.integration_name + " - " + output.name + " - " + output.configuration_name, value: output.value } })
+  },
+  integration_outputs: state => {
+    return state.integration_outputs
+  },
   running_tasks: state => { return state.running_tasks },
   list_values: state => { return state.list_values },
   pagination: state => { return state.pagination },
@@ -3593,7 +3603,7 @@ const actions = {
         })
     })
   },
-  getMitreTactics({ commit }, { page = 1, page_size = 10, name__like = null, external_id__like = null }) {
+  getMitreTactics({ commit }, { page = 1, page_size = 25, name__like = null, external_id__like = null }) {
 
     let url = `${BASE_URL}/mitre/tactic?page=${page}&page_size=${page_size}`
 
@@ -3616,7 +3626,7 @@ const actions = {
         })
     })
   },
-  getMitreTechniques({ commit }, { page = 1, page_size = 10, name__like = null, external_id__like = null, phase_names = null }) {
+  getMitreTechniques({ commit }, { page = 1, page_size = 50, name__like = null, external_id__like = null, phase_names = null }) {
 
     let url = `${BASE_URL}/mitre/technique?page=${page}&page_size=${page_size}`
 
@@ -4559,6 +4569,18 @@ const actions = {
       Axios({ url: `${BASE_URL}/sso/provider/${uuid}`, method: 'DELETE' })
         .then(resp => {
           commit('remove_sso_provider', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getConfiguredOutputs({ commit }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/agent/policy/outputs`, method: 'GET' })
+        .then(resp => {
+          commit('save_outputs', resp.data.outputs)
           resolve(resp)
         })
         .catch(err => {

@@ -1,288 +1,531 @@
 <template>
   <CRow>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
+    />
     <CCol col v-if="loading">
       <div style="margin: auto; text-align: center; verticle-align: middle">
         <CSpinner color="dark" style="width: 6rem; height: 6rem" />
       </div>
     </CCol>
     <CCol col v-if="!loading">
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
-      />
-      <CCard class="shadow-sm bg-white rounded">
-        <CCardHeader>
-          <CRow>
-            <CCol col="12" lg="6" sm="12" class="text-left">
-              <h1>{{ input.name }}</h1>
-            </CCol>
-            <CCol col="12" lg="6" sm="12" class="text-right">
-              <template #tags="{ tag }">
-                {{ tag.name }}
-              </template>
-              <li
-                style="display: inline; margin-right: 2px"
-                v-for="tag, i in input.tags"
-                :key="i"
-              >
-                <CBadge class="tag tag-list" color="info" size="sm" disabled>{{ tag }}</CBadge>
-              </li>
-            </CCol>
-          </CRow>
-          <CRow>
-            <CCol col="12" lg="6" sm="12">
-              {{ input.description }}
-            </CCol>
-            <CCol col="12" lg="6" sm="12" class="text-right">
-              <CButton color="danger" @click="delete_modal = true"
-                ><CIcon name="cil-trash"
-              /></CButton>
-            </CCol>
-          </CRow>
-        </CCardHeader>
-        <CCardBody>
-          <CRow>
-            <CCol col="6">
-              <b>Enabled: </b> True<br />
-              <b>Plugin: </b> Elasticsearch<br />
-            </CCol>
-            <CCol col="6">
-              <b>Date Created: </b>{{ input.created_at | moment("LLLL") }}<br />
-              <b>Last Updated: </b>
-            </CCol>
-          </CRow>
-        </CCardBody>
-      </CCard>
-      <CRow>
-        <CCol v-if="edit_config">
-          <CCard
-            class="shadow-sm bg-white rounded"
-            @mouseover="config_hover = true"
-            @mouseleave="config_hover = false"
-          >
+      <CRow class="page-heading page-heading-row">
+        <CCol>
+          <h1>{{ input.name }}</h1>
+        </CCol>
+      </CRow>
+      <CTabs
+        :activeTab.sync="activeTab"
+        addNavWrapperClasses="page-nav"
+        addTabClasses="page-nav-tab-body"
+        addNavClasses="page-nav-tab"
+      >
+        <CTab title="Overview">
+          <h2 class="page-sub-header">Overview</h2>
+          <CCard class="shadow-sm bg-white rounded">
             <CCardHeader>
               <CRow>
                 <CCol col="12" lg="6" sm="12" class="text-left">
-                  <b>Configuration</b>&nbsp;<a
-                    v-if="config_hover && !edit_config"
-                    @click="edit_config = !edit_config"
-                    ><CIcon name="cilPencil" size="sm"
-                  /></a>
+                  <h1>{{ input.name }}</h1>
+                </CCol>
+                <CCol col="12" lg="6" sm="12" class="text-right">
+                  <template #tags="{ tag }">
+                    {{ tag.name }}
+                  </template>
+                  <li
+                    style="display: inline; margin-right: 2px"
+                    v-for="(tag, i) in input.tags"
+                    :key="i"
+                  >
+                    <CBadge class="tag tag-list" color="info" size="sm" disabled>{{
+                      tag
+                    }}</CBadge>
+                  </li>
                 </CCol>
               </CRow>
-            </CCardHeader>
-            <CCardBody
-              class="bg-dark"
-              v-if="!edit_config"
-              style="overflow: scroll; min-height: 300px; max-height: 300px"
-            >
-              <CRow class="bg-dark">
-                <CCol col="12" class="bg-dark pre-formatted raw_log">
-                  {{ input.config }}
-                </CCol>
-              </CRow>
-            </CCardBody>
-            <CCardBody v-if="edit_config">
-              <CAlert
-                :show.sync="config_json_error"
-                color="danger"
-                closeButton
-                class="text-left"
-              >
-                Invalid JSON. Please check your config before submitting.
-              </CAlert>
-              <CTextarea
-                :value="jsonToString(input.config)"
-                @change="convertConfig($event)"
-                rows="10"
-              />
-              <CButton
-                color="danger"
-                @click="
-                  edit_config = !edit_config;
-                  config_json_error = false;
-                "
-                size="sm"
-                ><CIcon name="cilXCircle" /></CButton
-              >&nbsp;
-              <CButton
-                color="primary"
-                @click="updateConfig()"
-                size="sm"
-                v-bind:disabled="config_json_error"
-                ><CIcon name="cilSave"
-              /></CButton>
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol v-else col="12">
-          <CCard>
-            <CCardHeader>
               <CRow>
-                <CCol><b>Configuration</b></CCol>
-                <CCol class="text-right"
-                  ><CButton size="sm" color="primary" @click="editConfig()"
-                    >{{edit_config ? 'Save' : 'Edit'}} Config</CButton
-                  ></CCol
-                >
+                <CCol col="12" lg="6" sm="12">
+                  {{ input.description }}
+                </CCol>
+                <CCol col="12" lg="6" sm="12" class="text-right">
+                  <CButton color="danger" @click="delete_modal = true"
+                    ><CIcon name="cil-trash"
+                  /></CButton>
+                </CCol>
               </CRow>
             </CCardHeader>
             <CCardBody>
               <CRow>
-                <CCol col="4">
-                  <label>Hosts</label><br />
-                  <div v-if="!edit_config">
-                    <li
-                      style="display: inline; margin-right: 2px"
-                      v-for="host, i in input.config['hosts']"
-                      :key="i"
-                    >
-                      <CBadge class="tag tag-list" color="info" size="sm">{{ host }}</CBadge>
-                    </li>
-                    <br /><br />
-                  </div>
-                  <div v-else>
-                    <multiselect
-                      v-model="input.config['hosts']"
-                      :taggable="true"
-                      @tag="addHost"
-                      :options="hosts"
-                      :multiple="true"
-                      :close-on-select="false"
-                      placeholder="Select"
-                      :preselect-first="true"
-                    ></multiselect
-                    ><br />
-                  </div>
+                <CCol col="6">
+                  <b>Enabled: </b> True<br />
+                  <b>Plugin: </b> Elasticsearch<br />
                 </CCol>
-                <CCol col="4">
-                  <label>Distro</label><br />
-                  <div v-if="!edit_config">{{ input.config["distro"] }}<br /><br /></div>
-                  <div v-else><CSelect :value.sync="input.config['distro']" :options="distros">
-                    </CSelect></div>
-                </CCol>
-                <CCol col="4">
-                  <label>Alert Index</label><br />
-                  {{ input.config["index"] }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Lucene Filter</label><br />
-                  {{ input.config["lucene_filter"] }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>HTTP scheme</label><br />
-                  {{ input.config["scheme"] }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Auth Method</label><br />
-                  {{ input.config["auth_method"] }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Verify Hostname</label><br />
-                  {{ input.config["check_hostname"] ? "Yes" : "No" }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>TLS Verification Mode</label><br />
-                  {{ input.config["cert_verification"] }}<br /><br />
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol col="12">
-                  <h5>Event Base Configuration</h5>
-                </CCol>
-                <CCol col="4">
-                  <label>Event Title Field</label><br />
-                  {{ input.config["rule_name"] }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Description Field</label><br />
-                  {{ input.config["description_field"] }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Reference Field</label><br />
-                  {{ input.config["source_reference"] }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Severity Field</label><br />
-                  {{ input.config["severity_field"] }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Original Date Field</label><br />
-                  {{ input.config["original_date_field"] }}<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Tag Fields</label><br />
-                  <li
-                    style="display: inline; margin-right: 2px"
-                    v-for="field, i in input.config['tag_fields']"
-                    :key="i"
-                  >
-                    <CBadge class="tag tag-list" color="info" size="sm">{{ field }}</CBadge>
-                  </li>
-                  <br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Signature Fields</label><br />
-                  <li
-                    style="display: inline; margin-right: 2px"
-                    v-for="field, i in input.config['signature_fields']"
-                    :key="i"
-                  >
-                    <CBadge class="tag tag-list"  color="info" size="sm">{{ field }}</CBadge>
-                  </li>
-                  <br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Search Size</label><br />
-                  {{ input.config["search_size"] }} events<br /><br />
-                </CCol>
-                <CCol col="4">
-                  <label>Search Period</label><br />
-                  {{ input.config["search_period"] }}<br /><br />
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol>
-                  <label>Static Tags</label><br />
-                  <li
-                    style="display: inline; margin-right: 2px"
-                    v-for="field, i in input.config['static_tags']"
-                    :key="i"
-                  >
-                    <CBadge class="tag tag-list"  color="info" size="sm">{{ field }}</CBadge>
-                  </li>
+                <CCol col="6">
+                  <b>Date Created: </b>{{ input.created_at | moment("LLLL") }}<br />
+                  <b>Last Updated: </b>
                 </CCol>
               </CRow>
             </CCardBody>
           </CCard>
-        </CCol>
-        <CCol col="12">
+        </CTab>
+        <CTab title="Configuration">
+          <CRow class="page-sub-header">
+            <CCol>
+              <h2>Configuration</h2>
+            </CCol>
+            <CCol>
+              <CAlert
+                        :show.sync="config_json_error"
+                        color="danger"
+                        closeButton
+                        class="text-left"
+                      >
+                        Invalid JSON. Please check your config before submitting.
+                      </CAlert>
+                      </CCol>
+            <CCol class="text-right">
+              <CButton
+                v-bind:disabled="config_json_error"
+                color="primary"
+                @click="editConfig()"
+                >{{ edit_config ? "Save" : "Edit" }} Config</CButton
+              ><span v-if="edit_config"
+                >&nbsp;
+                <CButton
+                  color="danger"
+                  @click="
+                    edit_config = !edit_config;
+                    config_json_error = false;
+                  "
+                  >Discard Changes</CButton
+                ></span
+              >
+            </CCol>
+          </CRow>
+
           <CCard>
-            <CCardHeader style="border-bottom: 0px">
-              <CRow>
-                <CCol
-                  ><b
-                    >Field Mapping
-                    <CButton size="sm" color="success" @click="addField()">+</CButton></b
-                  ></CCol
-                >
-                <CCol class="text-right"
-                  ><CButton
-                    v-bind:disabled="!changes_made"
-                    size="sm"
-                    color="primary"
-                    @click="updateFieldMapping()"
-                    >Save Changes</CButton
-                  >&nbsp;<CButton
-                    v-bind:disabled="!changes_made"
-                    size="sm"
-                    color="secondary"
-                    @click="discardChanges()"
-                    >Discard Changes</CButton
-                  ></CCol
-                >
-              </CRow>
-            </CCardHeader>
+            <CCardBody>
+              <CTabs
+                :fade="false"
+                variant="pills"
+                :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
+              >
+                <CTab title="Host Configuration"
+                  ><CRow
+                    ><CCol>
+                      
+                      <h3>Host Configuration</h3></CCol
+                    ></CRow
+                  ><CRow>
+                    <CCol col="4">
+                      <label>Hosts</label><br />
+                      <div v-if="!edit_config">
+                        <li
+                          style="display: inline; margin-right: 2px"
+                          v-for="(host, i) in input.config['hosts']"
+                          :key="i"
+                        >
+                          <CBadge class="tag tag-list" color="info" size="sm">{{
+                            host
+                          }}</CBadge>
+                        </li>
+                        <br /><br />
+                      </div>
+                      <div v-else>
+                        <multiselect
+                          v-model="input.config['hosts']"
+                          :taggable="true"
+                          @tag="addMultiSelectValue(input.config['hosts'], $event)"
+                          :options="hosts"
+                          :multiple="true"
+                          :close-on-select="false"
+                          placeholder="Select"
+                          :preselect-first="true"
+                        ></multiselect
+                        ><br />
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Distro</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["distro"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CSelect :value.sync="input.config['distro']" :options="distros">
+                        </CSelect>
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Alert Index</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["index"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CInput v-model="input.config['index']" />
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Lucene Filter</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["lucene_filter"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CInput v-model.str="input.config['lucene_filter']" />
+                      </div>
+                      
+                    </CCol>
+                    <CCol col="4">
+                      <label>HTTP scheme</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["scheme"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CSelect :value.sync="input.config['scheme']" :options="['http', 'https']">
+                        </CSelect>
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Auth Method</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["auth_method"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CSelect :value.sync="input.config['auth_method']" :options="['http_auth', 'api_key']">
+                        </CSelect>
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Verify Hostname</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["check_hostname"] ? "Yes" : "No" }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CSwitch
+                                  v-bind:checked.sync="input.config['check_hostname']"
+                                  color="success"
+                                  label-on="Yes"
+                                  label-off="No"
+                                />
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>TLS Verification Mode</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["cert_verification"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CSelect :value.sync="input.config['cert_verification']" :options="['none', 'certificate', 'required']">
+                        </CSelect>
+                      </div>
+                      
+                    </CCol>
+                  </CRow>
+              </CTab>
+              <CTab title="Event Base Configuration">
+                  <CRow
+                    ><CCol>
+                      
+                      <h3>Event Base Configuration</h3></CCol
+                    ></CRow
+                  ><CRow>
+                    <CCol col="12">
+                      <h5>Event Base Configuration</h5>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Event Title Field</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["rule_name"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CInput v-model="input.config['rule_name']" />
+                      </div>
+                      
+                    </CCol>
+                    <CCol col="4">
+                      <label>Description Field</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["description_field"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CInput v-model="input.config['description_field']" />
+                      </div>
+
+                      
+                      
+                    </CCol>
+                    <CCol col="4">
+                      <label>Reference Field</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["source_reference"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CInput v-model="input.config['source_reference']" />
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Severity Field</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["severity_field"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CInput v-model="input.config['severity_field']" />
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Original Date Field</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["original_date_field"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CInput v-model="input.config['original_date_field']" />
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Search Size</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["search_size"] }} events<br /><br />
+                      </div>
+                      <div v-else>
+                        <CInput v-model.number="input.config['search_size']" />
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Search Period</label><br />
+                      <div v-if="!edit_config">
+                        {{ input.config["search_period"] }}<br /><br />
+                      </div>
+                      <div v-else>
+                        <CInput v-model.str="input.config['search_period']" />
+                      </div>
+                    </CCol>
+                    <CCol col=12>
+                      <label>Tag Fields</label><br />
+                      <div v-if="!edit_config">
+                      <li
+                        style="display: inline; margin-right: 2px"
+                        v-for="(field, i) in input.config['tag_fields']"
+                        :key="i"
+                      >
+                        <CBadge class="tag tag-list" color="info" size="sm">{{
+                          field
+                        }}</CBadge>
+                      </li>
+                      <br /><br />
+                      </div>
+                      <div v-else>
+                        <multiselect
+                          v-model="input.config['tag_fields']"
+                          :taggable="true"
+                          @tag="addMultiSelectValue(input.config['tag_fields'], $event)"
+                          :options="[]"
+                          :multiple="true"
+                          :close-on-select="false"
+                          placeholder="Select"
+                          :preselect-first="true"
+                        ></multiselect
+                        ><br />
+                        </div>
+                    </CCol>
+                    <CCol col=12>
+                      <label>Signature Fields</label><br />
+                      <div v-if="!edit_config">
+                      <li
+                        style="display: inline; margin-right: 2px"
+                        v-for="(field, i) in input.config['signature_fields']"
+                        :key="i"
+                      >
+                        <CBadge class="tag tag-list" color="info" size="sm">{{
+                          field
+                        }}</CBadge>
+                      </li>
+                      <br /><br />
+                      </div>
+                      <div v-else>
+                        <multiselect
+                          v-model="input.config['signature_fields']"
+                          :taggable="true"
+                          @tag="addMultiSelectValue(input.config['signature_fields'], $event)"
+                          :options="[]"
+                          :multiple="true"
+                          :close-on-select="false"
+                          placeholder="Select"
+                          :preselect-first="true"
+                        ></multiselect
+                        ><br />
+                        </div>
+                        
+                    </CCol>
+                    
+                  </CRow>
+                  <CRow>
+                    <CCol>
+                      <label>Static Tags</label><br />
+                      <div v-if="!edit_config">
+                        <li
+                          style="display: inline; margin-right: 2px"
+                          v-for="(field, i) in input.config['static_tags']"
+                          :key="i"
+                        >
+                          <CBadge class="tag tag-list" color="info" size="sm">{{
+                            field
+                          }}</CBadge>
+                        </li>
+                        <br /><br />
+                      </div>
+                      <div v-else>
+                        <multiselect
+                          v-model="input.config['static_tags']"
+                          :taggable="true"
+                          @tag="addMultiSelectValue(input.config['static_tags'], $event)"
+                          :options="[]"
+                          :multiple="true"
+                          :close-on-select="false"
+                          placeholder="Select"
+                          :preselect-first="true"
+                        ></multiselect
+                        ><br />
+                      </div>
+                    </CCol>
+                  </CRow>
+                </CTab>
+                <CTab title="Data Source Mapping">
+                <CRow
+                    ><CCol>
+                      
+                      <h3>Data Source Mapping</h3>
+                      <p>Data Sources provide a mechanism for establishing exactly what data an input may contain.  Detection rules will automatically target inputs to run against by the data sources available within the input.</p></CCol
+                    ></CRow
+                  >
+                    <CRow>
+                      <CCol>
+                        <h4>Data Source Templates</h4>
+                        <p>Data Source Templates provide a mechanism for automatically discovering what data sources are available in the input.  More than one Data Source Template can be selected.  Periodically the index will be queried to see if the criteria is met for each Data Source and the data sources will be updated.</p>
+                        <label>Data Source Templates</label><br />
+                        
+                        <div v-if="!edit_config">
+                          <div v-if="input.data_source_templates.length == 0">
+                            <p>No data source templates mapped to this input.</p>
+                          </div>
+                          <li
+                            style="display: inline; margin-right: 2px"
+                            v-for="(field, i) in input.data_source_templates"
+                            :key="i"
+                          >
+                            <CBadge class="tag tag-list" color="info" size="sm">{{
+                              field
+                            }}</CBadge>
+                          </li>
+                          <br /><br />
+                        </div>
+                        <div v-else>
+                          <multiselect
+                            v-model="input.data_source_templates"
+                            :taggable="true"
+                            @tag="addMultiSelectValue(input.data_source_templates, $event)"
+                            :options="data_source_templates"
+                            :multiple="true"
+                            :close-on-select="false"
+                            placeholder="Select"
+                            :preselect-first="true"
+                          ></multiselect
+                          ><br />
+                        </div>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                    <CCol>
+                      <h4>Manual Data Sources</h4>
+                      <label>Data Sources</label><br />
+                      
+                      <div v-if="!edit_config">
+                        <div v-if="input.mitre_data_sources.length == 0">
+                        <p>No data sources mapped to this input.</p>
+                      </div>
+                        <li
+                          style="display: inline; margin-right: 2px"
+                          v-for="(field, i) in input.mitre_data_sources"
+                          :key="i"
+                        >
+                          <CBadge class="tag tag-list" color="info" size="sm">{{
+                            field
+                          }}</CBadge>
+                        </li>
+                        <br /><br />
+                      </div>
+                      <div v-else>
+                        <multiselect
+                          v-model="input.mitre_data_sources"
+                          :taggable="true"
+                          @tag="addMultiSelectValue(input.mitre_data_sources, $event)"
+                          :options="mitre_data_sources"
+                          :multiple="true"
+                          :close-on-select="false"
+                          placeholder="Select one"
+                        ></multiselect
+                        ><br />
+                      </div>
+                    </CCol>
+                  </CRow>
+
+                </CTab>
+                <CTab title="Advanced Editing"
+                  ><CRow
+                    ><CCol
+                      >
+                      <h3>Advanced Editing - JSON View</h3></CCol
+                    ></CRow
+                  ><CRow
+                    ><CCol
+                      v-if="edit_config"
+                      style="overflow-y: scroll; height: calc(100vh - 300px)"
+                    >
+                      <CCardBody v-if="edit_config">
+                        <CTextarea
+                          :value="jsonToString(input.config)"
+                          @change="convertConfig($event)"
+                          style="height: 100%"
+                          rows="20"
+                        />
+                      </CCardBody>
+                    </CCol>
+                    <CCol v-else style="overflow-y: scroll; height: calc(100vh - 300px)">
+                      <div>
+                        <pre> {{ input.config }}</pre>
+                      </div>
+                    </CCol></CRow
+                  >
+                </CTab>
+              </CTabs>
+            </CCardBody>
+          </CCard>
+        </CTab>
+        
+        <CTab title="Field Mapping">
+          <CRow class="page-sub-header">
+            <CCol>
+              <h2>Field Mapping</h2>
+            </CCol>
+            <CCol class="text-right"
+              ><CButton size="sm" color="success" @click="addField()">New Field</CButton
+              >&nbsp;
+              <CButton
+                v-bind:disabled="!changes_made"
+                size="sm"
+                color="primary"
+                @click="updateFieldMapping()"
+                >Save Changes</CButton
+              >&nbsp;<CButton
+                v-bind:disabled="!changes_made"
+                size="sm"
+                color="secondary"
+                @click="discardChanges()"
+                >Discard Changes</CButton
+              ></CCol
+            >
+          </CRow>
+
+          <CCard>
             <CCardBody style="padding: 0px">
               <CDataTable
                 :items="input.field_mapping['fields']"
@@ -324,10 +567,7 @@
                 <template #data_type="{ item }">
                   <td>
                     <div v-if="edit_field == itemIndex(item['field'])">
-                      <CSelect
-                        :options="data_types"
-                        :value.sync="item['data_type']"
-                      />
+                      <CSelect :options="data_types" :value.sync="item['data_type']" />
                     </div>
                     <div v-else>{{ item["data_type"] }}</div>
                   </td>
@@ -335,10 +575,7 @@
                 <template #tlp="{ item }">
                   <td>
                     <div v-if="edit_field == itemIndex(item['field'])">
-                      <CSelect
-                        :options="[1, 2, 3, 4]"
-                        :value.sync="item['tlp']"
-                      />
+                      <CSelect :options="[1, 2, 3, 4]" :value.sync="item['tlp']" />
                     </div>
                     <div v-else>{{ item["tlp"] }}</div>
                   </td>
@@ -363,9 +600,7 @@
                         v-for="tag in item['tags']"
                         :key="tag"
                       >
-                        <CButton color="primary" size="sm" disabled="">{{
-                          tag
-                        }}</CButton>
+                        <CButton color="primary" size="sm" disabled="">{{ tag }}</CButton>
                       </li>
                     </div>
                     <div v-else>None</div>
@@ -400,7 +635,11 @@
               </CDataTable>
             </CCardBody>
           </CCard>
-        </CCol>
+        </CTab>
+      </CTabs>
+
+      <CRow>
+        <CCol col="12"> </CCol>
         <CModal
           title="Delete Input"
           :closeOnBackdrop="false"
@@ -455,11 +694,14 @@ export default {
       data_types: [],
       changes_made: false,
       hosts: [],
-      distros: ["elasticsearch","opensearch"]
+      distros: ["elasticsearch", "opensearch"],
+      activeTab: 0,
+      data_source_templates: []
     };
   },
-  computed: mapState(["input"]),
+  computed: mapState(["input", "mitre_data_sources"]),
   created() {
+    this.$store.dispatch("getMitreDataSources");
     this.$store.dispatch("getInput", this.$route.params.uuid).then((resp) => {
       this.loading = false;
       this.hosts = this.input.config["hosts"];
@@ -535,6 +777,13 @@ export default {
         field["tags"].push(tag);
       }
     },
+    addMultiSelectValue(field, val) {
+      if (field.includes(val)) {
+        field = field.filter((t) => t != val);
+      } else {
+        field.push(val);
+      }
+    },
     convertFieldMapping(event) {
       try {
         this.input.field_mapping = JSON.parse(event);
@@ -554,9 +803,9 @@ export default {
       }
     },
     editConfig() {
-      console.log(this.edit_config)     
-      if(this.edit_config) {
-        console.log('saving config')
+      console.log(this.edit_config);
+      if (this.edit_config) {
+        this.updateConfig();
       }
       this.edit_config = !this.edit_config;
     },
@@ -570,9 +819,15 @@ export default {
         config = null;
         this.config_json_error = true;
       }
+
+      let update_payload = {
+        config: this.input.config,
+        mitre_data_sources: this.input.mitre_data_sources
+      };
+
       if (config) {
         this.$store
-          .dispatch("updateInput", { uuid: uuid, data: { config: config } })
+          .dispatch("updateInput", { uuid: uuid, data: update_payload })
           .then((resp) => {
             this.edit_config = false;
           });
