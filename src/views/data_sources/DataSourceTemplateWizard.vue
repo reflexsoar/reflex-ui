@@ -58,7 +58,8 @@
         </CTab>
         <CTab title="Data Source Definitions">
           <CRow>
-            <CCol col="9">
+            <CCol col="9"
+              >
               <h3>Data Sources</h3>
               <p>
                 Each data source defined in this template will evaluate an input to see if
@@ -72,27 +73,68 @@
           <CRow>
             <CCol>
               <CRow v-for="(source, i) in template.sources" :key="i">
-                <CCol col="4">
-                  <SelectInput :value.sync="source.name" :options="mitre_data_sources" placeholder="Select a Data Source" />
-                </CCol>
                 <CCol>
-                  <CInput v-model="source.query" placeholder="Query"></CInput>
-                </CCol>
-                <CCol col="1">
-                  <CButton color="danger" @click="template.sources.splice(i, 1)"
-                    ><i class="fas fa-trash-can"></i
-                  ></CButton>
+                  <CRow>
+                    <CCol col="4">
+                      <SelectInput
+                        :value.sync="source.name"
+                        :options="mitre_data_sources"
+                        placeholder="Select a Data Source"
+                      />
+                    </CCol>
+                    <CCol>
+                      <CRow>
+                        <CCol>
+                          <CInput v-model="source.query" placeholder="Query"></CInput>
+                        </CCol>
+                      </CRow>
+                    </CCol>
+                    <CCol col="1">
+                      <CButton color="danger" @click="template.sources.splice(i, 1)"
+                        ><i class="fas fa-trash-can"></i
+                      ></CButton>
+                    </CCol>
+                  </CRow>
+                  <CRow style="margin-top: -15px; margin-bottom: 10px;">
+                    <CCol>
+                      <span style="cursor: pointer; font-size: 80%;" @click="toggleCollapse(i)"
+                        >Additional Settings
+                        <i
+                          v-if="source_collapse[i]"
+                          class="fas fa-chevron-down"
+                        ></i>
+                        <i v-else class="fas fa-chevron-up"></i>
+                      </span>
+                      <CCollapse :show="source_collapse[i]" style="padding-top: 10px">
+                        <CRow>
+                            <CCol>
+                                <CTextarea
+                                v-model="source.description"
+                                placeholder="Description"
+                                ></CTextarea>
+                            </CCol>
+                            <CCol>
+                                <CTextarea
+                                    v-model="source.prequisites"
+                                    placeholder="Prerequisites"
+                                    description="Prerequisites describe what steps are necessary to configure this data source."
+                                ></CTextarea>
+                            </CCol>
+                        </CRow>
+                      </CCollapse>
+                    </CCol>
+                  </CRow>
                 </CCol>
               </CRow>
             </CCol>
           </CRow>
         </CTab>
         <CTab title="Review">
-            <CRow>
-                <CCol>
-                    <CAlert color="danger" v-if="error">{{ error_message }}</CAlert>
-                </CCol>
-            </CRow>
+          <CRow>
+            <CCol>
+              <CAlert color="danger" v-if="error">{{ error_message }}</CAlert>
+            </CCol>
+          </CRow>
           <CRow>
             <CCol>
               <h3>Confirm Settings</h3>
@@ -102,8 +144,7 @@
               </p>
             </CCol>
           </CRow>
-          <CRow
-            >
+          <CRow>
             <CCol col="5">
               <ObjectAttribute label="Name" :value="template.name"></ObjectAttribute>
               <ObjectAttribute
@@ -122,10 +163,13 @@
             </CCol>
             <CCol>
               <h4>Data Sources</h4>
-              <div style="max-height: 400px; overflow-y: auto; overflow-x: hidden;">
+              <div style="max-height: 400px; overflow-y: auto; overflow-x: hidden">
                 <ul class="data-source-list">
                   <li class="data-source-query" v-for="source in template.sources">
-                    <ObjectAttribute :label="source.name" :value="source.query"></ObjectAttribute>
+                    <ObjectAttribute
+                      :label="source.name"
+                      :value="source.query"
+                    ></ObjectAttribute>
                   </li>
                 </ul>
               </div>
@@ -146,7 +190,9 @@
               ></span
             >
             <span v-if="step == 2"
-              >&nbsp;<CButton color="primary" @click="save">{{ capitalize(mode) }}</CButton></span
+              >&nbsp;<CButton color="primary" @click="save">{{
+                capitalize(mode)
+              }}</CButton></span
             >
           </CCol>
         </CRow>
@@ -166,7 +212,6 @@
   list-style-type: none;
   margin-bottom: 5px;
 }
-
 </style>
 
 <script>
@@ -224,6 +269,7 @@ export default {
       error_message: "",
       step: 0,
       title: "",
+      source_collapse: {},
     };
   },
   watch: {
@@ -280,39 +326,47 @@ export default {
       this.uuid = "";
       this.modal_status = false;
     },
+    toggleCollapse(i) {
+      if (!(i in this.source_collapse)) {
+        console.log("WHAT THE!");
+        this.$set(this.source_collapse, i, false);
+      }
+
+      this.source_collapse[i] = !this.source_collapse[i];
+    },
     capitalize: function (value) {
       if (!value) return "";
       value = value.toString();
       return value.charAt(0).toUpperCase() + value.slice(1);
     },
     save() {
-        if (this.mode == "create") {
-            this.$store
-            .dispatch("createDataSourceTemplate", this.template)
-            .then((resp) => {
-                this.dismiss();
-            })
-            .catch((err) => {
-                this.error = true;
-                this.error_message = err.response.data.message;
-                this.step = 2;
-            });
-        } else if (this.mode == "edit") {
-            this.$store
-            .dispatch("updateDataSourceTemplate", {
-                uuid: this.uuid,
-                template: this.template,
-            })
-            .then((resp) => {
-                this.dismiss();
-            })
-            .catch((err) => {
-                this.error = true;
-                this.error_message = err.response.data.message;
-                this.step = 2;
-            });
-        }
-    }
+      if (this.mode == "create") {
+        this.$store
+          .dispatch("createDataSourceTemplate", this.template)
+          .then((resp) => {
+            this.dismiss();
+          })
+          .catch((err) => {
+            this.error = true;
+            this.error_message = err.response.data.message;
+            this.step = 2;
+          });
+      } else if (this.mode == "edit") {
+        this.$store
+          .dispatch("updateDataSourceTemplate", {
+            uuid: this.uuid,
+            template: this.template,
+          })
+          .then((resp) => {
+            this.dismiss();
+          })
+          .catch((err) => {
+            this.error = true;
+            this.error_message = err.response.data.message;
+            this.step = 2;
+          });
+      }
+    },
   },
   mounted() {
     this.getDataSources();

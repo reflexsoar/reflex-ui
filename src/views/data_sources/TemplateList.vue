@@ -13,8 +13,9 @@
                 <CCard>
                 <CDataTable
                     :items="data_source_templates"
-                    :fields="[{key: 'name', label:'Name', _style:'width: 60%'},'sources', {key: 'actions', label:''}]"
+                    :fields="fields"
                     :loading="loading"
+                    :responsive="false"
                     >
                     <template #name="{item}">
                         <td>
@@ -24,15 +25,18 @@
                     </template>
                     <template #sources="{item}">
                         <td>
-                            <span v-for="source, i in item.sources" :key="i">
-                                <CBadge class="tag" size="sm" color="info">{{source.name}}</CBadge>
-                            </span>
+                            <TagBucket label="Data Sources" :tags="item.sources.map((i) => { return i.name})"></TagBucket>
                         </td>
                     </template>
                     <template #active="{item}">
                         <td>
                             <CBadge class="tag" size="sm" v-if="item.active" color="success">Active</CBadge>
                             <CBadge class="tag" size="sm" v-else color="danger">Inactive</CBadge>
+                        </td>
+                    </template>
+                    <template #organization="{item}">
+                        <td>
+                            <OrganizationBadge :uuid="item.organization"></OrganizationBadge>
                         </td>
                     </template>
                     <template #actions="{item}">
@@ -61,11 +65,15 @@
 import { mapState } from 'vuex';
 
 import DataSourceTemplateWizard from './DataSourceTemplateWizard.vue'
+import OrganizationBadge from '../OrganizationBadge.vue'
+import TagBucket from '../components/TagBucket.vue'
 
 export default {
     name: 'DataSourceTemplateList',
     components: {
-        DataSourceTemplateWizard
+        DataSourceTemplateWizard,
+        OrganizationBadge,
+        TagBucket
     },
     computed: {
         ...mapState(['data_source_templates', 'current_user'])
@@ -79,7 +87,12 @@ export default {
             loading: false,
             target_template: {},
             delete_confirm: "",
-            show_delete_confirmation: false
+            show_delete_confirmation: false,
+            fields: [
+                {key: 'name', label:'Name', _style:'width: 60%'},
+                {key: 'sources', label: 'Data Sources'},
+                {key: 'actions', label:''}
+            ]
         }
     },
     methods: {
@@ -129,6 +142,9 @@ export default {
         }
     },
     mounted() {
+        if(this.current_user.default_org && this.current_user.permissions.view_organizations) {
+            this.fields.splice(2, 0, 'organization')
+        }
         this.getTemplates()
     }
 }

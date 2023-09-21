@@ -163,7 +163,7 @@ const mutations = {
   },
   add_data_source_template(state, template) {
     if(state.data_source_templates.length == 0) {
-      state.data_source_templates = [template]
+      state.data_source_templates = []
     }
     state.data_source_templates.push(template)
   },
