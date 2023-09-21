@@ -20,8 +20,15 @@
           class="option"
           @click="select(option)"
         >
-          <input type="checkbox" class="checkbox" :value="option" :checked="isSelected(option)">&nbsp;
-          <slot name="option" :option="option">{{ optionValue(option) }}</slot></input>
+          <div style="width: 98%">
+            <input type="checkbox" class="checkbox" :value="option" :checked="isSelected(option)">&nbsp;
+              <slot name="option" :option="option">{{ optionValue(option) }}</slot>
+            </input>
+          </div>
+          <div>
+            <CBadge v-if="showCount" class="tag tag-sm" color="secondary">{{ option.count ? option.count : 0 }}</CBadge>
+          </div>
+          
         </li>
       </ul>
       <span v-else class="no-results">No options found</span>
@@ -39,7 +46,6 @@
   position: relative;
   margin-bottom: 10px;
 }
-
 
 .selected-option {
   margin-right: 5px;
@@ -214,7 +220,11 @@ export default {
     asTags: {
       type: Boolean,
       default: false
-    }
+    },
+    showCount: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
