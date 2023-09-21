@@ -27,6 +27,7 @@ import VueJsonPretty from 'vue-json-pretty'
 
 require('vue-tour/dist/vue-tour.css')
 require('vue-json-pretty/lib/styles.css')
+require('vue-multiselect/dist/vue-multiselect.min.css')
 
 Vue.config.performance = true
 Vue.use(CoreuiVuePro)
