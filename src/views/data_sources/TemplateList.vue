@@ -41,8 +41,10 @@
                     </template>
                     <template #actions="{item}">
                         <td class="text-right">
-                            <CButton color="primary" size="sm" @click="editTemplate(item.uuid)"><CIcon name="cilPencil"/></CButton>&nbsp;
-                            <CButton color="danger" size="sm" @click="deleteTemplate(item.uuid)"><CIcon name="cilTrash"/></i></CButton>
+                            <CDropdown color="secondary" toggler-text="Manage" size="sm">
+                                <CDropdownItem @click="editTemplate(item.uuid)"><CIcon name="cil-pencil"/>&nbsp;Edit</CDropdownItem>
+                                <CDropdownItem @click="deleteTemplate(item.uuid)"><CIcon name="cilTrash"/>&nbsp;Delete</CDropdownItem>
+                            </CDropdown>
                         </td>
                     </template>
                 </CDataTable>
