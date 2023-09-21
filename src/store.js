@@ -153,10 +153,26 @@ const state = {
   sso_provider: {},
   sso_role_mappings: [],
   sso_role_mapping: {},
-  integration_outputs: []
+  integration_outputs: [],
+  data_source_templates: [],
 }
 
 const mutations = {
+  save_data_source_templates(state, templates) {
+    state.data_source_templates = templates
+  },
+  add_data_source_template(state, template) {
+    if(state.data_source_templates.length == 0) {
+      state.data_source_templates = [template]
+    }
+    state.data_source_templates.push(template)
+  },
+  update_data_source_template(state, template) {
+    state.data_source_templates = state.data_source_templates.map(t => t.uuid == template.uuid ? template : t)
+  },
+  remove_data_source_template(state, uuid) {
+    state.data_source_templates = state.data_source_templates.filter(t => t.uuid != uuid)
+  },
   save_outputs(state, outputs) {
     state.integration_outputs = outputs
   },
@@ -4581,6 +4597,54 @@ const actions = {
       Axios({ url: `${BASE_URL}/agent/policy/outputs`, method: 'GET' })
         .then(resp => {
           commit('save_outputs', resp.data.outputs)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getDataSourceTemplates({ commit }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/data_source_template`, method: 'GET' })
+        .then(resp => {
+          commit('save_data_source_templates', resp.data.templates)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  createDataSourceTemplate({ commit }, data) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/data_source_template`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_data_source_template', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateDataSourceTemplate({ commit }, { uuid, template }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/data_source_template/${uuid}`, data: template, method: 'PUT' })
+        .then(resp => {
+          commit('update_data_source_template', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  deleteDataSourceTemplate({ commit }, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/data_source_template/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_data_source_template', uuid)
           resolve(resp)
         })
         .catch(err => {

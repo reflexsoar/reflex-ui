@@ -34,6 +34,7 @@
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_agents')" name="Agents" to="/agents"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_credentials')" name="Credentials" to="/credentials"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_inputs')" name="Inputs" to="/inputs"></CSidebarNavItem>
+        <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_data_source_templates')" name="Data Source Templates" to="/data_source_templates"></CSidebarNavItem>
       </CSidebarNavDropdown>
     </CSidebarNav>
 
