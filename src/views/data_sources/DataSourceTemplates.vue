@@ -24,57 +24,15 @@
 import { mapState } from 'vuex';
 
 import DataSourceTemplateList from '@/views/data_sources/TemplateList.vue';
-import SelectInput from '../components/SelectInput.vue'
 
 export default {
     name: 'DataSourceTemplates',
     components: {
-        DataSourceTemplateList,
-        SelectInput
+        DataSourceTemplateList
     },
     data() {
         return {
-            test: '',
-            options: [
-                {
-                    label: 'test',
-                    value: 'a'
-                },
-                {
-                    label: 'test2',
-                    value: 'b'
-                },
-                {
-                    label: 'test3',
-                    value: 'c'
-                },{
-                    label: 'test',
-                    value: 'd'
-                },
-                {
-                    label: 'test2',
-                    value: 'e'
-                },
-                {
-                    label: 'test3',
-                    value: 'f'
-                },{
-                    label: 'test',
-                    value: 'g'
-                },
-                {
-                    label: 'test2',
-                    value: 'h'
-                },
-                {
-                    label: 'test3',
-                    value: 'i'
-                },
-                {
-                    label: 'Default Organization',
-                    value: 'foo'
-                }
-            ]
+            
         }
     },
     methods: {
