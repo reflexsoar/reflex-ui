@@ -270,6 +270,10 @@
                   <CCard>
                     <CCardHeader> Overview </CCardHeader>
                     <CCardBody>
+                      <div v-if="current_user.default_org && current_user.permissions.view_organizations"  style="margin-bottom: 10px">
+                        <label>Organization</label><br>
+                        <OrganizationBadge :uuid="case_data.organization"/>
+                      </div>
                       <ObjectAttribute
                         label="Created"
                         :value="case_data.created_at | moment('LLLL')"
@@ -798,6 +802,8 @@ import "@toast-ui/editor/dist/toastui-editor.css";
 
 import { Editor } from "@toast-ui/vue-editor";
 
+import OrganizationBadge from './OrganizationBadge.vue'
+
 import { Mentionable } from "vue-mention";
 import moment from "moment";
 export default {
@@ -819,6 +825,7 @@ export default {
     ObjectAttribute,
     Editor,
     CalloutCard,
+    OrganizationBadge
   },
   computed: {
     ...mapState(["alert", "current_user", "settings", "tags", "case_observables"]),
