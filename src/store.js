@@ -2069,6 +2069,7 @@ const actions = {
           let credentials = []
           resp.data.credentials.forEach(cred => credentials.push({ 'value': cred.uuid, 'label': cred.name + " - " + cred.description }))
           commit('creds_success', credentials)
+          commit('save_credentials', resp.data.credentials)
           resolve(resp)
         })
         .catch(err => {
@@ -4604,9 +4605,14 @@ const actions = {
         })
     })
   },
-  getDataSourceTemplates({ commit }) {
+  getDataSourceTemplates({ commit }, organization=null) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/data_source_template`, method: 'GET' })
+      let url = `${BASE_URL}/data_source_template`
+
+      if (organization) {
+        url += `?organization=${organization}`
+      }
+      Axios({ url: url, method: 'GET' })
         .then(resp => {
           commit('save_data_source_templates', resp.data.templates)
           resolve(resp)

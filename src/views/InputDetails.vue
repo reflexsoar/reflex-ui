@@ -4,15 +4,14 @@
       rel="stylesheet"
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
     />
-    <CCol col v-if="loading">
-      <div style="margin: auto; text-align: center; verticle-align: middle">
-        <CSpinner color="dark" style="width: 6rem; height: 6rem" />
-      </div>
-    </CCol>
-    <CCol col v-if="!loading">
+
+    <CCol>
       <CRow class="page-heading page-heading-row">
         <CCol>
           <h1>{{ input.name }}</h1>
+          <CElementCover :opacity="0.8" v-if="loading">
+            <CSpinner size="5xl" color="success" />
+          </CElementCover>
         </CCol>
       </CRow>
       <CTabs
@@ -21,69 +20,30 @@
         addTabClasses="page-nav-tab-body"
         addNavClasses="page-nav-tab"
       >
-        <CTab title="Overview">
-          <h2 class="page-sub-header">Overview</h2>
-          <CCard class="shadow-sm bg-white rounded">
-            <CCardHeader>
-              <CRow>
-                <CCol col="12" lg="6" sm="12" class="text-left">
-                  <h1>{{ input.name }}</h1>
-                </CCol>
-                <CCol col="12" lg="6" sm="12" class="text-right">
-                  <template #tags="{ tag }">
-                    {{ tag.name }}
-                  </template>
-                  <li
-                    style="display: inline; margin-right: 2px"
-                    v-for="(tag, i) in input.tags"
-                    :key="i"
-                  >
-                    <CBadge class="tag tag-list" color="info" size="sm" disabled>{{
-                      tag
-                    }}</CBadge>
-                  </li>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol col="12" lg="6" sm="12">
-                  {{ input.description }}
-                </CCol>
-                <CCol col="12" lg="6" sm="12" class="text-right">
-                  <CButton color="danger" @click="delete_modal = true"
-                    ><CIcon name="cil-trash"
-                  /></CButton>
-                </CCol>
-              </CRow>
-            </CCardHeader>
-            <CCardBody>
-              <CRow>
-                <CCol col="6">
-                  <b>Enabled: </b> True<br />
-                  <b>Plugin: </b> Elasticsearch<br />
-                </CCol>
-                <CCol col="6">
-                  <b>Date Created: </b>{{ input.created_at | moment("LLLL") }}<br />
-                  <b>Last Updated: </b>
-                </CCol>
-              </CRow>
-            </CCardBody>
-          </CCard>
-        </CTab>
         <CTab title="Configuration">
+        
           <CRow class="page-sub-header">
+            <CCol col="12">
+              <CAlert :show="error" color="danger">
+                {{ error_message }}
+              </CAlert>
+              <CAlert :show="success" color="success">
+                {{ success_message }}
+              </CAlert>
+            </CCol>
             <CCol>
               <h2>Configuration</h2>
             </CCol>
             <CCol>
               <CAlert
-                        :show.sync="config_json_error"
-                        color="danger"
-                        closeButton
-                        class="text-left"
-                      >
-                        Invalid JSON. Please check your config before submitting.
-                      </CAlert>
-                      </CCol>
+                :show.sync="config_json_error"
+                color="danger"
+                closeButton
+                class="text-left"
+              >
+                Invalid JSON. Please check your config before submitting.
+              </CAlert>
+            </CCol>
             <CCol class="text-right">
               <CButton
                 v-bind:disabled="config_json_error"
@@ -95,6 +55,7 @@
                 <CButton
                   color="danger"
                   @click="
+                    discardChanges();
                     edit_config = !edit_config;
                     config_json_error = false;
                   "
@@ -111,13 +72,81 @@
                 variant="pills"
                 :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
               >
+                <CTab title="General Settings">
+                  <CRow>
+                    <CCol>
+                      <h3>General Settings</h3>
+                    </CCol>
+                  </CRow>
+                  <CRow v-if="loading">
+                    <CCol>
+                      <CSpinner size="5xl" color="success" />
+                    </CCol>
+                  </CRow>
+                  <CRow v-else>
+                    <CCol>
+                      <CRow>
+                        <CCol col="6">
+                          <label>Name</label><br />
+                          <div v-if="!edit_config">{{ input.name }}<br /><br /></div>
+                          <div v-else>
+                            <CInput v-model="input.name" />
+                          </div>
+                        </CCol>
+                      </CRow>
+                      <CRow>
+                        <CCol col="6">
+                          <label>Description</label><br />
+                          <div v-if="!edit_config">{{ input.description }}<br /><br /></div>
+                          <div v-else>
+                            <CTextarea v-model="input.description" />
+                          </div>
+                        </CCol>
+                      </CRow>
+                      <CRow>
+                        <CCol col="6">
+                          <label>Tags</label><br />
+                          <div v-if="!edit_config">
+                            <li
+                              style="display: inline; margin-right: 2px"
+                              v-for="(tag, i) in input.tags"
+                              :key="i"
+                            >
+                              <CBadge class="tag tag-list" color="info" size="sm">{{
+                                tag
+                              }}</CBadge>
+                            </li>
+                            <br /><br />
+                          </div>
+                          <div v-else>
+                            <multiselect
+                              v-model="input.tags"
+                              :taggable="true"
+                              @tag="addMultiSelectValue(input.tags, $event)"
+                              :options="[]"
+                              :multiple="true"
+                              :close-on-select="false"
+                              placeholder="Select"
+                              :preselect-first="true"
+                            ></multiselect
+                            ><br />
+                          </div>
+                        </CCol>
+                      </CRow>
+                    </CCol>
+                  </CRow>
+                </CTab>
                 <CTab title="Host Configuration"
                   ><CRow
-                    ><CCol>
-                      
-                      <h3>Host Configuration</h3></CCol
-                    ></CRow
-                  ><CRow>
+                    ><CCol> <h3>Host Configuration</h3></CCol></CRow
+                  >
+                  <CRow v-if="loading">
+                    <CCol>
+                      <CSpinner size="5xl" color="success" />
+                    </CCol>
+                  </CRow>
+                  <CRow v-else>
+                    <CCol><CRow>
                     <CCol col="4">
                       <label>Hosts</label><br />
                       <div v-if="!edit_config">
@@ -173,7 +202,6 @@
                       <div v-else>
                         <CInput v-model.str="input.config['lucene_filter']" />
                       </div>
-                      
                     </CCol>
                     <CCol col="4">
                       <label>HTTP scheme</label><br />
@@ -181,7 +209,10 @@
                         {{ input.config["scheme"] }}<br /><br />
                       </div>
                       <div v-else>
-                        <CSelect :value.sync="input.config['scheme']" :options="['http', 'https']">
+                        <CSelect
+                          :value.sync="input.config['scheme']"
+                          :options="['http', 'https']"
+                        >
                         </CSelect>
                       </div>
                     </CCol>
@@ -191,8 +222,29 @@
                         {{ input.config["auth_method"] }}<br /><br />
                       </div>
                       <div v-else>
-                        <CSelect :value.sync="input.config['auth_method']" :options="['http_auth', 'api_key']">
+                        <CSelect
+                          :value.sync="input.config['auth_method']"
+                          :options="['http_auth', 'api_key']"
+                        >
                         </CSelect>
+                      </div>
+                    </CCol>
+                    <CCol col="4">
+                      <label>Credential</label><br />
+                      <div v-if="!edit_config">
+                        {{
+                          credentials.length > 0
+                            ? credentials.find((x) => x.uuid == input.credential).name
+                            : null
+                        }}
+                      </div>
+                      <div v-else>
+                        <SelectInput
+                          :options="credentials"
+                          :value.sync="input['credential']"
+                          option_label="name"
+                          option_key="uuid"
+                        />
                       </div>
                     </CCol>
                     <CCol col="4">
@@ -202,11 +254,11 @@
                       </div>
                       <div v-else>
                         <CSwitch
-                                  v-bind:checked.sync="input.config['check_hostname']"
-                                  color="success"
-                                  label-on="Yes"
-                                  label-off="No"
-                                />
+                          v-bind:checked.sync="input.config['check_hostname']"
+                          color="success"
+                          label-on="Yes"
+                          label-off="No"
+                        />
                       </div>
                     </CCol>
                     <CCol col="4">
@@ -215,20 +267,27 @@
                         {{ input.config["cert_verification"] }}<br /><br />
                       </div>
                       <div v-else>
-                        <CSelect :value.sync="input.config['cert_verification']" :options="['none', 'certificate', 'required']">
+                        <CSelect
+                          :value.sync="input.config['cert_verification']"
+                          :options="['none', 'certificate', 'required']"
+                        >
                         </CSelect>
                       </div>
-                      
                     </CCol>
                   </CRow>
-              </CTab>
-              <CTab title="Event Base Configuration">
+                  </CCol>
+                  </CRow>
+                </CTab>
+                <CTab title="Event Base Configuration">
                   <CRow
-                    ><CCol>
-                      
-                      <h3>Event Base Configuration</h3></CCol
-                    ></CRow
-                  ><CRow>
+                    ><CCol> <h3>Event Base Configuration</h3></CCol></CRow
+                  ><CRow v-if="loading">
+                    <CCol>
+                      <CSpinner size="5xl" color="success" />
+                    </CCol>
+                  </CRow>
+                  <CRow v-else>
+                    <CCol><CRow>
                     <CCol col="12">
                       <h5>Event Base Configuration</h5>
                     </CCol>
@@ -240,7 +299,6 @@
                       <div v-else>
                         <CInput v-model="input.config['rule_name']" />
                       </div>
-                      
                     </CCol>
                     <CCol col="4">
                       <label>Description Field</label><br />
@@ -250,9 +308,6 @@
                       <div v-else>
                         <CInput v-model="input.config['description_field']" />
                       </div>
-
-                      
-                      
                     </CCol>
                     <CCol col="4">
                       <label>Reference Field</label><br />
@@ -299,19 +354,19 @@
                         <CInput v-model.str="input.config['search_period']" />
                       </div>
                     </CCol>
-                    <CCol col=12>
+                    <CCol col="12">
                       <label>Tag Fields</label><br />
                       <div v-if="!edit_config">
-                      <li
-                        style="display: inline; margin-right: 2px"
-                        v-for="(field, i) in input.config['tag_fields']"
-                        :key="i"
-                      >
-                        <CBadge class="tag tag-list" color="info" size="sm">{{
-                          field
-                        }}</CBadge>
-                      </li>
-                      <br /><br />
+                        <li
+                          style="display: inline; margin-right: 2px"
+                          v-for="(field, i) in input.config['tag_fields']"
+                          :key="i"
+                        >
+                          <CBadge class="tag tag-list" color="info" size="sm">{{
+                            field
+                          }}</CBadge>
+                        </li>
+                        <br /><br />
                       </div>
                       <div v-else>
                         <multiselect
@@ -325,27 +380,29 @@
                           :preselect-first="true"
                         ></multiselect
                         ><br />
-                        </div>
+                      </div>
                     </CCol>
-                    <CCol col=12>
+                    <CCol col="12">
                       <label>Signature Fields</label><br />
                       <div v-if="!edit_config">
-                      <li
-                        style="display: inline; margin-right: 2px"
-                        v-for="(field, i) in input.config['signature_fields']"
-                        :key="i"
-                      >
-                        <CBadge class="tag tag-list" color="info" size="sm">{{
-                          field
-                        }}</CBadge>
-                      </li>
-                      <br /><br />
+                        <li
+                          style="display: inline; margin-right: 2px"
+                          v-for="(field, i) in input.config['signature_fields']"
+                          :key="i"
+                        >
+                          <CBadge class="tag tag-list" color="info" size="sm">{{
+                            field
+                          }}</CBadge>
+                        </li>
+                        <br /><br />
                       </div>
                       <div v-else>
                         <multiselect
                           v-model="input.config['signature_fields']"
                           :taggable="true"
-                          @tag="addMultiSelectValue(input.config['signature_fields'], $event)"
+                          @tag="
+                            addMultiSelectValue(input.config['signature_fields'], $event)
+                          "
                           :options="[]"
                           :multiple="true"
                           :close-on-select="false"
@@ -353,10 +410,8 @@
                           :preselect-first="true"
                         ></multiselect
                         ><br />
-                        </div>
-                        
+                      </div>
                     </CCol>
-                    
                   </CRow>
                   <CRow>
                     <CCol>
@@ -388,60 +443,86 @@
                       </div>
                     </CCol>
                   </CRow>
+                  </CCol>
+                  </CRow>
                 </CTab>
                 <CTab title="Data Source Mapping">
-                <CRow
+                  <CRow
                     ><CCol>
-                      
                       <h3>Data Source Mapping</h3>
-                      <p>Data Sources provide a mechanism for establishing exactly what data an input may contain.  Detection rules will automatically target inputs to run against by the data sources available within the input.</p></CCol
+                      <p>
+                        Data Sources provide a mechanism for establishing exactly what
+                        data an input may contain. Detection rules will automatically
+                        target inputs to run against by the data sources available within
+                        the input.
+                      </p></CCol
                     ></CRow
                   >
-                    <CRow>
-                      <CCol>
-                        <h4>Data Source Templates</h4>
-                        <p>Data Source Templates provide a mechanism for automatically discovering what data sources are available in the input.  More than one Data Source Template can be selected.  Periodically the index will be queried to see if the criteria is met for each Data Source and the data sources will be updated.</p>
-                        <label>Data Source Templates</label><br />
-                        
-                        <div v-if="!edit_config">
-                          <div v-if="input.data_source_templates.length == 0">
-                            <p>No data source templates mapped to this input.</p>
-                          </div>
-                          <li
-                            style="display: inline; margin-right: 2px"
-                            v-for="(field, i) in input.data_source_templates"
-                            :key="i"
-                          >
-                            <CBadge class="tag tag-list" color="info" size="sm">{{
-                              field
-                            }}</CBadge>
-                          </li>
-                          <br /><br />
+                  <CRow v-if="loading">
+                    <CCol>
+                      <CSpinner size="5xl" color="success" />
+                    </CCol>
+                  </CRow>
+                  <CRow v-else>
+                    <CCol>
+                  <CRow>
+                    <CCol>
+                      <h4>Data Source Templates</h4>
+                      <p>
+                        Data Source Templates provide a mechanism for automatically
+                        discovering what data sources are available in the input. More
+                        than one Data Source Template can be selected. Periodically the
+                        index will be queried to see if the criteria is met for each Data
+                        Source and the data sources will be updated.
+                      </p>
+                      <label>Data Source Templates</label><br />
+
+                      <div v-if="!edit_config">
+                        <div v-if="input.data_source_templates.length == 0">
+                          <p>No data source templates mapped to this input.</p>
                         </div>
-                        <div v-else>
-                          <multiselect
-                            v-model="input.data_source_templates"
-                            :taggable="true"
-                            @tag="addMultiSelectValue(input.data_source_templates, $event)"
-                            :options="data_source_templates"
-                            :multiple="true"
-                            :close-on-select="false"
-                            placeholder="Select"
-                            :preselect-first="true"
-                          ></multiselect
-                          ><br />
-                        </div>
-                      </CCol>
-                    </CRow>
-                    <CRow>
+                        <li
+                          style="display: inline; margin-right: 2px"
+                          v-for="(field, i) in input.data_source_templates"
+                          :key="i"
+                        >
+                          <CBadge class="tag tag-list" color="info" size="sm">{{
+                            data_source_templates.length > 0
+                              ? data_source_templates.find((x) => x.uuid == field).name
+                              : null
+                          }}</CBadge>
+                        </li>
+                        <br /><br />
+                      </div>
+                      <div v-else>
+                        <MultiPicker
+                          :options="data_source_templates"
+                          :value.sync="input.data_source_templates"
+                          option_label="name"
+                          option_key="uuid"
+                        >
+                          <template #option="{ option }">
+                            <b>{{ option.name }}</b
+                            ><span v-if="option.is_global"
+                              >&nbsp;<CBadge color="secondary" class="tag tag-sm"
+                                >Global Template</CBadge
+                              ></span
+                            ><br />
+                            <small>{{ option.description }}</small>
+                          </template>
+                        </MultiPicker>
+                      </div>
+                    </CCol>
+                  </CRow>
+                  <CRow>
                     <CCol>
                       <h4>Manual Data Sources</h4>
                       <label>Data Sources</label><br />
-                      
+
                       <div v-if="!edit_config">
                         <div v-if="input.mitre_data_sources.length == 0">
-                        <p>No data sources mapped to this input.</p>
-                      </div>
+                          <p>No data sources mapped to this input.</p>
+                        </div>
                         <li
                           style="display: inline; margin-right: 2px"
                           v-for="(field, i) in input.mitre_data_sources"
@@ -454,28 +535,26 @@
                         <br /><br />
                       </div>
                       <div v-else>
-                        <multiselect
-                          v-model="input.mitre_data_sources"
-                          :taggable="true"
-                          @tag="addMultiSelectValue(input.mitre_data_sources, $event)"
+                        <MultiPicker
                           :options="mitre_data_sources"
-                          :multiple="true"
-                          :close-on-select="false"
-                          placeholder="Select one"
-                        ></multiselect
-                        ><br />
+                          :value.sync="input.mitre_data_sources"
+                        />
                       </div>
                     </CCol>
                   </CRow>
-
+                  </CCol>
+                  </CRow>
                 </CTab>
                 <CTab title="Advanced Editing"
                   ><CRow
-                    ><CCol
-                      >
-                      <h3>Advanced Editing - JSON View</h3></CCol
-                    ></CRow
-                  ><CRow
+                    ><CCol> <h3>Advanced Editing - JSON View</h3></CCol></CRow
+                  ><CRow v-if="loading">
+                    <CCol>
+                      <CSpinner size="5xl" color="success" />
+                    </CCol>
+                  </CRow>
+                  <CRow v-else>
+                    <CCol><CRow
                     ><CCol
                       v-if="edit_config"
                       style="overflow-y: scroll; height: calc(100vh - 300px)"
@@ -494,14 +573,16 @@
                         <pre> {{ input.config }}</pre>
                       </div>
                     </CCol></CRow
-                  >
+                  ></CCol>
+                  </CRow>
                 </CTab>
               </CTabs>
             </CCardBody>
           </CCard>
         </CTab>
-        
+
         <CTab title="Field Mapping">
+
           <CRow class="page-sub-header">
             <CCol>
               <h2>Field Mapping</h2>
@@ -527,9 +608,13 @@
 
           <CCard>
             <CCardBody style="padding: 0px">
-              <CDataTable
+                        <CRow v-if="loading">
+            <CCol>
+              <CSpinner size="5xl" color="success" />
+            </CCol>
+          </CRow>
+              <CDataTable v-else
                 :items="input.field_mapping['fields']"
-                :key="input.field_mapping['fields']"
                 :fields="[
                   'field',
                   'alias',
@@ -597,8 +682,8 @@
                     <div v-if="item['tags'].length > 0">
                       <li
                         style="display: inline; margin-right: 2px"
-                        v-for="tag in item['tags']"
-                        :key="tag"
+                        v-for="(tag, i) in item['tags']"
+                        :key="i"
                       >
                         <CButton color="primary" size="sm" disabled="">{{ tag }}</CButton>
                       </li>
@@ -671,8 +756,15 @@
 
 <script>
 import { mapState } from "vuex";
+import MultiPicker from "./components/MultiPicker.vue";
+import SelectInput from "./components/SelectInput.vue";
+
 export default {
   name: "InputDetails",
+  components: {
+    MultiPicker,
+    SelectInput,
+  },
   data() {
     return {
       uuid: this.$route.params.uuid,
@@ -696,16 +788,30 @@ export default {
       hosts: [],
       distros: ["elasticsearch", "opensearch"],
       activeTab: 0,
-      data_source_templates: []
+      error: false,
+      error_message: "",
+      success: false,
+      success_message: "",
     };
   },
-  computed: mapState(["input", "mitre_data_sources"]),
+  computed: mapState([
+    "input",
+    "mitre_data_sources",
+    "data_source_templates",
+    "credentials",
+  ]),
   created() {
     this.$store.dispatch("getMitreDataSources");
+    
     this.$store.dispatch("getInput", this.$route.params.uuid).then((resp) => {
-      this.loading = false;
       this.hosts = this.input.config["hosts"];
+      this.$store.dispatch("getDataSourceTemplates", this.input.organization);
+      this.$store.dispatch("getCredentialList", {
+        organization: this.input.organization,
+      });
+      this.loading = false;
     });
+
     this.$store
       .dispatch("getDataTypes", { organization: this.input.organization })
       .then((resp) => {
@@ -765,6 +871,7 @@ export default {
       this.changes_made = true;
     },
     discardChanges() {
+      this.loading = true;
       this.$store.dispatch("getInput", this.$route.params.uuid).then((resp) => {
         this.loading = false;
       });
@@ -803,7 +910,6 @@ export default {
       }
     },
     editConfig() {
-      console.log(this.edit_config);
       if (this.edit_config) {
         this.updateConfig();
       }
@@ -822,7 +928,12 @@ export default {
 
       let update_payload = {
         config: this.input.config,
-        mitre_data_sources: this.input.mitre_data_sources
+        mitre_data_sources: this.input.mitre_data_sources,
+        data_source_templates: this.input.data_source_templates,
+        name: this.input.name,
+        description: this.input.description,
+        tags: this.input.tags,
+        credential: this.input.credential,
       };
 
       if (config) {
@@ -830,6 +941,14 @@ export default {
           .dispatch("updateInput", { uuid: uuid, data: update_payload })
           .then((resp) => {
             this.edit_config = false;
+            this.success = true;
+            this.success_message = "Input updated successfully.";
+            this.error = false;
+            this.error_message = "";
+          })
+          .catch((err) => {
+            this.error = true;
+            this.error_message = err.response.data.message + " Updates not saved.";
           });
       }
     },
@@ -851,9 +970,16 @@ export default {
             data: { field_mapping: field_mapping },
           })
           .then((resp) => {
-            console.log(this.input);
             this.edit_field_mapping = false;
             this.changes_made = false;
+            this.success = true;
+            this.success_message = "Input updated successfully.";
+            this.error = false;
+            this.error_message = "";
+          })
+          .catch((err) => {
+            this.error = true;
+            this.error_message = err.response.data.message;
           });
       }
     },
