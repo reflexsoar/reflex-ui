@@ -406,7 +406,21 @@
                   :invalidFeedback="validations.mapping_refresh_interval.message"
                 />
               </CCol>
-              <CCol></CCol>
+              <CCol>
+                <CInput
+                  v-model.number="policy.mitre_mapper_config.assessment_days"
+                  label="Assessment Days"
+                  placeholder="Enter a time in days"
+                  description="How many days back to look for new data source assessments"
+                  :isValid="
+                    validate(
+                      policy.mitre_mapper_config.assessment_days,
+                      validations.assessment_days
+                    )
+                  "
+                  :invalidFeedback="validations.assessment_days.message"
+                />
+              </CCol>
             </CRow>
           </CTab>
           <CTab title="Review">
@@ -670,6 +684,13 @@ export default {
           required: true,
           type: "number",
           message: "Must be between 1 and 86400"
+        },
+        assessment_days: {
+          min: 1,
+          max: 90,
+          required: true,
+          type: "number",
+          message: "Must be between 1 and 90"
         }
       },
     };

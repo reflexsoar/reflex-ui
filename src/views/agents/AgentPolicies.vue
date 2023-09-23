@@ -149,6 +149,8 @@ export default {
           'concurrent_inputs': 10,
           'graceful_exit': true,
           'mapping_refresh_interval': 60,
+          'assessment_days': 14,
+          'logging_level': 'ERROR'
         },
         "tags": [],
         "priority": 1,
@@ -204,6 +206,8 @@ export default {
           'concurrent_inputs': 10,
           'graceful_exit': true,
           'mapping_refresh_interval': 60,
+          'assessment_days': 14,
+          'logging_level': 'ERROR'
         },
         "tags": [],
         "priority": 1,
