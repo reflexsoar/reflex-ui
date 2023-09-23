@@ -114,7 +114,6 @@
           <CTab title="General Settings">
             <CRow>
               <CCol>
-                <label for="agent_roles">Roles</label>
                 <MultiPicker label="Roles" :value.sync="policy.roles" :options="roles"/>
               </CCol>
             </CRow>
@@ -446,7 +445,7 @@
                   :key="role"
                 >
                   <CButton color="primary" style="cursor: auto" size="sm" disabled>
-                    {{ roles.find((r) => r.value == role).label }}
+                    {{ roles.find((r) => r.value == role) ? roles.find((r) => r.value == role).label : "Unknown: " + role }}
                   </CButton>
                 </li>
                 <br /><br />
