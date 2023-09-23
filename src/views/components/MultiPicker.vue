@@ -295,8 +295,6 @@ export default {
         this.selections = [];
       }
 
-      this.search = "";
-
       this.$emit("update:value", this.selections);
     },
     getSelectedLabel(val) {
@@ -327,16 +325,6 @@ export default {
       this.selections = this.value;
     }
 
-    // Select the option when the user presses enter but only if it is
-    // the remaining option
-    searchBox.addEventListener("keyup", (e) => {
-      if (e.key === "Enter") {
-        if (this.filtered_options.length === 1) {
-          this.select(this.filtered_options[0]);
-        }
-      }
-    });
-
     selectBtn.addEventListener("click", () => {
       this.wrapper.classList.toggle("active");
 
@@ -345,6 +333,7 @@ export default {
       document.addEventListener("click", (e) => {
         if (!this.wrapper.contains(e.target)) {
           this.wrapper.classList.remove("active");
+          this.search = "";
         }
       });
 
