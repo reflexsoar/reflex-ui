@@ -139,7 +139,7 @@
         >
 python reflex-agent.py --pair --token "{{ pairingToken }}" --console {{
             current_url
-          }} --roles poller,runner</pre
+          }} --roles detector</pre
         >
       </div>
     </CModal>

@@ -115,15 +115,7 @@
             <CRow>
               <CCol>
                 <label for="agent_roles">Roles</label>
-                <multiselect
-                  id="agent_roles"
-                  v-model="policy.roles"
-                  placeholder="Select the groups this agent belongs to"
-                  :options="roles"
-                  :multiple="true"
-                >
-                </multiselect
-                ><br />
+                <MultiPicker label="Roles" :value.sync="policy.roles" :options="roles"/>
               </CCol>
             </CRow>
             <CRow>
@@ -371,6 +363,52 @@
               <CCol> </CCol>
             </CRow>
           </CTab>
+          <CTab title="MITRE Mapper Settings"
+          v-bind:disabled="policy.roles && !policy.roles.includes('mitre')">
+            <CRow>
+              <CCol>
+                <CInput
+                  v-model.number="policy.mitre_mapper_config.concurrent_inputs"
+                  label="Concurrent Inputs"
+                  placeholder="Enter the number of concurrent inputs"
+                  description="The number of concurrent inputs the poller will process"
+                  :isValid="
+                    validate(
+                      policy.mitre_mapper_config.concurrent_inputs,
+                      validations.concurrent_inputs
+                    )
+                  "
+                  :invalidFeedback="validations.concurrent_inputs.message"
+                />
+              </CCol>
+              <CCol>
+                <CSelect
+                  :value.sync="policy.mitre_mapper_config.logging_level"
+                  label="Log Level"
+                  placeholder="Select a logging level"
+                  :options="log_levels"
+                />
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol>
+                <CInput
+                  v-model.number="policy.mitre_mapper_config.mapping_refresh_interval"
+                  label="Mapping Refresh Interval"
+                  placeholder="Enter a time in seconds"
+                  description="How often the MITRE mapper will refresh the mapping data"
+                  :isValid="
+                    validate(
+                      policy.mitre_mapper_config.mapping_refresh_interval,
+                      validations.mapping_refresh_interval
+                    )
+                  "
+                  :invalidFeedback="validations.mapping_refresh_interval.message"
+                />
+              </CCol>
+              <CCol></CCol>
+            </CRow>
+          </CTab>
           <CTab title="Review">
             <CRow>
               <CCol>
@@ -393,9 +431,9 @@
                   v-for="role in policy.roles"
                   :key="role"
                 >
-                  <CButton color="primary" style="cursor: auto" size="sm" disabled>{{
-                    role
-                  }}</CButton>
+                  <CButton color="primary" style="cursor: auto" size="sm" disabled>
+                    {{ roles.find((r) => r.value == role).label }}
+                  </CButton>
                 </li>
                 <br /><br />
                 <label>Health Check Interval:</label> {{ policy.health_check_interval
@@ -460,8 +498,13 @@
 <script>
 import { mapState } from "vuex";
 
+import MultiPicker from '../components/MultiPicker.vue'
+
 export default {
   name: "AgentPolicyWizard",
+  components: {
+    MultiPicker
+  },
   props: {
     show: {
       type: Boolean,
@@ -511,7 +554,23 @@ export default {
       error_message: "",
       modalStatus: this.show,
       submitted: false,
-      roles: ["detector", "runner", "poller"],
+      roles: [
+        {
+          label: "Detector",
+          value: "detector",
+        },
+        {
+          label: "Runner",
+          value: "runner",
+        },
+        {
+          label: "Poller",
+          value: "poller",
+        },
+        {
+          label: "MITRE Mapper",
+          value: "mitre",
+        }],
       log_levels: ["INFO", "ERROR", "WARNING", "DEBUG"],
       tags: [],
       validations: {
@@ -605,6 +664,13 @@ export default {
           type: "string",
           message: "Must be at least 3 characters",
         },
+        mapping_refresh_interval: {
+          min: 1,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 1 and 86400"
+        }
       },
     };
   },

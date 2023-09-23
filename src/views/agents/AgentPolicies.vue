@@ -115,7 +115,8 @@ export default {
         "roles": [
           "runner",
           "detector",
-          "poller"
+          "poller",
+          "mitre"
         ],
         "health_check_interval": 30,
         "logging_level": "ERROR",
@@ -143,6 +144,11 @@ export default {
           "wait_interval": 30,
           "plugin_poll_interval": 30,
           "logging_level": "ERROR"
+        },
+        "mitre_mapper_config": {
+          'concurrent_inputs': 10,
+          'graceful_exit': true,
+          'mapping_refresh_interval': 60,
         },
         "tags": [],
         "priority": 1,
@@ -164,7 +170,8 @@ export default {
         "roles": [
           "runner",
           "detector",
-          "poller"
+          "poller",
+          "mitre"
         ],
         "health_check_interval": 30,
         "logging_level": "ERROR",
@@ -192,6 +199,11 @@ export default {
           "wait_interval": 30,
           "plugin_poll_interval": 30,
           "logging_level": "ERROR"
+        },
+        "mitre_mapper_config": {
+          'concurrent_inputs': 10,
+          'graceful_exit': true,
+          'mapping_refresh_interval': 60,
         },
         "tags": [],
         "priority": 1,
