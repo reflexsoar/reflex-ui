@@ -305,7 +305,7 @@ export default {
       return "";
     },
     getDataSources: function () {
-      this.$store.dispatch("getMitreDataSources");
+      this.$store.dispatch("getMitreDataSources", {});
     },
     add_source() {
       this.template.sources.push({

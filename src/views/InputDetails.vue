@@ -801,7 +801,7 @@ export default {
     "credentials",
   ]),
   created() {
-    this.$store.dispatch("getMitreDataSources");
+    this.$store.dispatch("getMitreDataSources", {});
     
     this.$store.dispatch("getInput", this.$route.params.uuid).then((resp) => {
       this.hosts = this.input.config["hosts"];
