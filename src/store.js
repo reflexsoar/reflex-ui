@@ -3613,7 +3613,7 @@ const actions = {
         })
     })
   },
-  getMitreDataSources({ commit }, { with_coverage=False }) {
+  getMitreDataSources({ commit }, { with_coverage= false }) {
     let url = `${BASE_URL}/mitre/data_sources`
 
     if (with_coverage) {
