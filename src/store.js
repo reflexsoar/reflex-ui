@@ -1913,9 +1913,15 @@ const actions = {
         })
     })
   },
-  getDetection({ commit }, uuid) {
+  getDetection({ commit }, {uuid, event = null}) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/detection/${uuid}`, method: 'GET' })
+      let url = `${BASE_URL}/detection/${uuid}`
+
+      if (event) {
+        url += `?event=${event}`
+      }
+
+      Axios({ url: url, method: 'GET' })
         .then(resp => {
           commit('save_detection', resp.data)
           resolve(resp)
@@ -3607,8 +3613,13 @@ const actions = {
         })
     })
   },
-  getMitreDataSources({ commit }) {
+  getMitreDataSources({ commit }, { with_coverage=False }) {
     let url = `${BASE_URL}/mitre/data_sources`
+
+    if (with_coverage) {
+      url += `?with_coverage=${with_coverage}`
+    }
+    
     return new Promise((resolve, reject) => {
       Axios({ url: url, method: 'GET' })
         .then(resp => {

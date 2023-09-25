@@ -81,7 +81,7 @@
                                             class="tag tag-sm"
                                             :style="{'background-color': getDataSourceColorFromScale(getInputCount(technique.data_sources), technique), 'color': getDataSourceFontColorFromScale(getInputCount(technique.data_sources), technique)}"
                                         >
-                                            <i class="fas fa-database"></i> {{ getInputCount(technique.data_sources)}}/{{ technique.data_sources ? technique.data_sources.length : 0 }}
+                                            <i class="fas fa-database"></i> {{ getDataSourceCount(technique.data_sources) }}/{{ technique.data_sources ? technique.data_sources.length : 0 }}
                                         </CBadge>
                                         </CCol>
                                     </CRow>
@@ -207,7 +207,7 @@ export default {
                 return this.mitre_techniques;
             }
         },
-        ...mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations', 'mitre_mapping'])
+        ...mapState(['mitre_tactics', 'mitre_techniques', 'detections', 'mitre_technique', 'current_user', 'organizations', 'mitre_mapping', 'mitre_data_sources'])
     },
     components: {
         MitreTechniqueDrawer,
@@ -241,6 +241,7 @@ export default {
         }
         this.$store.commit('set', ['mitreDrawerMinimize', true])
         this.loading = true
+        this.getMitreDataSources()
         this.getDetectionMapping()
         this.getMitreTactics()
         this.getMitreTechniques()
@@ -408,13 +409,27 @@ export default {
         },
         getInputCount(data_sources) {
             let count = 0
+
+            /* Create a list of unique data_sources from all inputs */
+            let unique_data_sources = []
+
             for (let i in this.inputs) {
                 let input = this.inputs[i]
                 for (let data_source in data_sources) {
-                    
-                    if (input.mitre_data_sources && input.mitre_data_sources.includes(data_sources[data_source])) {
+                    if (input.mitre_data_sources && input.mitre_data_sources.includes(data_sources[data_source]) && !unique_data_sources.includes(data_sources[data_source])) {
+                        unique_data_sources.push(data_sources[data_source])
                         count++
                     }
+                }
+            }
+            return count
+        },
+        getDataSourceCount(data_sources) {
+            // Count the number of data_sources that show up in mitre_data_sources
+            let count = 0
+            for (let data_source in data_sources) {
+                if (this.mitre_data_sources.includes(data_sources[data_source])) {
+                    count++
                 }
             }
             return count
@@ -453,6 +468,9 @@ export default {
         },
         getMitreTactics() {
             this.$store.dispatch('getMitreTactics', { page_size: 1000 })
+        },
+        getMitreDataSources() {
+            this.$store.dispatch('getMitreDataSources', { with_coverage: true })
         },
         formattedOrganizations() {
             return this.organizations.map((o) => { return { label: o.name, value: o.uuid } })
