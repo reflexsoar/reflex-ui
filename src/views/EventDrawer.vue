@@ -366,7 +366,14 @@
               <CTab title="Exclusions">
 
                 <div v-if="detection.exceptions">
-                  <h4>Exceptions</h4>
+                  <CRow>
+                    <CCol>
+                      <h4>Exceptions</h4>
+                    </CCol>
+                    <CCol>
+                      
+                    </CCol>
+                  </CRow>
                   <CDataTable
                     :items="detection.exceptions"
                     :fields="[
