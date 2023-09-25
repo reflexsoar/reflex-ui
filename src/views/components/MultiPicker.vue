@@ -5,7 +5,7 @@
     </slot>
     <div class="select-btn">
       <span v-if="selections.length == 0">{{ placeholder }}</span>
-      <span v-if="selections.length > 0 && asTags"><CBadge v-for="item, i in selections" class="tag selected-option" color="secondary">{{ getSelectedLabel(item) }}&nbsp;<i @click="select(item)" class="fas fa-x"></i></CBadge></span>
+      <span v-if="selections.length > 0 && asTags"><CBadge v-for="(item, i) in selections" :key="i" class="tag selected-option" color="secondary">{{ getSelectedLabel(item) }}&nbsp;<i @click="select(item)" class="fas fa-x"></i></CBadge></span>
       <span v-if="selections.length > 0 && !asTags">Selected {{ selections.length }} of {{ options.length }} items.</span>
       <i class="fas fa-chevron-down"></i>
     </div>
