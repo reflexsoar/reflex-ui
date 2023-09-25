@@ -17,8 +17,8 @@ button.kb {
 
 /* Change the code element when not in a pre */
 :not(pre) > code {
-    color: #fff;
-    
+    color: $dark;
+    background-color: #f3f3f3;
     padding: 3px !important;
     border-radius: 3px !important;
     border: 1px solid #e2e2e2 !important;

@@ -155,9 +155,25 @@ const state = {
   sso_role_mapping: {},
   integration_outputs: [],
   data_source_templates: [],
+  schedules: []
 }
 
 const mutations = {
+  save_schedules(state, schedules) {
+    state.schedules = schedules
+  },
+  add_schedule(state, schedule) {
+    if(state.schedules.length == 0) {
+      state.schedules = []
+    }
+    state.schedules.push(schedule)
+  },
+  update_schedule(state, schedule) {
+    state.schedules = [...state.schedules.filter(s => s.uuid != schedule.uuid), schedule]
+  },
+  remove_schedule(state, uuid) {
+    state.schedules = state.schedules.filter(s => s.uuid != uuid)
+  },
   save_data_source_templates(state, templates) {
     state.data_source_templates = templates
   },
@@ -4668,7 +4684,61 @@ const actions = {
           reject(err)
         })
     })
-  }
+  },
+  getSchedules({ commit }, { active = null, organization = null }) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/schedule?active=${active}}`
+
+      if (organization) {
+        url += `&organization=${organization}`
+      }
+
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_schedules', resp.data.schedules)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  createSchedule({ commit }, data) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/schedule`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_schedule', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateSchedule({ commit }, { uuid, data }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/schedule/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_schedule', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  deleteSchedule({ commit }, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/schedule/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_schedule', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
 }
 
 export default new Vuex.Store({
