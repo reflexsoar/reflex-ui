@@ -98,7 +98,7 @@
 
 .content {
   position: absolute;
-  z-index: 2;
+  z-index: 2000 !important;
   width: 100%;
   display: none;
   margin-top: 5px;
@@ -246,7 +246,7 @@ export default {
   },
   watch: {
     value: function () {
-      this.selected = this.value;
+      this.selections = this.value;
     },
   },
   methods: {
