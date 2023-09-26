@@ -10,6 +10,7 @@
     >
       <CTabs
         variant="pills"
+        :activeTab.sync="step"
         :fade="true"
         :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
       >
@@ -48,10 +49,10 @@
         </CTab>
         <CTab title="Schedule">
             <h3>Daily Schedule</h3>
-            <p>Configure the days of the week the schedule allows actions to run.  Selecting <code>Custom Hours</code> will allow for configuring up to 5 individual time windows per day</p>
+            <p>Configure the days of the week the schedule allows actions to run.  Selecting <code>Custom Hours</code> will allow for configuring up to 5 individual time windows per day.</p>
             <CRow>
                 <CCol>
-                    <SelectInput label="Timezone" :options="timezones" :value.sync="schedule.timezone" placeholder="Select a timezone" description="Select the timezone for this schedule."/>
+                    <SelectInput label="Timezone" option_value="value" option_label="label" :options="timezones" :value.sync="schedule.timezone" placeholder="Select a timezone" description="Select the timezone for this schedule."/>
                 </CCol>
             </CRow>
             <CRow>
@@ -90,27 +91,31 @@
             </CRow>
         </CTab>
         <CTab title="Review">
+            <CAlert :show="error" color="danger">
+                {{ error_message}}
+            </CAlert>
+
             {{ schedule }}
         </CTab>
       </CTabs>
       <template #footer>
+        <CButton color="secondary" @click="dismiss()">Dismiss</CButton>
         <CButton
-          v-if="mode == 'Create'"
+          v-if="mode == 'create' && step == 2"
           @click="createSchedule()"
           color="primary"
-          :disabled="submitted"
           ><span v-if="submitted"><CSpinner size="sm" />&nbsp;</span
           >Create</CButton
         >
         <CButton
-          v-if="mode == 'Edit'"
+          v-if="mode == 'edit' && step == 2"
           @click="editSchedule()"
           color="primary"
           :disabled="submitted"
           ><span v-if="submitted"><CSpinner size="sm" />&nbsp;</span
           >Save</CButton
         >
-        <CButton color="secondary" @click="dismiss()">Dismiss</CButton>
+        
         </template>
     </CModal>
   </div>
@@ -152,7 +157,7 @@ export default {
     },
     checkDayActive(day) {
 
-        if(!this.schedule[day].active) {
+        if(!this.schedule[day].active && this.schedule[day].custom) {
             this.schedule[day].active = true
         }
 
@@ -163,8 +168,58 @@ export default {
                     end: "23:59"
                 }
             ]
+        } else {
+            this.schedule[day].hours = []
         }
-        console.log(this.schedule[day].active);
+    },
+    createSchedule() {
+      this.submitted = true;
+      this.$store
+        .dispatch("createSchedule", this.schedule)
+        .then(() => {
+          this.submitted = false;
+          this.dismiss();
+        })
+        .catch((error) => {
+          this.submitted = false;
+          this.error = true;
+          this.error_message = error.response.data.message;
+          step = this.last_step;
+        });
+    },
+    editSchedule() {
+        this.submitted = true;
+        let update_payload = {
+            name: this.schedule.name,
+            description: this.schedule.description,
+            organization: this.schedule.organization,
+            monday: this.schedule.monday,
+            tuesday: this.schedule.tuesday,
+            wednesday: this.schedule.wednesday,
+            thursday: this.schedule.thursday,
+            friday: this.schedule.friday,
+            saturday: this.schedule.saturday,
+            sunday: this.schedule.sunday,
+            timezone: this.schedule.timezone
+        }
+        this.$store.dispatch("updateSchedule", {
+            uuid: this.uuid,
+            data: update_payload,
+        })
+        .then(() => {
+            this.submitted = false;
+            this.dismiss();
+        })
+        .catch((error) => {
+            this.submitted = false;
+            this.error = true;
+            this.error_message = error.response.data.message;
+            step = this.last_step;
+        });
+    },
+    clearError() {
+        this.error = false;
+        this.error_message = "";
     },
     addTimeWindow(day) {
         if(this.schedule[day].hours.length < 5) {
@@ -183,6 +238,7 @@ export default {
     },
     dismiss() {
         this.modal_status = false;
+        this.clearError();
     }
   },
   watch: {
@@ -193,6 +249,7 @@ export default {
     },
     modal_status: function () {
       if (this.modal_status) {
+        this.step = 0;
         this.title = this.capitalize(this.mode) + " Schedule";
         this.schedule = JSON.parse(JSON.stringify(this.source_schedule));
         if (this.mode == "edit") {
@@ -209,6 +266,8 @@ export default {
   data() {
     return {
       title: "",
+      step: 0,
+      submitted: false,
       modal_status: false,
       schedule: {
         name: "",
@@ -384,6 +443,9 @@ export default {
         { label: "(UTC+13:00) Nuku'alofa", value: "Pacific/Tongatapu" },
         { label: "(UTC+13:00) Samoa", value: "Pacific/Apia" },
       ],
+      error: false,
+      error_message: "",
+      last_step: 2
     };
   },
 };

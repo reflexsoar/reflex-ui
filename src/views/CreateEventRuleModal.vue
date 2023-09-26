@@ -14,12 +14,7 @@
       <template #header>
         <h5 style="text-transform: capitalize">{{ mode }} Event Rule</h5>
         <span class="text-right">
-          <button
-            type="button"
-            aria-label="Close"
-            class="close"
-            @click="dismiss()"
-          >
+          <button type="button" aria-label="Close" class="close" @click="dismiss()">
             ×
           </button>
           <button
@@ -53,9 +48,9 @@
             >
               <CTab title="1. Rule Details">
                 <CAlert :show="mode == 'clone'" color="warning">
-                  <b>WARNING: </b>This Event Rule has been cloned from another.
-                  Please verify all fields before submitting. The following
-                  fields are not copied:<br />
+                  <b>WARNING: </b>This Event Rule has been cloned from another. Please
+                  verify all fields before submitting. The following fields are not
+                  copied:<br />
                   <ul style="margin-bottom: 0px">
                     <li>Organization</li>
                     <li>Target Case</li>
@@ -64,21 +59,18 @@
                 </CAlert>
                 <h4>Rule Details</h4>
                 <p>
-                  An Event rule allows you to automatically handle Events over a
-                  period of time based on Event criteria.
+                  An Event rule allows you to automatically handle Events over a period of
+                  time based on Event criteria.
                 </p>
                 <p v-if="from_card">
-                  This rule will apply to <b>{{ events.length }}</b> Events and
-                  any future events matching the title of this event and
-                  observables selected in this wizard.
+                  This rule will apply to <b>{{ events.length }}</b> Events and any future
+                  events matching the title of this event and observables selected in this
+                  wizard.
                 </p>
                 <CSelect
                   label="Organization"
                   placeholder="Select an organization"
-                  v-if="
-                    current_user.permissions.view_organizations &&
-                    !from_card
-                  "
+                  v-if="current_user.permissions.view_organizations && !from_card"
                   :value.sync="organization"
                   :options="organizations"
                   @change="reloadMeta()"
@@ -114,11 +106,13 @@
                       label-on="Yes"
                       label-off="no"
                       color="success"
-                      aria-label="Protected Rule"/>
-                      <br>
-                       <small class="text-muted"
-                      >A protected rule can only be edited by it's creator and will not
-                      be disabled via background Event Rule maintenance.</small>
+                      aria-label="Protected Rule"
+                    />
+                    <br />
+                    <small class="text-muted"
+                      >A protected rule can only be edited by it's creator and will not be
+                      disabled via background Event Rule maintenance.</small
+                    >
                   </CCol>
                   <CCol>
                     <label>Run Retroactive</label><br />
@@ -130,9 +124,9 @@
                       aria-label="Run Rule Retroactively"
                     /><br />
                     <small class="text-muted"
-                      >When the rule is saved, Reflex will retroactively attempt
-                      to match this rule to any event that is currently in a New
-                      state</small>
+                      >When the rule is saved, Reflex will retroactively attempt to match
+                      this rule to any event that is currently in a New state</small
+                    >
                   </CCol>
                   <CCol v-if="current_user.default_org && !from_card">
                     <label>Global Rule</label><br />
@@ -143,24 +137,36 @@
                       color="success"
                     /><br />
                     <small class="text-muted"
-                      >Global Rules exist in the Default Tenant and will apply
-                      to every tenant in the Reflex system. Matches on Global
-                      rules do not stop further rule processing.</small
+                      >Global Rules exist in the Default Tenant and will apply to every
+                      tenant in the Reflex system. Matches on Global rules do not stop
+                      further rule processing.</small
                     >
                   </CCol>
                 </CRow>
                 <CRow>
                   <CCol col="3">
-                    <CInput v-model="priority" label="Priority" description="Set the rule priority to determine which rules to run first.  Lower priorities run first  (Min: 1, Max: 65535)"></CInput>
+                    <CInput
+                      v-model="priority"
+                      label="Priority"
+                      description="Set the rule priority to determine which rules to run first.  Lower priorities run first  (Min: 1, Max: 65535)"
+                    ></CInput>
                   </CCol>
                 </CRow>
               </CTab>
-              <CTab title="2. Expiration">
+              <CTab title="2. Schedule">
+                <h4>Schedule</h4>
+                <p>Select a schedule to determine when this rule will run.</p>
+                <MultiPicker
+                  label="Schedules"
+                  :value.sync="selected_schedules"
+                  :options="schedules"
+                  option_label="name"
+                  option_key="uuid"
+                />
                 <h4>Expiration</h4>
                 <p>
-                  Setting an expiration will cause this rule to disable itself
-                  at a future date and all new events will not be acted on by
-                  this rule.
+                  Setting an expiration will cause this rule to disable itself at a future
+                  date and all new events will not be acted on by this rule.
                 </p>
 
                 <CRow>
@@ -186,20 +192,14 @@
                 </CRow>
               </CTab>
               <CTab title="3. Event Query">
-                <CAlert
-                  :show.sync="test_complete"
-                  :color="test_result_color"
-                  closeButton
-                >
+                <CAlert :show.sync="test_complete" :color="test_result_color" closeButton>
                   {{ test_result }}
                 </CAlert>
                 <h4>Event Query</h4>
                 <p>
-                  Supply an RQL query to match events to this rule based on a
-                  certain criteria. Click
-                  <a
-                    href="https://docs.reflexsoar.com/en/latest/rql/"
-                    target="_new"
+                  Supply an RQL query to match events to this rule based on a certain
+                  criteria. Click
+                  <a href="https://docs.reflexsoar.com/en/latest/rql/" target="_new"
                     >here</a
                   >
                   for a syntax reference.
@@ -292,8 +292,8 @@
                       >View Results</CButton
                     ><br />
                     <small class="text-muted"
-                      >Selecting this option will present all matched events in
-                      a new window.</small
+                      >Selecting this option will present all matched events in a new
+                      window.</small
                     >
                   </CCol>
                   <CCol class="text-right" v-if="from_card">
@@ -389,9 +389,16 @@
               </CTab>
               <CTab title="5. Case Actions" :disabled="test_failed && from_card">
                 <h4>Case Actions</h4>
-                <p>Applying Case Actions when an Event Rule matches quickly helps analysts organize events in to Cases.  When <b>Create New Case</b> is selected, each matching event will have it's own unique case created. When <b>Merge into Case</b> is selected, all matching events will merge into the selected case.</p>
+                <p>
+                  Applying Case Actions when an Event Rule matches quickly helps analysts
+                  organize events in to Cases. When <b>Create New Case</b> is selected,
+                  each matching event will have it's own unique case created. When
+                  <b>Merge into Case</b> is selected, all matching events will merge into
+                  the selected case.
+                </p>
                 <CRow>
-                  <CCol col="2"><label>Create New Case</label>
+                  <CCol col="2"
+                    ><label>Create New Case</label>
                     <CSwitch
                       label="Merge into Case"
                       color="success"
@@ -403,29 +410,38 @@
                     ></CSwitch>
                   </CCol>
                   <CCol col="10">
-                      <label for="case_template">Case Template</label>
-                      <multiselect 
-                    v-model="case_template" 
-                    label="title" 
-                    :options="case_templates" 
-                    track-by="uuid" 
-                    :searchable="true"
-                    :internal-search="false"
-                    :options-limit="10"
-                    :show-no-results="false"
-                    placeholder="Select a case template..."
-                    @search-change="caseTemplateFind"
-                    v-bind:disabled="(current_user.permissions.view_organizations && organization == null) || !create_new_case">
-                    <template slot="option" slot-scope="props">
-                        {{props.option.title}}<br>
-                        <small>{{props.option.description}}<br>Contains {{props.option.task_count}} tasks.</small>
-                    </template>
-                </multiselect>
-                <small class="text-muted"
-                      >Select a Case Template to apply when the new case is created</small>
+                    <label for="case_template">Case Template</label>
+                    <multiselect
+                      v-model="case_template"
+                      label="title"
+                      :options="case_templates"
+                      track-by="uuid"
+                      :searchable="true"
+                      :internal-search="false"
+                      :options-limit="10"
+                      :show-no-results="false"
+                      placeholder="Select a case template..."
+                      @search-change="caseTemplateFind"
+                      v-bind:disabled="
+                        (current_user.permissions.view_organizations &&
+                          organization == null) ||
+                        !create_new_case
+                      "
+                    >
+                      <template slot="option" slot-scope="props">
+                        {{ props.option.title }}<br />
+                        <small
+                          >{{ props.option.description }}<br />Contains
+                          {{ props.option.task_count }} tasks.</small
+                        >
+                      </template>
+                    </multiselect>
+                    <small class="text-muted"
+                      >Select a Case Template to apply when the new case is created</small
+                    >
                   </CCol>
                 </CRow>
-                <br><label>Merge into Case</label>
+                <br /><label>Merge into Case</label>
                 <CRow>
                   <CCol col="1">
                     <CSwitch
@@ -455,12 +471,9 @@
                       placeholder="Select a case"
                     >
                       <template slot="option" slot-scope="props">
-                        {{ props.option.title }} ({{ props.option.uuid
-                        }}<br /><small
+                        {{ props.option.title }} ({{ props.option.uuid }}<br /><small
                           >{{
-                            props.option.event_count
-                              ? props.option.event_count
-                              : 0
+                            props.option.event_count ? props.option.event_count : 0
                           }}
                           events.</small
                         >
@@ -471,59 +484,71 @@
               </CTab>
               <CTab title="6. Notifications" :disabled="test_failed && from_card">
                 <h4>Notifications</h4>
-                <p>By selecting a notification channel, any time this Event Rule matches an event, a notification will be sent to all selected channels using the channels defined message template.</p>
-                <label for="notification_channel_select">Notification Channel</label><br>
+                <p>
+                  By selecting a notification channel, any time this Event Rule matches an
+                  event, a notification will be sent to all selected channels using the
+                  channels defined message template.
+                </p>
+                <label for="notification_channel_select">Notification Channel</label
+                ><br />
                 <multiselect
-                      id="notification_channel_select"
-                      style="z-index: 50"
-                      :options="formatted_notification_channels"
-                      v-model="channels"
-                      track-by="uuid"
-                      label="name"
-                      :searchable="true"
-                      :internal-search="false"
-                      :options-limit="10"
-                      :show-no-results="false"
-                      @search-change="loadNotificationChannels"
-                      placeholder="Select a notification channel"
-                      :multiple="true"
-                      :close-on-select="false"
-                      
-                    ></multiselect>
+                  id="notification_channel_select"
+                  style="z-index: 50"
+                  :options="formatted_notification_channels"
+                  v-model="channels"
+                  track-by="uuid"
+                  label="name"
+                  :searchable="true"
+                  :internal-search="false"
+                  :options-limit="10"
+                  :show-no-results="false"
+                  @search-change="loadNotificationChannels"
+                  placeholder="Select a notification channel"
+                  :multiple="true"
+                  :close-on-select="false"
+                ></multiselect>
               </CTab>
               <CTab title="7. Integrations" :disabled="test_failed && from_card">
                 <h4>Integration Actions</h4>
-                <p>Integration Actions allow Event Rules to perform actions from configuration Integrations.  One or more actions can be added to an Event Rule.</p>
+                <p>
+                  Integration Actions allow Event Rules to perform actions from
+                  configuration Integrations. One or more actions can be added to an Event
+                  Rule.
+                </p>
                 <CRow>
                   <CCol>
                     <h5>Actions</h5>
                   </CCol>
                   <CCol class="text-right">
                     <CButton @click="show_add_action = true" color="primary"
-                      >Add Action</CButton>
-                    </CCol>
-                  </CRow>
+                      >Add Action</CButton
+                    >
+                  </CCol>
+                </CRow>
                 <CRow>
-                <CCol><br>
-                <CDataTable
-                  :items="integration_actions"
-                  :fields="action_fields"
-                  >
-                    <template #parameters="{item}">
-                      <td>
-                        <!-- Show the key, value pairs of the parameters -->
-                        <div v-for="(value, key) in item.parameters">
-                          <b>{{ key }}:</b> {{ value }}
-                        </div>
-                      </td>
-                    </template>
-                    <template #manage="{item}">
-                      <td class="text-right">
-                        <CButton @click="removeIntegrationAction(item.uuid)" color="danger" size="sm"><i class="fas fa-trash-can"/></CButton>
-                      </td>
-                    </template>
-                  </CDataTable>
-                </CCol>
+                  <CCol
+                    ><br />
+                    <CDataTable :items="integration_actions" :fields="action_fields">
+                      <template #parameters="{ item }">
+                        <td>
+                          <!-- Show the key, value pairs of the parameters -->
+                          <div v-for="(value, key) in item.parameters">
+                            <b>{{ key }}:</b> {{ value }}
+                          </div>
+                        </td>
+                      </template>
+                      <template #manage="{ item }">
+                        <td class="text-right">
+                          <CButton
+                            @click="removeIntegrationAction(item.uuid)"
+                            color="danger"
+                            size="sm"
+                            ><i class="fas fa-trash-can"
+                          /></CButton>
+                        </td>
+                      </template>
+                    </CDataTable>
+                  </CCol>
                 </CRow>
               </CTab>
               <CTab title="8. Review" :disabled="test_failed && from_card">
@@ -562,9 +587,7 @@
       </div>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
-        <CButton v-if="step != 0" @click="previousStep()" color="info"
-          >Previous</CButton
-        >
+        <CButton v-if="step != 0" @click="previousStep()" color="info">Previous</CButton>
         <CButton
           v-if="step != final_step"
           @click="nextStep()"
@@ -577,24 +600,18 @@
           @click="createEventRule()"
           color="primary"
           :disabled="submitted"
-          ><span v-if="submitted"><CSpinner size="sm" />&nbsp;</span
-          >Create</CButton
+          ><span v-if="submitted"><CSpinner size="sm" />&nbsp;</span>Create</CButton
         >
         <CButton
           v-if="step == final_step && mode == 'edit'"
           @click="editEventRule()"
           color="primary"
           :disabled="submitted"
-          ><span v-if="submitted"><CSpinner size="sm" />&nbsp;</span
-          >Save</CButton
+          ><span v-if="submitted"><CSpinner size="sm" />&nbsp;</span>Save</CButton
         >
       </template>
     </CModal>
-    <CModal
-      title="Rule Testing Results"
-      size="xl"
-      :show.sync="show_test_results"
-    >
+    <CModal title="Rule Testing Results" size="xl" :show.sync="show_test_results">
       <div style="overflow-y: scroll; max-height: 400px">
         <!--<vue-json-pretty :showLength="true" selectableType="multiple" :path="'res'" :data="test_results"></vue-json-pretty>-->
         {{ test_results }}
@@ -604,7 +621,7 @@
       :show.sync="show_add_action"
       mode="add_to_eventrule"
       @addToEventRule="addIntegrationAction"
-      />
+    />
   </div>
 </template>
 
@@ -645,13 +662,15 @@ import "../assets/js/prism-rql";
 import "../assets/css/prism-reflex.css"; // import syntax highlighting styles
 
 import RunActionModal from "./RunActionModal";
+import MultiPicker from "./components/MultiPicker";
 
 import { mapState } from "vuex";
 
 export default {
   components: {
     PrismEditor,
-    RunActionModal
+    RunActionModal,
+    MultiPicker,
   },
   name: "CreateEventRuleModal",
   props: {
@@ -677,8 +696,11 @@ export default {
   },
   computed: {
     formatted_notification_channels() {
-      return this.notification_channels.map((o) => { return { name:o.name, uuid:o.uuid}})
-    }, ...mapState(["settings", "current_user", "notification_channels"])
+      return this.notification_channels.map((o) => {
+        return { name: o.name, uuid: o.uuid };
+      });
+    },
+    ...mapState(["settings", "current_user", "notification_channels", "schedules"]),
   },
   data() {
     return {
@@ -697,7 +719,7 @@ export default {
       dismiss_event: false,
       expire_days: 1,
       observables: [],
-      action_fields: ["action", "parameters", {key: 'manage', label: ''}],
+      action_fields: ["action", "parameters", { key: "manage", label: "" }],
       integration_actions: [],
       expire: false,
       final_step: 7,
@@ -709,7 +731,7 @@ export default {
       close_reason: "",
       close_reasons: [],
       create_new_case: false,
-      case_template: '',
+      case_template: "",
       dismiss_comment: "",
       tag_list: [],
       case_templates: [],
@@ -717,6 +739,7 @@ export default {
       protected: false,
       add_action: false,
       channels: [],
+      selected_schedules: [],
       severities: [
         {
           label: "Low",
@@ -782,6 +805,7 @@ export default {
       disable_reason: null,
       show_disable_reason: false,
       active: true,
+      rule: {},
     };
   },
   watch: {
@@ -789,14 +813,14 @@ export default {
       this.error = false;
       this.error_message = "";
       this.modalStatus = this.show;
-      if(this.show) {
-        this.$store.dispatch("getNotificationChannels", {})
+      if (this.show) {
+        this.$store.dispatch("getNotificationChannels", {});
       }
     },
     modalStatus: function () {
       if (this.modalStatus) {
         this.test_failed = true;
-        this.loadData();
+        //this.loadData();
         if (this.from_card) {
           this.event_count = this.events.length;
           this.organization = this.event_organization;
@@ -814,14 +838,16 @@ export default {
         }
 
         this.caseFind("*");
+        this.$store.dispatch("getConfiguredActions", { trigger: "event_rule" });
         this.loadNotificationChannels();
         this.loadCloseReasons();
+        this.loadSchedules();
       }
       this.$emit("update:show", this.modalStatus);
       if (!this.modalStatus) {
         this.reset();
       }
-    }
+    },
   },
   created() {
     //this.loadData()
@@ -850,64 +876,63 @@ export default {
       return d;
     },
     populateEventRuleFields() {
-      this.organization = this.current_user.organization;
 
       if (this.event_rule.organization) {
         this.organization = this.event_rule.organization;
+      } else {
+        this.organization = this.current_user.organization;
+      
       }
+      this.step = 0;
+      this.name = this.event_rule.name;
+      this.description = this.event_rule.description;
+      this.merge_into_case = this.event_rule.merge_into_case;
+      this.tag_event = this.event_rule.add_tags;
+      this.tags_to_add = this.event_rule.tags_to_add;
+      this.priority = this.event_rule.priority;
+      this.global_rule = this.event_rule.global_rule;
+      this.update_severity = this.event_rule.update_severity;
+      this.target_severity = this.event_rule.target_severity;
+      this.integration_actions = this.event_rule.integration_actions;
+      this.selected_tags = this.event_rule.tags_to_add;
+      this.dismiss_event = this.event_rule.dismiss_event;
+      this.expire_days = this.event_rule.expire_days;
+      this.observables = this.event_rule.observables;
+      this.expire = this.event_rule.expire;
+      this.dismiss_event = this.event_rule.dismiss;
+      this.run_retroactively = this.event_rule.run_retroactively;
+      this.selected_schedules = this.event_rule.schedules;
+      this.protected = this.event_rule.protected;
+      this.channels = this.formatted_notification_channels.filter(
+        (channel) =>
+          this.event_rule.notification_channels &&
+          this.event_rule.notification_channels.includes(channel.uuid)
+      );
+      if (this.event_rule.target_case_uuid) {
+        this.$store.dispatch("getCase", this.event_rule.target_case_uuid).then((resp) => {
+          this.target_case = resp.data;
+        });
+      } else {
+        this.target_case = {};
+      }
+      if (this.event_rule.disable_reason) {
+        this.show_disable_reason = true;
+        this.disable_reason = this.event_rule.disable_reason;
+      }
+      this.active = this.event_rule.active;
+      this.query = this.event_rule.query;
+      this.close_reason = this.event_rule.dismiss_reason
+        ? this.close_reasons.filter((c) => c.value === this.event_rule.dismiss_reason)[0]
+            .value
+        : null;
+      this.dismiss_comment = this.event_rule.dismiss_comment;
 
       this.$store
         .dispatch("getCloseReasons", { organization: this.organization })
         .then((resp) => {
-          this.close_reasons = this.$store.getters.close_reasons.map(
-            (reason) => {
-              return { label: reason.title, value: reason.uuid };
-            }
-          );
-          this.step = 0;
-          this.name = this.event_rule.name;
-          //this.organization = this.event_rule.organization
-          this.description = this.event_rule.description;
-          this.merge_into_case = this.event_rule.merge_into_case;
-          this.tag_event = this.event_rule.add_tags;
-          this.tags_to_add = this.event_rule.tags_to_add
-          this.priority = this.event_rule.priority;
-          this.global_rule = this.event_rule.global_rule;
-          this.update_severity = this.event_rule.update_severity;
-          this.target_severity = this.event_rule.target_severity;
-          this.integration_actions = this.event_rule.integration_actions;
-          this.selected_tags = this.event_rule.tags_to_add;
-          this.dismiss_event = this.event_rule.dismiss_event;
-          this.expire_days = this.event_rule.expire_days;
-          this.observables = this.event_rule.observables;
-          this.expire = this.event_rule.expire;
-          this.dismiss_event = this.event_rule.dismiss;
-          this.run_retroactively = this.event_rule.run_retroactively;
-          this.protected = this.event_rule.protected;
-          this.channels = this.formatted_notification_channels.filter((channel) =>
-            this.event_rule.notification_channels && this.event_rule.notification_channels.includes(channel.uuid)
-          );
-          if (this.event_rule.target_case_uuid) {
-            this.$store
-              .dispatch("getCase", this.event_rule.target_case_uuid)
-              .then((resp) => {
-                this.target_case = resp.data;
-              });
-          } else {
-            this.target_case = {};
-          }
-          if (this.event_rule.disable_reason) {
-            this.show_disable_reason = true;
-            this.disable_reason = this.event_rule.disable_reason;
-          }
-          this.active = this.event_rule.active;
-          this.query = this.event_rule.query;
-          this.close_reason = this.event_rule.dismiss_reason
-            ? this.close_reasons.filter(
-                (c) => c.value === this.event_rule.dismiss_reason
-              )[0].value
-            : null;
-          this.dismiss_comment = this.event_rule.dismiss_comment;
+          this.close_reasons = this.$store.getters.close_reasons.map((reason) => {
+            return { label: reason.title, value: reason.uuid };
+          });
         });
     },
     generateRule() {
@@ -923,9 +948,7 @@ export default {
       let observable_values = this.rule_observables.map((obs) =>
         obs.value.replace(/\\/g, "\\\\").replace(/\"/g, '\\"')
       );
-      rule_text += `and observables.value|all In ["${observable_values.join(
-        '","'
-      )}"]`;
+      rule_text += `and observables.value|all In ["${observable_values.join('","')}"]`;
 
       return rule_text;
     },
@@ -988,10 +1011,10 @@ export default {
 
             this.test_result_color = "success";
 
-            if(resp.data.danger) {
+            if (resp.data.danger) {
               this.test_result_color = "danger";
-            } 
-            
+            }
+
             this.test_failed = false;
           } else {
             this.test_result =
@@ -1038,7 +1061,7 @@ export default {
         protected: this.protected,
         notification_channels: Array(),
         query: this.query,
-        active: this.active
+        active: this.active,
       };
 
       if (this.current_user.default_org) {
@@ -1091,10 +1114,11 @@ export default {
         run_retroactively: this.run_retroactively,
         protected: this.protected,
         notification_channels: Array(),
+        schedules: this.selected_schedules,
         query: this.query,
         active: this.active,
       };
-    
+
       if (this.current_user.default_org) {
         rule["global_rule"] = this.global_rule;
       }
@@ -1129,9 +1153,6 @@ export default {
       this.step -= 1;
     },
     loadData() {
-      this.$store.dispatch("getConfiguredActions", {trigger: "event_rule"}).then((resp) => {
-        console.log(resp.data)
-      })
       this.$store.dispatch("getCases", {}).then((resp) => {
         this.cases = this.$store.getters.cases;
       });
@@ -1185,7 +1206,7 @@ export default {
         name: channel.name,
         uuid: channel.uuid,
       };
-      this.channels.push(c)
+      this.channels.push(c);
     },
     addTag(newTag) {
       const t = {
@@ -1196,30 +1217,44 @@ export default {
       this.selected_tags.push(t);
     },
     reloadMeta() {
-      this.loadCloseReasons()
-      this.loadNotificationChannels()
-      this.caseTemplateFind('')
-      this.channels = []
+      this.loadCloseReasons();
+      this.loadNotificationChannels();
+      this.loadSchedules();
+      this.caseTemplateFind("");
+      this.channels = [];
     },
-    loadNotificationChannels(name=null) {
+    loadSchedules() {
       let organization = this.organization;
 
       if (this.from_card) {
-        organization = this.event_organization
+        organization = this.event_organization;
       }
 
-      if(name) {
-        this.$store.dispatch("getNotificationChannels", { organization: organization, name__like: name });
+      this.$store.dispatch("getSchedules", { organization: organization });
+    },
+    loadNotificationChannels(name = null) {
+      let organization = this.organization;
+
+      if (this.from_card) {
+        organization = this.event_organization;
+      }
+
+      if (name) {
+        this.$store.dispatch("getNotificationChannels", {
+          organization: organization,
+          name__like: name,
+        });
       } else {
         this.$store.dispatch("getNotificationChannels", { organization });
       }
-
     },
     caseTemplateFind(query) {
-        let organization = this.organization
-        this.$store.dispatch('getCaseTemplateList', {title: query, organization: organization}).then(resp => {
-            this.case_templates = resp.data
-        })
+      let organization = this.organization;
+      this.$store
+        .dispatch("getCaseTemplateList", { title: query, organization: organization })
+        .then((resp) => {
+          this.case_templates = resp.data;
+        });
     },
     loadCloseReasons() {
       let organization = this.organization;

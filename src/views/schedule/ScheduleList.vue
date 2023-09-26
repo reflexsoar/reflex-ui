@@ -18,21 +18,43 @@
                         :responsive="false"
                         :noItemsView='{ noResults: "No schedules found", noItems: "No schedules" }'
                         >
-                        <template #default="{ item, index }">
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.description }}</td>
-                            <td>{{ item.organization.name }}</td>
+                        <template #active="{item}">
+                            <td><CBadge color="success" class="tag" size="sm" v-if="item.active">Active</CBadge>
+                            <CBadge color="danger" class="tag" size="sm" v-else>Inactive</CBadge></td>
+                        </template>
+                        <template #name="{item}">
+                        
+                                <td>
+                                    <b>{{ item.name }}</b><br>
+                                    {{ item.description }}
+                                </td>
+                            
+                        </template>
+                        <template #ineffect="{item}">
                             <td>
-                                <CButtonGroup>
-                                    <CButton color="primary" @click="editSchedule(item.uuid)">Edit</CButton>
-                                    <CButton color="danger" @click="deleteSchedule(item.uuid)">Delete</CButton>
-                                </CButtonGroup>
+                                <CBadge v-if="item.schedule_active" color="success" class="tag">Yes</CBadge>
+                                <CBadge v-else color="danger" class="tag">No</CBadge>
+                            </td>
+                        </template>
+                        <template #actions="{item}">
+                            <td class="text-right">
+                                <CDropdown toggler-text="Manage" size="sm" color="secondary">
+                                    <CDropdownItem @click="editSchedule(item.uuid)"><CIcon name="cilPencil"/>&nbsp;Edit</CDropdownItem>
+                                    <CDropdownItem v-if="!item.active" @click="activateSchedule(item.uuid)"><CIcon name="cilCheck"/>&nbsp;Activate</CDropdownItem>
+                                    <CDropdownItem v-if="item.active" @click="deactivateSchedule(item.uuid)"><CIcon name="cilBan"/>&nbsp;Deactivate</CDropdownItem>
+                                    <CDropdownItem @click="deleteSchedule(item.uuid)"><CIcon name="cilTrash"/>&nbsp;Delete</CDropdownItem>
+                                </CDropdown>
+                            </td>
+                        </template>
+                        <template #organization="{item}">
+                            <td>
+                                <OrganizationBadge :uuid="item.organization"/>
                             </td>
                         </template>
                     </CDataTable>
                 </CCard>
             </CCol>
-        </CRow> {{ current_user.organization }} {{ schedule }}
+        </CRow>
         <ScheduleWizard :show.sync="show_wizard" :mode="wizard_mode" :source_schedule="schedule"></ScheduleWizard>
         <CModal :show.sync="show_delete_confirmation" title="Confirm Delete" color="danger">
             <p>Are you sure you want to delete the schedule <b>{{ target_schedule.name }}</b>? If yes, enter the schedule name in the field below.</p>
@@ -49,11 +71,13 @@
 import { mapState } from 'vuex';
 
 import ScheduleWizard from './ScheduleWizard.vue'
+import OrganizationBadge from '../OrganizationBadge.vue'
 
 export default {
     name: 'ScheduleList',
     components: {
-        ScheduleWizard
+        ScheduleWizard,
+        OrganizationBadge
     },
     computed: {
         ...mapState(['schedules', 'current_user'])
@@ -68,10 +92,10 @@ export default {
             delete_confirm: "",
             show_delete_confirmation: false,
             fields: [
-                { key: 'name', label: 'Name', sortable: true },
-                { key: 'description', label: 'Description', sortable: true },
-                { key: 'organization', label: 'Organization', sortable: true },
-                { key: 'actions', label: 'Actions' }
+                { key: 'active', label: 'Active', sortable: true, _style: 'width: 5%' },
+                { key: 'name', label: 'Name', sortable: true, _style: 'width: 60%' },
+                { key: 'ineffect', label: 'In Effect'},
+                { key: 'actions', label: '' }
             ]
         }
     },
@@ -138,9 +162,19 @@ export default {
             this.target_schedule = {}
             this.delete_confirm = ""
             this.show_delete_confirmation = false
+        },
+        activateSchedule(uuid) {
+            this.$store.dispatch('updateSchedule', {uuid: uuid, data: { active: true } })
+        },
+        deactivateSchedule(uuid) {
+            this.$store.dispatch('updateSchedule', {uuid: uuid, data: { active: false } })
         }
     },
     mounted() {
+        this.$store.dispatch('getSchedules', {})
+        if(this.current_user.default_org && this.current_user.permissions.view_organizations) {
+            this.fields.splice(2, 0, 'organization')
+        }
     }
 }
 </script>

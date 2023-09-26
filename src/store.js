@@ -4687,10 +4687,27 @@ const actions = {
   },
   getSchedules({ commit }, { active = null, organization = null }) {
     return new Promise((resolve, reject) => {
-      let url = `${BASE_URL}/schedule?active=${active}}`
+      let url = `${BASE_URL}/schedule`
 
+      let params = false;
+
+      if (active) {
+        if (params) {
+          url += `&active=${active}`
+        } else {
+          url += `?active=${active}`
+          params = true
+        }
+          
+      }
+      
       if (organization) {
-        url += `&organization=${organization}`
+        if (params) {
+          url += `&organization=${organization}`
+        } else {
+          url += `?organization=${organization}`
+          params = true
+        }
       }
 
       Axios({ url: url, method: 'GET' })
