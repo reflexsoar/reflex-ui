@@ -51,6 +51,8 @@
                 <CDataTable
                   :items="associated_detections"
                   :fields="[{key: 'name', label:'Name', _style:'width: 60%'},'severity','risk_score','active']"
+                  :column-filter="true"
+                  sorter
                   pagination
                   >
                   <template #name="{item}">
