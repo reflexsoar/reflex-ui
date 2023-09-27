@@ -13,9 +13,9 @@
       </CCol>
       <CCol col v-if="!loading">
         <CRow class="page-heading" style="padding-left: 15px; padding-right: 15px">
-          <CCol
-            ><h2>
-              &nbsp;{{ case_data.title
+          <CCol class="case-title-container"
+            ><h2 v-if="!edit_title" class="case-title" @click="editTitle()">
+              {{ case_data.title
               }}<CIcon
                 v-if="case_data.escalated"
                 name="cilWarning"
@@ -23,8 +23,8 @@
                 size="xl"
               />
             </h2>
-            <TagList style="padding-left: 15px" :tags="case_data.tags" label="name"
-          /></CCol>
+            <CInput v-if="edit_title" v-model="case_data.title" @keydown.enter="titleEditEnter" id="case_title_input"/>
+            </CCol>
           <CCol col="2" class="text-right">
             <label class="text-muted"
               ><b>Status</b></label
@@ -270,6 +270,10 @@
                   <CCard>
                     <CCardHeader> Overview </CCardHeader>
                     <CCardBody>
+                      <div v-if="current_user.default_org && current_user.permissions.view_organizations"  style="margin-bottom: 10px">
+                        <label>Organization</label><br>
+                        <OrganizationBadge :uuid="case_data.organization"/>
+                      </div>
                       <ObjectAttribute
                         label="Created"
                         :value="case_data.created_at | moment('LLLL')"
@@ -289,18 +293,18 @@
                         label="Applied Case Template"
                         :value="case_data.case_template.title"
                       />
-                      <div>
-                        <span
+                      <label>Tags</label><br>
+                      <span
                           v-if="!edit_tags"
                           @click="editTags()"
                           style="cursor: pointer"
+                          
                         >
-                          <TagList :tags="case_data.tags" label="name"
-                        /></span>
-                        <span v-if="edit_tags">
+                          <TagList id="taglabel" :tags="case_data.tags" label="name"
+                        /></span><span v-if="edit_tags">
                           <multiselect
                             id="tagselect"
-                            v-model="current_tags"
+                            v-model="case_data.tags"
                             placeholder="Select tags to apply to this case"
                             :taggable="true"
                             tag-placeholder="Add new tag"
@@ -312,9 +316,8 @@
                             @tag="addTag"
                             style="z-index: 50"
                           ></multiselect
-                          ><CButton @click="saveTags()">Save Tags</CButton>
+                          >
                         </span>
-                      </div>
                     </CCardBody>
                   </CCard>
                 </CCol>
@@ -774,6 +777,16 @@
   margin-left: 10px;
   margin-right: 10px;
 }
+
+.case-title {
+  font-size: 24px;
+  font-size: 1.25vw;
+}
+
+.case-title:hover {
+  cursor: pointer;
+}
+
 </style>
 
 <script>
@@ -798,6 +811,8 @@ import "@toast-ui/editor/dist/toastui-editor.css";
 
 import { Editor } from "@toast-ui/vue-editor";
 
+import OrganizationBadge from './OrganizationBadge.vue'
+
 import { Mentionable } from "vue-mention";
 import moment from "moment";
 export default {
@@ -819,6 +834,7 @@ export default {
     ObjectAttribute,
     Editor,
     CalloutCard,
+    OrganizationBadge
   },
   computed: {
     ...mapState(["alert", "current_user", "settings", "tags", "case_observables"]),
@@ -931,6 +947,8 @@ export default {
       edit_severity: false,
       edit_owner: false,
       edit_status: false,
+      edit_title: false,
+      current_title: "",
       severities: [
         {
           label: "Low",
@@ -1050,10 +1068,32 @@ export default {
         uuid: "",
       };
       this.tags.push(t);
-      this.current_tags.push(t);
+      this.case_data.tags.push(t);
     },
     updateCaseDescription() {
       this.case_data.description = this.$refs.descriptionEditor.invoke("getMarkdown");
+    },
+    editTitle() {
+      this.edit_title = !this.edit_title;
+      this.current_title = this.case_data.title;
+      document.addEventListener("click", this.closeTitleEdit);
+    },
+    titleEditEnter() {
+      this.edit_title = false;
+      document.removeEventListener("click", this.closeTitleEdit);
+        if(this.current_title != this.case_data.title) {
+          this.updateTitle();
+        }
+    },
+    closeTitleEdit(e) {
+      console.log(e);
+      if (!e.target.id.includes("case_title_input") && !e.target.classList.contains("case-title")) {
+        this.edit_title = false;
+        document.removeEventListener("click", this.closeTitleEdit);
+        if(this.current_title != this.case_data.title) {
+          this.updateTitle();
+        }
+      }
     },
     editSeverity() {
       this.edit_severity = !this.edit_severity;
@@ -1093,15 +1133,28 @@ export default {
         document.removeEventListener("click", this.closeOwnerEdit);
       }
     },
-    editTags() {
+    editTags() {      
+      console.log("ermmm")
       this.current_tags = this.case_data.tags;
       this.edit_tags = !this.edit_tags;
+      console.log(this.edit_tags);
+      document.addEventListener("click", this.stopEditingTags);
       // If the tags have been edited, we need to update the current_tags
+    },
+    stopEditingTags(e) {
+      console.log(e);
+      if (!e.target.id.includes("tagselect") && !e.target.id.includes("taglabel") && !e.target.classList.contains("multiselect__tags")) {
+        this.edit_tags = false;
+        document.removeEventListener("click", this.stopEditingTags);
+        if(this.current_tags != this.case_data.tags) {
+          this.saveTags();
+        }
+      }
     },
     saveTags() {
       let uuid = this.uuid;
       let data = {
-        tags: this.current_tags.map((tag) => {
+        tags: this.case_data.tags.map((tag) => {
           return tag.name;
         }),
       };

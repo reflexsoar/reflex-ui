@@ -228,148 +228,195 @@
           </CTab>
           <CTab title="Detection" v-if="this.event_data.detection_id">
             <CCardBody class="tab-container" v-if="!this.detection_loading">
-              <h3>Detection</h3>
-              {{ detection.description }}<br /><br />
-              <div>
-                <h4>Base Query</h4>
-                <pre class="detection-query">{{
-                  detection.query ? detection.query.query : ""
-                }}</pre>
-              </div>
-              <div v-if="detection.guide">
-                <h4>Investigation Guide</h4>
-                <viewer
-                  :initialValue="detection.guide"
-                  height="100px"
-                  style="
-                    min-height: 100px;
-                    max-height: 550px;
-                    overflow-y: scroll;
-                    overflow-x: hidden;
-                  "
-                />
+              <CRow>
+                <CCol>
+                  <h3>Detection</h3>
+                  {{ detection.description }}
+                  <hr>
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol>
+                  <CTabs
+              :fade="false"
+              variant="pills"
+              :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
+            >
+              <CTab title="Configuration">
+                <div>
+                  <h4>Base Query</h4>
+                  <pre class="detection-query">{{
+                    detection.query ? detection.query.query : ""
+                  }}</pre>
+                </div>
+              </CTab>
+              <CTab v-if="detection.guide" title="Triage Guide">
+                <div>
+                  <h4>Investigation Guide</h4>
+                  <viewer
+                    :initialValue="detection.guide"
+                    height="100px"
+                    style="
+                      min-height: 100px;
+                      max-height: 550px;
+                      overflow-y: scroll;
+                      overflow-x: hidden;
+                    "
+                  />
 
-                <span
-                  v-if="detection.false_positives && detection.false_positives.length > 0"
-                >
-                  <h4>False Positives</h4>
-                  <li v-for="(fp, i) in detection.false_positives" :key="i">
-                    {{ fp }}
-                  </li>
-                  <br />
-                </span>
+                  <span
+                    v-if="detection.false_positives && detection.false_positives.length > 0"
+                  >
+                    <h4>False Positives</h4>
+                    <li v-for="(fp, i) in detection.false_positives" :key="i">
+                      {{ fp }}
+                    </li>
+                    <br />
+                  </span>
 
-                <span v-if="detection.references && detection.references.length > 0">
-                  <h4>References</h4>
-                  <li v-for="(ref, i) in detection.references" :key="i">
-                    <span v-if="ref.startsWith('http')"
-                      >{{ ref }}&nbsp;<a _target="_child" :href="ref" target="_blank"
-                        ><CIcon name="cil-external-link" size="sm" /></a
-                    ></span>
-                    <span v-else-if="ref.toLowerCase().startsWith('cve-')"
-                      >{{ ref }}
-                      <ol>
-                        <li>
-                          <a
-                            _target="_child"
-                            :href="
-                              'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + ref
-                            "
-                            target="_blank"
-                            >https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ ref }}</a
-                          >
-                        </li>
-                        <li>
-                          <a
-                            _target="_child"
-                            :href="'https://nvd.nist.gov/vuln/detail/' + ref"
-                            target="_blank"
-                            >https://nvd.nist.gov/vuln/detail/{{ ref }}</a
-                          >
-                        </li>
-                        <li>
-                          <a
-                            _target="_child"
-                            :href="'https://www.cvedetails.com/cve/' + ref"
-                            target="_blank"
-                            >https://www.cvedetails.com/cve/{{ ref }}</a
-                          >
-                        </li>
-                      </ol></span
-                    >
-                    <span v-else>{{ ref }}</span>
-                  </li>
-                  <br />
-                </span>
-              </div>
-
-              <h4>MITRE ATT&CK</h4>
-              <p>
-                <b>MITRE ATT&CK Tactics</b>
-                <li
-                  style="display: inline; margin-right: 2px"
-                  v-for="t in detection.tactics"
-                  :key="t.name"
-                >
-                  <CBadge class="tag" color="info" size="sm" disabled="">{{
-                    t.name
-                  }}</CBadge>
-                </li>
-              </p>
-              <p>
-                <b>MITRE ATT&CK Techniques</b>
-                <li
-                  style="display: inline; margin-right: 2px"
-                  v-for="t in detection.techniques"
-                  :key="t.name"
-                >
-                  <CBadge class="tag" color="info" size="sm" disabled="">{{
-                    t.name
-                  }}</CBadge>
-                </li>
-              </p>
-
-              <div v-if="detection.exceptions">
-                <h4>Exceptions</h4>
-                <CDataTable
-                  :items="detection.exceptions"
-                  :fields="[
-                    'field',
-                    'condition',
-                    'values',
-                    { key: 'list', label: 'Intel List' },
-                    //{ key: 'admin', label: '' },
-                  ]"
-                >
-                  <template #admin="{ item }">
-                    <td class="text-right">
-                      <CButton
-                        aria-label="Edit Exclusion"
-                        @click="editExclusion(item.uuid)"
-                        size="sm"
-                        color="info"
-                        v-c-tooltip="{ content: 'Edit Exclusion', placement: 'left' }"
+                  <span v-if="detection.references && detection.references.length > 0">
+                    <h4>References</h4>
+                    <li v-for="(ref, i) in detection.references" :key="i">
+                      <span v-if="ref.startsWith('http')"
+                        >{{ ref }}&nbsp;<a _target="_child" :href="ref" target="_blank"
+                          ><CIcon name="cil-external-link" size="sm" /></a
+                      ></span>
+                      <span v-else-if="ref.toLowerCase().startsWith('cve-')"
+                        >{{ ref }}
+                        <ol>
+                          <li>
+                            <a
+                              _target="_child"
+                              :href="
+                                'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + ref
+                              "
+                              target="_blank"
+                              >https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ ref }}</a
+                            >
+                          </li>
+                          <li>
+                            <a
+                              _target="_child"
+                              :href="'https://nvd.nist.gov/vuln/detail/' + ref"
+                              target="_blank"
+                              >https://nvd.nist.gov/vuln/detail/{{ ref }}</a
+                            >
+                          </li>
+                          <li>
+                            <a
+                              _target="_child"
+                              :href="'https://www.cvedetails.com/cve/' + ref"
+                              target="_blank"
+                              >https://www.cvedetails.com/cve/{{ ref }}</a
+                            >
+                          </li>
+                        </ol></span
                       >
-                        <CIcon name="cilPencil" />
-                      </CButton>
-                    </td>
-                  </template>
-                  <template #values="{ item }">
-                    <td>
-                      <TagBucket :tags="item.values" label="Exclusions" />
-                    </td>
-                  </template>
-                  <template #list="{ item }">
-                    <td>
-                      <span v-if="item.list !== null">
-                        <CBadge class="tag" color="dark" size="sm" disabled>{{
-                          item.list.name
-                        }}</CBadge>
-                      </span>
-                    </td>
-                  </template>
-                </CDataTable>
-              </div>
+                      <span v-else>{{ ref }}</span>
+                    </li>
+                    <br />
+                  </span>
+                </div>
+              </CTab>
+              <CTab title="Email Template" v-if="detection.email_template">
+                <div>
+                  <h4>Email Template</h4>
+                  <viewer
+                    :initialValue="detection.email_template"
+                    height="100px"
+                    style="
+                      min-height: 100px;
+                      max-height: 550px;
+                      overflow-y: scroll;
+                      overflow-x: hidden;
+                    "
+                  />
+                </div>
+              </CTab>
+              <CTab title="MITRE ATT&CK">
+                <h4>MITRE ATT&CK</h4>
+                <p>
+                  <h5>MITRE ATT&CK Tactics</h5>
+                  <span v-if="detection.tactics != null && detection.tactics.length > 0"><li
+                    style="display: inline; margin-right: 2px"
+                    v-for="t in detection.tactics"
+                    :key="t.name"
+                    
+                  >
+                    <CBadge class="tag" color="info" size="sm" disabled="">{{
+                      t.name
+                    }}</CBadge>
+                  </li></span>
+                  <span v-else>No tactics mapped to this detection.</span>
+                </p>
+                <p>
+                  <h5>MITRE ATT&CK Techniques</h5>
+                  <span v-if="detection.techniques != null && detection.techniques.length > 0"><li
+                    style="display: inline; margin-right: 2px"
+                    v-for="t in detection.techniques"
+                    :key="t.name"
+                  >
+                    <CBadge class="tag" color="info" size="sm" disabled="">{{
+                      t.name
+                    }}</CBadge>
+                  </li></span>
+                  <span v-else>No techniques mapped to this detection.</span>
+                </p>
+              </CTab>
+              <CTab title="Exclusions">
+
+                <div v-if="detection.exceptions">
+                  <CRow>
+                    <CCol>
+                      <h4>Exceptions</h4>
+                    </CCol>
+                    <CCol>
+                      
+                    </CCol>
+                  </CRow>
+                  <CDataTable
+                    :items="detection.exceptions"
+                    :fields="[
+                      'field',
+                      'condition',
+                      'values',
+                      { key: 'list', label: 'Intel List' },
+                      //{ key: 'admin', label: '' },
+                    ]"
+                  >
+                    <template #admin="{ item }">
+                      <td class="text-right">
+                        <CButton
+                          aria-label="Edit Exclusion"
+                          @click="editExclusion(item.uuid)"
+                          size="sm"
+                          color="info"
+                          v-c-tooltip="{ content: 'Edit Exclusion', placement: 'left' }"
+                        >
+                          <CIcon name="cilPencil" />
+                        </CButton>
+                      </td>
+                    </template>
+                    <template #values="{ item }">
+                      <td>
+                        <TagBucket :tags="item.values" label="Exclusions" />
+                      </td>
+                    </template>
+                    <template #list="{ item }">
+                      <td>
+                        <span v-if="item.list !== null">
+                          <CBadge class="tag" color="dark" size="sm" disabled>{{
+                            item.list.name
+                          }}</CBadge>
+                        </span>
+                      </td>
+                    </template>
+                  </CDataTable>
+                </div>
+              </CTab>
+              </CTabs>
+                </CCol>
+              </CRow>
             </CCardBody>
             <CCardBody v-else  class="text-center">
               <CSpinner color="primary" size="lg"></CSpinner>
@@ -632,7 +679,7 @@ export default {
         if (this.event_data.detection_id) {
           this.detection_loading = true;
           this.$store
-            .dispatch("getDetection", this.event_data.detection_id)
+            .dispatch("getDetection", {uuid: this.event_data.detection_id, event: this.event_data.uuid})
             .then((resp) => {
               this.detection = resp.data;
               this.detection_loading = false;

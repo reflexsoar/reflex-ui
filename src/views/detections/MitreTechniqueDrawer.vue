@@ -51,6 +51,8 @@
                 <CDataTable
                   :items="associated_detections"
                   :fields="[{key: 'name', label:'Name', _style:'width: 60%'},'severity','risk_score','active']"
+                  :column-filter="true"
+                  sorter
                   pagination
                   >
                   <template #name="{item}">
@@ -217,7 +219,7 @@ export default {
     },
     getDetections(tech,tactics){
       this.detections_loading = true
-      this.$store.dispatch('getDetections', { phase_names: tactics, techniques: tech, save: false, organization: this.organization }).then(resp => {
+      this.$store.dispatch('getDetections', { techniques: tech, save: false, organization: this.organization }).then(resp => {
         this.associated_detections = resp.data.detections
 
         // Sort the detections by their external_id in alphabetical order

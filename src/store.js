@@ -153,10 +153,42 @@ const state = {
   sso_provider: {},
   sso_role_mappings: [],
   sso_role_mapping: {},
-  integration_outputs: []
+  integration_outputs: [],
+  data_source_templates: [],
+  schedules: []
 }
 
 const mutations = {
+  save_schedules(state, schedules) {
+    state.schedules = schedules
+  },
+  add_schedule(state, schedule) {
+    if(state.schedules.length == 0) {
+      state.schedules = []
+    }
+    state.schedules.push(schedule)
+  },
+  update_schedule(state, schedule) {
+    state.schedules = [...state.schedules.filter(s => s.uuid != schedule.uuid), schedule]
+  },
+  remove_schedule(state, uuid) {
+    state.schedules = state.schedules.filter(s => s.uuid != uuid)
+  },
+  save_data_source_templates(state, templates) {
+    state.data_source_templates = templates
+  },
+  add_data_source_template(state, template) {
+    if(state.data_source_templates.length == 0) {
+      state.data_source_templates = []
+    }
+    state.data_source_templates.push(template)
+  },
+  update_data_source_template(state, template) {
+    state.data_source_templates = state.data_source_templates.map(t => t.uuid == template.uuid ? template : t)
+  },
+  remove_data_source_template(state, uuid) {
+    state.data_source_templates = state.data_source_templates.filter(t => t.uuid != uuid)
+  },
   save_outputs(state, outputs) {
     state.integration_outputs = outputs
   },
@@ -1897,9 +1929,15 @@ const actions = {
         })
     })
   },
-  getDetection({ commit }, uuid) {
+  getDetection({ commit }, {uuid, event = null}) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/detection/${uuid}`, method: 'GET' })
+      let url = `${BASE_URL}/detection/${uuid}`
+
+      if (event) {
+        url += `?event=${event}`
+      }
+
+      Axios({ url: url, method: 'GET' })
         .then(resp => {
           commit('save_detection', resp.data)
           resolve(resp)
@@ -2053,6 +2091,7 @@ const actions = {
           let credentials = []
           resp.data.credentials.forEach(cred => credentials.push({ 'value': cred.uuid, 'label': cred.name + " - " + cred.description }))
           commit('creds_success', credentials)
+          commit('save_credentials', resp.data.credentials)
           resolve(resp)
         })
         .catch(err => {
@@ -3590,8 +3629,13 @@ const actions = {
         })
     })
   },
-  getMitreDataSources({ commit }) {
+  getMitreDataSources({ commit }, { with_coverage= false }) {
     let url = `${BASE_URL}/mitre/data_sources`
+
+    if (with_coverage) {
+      url += `?with_coverage=${with_coverage}`
+    }
+    
     return new Promise((resolve, reject) => {
       Axios({ url: url, method: 'GET' })
         .then(resp => {
@@ -4587,7 +4631,131 @@ const actions = {
           reject(err)
         })
     })
-  }
+  },
+  getDataSourceTemplates({ commit }, organization=null) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/data_source_template`
+
+      if (organization) {
+        url += `?organization=${organization}`
+      }
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_data_source_templates', resp.data.templates)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  createDataSourceTemplate({ commit }, data) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/data_source_template`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_data_source_template', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateDataSourceTemplate({ commit }, { uuid, template }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/data_source_template/${uuid}`, data: template, method: 'PUT' })
+        .then(resp => {
+          commit('update_data_source_template', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  deleteDataSourceTemplate({ commit }, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/data_source_template/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_data_source_template', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getSchedules({ commit }, { active = null, organization = null }) {
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/schedule`
+
+      let params = false;
+
+      if (active) {
+        if (params) {
+          url += `&active=${active}`
+        } else {
+          url += `?active=${active}`
+          params = true
+        }
+          
+      }
+      
+      if (organization) {
+        if (params) {
+          url += `&organization=${organization}`
+        } else {
+          url += `?organization=${organization}`
+          params = true
+        }
+      }
+
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_schedules', resp.data.schedules)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  createSchedule({ commit }, data) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/schedule`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_schedule', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateSchedule({ commit }, { uuid, data }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/schedule/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_schedule', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  deleteSchedule({ commit }, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/schedule/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_schedule', uuid)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
 }
 
 export default new Vuex.Store({

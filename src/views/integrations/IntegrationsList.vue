@@ -67,7 +67,7 @@
       </CCol>
       <CCol>
         <CRow>
-          <CCol v-for="integration in filtered_results" col="3">
+          <CCol v-for="integration in filtered_results" :key="integration.uuid" col="3">
             <IntegrationCard :integration="integration" />
           </CCol>
         </CRow>

@@ -733,7 +733,7 @@ export default {
     this.loadTags();
     this.getSourceInput();
     this.$store.dispatch("getCredentialList", {});
-    this.$store.dispatch("getMitreDataSources");
+    this.$store.dispatch("getMitreDataSources", {});
     this.$store.commit("add_start"); // Stop the success/fail add from showing up when changing from other pages
   },
   methods: {

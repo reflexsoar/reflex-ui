@@ -328,6 +328,8 @@ export default {
     },
     selectFilter(filter) {
       // If the filter is already selected, remove it
+      let allow_multiple = ['status','tactics','techniques','organization','warnings','rule_type','severity'];
+
       if (filter.type in this.selected_filters) {
         if (this.selected_filters[filter.type].includes(filter.value)) {
           // Remove the filter
@@ -337,15 +339,25 @@ export default {
             this.selected_filters[filter.type].filter((item) => item !== filter.value)
           );
         } else {
-          // Add the filter
-          if (["name", "description".includes(filter.type)]) {
-            this.selected_filters[filter.type] = [];
+          // If the filter.type is not in this.selected_filters create a new empty array
+          if(!allow_multiple.includes(filter.type)) {
+            this.$set(this.selected_filters, filter.type, [filter.value]);
+          } else {
+            this.$set(this.selected_filters, filter.type, [...this.selected_filters[filter.type], filter.value]);
           }
-          this.selected_filters[filter.type].push(filter.value);
         }
       } else {
-        // Add the filter
-        this.$set(this.selected_filters, filter.type, [filter.value]);
+        if (!(filter.type in this.selected_filters)) {
+          this.$set(this.selected_filters, filter.type, []);
+        }
+        
+        
+        if(!allow_multiple.includes(filter.type)) {
+          this.$set(this.selected_filters, filter.type, [filter.value]);
+        } else {
+          this.$set(this.selected_filters, filter.type, [...this.selected_filters[filter.type], filter.value]);
+        }
+
       }
       this.$store.commit("update_selected_detection_filters", this.selected_filters);
       this.getFilters();

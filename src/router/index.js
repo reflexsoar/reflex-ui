@@ -55,6 +55,8 @@ const Organization = () => import('@/views/Organization')
 const OrganizationSettings = () => import('@/views/OrganizationSettings')
 const NotificationChannelsList = () => import('@/views/notify/NotificationChannelsList')
 const InputManagement = () => import('@/views/InputManagement')
+const DataSourceTemplates = () => import('@/views/data_sources/DataSourceTemplates')
+const Schedule = () => import('@/views/schedule/Schedule')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -246,6 +248,24 @@ function configRoutes () {
               }
             }
           ]
+        },
+        {
+          path: 'data_source_templates',
+          name: 'Data Source Templates',
+          component: DataSourceTemplates,
+          meta: {
+            requiresAuth: true,
+            fetchOrganizations: true
+          }
+        },
+        {
+          path: 'schedules',
+          name: 'Schedule',
+          component: Schedule,
+          meta: {
+            requiresAuth: true,
+            fetchOrganizations: true
+          }
         },
         {
           path: 'inputs',

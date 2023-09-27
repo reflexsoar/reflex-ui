@@ -27,6 +27,7 @@ import VueJsonPretty from 'vue-json-pretty'
 
 require('vue-tour/dist/vue-tour.css')
 require('vue-json-pretty/lib/styles.css')
+require('vue-multiselect/dist/vue-multiselect.min.css')
 
 Vue.config.performance = true
 Vue.use(CoreuiVuePro)
@@ -61,6 +62,14 @@ Vue.prototype.$http.interceptors.response.use(function(response) {
     return new Promise(function (resolve, reject) {
       const {status} = error.response
       if(status === 401) {
+
+        /* If the page was reset_password or forgot_password, then we don't want to redirect to login */
+        const path = window.location.href
+        if (path.indexOf('reset_password') > -1 || path.indexOf('forgot_password') > -1) {
+          reject(error)
+          return
+        }
+
         store.dispatch('logout')
         window.location.href = '/#/login'
       }

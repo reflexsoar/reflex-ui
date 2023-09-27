@@ -570,7 +570,7 @@ export default {
     },
     getDetection(uuid) {
       this.loading = true
-      this.$store.dispatch("getDetection", uuid).then(() => {
+      this.$store.dispatch("getDetection", {uuid}).then(() => {
         this.loading = false
       });
     },
