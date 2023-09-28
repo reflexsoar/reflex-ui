@@ -155,10 +155,16 @@ const state = {
   sso_role_mapping: {},
   integration_outputs: [],
   data_source_templates: [],
-  schedules: []
+  schedules: [],
+  release_notes: {},
+  previous_versions: []
 }
 
 const mutations = {
+  save_release_notes(state, data) {
+    state.release_notes = data.notes
+    state.previous_versions = data.previous_versions
+  },
   save_schedules(state, schedules) {
     state.schedules = schedules
   },
@@ -4756,6 +4762,19 @@ const actions = {
         })
     })
   },
+  getReleaseNotes({ commit }, { version = "current" }) {
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/release-notes?version=${version}`, method: 'GET' })
+        .then(resp => {
+          commit('save_release_notes', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  }
 }
 
 export default new Vuex.Store({
