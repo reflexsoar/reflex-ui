@@ -137,6 +137,17 @@
                   label="name"
                   :options="input_list"
                 /><br />
+                <label>Author</label>
+                <multiselect
+                  v-model="rule.author"
+                  placeholder="Add one or more authors for this detection"
+                  :taggable="true"
+                  @tag="addAuthor"
+                  tag-placeholder="Add new tag"
+                  :options="author_list"
+                  :multiple="true"
+                  :close-on-select="false"
+                /><br />
                 <label>Tags</label>
                 <multiselect
                   v-model="rule.tags"
@@ -1425,6 +1436,7 @@ export default {
       active: true,
       modalStatus: this.show,
       tag_list: [],
+      author_list: [],
       short_names: [],
       show_exclusion_modal: false,
       exclusion_modal_mode: "Create",
@@ -1522,6 +1534,12 @@ export default {
 
         if (this.rule.tags) {
           this.tag_list = this.rule.tags.map((o) => {
+            return o;
+          });
+        }
+
+        if (this.rule.author) {
+          this.author_list = this.rule.author.map((o) => {
             return o;
           });
         }
@@ -1971,6 +1989,20 @@ export default {
       }
 
       this.tag_list.push(t.name);
+    },
+    addAuthor(newAuthor) {
+      const t = {
+        name: newAuthor,
+        uuid: "",
+      };
+
+      if (this.rule.author) {
+        this.$set(this.rule, "author", [...this.rule.author, t.name])
+      } else {
+        this.$set(this.rule, "author", [t.name])
+      }
+
+      this.author_list.push(t.name);
     },
     addTagToField(field, t) {
       if (field) {

@@ -14,7 +14,7 @@
           <CSpinner color="primary" />
         </div>
         <div v-else>
-        <CRow>
+        <CRow class="page-heading page-heading-no-nav">
           <CCol>
             <h1>{{ detection.name }}</h1>
             <p>
@@ -23,7 +23,18 @@
               (<RMoment :date="detection.last_run" />)
             </p>
           </CCol>
-          
+          <CCol>
+            <label class="text-muted">Severity</label>
+            <h4><CBadge
+              :color="$store.getters.severity_color(detection.severity)"
+              >{{ $store.getters.severity_text(detection.severity) }}</CBadge></h4>
+              </CCol
+          >
+          <CCol>
+            <label class="text-muted">Risk Score</label>
+            <h4>{{ detection.risk_score }} / 100</h4>
+              </CCol
+          >
         </CRow>
         <CRow>
           <CCol col="8">
@@ -40,58 +51,126 @@
               :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
             >
                       <CTab title="Overview">
-                        <table class="properties-table">
-                          <tr><td>Description</td><td>{{ detection.description }}</td></tr>
-                          <tr><td>Created By</td><td>{{ detection.created_by ? detection.created_by.username : "N/A" }} on <RMoment :date="detection.created_at" format="MMMM Do YYYY, h:mm:ss a" /></td></tr>
-                          <tr v-if="detection.updated_by && detection.updated_at"><td>Updated By</td><td>{{ detection.updated_by.username ? detection.updated_by.username : "System" }} on <RMoment :date="detection.updated_at" /> </td></tr>
-                          <tr v-if="detection.false_positives && detection.false_positives.length > 0"><td>False Positives</td><td><li v-for="fp in detection.false_positives" :key="fp">
-                        {{ fp }}
-                      </li></td></tr>
-                        <tr v-if="detection.references && detection.references.length > 0"><td>References</td><td><li v-for="ref in detection.references" :key="ref">
-                        <span v-if="ref.startsWith('http')"
-                          >{{ ref }}&nbsp;<a _target="_child" :href="ref" target="_blank"
-                            ><CIcon name="cil-external-link" size="sm" /></a
-                        ></span>
-                        <span v-else-if="ref.toLowerCase().startsWith('cve-')"
-                          >{{ ref }}
-                          <ol>
-                            <li>
-                              <a
-                                _target="_child"
-                                :href="
-                                  'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + ref
-                                "
-                                target="_blank"
-                                >https://cve.mitre.org/cgi-bin/cvename.cgi?name={{
-                                  ref
-                                }}</a
-                              >
-                            </li>
-                            <li>
-                              <a
-                                _target="_child"
-                                :href="'https://nvd.nist.gov/vuln/detail/' + ref"
-                                target="_blank"
-                                >https://nvd.nist.gov/vuln/detail/{{ ref }}</a
-                              >
-                            </li>
-                            <li>
-                              <a
-                                _target="_child"
-                                :href="'https://www.cvedetails.com/cve/' + ref"
-                                target="_blank"
-                                >https://www.cvedetails.com/cve/{{ ref }}</a
-                              >
-                            </li>
-                          </ol></span
-                        >
-                        <span v-else>{{ ref }}</span>
-                        </li></td></tr>
-                        <tr><td>MITRE ATT&CK Tactics</td><td><TagList :tags="tactic_names" :tagIcon="false" /></td></tr>
-                        <tr><td>MITRE ATT&CK Techniques</td><td><TagList :tags="technique_names" :tagIcon="false" /></td></tr>
-                        <tr><td>Tags</td><td><TagList :tags="detection.tags" :tagIcon="false"/></td></tr>
-                        <tr><td>Last Assessed</td><td><CBadge class="tag" color="info" v-if="detection.assess_rule">Pending - Previously <RMoment :date="detection.last_assessed" /></CBadge><RMoment v-else :date="detection.last_assessed" /></td></tr>
-                        </table>
+                        <CRow>
+                          <CCol>
+                            <ObjectAttribute label="Description" :value="detection.description"/>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CCol>
+                            <ObjectAttribute label="Created By">
+                              <template #value>
+                                {{ detection.created_by ? detection.created_by.username : "N/A" }} on <RMoment :date="detection.created_at" format="MMMM Do YYYY, h:mm:ss a" />
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                          <CCol>
+                            <ObjectAttribute label="Updated By">
+                            <template #value>
+                            {{ detection.updated_by.username ? detection.updated_by.username : "System" }} on <RMoment :date="detection.updated_at" />
+                            </template>
+                            </ObjectAttribute>
+                          </CCol>
+                        </CRow>
+                        <CRow v-if="detection.false_positives && detection.false_positives.length > 0">
+                          <CCol>
+                            <ObjectAttribute label="False Positives">
+                              <template #value>
+                                <li v-for="fp in detection.false_positives" :key="fp">
+                                  {{ fp }}
+                                </li>
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                        </CRow>
+
+                        <CRow v-if="detection.references && detection.references.length > 0">
+                          <CCol>
+                            <ObjectAttribute label="References">
+                              <template #value>
+                                <li v-for="ref in detection.references" :key="ref">
+                                  <span v-if="ref.startsWith('http')">{{ ref }}&nbsp;<a _target="_child" :href="ref" target="_blank"><CIcon name="cil-external-link" size="sm" /></a></span>
+                                  <span v-else-if="ref.toLowerCase().startsWith('cve-')">{{ ref }}
+                                    <ol>
+                                      <li>
+                                        <a
+                                          _target="_child"
+                                          :href="
+                                            'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + ref
+                                          "
+                                          target="_blank"
+                                          >https://cve.mitre.org/cgi-bin/cvename.cgi?name={{
+                                            ref
+                                          }}</a
+                                        >
+                                      </li>
+                                      <li>
+                                        <a
+                                          _target="_child"
+                                          :href="'https://nvd.nist.gov/vuln/detail/' + ref"
+                                          target="_blank"
+                                          >https://nvd.nist.gov/vuln/detail/{{ ref }}</a
+                                        >
+                                      </li>
+                                      <li>
+                                        <a
+                                          _target="_child"
+                                          :href="'https://www.cvedetails.com/cve/' + ref"
+                                          target="_blank"
+                                          >https://www.cvedetails.com/cve/{{ ref }}</a
+                                        >
+                                      </li>
+                                    </ol></span>
+                                  <span v-else>{{ ref }}</span>
+                                </li>
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                        </CRow>
+
+                        <CRow>
+                          <CCol>
+                            <ObjectAttribute label="MITRE ATT&CK Tactics">
+                              <template #value>
+                                <TagList :tags="tactic_names" :tagIcon="false" />
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                          <CCol>
+                            <ObjectAttribute label="MITRE ATT&CK Techniques">
+                              <template #value>
+                                <TagList :tags="technique_names" :tagIcon="false" />
+                                </template>
+                            </ObjectAttribute>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CCol>
+                            <ObjectAttribute label="Authors">
+                              <template #value>
+                                <TagList :tags="detection.author" :tagIcon="false"/>
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CCol>
+                            <ObjectAttribute label="Tags">
+                              <template #value>
+                                <TagList :tags="detection.tags" :tagIcon="false"/>
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                        </CRow>
+                        <CRow>
+                          <CCol>
+                            <ObjectAttribute label="Last Rule Assessment">
+                              <template #value>
+                                <CBadge class="tag" color="info" v-if="detection.assess_rule">Pending - Previously <RMoment :date="detection.last_assessed" /></CBadge><RMoment v-else :date="detection.last_assessed" />
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                        </CRow>
                     <span v-if="detection.from_sigma"
                       ><b
                         >Sigma Rule (<span
@@ -106,6 +185,31 @@
                       </CCollapse></span
                     >
                       </CTab>
+                      <CTab title="Schedule">
+                        <CRow>
+                          <CCol>
+                            <ObjectAttribute label="Runs Every">
+                              <template #value>
+                                {{ detection.interval }} minutes
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                          <CCol>
+                            <ObjectAttribute label="Lookbehind">
+                              <template #value>
+                                {{ detection.lookbehind }} minutes
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                          <CCol>
+                            <ObjectAttribute label="Mute Period">
+                              <template #value>
+                                {{ detection.mute_period }} minutes
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                        </CRow>
+                    </CTab>
                       <CTab title="Triage Guide">
                       <h3>Triage Guide</h3>
                         <viewer :initialValue="detection.guide" height="550px" style="min-height:400px; max-height: 550px; overflow-y: scroll; overflow-x: hidden;" />
@@ -190,38 +294,33 @@
                     <b>Configuration</b>
                   </CCardHeader>
                   <CCardBody>
-                    <table class="properties-table">
-                      <tr v-if="current_user.default_org"><td>Organization</td><td><OrganizationBadge :uuid="detection.organization"/></td></tr>
-                      <tr><td>Source Input</td><td>{{detection.source ? detection.source.name : "Unknown"}}</td></tr>
-                      <tr><td>Detection Type</td><td>{{ detectionType(detection.rule_type) }}</td></tr>
-                      <tr><td>Base Query</td><td><pre style="white-space: pre-wrap;" class="query">{{ detection.query ? detection.query.query : "" }}</pre></td></tr>
-                      <tr><td>Severity</td><td><CBadge
-                        class="tag"
-                        size="sm"
-                        :color="$store.getters.severity_color(detection.severity)"
-                        >{{ $store.getters.severity_text(detection.severity) }}</CBadge>
-                      </td></tr>
-                      <tr><td>Risk Score</td><td><CProgress
-                        :max="max_risk"
-                        :value="parseInt(detection.risk_score)"
-                        show-value
-                        :color="riskScoreColor(detection.risk_score)"/>
-                      </td></tr>
-                    </table>
-                  </CCardBody>
-                </CCard>
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CCard>
-                  <CCardHeader>
-                    <b>Schedule</b>
-                  </CCardHeader>
-                  <CCardBody>
-                    <p><b>Runs Every: </b> {{ detection.interval }} minutes</p>
-                    <p><b>Look Behind: </b> {{ detection.lookbehind }} minutes</p>
-                    <p><b>Mute Period: </b> {{ detection.mute_period }} minutes</p>
+                    <CRow>
+                      <CCol>
+                      <ObjectAttribute label="Organization">
+                        <template #value>
+                          <OrganizationBadge :uuid="detection.organization"/>
+                        </template>
+                      </ObjectAttribute>
+                      </CCol>
+                      </CRow>
+                      <CRow>
+                        <CCol>
+                          <ObjectAttribute label="Source Input" :value="detection.source ? detection.source.name : 'Unknown'"/>
+                        </CCol>
+                        <CCol>
+                          <ObjectAttribute label="Detection Type" :value="detectionType(detection.rule_type)"/>
+                        </CCol>
+                      </CRow>
+                      <CRow>
+                        <CCol>
+                        <ObjectAttribute label="Query">
+                          <template #value>
+                            <pre style="white-space: pre-wrap;" class="query">{{ detection.query ? detection.query.query : "" }}</pre>
+                          </template>
+                        </ObjectAttribute>
+                        </CCol>
+                      </CRow>
+                      
                   </CCardBody>
                 </CCard>
               </CCol>
@@ -431,6 +530,7 @@ import RMoment from './components/RMoment'
 import TagList from './components/TagList'
 import TagBucket from './components/TagBucket'
 import OrganizationBadge from './OrganizationBadge'
+import ObjectAttribute from './components/ObjectAttribute'
 
 export default {
   name: "DetectionDetails",
@@ -440,7 +540,8 @@ export default {
     TagList,
     Viewer,
     OrganizationBadge,
-    TagBucket
+    TagBucket,
+    ObjectAttribute
   },
   computed: {
     ...mapState(["detection", "detection_hits", "current_user"]), 
