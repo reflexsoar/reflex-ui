@@ -207,7 +207,8 @@ export default {
           'graceful_exit': true,
           'mapping_refresh_interval': 60,
           'assessment_days': 14,
-          'logging_level': 'ERROR'
+          'logging_level': 'ERROR',
+          'timeout': 30
         },
         "tags": [],
         "priority": 1,
