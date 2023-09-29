@@ -17,11 +17,13 @@
         <CRow class="page-heading page-heading-no-nav">
           <CCol>
             <h1>{{ detection.name }}</h1>
-            <p>
-              <b>Last Run:</b>
-              <RMoment :date="detection.last_run" format="MMMM Do YYYY, h:mm:ss a" />
-              (<RMoment :date="detection.last_run" />)
-            </p>
+          </CCol>
+          <CCol>
+            <label class="text-muted">Last Run</label>
+            <h4>
+              <RMoment :date="detection.last_run" /><br>
+              <small style="font-size: .5em"><RMoment :date="detection.last_run" format="MMMM Do YYYY, h:mm:ss a" /></small>
+            </h4>
           </CCol>
           <CCol>
             <label class="text-muted">Severity</label>
