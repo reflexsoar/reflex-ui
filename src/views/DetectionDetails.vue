@@ -15,7 +15,7 @@
         </div>
         <div v-else>
         <CRow class="page-heading page-heading-no-nav">
-          <CCol>
+          <CCol col=6>
             <h1>{{ detection.name }}</h1>
           </CCol>
           <CCol>
