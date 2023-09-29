@@ -4,9 +4,9 @@
       <label v-if="label"> {{ label }} </label>
     </slot>
     <div class="select-btn">
-      <span v-if="selections.length == 0">{{ placeholder }}</span>
-      <span v-if="selections.length > 0 && asTags"><CBadge v-for="(item, i) in selections" :key="i" class="tag selected-option" color="secondary">{{ getSelectedLabel(item) }}&nbsp;<i @click="select(item)" class="fas fa-x"></i></CBadge></span>
-      <span v-if="selections.length > 0 && !asTags">Selected {{ selections.length }} of {{ options.length }} items.</span>
+      <span v-if="selections === null || selections.length == 0">{{ placeholder }}</span>
+      <span v-if="selections && selections.length > 0 && asTags"><CBadge v-for="(item, i) in selections" :key="i" class="tag selected-option" color="secondary">{{ getSelectedLabel(item) }}&nbsp;<i @click="select(item)" class="fas fa-x"></i></CBadge></span>
+      <span v-if="selections && selections.length > 0 && !asTags">Selected {{ selections.length }} of {{ options.length }} items.</span>
       <i class="fas fa-chevron-down"></i>
     </div>
     <div class="content">
@@ -258,6 +258,10 @@ export default {
         return option[this.option_label];
     },
     isSelected(option) {
+      if (this.selections === null) {
+        return false;
+      }
+
       if (typeof option === "string") {
         return this.selections.includes(option);
       }
@@ -265,6 +269,11 @@ export default {
       return this.selections.includes(option[this.option_key]);
     },
     select(option) {
+
+      if (this.selections === null) {
+        this.selections = [];
+      }
+
       // Get the value from the option using the key_field prop
       if (option) {
 
