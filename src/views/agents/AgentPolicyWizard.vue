@@ -421,6 +421,25 @@
                 />
               </CCol>
             </CRow>
+            <CRow>
+              <CCol>
+                <CInput
+                  v-model.number="policy.mitre_mapper_config.timeout"
+                  label="Timeout"
+                  placeholder="Enter a time in seconds"
+                  description="How long the MITRE Mapper will wait for mapping queries to timeout"
+                  :isValid="
+                    validate(
+                      policy.mitre_mapper_config.timeout,
+                      validations.timeout
+                    )
+                  "
+                  :invalidFeedback="validations.timeout.message"
+                />
+                </CCol>
+                <CCol>
+                </CCol>
+              </CRow>
           </CTab>
           <CTab title="Review">
             <CRow>
@@ -690,6 +709,13 @@ export default {
           required: true,
           type: "number",
           message: "Must be between 1 and 90"
+        },
+        timeout: {
+          min: 1,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 1 and 86400"
         }
       },
     };

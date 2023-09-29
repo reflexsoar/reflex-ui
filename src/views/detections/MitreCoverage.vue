@@ -79,7 +79,7 @@
                                         <CBadge
                                             v-if="technique.data_sources && technique.data_sources.length > 0"
                                             class="tag tag-sm"
-                                            :style="{'background-color': getDataSourceColorFromScale(getInputCount(technique.data_sources), technique), 'color': getDataSourceFontColorFromScale(getInputCount(technique.data_sources), technique)}"
+                                            :style="{'background-color': getDataSourceColorFromScale(getDataSourceCount(technique.data_sources), technique.data_sources ? technique.data_sources.length : 0), 'color': getDataSourceFontColorFromScale(getDataSourceCount(technique.data_sources), technique.data_sources ? technique.data_sources.length : 0)}"
                                         >
                                             <i class="fas fa-database"></i> {{ getDataSourceCount(technique.data_sources) }}/{{ technique.data_sources ? technique.data_sources.length : 0 }}
                                         </CBadge>
@@ -303,27 +303,28 @@ export default {
             return this.max_green;
             
         },
-        getDataSourceColorFromScale(count, technique) {
+        getDataSourceColorFromScale(count, max) {
 
             let total_colors = 10;
-
-            if (!technique.data_sources) {
-                return this.none_red;
-            }
 
             if (count == 0) {
                 return this.none_red;
             }
-
-            let max = technique.data_sources.length;
+            
             let min = 1;
 
-            if (count == max) {
+            if (count == max || min == max) {
                 return this.max_green;
             }
 
             let scale = chroma.scale([this.min_green, this.max_green]).domain([min, max]).colors(Math.round(max/total_colors));
-            let index = Math.round((count - min) / (max - min) * (max/total_colors));
+            let index = 0
+            if (count == 1) {
+                index = Math.round((count) / (max - min) * (max/total_colors));
+            } else {
+                index = Math.round((count - min) / (max - min) * (max/total_colors));
+            }
+            
             if(index >= scale.length) {
                 index = scale.length - 1
             }
@@ -331,7 +332,7 @@ export default {
             return scale[index];
 
         },
-        getDataSourceFontColorFromScale(count, technique=null) {
+        getDataSourceFontColorFromScale(count, max) {
 
             let total_colors = 10;
 
@@ -339,14 +340,9 @@ export default {
                 return this.white;
             }
 
-            if (!technique.data_sources) {
-                return this.white;
-            }
-
-            let max = technique.data_sources.length;
             let min = 1;
 
-            if (count == max) {
+            if (count == max  || min == max) {
                 return this.white;
             }
 
@@ -367,24 +363,28 @@ export default {
 
             let max = this.max_detections;
             let min = 1;
+
             if(technique) {
                 max = this.mitre_mapping['techniques'][technique.external_id]['total']
             }
 
-            if (count == max) {
+            if (count == max || min == max) {
                 return this.white;
             }
 
             let scale = chroma.scale([this.dark, this.white]).domain([min, max]).colors(Math.round(max/total_colors));
-            let index = Math.round((count - min) / (max - min) * (max/total_colors));            
+            let index = Math.round((count - min) / (max - min) * (max/total_colors));
+            if(index >= scale.length) {
+                index = total_colors - 1
+            }
             return scale[index];
         },
         getDetectionColorFromScale(count, technique=null) {
             /* Create a color gradient based on the number of detections for a technique, the should 
             be based on shades of green. */
 
-            let total_colors = 10
-
+            let total_colors = 3
+            
             if (count == 0) {
                 return this.none_red;
             }
@@ -395,15 +395,16 @@ export default {
                 max = this.mitre_mapping['techniques'][technique.external_id]['total']
             }
 
-            if (min == max) {
+            if (min == max || count == max) {
                 return this.max_green;
             }
 
-            let scale = chroma.scale([this.min_green, this.max_green]).domain([min, max]).colors(Math.round(max/total_colors));
-            let index = Math.round((count - min) / (max - min) * (max/total_colors));
+            let scale = chroma.scale([this.min_green, this.max_green]).domain([min, max]).colors(total_colors);
+            let index = Math.round((count - min) / (max - min) * (total_colors));
             if(index >= scale.length) {
-                index = scale.length - 1
+                index = total_colors - 2
             }
+            console.log(scale[index])
             return scale[index];
 
         },
