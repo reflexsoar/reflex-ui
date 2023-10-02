@@ -883,6 +883,15 @@ export default {
         this.organization = this.current_user.organization;
       
       }
+
+      this.$store
+        .dispatch("getCloseReasons", { organization: this.organization })
+        .then((resp) => {
+          this.close_reasons = this.$store.getters.close_reasons.map((reason) => {
+            return { label: reason.title, value: reason.uuid };
+          });
+        });
+        
       this.step = 0;
       this.name = this.event_rule.name;
       this.description = this.event_rule.description;
@@ -927,13 +936,7 @@ export default {
         : null;
       this.dismiss_comment = this.event_rule.dismiss_comment;
 
-      this.$store
-        .dispatch("getCloseReasons", { organization: this.organization })
-        .then((resp) => {
-          this.close_reasons = this.$store.getters.close_reasons.map((reason) => {
-            return { label: reason.title, value: reason.uuid };
-          });
-        });
+      
     },
     generateRule() {
       /* Generates a basic rule for the selected Event that an analyst
