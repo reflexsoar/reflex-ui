@@ -214,16 +214,43 @@
             <CCardFooter style="background-color:#f0f0f0;">
               <CRow>
                 <CCol col="3">
-                  <CButtonGroup>
+                  <CDropdown toggler-text="Actions" size="sm" color="secondary">
+                    <!-- Ack -->
+                    <CDropdownItem v-if="!event.acknowledged" @click="ackEvent(event.uuid)"><CIcon name="cilCheck"/>&nbsp;Acknowledge</CDropdownItem>
+                    <CDropdownItem v-if="event.acknowledged" @click="unackEvent(event.uuid)"><CIcon name="cilX"/>&nbsp;Unacknowledge</CDropdownItem>
+                    <!-- Dismiss -->
+                    <CDropdownItem @click="dismissEventFromCard(event.uuid)"><CIcon name="cilDeaf"/>&nbsp;Dismiss</CDropdownItem>
+                    <!-- Create Case -->
+                    <CDropdownItem @click="caseFromCard(event.uuid)"><CIcon name="cilBriefcase"/>&nbsp;Create Case</CDropdownItem>
+                    <!-- Create Event Rule -->
+                    <CDropdownItem @click="createEventRule(event.signature, event.uuid)"><CIcon name="cilGraph"/>&nbsp;Create Event Rule</CDropdownItem>
+                    <!-- Run Action -->
+                    <CDropdownItem @click="showRunActionModal(event.uuid, true)"><i class="fas fa-play"/>&nbsp;Run Action</CDropdownItem>
+                    <!-- View Event -->
+                    <CDropdownItem @click="showDrawer(event.uuid)"><CIcon name="cilMagnifyingGlass"/>&nbsp;View Event</CDropdownItem>
+                    <!-- View Case -->
+                    <CDropdownItem v-if="event.case" :to="`/cases/${event.case}`"><CIcon name="cilFolderOpen"/>&nbsp;View Case</CDropdownItem>
+                    <!-- Add Comment -->
+                    <CDropdownItem @click="showEventCommentModal(event.uuid)"><CIcon name="cilCommentBubble"/>&nbsp;Add Comment</CDropdownItem>
+                    <!-- Reopen Event -->
+                    <CDropdownItem v-if="event.status.closed" @click="reopenEvent(event.uuid)"><CIcon name="cilEnvelopeOpen"/>&nbsp;Reopen Event</CDropdownItem>
+                    
+
+                  </CDropdown>
+                  <!--<CButtonGroup>
+                    <CButton v-if="!event.acknowledged" aria-label="Acknowlege" @click="ackEvent(event.uuid)" size="sm" color="success" v-c-tooltip="{'content':'Acknowledge Event','placement':'bottom'}"><CIcon name="cilCheck"/></CButton>
+                    <CButton v-if="event.acknowledged" aria-label="Unacknowledge" @click="unackEvent(event.uuid)" size="sm" color="warning" v-c-tooltip="{'content':'Acknowledge Event','placement':'bottom'}"><CIcon name="cilX"/></CButton>
                     <CButton aria-label="Create Event Rule" size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
-                    <CButton aria-label="Run Action" size="sm" color="success" @click="showRunActionModal(event.uuid, true)" v-c-tooltip="{'content':'Run Action','placement':'bottom'}"><i class="fas fa-play"/></CButton>
+                    <CButton aria-label="Dismiss Event" v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
+                    <CButton aria-label="Run Action" size="sm" color="secondary" @click="showRunActionModal(event.uuid, true)" v-c-tooltip="{'content':'Run Action','placement':'bottom'}"><i class="fas fa-play"/></CButton>
                     <CButton aria-label="Create Case" @click="caseFromCard(event.uuid)" v-if="event.status.name === 'New'" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>
                     <CButton aria-label="View Event" @click="showDrawer(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><CIcon name="cilMagnifyingGlass"/></CButton>
+                    
                     <CButton aria-label="Add Comment" @click="showEventCommentModal(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'Add Comment','placement':'bottom'}"><CIcon name="cilCommentBubble"/> {{event.total_comments ? event.total_comments : 0}}</CButton>
                     <CButton aria-label="Reopen Event" v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
                     <CButton aria-label="View Case" v-if="event.case" size="sm" color="secondary" :to="`/cases/${event.case}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cil-folder-open"/></CButton>
-                    <CButton aria-label="Dismiss Event" v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
-                  </CButtonGroup>
+                    
+                  </CButtonGroup>-->
                 </CCol>
                 <CCol col="9" class="text-right">
                   <small>
@@ -606,6 +633,12 @@ export default {
       }
     },
     methods: {
+      ackEvent(uuid) {
+        console.log("ACK")
+      },
+      unackEvent(uuid) {
+        console.log("UNACK")
+      },
       showExportWizard() {
         this.show_export_wizard = true;
       },
