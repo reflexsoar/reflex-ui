@@ -214,7 +214,7 @@
             <CCardFooter style="background-color:#f0f0f0;">
               <CRow>
                 <CCol col="3">
-                  <CDropdown toggler-text="Actions" size="sm" color="secondary">
+                  <CDropdown toggler-text="Actions" size="sm" color="primary">
                     <!-- Ack -->
                     <CDropdownItem v-if="!event.acknowledged" @click="ackEvent(event.uuid)"><CIcon name="cilCheck"/>&nbsp;Acknowledge</CDropdownItem>
                     <CDropdownItem v-if="event.acknowledged" @click="unackEvent(event.uuid)"><CIcon name="cilX"/>&nbsp;Unacknowledge</CDropdownItem>
