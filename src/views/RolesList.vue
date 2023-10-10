@@ -544,6 +544,11 @@ export default {
           'view_agent_groups',
           'update_agent_group',
           'delete_agent_group',
+          'create_agent_policy',
+          'view_agent_policies',
+          'update_agent_policy',
+          'delete_agent_policy',
+          'view_agent_logs'
         ],
         "Inputs": [
           'add_input',
@@ -596,6 +601,12 @@ export default {
           'delete_plugin',
           'update_plugin',
         ],*/
+        "Schedules": [
+          'create_schedule',
+          'update_schedule',
+          'delete_schedule',
+          'view_schedules',
+        ],
         "Credentials": [
           'add_credential',
           'update_credential',
@@ -618,6 +629,22 @@ export default {
         "Data Types": [
           'create_data_type',
           'update_data_type',
+        ],
+        "SSO": [
+          'create_sso_provider',
+          'update_sso_provider',
+          'delete_sso_provider',
+          'view_sso_providers',
+          'create_sso_mapping_policy',
+          'update_sso_mapping_policy',
+          'delete_sso_mapping_policy',
+          'view_sso_mapping_policies',
+        ],
+        "Service Accounts": [
+          'create_service_account',
+          'update_service_account',
+          'delete_service_account',
+          'view_service_accounts',
         ],
         "Settings": [
           'update_settings',

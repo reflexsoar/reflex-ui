@@ -769,6 +769,7 @@ export default {
       this.rule = {
         name: "",
         tags: [],
+        author: [],
         query: {
           query: "okay",
           language: "",

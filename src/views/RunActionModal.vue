@@ -13,20 +13,40 @@
         <CAlert :show.sync="error" color="danger">
             {{ error_message }}
         </CAlert>
-      <CSelect
-        v-bind:disabled="loading || configured_actions.length == 0"
-        :value.sync="selected_action"
-        :options="actions_list"
-        label="Action to Run"
-        :placeholder="'Select Action'"
-        @change="selectAction"
-      >
-        <template #label>
-          <label v-if="mode == 'run'">Action to Run</label>
-          <label v-if="mode == 'add_to_eventrule'">Action to Add</label>
-        </template>
-      </CSelect>
-      <CRow v-if="action.parameters && !!Object.keys(action.parameters).length">
+          <SelectInput
+            :value.sync="selected_action"
+            :options="configured_actions"
+            label="Action to Run"
+            placeholder="Select Action"
+            :loading.sync="loading"
+            option_key="name"
+            option_label="friendly_name"
+          >
+            <template #label>
+              <label v-if="mode == 'run'">Action to Run</label>
+              <label v-if="mode == 'add_to_eventrule'">Action to Add</label>
+            </template>
+            <template #option="{ option }">
+              <CRow style="width: 100%">
+                <CCol>
+                  <label>Integration</label><br>
+                  {{ option.integration_name }}
+                </CCol>
+                <CCol>
+                  <label>Action</label><br>
+                  {{ option.friendly_name }}
+                </CCol>
+                <CCol>
+                  <label>Configuration</label><br>
+                  {{ option.configuration_name }}
+                </CCol>
+              </CRow>
+
+              
+            </template>
+          </SelectInput>
+
+      <CRow v-if="action && action.parameters && !!Object.keys(action.parameters).length">
         <CCol>
           <h3>Parameters</h3>
           <CRow v-for="(field, name) in action.parameters">
@@ -50,6 +70,7 @@
                 :placeholder="field.description"
                 :description="field.description"
                 :label="field.label"
+                
               />
               <div v-if="field.type == 'str-multiple'">
                 <label style="text-transform: capitalize">{{ field.label }}</label
@@ -94,8 +115,6 @@
           </CRow>
         </CCol>
       </CRow>
-      {{action_payload}}
-      {{ mode }}
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Cancel</CButton>
         <CButton v-if="mode == 'run'" @click="runByMode()" color="primary">Execute</CButton>
@@ -109,8 +128,12 @@
 import { vSelect } from "vue-select";
 import { mapState } from "vuex";
 import {v4 as uuidv4} from 'uuid';
+import SelectInput from './components/SelectInput.vue'
 export default {
   name: "RunActionModal",
+  components: {
+    SelectInput
+  },
   props: {
     show: Boolean,
     events: {
@@ -158,6 +181,9 @@ export default {
   watch: {
     show: function () {
       this.modalStatus = this.show;
+    },
+    selected_action: function () {
+      this.selectAction();
     },
     modalStatus: function () {
       if (this.modalStatus) {
@@ -231,6 +257,14 @@ export default {
       this.action = this.configured_actions.find(
         (action) => action.name == this.selected_action
       );
+
+      
+
+      if (this.action === undefined) {
+        this.action_payload = {}
+        return;
+      }
+
       this.action_payload = {
         action: this.action.name,
         configuration_uuid: this.action.configuration_uuid,

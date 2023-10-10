@@ -274,8 +274,15 @@ export default {
                     name: email,
                     uuid: email.substring(0, 2) + Math.floor((Math.random() * 10000000))
                 };
+                // If mail_to is null, then we need to initialize it
+                if(this.channel.email_configuration.mail_to === null) {
+                    this.$set(this.channel.email_configuration,'mail_to',[])
+                }
+                if(this.recipients === null) {
+                    this.$set(this,'recipients',[])
+                }
                 this.channel.email_configuration.mail_to.push(email);
-                this.recipients.push(email);     
+                this.recipients.push(email);
             }
         },
         createNotificationChannel() {

@@ -23,6 +23,7 @@
           <slot name="option" :option="option">{{ optionValue(option) }}</slot>
         </li>
       </ul>
+      <span v-else-if="loading" class="no-results"><div class="lds-dual-ring"></div></span>
       <span v-else class="no-results">No options found</span>
     </div>
     <slot name="description">
@@ -164,6 +165,31 @@
   background-color: rgb(255, 106, 106);
   color: #fff;
 }
+
+.lds-dual-ring {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 6px solid #3c4b64;
+  border-color: #3c4b64 transparent #3c4b64 transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 </style>
 
 <script>
@@ -195,6 +221,10 @@ export default {
     placeholder : {
       type: String,
       default: "Select an option"
+    },
+    loading: {
+      type: Boolean,
+      default: false,
     }
   },
   data() {

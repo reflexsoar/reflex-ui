@@ -876,12 +876,10 @@ export default {
       return d;
     },
     populateEventRuleFields() {
-
       if (this.event_rule.organization) {
         this.organization = this.event_rule.organization;
       } else {
         this.organization = this.current_user.organization;
-      
       }
       this.step = 0;
       this.name = this.event_rule.name;
@@ -921,11 +919,6 @@ export default {
       }
       this.active = this.event_rule.active;
       this.query = this.event_rule.query;
-      this.close_reason = this.event_rule.dismiss_reason
-        ? this.close_reasons.filter((c) => c.value === this.event_rule.dismiss_reason)[0]
-            .value
-        : null;
-      this.dismiss_comment = this.event_rule.dismiss_comment;
 
       this.$store
         .dispatch("getCloseReasons", { organization: this.organization })
@@ -933,6 +926,12 @@ export default {
           this.close_reasons = this.$store.getters.close_reasons.map((reason) => {
             return { label: reason.title, value: reason.uuid };
           });
+          this.close_reason = this.event_rule.dismiss_reason
+            ? this.close_reasons.filter(
+                (c) => c.value === this.event_rule.dismiss_reason
+              )[0].value
+            : null;
+          this.dismiss_comment = this.event_rule.dismiss_comment;
         });
     },
     generateRule() {
