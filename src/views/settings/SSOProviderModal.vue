@@ -327,6 +327,10 @@ CERTIFICATE DATA HERE
         .dispatch("getRoles", {})
     },
     addLogonDomain(domain) {
+      if(this.logon_domains === null || this.logon_domains === undefined) {
+        this.logon_domains = [];
+      }
+      
       if(!this.logon_domains.includes(domain)) {
         this.logon_domains.push(domain);
         this.logon_domain_options.push(domain)
