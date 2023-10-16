@@ -5,7 +5,8 @@
         ><CRow>
           <CCol
             ><CBadge color="info">{{ observable.data_type }}</CBadge
-            >&nbsp;<span v-c-tooltip="`${observable.value}`">{{
+            >&nbsp;<span class="observable-value" @click="copyToClipboard(observable.value, $event)" v-c-tooltip="{
+              'content': 'Click to Copy'}">{{
               observable.value | truncate
             }}</span></CCol
           >
@@ -18,7 +19,7 @@
             >
               <CDropdownItem @click="vt_lookup()">Virus Total Lookup</CDropdownItem>
               <CDropdownItem @click="google_search()">Google Search</CDropdownItem>
-              <CDropdownItem>Copy Value</CDropdownItem>
+              <CDropdownItem @click="copyButton(observable.value, $event)">Copy Value</CDropdownItem>
               <CDropdownItem @click="addToFilter()">Filter for Value</CDropdownItem>
               <CDropdownItem @click="show_list_adder = true">Add To List</CDropdownItem>
               <CDropdownItem disabled>Run Action</CDropdownItem>
@@ -221,6 +222,10 @@
 .tab-content {
   padding: 5px !important;
 }
+
+.observable-value {
+  cursor: pointer
+}
 </style>
 
 <script>
@@ -414,6 +419,24 @@ export default {
         this.current_asset -= 1;
       }
     },
+    copyButton(text, event) {
+        navigator.clipboard.writeText(text);
+        // Set the text of the button to "Copied!"
+        event.target.innerText = "Copied!";
+        // Reset the text of the button after 2 seconds
+        setTimeout(() => {
+            event.target.innerText = "Copy Value";
+        }, 1000);
+    },
+    copyToClipboard(text, event) {
+        navigator.clipboard.writeText(text);
+        // Set the text of the button to "Copied!"
+        event.target.innerText = "Copied!";
+        // Reset the text of the button after 2 seconds
+        setTimeout(() => {
+            event.target.innerText = text;
+        }, 1000);
+    }
   },
   computed: {
     positionInlineStyle() {
