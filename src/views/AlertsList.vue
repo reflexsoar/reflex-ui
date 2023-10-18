@@ -2,7 +2,6 @@
   <CRow>
     <CCol col="12">
       <h2>Events<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
-      {{ selected }}
       <event-drawer :event_data="event_data"></event-drawer>
       <CRow>
         <CCol col="12">
@@ -1192,8 +1191,14 @@ export default {
       },
       selectAllNew() {
         this.selected_orgs = {}
-        this.selected = []
+        
+        if(this.select_all) {
+          
+          
+          this.select_all = false
+        }
         if(!this.select_all) {
+          this.selected = []
           if(this.observableFilters.some(e => e.filter_type === 'signature')) {
             this.selected_count = 0 
             for (let i in this.filtered_events) {
@@ -1252,6 +1257,7 @@ export default {
         let start_time = ""
         let end_time = ""
         let title__like_filter = null
+        this.select_all = true
         this.selected_count = this.page_data.total_results
         for(let f in this.observableFilters) {
           let filter = this.observableFilters[f]
