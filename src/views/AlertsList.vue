@@ -2,6 +2,7 @@
   <CRow>
     <CCol col="12">
       <h2>Events<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
+      {{ selected }}
       <event-drawer :event_data="event_data"></event-drawer>
       <CRow>
         <CCol col="12">
@@ -232,8 +233,8 @@
                       </template>
 
                     <!-- Ack -->
-                    <CDropdownItem v-if="!event.acknowledged" @click="ackEvent(event.uuid)"><i class="fas fa-check"></i>&nbsp;Acknowledge</CDropdownItem>
-                    <CDropdownItem v-if="event.acknowledged" @click="unackEvent(event.uuid)"><i class="fas fa-x"></i>&nbsp;Unacknowledge</CDropdownItem>
+                    <CDropdownItem v-if="!event.acknowledged" @click="ackBySig(event.uuid, event.signature)"><i class="fas fa-check"></i>&nbsp;Acknowledge</CDropdownItem>
+                    <CDropdownItem v-if="event.acknowledged" @click="unAckBySig(event.uuid, event.signature)"><i class="fas fa-x"></i>&nbsp;Unacknowledge</CDropdownItem>
                     <!-- Dismiss -->
                     <CDropdownItem @click="dismissEventFromCard(event.uuid)"><i class="fas fa-bell-slash"></i>&nbsp;Dismiss</CDropdownItem>
                     <!-- Create Case -->
@@ -638,11 +639,25 @@ export default {
       }
     },
     methods: {
+      ackBySig(uuid, signature) {
+        this.$store.dispatch('acknowledgeEventBySignature', {'uuid': uuid, 'signature': signature}).then(() => {
+          this.filtered_events = this.filterEvents()
+        })
+      },
+      unAckBySig(uuid, signature) {
+        this.$store.dispatch('unacknowledgeEventBySignature', {'uuid': uuid, 'signature': signature}).then(() => {
+          this.filtered_events = this.filterEvents()
+        })
+      },
       ackEvent(uuid) {
-        console.log("ACK")
+        this.$store.dispatch('acknowledgeEvent', uuid).then(() => {
+          this.filtered_events = this.filterEvents()
+        })
       },
       unackEvent(uuid) {
-        console.log("UNACK")
+        this.$store.dispatch('unacknowledgeEvent', uuid).then(() => {
+          this.filtered_events = this.filterEvents()
+        })
       },
       showExportWizard() {
         this.show_export_wizard = true;
@@ -1177,6 +1192,7 @@ export default {
       },
       selectAllNew() {
         this.selected_orgs = {}
+        this.selected = []
         if(!this.select_all) {
           if(this.observableFilters.some(e => e.filter_type === 'signature')) {
             this.selected_count = 0 
