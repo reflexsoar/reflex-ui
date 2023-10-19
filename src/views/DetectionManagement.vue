@@ -561,7 +561,7 @@ export default {
         "5. Triage Notes",
         "6. Outputs",
       ],
-      severities: ["Critical", "High", "Medium", "Low"],
+      severities: ["Critical", "High", "Medium", "Low", "Informational"],
       playbook_names: ["Phishing Analysis", "Threat Enrichment", "Cuckoo Sandbox"],
       backends: ["Elasticsearch", "Sysmon", "Crowdstrike", "SentinelOne", "Splunk"],
       tags: [
@@ -640,6 +640,8 @@ export default {
   methods: {
     getSeverityColor(severity) {
       switch (severity) {
+        case 0:
+          return "light";
         case 1:
           return "dark";
         case 2:
@@ -654,6 +656,8 @@ export default {
     },
     getSeverityText(severity) {
       switch (severity) {
+        case 0:
+          return "Informational";
         case 1:
           return "Low";
         case 2:

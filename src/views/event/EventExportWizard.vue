@@ -196,6 +196,10 @@ export default {
       ],
       severity_options: [
         {
+          label: "Informational",
+          value: 0,
+        },
+        {
           label: "Low",
           value: 1,
         },

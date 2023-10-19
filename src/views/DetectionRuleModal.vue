@@ -1666,7 +1666,9 @@ export default {
       this.rule.field_templates.push({ name: t.name, uuid: t.uuid });
     },
     setRiskScore() {
-      if (this.rule.severity == 1) {
+      if (this.rule.severity == 0 ) {
+        this.rule.risk_score = 0;
+      } else if (this.rule.severity == 1) {
         this.rule.risk_score = 1;
       } else if (this.rule.severity == 2) {
         this.rule.risk_score = 30;
@@ -1677,7 +1679,9 @@ export default {
       }
     },
     setSeverity() {
-      if (this.rule.risk_score <= 29) {
+      if (this.rule.risk_score == 0) {
+        this.rule.severity = 0;
+      } else if (this.rule.risk_score <= 29) {
         this.rule.severity = 1;
       } else if (this.rule.risk_score <= 59 && this.rule.risk_score >= 30) {
         this.rule.severity = 2;

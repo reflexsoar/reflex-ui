@@ -951,6 +951,10 @@ export default {
       current_title: "",
       severities: [
         {
+          label: "Informational",
+          value: 0,
+        },
+        {
           label: "Low",
           value: 1,
         },
@@ -1493,6 +1497,8 @@ export default {
     },
     getSeverityColor(severity) {
       switch (severity) {
+        case 0:
+          return "light";
         case 1:
           return "dark";
         case 2:

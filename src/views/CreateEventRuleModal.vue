@@ -742,6 +742,10 @@ export default {
       selected_schedules: [],
       severities: [
         {
+          label: "Informational",
+          value: 0,
+        },
+        {
           label: "Low",
           value: 1,
         },

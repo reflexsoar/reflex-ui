@@ -435,23 +435,27 @@ export default {
       tag_event: false,
       severities: [
         {
-          label: "Low",
+          label: "Informational",
           value: 0,
         },
         {
-          label: "Medium",
+          label: "Low",
           value: 1,
         },
         {
-          label: "High",
+          label: "Medium",
           value: 2,
         },
         {
-          label: "Critical",
+          label: "High",
           value: 3,
         },
+        {
+          label: "Critical",
+          value: 4,
+        },
       ],
-      target_severity: 0,
+      target_severity: 1,
       update_severity: false,
       selected_tags: [],
       showRuleDownloadModal: false,

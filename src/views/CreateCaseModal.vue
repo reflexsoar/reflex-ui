@@ -155,6 +155,7 @@ export default {
             modalStatus: this.show,
             generate_event_rule: false,
             severities: [
+                {'label':'Informational', 'value':0},
                 {'label':'Low', 'value':1},
                 {'label':'Medium', 'value':2},
                 {'label':'High', 'value':3},
