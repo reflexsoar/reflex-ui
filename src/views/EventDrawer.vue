@@ -414,6 +414,49 @@
                   </CDataTable>
                 </div>
               </CTab>
+              <CTab title="Field Analysis">
+          <CRow>
+            <CCol>
+            <h3>Field Analysis</h3>
+            <p>During rule assessment the following values were highlighted as potentially significant values, for the purpose of providing tuning opportunities.</p>
+            <CRow>
+              <CCol>
+                <CCard v-for="field,i in detection.field_metrics" :key="i" style="margin-bottom: 5px;">
+                  <CCardHeader @click="toggleField(field.field)" style="cursor:pointer">
+                    <CRow>
+                      <CCol col=6>
+                        {{ field.field }}
+                      </CCol>
+                      <CCol>
+                        {{ sumDocCount(field.top_ten) }} hits
+                      </CCol>
+                      <CCol>
+                        {{ field.cardinality }} values
+                        </CCol>
+                      <CCol>
+                        <CProgress :value="getTopPercentage(field.top_ten)" :max="100" :showValue="true" :showPercentage="true" color="info"/>
+                      </CCol>
+                    </CRow> </CCardHeader>
+                      <CCollapse :show.sync="show_field[field.field]">
+                        <CCardBody>
+                        <h5>Top 10 Values</h5>
+                        <table style="width: 100%">
+                          <tr><th><label>Value</label></th><th><label>Hits</label></th><th><label>Percentage of Hits</label></th></tr>
+                          <tr v-for="value,i in field.top_ten" :key="i">
+                            <td>{{ value.key }}</td>
+                            <td>{{ value.doc_count }}</td>
+                            <td><CProgress :value="value.pct" :max="100" :showValue="true" :showPercentage="true" color="info"/></td>
+                          </tr>
+                        </table>
+                      </CCardBody>
+                    </CCollapse>
+                  </CCard>
+              </CCol>
+            </CRow>
+            </CCol>
+          </CRow>
+          
+        </CTab>
               </CTabs>
                 </CCol>
               </CRow>
@@ -706,6 +749,7 @@ export default {
       exclusion: {},
       show_exclusion_modal: false,
       exclusion_modal_mode: "Create",
+      show_field: {}
     };
   },
   computed: {
@@ -717,6 +761,28 @@ export default {
     },
   },
   methods: {
+    sumDocCount(top_hits) {
+      let count = 0;
+      for(let i in top_hits) {
+        let hit = top_hits[i]
+        if (hit.doc_count) {
+          count += hit.doc_count
+        }
+      }
+      return count;
+    },
+    getTopPercentage(top_hits) {
+      if(top_hits && top_hits.length > 0) {
+        return top_hits[0]['pct']
+      }
+    },
+    toggleField(field) {
+      if(field in this.show_field) {
+        this.$set(this.show_field, field, !this.show_field[field])
+      } else {
+        this.$set(this.show_field, field, true)
+      }
+    },
     toggleOutputShow(output) {
       // If the output does not have a show property, create it and set it to false
       if (!output.hasOwnProperty("show")) {
