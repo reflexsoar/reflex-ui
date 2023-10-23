@@ -82,6 +82,7 @@ export default {
         },
         getSeverity(severity) {
             switch(severity) {
+                case 0: return "Informational";
                 case 1: return "Low";
                 case 2: return "Medium";
                 case 3: return "High";

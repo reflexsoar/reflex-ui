@@ -52,6 +52,7 @@
           </template>
           <template #severity="{ item }">
             <td>
+              <CButton v-if="item.severity == 0" color="light" size="sm">Informational</CButton>
               <CButton v-if="item.severity == 1" color="light" size="sm">Low</CButton>
               <CButton v-if="item.severity == 2" color="warning" size="sm"
                 >Medium</CButton

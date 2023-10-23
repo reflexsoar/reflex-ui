@@ -191,6 +191,8 @@ export default {
   methods: {
     getSeverityColor(severity) {
       switch (severity) {
+        case 0:
+          return "light";
         case 1:
           return "dark";
         case 2:
@@ -205,6 +207,8 @@ export default {
     },
     getSeverityText(severity) {
       switch (severity) {
+        case 0: 
+          return "Informational";
         case 1:
           return "Low";
         case 2:

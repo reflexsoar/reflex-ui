@@ -984,6 +984,7 @@ const getters = {
   },
   severity_color: state => function (severity) {
     switch (severity) {
+      case 0: return 'light';
       case 1: return 'dark';
       case 2: return 'info';
       case 3: return 'warning';
@@ -2533,6 +2534,58 @@ const actions = {
         .then(resp => {
           commit('save_event', resp.data)
           commit('show_alert', { message: `Successfully updated Event.`, 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  acknowledgeEvent({ commit }, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/event/${uuid}/acknowledge`, method: 'PUT' })
+        .then(resp => {
+          commit('save_event', resp.data)
+          commit('show_alert', { message: `Successfully acknowledged Event.`, 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  acknowledgeEventBySignature({ commit }, {uuid, signature}) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/event/${uuid}/acknowledge?signature=${signature}`, method: 'PUT' })
+        .then(resp => {
+          commit('save_event', resp.data)
+          commit('show_alert', { message: `Successfully acknowledged Event.`, 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  unacknowledgeEventBySignature({ commit }, {uuid, signature}) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/event/${uuid}/unacknowledge?signature=${signature}`, method: 'PUT' })
+        .then(resp => {
+          commit('save_event', resp.data)
+          commit('show_alert', { message: `Successfully unacknowledged Event.`, 'type': 'success' })
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  unacknowledgeEvent({ commit }, uuid ) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/event/${uuid}/unacknowledge`, method: 'PUT' })
+        .then(resp => {
+          commit('save_event', resp.data)
+          commit('show_alert', { message: `Successfully unacknowledge Event.`, 'type': 'success' })
           resolve(resp)
         })
         .catch(err => {

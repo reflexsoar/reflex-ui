@@ -352,10 +352,19 @@ export default {
             this.step = 2;
           });
       } else if (this.mode == "edit") {
+
+        let template = {}
+        template.name = this.template.name
+        template.description = this.template.description
+        template.is_global = this.template.is_global
+        template.organization = this.template.organization
+        template.revision = this.template.revision
+        template.sources = this.template.sources
+        
         this.$store
           .dispatch("updateDataSourceTemplate", {
             uuid: this.uuid,
-            template: this.template,
+            template: template,
           })
           .then((resp) => {
             this.dismiss();
