@@ -1257,6 +1257,7 @@ export default {
         let start_time = ""
         let end_time = ""
         let title__like_filter = null
+        let event_rule_filters = []
         this.select_all = true
         this.selected_count = this.page_data.total_results
         for(let f in this.observableFilters) {
@@ -1314,6 +1315,10 @@ export default {
             title__like_filter = filter.value
           }
 
+          if(filter.filter_type == 'event_rule') {
+            event_rule_filters.push(filter.value)
+          }
+
         }
         this.$store.dispatch('getBulkEvents', {
           signature: signature_filter,
@@ -1326,7 +1331,8 @@ export default {
           start: start_time,
           end: end_time,
           organization: organization_filters,
-          title__like: title__like_filter
+          title__like: title__like_filter,
+          event_rule: event_rule_filters
         }).then(resp => {
           this.selected = [...resp.data.events]
           if (resp.data.organizations === null) {

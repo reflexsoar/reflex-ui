@@ -2299,7 +2299,7 @@ const actions = {
         })
     })
   },
-  getBulkEvents({ commit }, { signature = null, status = [], severity = [], source = [], tags = [], title = [], observables = [], start = null, end = null, organization = [], title__like = null }) {
+  getBulkEvents({ commit }, { signature = null, status = [], severity = [], source = [], tags = [], title = [], observables = [], start = null, end = null, organization = [], title__like = null, event_rule = [] }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/bulk_select_all?q=`
@@ -2334,6 +2334,11 @@ const actions = {
       if (title__like) {
         url = url + `&title__like=${title__like}`
       }
+
+      if (event_rule && event_rule.length > 0) {
+        url = url + `&event_rule=${event_rule}`
+      }
+      
       Axios({ url: url, method: 'GET' })
         .then(resp => {
           resolve(resp)
@@ -3688,11 +3693,15 @@ const actions = {
         })
     })
   },
-  getMitreDataSources({ commit }, { with_coverage= false }) {
+  getMitreDataSources({ commit }, { with_coverage= false, organization=null }) {
     let url = `${BASE_URL}/mitre/data_sources`
 
     if (with_coverage) {
       url += `?with_coverage=${with_coverage}`
+    }
+
+    if (organization) {
+      url += `&organization=${organization}`
     }
     
     return new Promise((resolve, reject) => {
