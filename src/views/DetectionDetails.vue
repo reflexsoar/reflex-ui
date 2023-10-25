@@ -173,19 +173,6 @@
                             </ObjectAttribute>
                           </CCol>
                         </CRow>
-                    <span v-if="detection.from_sigma"
-                      ><b
-                        >Sigma Rule (<span
-                          style="cursor: pointer"
-                          @click="show_sigma = !show_sigma"
-                          >{{ show_sigma ? "Hide" : "Show" }}</span
-                        >)</b
-                      >
-                      <CCollapse :show.sync="show_sigma"
-                        ><br />
-                        <pre>{{ detection.sigma_rule }}</pre>
-                      </CCollapse></span
-                    >
                       </CTab>
                       <CTab title="Schedule">
                         <CRow>
@@ -234,6 +221,14 @@
                         <h3>Email Template</h3>
                         <pre class="query">{{detection.email_template}}</pre>
                       </CTab>
+                      
+        <CTab title="Source Sigma Rule" v-if="detection.from_sigma">
+          <CRow>
+            <CCol>
+              <pre style="white-space: pre-wrap" class="sigma">{{ detection.sigma_rule ? detection.sigma_rule : "" }}</pre>         
+            </CCol>
+          </CRow>
+        </CTab>
                       <CTab title="Rule Quality">
                         <h3>Predicted Hits</h3>
                         <p>The below chart shows how many hits this rule would have generated over the last 30 days.  This is an estimate based on the last time the rule was assessed.  Rules are automatically assessed when they are synchronized from a repository and the query has changed, or if they are edited directly.</p>
@@ -525,6 +520,22 @@
   </div>
 </template>
 <style scoped>
+.sigma {
+  background: #0e0e0e;
+  color: #ccc !important;
+  border: 1px solid rgb(216, 219, 224);
+  border-radius: 0.25rem;
+  box-shadow: inset 0 1px 1px rgb(0 0 21 / 8%);
+  max-height: 100%;
+  overflow-y: auto;
+
+  /* you must provide font-family font-size line-height. Example: */
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 5px;
+  padding-left: 10px;
+}
 .query {
   background: #0e0e0e;
   color: #ccc !important;
