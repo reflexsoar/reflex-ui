@@ -55,6 +55,12 @@
                 content: 'This will allow users to delete their commends',
                 placement: 'right'}">Allow Comment Deletion</label><br/>
                 <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.allow_comment_deletion"/><br><br>
+                <label v-c-tooltip="{
+                content: 'This will allow users to delete their commends',
+                placement: 'right'}">Automatically Close Cases</label><br>
+                
+                <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="settings.case_auto_close"/><br><br>
+                <CInput v-model="settings.case_auto_close_days" label="Case Auto Close Days" placeholder="7"/>
             </CCol>
           </CRow>
           <CRow>
