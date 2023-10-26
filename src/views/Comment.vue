@@ -4,7 +4,7 @@
       ><CRow>
         <CCol col="6">
           <span v-if="!comment.is_closure_comment"
-            ><b>{{ comment.created_by.username }}</b
+            ><b>{{comment.created_by.username ? comment.created_by.username : 'System'}}</b
             ><span v-if="comment.other_organization_name"
               >&nbsp;<CBadge class="tag" size="xs" color="secondary">{{
                 comment.other_organization_name
@@ -14,7 +14,7 @@
             <span v-if="comment.edited"><i>edited</i></span></span
           >
           <span v-else
-            ><b>{{ comment.created_by.username }}</b
+            ><b>{{comment.created_by.username ? comment.created_by.username : 'System'}}</b
             ><span v-if="comment.other_organization_name"
               >&nbsp;<CBadge class="tag" size="xs" color="secondary">{{
                 comment.other_organization_name
