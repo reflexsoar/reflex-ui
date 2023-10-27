@@ -8,7 +8,7 @@
             >&nbsp;<span class="observable-value" @click="copyToClipboard(observable.value, $event)" v-c-tooltip="{
               'content': 'Click to Copy'}">{{
               observable.value | truncate
-            }}</span></CCol
+            }}<span id="copy-confirm"></span></span></CCol
           >
           <CCol col="1"
             ><CDropdown
@@ -429,13 +429,17 @@ export default {
         }, 1000);
     },
     copyToClipboard(text, event) {
-        navigator.clipboard.writeText(text);
-        // Set the text of the button to "Copied!"
-        event.target.innerText = "Copied!";
-        // Reset the text of the button after 2 seconds
+
+        // Get the copy-confirm element and set its innerText to Copied to 2s
+        // after the copy button is clicked
+        let copyConfirm = document.getElementById("copy-confirm");
+        copyConfirm.innerText = " - Copied!";
         setTimeout(() => {
-            event.target.innerText = text;
+            copyConfirm.innerText = "";
         }, 1000);
+
+        navigator.clipboard.writeText(text);
+        
     }
   },
   computed: {
