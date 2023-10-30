@@ -13,7 +13,11 @@
                   class="tag tag-clickable"
                   color="secondary"
                   style="margin-left: 2px"
-                  @click="
+                  @click.alt.exact="selectFilter({
+                      type: type,
+                      value: value,
+                    }, true)"
+                  @click.exact="
                     selectFilter({
                       type: type,
                       value: value,
@@ -336,16 +340,31 @@ export default {
       this.search_text = "";
       this.selectFilter(filter);
     },
+    filterSelected(filter) {
+      if (filter.type in this.selected_filters) {
+        if (this.selected_filters[filter.type].includes(filter.value)) {
+          return true;
+        }
+      }
+      return false;
+    },
     selectFilter(filter, filter_out = false) {
       // If the filter is already selected, remove it
       let allow_multiple = ['status','status__not', 'tags__not', 'tags', 'tactics','techniques','organization','warnings','warnings__not','rule_type','severity'];
-      let supported_for_not = ['status', 'warnings', 'tags']
+      let supported_for_not = ['status', 'warnings', 'tags', 'status__not', 'warnings__not', 'tags__not']
 
       if(filter_out) {
         if(!supported_for_not.includes(filter.type)) {
           return;
         }
-        filter.type = filter.type + '__not';
+        if(this.filterSelected(filter)) {
+          this.selectFilter(filter);
+        }
+        if(filter.type.endsWith('__not')) {
+          filter.type = filter.type.replace('__not', '');
+        } else {
+          filter.type = filter.type + '__not';
+        }
       }
 
       if (filter.type in this.selected_filters) {
