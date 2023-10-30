@@ -159,12 +159,16 @@
               >
                 <CRow v-for="k in filters[title]" :key="k.value">
                   <CCol
-                    @click="
+                  @click.alt.exact="selectFilter({
+                      type: title,
+                      value: k.value,
+                    }, true)"
+                    @click.exact="
                       selectFilter({
                         type: title,
                         value: k.value,
                       })
-                    "
+                    "                    
                     style="
                       cursor: pointer;
                       overflow: hidden;
@@ -304,6 +308,12 @@ export default {
       if (type in display_names) {
         return display_names[type];
       }
+
+      if (type.endsWith("__not")) {
+        type = type.replace("__not", "");
+        type = "NOT " + type;
+        return type
+      }
       return type;
     },
     applyFreeSearch() {
@@ -326,9 +336,17 @@ export default {
       this.search_text = "";
       this.selectFilter(filter);
     },
-    selectFilter(filter) {
+    selectFilter(filter, filter_out = false) {
       // If the filter is already selected, remove it
-      let allow_multiple = ['status','tactics','techniques','organization','warnings','rule_type','severity'];
+      let allow_multiple = ['status','status__not', 'tags__not', 'tags', 'tactics','techniques','organization','warnings','warnings__not','rule_type','severity'];
+      let supported_for_not = ['status', 'warnings', 'tags']
+
+      if(filter_out) {
+        if(!supported_for_not.includes(filter.type)) {
+          return;
+        }
+        filter.type = filter.type + '__not';
+      }
 
       if (filter.type in this.selected_filters) {
         if (this.selected_filters[filter.type].includes(filter.value)) {
@@ -351,7 +369,6 @@ export default {
           this.$set(this.selected_filters, filter.type, []);
         }
         
-        
         if(!allow_multiple.includes(filter.type)) {
           this.$set(this.selected_filters, filter.type, [filter.value]);
         } else {
@@ -360,6 +377,7 @@ export default {
 
       }
       this.$store.commit("update_selected_detection_filters", this.selected_filters);
+      console.log(this.selected_filters);
       this.getFilters();
 
       let filters = this.selected_filters;
