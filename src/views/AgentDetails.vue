@@ -177,7 +177,7 @@ export default {
       group_list: [],
       selected: [],
       selected_groups: [],
-      roles: ["detector", "poller", "runner", "mitre"],
+      roles: ["detector", "poller", "runner", "mitre", "fim"],
       selected_roles: [],
       loading: true,
       cardCollapse: true,

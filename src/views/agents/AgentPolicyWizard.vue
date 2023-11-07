@@ -441,6 +441,84 @@
                 </CCol>
               </CRow>
           </CTab>
+          <CTab title="File Integrity Monitoring"
+          v-bind:disabled="policy.roles && !policy.roles.includes('fim')">
+            <CRow>
+              <CCol>
+                <CInput
+                  v-model.number="policy.fim_config.max_parallel_rules"
+                  label="Concurrent Rules"
+                  placeholder="Enter the number of concurrent rules"
+                  description="The number of concurrent rules the FIM engine will process"
+                  :isValid="
+                    validate(
+                      policy.fim_config.max_parallel_rules,
+                      validations.max_parallel_rules
+                    )
+                  "
+                  :invalidFeedback="validations.max_parallel_rules.message"
+                />
+              </CCol>
+              <CCol>
+                <CSelect
+                  :value.sync="policy.fim_config.logging_level"
+                  label="Log Level"
+                  placeholder="Select a logging level"
+                  :options="log_levels"
+                />
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol>
+                <CInput
+                  v-model.number="policy.fim_config.max_cpu_time"
+                  label="Max CPU Time"
+                  placeholder="Enter a time in seconds"
+                  description="Tells the host how much CPU time to give the FIM process.  Higher numbers may impact system performance."
+                  :isValid="
+                    validate(
+                      policy.fim_config.max_cpu_time,
+                      validations.max_cpu_time
+                    )
+                  "
+                  :invalidFeedback="validations.max_cpu_time.message"
+                />
+                </CCol>
+                <CCol>
+                <CInput
+                  v-model.number="policy.fim_config.max_memory"
+                  label="Max Memory"
+                />
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol>
+                  <CInput
+                    v-model.number="policy.fim_config.max_cache_db_size"
+                    label="Max Cache DB Size"
+                    placeholder="Enter a size in Mb"
+                    description="The maximum size of the FIM cache database in Mb"
+                  />
+                </CCol>
+                <CCol>
+                  <CInput
+                    v-model.number="policy.fim_config.max_cache_db_age"
+                    label="Max Cache DB Age"
+                    placeholder="Enter a time in hours"
+                    description="The maximum age of the FIM cache database in hours"
+                  />
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol>
+                  <label>Alert on Cache Missing</label><br>
+                    <CSwitch :checked.sync="policy.fim_config.alert_on_cache_missing" label-on="Yes" label-of="No" color="success"/><br>
+                  <span class="text-muted"><small>If the FIM cache goes missing, fire an alert for further investigation.</small></span>
+                </CCol>
+                </CRow>
+                  
+            {{ policy.fim_config }}
+          </CTab>
           <CTab title="Review">
             <CRow>
               <CCol>
@@ -602,6 +680,11 @@ export default {
         {
           label: "MITRE Mapper",
           value: "mitre",
+        },
+        {
+          label: "File Integrity Monitoring",
+          value: "fim",
+        
         }],
       log_levels: ["INFO", "ERROR", "WARNING", "DEBUG"],
       tags: [],
@@ -716,6 +799,20 @@ export default {
           required: true,
           type: "number",
           message: "Must be between 1 and 86400"
+        },
+        max_parallel_rules: {
+          min: 1,
+          max: 25,
+          required: true,
+          type: "number",
+          message: "Must be between 1 and 25"
+        },
+        max_cpu_time: {
+          min: 5,
+          max: 60,
+          required: true,
+          type: "number",
+          message: "Must be between 5 and 60"
         }
       },
     };

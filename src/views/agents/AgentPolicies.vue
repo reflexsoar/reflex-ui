@@ -116,64 +116,8 @@ export default {
           "runner",
           "detector",
           "poller",
-          "mitre"
-        ],
-        "health_check_interval": 30,
-        "logging_level": "ERROR",
-        "max_intel_db_size": 0,
-        "disable_event_cache_check": false,
-        "event_realert_ttl": 3600,
-        "poller_config": {
-          "concurrent_inputs": 5,
-          "graceful_exit": true,
-          "logging_level": "ERROR",
-          "max_input_attempts": 3,
-          "signature_cache_ttl": 3600
-        },
-        "detector_config": {
-          "concurrent_rules": 10,
-          "graceful_exit": true,
-          "catchup_period": 60,
-          "wait_interval": 30,
-          "max_threshold_events": 1000,
-          "logging_level": "ERROR"
-        },
-        "runner_config": {
-          "concurrent_actions": 10,
-          "graceful_exit": true,
-          "wait_interval": 30,
-          "plugin_poll_interval": 30,
-          "logging_level": "ERROR"
-        },
-        "mitre_mapper_config": {
-          'concurrent_inputs': 10,
-          'graceful_exit': true,
-          'mapping_refresh_interval': 60,
-          'assessment_days': 14,
-          'logging_level': 'ERROR'
-        },
-        "tags": [],
-        "priority": 1,
-      },
-      loading: false,
-      small: false,
-      modal_mode: 'Create'
-    };
-  },
-  created() {
-    this.listPolicies();
-  },
-  methods: {
-    newAgentPolicy() {
-      this.modal_mode = "Create";
-      this.agent_policy = {
-        "name": "",
-        "description": null,
-        "roles": [
-          "runner",
-          "detector",
-          "poller",
-          "mitre"
+          "mitre",
+          "fim"
         ],
         "health_check_interval": 30,
         "logging_level": "ERROR",
@@ -209,6 +153,87 @@ export default {
           'assessment_days': 14,
           'logging_level': 'ERROR',
           'timeout': 30
+        },
+        "fim_config": {
+          "max_parallel_rules": 10,
+          "max_cpu_time": 30,
+          "max_memory": 256,
+          "max_cache_db_size": 100,
+          "max_cache_db_age": 72,
+          "alert_on_cache_missing": false,
+          "wait_interval": 30,
+          "logging_level": 'ERROR',
+          "graceful_exit": true
+        },
+        "tags": [],
+        "priority": 1,
+      },
+      loading: false,
+      small: false,
+      modal_mode: 'Create'
+    };
+  },
+  created() {
+    this.listPolicies();
+  },
+  methods: {
+    newAgentPolicy() {
+      this.modal_mode = "Create";
+      this.agent_policy = {
+        "name": "",
+        "description": null,
+        "roles": [
+          "runner",
+          "detector",
+          "poller",
+          "mitre",
+          "fim"
+        ],
+        "health_check_interval": 30,
+        "logging_level": "ERROR",
+        "max_intel_db_size": 0,
+        "disable_event_cache_check": false,
+        "event_realert_ttl": 3600,
+        "poller_config": {
+          "concurrent_inputs": 5,
+          "graceful_exit": true,
+          "logging_level": "ERROR",
+          "max_input_attempts": 3,
+          "signature_cache_ttl": 3600
+        },
+        "detector_config": {
+          "concurrent_rules": 10,
+          "graceful_exit": true,
+          "catchup_period": 60,
+          "wait_interval": 30,
+          "max_threshold_events": 1000,
+          "logging_level": "ERROR"
+        },
+        "runner_config": {
+          "concurrent_actions": 10,
+          "graceful_exit": true,
+          "wait_interval": 30,
+          "plugin_poll_interval": 30,
+          "logging_level": "ERROR"
+        },
+        "mitre_mapper_config": {
+          'concurrent_inputs': 10,
+          'graceful_exit': true,
+          'mapping_refresh_interval': 60,
+          'assessment_days': 14,
+          'logging_level': 'ERROR',
+          'timeout': 30
+        },
+        "fim_config": {
+          "max_parallel_rules": 10,
+          "max_cpu_time": 30,
+          "max_memory": 256,
+          "max_cache_db_size": 100,
+          "max_cache_db_age": 72,
+          "alert_on_cache_missing": false,
+          "wait_interval": 30,
+          "logging_level": 'ERROR',
+          "graceful_exit": true
         },
         "tags": [],
         "priority": 1,
