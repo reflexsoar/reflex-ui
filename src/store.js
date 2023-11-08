@@ -157,7 +157,9 @@ const state = {
   data_source_templates: [],
   schedules: [],
   release_notes: {},
-  previous_versions: []
+  previous_versions: [],
+  fim_rule: {},
+  fim_rules: []
 }
 
 const mutations = {
@@ -169,10 +171,22 @@ const mutations = {
     state.schedules = schedules
   },
   add_schedule(state, schedule) {
-    if(state.schedules.length == 0) {
+    if (state.schedules.length == 0) {
       state.schedules = []
     }
     state.schedules.push(schedule)
+  },
+  add_fim_rule(state, rule) {
+    state.fim_rules = [...state.fim_rules, rule]
+  },
+  update_fim_rule(state, rule) {
+    state.fim_rules = [...state.fim_rules.filter(r => r.uuid != rule.uuid), rule]
+  },
+  remove_fim_rule(state, uuid) {
+    state.fim_rules = state.fim_rules.filter(r => r.uuid != uuid)
+  },
+  save_fim_rules(state, rules) {
+    state.fim_rules = rules
   },
   update_schedule(state, schedule) {
     state.schedules = [...state.schedules.filter(s => s.uuid != schedule.uuid), schedule]
@@ -184,7 +198,7 @@ const mutations = {
     state.data_source_templates = templates
   },
   add_data_source_template(state, template) {
-    if(state.data_source_templates.length == 0) {
+    if (state.data_source_templates.length == 0) {
       state.data_source_templates = []
     }
     state.data_source_templates.push(template)
@@ -1482,7 +1496,7 @@ const actions = {
         })
     })
   },
-  getDetectionFilters({ commit }, { warnings = [], warnings__not=[], organization__not = [], status__not = [], tags__not = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, organization = [], status = [], tags = [], techniques = [], tactics = [], repository = [], active = [], assess_rule = [], severity = [], repo_synced = true }) {
+  getDetectionFilters({ commit }, { warnings = [], warnings__not = [], organization__not = [], status__not = [], tags__not = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, organization = [], status = [], tags = [], techniques = [], tactics = [], repository = [], active = [], assess_rule = [], severity = [], repo_synced = true }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}&repository=${repository}&status=${status}`
@@ -1557,7 +1571,7 @@ const actions = {
         })
     })
   },
-  getDetectionsByFilter({ commit }, { warnings = [], warnings__not = [],  organization__not = [], status__not = [], tags__not = [],  min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
+  getDetectionsByFilter({ commit }, { warnings = [], warnings__not = [], organization__not = [], status__not = [], tags__not = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
 
@@ -1600,7 +1614,7 @@ const actions = {
         url = url + `&tags=${tags}`
       }
 
-      if(tags__not.length > 0) {
+      if (tags__not.length > 0) {
         url = url + `&tags__not=${tags__not}`
       }
 
@@ -1626,7 +1640,7 @@ const actions = {
 
       if (warnings__not.length > 0) {
         url = url + `&warnings__not=${warnings__not}`
-      }      
+      }
 
       if (status__not.length > 0) {
         url = url + `&status__not=${status__not}`
@@ -1655,7 +1669,7 @@ const actions = {
         })
     })
   },
-  getDetections({ commit }, { warnings = [], warnings__not = [], organization__not = [], status__not = [], tags__not = [],  min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
+  getDetections({ commit }, { warnings = [], warnings__not = [], organization__not = [], status__not = [], tags__not = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}&repository=${repository}&status=${status}`
@@ -1982,7 +1996,7 @@ const actions = {
         })
     })
   },
-  getDetection({ commit }, {uuid, event = null}) {
+  getDetection({ commit }, { uuid, event = null }) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection/${uuid}`
 
@@ -2384,7 +2398,7 @@ const actions = {
       if (event_rule && event_rule.length > 0) {
         url = url + `&event_rule=${event_rule}`
       }
-      
+
       Axios({ url: url, method: 'GET' })
         .then(resp => {
           resolve(resp)
@@ -2605,7 +2619,7 @@ const actions = {
         })
     })
   },
-  acknowledgeEventBySignature({ commit }, {uuid, signature}) {
+  acknowledgeEventBySignature({ commit }, { uuid, signature }) {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/event/${uuid}/acknowledge?signature=${signature}`, method: 'PUT' })
         .then(resp => {
@@ -2618,7 +2632,7 @@ const actions = {
         })
     })
   },
-  unacknowledgeEventBySignature({ commit }, {uuid, signature}) {
+  unacknowledgeEventBySignature({ commit }, { uuid, signature }) {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/event/${uuid}/unacknowledge?signature=${signature}`, method: 'PUT' })
         .then(resp => {
@@ -2631,7 +2645,7 @@ const actions = {
         })
     })
   },
-  unacknowledgeEvent({ commit }, uuid ) {
+  unacknowledgeEvent({ commit }, uuid) {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/event/${uuid}/unacknowledge`, method: 'PUT' })
         .then(resp => {
@@ -3739,7 +3753,7 @@ const actions = {
         })
     })
   },
-  getMitreDataSources({ commit }, { with_coverage= false, organization=null }) {
+  getMitreDataSources({ commit }, { with_coverage = false, organization = null }) {
     let url = `${BASE_URL}/mitre/data_sources`
 
     if (with_coverage) {
@@ -3749,7 +3763,7 @@ const actions = {
     if (organization) {
       url += `&organization=${organization}`
     }
-    
+
     return new Promise((resolve, reject) => {
       Axios({ url: url, method: 'GET' })
         .then(resp => {
@@ -4746,7 +4760,7 @@ const actions = {
         })
     })
   },
-  getDataSourceTemplates({ commit }, organization=null) {
+  getDataSourceTemplates({ commit }, organization = null) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/data_source_template`
 
@@ -4812,9 +4826,9 @@ const actions = {
           url += `?active=${active}`
           params = true
         }
-          
+
       }
-      
+
       if (organization) {
         if (params) {
           url += `&organization=${organization}`
@@ -4877,6 +4891,68 @@ const actions = {
         .then(resp => {
           commit('save_release_notes', resp.data)
           resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getFimRules({ commit }, { organization = null }) {
+
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/fim`
+
+      if (organization) {
+        url += `?organization=${organization}`
+      }
+
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_fim_rules', resp.data.rules)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  createFIMRule({ commit }, data) {
+      
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/fim`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_fim_rule', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateFIMRule({ commit }, { uuid, data }) {
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/fim/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_fim_rule', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  deleteFIMRule({ commit }, { uuid }) {
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/fim/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_fim_rule', uuid)
+          resolve(resp)
+
         })
         .catch(err => {
           reject(err)

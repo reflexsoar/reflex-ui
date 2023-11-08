@@ -135,7 +135,8 @@ import {
   cilTransfer,
   cilDial,
   cilApplications,
-  cilEye
+  cilEye,
+  cilFolder
 } from '@coreui/icons'
 import { logo } from './logo'
 
@@ -245,7 +246,8 @@ export const iconsSet = Object.assign(
     cilTransfer,
     cilDial,
     cilApplications,
-    cilEye
+    cilEye,
+    cilFolder
   },
   {
     cifUs,

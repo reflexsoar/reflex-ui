@@ -16,6 +16,7 @@
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt">
         <CSidebarNavItem name="Detections" to="/detections"></CSidebarNavItem>
         <CSidebarNavItem name="MITRE ATT&CK" to="/mitre_coverage" :badge="beta_badge"></CSidebarNavItem>
+        <CSidebarNavItem name="File Integrity" to="/fim" :badge="beta_badge" v-if="this.$store.getters.user_has_permission('view_fim_rules')"></CSidebarNavItem>
       </CSidebarNavDropdown>
       <!--<CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt" to="/detections" :badge="beta_badge"></CSidebarNavItem>-->
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_events') || this.$store.getters.user_has_permission('view_event_rules')" name='Events' icon="cil-bell">

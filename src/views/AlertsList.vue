@@ -213,7 +213,7 @@
             </CCardBody>
             <CCardFooter style="background-color:#f0f0f0;">
               <CRow>
-                <CCol col="3">
+                <CCol col="2">
                 <CButtonGroup>
                     <!--<CButton v-if="!event.acknowledged" aria-label="Acknowlege" @click="ackEvent(event.uuid)" size="sm" color="success" v-c-tooltip="{'content':'Acknowledge Event','placement':'bottom'}"><CIcon name="cilCheck"/></CButton>
                     <CButton v-if="event.acknowledged" aria-label="Unacknowledge" @click="unackEvent(event.uuid)" size="sm" color="warning" v-c-tooltip="{'content':'Acknowledge Event','placement':'bottom'}"><CIcon name="cilX"/></CButton>
@@ -257,8 +257,10 @@
                   
                   
                 </CCol>
-                <CCol col="9" class="text-right">
+                <CCol col="10" class="text-right">
                   <small>
+                    <CBadge class="tag" color="dark" v-if="event.category">{{ event.category ? event.category : 'Uncategorized' }}</CBadge>
+                    <span class="separator">|</span>
                     <CBadge @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':event.severity})" class="tag tag-clickable" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CBadge>
                     <span class="separator" v-if="event.risk_score">|</span><CBadge v-if="event.risk_score" class="tag tag-clickable" :color="getSeverityColor(event.severity)" size="sm">Risk: {{event.risk_score}}</CBadge>
                     <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CBadge class="tag tag-clickable" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurrences <span v-if="event.related_events_count > 0"></span></CBadge>                    
