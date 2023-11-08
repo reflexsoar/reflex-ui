@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CRow class="page-heading">
+    <CRow class="page-heading page-heading-no-nav">
       <CCol>
         <h2>File Integrity Monitoring</h2>
         <CAlert :show.sync="alert.show" :color="alert.color" :fade="false" closeButton>
