@@ -169,6 +169,9 @@ export default {
     disableRule(uuid) {
       this.$store.dispatch("updateFIMRule", { uuid: uuid, data: { active: false } });
     },
+    deleteRule(uuid) {
+        this.$store.dispatch("deleteFIMRule", { uuid: uuid });
+    }
   },
 };
 </script>
