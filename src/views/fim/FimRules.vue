@@ -38,7 +38,7 @@
             :fields="columns"
             :responsive="false"
             pagination
-            :items-per-page="3"
+            :items-per-page="10"
             :sorter="{ external: true, resetable: true }"
           >
             <template #name="{ item }">
