@@ -956,6 +956,9 @@ export default {
       return rule_text;
     },
     highlighter(code) {
+      if (languages.rql == undefined) {
+        return highlight(code, languages.python);
+      }
       return highlight(code, languages.rql);
     },
     test_query() {
