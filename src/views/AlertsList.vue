@@ -681,14 +681,27 @@ export default {
         }
       },
       startDismissEvent() {
-        this.loadCloseReasons()
-        this.error = false
-        this.error_message = ""
-        this.dismissalComment = ""
-        this.dismissalReason = null
-        this.tuningAdviceToggle = false
-        this.tuningAdvice = ''
-        this.dismissEventModal = true
+        let organization = ""
+        if(this.target_event) {
+          organization = this.target_event.organization
+        }
+
+        if(this.selectedOrgLength() == 1) {
+          organization = Object.keys(this.selected_orgs)[0]
+        }
+
+        this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
+          this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid, description: reason.description}})
+          this.error = false
+          this.error_message = ""
+          this.dismissalComment = ""
+          this.dismissalReason = null
+          this.tuningAdviceToggle = false
+          this.tuningAdvice = ''
+          this.dismissEventModal = true
+        })
+        //this.loadCloseReasons()
+        
       },
       resetDismissModal() {
         this.dismissEventModal = false
@@ -801,7 +814,8 @@ export default {
           event = event[0]
         }
         this.target_event = event
-        this.loadCloseReasons()
+        
+        //this.loadCloseReasons()
         this.selected = [uuid]
         this.selected_count = this.selected.length
         
@@ -809,17 +823,30 @@ export default {
         this.selected_orgs[event.organization] = {
           'events': [uuid]
         }
+        
         this.related_events_count = this.getRelatedCount(event.signature)
         if(this.related_events_count > 0) {
           this.selected_count = this.related_events_count
         }
-        this.dismissalReason = null
-        this.dismissalComment = ""
-        this.tuningAdviceToggle = false
-        this.tuningAdvice = ''
-        this.error = false
-        this.error_message = ""
-        this.dismissEventModal = true
+
+        let organization = ""
+        if(this.target_event) {
+          organization = this.target_event.organization
+        }
+
+        if(this.selectedOrgLength() == 1) {
+          organization = Object.keys(this.selected_orgs)[0]
+        }
+
+        this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
+          this.dismissalReason = null
+          this.dismissalComment = ""
+          this.tuningAdviceToggle = false
+          this.tuningAdvice = ''
+          this.error = false
+          this.error_message = ""
+          this.dismissEventModal = true
+        })
       },
       deleteEvent() {
         this.dismiss_submitted = true
