@@ -11,11 +11,18 @@
         </div>
       </CCol>
     </CRow>
-    <CRow v-if="!loading">
+    <CRow v-if="!loading"  class="page-heading">
       <CCol>
-        <CAlert :show.sync="alert" color="success" closeButton>
-          {{ alert_message }}
-        </CAlert>
+        <h1>{{ agent.name }}</h1>
+      </CCol>
+    </CRow>
+    <CTabs
+        addNavWrapperClasses="page-nav"
+        addTabClasses="page-nav-tab-body"
+        addNavClasses="page-nav-tab"
+        v-if="!loading"
+      >
+        <CTab title="Configuration">
         <CCard class="shadow-sm bg-white rounded">
           <CCardHeader>
             <CRow>
@@ -134,6 +141,47 @@
             </CRow>
           </CCardFooter>
         </CCard>
+        </CTab>
+        <CTab title="Listening Ports" v-if="agent.host_information && agent.host_information.listening_ports.length > 0">
+          <CRow>
+            <CCol>
+              <CCard>
+                <CDataTable
+                  :items="agent.host_information.listening_ports"
+                  :fields="listening_port_fields"
+                  :responsive="false"
+                  :items-per-page="10"
+                  :sorter="{ external: false, resetable: true }"
+                  table-filter
+                >
+                <template #parent_process_name="{item}">
+                  <td>
+                    <span>{{ item.parent_process_name }}</span>
+                    <br>
+                    <span class="text-muted"><CBadge color="secondary " class="tag tag-sm">Path</CBadge>&nbsp;<small>{{ item.parent_process_path }}</small></span><br>
+                    <span class="text-muted"><CBadge color="secondary " class="tag tag-sm">User</CBadge>&nbsp;<small>{{ item.parent_process_user }}</small></span>
+                  </td>
+                </template>
+                <template #process_name="{item}">
+                  <td>
+                    <span>{{ item.process_name }}</span><br>
+                    <span class="text-muted"><CBadge color="secondary " class="tag tag-sm">Path</CBadge>&nbsp;<small>{{ item.process_path }}</small></span><br>
+                    <span class="text-muted"><CBadge color="secondary " class="tag tag-sm">User</CBadge>&nbsp;<small>{{ item.process_user }}</small></span>
+                  </td>
+                </template>
+
+                </CDataTable>
+              </CCard>
+              </CCol>
+              </CRow>
+        </CTab>
+    </CTabs>
+    <CRow v-if="!loading">
+      <CCol>
+        <CAlert :show.sync="alert" color="success" closeButton>
+          {{ alert_message }}
+        </CAlert>
+        
         <CModal
           title="Delete Agent"
           :closeOnBackdrop="false"
@@ -163,11 +211,29 @@
   </div>
 </template>
 
+<style scoped>
+.path {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.path:hover {
+  display: block;
+}
+</style>
+
 <script>
 import { mapState } from "vuex";
 import { vSelect } from "vue-select";
+import ObjectAttribute from './components/ObjectAttribute.vue'
 export default {
   name: "InputDetails",
+  components: {
+    ObjectAttribute
+  },
   computed: mapState(["input_list"]),
   data() {
     return {
@@ -178,6 +244,13 @@ export default {
       selected: [],
       selected_groups: [],
       roles: ["detector", "poller", "runner", "mitre", "fim"],
+      listening_port_fields: [
+        'port',
+        'pid',
+        'process_name',
+        'parent_pid',
+        'parent_process_name'
+      ],
       selected_roles: [],
       loading: true,
       cardCollapse: true,
