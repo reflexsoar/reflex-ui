@@ -69,7 +69,7 @@
             </p>
           </CCol>
         </CRow>
-        <CRow v-for="(path, index) in paths">
+        <CRow v-for="(path, index) in paths" :key="index">
           <CCol col>
             <CInput
               v-model="paths[index]"
@@ -113,7 +113,7 @@
             ><br />
             <h5>Exclude Patterns</h5>
             <p>Enter one or more regular expressions to exclude from monitoring.</p>
-            <CRow v-for="(pattern, index) in exclude_patterns">
+            <CRow v-for="(pattern, index) in exclude_patterns" :key="index">
               <CCol>
                 <CInput
                   v-model="exclude_patterns[index]"
@@ -140,7 +140,7 @@
             ><br />
             <h5>Include Patterns</h5>
             <p>Enter one or more regular expressions to include in monitoring.</p>
-            <CRow v-for="(pattern, index) in include_patterns">
+            <CRow v-for="(pattern, index) in include_patterns" :key="index">
               <CCol>
                 <CInput
                   v-model="include_patterns[index]"
