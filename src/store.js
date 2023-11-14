@@ -2085,9 +2085,15 @@ const actions = {
         })
     })
   },
-  getAgent({ commit }, uuid) {
+  getAgent({ commit }, {uuid, include_host_info = false}) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/agent/${uuid}`, method: 'GET' })
+      let url = `${BASE_URL}/agent/${uuid}`
+
+      if (include_host_info) {
+        url += `?include_host_info=true`
+      }
+
+      Axios({ url: url, method: 'GET' })
         .then(resp => {
           commit('save_agent', resp.data)
           resolve(resp)

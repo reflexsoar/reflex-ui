@@ -15,6 +15,27 @@
       <CCol>
         <h1>{{ agent.name }}</h1>
       </CCol>
+      <CCol>
+        <span v-if="propertyExistsAndNotNull(agent.host_information, 'system')">
+          <ObjectAttribute 
+            label="Operating System"
+            :value="agent.host_information.system.os_name"
+          />
+        </span>
+      </CCol>
+      <CCol>
+        
+          <ObjectAttribute
+            label="Last Boot"
+            :value="agent.host_information.last_reboot | moment('LLLL')"
+          />
+          </CCol>
+      <CCol>
+        <ObjectAttribute
+          label="Last Logged On User"
+          :value="last_logged_on_user(agent.host_information.users)"
+        />
+      </CCol>
     </CRow>
     <CTabs
         addNavWrapperClasses="page-nav"
@@ -142,7 +163,74 @@
           </CCardFooter>
         </CCard>
         </CTab>
-        <CTab title="Listening Ports" v-if="agent.host_information && agent.host_information.listening_ports.length > 0">
+        <CTab title="Services" v-if="propertyExistsAndNotNull(agent.host_information, 'services')">
+          <CCard>
+            <CDataTable
+              :items="agent.host_information.services"
+              :fields="service_columns"
+              :responsive="false"
+              :items-per-page="25"
+              :sorter="{ external: false, resetable: true }"
+              column-filter
+              pagination
+              >
+                <template #name="{item}">
+                  <td>
+                    <b>{{ item.display_name}} ({{ item.name }})</b><br>
+                    <small class="text-muted">{{ item.description }}</small>
+                  </td>
+                </template>
+                <template #status="{item}">
+                  <td>
+                    <CBadge v-if="item.status == 'running'" color="success" class="tag">running</CBadge>
+                    <CBadge v-if="item.status == 'stopped'" color="danger" class="tag">stopped</CBadge>
+                    <CBadge v-if="item.status == 'paused'" color="warning" class="tag">paused</CBadge>
+                    </td>
+                </template>
+                <template #start_type="{item}">
+                  <td>
+                    <CBadge color="secondary" class="tag">{{ item.start_type }}</CBadge>
+                    </td>
+                </template>
+              </CDataTable>
+          </CCard>
+        </CTab>
+        <CTab title="Installed Software" v-if="propertyExistsAndNotNull(agent.host_information, 'installed_software')">
+          <CRow>
+            <CCol>
+              <h3 class="page-sub-header">Installed Software</h3>
+            </CCol>
+            <CCol col=3>
+              <MultiPicker
+                label="Vendor"
+                          :options="vendors"
+                          :value.sync="selected_vendors"
+                          option_key="value"
+                          option_label="label"
+                        />
+            </CCol>
+          </CRow>
+          <CCard>
+            <CDataTable
+              :items="filtered_software"
+              :fields="software_columns"
+              :responsive="false"
+              :items-per-page="25"
+              :sorter="{ external: false, resetable: true }"
+              column-filter
+              pagination
+            >
+            <template #name="{item}">
+              <td>
+                <b>{{ item.name }}</b>
+                <br>
+                <small class="text-muted"><b>Install Date:</b> {{ formattedInstallDate(item.install_date )}}</small>
+              </td>
+              </template>
+            </CDataTable>
+          </CCard>
+        </CTab>
+        <CTab title="Listening Ports" v-if="propertyExistsAndNotNull(agent.host_information, 'listening_ports')">
           <CRow>
             <CCol>
               <CCard>
@@ -150,9 +238,11 @@
                   :items="agent.host_information.listening_ports"
                   :fields="listening_port_fields"
                   :responsive="false"
-                  :items-per-page="10"
+                  :items-per-page="25"
                   :sorter="{ external: false, resetable: true }"
                   table-filter
+                  pagination
+
                 >
                 <template #parent_process_name="{item}">
                   <td>
@@ -174,6 +264,14 @@
               </CCard>
               </CCol>
               </CRow>
+        </CTab>
+        <CTab title="Advanced View">
+          <h3 class="page-sub-heading">JSON View</h3>
+          <CCard>
+            <CCardBody style="overflow: auto; max-height: 600px">
+              <pre>{{ agent.host_information }}</pre>
+            </CCardBody>
+          </CCard>
         </CTab>
     </CTabs>
     <CRow v-if="!loading">
@@ -229,12 +327,50 @@
 import { mapState } from "vuex";
 import { vSelect } from "vue-select";
 import ObjectAttribute from './components/ObjectAttribute.vue'
+import MultiPicker from './components/MultiPicker.vue'
 export default {
   name: "InputDetails",
   components: {
-    ObjectAttribute
+    ObjectAttribute,
+    MultiPicker
   },
-  computed: mapState(["input_list"]),
+  computed: {
+    ...mapState(["input_list"]),
+    vendors: function() {
+      if(this.propertyExistsAndNotNull(this.agent.host_information, 'installed_software')) {
+        let vendors = this.agent.host_information.installed_software.map(function(item) {
+          if (item.vendor === null) { return 'Unknown' } else {
+            return item.vendor
+          }
+        })
+
+        vendors =  [... new Set(vendors)]
+        // Deduplicate
+        return vendors.map(function(item) {
+          return {label: item, value: item}
+        })
+      }
+      return []
+    },
+    filtered_software: function() {
+      if(this.propertyExistsAndNotNull(this.agent.host_information, 'installed_software')) {
+        let software_list = []
+        for (const item in this.agent.host_information.installed_software) {
+          let software = this.agent.host_information.installed_software[item]
+          if (this.selected_vendors.length > 0) {
+            if (this.selected_vendors.includes(software.vendor)) {
+              software_list.push(software)
+            }
+          } else {
+            software_list.push(software)
+          }
+        }
+        return software_list
+      }
+      return []
+      
+    }
+  },
   data() {
     return {
       uuid: this.$route.params.uuid,
@@ -251,6 +387,9 @@ export default {
         'parent_pid',
         'parent_process_name'
       ],
+      service_columns: ['name',  {key: 'binpath', label: 'Path', _style: "width: 10%"}, 'status', 'start_type'],
+      software_columns: ['name', 'version', 'vendor', 'install_source'],
+      selected_vendors: [],
       selected_roles: [],
       loading: true,
       cardCollapse: true,
@@ -272,7 +411,7 @@ export default {
     this.$store.dispatch("getAgentGroups", {}).then((resp) => {
       this.group_list = this.$store.getters.agent_groups;
     });
-    this.$store.dispatch("getAgent", this.$route.params.uuid).then((resp) => {
+    this.$store.dispatch("getAgent", {uuid: this.$route.params.uuid, include_host_info: true}).then((resp) => {
       this.agent = resp.data;
       this.selectedInputs();
       this.selectedGroups();
@@ -280,6 +419,33 @@ export default {
     });
   },
   methods: {
+    last_logged_on_user(users) {
+      /* Get the user with the most recent start_time */
+      if (users) {
+        let last_user = users[0];
+        for (const user in users) {
+          if (users[user].start_time > last_user.start_time) {
+            last_user = users[user];
+          }
+        }
+        return last_user.username;
+      }
+    },
+    formattedInstallDate(install_date) {
+      /* Takes a date in YYYYMMDD format and returns a formatted date string */
+      if (install_date) {
+        return install_date.substring(0, 4) + "-" + install_date.substring(4, 6) + "-" + install_date.substring(6, 8)
+      }
+    },
+    unquotedSearchPath(path) {
+      if (path.includes(' ') && !path.startsWith('"')) {
+        return true
+      }
+      return false
+    },
+    propertyExistsAndNotNull(obj, key) {
+      return obj.hasOwnProperty(key) && obj[key] !== null;
+    },
     toggleAgentActive() {
       this.$store
         .dispatch("updateAgent", { uuid: this.uuid, data: { active: this.agent.active } })
