@@ -159,7 +159,9 @@ const state = {
   release_notes: {},
   previous_versions: [],
   fim_rule: {},
-  fim_rules: []
+  fim_rules: [],
+  benchmark_rule: {},
+  benchmark_rules: []
 }
 
 const mutations = {

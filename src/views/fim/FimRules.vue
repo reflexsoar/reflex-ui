@@ -11,7 +11,7 @@
     <CRow>
       <CCol>
         <CAlert color="info">
-          <h3>Beta Functionality</h3>
+          <b>Beta Functionality</b> 
           This functionality is currently in Beta and requires a special agent to properly
           function.
         </CAlert>
