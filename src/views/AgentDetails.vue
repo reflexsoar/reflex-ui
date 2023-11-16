@@ -44,6 +44,9 @@
         v-if="!loading"
       >
         <CTab title="Configuration">
+        <CAlert :show.sync="alert" color="success" closeButton>
+          {{ alert_message }}
+        </CAlert>
         <CCard class="shadow-sm bg-white rounded">
           <CCardHeader>
             <CRow>
@@ -276,9 +279,7 @@
     </CTabs>
     <CRow v-if="!loading">
       <CCol>
-        <CAlert :show.sync="alert" color="success" closeButton>
-          {{ alert_message }}
-        </CAlert>
+        
         
         <CModal
           title="Delete Agent"
