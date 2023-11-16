@@ -58,6 +58,7 @@ const InputManagement = () => import('@/views/InputManagement')
 const DataSourceTemplates = () => import('@/views/data_sources/DataSourceTemplates')
 const Schedule = () => import('@/views/schedule/Schedule')
 const FimRules = () => import('@/views/fim/FimRules')
+const Benchmarks = () => import('@/views/benchmark/Benchmarks')
 const BenchmarkManagement = () => import('@/views/benchmark/BenchmarkManagement')
 const BenchmarkRuleDetails = () => import('@/views/benchmark/BenchmarkRuleDetails')
 
@@ -220,22 +221,36 @@ function configRoutes () {
         {
           path: 'benchmarks',
           name: 'Asset Benchmarks',
-          component: BenchmarkManagement,
+          component: Benchmarks,
+          redirect: 'benchmarks/manage',
           meta: {
             requiresAuth: true,
             requiresPermission: 'view_benchmarks',
             fetchOrganizations: true
-          }
+          },
+          children: [
+            {
+              path: 'manage',
+              name: '',
+              component: BenchmarkManagement,
+              meta: {
+                fetchSettings: true,
+                requiresAuth: true,
+                requiresPermission: 'view_benchmarks'
+              }
+            },
+            {
+              path: ':uuid',
+              name: 'View Benchmark',
+              component: BenchmarkRuleDetails,
+              meta: {
+                requiresAuth: true,
+                requiresPermission: 'view_benchmarks'
+              }
+            }
+          ]
         },
-        {
-          path: 'benchmarks/rules/:uuid',
-          name: 'View Benchmark',
-          component: BenchmarkRuleDetails,
-          meta: {
-            requiresAuth: true,
-            requiresPermission: 'view_benchmarks'
-          }
-        },
+        
         {
           path: 'hunter',
           name: 'Threat Hunting',

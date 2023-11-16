@@ -190,6 +190,14 @@
                     <CBadge v-if="item.status == 'paused'" color="warning" class="tag">paused</CBadge>
                     </td>
                 </template>
+                <template #binpath="{item}">
+                  <td style="max-width: 300px">
+                    
+                      <span><pre>{{ item.binpath }}</pre></span>
+                    
+                  </td>
+                </template>
+
                 <template #start_type="{item}">
                   <td>
                     <CBadge color="secondary" class="tag">{{ item.start_type }}</CBadge>
@@ -319,6 +327,18 @@
   cursor: pointer;
 }
 
+.path {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.path:hover {
+  display: block;
+}
+
 .path:hover {
   display: block;
 }
@@ -388,7 +408,12 @@ export default {
         'parent_pid',
         'parent_process_name'
       ],
-      service_columns: ['name',  {key: 'binpath', label: 'Path', _style: "width: 10%"}, 'status', 'start_type'],
+      service_columns: [
+        { key : 'name', label: 'name', _style: "width: 25%"}, 
+        { key: 'binpath', label: 'Path', _style: "width: 35%" },
+        { key: 'status', _style: "width: 5%"},
+        { key: 'start_type', _style: "width: 5%"}
+      ],
       software_columns: ['name', 'version', 'vendor', 'install_source'],
       selected_vendors: [],
       selected_roles: [],

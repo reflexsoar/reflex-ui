@@ -46,7 +46,16 @@
                     <p><TagList :tags="benchmark_rule.frameworks" :tagIcon="false" /></p>
                   </CCol>
                 </CRow>
+                
               </CCardBody>
+              <CCardFooter>
+                <CRow>
+                  <CCol>
+                    <CBadge color="secondary" class="tag"
+                      ><b>Rule Version:</b> {{ benchmark_rule.version }}</CBadge>
+                  </CCol>
+                </CRow>
+                </CCardFooter>
             </CCard>
           </CCol>
           <CCol col="3">
@@ -55,15 +64,19 @@
                 <h4>Scoring</h4>
                 <CRow>
                   <CCol>
-                    <CBadge color="dark" class="tag metric-badge"
-                      ><h1>{{ benchmark_rule.risk_score }}</h1>
-                      Severity</CBadge
-                    >
+                    <CBadge
+                      :color="getSeverityColor(benchmark_rule.severity)"
+                      class="tag metric-badge"
+                      >Severity
+                      <h1>{{ getSeverityText(benchmark_rule.severity) }}</h1>
+                    </CBadge>
                   </CCol>
                   <CCol>
-                    <CBadge color="dark" class="tag metric-badge"
-                      ><h1>{{ benchmark_rule.risk_score }}</h1>
-                      Risk Score</CBadge
+                    <CBadge
+                      :color="getSeverityColor(benchmark_rule.severity)"
+                      class="tag metric-badge"
+                      >Risk Score
+                      <h1>{{ benchmark_rule.risk_score }}</h1></CBadge
                     >
                   </CCol> </CRow
                 ><br />
@@ -201,6 +214,12 @@ export default {
           skipped: 0,
         };
       }
+    },
+    getSeverityText(sev) {
+      return this.$store.getters.severity_text(sev);
+    },
+    getSeverityColor(sev) {
+      return this.$store.getters.severity_color(sev);
     },
   },
 };

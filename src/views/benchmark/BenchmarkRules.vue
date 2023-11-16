@@ -20,7 +20,7 @@
             <template #name="{ item }">
               <td>
                 <b
-                  ><router-link :to="`/benchmarks/rules/${item.uuid}`">{{
+                  ><router-link :to="`/benchmarks/${item.uuid}`">{{
                     item.name
                   }}</router-link></b
                 ><br />
