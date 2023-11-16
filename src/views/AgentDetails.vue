@@ -266,7 +266,7 @@
               </CRow>
         </CTab>
         <CTab title="Advanced View">
-          <h3 class="page-sub-heading">JSON View</h3>
+          <h3 class="page-sub-header">JSON View</h3>
           <CCard>
             <CCardBody style="overflow: auto; max-height: 600px">
               <pre>{{ agent.host_information }}</pre>

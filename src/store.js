@@ -161,10 +161,26 @@ const state = {
   fim_rule: {},
   fim_rules: [],
   benchmark_rule: {},
-  benchmark_rules: []
+  benchmark_rules: [],
+  benchmark_metrics: {}
 }
 
 const mutations = {
+  save_benchmark_metrics(state, metrics) {
+    state.benchmark_metrics = metrics
+  },
+  save_benchmark_rules(state, rules) {
+    state.benchmark_rules = rules
+  },
+  add_benchmark_rule(state, rule) {
+    state.benchmark_rules = [...state.benchmark_rules.filter(r => r.uuid != rule.uuid), rule]
+  },
+  update_benchmark_rule(state, rule) {
+    state.benchmark_rules = [...state.benchmark_rules.filter(r => r.uuid != rule.uuid), rule]
+  },
+  remove_benchmark_rule(state, uuid) {
+    state.benchmark_rules = state.benchmark_rules.filter(r => r.uuid != uuid)
+  },
   save_release_notes(state, data) {
     state.release_notes = data.notes
     state.previous_versions = data.previous_versions
@@ -4959,6 +4975,46 @@ const actions = {
       Axios({ url: `${BASE_URL}/fim/${uuid}`, method: 'DELETE' })
         .then(resp => {
           commit('remove_fim_rule', uuid)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getBenchmarkRules({ commit }, { organization = null }) {
+
+    let url = `${BASE_URL}/benchmark/rules`
+
+    if (organization) {
+      url += `?organization=${organization}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_benchmark_rules', resp.data.rules)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getBenchmarkMetrics({ commit }, { organization = null }) {
+
+    let url = `${BASE_URL}/benchmark/metrics`
+
+    if (organization) {
+      url += `?organization=${organization}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_benchmark_metrics', resp.data.metrics)
           resolve(resp)
 
         })

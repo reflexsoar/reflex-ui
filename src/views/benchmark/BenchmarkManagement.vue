@@ -20,6 +20,7 @@
         addNavClasses="page-nav-tab"
       >
       <CTab title="Rules">
+        <BenchmarkRules/>
       </CTab>
       <CTab title="Rule Sets">
       </CTab>
@@ -32,53 +33,22 @@
 <script>
 import { mapState } from "vuex";
 
-import OrganizationBadge from "../OrganizationBadge";
-import TagBucket from "../components/TagBucket.vue";
+import BenchmarkRules from "./BenchmarkRules.vue";
 
 export default {
   name: "BenchmarkManagement",
   components: {
-    OrganizationBadge,
-    TagBucket,
+    BenchmarkRules,
   },
-  computed: mapState(["current_user", "benchmark_rules"]),
-  created: function () {
-    this.$store.dispatch("getBenchmarkRules", {});
-    if (this.current_user.default_org) {
-      this.columns.splice(3, 0, "organization");
-    }
-  },
+  computed: mapState(["current_user"]),
   data() {
     return {
       alert: {
         show: false,
         color: "success",
         message: "",
-      },
-      benchmark_rule: {},
-      columns: [
-        "name",
-        "description",
-        { key: "actions", label: "" },
-      ],
-      show_benchmark_rule_wizard: false,
-      modal_mode: "create",
+      }
     };
-  },
-  methods: {
-    createRule() {
-      this.modal_mode = "create";
-      this.benchmark_rule = {};
-      this.show_benchmark_rule_wizard = true;
-    },
-    editRule(uuid) {
-      this.benchmark_rule = this.benchmark_rules.find((x) => x.uuid == uuid);
-      this.modal_mode = "edit";
-      this.show_benchmark_rule_wizard = true;
-    },
-    deleteRule(uuid) {
-        this.$store.dispatch("deleteBenchmarkRule", { uuid: uuid });
-    }
-  },
+  }
 };
 </script>
