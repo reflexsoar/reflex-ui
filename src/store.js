@@ -162,6 +162,7 @@ const state = {
   fim_rules: [],
   benchmark_rule: {},
   benchmark_rules: [],
+  benchmark_metric: {},
   benchmark_metrics: {}
 }
 
@@ -171,6 +172,9 @@ const mutations = {
   },
   save_benchmark_rules(state, rules) {
     state.benchmark_rules = rules
+  },
+  save_benchmark_rule(state, rule) {
+    state.benchmark_rule = rule
   },
   add_benchmark_rule(state, rule) {
     state.benchmark_rules = [...state.benchmark_rules.filter(r => r.uuid != rule.uuid), rule]
@@ -5003,12 +5007,12 @@ const actions = {
         })
     })
   },
-  getBenchmarkMetrics({ commit }, { organization = null }) {
+  getBenchmarkMetrics({ commit }, { rule_uuids = null }) {
 
     let url = `${BASE_URL}/benchmark/metrics`
 
-    if (organization) {
-      url += `?organization=${organization}`
+    if (rule_uuids) {
+      url += `?rule_uuids=${rule_uuids}`
     }
 
     return new Promise((resolve, reject) => {
@@ -5022,7 +5026,22 @@ const actions = {
           reject(err)
         })
     })
+  },
+  getBenchmarkRule({ commit }, { uuid }) {
+      
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/benchmark/rules/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_benchmark_rule', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
   }
+  
 }
 
 export default new Vuex.Store({

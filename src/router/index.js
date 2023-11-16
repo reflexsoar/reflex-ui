@@ -59,6 +59,7 @@ const DataSourceTemplates = () => import('@/views/data_sources/DataSourceTemplat
 const Schedule = () => import('@/views/schedule/Schedule')
 const FimRules = () => import('@/views/fim/FimRules')
 const BenchmarkManagement = () => import('@/views/benchmark/BenchmarkManagement')
+const BenchmarkRuleDetails = () => import('@/views/benchmark/BenchmarkRuleDetails')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -217,13 +218,22 @@ function configRoutes () {
           }
         },
         {
-          path: '/benchmarks',
+          path: 'benchmarks',
           name: 'Asset Benchmarks',
           component: BenchmarkManagement,
           meta: {
             requiresAuth: true,
             requiresPermission: 'view_benchmarks',
             fetchOrganizations: true
+          }
+        },
+        {
+          path: 'benchmarks/rules/:uuid',
+          name: 'View Benchmark',
+          component: BenchmarkRuleDetails,
+          meta: {
+            requiresAuth: true,
+            requiresPermission: 'view_benchmarks'
           }
         },
         {
