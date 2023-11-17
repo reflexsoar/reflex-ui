@@ -33,7 +33,7 @@
                 <td class="text-right">
                   <CDropdown toggler-text="Actions" color="secondary" size="sm">
                     <CDropdownItem @click="editTag(item.uuid)">Edit</CDropdownItem>
-                    <CDropdownItem @click="deleteTag(item.uuid)">Delete</CDropdownItem>
+                    <CDropdownItem @click="deletePrompt(item.uuid)">Delete</CDropdownItem>
                   </CDropdown>
                 </td>
               </template>
@@ -43,6 +43,29 @@
       </CCol>
     </CRow>
     <AgentTagWizard :show.sync="show_tag_wizard" :tag="tag" :mode="wizard_mode" />
+    <CModal
+      :show.sync="show_delete_confirm"
+      size="md"
+      title="Confirm Delete"
+      color="danger"
+      :close-on-backdrop="false"
+      :close-on-esc="false"
+      :centered="true"
+      v-if="target_tag"
+    >
+        <b>Warning!</b>
+        <p>Are you sure you want to delete the tag <AgentTag :namespace="target_tag.namespace" :value="target_tag.value" :color="target_tag.color" />?</p>
+        <p>If this tag is used in any other tags or is used to assign policies to agents, those tags and policies may not work as expected.</p>
+
+        <template #footer>
+            <CRow>
+                <CCol class="text-right">
+                <CButton color="secondary" @click="cancelDelete()">Cancel</CButton>&nbsp;
+                <CButton color="danger" @click="deleteTag(target_tag.uuid)">Delete</CButton>
+                </CCol>
+            </CRow>
+        </template>
+    </CModal>
   </div>
 </template>
 
@@ -84,6 +107,8 @@ export default {
       loading: false,
       fields: [{ key: "namespace", label: "Tag"}, "description", "query", { key: "actions", label: "" }],
       show_tag_wizard: false,
+      show_delete_confirm: false,
+      target_tag: null,
       wizard_mode: "create",
       tag: { 
         namespace: null,
@@ -107,6 +132,25 @@ export default {
       };
         this.wizard_mode = "create";
         this.show_tag_wizard = true;
+    },
+    editTag(uuid) {
+        this.tag = this.agent_tags.find((tag) => tag.uuid === uuid);
+        this.wizard_mode = "edit";
+        this.show_tag_wizard = true;
+    },
+    deletePrompt(uuid) {
+        this.target_tag = this.agent_tags.find((tag) => tag.uuid === uuid);
+        this.show_delete_confirm = true;
+    },
+    deleteTag() {
+        this.$store.dispatch("deleteAgentTag", { uuid: this.target_tag.uuid }).then(() => {
+            this.show_delete_confirm = false;
+            this.target_tag = null;
+        });
+    },
+    cancelDelete() {
+        this.show_delete_confirm = false;
+        this.target_tag = null;
     }
   },
   created() {

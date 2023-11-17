@@ -229,6 +229,7 @@ export default {
       this.submitted = true;
       let payload = {
         namespace: this.namespace,
+        organization: this.organization,
         value: this.value,
         description: this.description,
         query: this.query,
@@ -274,9 +275,18 @@ export default {
     updateTag() {
       this.error = false;
       this.error_message = "";
+
+      let payload = {
+        namespace: this.namespace,
+        organization: this.organization,
+        value: this.value,
+        description: this.description,
+        query: this.query,
+        color: this.color,
+      }
       
       this.$store
-        .dispatch("updateAgentTag", this.tag)
+        .dispatch("updateAgentTag", { uuid: this.tag.uuid, data: payload })
         .then(() => {
           this.submitted = false;
           this.closeModal();

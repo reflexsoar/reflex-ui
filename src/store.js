@@ -5095,6 +5095,8 @@ const actions = {
   },
   updateAgentTag({ commit }, { uuid, data }) {
 
+    console.log(data)
+
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/agent_tag/${uuid}`, data: data, method: 'PUT' })
         .then(resp => {
