@@ -15,7 +15,28 @@
       <CCol>
         <h1>{{ agent.name }}</h1>
       </CCol>
-      <CCol>
+      <CCol class="text-right">
+        <span><CIcon name="cilTags"/>&nbsp;</span>
+        <li style="display: inline; margin-right: 2px" v-for="tag, i in agent.tags" :key="i">
+        <CBadge :style="`background-color: ${tag.color}; color: #fff`" class="tag tag-list" size="sm">
+          {{ tag.namespace}}: {{ tag.value }}</CBadge>
+        </li>
+      </CCol>
+    </CRow>
+    <CTabs
+        addNavWrapperClasses="page-nav"
+        addTabClasses="page-nav-tab-body"
+        addNavClasses="page-nav-tab"
+        v-if="!loading"
+      >
+        <CTab title="Overview">
+          <h3 class="page-sub-header">Overview</h3>
+            <CRow>
+            <CCol>
+          <CCard>
+            <CCardBody>
+              <CRow>
+                <CCol>
         <span v-if="propertyExistsAndNotNull(agent.host_information, 'system')">
           <ObjectAttribute 
             label="Operating System"
@@ -36,13 +57,49 @@
           :value="last_logged_on_user(agent.host_information.users)"
         />
       </CCol>
-    </CRow>
-    <CTabs
-        addNavWrapperClasses="page-nav"
-        addTabClasses="page-nav-tab-body"
-        addNavClasses="page-nav-tab"
-        v-if="!loading"
-      >
+      <CCol>
+        <ObjectAttribute
+          label="IP Address"
+          :value="agent.ip_address"
+        />
+      </CCol>
+      <CCol>
+        <ObjectAttribute
+          label="Public IP Address"
+          :value="agent.console_visible_ip"
+        />
+      </CCol>
+      <CCol>
+        <ObjectAttribute
+          label="Country"
+          :value="agent.geo.country"
+        />
+      </CCol>
+      </CRow>
+            </CCardBody>
+            </CCard>
+              </CCol>
+            </CRow>
+          <CRow>
+            <CCol>
+              <CCard>
+                <CCardBody>
+                  <h4>Network Interfaces</h4>
+                  <CDataTable
+                    :items="agent.host_information.network_adapters"
+                    :fields="network_interface_fields"
+                    :responsive="false"
+                    :items-per-page="25"
+                    :sorter="{ external: false, resetable: true }"
+                    column-filter
+                    pagination
+                    />
+                </CCardBody>
+              </CCard>
+            </CCol>
+          </CRow>
+
+        </CTab>
         <CTab title="Configuration">
         <CAlert :show.sync="alert" color="success" closeButton>
           {{ alert_message }}
