@@ -38,7 +38,7 @@ Prism.languages.rql = {
 	},
     
 	'constant': {
-		pattern: /(observables(\.([\.\w]+))?|agent(\.([\.\w]+))?|value|tlp|tags|spotted|safe|source_field|description|data_type|ioc|original_source_field|title|organization|severity|risk_score|status(\.([\.\w]+))?|reference|source|signature|namespace|tags|raw_log(\.([\.\w]+))?)/
+		pattern: /(observables(\.([\.\w]+))?|agent(\.([\.\w]+))?|value|tlp|tags|spotted|safe|source_field|description|data_type|ioc|original_source_field|title|organization|severity|risk_score|status(\.([\.\w]+))?|reference|source|signature|namespace|name|version|vendor|tags|raw_log(\.([\.\w]+))?)/
 	},
 
 	'command': {
