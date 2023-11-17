@@ -18,8 +18,7 @@
       <CCol class="text-right">
         <span><CIcon name="cilTags"/>&nbsp;</span>
         <li style="display: inline; margin-right: 2px" v-for="tag, i in agent.tags" :key="i">
-        <CBadge :style="`background-color: ${tag.color}; color: #fff`" class="tag tag-list" size="sm">
-          {{ tag.namespace}}: {{ tag.value }}</CBadge>
+          <AgentTag :namespace="tag.namespace" :value="tag.value" :color="tag.color" />
         </li>
       </CCol>
     </CRow>
@@ -406,11 +405,13 @@ import { mapState } from "vuex";
 import { vSelect } from "vue-select";
 import ObjectAttribute from './components/ObjectAttribute.vue'
 import MultiPicker from './components/MultiPicker.vue'
+import AgentTag from './agents/AgentTag.vue'
 export default {
   name: "InputDetails",
   components: {
     ObjectAttribute,
-    MultiPicker
+    MultiPicker,
+    AgentTag
   },
   computed: {
     ...mapState(["input_list"]),

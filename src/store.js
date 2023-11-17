@@ -163,10 +163,27 @@ const state = {
   benchmark_rule: {},
   benchmark_rules: [],
   benchmark_metric: {},
-  benchmark_metrics: {}
+  benchmark_metrics: {},
+  agent_tag: {},
+  agent_tags: [],
 }
 
 const mutations = {
+  save_agent_tags(state, tags) {
+    state.agent_tags = tags
+  },
+  save_agent_tag(state, tag) {
+    state.agent_tag = tag
+  },
+  add_agent_tag(state, tag) {
+    state.agent_tags = [...state.agent_tags.filter(t => t.uuid != tag.uuid), tag]
+  },
+  remove_agent_tag(state, uuid) {
+    state.agent_tags = state.agent_tags.filter(t => t.uuid != uuid)
+  },
+  update_agent_tag(state, tag) {
+    state.agent_tags = state.agent_tags.map(t => t.uuid == tag.uuid ? tag : t)
+  },
   save_benchmark_metrics(state, metrics) {
     state.benchmark_metrics = metrics
   },
@@ -5040,7 +5057,71 @@ const actions = {
           reject(err)
         })
     })
-  }
+  },
+  getAgentTags({ commit }, { organization = null, namespace = null, value = null }) {
+
+    let url = `${BASE_URL}/agent_tag`      
+
+    if (organization) {
+      url += `&organization=${organization}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_agent_tags', resp.data.tags)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  createAgentTag({ commit }, data) {
+      
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/agent_tag`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_agent_tag', resp.data)
+          commit('save_agent_tag', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateAgentTag({ commit }, { uuid, data }) {
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/agent_tag/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_agent_tag', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  deleteAgentTag({ commit }, { uuid }) {
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/agent_tag/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_agent_tag', uuid)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
   
 }
 

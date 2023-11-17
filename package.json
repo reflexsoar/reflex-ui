@@ -40,6 +40,7 @@
     "apexcharts": "^3.35.4",
     "axios": "^0.21.4",
     "chroma-js": "^2.4.2",
+    "color": "^4.2.3",
     "drawflow": "0.0.59",
     "jwt-decode": "^3.1.2",
     "moment-timezone": "^0.5.34",
