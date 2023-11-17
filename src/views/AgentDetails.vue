@@ -85,7 +85,7 @@
                   <h4>Network Interfaces</h4>
                   <CDataTable
                     :items="agent.host_information.network_adapters"
-                    :fields="network_interface_fields"
+                    
                     :responsive="false"
                     :items-per-page="25"
                     :sorter="{ external: false, resetable: true }"

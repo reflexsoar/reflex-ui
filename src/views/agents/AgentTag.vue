@@ -15,15 +15,18 @@ export default {
   props: {
     namespace: {
       type: String,
-      required: true,
+      required: false,
+      default: "unknown"
     },
     value: {
       type: String,
-      required: true,
+      required: false,
+      default: "unknown"
     },
     color: {
       type: String,
-      required: true,
+      required: false,
+      default: "#000000"
     }
   },
   methods: {
