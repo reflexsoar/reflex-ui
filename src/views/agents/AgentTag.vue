@@ -1,9 +1,8 @@
 <template>
-  <div>
-    <CBadge :style="{ backgroundColor: color, color: getFontColor(color) }" class="tag">
+  
+    <CBadge :style="{ backgroundColor: color, color: getFontColor(color) }" class="tag tag-list">
       {{ namespace }}: {{ value }}
     </CBadge>
-  </div>
 </template>
 
 <script>

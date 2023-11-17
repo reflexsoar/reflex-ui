@@ -142,12 +142,12 @@ export default {
       type: Object,
       default: () => {
         return {
-          namespace: "",
-          value: "",
-          description: "",
-          query: "",
-          organization: "",
-          color: "",
+          namespace: null,
+          value: null,
+          description: null,
+          query: null,
+          organization: null,
+          color: null,
         };
       },
     },
@@ -157,12 +157,12 @@ export default {
     return {
       error: false,
       error_message: "",
-      namespace: "",
-      description: "",
-      value: "",
-      query: "",
+      namespace: null,
+      description: null,
+      value: null,
+      query: null,
       dynamic: true,
-      organization: "",
+      organization: null,
       color: "#" + Math.floor(Math.random() * 16777215).toString(16),
       submitted: false,
       test_hit_count: 0,
@@ -214,10 +214,10 @@ export default {
     reset() {
       this.error = false;
       this.error_message = "";
-      this.namespace = "";
-      this.description = "";
-      this.value = "";
-      this.query = "";
+      this.namespace = null;
+      this.description = null;
+      this.value = null;
+      this.query = null;
       this.color = "#" + Math.floor(Math.random() * 16777215).toString(16);
       this.submitted = false;
       this.tested = false;
@@ -227,11 +227,18 @@ export default {
       this.error = false;
       this.error_message = "";
       this.submitted = true;
+      let payload = {
+        namespace: this.namespace,
+        value: this.value,
+        description: this.description,
+        query: this.query,
+        color: this.color,
+      };
       this.$store
-        .dispatch("createAgentTag", this.tag)
+        .dispatch("createAgentTag", payload)
         .then(() => {
           this.submitted = false;
-          this.$emit("dismiss");
+          this.closeModal();
         })
         .catch((error) => {
           this.error = true;
@@ -267,11 +274,12 @@ export default {
     updateTag() {
       this.error = false;
       this.error_message = "";
+      
       this.$store
         .dispatch("updateAgentTag", this.tag)
         .then(() => {
           this.submitted = false;
-          this.$emit("dismiss");
+          this.closeModal();
         })
         .catch((error) => {
           this.error = true;

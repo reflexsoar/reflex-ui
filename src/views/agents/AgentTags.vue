@@ -86,11 +86,11 @@ export default {
       show_tag_wizard: false,
       wizard_mode: "create",
       tag: { 
-        namespace: "",
-        value: "",
+        namespace: null,
+        value: null,
         dynamic: true,
-        description: "",
-        query: "",
+        description: null,
+        query: null,
         color: "#" + Math.floor(Math.random() * 16777215).toString(16),
       }
     };
@@ -98,11 +98,11 @@ export default {
   methods: {
     createTag() {
         this.tag = { 
-        namespace: "",
-        value: "",
+        namespace: null,
+        value: null,
         dynamic: true,
-        description: "",
-        query: "",
+        description: null,
+        query: null,
         color: "#" + Math.floor(Math.random() * 16777215).toString(16),
       };
         this.wizard_mode = "create";
