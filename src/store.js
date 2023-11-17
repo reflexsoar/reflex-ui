@@ -5121,8 +5121,20 @@ const actions = {
         })
     })
   },
+  testAgentTag({ commit }, data) {
 
-  
+    let url = `${BASE_URL}/agent_tag/test`
+      
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, data: data, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  }
 }
 
 export default new Vuex.Store({

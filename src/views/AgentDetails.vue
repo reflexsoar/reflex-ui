@@ -16,7 +16,6 @@
         <h1>{{ agent.name }}</h1>
       </CCol>
       <CCol class="text-right">
-        <span><CIcon name="cilTags"/>&nbsp;</span>
         <li style="display: inline; margin-right: 2px" v-for="tag, i in agent.tags" :key="i">
           <AgentTag :namespace="tag.namespace" :value="tag.value" :color="tag.color" />
         </li>

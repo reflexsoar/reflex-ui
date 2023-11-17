@@ -1,5 +1,5 @@
 <template>
-  <CModal :centered="false" size="lg" :show.sync="show">
+  <CModal :centered="false" size="lg" :show.sync="show" :close-on-backdrop="false">
     <link
       rel="stylesheet"
       href="https://unpkg.com/vue-multiselect/dist/vue-multiselect.min.css"
@@ -11,49 +11,59 @@
       {{ error_message }}
     </CAlert>
     <CRow>
-        <CCol>
-            
-            <CInput
-            label="Namespace"
-            v-model="namespace"
-            placeholder="Enter a name for the tag"
-            />
-            
-        </CCol>
-        <CCol>
-            <CInput
-            label="Value"
-            v-model="value"
-            placeholder="Enter a name for the tag"
-            />
-        </CCol>
-        <CCol col=2>
-            <CInput label="Color" type="color" v-model="color" placeholder="Enter a color for the tag"/>
-            </CCol>
+      <CCol>
+        <CInput
+          label="Namespace"
+          v-model="namespace"
+          placeholder="Enter a name for the tag"
+        />
+      </CCol>
+      <CCol>
+        <CInput label="Value" v-model="value" placeholder="Enter a name for the tag" />
+      </CCol>
+      <CCol col="2">
+        <CInput
+          label="Color"
+          type="color"
+          v-model="color"
+          placeholder="Enter a color for the tag"
+        />
+      </CCol>
     </CRow>
     <CRow>
-        <CCol>
-            <CTextarea
-            label="Description"
-            v-model="description"
-            placeholder="Enter a description for the tag"
-            />
-        </CCol>
+      <CCol>
+        <CTextarea
+          label="Description"
+          v-model="description"
+          placeholder="Enter a description for the tag"
+        />
+      </CCol>
     </CRow>
     <CRow>
-        <CCol>
-            <CTextarea
-            label="Query"
-            v-model="query"
-            placeholder="Enter a query for the tag"
-            />
-        </CCol>
+      <CCol>
+        <div>
+        <label>Tag Query</label>
+        <prism-editor
+          class="my-editor"
+          v-model="query"
+          :highlight="highlighter"
+          line-numbers
+          aria-label="Tag RQL Query"
+        ></prism-editor><br>
+        </div>
+      </CCol>
     </CRow>
     <CRow>
-        <CCol>
-            <h5>Preview</h5>
-            <AgentTag :namespace="namespace" :value="value" :color="color" />
-        </CCol>
+      <CCol>
+        <h5>Preview</h5>
+        <AgentTag :namespace="namespace" :value="value" :color="color" />
+      </CCol>
+      <CCol>
+        <h5>Testing</h5>
+        <CButton @click="testTag()" size="sm" color="primary">Test Query</CButton>
+
+          <span v-if="tested">&nbsp;{{ test_hit_count }} Agents would match.</span>        
+      </CCol>
     </CRow>
     <template #footer>
       <CRow>
@@ -68,14 +78,48 @@
         </CCol>
       </CRow>
     </template>
-    </CModal>
+  </CModal>
 </template>
 
 <style>
+.my-editor {
+  /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
+  /*background: #fdfdfd;*/
+  background: #0e0e0e;
+  color: #ccc !important;
+  border: 1px solid rgb(216, 219, 224);
+  border-radius: 0.25rem;
+  box-shadow: inset 0 1px 1px rgb(0 0 21 / 8%);
+
+  /* you must provide font-family font-size line-height. Example: */
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 5px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.prism-editor__container{
+
+  min-height: 200px;
+
+}
+
+/* optional class for removing the outline */
+.prism-editor__textarea:focus {
+  outline: none;
+}
 </style>
 
 <script>
 import { mapState } from "vuex";
+import { PrismEditor } from "vue-prism-editor";
+import { highlight, languages } from "prismjs/components/prism-core";
+import "vue-prism-editor/dist/prismeditor.min.css"; // import the styles somewhere
+import "prismjs/components/prism-python";
+import "../../assets/js/prism-rql";
+import "../../assets/css/prism-reflex.css"; // import syntax highlighting styles
 
 import AgentTag from "./AgentTag.vue";
 
@@ -83,6 +127,7 @@ export default {
   name: "AgentTagWizard",
   components: {
     AgentTag,
+    PrismEditor,
   },
   props: {
     show: {
@@ -120,6 +165,8 @@ export default {
       organization: "",
       color: "#" + Math.floor(Math.random() * 16777215).toString(16),
       submitted: false,
+      test_hit_count: 0,
+      tested: false
     };
   },
   watch: {
@@ -145,28 +192,36 @@ export default {
     },
   },
   methods: {
+    highlighter(code) {
+      if (languages.rql == undefined) {
+        return highlight(code, languages.python);
+      }
+      return highlight(code, languages.rql);
+    },
     generateRandomHexColor() {
-        this.color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+      this.color = "#" + Math.floor(Math.random() * 16777215).toString(16);
     },
     getFontColor(color) {
-        let color_info = Color(color);
-        console.log(color_info.isDark())
-        /* The font should be white if the background is dark */
-        if (color_info.isDark()) {
-            return "#fff";
-        } else {
-            return "#000";
-        }
+      let color_info = Color(color);
+      console.log(color_info.isDark());
+      /* The font should be white if the background is dark */
+      if (color_info.isDark()) {
+        return "#fff";
+      } else {
+        return "#000";
+      }
     },
     reset() {
-        this.error = false;
-        this.error_message = "";
-        this.namespace = "";
-        this.description = "";
-        this.value = "";
-        this.query = "";
-        this.color = "#" + Math.floor(Math.random() * 16777215).toString(16);
-        this.submitted = false;
+      this.error = false;
+      this.error_message = "";
+      this.namespace = "";
+      this.description = "";
+      this.value = "";
+      this.query = "";
+      this.color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+      this.submitted = false;
+      this.tested = false;
+      this.test_hit_count = 0;
     },
     createTag() {
       this.error = false;
@@ -184,13 +239,38 @@ export default {
           this.submitted = false;
         });
     },
+    testTag() {
+      this.error = false;
+      this.error_message = "";
+      this.submitted = true;
+      let payload = {
+        query: this.query,
+      }
+
+      if (this.organization != "" || this.organization != undefined) {
+        payload.organization = this.organization;
+      }
+
+      this.$store
+        .dispatch("testAgentTag", payload)
+        .then((resp) => {
+          this.submitted = false;
+          this.test_hit_count = resp.data.hits;
+          this.tested = true;
+        })
+        .catch((error) => {
+          this.error = true;
+          this.error_message = error.response.data.message;
+          this.submitted = false;
+        });
+    },
     updateTag() {
       this.error = false;
       this.error_message = "";
       this.$store
         .dispatch("updateAgentTag", this.tag)
         .then(() => {
-            this.submitted = false;
+          this.submitted = false;
           this.$emit("dismiss");
         })
         .catch((error) => {
