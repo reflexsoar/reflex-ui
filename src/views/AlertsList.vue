@@ -1,29 +1,18 @@
 <template>
   <CRow>
     <CCol col="12">
-      <h2>Events<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
-      <event-drawer :event_data="event_data"></event-drawer>
-      <CRow>
-        <CCol col="12">
-          <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
-            {{alert.message}}
-          </CAlert>
-          <CAlert :show="selectedOrgLength() > 1" color="warning" closeButton>
-            <h5>WARNING: Multiple Organizations Selected</h5>
-            You have selected events from more than one organization, bulk actions have been disabled.  In a future release you will be able to perform this action.
-          </CAlert>
-        </CCol>
-      </CRow>
-      <!-- START FILTER PICKERS TODO: Move this to it's own component-->
+      <CRow class="page-heading page-heading-no-nav">
+        <CCol>
+          <h2>Events<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
+          <!-- START FILTER PICKERS TODO: Move this to it's own component-->
       <CRow>        
         <CCol col="12">
-          <CCard>
-            <CCardHeader>
+          
               <CRow>
                 <CCol col="9">
                   <li style="display: inline; margin-right: 2px;" v-for="obs,i  in observable_filters" :key="i"><CBadge color="secondary" class="tag tag-clickable"  size="sm" @click="toggleObservableFilter({'filter_type': obs.data_type, 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else-if="obs.filter_type == 'event_rule'">{{getEventRuleName(obs.value)}}</span><span v-else-if="obs.filter_type == 'title__like'">{{obs.value}}*</span><span v-else>{{ obs.value | truncate }}</span></CBadge></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
-                <CCol col="3" class="text-right">
+                <CCol col="3" class="text-right" style="padding-right:50px">
                   <CDropdown 
                     toggler-text="Options"
                     color="secondary"
@@ -40,8 +29,9 @@
                 </CCol>
                 
               </CRow>
-            </CCardHeader>
+        
             <CCollapse :show="quick_filters" >
+            <hr>
               <!-- MOVE THIS TO ITS OWN COMPONENT -->
             <CRow class='event-stats-container event-stats-row'>
               <div class='event-stats-picker'>
@@ -129,10 +119,24 @@
             </CRow>
             <!-- END EVENT STATS COMPONENT -->
             </CCollapse>
-          </CCard>
         </CCol>
       </CRow>
       <!-- END FILTER PICKERS -->
+        </CCol>
+      </CRow>
+      
+      <CRow>
+        <CCol col="12">
+          <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
+            {{alert.message}}
+          </CAlert>
+          <CAlert :show="selectedOrgLength() > 1" color="warning" closeButton>
+            <h5>WARNING: Multiple Organizations Selected</h5>
+            You have selected events from more than one organization, bulk actions have been disabled.  In a future release you will be able to perform this action.
+          </CAlert>
+        </CCol>
+      </CRow>
+      
       <CRow>
         <CCol col="4">
             <div>
@@ -384,6 +388,7 @@
       :ref="'savedFiltersMenu'"
       @option-clicked="loadFilterClicked"
     />
+    <event-drawer :event_data="event_data"></event-drawer>
   </CRow>
 </template>
 

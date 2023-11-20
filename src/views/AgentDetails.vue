@@ -377,7 +377,7 @@
         </CRow>
         <CCard>
           <CCardBody>
-            <pre v-if="!logs_loading" class="query">{{ agent_logs }}</pre>
+            <pre v-if="!logs_loading" class="query"><span v-for="log, i in agent_logs">{{ log }}<br></span></pre>
             <CSpinner v-else color="dark" style="width: 6rem; height: 6rem" />
           </CCardBody>
         </CCard>
