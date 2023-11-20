@@ -166,9 +166,13 @@ const state = {
   benchmark_metrics: {},
   agent_tag: {},
   agent_tags: [],
+  agent_logs: []
 }
 
 const mutations = {
+  save_agent_logs (state, logs) {
+    state.agent_logs = logs
+  },
   save_agent_tags(state, tags) {
     state.agent_tags = tags
   },
@@ -1921,9 +1925,14 @@ const actions = {
         })
     })
   },
-  getAgents({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc" }) {
+  getAgents({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc", filter_query = null  }) {
 
     let url = `${BASE_URL}/agent?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+
+    if (filter_query) {
+      url += `&filter_query=${filter_query}`
+    }
+
     return new Promise((resolve, reject) => {
       Axios({ url: url, method: 'GET' })
         .then(resp => {
@@ -5130,6 +5139,40 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({ url: url, data: data, method: 'POST' })
         .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getAgentLogs({ commit }, { agent = null, organization = null, level = null, module = null, start_date = null, end_date = null }) {
+    let url = `${BASE_URL}/agent/log?agent=${agent}`
+
+    if (organization) {
+      url += `&organization=${organization}`
+    }
+
+    if (level) {
+      url += `&level=${level}`
+    }
+
+    if (module) {
+      url += `&module=${module}`
+    }
+
+    if (start_date) {
+      url += `&start_date=${start_date}`
+    }
+
+    if (end_date) {
+      url += `&end_date=${end_date}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_agent_logs', resp.data.logs)
           resolve(resp)
         })
         .catch(err => {

@@ -30,6 +30,7 @@
       addTabClasses="page-nav-tab-body"
       addNavClasses="page-nav-tab"
       v-if="!loading"
+      :activeTab.sync="active_tab"
     >
       <CTab title="Overview">
         <h3 class="page-sub-header">Overview</h3>
@@ -365,6 +366,22 @@
           </CCardBody>
         </CCard>
       </CTab>
+      <CTab title="Logs" @click="loadLogs()">
+        <CRow>
+          <CCol>
+            <h3 class="page-sub-header">Agent Logs</h3>
+          </CCol>
+          <CCol class="text-right">
+            <CButton @click="loadLogs()" color="primary">Refresh Logs</CButton>
+          </CCol>
+        </CRow>
+        <CCard>
+          <CCardBody>
+            <pre v-if="!logs_loading" class="query">{{ agent_logs }}</pre>
+            <CSpinner v-else color="dark" style="width: 6rem; height: 6rem" />
+          </CCardBody>
+        </CCard>
+      </CTab>
     </CTabs>
     <CRow v-if="!loading">
       <CCol>
@@ -437,7 +454,7 @@ export default {
     AgentTag,
   },
   computed: {
-    ...mapState(["input_list"]),
+    ...mapState(["input_list","agent_logs"]),
     vendors: function () {
       if (
         this.propertyExistsAndNotNull(this.agent.host_information, "installed_software")
@@ -478,6 +495,13 @@ export default {
       return [];
     },
   },
+  watch: {
+    active_tab: function() {
+      if(this.active_tab === 6) {
+        this.loadLogs();
+      }
+    }
+  },
   data() {
     return {
       uuid: this.$route.params.uuid,
@@ -516,6 +540,8 @@ export default {
       delete_confirm: "",
       delete_error: "",
       current_tags: [],
+      active_tab: 0,
+      logs_loading: false
     };
   },
   created() {
@@ -542,7 +568,13 @@ export default {
             last_user = users[user];
           }
         }
-        return last_user.username;
+        
+        /* If the last_user has the username property, return it, otherwise return the name property */
+        if (last_user) {
+          return last_user.username;
+        } else {
+          return 'N/A'
+        }
       }
     },
     formattedInstallDate(install_date) {
@@ -667,6 +699,12 @@ export default {
       this.delete_confirm = "";
       this.delete_modal = false;
     },
+    loadLogs() {
+      this.logs_loading = true;
+      this.$store.dispatch("getAgentLogs", { agent: [this.uuid] }).then(() => {
+        this.logs_loading = false;
+      });
+    }
   },
   filters: {
     firstTwo: function (value) {
