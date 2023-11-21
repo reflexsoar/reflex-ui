@@ -31,7 +31,6 @@
               </CRow>
         
             <CCollapse :show="quick_filters" >
-            <hr>
               <!-- MOVE THIS TO ITS OWN COMPONENT -->
             <CRow class='event-stats-container event-stats-row'>
               <div class='event-stats-picker'>
