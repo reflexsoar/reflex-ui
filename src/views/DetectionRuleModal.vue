@@ -1922,10 +1922,14 @@ export default {
         .dispatch("updateDetection", { uuid: this.rule.uuid, data: this.rule })
         .then((resp) => {
           this.submitted = false;
+          this.error = false;
+          this.error_message = "";
           this.dismiss();
         })
         .catch((err) => {
           this.submitted = false;
+          this.error = true;
+          this.error_message = err.response.data.message;
           console.log(err);
         });
     },
