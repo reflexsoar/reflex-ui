@@ -52,7 +52,7 @@
           <AgentGroups></AgentGroups>
         </CTab>
         <CTab>
-          <template slot="title"> <CIcon name="cil-settings" /> Agent</template>
+          <template slot="title"> <CIcon name="cil-settings" /> Policies</template>
           <AgentPolicies></AgentPolicies>
         </CTab>
         <CTab>
