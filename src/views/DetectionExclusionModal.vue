@@ -11,6 +11,9 @@
       :show.sync="modalStatus"
       :closeOnBackdrop="false"
     >
+    <CAlert v-if="error" color="danger">
+      <strong>Error:</strong> {{error_message}}
+    </CAlert>
     <h5>Exclusion</h5>
     <p>An exclusion can be added to prevent a detection rule from firing on very specific criteria.</p>
     <CAlert :show="performance_warning" color="warning">
@@ -137,7 +140,9 @@ export default {
     return {
       modalStatus: this.show,
       exclusion_values: [],
-      submitted: false
+      submitted: false,
+      error: false,
+      error_message: ""
     }
   },
   watch: {
@@ -192,6 +197,12 @@ export default {
       }
     },
     createExclusion() {
+      if(this.exclusion.field === null || this.exclusion.field === "") {
+        this.error = true
+        this.error_message = "Field Name is required"
+        return
+      }
+
       if('exceptions' in this.rule) {
         if(this.rule.exceptions === null) {
           this.$set(this.rule,'exceptions',[this.exclusion])
