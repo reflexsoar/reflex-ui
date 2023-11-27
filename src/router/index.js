@@ -57,6 +57,10 @@ const NotificationChannelsList = () => import('@/views/notify/NotificationChanne
 const InputManagement = () => import('@/views/InputManagement')
 const DataSourceTemplates = () => import('@/views/data_sources/DataSourceTemplates')
 const Schedule = () => import('@/views/schedule/Schedule')
+const FimRules = () => import('@/views/fim/FimRules')
+const Benchmarks = () => import('@/views/benchmark/Benchmarks')
+const BenchmarkManagement = () => import('@/views/benchmark/BenchmarkManagement')
+const BenchmarkRuleDetails = () => import('@/views/benchmark/BenchmarkRuleDetails')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -204,6 +208,49 @@ function configRoutes () {
             fetchOrganizations: true
           }
         },
+        {
+          path: '/fim',
+          name: 'File Integrity Monitoring',
+          component: FimRules,
+          meta: {
+            requiresAuth: true,
+            requiresPermission: 'view_fim_rules',
+            fetchOrganizations: true
+          }
+        },
+        {
+          path: 'benchmarks',
+          name: 'Asset Benchmarks',
+          component: Benchmarks,
+          redirect: 'benchmarks/manage',
+          meta: {
+            requiresAuth: true,
+            requiresPermission: 'view_benchmarks',
+            fetchOrganizations: true
+          },
+          children: [
+            {
+              path: 'manage',
+              name: '',
+              component: BenchmarkManagement,
+              meta: {
+                fetchSettings: true,
+                requiresAuth: true,
+                requiresPermission: 'view_benchmarks'
+              }
+            },
+            {
+              path: ':uuid',
+              name: 'View Benchmark',
+              component: BenchmarkRuleDetails,
+              meta: {
+                requiresAuth: true,
+                requiresPermission: 'view_benchmarks'
+              }
+            }
+          ]
+        },
+        
         {
           path: 'hunter',
           name: 'Threat Hunting',

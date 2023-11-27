@@ -16,7 +16,9 @@
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt">
         <CSidebarNavItem name="Detections" to="/detections"></CSidebarNavItem>
         <CSidebarNavItem name="MITRE ATT&CK" to="/mitre_coverage" :badge="beta_badge"></CSidebarNavItem>
+        <CSidebarNavItem name="File Integrity" to="/fim" :badge="beta_badge" v-if="this.$store.getters.user_has_permission('view_fim_rules')"></CSidebarNavItem>
       </CSidebarNavDropdown>
+      <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_benchmarks')" name="Benchmarks" :badge="beta_badge" to="/benchmarks" icon="cil-chart"></CSidebarNavItem>
       <!--<CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt" to="/detections" :badge="beta_badge"></CSidebarNavItem>-->
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_events') || this.$store.getters.user_has_permission('view_event_rules')" name='Events' icon="cil-bell">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_events')" name="Queue" to="/alerts/list"></CSidebarNavItem>
@@ -27,7 +29,7 @@
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_lists')" name="Intel Explorer" to="/lists/explore"></CSidebarNavItem>
       </CSidebarNavDropdown>
       <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_events')" name="Integrations" to="/integrations" icon="cil-applications" :badge="beta_badge"></CSidebarNavItem>
-      <CSidebarNavItem name="Assets" to="/assets" icon="cil-layers" :badge="beta_badge"></CSidebarNavItem>
+      <!--<CSidebarNavItem name="Assets" to="/assets" icon="cil-layers" :badge="beta_badge"></CSidebarNavItem>-->
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_lists')" name='System' icon="cil-settings">
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_settings')" name="Settings" to="/settings"></CSidebarNavItem>
         <CSidebarNavItem v-if="this.$store.getters.user_has_permission('update_notification_channel')" name='Notifications' to="/notifications" :badge="beta_badge"></CSidebarNavItem>

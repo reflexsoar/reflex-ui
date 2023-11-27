@@ -157,10 +157,55 @@ const state = {
   data_source_templates: [],
   schedules: [],
   release_notes: {},
-  previous_versions: []
+  previous_versions: [],
+  fim_rule: {},
+  fim_rules: [],
+  benchmark_rule: {},
+  benchmark_rules: [],
+  benchmark_metric: {},
+  benchmark_metrics: {},
+  agent_tag: {},
+  agent_tags: [],
+  agent_logs: []
 }
 
 const mutations = {
+  save_agent_logs (state, logs) {
+    state.agent_logs = logs
+  },
+  save_agent_tags(state, tags) {
+    state.agent_tags = tags
+  },
+  save_agent_tag(state, tag) {
+    state.agent_tag = tag
+  },
+  add_agent_tag(state, tag) {
+    state.agent_tags = [...state.agent_tags.filter(t => t.uuid != tag.uuid), tag]
+  },
+  remove_agent_tag(state, uuid) {
+    state.agent_tags = state.agent_tags.filter(t => t.uuid != uuid)
+  },
+  update_agent_tag(state, tag) {
+    state.agent_tags = state.agent_tags.map(t => t.uuid == tag.uuid ? tag : t)
+  },
+  save_benchmark_metrics(state, metrics) {
+    state.benchmark_metrics = metrics
+  },
+  save_benchmark_rules(state, rules) {
+    state.benchmark_rules = rules
+  },
+  save_benchmark_rule(state, rule) {
+    state.benchmark_rule = rule
+  },
+  add_benchmark_rule(state, rule) {
+    state.benchmark_rules = [...state.benchmark_rules.filter(r => r.uuid != rule.uuid), rule]
+  },
+  update_benchmark_rule(state, rule) {
+    state.benchmark_rules = [...state.benchmark_rules.filter(r => r.uuid != rule.uuid), rule]
+  },
+  remove_benchmark_rule(state, uuid) {
+    state.benchmark_rules = state.benchmark_rules.filter(r => r.uuid != uuid)
+  },
   save_release_notes(state, data) {
     state.release_notes = data.notes
     state.previous_versions = data.previous_versions
@@ -169,10 +214,22 @@ const mutations = {
     state.schedules = schedules
   },
   add_schedule(state, schedule) {
-    if(state.schedules.length == 0) {
+    if (state.schedules.length == 0) {
       state.schedules = []
     }
     state.schedules.push(schedule)
+  },
+  add_fim_rule(state, rule) {
+    state.fim_rules = [...state.fim_rules, rule]
+  },
+  update_fim_rule(state, rule) {
+    state.fim_rules = [...state.fim_rules.filter(r => r.uuid != rule.uuid), rule]
+  },
+  remove_fim_rule(state, uuid) {
+    state.fim_rules = state.fim_rules.filter(r => r.uuid != uuid)
+  },
+  save_fim_rules(state, rules) {
+    state.fim_rules = rules
   },
   update_schedule(state, schedule) {
     state.schedules = [...state.schedules.filter(s => s.uuid != schedule.uuid), schedule]
@@ -184,7 +241,7 @@ const mutations = {
     state.data_source_templates = templates
   },
   add_data_source_template(state, template) {
-    if(state.data_source_templates.length == 0) {
+    if (state.data_source_templates.length == 0) {
       state.data_source_templates = []
     }
     state.data_source_templates.push(template)
@@ -1482,7 +1539,7 @@ const actions = {
         })
     })
   },
-  getDetectionFilters({ commit }, { warnings = [], warnings__not=[], organization__not = [], status__not = [], tags__not = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, organization = [], status = [], tags = [], techniques = [], tactics = [], repository = [], active = [], assess_rule = [], severity = [], repo_synced = true }) {
+  getDetectionFilters({ commit }, { warnings = [], warnings__not = [], organization__not = [], status__not = [], tags__not = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, organization = [], status = [], tags = [], techniques = [], tactics = [], repository = [], active = [], assess_rule = [], severity = [], repo_synced = true }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection/filters?tags=${tags}&techniques=${techniques}&tactics=${tactics}&organization=${organization}&repository=${repository}&status=${status}`
@@ -1557,7 +1614,7 @@ const actions = {
         })
     })
   },
-  getDetectionsByFilter({ commit }, { warnings = [], warnings__not = [],  organization__not = [], status__not = [], tags__not = [],  min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
+  getDetectionsByFilter({ commit }, { warnings = [], warnings__not = [], organization__not = [], status__not = [], tags__not = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
 
@@ -1600,7 +1657,7 @@ const actions = {
         url = url + `&tags=${tags}`
       }
 
-      if(tags__not.length > 0) {
+      if (tags__not.length > 0) {
         url = url + `&tags__not=${tags__not}`
       }
 
@@ -1626,7 +1683,7 @@ const actions = {
 
       if (warnings__not.length > 0) {
         url = url + `&warnings__not=${warnings__not}`
-      }      
+      }
 
       if (status__not.length > 0) {
         url = url + `&status__not=${status__not}`
@@ -1655,7 +1712,7 @@ const actions = {
         })
     })
   },
-  getDetections({ commit }, { warnings = [], warnings__not = [], organization__not = [], status__not = [], tags__not = [],  min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
+  getDetections({ commit }, { warnings = [], warnings__not = [], organization__not = [], status__not = [], tags__not = [], min_average_hits_per_day = 0, max_average_hits_per_day = 0, rule_type = [], name__like = null, description__like = null, query__like = null, page = 1, page_size = 10000, sort_by = "created_at", sort_direction = "asc", status = [], repository = [], phase_names = [], techniques = [], tactics = [], tags = [], active = [], assess_rule = [], severity = [], save = true, organization = null, repo_synced = true }) {
     commit('loading_status', true)
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}&repository=${repository}&status=${status}`
@@ -1868,9 +1925,14 @@ const actions = {
         })
     })
   },
-  getAgents({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc" }) {
+  getAgents({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc", filter_query = null  }) {
 
     let url = `${BASE_URL}/agent?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
+
+    if (filter_query) {
+      url += `&filter_query=${filter_query}`
+    }
+
     return new Promise((resolve, reject) => {
       Axios({ url: url, method: 'GET' })
         .then(resp => {
@@ -1982,7 +2044,7 @@ const actions = {
         })
     })
   },
-  getDetection({ commit }, {uuid, event = null}) {
+  getDetection({ commit }, { uuid, event = null }) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/detection/${uuid}`
 
@@ -2071,9 +2133,15 @@ const actions = {
         })
     })
   },
-  getAgent({ commit }, uuid) {
+  getAgent({ commit }, {uuid, include_host_info = false}) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/agent/${uuid}`, method: 'GET' })
+      let url = `${BASE_URL}/agent/${uuid}`
+
+      if (include_host_info) {
+        url += `?include_host_info=true`
+      }
+
+      Axios({ url: url, method: 'GET' })
         .then(resp => {
           commit('save_agent', resp.data)
           resolve(resp)
@@ -2384,7 +2452,7 @@ const actions = {
       if (event_rule && event_rule.length > 0) {
         url = url + `&event_rule=${event_rule}`
       }
-      
+
       Axios({ url: url, method: 'GET' })
         .then(resp => {
           resolve(resp)
@@ -2605,7 +2673,7 @@ const actions = {
         })
     })
   },
-  acknowledgeEventBySignature({ commit }, {uuid, signature}) {
+  acknowledgeEventBySignature({ commit }, { uuid, signature }) {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/event/${uuid}/acknowledge?signature=${signature}`, method: 'PUT' })
         .then(resp => {
@@ -2618,7 +2686,7 @@ const actions = {
         })
     })
   },
-  unacknowledgeEventBySignature({ commit }, {uuid, signature}) {
+  unacknowledgeEventBySignature({ commit }, { uuid, signature }) {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/event/${uuid}/unacknowledge?signature=${signature}`, method: 'PUT' })
         .then(resp => {
@@ -2631,7 +2699,7 @@ const actions = {
         })
     })
   },
-  unacknowledgeEvent({ commit }, uuid ) {
+  unacknowledgeEvent({ commit }, uuid) {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/event/${uuid}/unacknowledge`, method: 'PUT' })
         .then(resp => {
@@ -3739,7 +3807,7 @@ const actions = {
         })
     })
   },
-  getMitreDataSources({ commit }, { with_coverage= false, organization=null }) {
+  getMitreDataSources({ commit }, { with_coverage = false, organization = null }) {
     let url = `${BASE_URL}/mitre/data_sources`
 
     if (with_coverage) {
@@ -3749,7 +3817,7 @@ const actions = {
     if (organization) {
       url += `&organization=${organization}`
     }
-    
+
     return new Promise((resolve, reject) => {
       Axios({ url: url, method: 'GET' })
         .then(resp => {
@@ -4746,7 +4814,7 @@ const actions = {
         })
     })
   },
-  getDataSourceTemplates({ commit }, organization=null) {
+  getDataSourceTemplates({ commit }, organization = null) {
     return new Promise((resolve, reject) => {
       let url = `${BASE_URL}/data_source_template`
 
@@ -4812,9 +4880,9 @@ const actions = {
           url += `?active=${active}`
           params = true
         }
-          
+
       }
-      
+
       if (organization) {
         if (params) {
           url += `&organization=${organization}`
@@ -4876,6 +4944,235 @@ const actions = {
       Axios({ url: `${BASE_URL}/release-notes?version=${version}`, method: 'GET' })
         .then(resp => {
           commit('save_release_notes', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getFimRules({ commit }, { organization = null }) {
+
+    return new Promise((resolve, reject) => {
+      let url = `${BASE_URL}/fim`
+
+      if (organization) {
+        url += `?organization=${organization}`
+      }
+
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_fim_rules', resp.data.rules)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  createFIMRule({ commit }, data) {
+      
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/fim`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_fim_rule', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateFIMRule({ commit }, { uuid, data }) {
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/fim/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_fim_rule', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  deleteFIMRule({ commit }, { uuid }) {
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/fim/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_fim_rule', uuid)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getBenchmarkRules({ commit }, { organization = null }) {
+
+    let url = `${BASE_URL}/benchmark/rules`
+
+    if (organization) {
+      url += `?organization=${organization}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_benchmark_rules', resp.data.rules)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getBenchmarkMetrics({ commit }, { rule_uuids = null }) {
+
+    let url = `${BASE_URL}/benchmark/metrics`
+
+    if (rule_uuids) {
+      url += `?rule_uuids=${rule_uuids}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_benchmark_metrics', resp.data.metrics)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getBenchmarkRule({ commit }, { uuid }) {
+      
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/benchmark/rules/${uuid}`, method: 'GET' })
+        .then(resp => {
+          commit('save_benchmark_rule', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getAgentTags({ commit }, { organization = null, namespace = null, value = null }) {
+
+    let url = `${BASE_URL}/agent_tag`      
+
+    if (organization) {
+      url += `&organization=${organization}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_agent_tags', resp.data.tags)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  createAgentTag({ commit }, data) {
+      
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/agent_tag`, data: data, method: 'POST' })
+        .then(resp => {
+          commit('add_agent_tag', resp.data)
+          commit('save_agent_tag', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateAgentTag({ commit }, { uuid, data }) {
+
+    console.log(data)
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/agent_tag/${uuid}`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('update_agent_tag', resp.data)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  deleteAgentTag({ commit }, { uuid }) {
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/agent_tag/${uuid}`, method: 'DELETE' })
+        .then(resp => {
+          commit('remove_agent_tag', uuid)
+          resolve(resp)
+
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  testAgentTag({ commit }, data) {
+
+    let url = `${BASE_URL}/agent_tag/test`
+      
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, data: data, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getAgentLogs({ commit }, { agent = null, organization = null, level = null, module = null, start_date = null, end_date = null }) {
+    let url = `${BASE_URL}/agent/log?agent=${agent}`
+
+    if (organization) {
+      url += `&organization=${organization}`
+    }
+
+    if (level) {
+      url += `&level=${level}`
+    }
+
+    if (module) {
+      url += `&module=${module}`
+    }
+
+    if (start_date) {
+      url += `&start_date=${start_date}`
+    }
+
+    if (end_date) {
+      url += `&end_date=${end_date}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_agent_logs', resp.data.logs)
           resolve(resp)
         })
         .catch(err => {

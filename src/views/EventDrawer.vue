@@ -15,7 +15,7 @@
             <h2>{{ event_data.title }}</h2>
             <TagBucket :tags="event_data.tags" />
           </CCol>
-          <CCol col="2" style="border-left: 1px solid #cfcfcf" class="text-right">
+          <CCol col="2">
             <CButton
               color="secondary"
               @click="$store.commit('set', ['eventDrawerMinimize', true])"

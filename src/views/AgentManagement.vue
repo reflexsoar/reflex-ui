@@ -47,13 +47,17 @@
         </CTab>
         <CTab>
           <template slot="title">
-            <CIcon name="cil-object-group" /> Agent Groups
+            <CIcon name="cil-object-group" /> Groups
           </template>
           <AgentGroups></AgentGroups>
         </CTab>
         <CTab>
-          <template slot="title"> <CIcon name="cil-settings" /> Agent Policies </template>
+          <template slot="title"> <CIcon name="cil-settings" /> Policies</template>
           <AgentPolicies></AgentPolicies>
+        </CTab>
+        <CTab>
+        <template slot="title"> <CIcon name="cil-tags" /> Tags</template>
+          <AgentTags/>
         </CTab>
       </CTabs> </CCol
   ></CRow>
@@ -65,6 +69,9 @@ import CalloutCard from "./components/CalloutCard";
 const Agents = () => import("@/views/AgentsList");
 const AgentGroups = () => import("@/views/AgentGroupList");
 const AgentPolicies = () => import("@/views/agents/AgentPolicies");
+
+import AgentTags from "./agents/AgentTags.vue";
+
 export default {
   name: "AgentManagement",
   computed: mapState(["agents"]),
@@ -73,6 +80,7 @@ export default {
     AgentGroups: AgentGroups,
     AgentPolicies: AgentPolicies,
     CalloutCard,
+    AgentTags
   },
   created() {
     this.$store.commit("add_start"); // Stop the success/fail add from showing up when changing from other pages

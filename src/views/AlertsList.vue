@@ -1,29 +1,18 @@
 <template>
   <CRow>
     <CCol col="12">
-      <h2>Events<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
-      <event-drawer :event_data="event_data"></event-drawer>
-      <CRow>
-        <CCol col="12">
-          <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
-            {{alert.message}}
-          </CAlert>
-          <CAlert :show="selectedOrgLength() > 1" color="warning" closeButton>
-            <h5>WARNING: Multiple Organizations Selected</h5>
-            You have selected events from more than one organization, bulk actions have been disabled.  In a future release you will be able to perform this action.
-          </CAlert>
-        </CCol>
-      </CRow>
-      <!-- START FILTER PICKERS TODO: Move this to it's own component-->
+      <CRow class="page-heading page-heading-no-nav">
+        <CCol>
+          <h2>Events<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
+          <!-- START FILTER PICKERS TODO: Move this to it's own component-->
       <CRow>        
         <CCol col="12">
-          <CCard>
-            <CCardHeader>
+          
               <CRow>
                 <CCol col="9">
                   <li style="display: inline; margin-right: 2px;" v-for="obs,i  in observable_filters" :key="i"><CBadge color="secondary" class="tag tag-clickable"  size="sm" @click="toggleObservableFilter({'filter_type': obs.data_type, 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: <span v-if="obs.filter_type == 'severity'">{{getSeverityText(obs.value).toLowerCase()}}</span><span v-else-if="obs.filter_type == 'organization'">{{mapOrgToName(obs.value)}}</span><span v-else-if="obs.filter_type == 'event_rule'">{{getEventRuleName(obs.value)}}</span><span v-else-if="obs.filter_type == 'title__like'">{{obs.value}}*</span><span v-else>{{ obs.value | truncate }}</span></CBadge></li><span v-if="!filteredBySignature() && observableFilters.length > 0"><span class="separator">|</span>Showing {{filtered_events ? filtered_events.length : 0  }} grouped events.</span><span v-if="filteredBySignature() && observableFilters.length != 0"><span class="separator" v-if="filteredBySignature() && observableFilters.length != 0">|</span>Showing {{filtered_events ? filtered_events.length : 0}} events.</span><span v-if="observableFilters.length == 0">Showing {{filtered_events.length}} grouped events.</span>
                 </CCol>
-                <CCol col="3" class="text-right">
+                <CCol col="3" class="text-right" style="padding-right:50px">
                   <CDropdown 
                     toggler-text="Options"
                     color="secondary"
@@ -40,7 +29,7 @@
                 </CCol>
                 
               </CRow>
-            </CCardHeader>
+        
             <CCollapse :show="quick_filters" >
               <!-- MOVE THIS TO ITS OWN COMPONENT -->
             <CRow class='event-stats-container event-stats-row'>
@@ -129,10 +118,24 @@
             </CRow>
             <!-- END EVENT STATS COMPONENT -->
             </CCollapse>
-          </CCard>
         </CCol>
       </CRow>
       <!-- END FILTER PICKERS -->
+        </CCol>
+      </CRow>
+      
+      <CRow>
+        <CCol col="12">
+          <CAlert :show.sync="alert.show" :color="alert.type" closeButton>
+            {{alert.message}}
+          </CAlert>
+          <CAlert :show="selectedOrgLength() > 1" color="warning" closeButton>
+            <h5>WARNING: Multiple Organizations Selected</h5>
+            You have selected events from more than one organization, bulk actions have been disabled.  In a future release you will be able to perform this action.
+          </CAlert>
+        </CCol>
+      </CRow>
+      
       <CRow>
         <CCol col="4">
             <div>
@@ -213,7 +216,7 @@
             </CCardBody>
             <CCardFooter style="background-color:#f0f0f0;">
               <CRow>
-                <CCol col="3">
+                <CCol col="2">
                 <CButtonGroup>
                     <!--<CButton v-if="!event.acknowledged" aria-label="Acknowlege" @click="ackEvent(event.uuid)" size="sm" color="success" v-c-tooltip="{'content':'Acknowledge Event','placement':'bottom'}"><CIcon name="cilCheck"/></CButton>
                     <CButton v-if="event.acknowledged" aria-label="Unacknowledge" @click="unackEvent(event.uuid)" size="sm" color="warning" v-c-tooltip="{'content':'Acknowledge Event','placement':'bottom'}"><CIcon name="cilX"/></CButton>
@@ -257,8 +260,10 @@
                   
                   
                 </CCol>
-                <CCol col="9" class="text-right">
+                <CCol col="10" class="text-right">
                   <small>
+                    <CBadge class="tag" color="dark" v-if="event.category">{{ event.category ? event.category : 'Uncategorized' }}</CBadge>
+                    <span class="separator">|</span>
                     <CBadge @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':event.severity})" class="tag tag-clickable" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CBadge>
                     <span class="separator" v-if="event.risk_score">|</span><CBadge v-if="event.risk_score" class="tag tag-clickable" :color="getSeverityColor(event.severity)" size="sm">Risk: {{event.risk_score}}</CBadge>
                     <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CBadge class="tag tag-clickable" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurrences <span v-if="event.related_events_count > 0"></span></CBadge>                    
@@ -382,6 +387,7 @@
       :ref="'savedFiltersMenu'"
       @option-clicked="loadFilterClicked"
     />
+    <event-drawer :event_data="event_data"></event-drawer>
   </CRow>
 </template>
 
@@ -679,14 +685,27 @@ export default {
         }
       },
       startDismissEvent() {
-        this.loadCloseReasons()
-        this.error = false
-        this.error_message = ""
-        this.dismissalComment = ""
-        this.dismissalReason = null
-        this.tuningAdviceToggle = false
-        this.tuningAdvice = ''
-        this.dismissEventModal = true
+        let organization = ""
+        if(this.target_event) {
+          organization = this.target_event.organization
+        }
+
+        if(this.selectedOrgLength() == 1) {
+          organization = Object.keys(this.selected_orgs)[0]
+        }
+
+        this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
+          this.close_reasons = this.$store.getters.close_reasons.map((reason) => { return {label: reason.title, value: reason.uuid, description: reason.description}})
+          this.error = false
+          this.error_message = ""
+          this.dismissalComment = ""
+          this.dismissalReason = null
+          this.tuningAdviceToggle = false
+          this.tuningAdvice = ''
+          this.dismissEventModal = true
+        })
+        //this.loadCloseReasons()
+        
       },
       resetDismissModal() {
         this.dismissEventModal = false
@@ -799,7 +818,8 @@ export default {
           event = event[0]
         }
         this.target_event = event
-        this.loadCloseReasons()
+        
+        //this.loadCloseReasons()
         this.selected = [uuid]
         this.selected_count = this.selected.length
         
@@ -807,17 +827,30 @@ export default {
         this.selected_orgs[event.organization] = {
           'events': [uuid]
         }
+        
         this.related_events_count = this.getRelatedCount(event.signature)
         if(this.related_events_count > 0) {
           this.selected_count = this.related_events_count
         }
-        this.dismissalReason = null
-        this.dismissalComment = ""
-        this.tuningAdviceToggle = false
-        this.tuningAdvice = ''
-        this.error = false
-        this.error_message = ""
-        this.dismissEventModal = true
+
+        let organization = ""
+        if(this.target_event) {
+          organization = this.target_event.organization
+        }
+
+        if(this.selectedOrgLength() == 1) {
+          organization = Object.keys(this.selected_orgs)[0]
+        }
+
+        this.$store.dispatch('getCloseReasons', {organization: organization}).then(resp => {
+          this.dismissalReason = null
+          this.dismissalComment = ""
+          this.tuningAdviceToggle = false
+          this.tuningAdvice = ''
+          this.error = false
+          this.error_message = ""
+          this.dismissEventModal = true
+        })
       },
       deleteEvent() {
         this.dismiss_submitted = true

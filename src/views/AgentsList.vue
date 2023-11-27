@@ -2,7 +2,6 @@
   <CRow>
     <CCol col
       >
-      
       <CRow class="page-sub-header page-header-row">
         <CCol>
           <h2>Agents</h2>
@@ -24,7 +23,7 @@
         :dark="dark"
         :sorter="{ external: false, resetable: false }"
         :loading="loading"
-        :responsive="true"
+        :responsive="false"
         column-filter
         pagination
         :column-filter-value.sync="column_filters"
@@ -145,9 +144,9 @@ python reflex-agent.py --pair --token "{{ pairingToken }}" --console {{
     </CModal>
   </CRow>
 </template>
-
 <script>
 import { mapState } from "vuex";
+
 import RMultiCheck from "./components/MultiCheck.vue";
 import OrganizationBadge from "./OrganizationBadge";
 export default {
@@ -281,6 +280,7 @@ export default {
       org_filter: [],
       column_filters: {},
       picker_filters: {},
+      search_filter: ""
     };
   },
   watch: {
@@ -301,6 +301,7 @@ export default {
           page: page,
           sort_by: this.sort_by,
           sort_direction: this.sort_direction,
+          filter_query: this.search_filter,
         })
         .then(() => {
           this.loading = false;
