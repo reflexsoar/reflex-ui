@@ -4,26 +4,29 @@
     <CModal title="Merge Event Into Case" :centered="true" size="lg" :show.sync="modalStatus">
       <div>
         <CAlert color="danger" v-if="error">{{error_message}}</CAlert>
-
           <p>Merging <b>{{events.length}}</b> event<span v-if="events.length > 1">s</span>.</p>
-           <multiselect 
-                v-model="case_data"
-                label="title" 
-                :options="cases" 
-                track-by="uuid" 
-                :searchable="true"
-                :internal-search="false"
-                :options-limit="10"
-                :show-no-results="false" 
-                :custom-label="caseLabel"
+            <SelectInput
+                :options="cases"
+                :value.sync="case_data.uuid"
+                option_label="title"
+                option_key="uuid"
                 @search-change="caseFind"
-                placeholder="Select a case">
-                <template slot="option" slot-scope="props">
-                    {{props.option.title}}<br>
-                    <small><b>Severity: </b>{{getSeverity(props.option.severity)}} | <b>Owner:</b> {{props.option.owner ? props.option.owner.username : "Unassigned" }} | Contains {{props.option.event_count ? props.option.event_count : 0}} events.</small><br>
-                    <small>{{props.option.description | truncate}}</small>
+                :loading="loading"
+            >
+                <template #option="{ option }">
+                    
+                        <CCol>
+                        
+                        <b>{{option.title}}</b><br>
+                        <small><b>Severity: </b>{{getSeverity(option.severity)}} | <b>Owner:</b> {{option.owner ? option.owner.username : "Unassigned" }} | Contains {{option.event_count ? option.event_count : 0}} events.</small><br>
+                        <small>{{option.description | truncate}}</small>
+                        
+                        </CCol>
+                    <CCol class="text-right">
+                        <OrganizationBadge :uuid="option.organization"></OrganizationBadge>
+                    </CCol>
                 </template>
-            </multiselect><br>
+            </SelectInput>
             <label>Include Related Events</label><br>
             <CSwitch color="success" label-on="Yes" label-off="No" v-bind:checked.sync="include_related_events"></CSwitch><br>
             <small class='text-muted'>Selecting this option will also merge any other event with the same signature that is in a <b>New</b> status</small>
@@ -39,11 +42,19 @@
 <script>
 import {vSelect} from "vue-select";
 import { mapState } from 'vuex';
+
+import SelectInput from './components/SelectInput.vue'
+import OrganizationBadge from './OrganizationBadge.vue'
+
 export default {
     name: 'MergeEventIntoCaseModal',
     props: {
         show: Boolean,
-        events: Array,
+        events: Array
+    },
+    components: {
+        SelectInput,
+        OrganizationBadge,
     },
     computed: mapState(['settings','cases']),
     data(){
@@ -54,7 +65,8 @@ export default {
             submitted: false,
             complete: true,
             error: false,
-            error_message: ""
+            error_message: "",
+            loading: false
         }
     },
     watch: {
@@ -73,7 +85,12 @@ export default {
     },
     methods: {
         loadData() {
-            this.$store.dispatch('getCases', 'uuid,title,id,event_count,owner,severity')
+            this.loading = true
+            this.$store.dispatch('getCases', {}).then(resp => {
+                this.loading = false
+            }).catch(err => {
+                this.loading = false
+            })
         },
         caseLabel({uuid, title}) {
             if(uuid && title) {
@@ -92,7 +109,12 @@ export default {
         },
         caseFind(query) {
             let fields = 'uuid,title,id,event_count,owner,severity'
-            this.$store.dispatch('getCasesByTitle', {title: query, fields})
+            this.loading = true
+            this.$store.dispatch('getCasesByTitle', {title: query, fields}).then(resp => {
+                this.loading = false
+            }).catch(err => {
+                this.loading = false
+            })
         },
         mergeEventIntoCase() {
             let uuid = this.case_data.uuid;
