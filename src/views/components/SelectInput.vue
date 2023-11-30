@@ -6,13 +6,14 @@
     <div class="select-btn">
       <span v-if="!selected">{{ placeholder }}</span>
       <span v-if="selected">{{ getSelectedLabel() }}</span>
-      <i class="fas fa-chevron-down"></i>
+      <i v-if="!loading" class="fas fa-chevron-down"></i>
+      <i v-else class="lds-dual-ring-small"></i>
     </div>
     <div class="content">
       <div class="search">
-        <input type="text" placeholder="Search..." v-model="search" />
+        <input type="text" placeholder="Search..." v-model="search" @input="searchChange" />
       </div>
-      <ul class="options" v-if="filtered_options.length > 0">
+      <ul class="options" v-if="filtered_options.length > 0 && !loading">
         <li
           v-for="(option, i) in filtered_options"
           :key="i"
@@ -171,6 +172,24 @@
   width: 80px;
   height: 80px;
 }
+
+.lds-dual-ring-small {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+}
+
+.lds-dual-ring-small:after {
+  content: " ";
+  display: block;
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  border: 6px solid #3c4b64;
+  border-color: #3c4b64 transparent #3c4b64 transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+
 .lds-dual-ring:after {
   content: " ";
   display: block;
@@ -182,7 +201,17 @@
   border-color: #3c4b64 transparent #3c4b64 transparent;
   animation: lds-dual-ring 1.2s linear infinite;
 }
+
 @keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lds-dual-ring-small {
   0% {
     transform: rotate(0deg);
   }
@@ -250,11 +279,14 @@ export default {
     },
   },
   methods: {
+    searchChange() {
+      /* Only if all existing options have been exhausted */
+      this.$emit("search-change", this.search);
+    },
     optionValue(option) {
         if (typeof option === "string") {
             return option;
         }
-    
         return option[this.option_label];
     },
     isSelected(option) {
