@@ -98,6 +98,15 @@
             </CCol>
           </CRow>
           </CCardBody></CCard>
+          <CCard>
+            <CCardBody>
+            <h4><i class="fas fa-sm fa-chart-simple card-header-icon"/>Benchmark Settings</h4>
+          <CRow>
+            <CCol>
+              <CInput v-model.number="settings.benchmark_history_retention" label="Benchmark History Retention (days)" placeholder="365" description="The time in days until Benchmark Results are purged from the system"/>
+            </CCol>
+            </CRow>
+            </CCardBody></CCard>
           <CCard><CCardBody>
           <h4><i class="fas fa-sm fa-chart-line card-header-icon"/>Report Settings</h4>
           <CRow>
