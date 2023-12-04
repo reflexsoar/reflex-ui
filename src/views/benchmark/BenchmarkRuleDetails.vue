@@ -26,7 +26,7 @@
             <CBadge
               :color="getSeverityColor(benchmark_rule.severity)"
               class="tag metric-badge"
-              >Security Score
+              >Secure Score
               <h3>
                 {{ benchmark_rule.secure_score ? benchmark_rule.secure_score : 0 }}
               </h3></CBadge
@@ -212,21 +212,22 @@
                   </td>
                 </template>
                 <template #details="{ item }">
-                  <CCardBody v-if="Boolean(item._output_toggled) || Boolean(item._history_toggled)">
-                    <CCollapse :show="Boolean(item._output_toggled)" :duration="300">
-                      
-                        <h5>Output</h5>
-                        <pre class="rule-output">{{ item.output }}</pre>
-                      
+                  <CCardBody v-if="Boolean(item._output_toggled) || Boolean(item._history_toggled)" style="border-top:1px solid #cfcfcf">
+                    <CCollapse :show="Boolean(item._output_toggled)" :duration="300">                      
+                        <h5>Latest Output</h5>
+                        {{ item.assessed_at | moment('from') }} | <CBadge color="secondary">{{ item.assessed_at | moment }}</CBadge> | <CBadge :color="getStatusColor(item.status)">{{item.status}}</CBadge>
+                        <pre class="rule-output"  style="margin-top: 2px;">{{ item.output }}</pre>                      
                     </CCollapse>
                     <CCollapse :show="Boolean(item._history_toggled)" :duration="300">
-                        <h5>Compliance History</h5>
+                      <div class="history-container">
+                        <h5>History</h5>
                         <div class="text-center" v-if="history_loading">
                           <CSpinner/>
                         </div>
                         <timeline v-else>
-                          <timeline-item bg-color="#9dd8e0" style="padding-bottom:5px;" v-for="entry, i in benchmark_history[item.agent]" :hollow="true" :key="i">{{ entry.assessed_at | moment('from','now') }} - <CBadge :color="getStatusColor(entry.status)">{{entry.status}}</CBadge><pre>{{ entry.output }}</pre></timeline-item>
+                          <timeline-item bg-color="#9dd8e0" style="padding-bottom:0px; margin-top:10px;" v-for="entry, i in benchmark_history[item.agent]" :hollow="true" :key="i"><small>{{ entry.assessed_at | moment('from') }}</small> | <CBadge color="secondary">{{ entry.assessed_at | moment }}</CBadge> | <CBadge :color="getStatusColor(entry.status)">{{entry.status}}</CBadge><pre class="rule-output" style="margin-top: 2px;">{{ entry.output }}</pre></timeline-item>
                         </timeline>
+                      </div>
                     </CCollapse>
                   </CCardBody>
                 </template>
@@ -290,6 +291,11 @@
   line-height: 1.5;
   padding: 5px;
   padding-left: 10px;
+}
+
+.history-container {
+  max-height: 250px;
+  overflow-y: auto;
 }
 </style>
 
