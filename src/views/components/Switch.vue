@@ -9,8 +9,9 @@
         </label>
         <label class="switch-details">
             <span class="switch-label">{{ label }}</span><br>
-            {{ description }}
-        </label>
+            
+        </label><br>
+        <small class="text-muted">{{ description }}</small>
     </div>
 </template>
 
@@ -25,6 +26,7 @@
 
 .switch-details {
     margin-left: 60px;
+    padding-top: 7px;
     font-weight: normal !important;
 }
 
