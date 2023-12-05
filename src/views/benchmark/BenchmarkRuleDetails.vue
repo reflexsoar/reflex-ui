@@ -137,9 +137,9 @@
                     </CRow>
                     <CRow>
                       <CCol>
-                        <b>Passed</b>
+                        <b>Skipped</b>
                         <CBadge color="secondary" class="tag metric-badge">{{
-                          getRuleMetrics(benchmark_rule.rule_id).total
+                          getRuleMetrics(benchmark_rule.rule_id).skipped
                         }}</CBadge
                         ><br />
                       </CCol>
