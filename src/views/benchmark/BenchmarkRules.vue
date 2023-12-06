@@ -4,6 +4,10 @@
       <CCol>
         <h3 class="page-sub-header">Benchmark Rules</h3>
       </CCol>
+      <CCol col=3>
+        <h5>Secure Score</h5>
+        <h3>{{ potential_score }} / {{ actual_score }}</h3>
+      </CCol>
     </CRow>
     <CRow>
       <CCol>
@@ -51,6 +55,27 @@
                 }}</CBadge>
               </td>
             </template>
+            <template #secure_score="{ item }">
+              <td>
+                <CProgress
+                  :value="calculateRuleSecureScore(item)"
+                  :max="item.secure_score ? item.secure_score : 1"
+                  color="success"
+                >
+                  <CProgressBar
+                    :value="calculateRuleSecureScore(item)"
+                    :max="item.secure_score ? item.secure_score : 1"
+                    color="success"
+                  >
+                    <template #default>
+                      {{ calculateRuleSecureScore(item) }} / {{
+                        item.secure_score ? item.secure_score : 1
+                      }}
+                    </template>
+                  </CProgressBar>
+                </CProgress>
+              </td>
+            </template>
             <template #scoring="{ item }">
               <td>
                 <BenchmarkScore :score="getRuleMetrics(item.rule_id)" />
@@ -95,7 +120,31 @@ export default {
     TagBucket,
     BenchmarkScore,
   },
-  computed: mapState(["current_user", "benchmark_rules", "benchmark_metrics"]),
+  computed: {
+    ...mapState(["current_user", "benchmark_rules", "benchmark_metrics"]),
+    potential_score: function () {
+      let total_score = 0;
+      for(let rule in this.benchmark_rules) {
+        let score = this.benchmark_rules[rule].secure_score;
+        if (score == 0 || score == null) {
+          score = 1;
+        }
+        total_score += score;
+      }
+      return total_score;
+    },
+    actual_score: function () {
+      let total_score = 0;
+      for(let rule in this.benchmark_rules) {
+        let score = this.calculateRuleSecureScore(this.benchmark_rules[rule]);
+        if (score == 0 || score == null) {
+          score = 1;
+        }
+        total_score += score;
+      }
+      return total_score;
+    }
+  },
   created: function () {
     this.loading = true
     this.$store.dispatch("getBenchmarkRules", {}).then(() => {
@@ -104,7 +153,7 @@ export default {
       });
     });
     if (this.current_user.default_org) {
-      this.columns.splice(3, 0, "organization");
+      this.columns.splice(1, 0, "organization");
     }
   },
   data() {
@@ -120,6 +169,7 @@ export default {
         { key: "name", label: "Name", _style: "width: 40%" },
         "severity",
         "risk_score",
+        { key:"secure_score", label: "Achieved Score" },
         { key: "scoring", label: "Asset Compliance" },
         //{ key: "actions", label: "" },
       ],
@@ -135,6 +185,31 @@ export default {
     };
   },
   methods: {
+    calculateRuleSecureScore(item) {
+      // Find the total number of assets that have been scanned for this rule
+      let total_assets = 0;
+      let passed_assets = 0;
+
+      if (!this.benchmark_metrics[item.rule_id]) {
+        return 0;
+      }
+
+      let metrics = this.benchmark_metrics[item.rule_id];
+
+      total_assets = metrics.total;
+      passed_assets = metrics.passed;
+
+      if (total_assets == 0) {
+        return 0;
+      }
+
+      let secure_score = item.secure_score;
+      if (secure_score == 0 || secure_score == null) {
+        secure_score = 1;
+      }
+
+      return Math.round((passed_assets / total_assets) * secure_score);
+    },
     getRuleMetrics(rule_id) {
       if (!this.benchmark_metrics[rule_id]) {
         return this.empty_score;
