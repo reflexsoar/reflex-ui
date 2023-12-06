@@ -25,12 +25,12 @@
       <CTab title="Rule Sets"> </CTab>
       <CTab title="Exceptions"> </CTab>
       <CTab title="Frameworks">
-        <h3 class="page-sub-header">Frameworks</h3>
-        <CRow>
+        <CRow class="page-sub-header">
           <CCol>
-            <CCard>
-              <CCardBody>
-                <CInput
+            <h3>Frameworks</h3>
+          </CCol>
+          <CCol>
+            <CInput
                   v-model="control_search"
                   placeholder="Search controls by control number or name"
                 >
@@ -38,6 +38,13 @@
                     <CButton color="primary" @click="control_search = ''">Clear</CButton>
                   </template>
                 </CInput>
+          </CCol>
+        </CRow>
+        <CRow>
+          <CCol>
+            <CCard>
+              <CCardBody>
+                
                 <CTabs
                   variant="pills"
                   :vertical="{ navs: 'col-md-3', content: 'col-md-9' }"
