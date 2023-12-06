@@ -166,10 +166,14 @@ const state = {
   benchmark_metrics: {},
   agent_tag: {},
   agent_tags: [],
-  agent_logs: []
+  agent_logs: [],
+  benchmark_assets: []
 }
 
 const mutations = {
+  save_benchmark_assets(state, assets) {
+    state.benchmark_assets = assets
+  },
   save_agent_logs (state, logs) {
     state.agent_logs = logs
   },
@@ -5061,6 +5065,29 @@ const actions = {
           commit('save_benchmark_rule', resp.data)
           resolve(resp)
 
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getBenchmarkAssets({ commit }, { uuid }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/benchmark/rules/${uuid}/assets`, method: 'GET' })
+        .then(resp => { 
+          commit('save_benchmark_assets', resp.data.assets)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getBenchmarkAssetHistory({commit}, { uuid, asset_uuid }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/benchmark/rules/${uuid}/assets/${asset_uuid}/history`, method: 'GET' })
+        .then(resp => { 
+          resolve(resp)
         })
         .catch(err => {
           reject(err)

@@ -472,6 +472,12 @@
                         :multiple="true"
                         @tag="addSourceMonitorDataSource"
                       />
+                      <label style="margin-top: 10px">Autodiscover Data Streams<br>
+                        <CSwitch :checked.sync="rule.source_monitor_config.autodiscover_data_streams" label-on="Yes" label-off="No" color="success" /><br>
+                      <small class="text-muted">If enabled, non-system managed data streams will be automatically monitored.</small>  
+                      </label>
+                      
+                      
                     </CCol>
                     <CCol>
                       <label>Intel Lists</label><br />

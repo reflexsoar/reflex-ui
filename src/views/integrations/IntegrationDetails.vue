@@ -3,14 +3,16 @@
     <CCol>
       <CRow class="page-heading page-heading-row">
         <CCol>
-          <img :src="integration.logo" :alt="integration.name" class="integration-card-logo"  style="max-height: 50px" />
+          <h2>{{ integration.name }}</h2>
+          </CCol>
+        <CCol class="text-right">
+          <img :src="integration.logo" :alt="integration.name" class="integration-card-logo"  style="max-height: 50px;" />
         </CCol>
       </CRow>
       <CRow>
     <CCol>
       <CRow>
-        <CCol>
-          
+        <CCol>          
             <CTabs 
           addNavWrapperClasses="page-nav"
           addTabClasses="page-nav-tab-body"
@@ -360,7 +362,8 @@ export default {
                 enabled: false
             }
             for (let field in action.configuration) {
-                if(action.configuration[field].default == null && action.configuration[field].required) {
+                if(action.configuration[field].default == null  && action.configuration[field].required) {
+                    
                     if(action.configuration[field].type == "str") {
                         action.configuration[field].default = ""
                     } else if(action.configuration[field].type == "bool") {
@@ -371,11 +374,40 @@ export default {
                       action.configuration[field].default = []
                     }
                 }
+                
+                if (action.configuration[field].type == 'item-config') {
+                      
+                      configuration.actions[action.name]['properties'] = action.configuration[field].properties
+                      action.configuration[field].default = []                      
+                      for (let i in action.configuration[field].items) {
+                        let item = action.configuration[field].items[i]
+                        
+                        for (let prop in action.configuration[field].properties) {
+                          if(action.configuration[field].properties[prop].default == null || action.configuration[field].properties[prop].default == undefined) {
+                            if(action.configuration[field].properties[prop].type == "str") {
+                              action.configuration[field].properties[prop].default = ""
+                            } else if(action.configuration[field].properties[prop].type == "bool") {
+                              action.configuration[field].properties[prop].default = false
+                            } else if(action.configuration[field].properties[prop].type == "int") {
+                              action.configuration[field].properties[prop].default = 0
+                            } else if(action.configuration[field].properties[prop].type == "str-multiple") {
+                              action.configuration[field].properties[prop].default = []
+                            }
+                          }
+
+                          let prop_name = action.configuration[field].properties[prop].name
+
+                          this.$set(item, prop_name, JSON.parse(JSON.stringify(action.configuration[field].properties[prop].default)))
+
+                        }
+                        this.$set(item, 'enabled', false);
+                        this.$set(action.configuration[field].default, i, item)
+                      }
+                    }
 
                 if(action.configuration[field].default) {
-                    configuration.actions[action.name][field] = action.configuration[field].default
-                }
-                
+                  this.$set(configuration.actions[action.name], field, JSON.parse(JSON.stringify(action.configuration[field].default)))
+                }   
             }
         }
 
@@ -395,7 +427,7 @@ export default {
                 configuration.global_settings[field] = this.integration.manifest.configuration[field].default
             }
         }
-        return configuration
+        return JSON.parse(JSON.stringify(configuration))
     },
     configuredActionNames(actions) {
         // Return all the properties of the actions object

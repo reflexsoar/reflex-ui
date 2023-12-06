@@ -66,8 +66,22 @@
           <CRow>
             <CCol>
               <h4>Detection settings</h4>
-              <CInput v-model.number="settings.slow_detection_threshold" label="Slow Detection Threshold (milliseconds)" placeholder="1000"/>
-              <CInput v-model.number="settings.high_volume_threshold" label="High Volume Threshold (number of events)" placeholder="1000"/>
+            <CRow>
+            <CCol>
+              <CInput v-model.number="settings.slow_detection_warning_threshold" label="Slow Detection Warning Threshold" description="The time in milliseconds a Detection must exceed to generate a warning that is poorly peforming" placeholder="1000"/>
+              <CInput v-model.number="settings.high_volume_warning_threshold" label="High Volume Warning Threshold" description="The number of events a Detection must exceed on a single run to generate a warning that its loud." placeholder="1000"/>
+            </CCol>
+            <CCol>
+              <CInput v-model.number="settings.slow_detection_threshold" label="Slow Detection Disable Threshold" description="The time in milliseconds a Detection must exceed on a single query for the Detection to be disabled." placeholder="60"/>
+              <CInput v-model.number="settings.high_volume_threshold" label="High Volume Disable Threshold" description="The number of events a Detection must exceed on a single run for the Detection to be disabled." placeholder="10000"/>
+            </CCol>
+            </CRow>
+            </CCol>
+          </CRow>
+          <CRow>
+            <CCol>
+              <h4>Benchmark Settings</h4>
+              <CInput v-model.number="settings.benchmark_history_retention" label="Benchmark History Retention (days)" placeholder="365" description="The time in days until Benchmark Results are purged from the system"/>
             </CCol>
           </CRow>
           <CRow>
