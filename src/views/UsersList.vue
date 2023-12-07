@@ -24,6 +24,7 @@
         column-filter
         :sorter="{ external: false, resetable: true }"
         pagination
+        :responsive="false"
       >
         <template #organization-filter="{ item }">
           <RMultiCheck
@@ -86,7 +87,7 @@
       </CCard>
     </CCol>
 
-    <CModal :title="modal_title" :centered="true" size="lg" :show.sync="modal_status">
+    <CModal :title="modal_title" :centered="true" size="lg" :show.sync="modal_status" :close-on-backdrop="false">
       <CAlert :show.sync="this.error" color="danger" closeButton>
         {{ error_message }}
       </CAlert>

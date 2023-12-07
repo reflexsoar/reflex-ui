@@ -280,7 +280,7 @@
         </CCol>
       </CRow>
     </CCol>
-    <CModal title="Dismiss Event" color="danger" :centered="true" size="lg" :show.sync="dismissEventModal">
+    <CModal title="Dismiss Event" color="danger" :centered="true" size="lg" :show.sync="dismissEventModal" :close-on-backdrop="false">
       <CAlert :show.sync="error" color="danger">
         Failed to dismiss Event(s). {{error_message}}
       </CAlert>
