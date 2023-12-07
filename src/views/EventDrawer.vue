@@ -467,35 +467,41 @@
           </CTab>
           <CTab title="Integration Output">
             <CRow>
-              <CCol><CCardBody class="tab-container">
-                <CCard v-for="output,i in event_data.integration_output" :key="i">
-                  <CCardHeader>
+              <CCol><CCardBody class="tab-container" style="font-size: 12px">
+                <timeline>
+                  <timeline-item
+                    v-for="output,i in event_data.integration_output"
+                    :key="i"
+                    :timestamp="output.created_at"
+                    :tag="output.integration_name"
+                    :color="output.action == 'success' ? 'success' : 'danger'"
+                  >
                     <CRow>
                       <CCol>
-                        {{ output.integration_name }} - {{ output.action }} - {{ output.created_at | moment("from") }}
-                      </CCol>
-                      <CCol>
+                        <CBadge class="tag" size="sm" color="secondary"><b>Integration:</b> {{ output.integration_name }}</CBadge> |
+                        <CBadge class="tag" color="secondary"><b>Action:</b> {{ output.action }}</CBadge> |
+                        {{ output.created_at | moment('from') }} at {{ output.created_at | moment }}</CBadge>
                         <CButton
                           color="info"
                           class="float-right"
                           @click="toggleOutputShow(output)"
                           size="sm"
-                        >
-                          <CIcon
-                            :name="output.show !== undefined && output.show != false ? 'cil-chevron-top' : 'cil-chevron-bottom'"
-                          />
-                        </CButton>
+                        >{{ output.show ? 'Hide' : 'Show' }} Output</CButton>
                       </CCol>
                     </CRow>
-                  </CCardHeader>
-                    <CCollapse :show.sync="(output.show !== undefined && output.show != false) || output.show">
-                      <CCardBody class="tab-container">
-                        <vue-markdown v-if="output.output_format == 'markdown'">
-                          {{ output.output }}
-                        </vue-markdown>
-                      </CCardBody>
-                    </CCollapse>
-                  </CCard>
+                    <CRow>
+                      <CCol>
+                      <CCollapse :show="output.show">
+                        <CCardBody style="padding-top: 5px; padding-bottom: 5px;">
+                            <vue-markdown v-if="output.output_format == 'markdown'">
+                            {{ output.output }}
+                            </vue-markdown>
+                        </CCardBody>
+                      </CCollapse>
+                      </CCol>
+                    </CRow>
+                  </timeline-item>
+                </timeline>
                   </CCardBody>
               </CCol>
             </CRow>
@@ -533,6 +539,9 @@
 </template>
 
 <style scoped>
+
+/* Create a simple table style that only applies for tables inside the style-reset
+css class */
 .observable-value {
   max-width: 50ch;
   overflow-y: clip;
@@ -650,6 +659,8 @@ import TagBucket from "./components/TagBucket";
 import DetectionExclusionModal from "./DetectionExclusionModal";
 import CommentList from './collaboration/CommentList'
 import ObjectAttribute from "./components/ObjectAttribute";
+import { Timeline, TimelineItem, TimelineTitle } from 'vue-cute-timeline'
+import 'vue-cute-timeline/dist/index.css'
 
 export default {
   name: "EventDrawer",
@@ -666,7 +677,9 @@ export default {
     TagBucket,
     DetectionExclusionModal,
     CommentList,
-    ObjectAttribute
+    ObjectAttribute,
+    Timeline,
+    TimelineItem
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
