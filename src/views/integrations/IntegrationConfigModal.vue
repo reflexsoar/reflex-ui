@@ -30,7 +30,6 @@
               placeholder="Enter a description for this configuration"
               description="Providing a description for the configuration allows users to determine in more detail why this configuration exsits"
             />
-            {{ configuration }}
           </CTab>
           <CTab
             title="Global Settings"
