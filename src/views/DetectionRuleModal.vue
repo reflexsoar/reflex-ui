@@ -472,10 +472,8 @@
                         :multiple="true"
                         @tag="addSourceMonitorDataSource"
                       />
-                      <label style="margin-top: 10px">Autodiscover Data Streams<br>
-                        <CSwitch :checked.sync="rule.source_monitor_config.autodiscover_data_streams" label-on="Yes" label-off="No" color="success" /><br>
-                      <small class="text-muted">If enabled, non-system managed data streams will be automatically monitored.</small>  
-                      </label>
+                    
+                      
                       
                       
                     </CCol>
@@ -496,6 +494,20 @@
                       /><br />
                     </CCol>
                   </CRow>
+                  <CRow>
+                    <CCol>
+                      <label>Autodiscover Data Streams<br>
+                      </label><br><CSwitch :checked.sync="rule.source_monitor_config.autodiscover_data_streams" label-on="Yes" label-off="No" color="success" /><br>
+                      <small class="text-muted">If enabled, non-system managed data streams will be automatically monitored.</small>
+                    </CCol>
+                    <CCol>
+                      <CInput v-model.number="rule.source_monitor_config.ignore_data_streams_older_than_days"
+                              v-bind:disabled="rule.source_monitor_config.autodiscover_data_streams == false"
+                              label="Ignore Data Streams Older Than"
+                              description="The number of days to ignore data streams that have not been updated.  Setting to 0 will disable this setting."
+                      />
+                    </CCol>
+                  </CRow>                
 
                   <h5>Excluded Sources</h5>
                   <CRow>
