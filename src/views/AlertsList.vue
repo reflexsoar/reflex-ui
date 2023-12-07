@@ -354,7 +354,7 @@
         <!--<CButton color="warning" @click="dismissEventByFilter()" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>-->
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
-    </CModal>{{ selected_events}}
+    </CModal>
     <SaveViewModal :filter_string="saved_filter_string" :show.sync="show_save_view_modal"></SaveViewModal>
     <LoadViewModal :show.sync="show_load_view_modal"></LoadViewModal>
     <EventCommentModal :event="event_comment_target" :show.sync="event_comment_modal"></EventCommentModal>
