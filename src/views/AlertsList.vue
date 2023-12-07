@@ -354,7 +354,7 @@
         <!--<CButton color="warning" @click="dismissEventByFilter()" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>-->
         <CButton type="submit" form="dismissEventForm" color="danger" v-bind:disabled="dismiss_submitted"><CSpinner color="success" size="sm" v-if="dismiss_submitted"/><span v-else>Dismiss Event</span></CButton>
       </template>
-    </CModal>
+    </CModal>{{ selected_events}}
     <SaveViewModal :filter_string="saved_filter_string" :show.sync="show_save_view_modal"></SaveViewModal>
     <LoadViewModal :show.sync="show_load_view_modal"></LoadViewModal>
     <EventCommentModal :event="event_comment_target" :show.sync="event_comment_modal"></EventCommentModal>
@@ -1413,6 +1413,7 @@ export default {
             this.selected.push(event_uuid)
             this.selected_count += 1
           }
+          this.selected_events = this.filtered_events.filter((event) => this.selected.includes(event.uuid))
           return
         }
         let e = this.filtered_events.find(x => x.uuid == event_uuid)
