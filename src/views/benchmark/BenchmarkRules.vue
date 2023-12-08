@@ -28,7 +28,7 @@
                     item.name
                   }}</router-link></b
                 ><br />
-                <CBadge color="secondary" class="tag tag-sm"
+                <CBadge color="secondary" class="tag"
                   ><b>Version:</b> {{ item.version }}</CBadge
                 >
               </td>

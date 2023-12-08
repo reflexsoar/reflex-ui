@@ -504,7 +504,7 @@
                           <template #option="{ option }">
                             <b>{{ option.name }}</b
                             ><span v-if="option.is_global"
-                              >&nbsp;<CBadge color="secondary" class="tag tag-sm"
+                              >&nbsp;<CBadge color="secondary" class="tag"
                                 >Global Template</CBadge
                               ></span
                             ><br />

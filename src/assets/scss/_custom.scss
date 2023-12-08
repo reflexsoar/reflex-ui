@@ -1,6 +1,23 @@
 // Here you can add other styles
 @import "vue-select/src/scss/vue-select.scss";
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Inter');
+@import url('https://fonts.googleapis.com/css?family=Fira+Code');
+
+body {
+    font-family: Inter !important;
+    font-size: 0.7835rem;
+    //font-weight: 400;
+}
+
+
+.dropdown-item, .btn, .multiselect__tags, .multiselect__option, .form-control {
+    font-size: 0.8rem !important;
+}
+
+.btn-sm {
+    font-size: .7rem;
+}
 
 input {
     color: #768192;
@@ -323,7 +340,7 @@ a {
 .raw_log {
     width: 100%;
     min-height: 30rem;
-    font-family: "Lucida Console", Monaco, monospace;
+    font-family: "Fira Code";
     font-size: 0.8rem;
     line-height: 1.2;
     max-height: 400px
@@ -369,7 +386,25 @@ a {
     padding-bottom: 1px !important;
     font-weight: normal !important;
     line-height: 1.5 !important;
-    font-size: 80% !important;
+    font-size: 90% !important;
+}
+
+.badge {
+    font-size: 95% !important;
+}
+
+.badge-mitre {
+    font-size: 75% !important;
+    padding: 1px;
+}
+
+.badge-count {
+    font-size: 75% !important;
+    padding-top: 4px;
+}
+
+.small {
+    font-size: 90% !important;
 }
 
 .badge.tag {
@@ -379,7 +414,7 @@ a {
     padding-bottom: 4px;
     font-weight: normal;
     line-height: 1.5;
-    font-size: 0.76563rem
+    //font-size: 0.76563rem
 }
 
 .horizontal-separator {
@@ -392,7 +427,7 @@ label {
     /* muted text */
     color: #6B7485;
     //font-size: 90%;
-    font-weight: 500 !important;
+    font-weight: 600;
 }
 
 .danger-accent {

@@ -51,7 +51,7 @@
         <div v-else-if="!loading" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 280px)">
             <CRow class="tactic-header">
                 <CCol v-for="tactic in mitre_tactics" :key="tactic.shortname" class="text-center"
-                    style="font-size: 14px; margin-left: 4px;"><b>{{ tactic.name }}</b>
+                    style="margin-left: 4px;"><b>{{ tactic.name }}</b>
                     <div class="coverage-bar">
                         <div class="coverage-bar-active" :style="{'max-width': getActiveCoverage(tactic)+'%', 'width': getActiveCoverage(tactic)+'%'}">{{ getTechniquesWithDetectionsPerPhase(tactic) }}</div>
                         <div class="coverage-bar-total" :style="{'max-width': getPossibleCoverage(tactic)+'%', 'width': getPossibleCoverage(tactic)+'%'}">&nbsp;</div>
@@ -72,10 +72,10 @@
                                     </CRow>
                                     <CRow>
                                         <CCol col=4>{{ technique.external_id }}</CCol>
-                                        <CCol class="text-right" style="font-size: 14px;">
-                                        <CBadge v-if="getDetectionCount(technique) > 0" class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(getDetectionActiveCount(technique), technique), 'color': getDetectionFontColorFromScale(getDetectionActiveCount(technique), technique)}"><i class="fas fa-shield"></i> {{getDetectionActiveCount(technique)}}/{{ getDetectionCount(technique,
+                                        <CCol class="text-right">
+                                        <CBadge v-if="getDetectionCount(technique) > 0" class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(getDetectionActiveCount(technique), technique), 'color': getFontColor(getDetectionColorFromScale(getDetectionActiveCount(technique), technique))}"><i class="fas fa-shield"></i> {{getDetectionActiveCount(technique)}}/{{ getDetectionCount(technique,
                                             tactic.shortname)}}</CBadge>
-                                        <CBadge v-else class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(0), 'color': getFontColorFromScale(0)}"><i class="fas fa-shield"></i> 0</CBadge>&nbsp;
+                                        <CBadge v-else class="tag tag-sm" :style="{'background-color': getDetectionColorFromScale(0), 'color': getFontColor(getDetectionColorFromScale(0))}"><i class="fas fa-shield"></i> 0</CBadge>&nbsp;
                                         <CBadge
                                             v-if="technique.data_sources && technique.data_sources.length > 0"
                                             class="tag tag-sm"
@@ -195,6 +195,8 @@ import CRightDrawer from '../CRightDrawer.vue';
 // Import chroma.js
 import chroma from 'chroma-js';
 
+const Color = require("color");
+
 export default {
     name: "MitreCoverage",
     computed: {
@@ -247,6 +249,13 @@ export default {
         this.getMitreTechniques()
     },
     methods: {
+        getFontColor(color) {
+            if (Color(color).isDark()) {
+                return "white";
+            } else {
+                return "black";
+            }
+        },
         showDrawer(external_id) {
             if (this.$store.getters.mitreDrawerMinimize) {
                 this.$store.dispatch('getMitreTechnique', { external_id: external_id }).then(resp => {

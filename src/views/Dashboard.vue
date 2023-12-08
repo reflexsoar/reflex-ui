@@ -1,7 +1,7 @@
 <template>
 
-  <CCol xs="12" lg="12">
-    <CRow>
+  <div>
+    <CRow class="page-heading page-heading-no-nav">
       <CCol>
         <h1>Dashboard</h1>
       </CCol>
@@ -223,7 +223,7 @@
 
     </CTabs>
 
-  </CCol>
+  </div>
 
 </template>
 </style>

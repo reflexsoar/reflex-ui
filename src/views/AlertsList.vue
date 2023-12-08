@@ -111,7 +111,7 @@
                     <CCol v-else-if="title === 'observable value'" v-c-tooltip="{ content: `${encodeURI(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'observable', 'data_type':'observable','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
                     <CCol v-else-if="title === 'event rule'" v-c-tooltip="{ content: `${getEventRuleName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'event_rule', 'data_type':'event rule','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getEventRuleName(v)}}</span></CCol>
                     <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
-                    <CCol class="text-right" col="3"><CBadge color="secondary">{{k.toLocaleString('en-US')}}</CBadge></CCol>
+                    <CCol class="text-right" col="3"><CBadge color="secondary badge-count">{{k.toLocaleString('en-US')}}</CBadge></CCol>
                   </CRow>                
                 </div>
               </div>
@@ -261,7 +261,7 @@
                   
                 </CCol>
                 <CCol col="10" class="text-right">
-                  <small>
+                  
                     <CBadge class="tag" color="dark" v-if="event.category">{{ event.category ? event.category : 'Uncategorized' }}</CBadge>
                     <span class="separator">|</span>
                     <CBadge @click="toggleObservableFilter({'filter_type':'severity', 'data_type':'severity', 'value':event.severity})" class="tag tag-clickable" :color="getSeverityColor(event.severity)" size="sm">{{getSeverityText(event.severity)}}</CBadge>
@@ -269,10 +269,10 @@
                     <span v-if="!filteredBySignature() && event.related_events_count > 1" class="separator">|</span><CBadge class="tag tag-clickable" @click="toggleObservableFilter({'filter_type':'signature','data_type':'signature','value':event.signature})" v-if="!filteredBySignature() && event.related_events_count > 1" color="dark" size="sm">{{event.related_events_count}} occurrences <span v-if="event.related_events_count > 0"></span></CBadge>                    
                     <span class="separator">|</span><CBadge class="tag tag-clickable" @click="toggleObservableFilter({'filter_type':'status', 'data_type':'status', 'value': event.status.name})" size="sm" color="info">{{event.status.name}}</CBadge>
                     <span  v-if="event.status.closed && event.dismiss_reason"><span class="separator">|</span><b>Dismiss Reason:</b> {{event.dismiss_reason.title }}</span>
-                    <span class="separator">|</span>Created {{event.original_date | moment('LLLL') }}
-                    <span class="separator">|</span><b>Reference:</b> {{event.reference}}
+                    <span class="separator">|</span><CBadge class="tag">{{event.original_date | moment('LLLL') }}</CBadge>
+                    <span class="separator">|</span><CBadge class="tag"><b>Reference:</b> {{event.reference}}</CBadge>
                     <span class="separator">|</span><CIcon name='cilVector' v-c-tooltip="{content: 'Event Rules Matched'}"></CIcon> {{event.event_rules ? event.event_rules.length : 0 }}
-                    <span v-if="current_user.default_org"><span class="separator">|</span></span></small><span style="cursor: pointer" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"><OrganizationBadge v-if="current_user.default_org" :uuid="event.organization" color="warning" /></span>
+                    <span v-if="current_user.default_org"><span class="separator">|</span></span><span style="cursor: pointer" @click="toggleObservableFilter({'filter_type':'organization','data_type':'organization','value':event.organization})"><OrganizationBadge v-if="current_user.default_org" :uuid="event.organization" color="warning" /></span>
                 </CCol>
               </CRow>
             </CCardFooter>
@@ -426,8 +426,8 @@ a {
 }
 
 .separator {
-  margin-left: 10px;
-  margin-right: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 /* required class */

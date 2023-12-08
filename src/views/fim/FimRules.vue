@@ -43,10 +43,10 @@
           >
             <template #name="{ item }">
               <td>
-                <CBadge v-if="item.active" color="success" class="tag tag-sm" size="sm"
+                <CBadge v-if="item.active" color="success" class="tag" size="sm"
                   >Active</CBadge
                 >
-                <CBadge v-if="!item.active" color="danger" class="tag tag-sm" size="sm"
+                <CBadge v-if="!item.active" color="danger" class="tag" size="sm"
                   >Disabled</CBadge
                 >
                 &nbsp;{{ item.name }}

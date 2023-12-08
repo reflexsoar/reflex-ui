@@ -330,11 +330,11 @@
                     <span>{{ item.parent_process_name }}</span>
                     <br />
                     <span class="text-muted"
-                      ><CBadge color="secondary " class="tag tag-sm">Path</CBadge
+                      ><CBadge color="secondary " class="tag">Path</CBadge
                       >&nbsp;<small>{{ item.parent_process_path }}</small></span
                     ><br />
                     <span class="text-muted"
-                      ><CBadge color="secondary " class="tag tag-sm">User</CBadge
+                      ><CBadge color="secondary " class="tag">User</CBadge
                       >&nbsp;<small>{{ item.parent_process_user }}</small></span
                     >
                   </td>
@@ -344,11 +344,11 @@
                     <span>{{ item.process_name }}</span
                     ><br />
                     <span class="text-muted"
-                      ><CBadge color="secondary " class="tag tag-sm">Path</CBadge
+                      ><CBadge color="secondary " class="tag">Path</CBadge
                       >&nbsp;<small>{{ item.process_path }}</small></span
                     ><br />
                     <span class="text-muted"
-                      ><CBadge color="secondary " class="tag tag-sm">User</CBadge
+                      ><CBadge color="secondary " class="tag">User</CBadge
                       >&nbsp;<small>{{ item.process_user }}</small></span
                     >
                   </td>

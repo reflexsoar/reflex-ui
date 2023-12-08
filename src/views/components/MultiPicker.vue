@@ -26,7 +26,7 @@
             </input>
           </div>
           <div>
-            <CBadge v-if="showCount" class="tag tag-sm" color="secondary">{{ option.count ? option.count : 0 }}</CBadge>
+            <CBadge v-if="showCount" class="tag" color="secondary">{{ option.count ? option.count : 0 }}</CBadge>
           </div>
           
         </li>

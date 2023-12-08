@@ -114,9 +114,9 @@
                     >
                       <template #name="{ item }">
                         <td>
-                          <CBadge class="tag tag-sm" color="success" v-if="item.active"
+                          <CBadge class="tag" color="success" v-if="item.active"
                             >Active</CBadge
-                          ><CBadge class="tag tag-sm" color="danger" v-else
+                          ><CBadge class="tag" color="danger" v-else
                             >Inactive</CBadge
                           >&nbsp;<b>{{ item.name }}</b>
                         </td>
