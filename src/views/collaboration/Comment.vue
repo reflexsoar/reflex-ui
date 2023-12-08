@@ -30,7 +30,7 @@
               <CCol>
 
                   <CCardBody style="padding-top: 5px; padding-bottom: 5px;">
-                  <viewer :initialValue="comment.comment" />
+                    <vue-markdown>{{ comment.comment }}</vue-markdown>
                   </CCardBody>
 
               </CCol>
