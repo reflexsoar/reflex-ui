@@ -82,6 +82,7 @@
               <CInput v-model="field_search" placeholder="Search fields" />
               <div class="field-list-wrapper">
                 <div class="field-group-header">Selected Fields</div>
+                <draggable v-model="tab.fields" group="fields" @start="drag=true" @end="drag=false">
                 <div
                   v-for="(field, i) in tab.fields"
                   :key="i"
@@ -89,12 +90,7 @@
                   @click="deselectField(tab, field)"
                 >
                   <div class="flex-grid field-picker-item text-left">
-                    <div class="d-col-1">
-                      <div class="reflex-badge reflex-badge-info">
-                        {{ field.type.length > 2 ? field.type[0] : field.type }}
-                      </div>
-                    </div>
-                    <div class="d-col-10">
+                    <div class="d-col-11">
                       <div class="field-name">{{ field.name }}</div>
                     </div>
                     <div class="d-col-1">
@@ -104,6 +100,7 @@
                     </div>
                   </div>
                 </div>
+                </draggable>
                 <div class="field-group-header">Available</div>
                 <div
                   v-for="field in filtered_fields(tab)"
@@ -112,12 +109,7 @@
                   @click="selectField(tab, field)"
                 >
                   <div class="flex-grid field-picker-item text-left">
-                    <div class="d-col-1">
-                      <div class="reflex-badge reflex-badge-info">
-                        {{ field.type.length > 2 ? field.type[0] : field.type }}
-                      </div>
-                    </div>
-                    <div class="d-col-10">
+                    <div class="d-col-11">
                       <div class="field-name">{{ field.name }}</div>
                     </div>
                     <div class="d-col-1">
@@ -474,7 +466,7 @@
 <script>
 import VueJsonPretty from "vue-json-pretty";
 import "vue-json-pretty/lib/styles.css";
-
+import draggable from 'vuedraggable'
 import SelectInput from "./components/SelectInput.vue";
 
 export default {
@@ -482,6 +474,7 @@ export default {
   components: {
     VueJsonPretty,
     SelectInput,
+    draggable
   },
   data() {
     return {
@@ -616,9 +609,7 @@ export default {
   },
 
   methods: {
-    msg() {
-      console.log("CLICKED!");
-    },
+    
     column_fields(tab) {
       let locked_fields = [{ key: "created_at", label: "@timestamp" }];
       if (tab.fields.length > 0) {
@@ -644,11 +635,11 @@ export default {
         if (this.field_search.length > 0) {
           return (
             field.name.toLowerCase().includes(this.field_search.toLowerCase()) &&
-            !tab.fields.includes(field)
+            !tab.fields.filter((f) => f.name === field.name).length > 0
           );
         } else {
           // If the search string is empty, only return fields that are not selected
-          return !tab.fields.includes(field);
+          return !tab.fields.filter((f) => f.name === field.name).length > 0;
         }
       });
     },
@@ -662,7 +653,6 @@ export default {
           if (!keys.includes(key)) {
             keys.push(key);
             fields.push({
-              type: "text",
               name: key,
             });
           }
@@ -676,7 +666,6 @@ export default {
       });
     },
     addSearch() {
-      console.log(this.active_tab);
       // Add a new tab
       this.search_tabs.push({
         name: "New search",
@@ -769,13 +758,12 @@ export default {
       return out;
     },
     selectField(tab, field) {
-      if (!tab.fields.includes(field)) {
+      // If the field is not already selected, add it
+      if (!tab.fields.map((f) => f.name).includes(field.name)) {
         tab.fields.push(field);
       }
     },
     deselectField(tab, field) {
-      console.log(tab);
-      console.log(field);
       tab.fields = tab.fields.filter((item) => {
         return item.name !== field.name;
       });
