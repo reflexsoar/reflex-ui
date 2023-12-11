@@ -702,7 +702,6 @@ html:not([dir="rtl"]) nav>.pagination {
 }
 
 .page-nav .nav-tabs .nav-link:hover {
-
     border-bottom: 3px solid $info !important;
 }
 
@@ -714,12 +713,14 @@ html:not([dir="rtl"]) nav>.pagination {
 }
 
 .page-nav-tab-body {
-    //border-radius: 5px;
-    //margin-right: 5px;
-    //margin-left: 5px;
     padding: 5px;
-    //background-color: #fff;
-    //border: 1px solid #d8dbe0;
+}
+
+
+
+.page-nav-tab > .button-tab > .nav-link {
+    padding-top: 6px;
+    padding-bottom: 5px;
 }
 
 .page-sub-header {
