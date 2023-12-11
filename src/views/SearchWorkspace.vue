@@ -81,20 +81,20 @@
             <div class="d-col-2 text-left">
               <CInput v-model="field_search" placeholder="Search fields" />
               <div class="field-list-wrapper">
-                <div class="field-group-header">Selected Fields</div>
-                <draggable v-model="tab.fields" group="fields" @start="drag=true" @end="drag=false">
+                <div class="field-group-header">Selected Fields <span v-if="tab.fields.length > 0" class="reset-fields" @click="tab.fields = []">| Clear All</span></div>
+                <draggable v-model="tab.fields" group="selected_fields" @start="drag=true" @end="drag=false">
                 <div
                   v-for="(field, i) in tab.fields"
                   :key="i"
                   :ref="field.name"
-                  @click="deselectField(tab, field)"
+                  
                 >
                   <div class="flex-grid field-picker-item text-left">
                     <div class="d-col-11">
                       <div class="field-name">{{ field.name }}</div>
                     </div>
                     <div class="d-col-1">
-                      <div class="field-picker-hide">
+                      <div class="field-picker-hide" @click="deselectField(tab, field)">
                         <i class="fas fa-eye-slash" />
                       </div>
                     </div>
@@ -102,18 +102,19 @@
                 </div>
                 </draggable>
                 <div class="field-group-header">Available</div>
+
                 <div
                   v-for="field in filtered_fields(tab)"
                   :key="field.name"
                   :ref="field.name"
-                  @click="selectField(tab, field)"
+                  
                 >
                   <div class="flex-grid field-picker-item text-left">
                     <div class="d-col-11">
                       <div class="field-name">{{ field.name }}</div>
                     </div>
                     <div class="d-col-1">
-                      <div class="field-picker-show">
+                      <div class="field-picker-show" @click="selectField(tab, field)">
                         <i class="fas fa-eye" />
                       </div>
                     </div>
@@ -131,7 +132,7 @@
                         <th
                           v-for="field in column_fields(tab)"
                           :key="field.key"
-                          class="field-header"
+                          class="fitwidth field-header"
                         >
                           {{ field.label }}
                           <span class="field-value-controls">
@@ -160,12 +161,10 @@
                         :key="result._id"
                         v-else-if="tab.search_complete"
                       >
-                        <td class="fitwidth">
-                          <label
-                            ><i
+                        <td class="fitwidth"><i
                               class="fa-solid fa-up-right-and-down-left-from-center expand-icon"
                             ></i
-                          ></label>
+                          >
                           <input type="checkbox" class="row-checkbox" />
                         </td>
                         <td
@@ -182,11 +181,10 @@
                             </span>
                           </span>
                           <span v-else>
-                            <span class="reflex-badge" :ref="i + '.' + field.key">{{
+                            <span :ref="i + '.' + field.key">{{
                               result[field.key]
                             }}</span>
                             <span class="field-value-controls">
-                              <label>
                                 <button
                                   class="field-value-control"
                                   @click="copyValue(result[field.key], i, field.key)"
@@ -201,7 +199,6 @@
                                 >
                                   <i class="fas fa-filter" />
                                 </button>
-                              </label>
                             </span>
                           </span>
                         </td>
@@ -328,6 +325,7 @@
   background-color: light-grey;
 }
 
+.log-table th.fitwidth,
 .log-table td.fitwidth {
   /* Make the table cells expand to fit the content */
   width: 1px;
@@ -348,9 +346,14 @@
   margin-left: 5px;
 }
 
+.field-header,
 .field-value {
   font-family: "Roboto Mono";
   font-size: 12px;
+}
+
+.field-header {
+  font-weight: 600;
 }
 
 .expand-icon {
@@ -362,6 +365,11 @@
 /* Show the expand icon when it's cell is hovered over */
 .log-table tr:hover .expand-icon {
   opacity: 1;
+}
+
+.reset-fields {
+  font-weight: normal;
+  cursor: pointer;
 }
 
 .flex-wrapper {
