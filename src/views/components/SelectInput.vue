@@ -80,6 +80,7 @@
 .content {
   position: absolute;
   z-index: 2;
+  min-width: 400px;
   width: 100%;
   display: none;
   margin-top: 5px;
