@@ -947,11 +947,14 @@ export default {
         tab.pages = resp.data.pages;
         tab.aggregations = resp.data.response.aggregations;
         tab.search_complete = true;
+        tab.search_failed = false;
+        tab.failure_reason = "";
       }).catch((err) => {
         console.log(err)
         tab.search_complete = true;
         tab.search_failed = true;
         tab.failure_reason = err.response.data.message;
+        tab.results = [];
       });
     },
     flatten: function (obj) {
