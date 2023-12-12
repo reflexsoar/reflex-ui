@@ -152,13 +152,21 @@
               </div>
             </div>
             <div class="d-col-10 text-left search-results">
-              <CCard>
+              
                 <div class="table-wrapper">
                   <table class="log-table">
-                    <thead>
+                    <thead >
+                      <tr >
+                        <th colspan="100%" class="table-controls">
+                        <button class="field-value-control" @click="fullScreenTable(tab)">
+                      <i v-if="!tab.full_screen_log_table" class="fas fa-maximize"></i>
+                      <i v-if="tab.full_screen_log_table" class="fas fa-minimize"></i>
+                    </button>
+                        </th>
+                      </tr>
                       <tr>
-                        <th class="fitwidth"></th>
-                        <th
+                        <th class="fitwidth" scope="col"></th>
+                        <th scope="col"
                           v-for="field in column_fields(tab)"
                           :key="field.key"
                           class="fitwidth field-header"
@@ -230,9 +238,12 @@
                             </span>
                           </span>
                           <span v-else>
-                            <span :ref="i + '.' + field.key">{{ result[field.key] }}</span
-                            >&nbsp;
-                            <span class="field-value-controls">
+                            <span v-if="result[field.key] == undefined" class="empty-value">empty</span>
+                            <span :ref="i + '.' + field.key" v-else>{{ result[field.key] }}</span
+                            >
+                            
+                            &nbsp;
+                            <span class="field-value-controls" v-if="result[field.key] != undefined">
                               <button
                                 class="field-value-control"
                                 @click="copyValue(result[field.key], i, field.key)"
@@ -252,9 +263,27 @@
                         </td>
                       </tr>
                     </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="100%" class="table-controls">
+                          <span class="pagination">
+                            <span v-bind:disabled="tab.current_page > 1" class="page-number" v-on:click="nextPage(tab, tab.current_page-1)">
+                             <i class="fa-solid fa-chevron-left"></i>
+                            </span>
+                            <span v-for="page in maxPages(tab)" >
+                              <button class="page-number" v-bind:class="page == tab.current_page ? 'active' : null" v-on:click="nextPage(tab, page)">
+                                {{ page }}
+                              </button>
+                            </span>
+                            <span v-bind:disabled="tab.current_page < maxPages(tab)" class="page-number" v-on:click="nextPage(tab, tab.current_page+1)">
+                              <i class="fa-solid fa-chevron-right"></i>
+                              </span>
+                          </span>
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
-              </CCard>
             </div>
           </div>
         </section>
@@ -265,6 +294,32 @@
 </template>
 
 <style scoped>
+
+.table-controls {
+  background-color: #efefef;
+  border-bottom: 1px solid #ddd;
+  padding: 5px;
+  font-size: 14px;
+  position: sticky;
+}
+
+.table-wrapper.full-screen {
+  /* Bring the log wrapper to the front and make it full screen */
+  z-index: 20000;
+  position: fixed;
+  display: block;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  min-height: 100vh;
+}
+
+.empty-value {
+  color: #aaa;
+}
+
 .field-list-wrapper {
   overflow-x: hidden;
   overflow-y: auto;
@@ -319,7 +374,7 @@
 
 .field-value-controls {
   opacity: 0;
-  transition: opacity 1s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .field-header:hover .field-value-controls,
@@ -337,6 +392,38 @@
   margin-right: 5px;
   font-size: 12px;
 }
+
+.pagination {
+  font-size: 13px;
+}
+
+.page-number {
+  padding: 2px 5px;
+  margin: 0 2px;
+  cursor: pointer;
+  line-height: 1.2;
+  font-weight: 500;
+  border: 0;
+}
+
+.page-number:focus {
+  outline: none;
+}
+
+.page-chevron {
+  padding: 2px 5px;
+  margin: 0 2px;
+  cursor: pointer;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.page-number.active {
+  background-color: #3c4b64;
+  color: #fff;
+  border-radius: 2px;
+}
+
 
 /* Hide the focus outline on the buttons */
 .field-value-control:focus {
@@ -362,7 +449,7 @@
   overflow-x: auto;
   overflow-y: auto;
   min-height: calc(100vh - 310px);
-
+  background-color: #fff;
   max-height: calc(100vh - 310px);
 }
 
@@ -370,6 +457,7 @@
   margin: auto;
   border-collapse: collapse;
   width: 100%;
+  height: 100%;
   max-width: 100%;
 }
 
@@ -379,12 +467,19 @@
   top: 0;
   background-color: #fff;
   z-index: 1;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ddd;
+}
+
+.log-table tfoot {
+  /* Make sticky footer */
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 1;
+  border-top: 1px solid #ddd;
 }
 
 .log-table tbody {
-  overflow-y: scroll;
-  overflow-x: scroll;
   width: 100%;
   height: 100% !important;
 }
@@ -393,6 +488,7 @@
 .log-table td {
   text-align: left;
   padding: 8px;
+  border: 1px solid #ddd;
 }
 
 .log-table tr {
@@ -625,6 +721,8 @@ export default {
         failure_reason: "",
           pages: 0,
           current_page: 1,
+          hide_empty_fields: false,
+        full_screen_log_table: false
         },
         {
           name: "User logins from new countries",
@@ -644,6 +742,8 @@ export default {
         failure_reason: "",
           pages: 0,
           current_page: 1,
+          hide_empty_fields: false,
+        full_screen_log_table: false
         },
       ],
       results: [],
@@ -725,6 +825,20 @@ export default {
   },
 
   methods: {
+    maxPages(tab) {
+      // Return the max number of pages based on the number of results and the page size of 100
+      return Math.ceil(tab.results.length / 100);
+    },
+    nextPage(tab, page) {
+      if(page < 1) {
+        page = 1
+      }
+
+      if(page > this.maxPages(tab)) {
+        page = this.maxPages(tab)
+      }
+      tab.current_page = page;
+    },
     view_log(entry) {
       this.$store.commit("set", [
         "logDrawerMinimize",
@@ -743,6 +857,20 @@ export default {
         data.data.push(tab.aggregations.time_buckets.buckets[bucket].doc_count);
       }
       return [data];
+    },
+    fullScreenTable(tab) {
+      // Find the table-wrapper and add the full-screen class if it doesn't exist, otherwise remove it
+      let log_wrapper = document.querySelector(".table-wrapper");
+      console.log(log_wrapper);
+      if (!log_wrapper.classList.contains("full-screen")) {
+        tab.full_screen_log_table = true;
+        log_wrapper.classList.add("full-screen");
+      } else {
+        log_wrapper.classList.remove("full-screen");
+        tab.full_screen_log_table = false;
+      }
+
+      
     },
     hide_field_selection() {
       // Find the field-selection-toggle and remove the hide class without using refs
@@ -790,7 +918,7 @@ export default {
       });
     },
     filtered_fields(tab) {
-      return this.available_fields(tab).filter((field) => {
+      let fields = this.available_fields(tab).filter((field) => {
         // If the search string is not empty, filter the fields by the search string and selected fields
         if (this.field_search.length > 0) {
           return (
@@ -801,6 +929,11 @@ export default {
           // If the search string is empty, only return fields that are not selected
           return !tab.fields.filter((f) => f.name === field.name).length > 0;
         }
+      });
+
+      // Sort the fields alphabetically
+      return fields.sort((a, b) => {
+        return a.name.localeCompare(b.name);
       });
     },
     available_fields(tab) {
@@ -821,8 +954,15 @@ export default {
       return fields;
     },
     flattened_results(tab) {
-      return tab.results.map((result) => {
-        return this.flatten_json(result["_source"]);
+      /* Slice the results by the current page e.g 0-100, 100-200, etc */
+      let tab_results = tab.results.slice(
+        (tab.current_page - 1) * 100,
+        tab.current_page * 100
+      );
+
+      /* Flatten the results */
+      return tab_results.map((result) => {
+        return this.flatten_json(result._source);
       });
     },
     addSearch() {
@@ -844,6 +984,8 @@ export default {
         failure_reason: "",
         pages: 0,
         current_page: 1,
+        hide_empty_fields: false,
+        full_screen_log_table: false
       });
 
       this.active_tab = this.search_tabs.length - 1;
