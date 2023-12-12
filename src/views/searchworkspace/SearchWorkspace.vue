@@ -51,6 +51,13 @@
                     >
                     Search on change
                   </CDropdownItem>
+                  <CDropdownItem @click="tab.show_chart = !tab.show_chart">
+                    <!-- show a checkmark if the search on change is enabled -->
+                    <span v-if="tab.show_chart"
+                      ><i class="fas fa-check"></i>&nbsp;</span
+                    >
+                    Show chart
+                  </CDropdownItem>
                 </CDropdown>
               </CButtonGroup>
             </div>
@@ -65,13 +72,13 @@
                 v-for="(filter, i) in tab.filters"
                 :key="i"
               >
-                <span class="reflex-badge reflex-badge-secondary tag-list">
+                <span class="reflex-filter reflex-badge-secondary tag-list">
                   <b>{{ filter.exclude ? "NOT" : "" }}</b> {{ filter.field }}:
                   {{ filter.value }}
                   <i
                     class="fas fa-times"
                     @click="removeFilter(tab, i)"
-                    style="cursor: pointer"
+                    style="cursor: pointer; margin-left:2px;"
                   ></i>
                 </span>
               </li>
@@ -115,7 +122,7 @@
                             class="field-picker-hide"
                             @click="deselectField(tab, field)"
                           >
-                            <i class="fas fa-eye-slash" />
+                            <i class="fas fa-times" />
                           </div>
                         </div>
                       </div>
@@ -152,7 +159,57 @@
               </div>
             </div>
             <div class="d-col-10 text-left search-results">
-              
+                
+                  <div class="flex-grid" style="margin-bottom: 10px" v-if="tab.show_chart">
+                    <div class="d-col-12" style="background-color: #fff; border: 1px solid #ddd; padding: 10px">
+              <CChartBar
+                :datasets="timeline_datasets(tab)"
+                :labels="timeline_datalabels(tab)"
+                style="height: 150px; width:100%"
+                :options="{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  legend: {
+                    display: false
+                  },
+                  scales: {
+                    xAxes: [
+                      {
+                        type: 'time',
+                        time: {
+                          unit: 'day',
+                          displayFormats: {
+                            day: 'MMM D'
+                          }
+                        },
+                        gridLines: {
+                          display: true,
+                        },
+                        ticks: {
+                          display: true,
+                          autoSkip: true,
+                        },
+                      },
+                    ],
+                    yAxes: [
+                      {
+                        beginAtZero: true,
+                        gridLines: {
+                          display: true,
+                        },
+                        ticks: {
+                          display: true,
+                          autoSkip: true,
+                          maxTicksLimit: 5
+                        },
+                      },
+                    ],
+                  },
+                }"
+              />
+          </div>
+          
+          </div>
                 <div class="table-wrapper">
                   <table class="log-table">
                     <thead >
@@ -180,7 +237,7 @@
                               class="field-value-control"
                               @click="deselectField(tab, { name: field.key })"
                             >
-                              <i class="fas fa-eye-slash" />
+                              <i class="fas fa-times" />
                             </button>
                           </span>
                         </th>
@@ -228,7 +285,7 @@
                           v-for="field in column_fields(tab)"
                           :key="field.key"
                           class="fitwidth field-value"
-                        >
+                        > 
                           <span v-if="field.key === '_'">
                             <span v-for="(v, k) in result" :key="k">
                               <span class="reflex-badge reflex-badge-secondary">{{
@@ -266,7 +323,7 @@
                     <tfoot>
                       <tr>
                         <td colspan="100%" class="table-controls">
-                          <span class="pagination">
+                          <span class="pagination"> 
                             <span v-bind:disabled="tab.current_page > 1" class="page-number" v-on:click="nextPage(tab, tab.current_page-1)">
                              <i class="fa-solid fa-chevron-left"></i>
                             </span>
@@ -278,6 +335,7 @@
                             <span v-bind:disabled="tab.current_page < maxPages(tab)" class="page-number" v-on:click="nextPage(tab, tab.current_page+1)">
                               <i class="fa-solid fa-chevron-right"></i>
                               </span>
+                            <span class="result-count"> | {{ tab.results.length }} results</span>
                           </span>
                         </td>
                       </tr>
@@ -350,7 +408,7 @@
 }
 
 .search-results.expand {
-  width: calc(100% - 30px);
+  width: calc(100% - 50px);
 }
 
 .field-selector.shrink {
@@ -424,6 +482,9 @@
   border-radius: 2px;
 }
 
+.result-count {
+  font-family: Inter;
+}
 
 /* Hide the focus outline on the buttons */
 .field-value-control:focus {
@@ -432,6 +493,18 @@
 
 .reflex-badge {
   font-size: 12px !important;
+}
+
+.reflex-filter {
+  background-color: #3c4b64;
+  color: #fff;
+  border-radius: 2px;
+  padding: 2px 5px;
+  margin: 0 2px;
+  cursor: pointer;
+  line-height: 1.2;
+  font-weight: 500;
+  padding: 6px 8px 6px 6px;
 }
 
 .field-picker-item {
@@ -554,8 +627,6 @@
 .flex-wrapper {
   margin-left: -30px;
   margin-right: -30px;
-
-  margin-bottom: 0.5rem;
 }
 
 .flex-grid {
@@ -722,7 +793,9 @@ export default {
           pages: 0,
           current_page: 1,
           hide_empty_fields: false,
-        full_screen_log_table: false
+        full_screen_log_table: false,
+        timefield: '@timestamp',
+        show_chart: true
         },
         {
           name: "User logins from new countries",
@@ -743,7 +816,9 @@ export default {
           pages: 0,
           current_page: 1,
           hide_empty_fields: false,
-        full_screen_log_table: false
+        full_screen_log_table: false,
+        timefield: '@timestamp',
+        show_chart: true
         },
       ],
       results: [],
@@ -851,17 +926,36 @@ export default {
       let data = {
         data: [],
         backgroundColor: "#3c4b64",
-        label: "Hits",
+        label: "Hits"
       };
+
+      if(tab.aggregations == undefined) {
+        return [data]
+      }
+
       for (let bucket in tab.aggregations.time_buckets.buckets) {
         data.data.push(tab.aggregations.time_buckets.buckets[bucket].doc_count);
       }
+
       return [data];
+    },
+    timeline_datalabels(tab) {
+      // Return the tab.aggregations.time_buckets.buckets in a format that can be used by the timeline chart
+      let data = [];
+
+      if(tab.aggregations == undefined) {
+        return data
+      }
+
+      for (let bucket in tab.aggregations.time_buckets.buckets) {
+        data.push(tab.aggregations.time_buckets.buckets[bucket].key_as_string);
+      }
+
+      return data;
     },
     fullScreenTable(tab) {
       // Find the table-wrapper and add the full-screen class if it doesn't exist, otherwise remove it
       let log_wrapper = document.querySelector(".table-wrapper");
-      console.log(log_wrapper);
       if (!log_wrapper.classList.contains("full-screen")) {
         tab.full_screen_log_table = true;
         log_wrapper.classList.add("full-screen");
@@ -899,7 +993,7 @@ export default {
       document.querySelector(".field-selector").classList.remove("shrink");
     },
     column_fields(tab) {
-      let locked_fields = [{ key: "created_at", label: "@timestamp" }];
+      let locked_fields = [{ key: tab.timefield, label: tab.timefield }];
       if (tab.fields.length > 0) {
         return [
           ...locked_fields,
@@ -951,6 +1045,11 @@ export default {
           }
         });
       });
+
+      // Remove the tabs timefield from the list
+      fields = fields.filter((field) => {
+        return field.name !== tab.timefield;
+      });
       return fields;
     },
     flattened_results(tab) {
@@ -985,7 +1084,9 @@ export default {
         pages: 0,
         current_page: 1,
         hide_empty_fields: false,
-        full_screen_log_table: false
+        full_screen_log_table: false,
+        timefield: '@timestamp',
+        show_chart: true
       });
 
       this.active_tab = this.search_tabs.length - 1;
@@ -1088,15 +1189,18 @@ export default {
         tab.results = resp.data.response.hits.hits;
         tab.pages = resp.data.pages;
         tab.aggregations = resp.data.response.aggregations;
+        tab.timefield = resp.data.timefield;
         tab.search_complete = true;
         tab.search_failed = false;
         tab.failure_reason = "";
+        tab.current_page = 1;
       }).catch((err) => {
-        console.log(err)
         tab.search_complete = true;
         tab.search_failed = true;
         tab.failure_reason = err.response.data.message;
+        tab.timefield = '@timestamp';
         tab.results = [];
+        tab.current_page = 1;
       });
     },
     flatten: function (obj) {
