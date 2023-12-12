@@ -11,9 +11,48 @@
     </div>
     <div class="content">
       <div class="search">
-        <input type="text" placeholder="Search..." v-model="search" @input="searchChange" />
+        <input
+          type="text"
+          placeholder="Search..."
+          v-model="search"
+          @input="searchChange"
+          @keydown.enter="select(search)"
+        />
       </div>
-      <ul class="options" v-if="filtered_options.length > 0 && !loading">
+      <ul
+        class="options"
+        v-if="
+          grouped && ((filtered_options.length > 0 && !loading) || (!loading && taggable))
+        "
+      >
+        <span v-for="(data, group) in filtered_options">
+          <span class="group-header">{{ data.name }}</span>
+          <li
+            v-for="(option, i) in data.options"
+            :key="i"
+            class="option"
+            @click="select(option)"
+            :class="{ selected: isSelected(option) }"
+          >
+            <slot name="option" :option="option">{{ optionValue(option) }}</slot>
+          </li>
+        </span>
+        <span v-if="taggable && search.length > 0" class="group-header">{{ custom_options_group }}</span>
+        <li
+          v-if="taggable && search.length > 0 && !notValidOption(search)"
+          @click="select(search)"
+          class="option taggable-option"
+        >
+          <slot name="option" :option="search">{{ search }}</slot>
+        </li>
+      </ul>
+      <ul
+        class="options"
+        v-else-if="
+          ((filtered_options.length > 0 && !loading) || (!loading && taggable)) &&
+          !grouped
+        "
+      >
         <li
           v-for="(option, i) in filtered_options"
           :key="i"
@@ -23,8 +62,18 @@
         >
           <slot name="option" :option="option">{{ optionValue(option) }}</slot>
         </li>
+        <span v-if="taggable && search.length > 0" class="group-header">{{ custom_options_group }}</span>
+        <li
+          v-if="taggable && search.length > 0"
+          @click="select(search)"
+          class="option taggable-option"
+        >
+          <slot name="option" :option="search">{{ search }}</slot>
+        </li>
       </ul>
-      <span v-else-if="loading" class="no-results"><div class="lds-dual-ring"></div></span>
+      <span v-else-if="loading" class="no-results"
+        ><div class="lds-dual-ring"></div
+      ></span>
       <span v-else class="no-results">No options found</span>
     </div>
     <slot name="description">
@@ -79,7 +128,7 @@
 
 .content {
   position: absolute;
-  z-index: 2;
+  z-index: 1002;
   min-width: 400px;
   width: 100%;
   display: none;
@@ -203,6 +252,15 @@
   animation: lds-dual-ring 1.2s linear infinite;
 }
 
+.group-header {
+  /* Align the text left */
+  display: block;
+  text-align: left;
+  padding: 10px;
+  /* Make the text bold */
+  font-weight: bold;
+}
+
 @keyframes lds-dual-ring {
   0% {
     transform: rotate(0deg);
@@ -248,14 +306,26 @@ export default {
       type: String,
       default: null,
     },
-    placeholder : {
+    placeholder: {
       type: String,
-      default: "Select an option"
+      default: "Select an option",
     },
     loading: {
       type: Boolean,
       default: false,
-    }
+    },
+    taggable: {
+      type: Boolean,
+      default: false,
+    },
+    grouped: {
+      type: Boolean,
+      default: false,
+    },
+    custom_options_group: {
+      type: String,
+      default: "Custom Options",
+    },
   },
   data() {
     return {
@@ -265,13 +335,37 @@ export default {
   },
   computed: {
     filtered_options: function () {
-      return this.options.filter((o) => {
-        if (typeof o === "string") {
-          return o.toLowerCase().includes(this.search.toLowerCase());
-        }
+      if (!this.grouped) {
+        return this.options.filter((o) => {
+          if (typeof o === "string") {
+            return o.toLowerCase().includes(this.search.toLowerCase());
+          }
 
-        return o[this.option_label].toLowerCase().includes(this.search.toLowerCase());
-      });
+          return o[this.option_label].toLowerCase().includes(this.search.toLowerCase());
+        });
+      } else {
+        // Filter the list of options inside each group by the search term
+        let filtered_groups = this.options.map((group) => {
+          return {
+            name: group.name,
+            options: group.options.filter((option) => {
+              if (typeof option === "string") {
+                return option.toLowerCase().includes(this.search.toLowerCase());
+              }
+              return option[this.option_label]
+                .toLowerCase()
+                .includes(this.search.toLowerCase());
+            }),
+          };
+        });
+
+        // Remove any groups that have no options
+        filtered_groups = filtered_groups.filter((group) => {
+          return group.options.length > 0;
+        });
+
+        return filtered_groups;
+      }
     },
   },
   watch: {
@@ -280,15 +374,50 @@ export default {
     },
   },
   methods: {
+    notValidOption(s) {
+      let found = false;
+      if(this.grouped) {
+        // If the search string shows up in any of the groups options, set found
+        // to true
+        this.options.forEach((group) => {
+          group.options.forEach((option) => {
+            if (typeof option === "string") {
+              if (option.toLowerCase().includes(s.toLowerCase())) {
+                found = true;
+              }
+            } else {
+              if (option[this.option_label].toLowerCase().includes(s.toLowerCase())) {
+                found = true;
+              }
+            }
+          });
+        });
+      } else {
+        // If the search string shows up in any of the options, set found to true
+        this.options.forEach((option) => {
+          if (typeof option === "string") {
+            if (option.toLowerCase().includes(s.toLowerCase())) {
+              found = true;
+            }
+          } else {
+            if (option[this.option_label].toLowerCase().includes(s.toLowerCase())) {
+              found = true;
+            }
+          }
+        });
+      }
+
+      return found;
+    },
     searchChange() {
       /* Only if all existing options have been exhausted */
       this.$emit("search-change", this.search);
     },
     optionValue(option) {
-        if (typeof option === "string") {
-            return option;
-        }
-        return option[this.option_label];
+      if (typeof option === "string") {
+        return option;
+      }
+      return option[this.option_label];
     },
     isSelected(option) {
       if (typeof option === "string") {
@@ -300,7 +429,6 @@ export default {
     select(option) {
       // Get the value from the option using the key_field prop
       if (option) {
-
         let selected_option = "";
 
         if (typeof option === "string") {
@@ -308,7 +436,7 @@ export default {
         } else {
           selected_option = option;
         }
-        
+
         if (typeof option === "object" && option[this.option_key] == this.selected) {
           this.selected = null;
           this.wrapper.classList.remove("active");
@@ -338,6 +466,35 @@ export default {
     },
     getSelectedLabel() {
 
+      if(this.grouped) {
+        // Find the selected option in the groups
+        let selected = null;
+        this.options.forEach((group) => {
+          group.options.forEach((option) => {
+            if (typeof option === "string") {
+              if (option === this.selected) {
+                selected = option;
+              }
+            } else {
+              if (option[this.option_key] === this.selected) {
+                selected = option;
+              }
+            }
+          });
+        });
+
+        if (selected == null) {
+          return this.selected;
+        }
+
+        if (selected) {
+          if (this.option_label in selected) {
+            return selected[this.option_label];
+          }
+          return selected;
+        }
+      }
+
       let selected = this.options.find(
         (option) => option[this.option_key] === this.selected
       );
@@ -356,7 +513,7 @@ export default {
   },
   mounted() {
     this.wrapper = this.$el;
-    
+
     let selectBtn = this.wrapper.querySelector(".select-btn");
     let searchBox = this.wrapper.querySelector("input");
 
@@ -371,7 +528,7 @@ export default {
 
       this.select(selected);
     } else {
-        this.selected = null;
+      this.selected = null;
     }
 
     // Select the option when the user presses enter but only if it is
