@@ -23,6 +23,8 @@
                 :value.sync="tab.dataset"
                 :options="datasets"
                 style="margin-bottom: 0px"
+                :taggable="true"
+                :grouped="true"
               />
             </div>
             <div class="d-col-9">
@@ -40,16 +42,16 @@
             <div class="d-col-2">
               <CButtonGroup>
                 <CButton @click="search(tab)" color="primary">Search</CButton>
-              <CDropdown toggler-text="Settings" color="secondary">
-                <CDropdownItem @click="addSearch()">New Search</CDropdownItem>
-                <CDropdownItem @click="tab.search_on_change = !tab.search_on_change">
-                  <!-- show a checkmark if the search on change is enabled -->
-                  <span v-if="tab.search_on_change"
-                    ><i class="fas fa-check"></i>&nbsp;</span
-                  >
-                  Search on change
-                </CDropdownItem>
-              </CDropdown>
+                <CDropdown toggler-text="Settings" color="secondary">
+                  <CDropdownItem @click="addSearch()">New Search</CDropdownItem>
+                  <CDropdownItem @click="tab.search_on_change = !tab.search_on_change">
+                    <!-- show a checkmark if the search on change is enabled -->
+                    <span v-if="tab.search_on_change"
+                      ><i class="fas fa-check"></i>&nbsp;</span
+                    >
+                    Search on change
+                  </CDropdownItem>
+                </CDropdown>
               </CButtonGroup>
             </div>
           </div>
@@ -78,51 +80,78 @@
         </section>
         <section class="flex-wrapper" id="results">
           <div class="flex-grid">
-            <div class="d-col-2 text-left">
-              <CInput v-model="field_search" placeholder="Search fields" />
-              <div class="field-list-wrapper">
-                <div class="field-group-header">Selected Fields <span v-if="tab.fields.length > 0" class="reset-fields" @click="tab.fields = []">| Clear All</span></div>
-                <draggable v-model="tab.fields" group="selected_fields" @start="drag=true" @end="drag=false">
-                <div
-                  v-for="(field, i) in tab.fields"
-                  :key="i"
-                  :ref="field.name"
-                  
-                >
-                  <div class="flex-grid field-picker-item text-left">
-                    <div class="d-col-11">
-                      <div class="field-name">{{ field.name }}</div>
-                    </div>
-                    <div class="d-col-1">
-                      <div class="field-picker-hide" @click="deselectField(tab, field)">
-                        <i class="fas fa-eye-slash" />
+            <div class="d-col-2 text-left field-selector">
+              <div class="field-selection">
+                <CInput v-model="field_search" placeholder="Search fields">
+                  <template #append>
+                    <CButton color="secondary" size="sm" @click="hide_field_selection()"
+                      ><i class="fa-solid fa-square-caret-left"></i
+                    ></CButton>
+                  </template>
+                </CInput>
+                <div class="field-list-wrapper">
+                  <div class="field-group-header">
+                    Selected Fields
+                    <span
+                      v-if="tab.fields.length > 0"
+                      class="reset-fields"
+                      @click="tab.fields = []"
+                      >| Clear All</span
+                    >
+                  </div>
+                  <draggable
+                    v-model="tab.fields"
+                    group="selected_fields"
+                    @start="drag = true"
+                    @end="drag = false"
+                  >
+                    <div v-for="(field, i) in tab.fields" :key="i" :ref="field.name">
+                      <div class="flex-grid field-picker-item text-left">
+                        <div class="d-col-11">
+                          <div class="field-name">{{ field.name }}</div>
+                        </div>
+                        <div class="d-col-1">
+                          <div
+                            class="field-picker-hide"
+                            @click="deselectField(tab, field)"
+                          >
+                            <i class="fas fa-eye-slash" />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                </draggable>
-                <div class="field-group-header">Available</div>
+                  </draggable>
+                  <div class="field-group-header">Available</div>
 
-                <div
-                  v-for="field in filtered_fields(tab)"
-                  :key="field.name"
-                  :ref="field.name"
-                  
-                >
-                  <div class="flex-grid field-picker-item text-left">
-                    <div class="d-col-11">
-                      <div class="field-name">{{ field.name }}</div>
-                    </div>
-                    <div class="d-col-1">
-                      <div class="field-picker-show" @click="selectField(tab, field)">
-                        <i class="fas fa-eye" />
+                  <div
+                    v-for="field in filtered_fields(tab)"
+                    :key="field.name"
+                    :ref="field.name"
+                  >
+                    <div class="flex-grid field-picker-item text-left">
+                      <div class="d-col-11">
+                        <div class="field-name">{{ field.name }}</div>
+                      </div>
+                      <div class="d-col-1">
+                        <div class="field-picker-show" @click="selectField(tab, field)">
+                          <i class="fas fa-eye" />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              <div class="field-selection-toggle">
+                <CButton
+                  @click="show_field_selection()"
+                  size="sm"
+                  color="secondary"
+                  v-c-tooltip="{ content: 'Show Fields', placement: 'right' }"
+                  ><i class="fa-solid fa-square-caret-right"></i
+                ></CButton>
+              </div>
             </div>
-            <div class="d-col-10 text-left">
+            <div class="d-col-10 text-left search-results">
               <CCard>
                 <div class="table-wrapper">
                   <table class="log-table">
@@ -151,20 +180,40 @@
                     </thead>
                     <tbody>
                       <tr v-if="tab.search_complete == false">
-                        <td class="text-center" colspan="100%" style="height: 160px"><CSpinner style="width: 125px; height: 125px"/></td>
+                        <td class="text-center" colspan="100%" style="height: 160px">
+                          <CSpinner style="width: 125px; height: 125px" />
+                        </td>
                       </tr>
-                      <tr v-if="flattened_results(tab).length == 0 && tab.search_complete">
-                        <td class="text-center" colspan="100%">No results</td>
+                      <tr
+                        v-if="flattened_results(tab).length == 0 && tab.search_complete"
+                      >
+                        <td class="text-center" colspan="100%">
+                          <span v-if="tab.search_failed">
+                            <CAlert color="warning">
+                              <strong>Search failed</strong>
+                              <br />
+                              {{ tab.failure_reason }}
+                            </CAlert>
+                            </span>
+                          <span v-else>
+                          No results {{ tab.search_failed }}
+                          </span>
+                          </td>
                       </tr>
                       <tr
                         v-for="(result, i) in flattened_results(tab)"
                         :key="result._id"
                         v-else-if="tab.search_complete"
                       >
-                        <td class="fitwidth"><i
-                              class="fa-solid fa-up-right-and-down-left-from-center expand-icon"
-                            ></i
+                        <td class="fitwidth">
+                          <button
+                            class="field-value-control"
+                            v-on:click="view_log(result)"
                           >
+                            <i
+                              class="fa-solid fa-up-right-and-down-left-from-center expand-icon"
+                            ></i>
+                          </button>
                           <input type="checkbox" class="row-checkbox" />
                         </td>
                         <td
@@ -181,24 +230,23 @@
                             </span>
                           </span>
                           <span v-else>
-                            <span :ref="i + '.' + field.key">{{
-                              result[field.key]
-                            }}</span>
+                            <span :ref="i + '.' + field.key">{{ result[field.key] }}</span
+                            >&nbsp;
                             <span class="field-value-controls">
-                                <button
-                                  class="field-value-control"
-                                  @click="copyValue(result[field.key], i, field.key)"
-                                >
-                                  <i class="fas fa-clipboard" />
-                                </button>
-                                <button
-                                  class="field-value-control"
-                                  v-on:click="
-                                    filterByValue(tab, result[field.key], field.key)
-                                  "
-                                >
-                                  <i class="fas fa-filter" />
-                                </button>
+                              <button
+                                class="field-value-control"
+                                @click="copyValue(result[field.key], i, field.key)"
+                              >
+                                <i class="fas fa-clipboard" />
+                              </button>
+                              <button
+                                class="field-value-control"
+                                v-on:click="
+                                  filterByValue(tab, result[field.key], field.key)
+                                "
+                              >
+                                <i class="fas fa-filter" />
+                              </button>
                             </span>
                           </span>
                         </td>
@@ -210,9 +258,9 @@
             </div>
           </div>
         </section>
-        {{ tab }}
       </CTab>
     </CTabs>
+    <LogDrawer />
   </div>
 </template>
 
@@ -232,13 +280,46 @@
   max-width: 95%;
 }
 
+.field-selection-toggle {
+  display: none;
+}
+
+/* Create a show class that shows the field-selection-toggle */
+.field-selection-toggle.show {
+  display: block;
+}
+
+/* Create a hide class that hides the field-selection div */
+.field-selection.hide {
+  display: none;
+}
+
+.search-results.expand {
+  width: calc(100% - 30px);
+}
+
+.field-selector.shrink {
+  width: auto;
+}
+
 .field-list-wrapper .collapse {
   max-width: 0%;
 }
 
+/* Transition the shrink and expand classes */
+.field-selector.shrink,
+.search-results.expand {
+  transition: width 0.5s ease-in-out;
+}
+
+/* Transition the collapse class */
+.field-list-wrapper .collapse {
+  transition: max-width 1s ease-in-out;
+}
+
 .field-value-controls {
   opacity: 0;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 1s ease-in-out;
 }
 
 .field-header:hover .field-value-controls,
@@ -281,6 +362,8 @@
   overflow-x: auto;
   overflow-y: auto;
   min-height: calc(100vh - 310px);
+
+  max-height: calc(100vh - 310px);
 }
 
 .log-table {
@@ -474,15 +557,24 @@
 <script>
 import VueJsonPretty from "vue-json-pretty";
 import "vue-json-pretty/lib/styles.css";
-import draggable from 'vuedraggable'
-import SelectInput from "./components/SelectInput.vue";
+import draggable from "vuedraggable";
+import SelectInput from "../components/SelectInput.vue";
+
+import LogDrawer from "@/views/searchworkspace/LogDrawer.vue";
+
+import { CChartBar } from "@coreui/vue-chartjs";
 
 export default {
   name: "SearchWorkspace",
   components: {
     VueJsonPretty,
     SelectInput,
-    draggable
+    draggable,
+    CChartBar,
+    LogDrawer,
+  },
+  created() {
+    this.$store.commit("set", ["logDrawerMinimize", true]);
   },
   data() {
     return {
@@ -491,20 +583,28 @@ export default {
       hunt_query: "",
       datasets: [
         {
-          value: "events",
-          label: "Tellaro Events",
+          name: "Tellaro",
+          options: [
+            {
+              value: "events",
+              label: "Events",
+            },
+            {
+              value: "cases",
+              label: "Cases",
+            },
+            {
+              value: "artifacts",
+              label: "Event Artifacts",
+            },
+          ],
         },
         {
-          value: "cases",
-          label: "Tellaro Cases",
-        },
-        {
-          value: "artifacts",
-          label: "Tellaro Event Artifacts",
-        },
-        {
-          value: "logs",
-          label: "Logs",
+          name: "External Sources",
+          options: [
+            { value: "ls1", label: "Log Source 1" },
+            { value: "ls2", label: "Log Source 2" },
+          ],
         },
       ],
       search_tabs: [
@@ -520,7 +620,11 @@ export default {
           results: [],
           fields: [],
           search_on_change: false,
-          search_complete: true
+          search_complete: true,
+        search_failed: false,
+        failure_reason: "",
+          pages: 0,
+          current_page: 1,
         },
         {
           name: "User logins from new countries",
@@ -535,7 +639,11 @@ export default {
           results: [],
           fields: [],
           search_on_change: false,
-          search_complete: true
+          search_complete: true,
+        search_failed: false,
+        failure_reason: "",
+          pages: 0,
+          current_page: 1,
         },
       ],
       results: [],
@@ -617,7 +725,51 @@ export default {
   },
 
   methods: {
-    
+    view_log(entry) {
+      this.$store.commit("set", [
+        "logDrawerMinimize",
+        !this.$store.getters.logDrawerMinimize,
+      ]);
+      this.$store.commit("set", ["searchWorkspaceLog", entry]);
+    },
+    timeline_datasets(tab) {
+      // Return the tab.aggregations.time_buckets.buckets in a format that can be used by the timeline chart
+      let data = {
+        data: [],
+        backgroundColor: "#3c4b64",
+        label: "Hits",
+      };
+      for (let bucket in tab.aggregations.time_buckets.buckets) {
+        data.data.push(tab.aggregations.time_buckets.buckets[bucket].doc_count);
+      }
+      return [data];
+    },
+    hide_field_selection() {
+      // Find the field-selection-toggle and remove the hide class without using refs
+      document.querySelector(".field-selection-toggle").classList.add("show");
+
+      // Find the field-selection and add the hide class
+      document.querySelector(".field-selection").classList.add("hide");
+
+      // Add the expand class to the search-results
+      document.querySelector(".search-results").classList.add("expand");
+
+      // Add the shrink class to the field-selector
+      document.querySelector(".field-selector").classList.add("shrink");
+    },
+    show_field_selection() {
+      // Find the field-selection-toggle and add the hide class without using refs
+      document.querySelector(".field-selection-toggle").classList.remove("show");
+
+      // Find the field-selection and remove the hide class
+      document.querySelector(".field-selection").classList.remove("hide");
+
+      // Replace the d-col-12 on search-results with d-col-10
+      document.querySelector(".search-results").classList.remove("expand");
+
+      // Remove the shrink class from the field-selector
+      document.querySelector(".field-selector").classList.remove("shrink");
+    },
     column_fields(tab) {
       let locked_fields = [{ key: "created_at", label: "@timestamp" }];
       if (tab.fields.length > 0) {
@@ -687,7 +839,11 @@ export default {
         results: [],
         fields: [],
         search_on_change: false,
-        search_complete: true
+        search_complete: true,
+        search_failed: false,
+        failure_reason: "",
+        pages: 0,
+        current_page: 1,
       });
 
       this.active_tab = this.search_tabs.length - 1;
@@ -722,7 +878,7 @@ export default {
     },
     removeFilter(tab, i) {
       tab.filters.splice(i, 1);
-      if(tab.search_on_change) {
+      if (tab.search_on_change) {
         this.search(tab);
       }
     },
@@ -747,19 +903,20 @@ export default {
         tab.filters.push(_filter);
       }
 
-      if(tab.search_on_change) {
+      if (tab.search_on_change) {
         this.search(tab);
       }
     },
     flatten_json(o) {
       var out = {};
       function flatten(x, name) {
-        if (typeof x == "object" && x !== null) {
-          Object.keys(x).forEach(function (a) {
-            flatten(x[a], name ? name + "." + a : a);
-          });
-        } else {
+        /* Flatten everything except arrays */
+        if (Object(x) !== x || Array.isArray(x)) {
           out[name] = x;
+        } else {
+          for (var a in x) {
+            flatten(x[a], name ? name + "." + a : a);
+          }
         }
       }
       flatten(o);
@@ -784,10 +941,17 @@ export default {
         date_range: tab.date_range,
       };
 
-      tab.search_complete = false
+      tab.search_complete = false;
       this.$store.dispatch("runThreatHunt", query).then((resp) => {
-        tab.results = resp.data.hits.hits;
-        tab.search_complete = true
+        tab.results = resp.data.response.hits.hits;
+        tab.pages = resp.data.pages;
+        tab.aggregations = resp.data.response.aggregations;
+        tab.search_complete = true;
+      }).catch((err) => {
+        console.log(err)
+        tab.search_complete = true;
+        tab.search_failed = true;
+        tab.failure_reason = err.response.data.message;
       });
     },
     flatten: function (obj) {
