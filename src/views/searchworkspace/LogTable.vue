@@ -5,13 +5,13 @@
         <tr>
           <th colspan="100%" class="table-controls">
             <button class="field-value-control" @click="fullScreenTable()">
-              <i v-if="!full_screen_log_table" class="fas fa-maximize"></i>
-              <i v-if="full_screen_log_table" class="fas fa-minimize"></i>
+              <i v-if="!full_screen_log_table" class="fas fa-expand"></i>
+              <i v-if="full_screen_log_table" class="fas fa-compress"></i>
             </button>
           </th>
         </tr>
         <tr>
-          <th class="fitwidth" scope="col"></th>
+          <th class="fitwidth" scope="col" style="width: 1%"></th>
           <th
             scope="col"
             v-for="field in fields"
@@ -56,11 +56,12 @@
           :key="result._id"
           v-else-if="tab.search_complete"
         >
-          <td class="fitwidth">
-            <button class="field-value-control" v-on:click="view_log(result)">
-              <i class="fa-solid fa-up-right-and-down-left-from-center expand-icon"></i>
+          <td class="fitwidth field-value">
+            <button class="expand-icon field-value-control" v-on:click="view_log(result)">
+              <i class="fa-solid fa-expand"></i>
             </button>
             <input type="checkbox" class="row-checkbox" />
+            
           </td>
           <td
             v-for="field in fields"
@@ -83,7 +84,7 @@
                       class="field-value-control"
                       @click="copyValue(value, i, field.key)"
                     >
-                      <i class="fas fa-clipboard" />
+                      <i class="far fa-copy" />
                     </button>
                     <button
                       class="field-value-control"
@@ -107,7 +108,7 @@
                     class="field-value-control"
                     @click="copyValue(result[field.key], i, field.key)"
                   >
-                    <i class="fas fa-clipboard" />
+                    <i class="far fa-copy" />
                   </button>
                   <button
                     class="field-value-control"
@@ -293,8 +294,8 @@
 
 .row-checkbox {
   /* Style the checkbox so it looks nice */
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   border: 1px solid #ddd;
   border-radius: 2px;
   margin: 0;
@@ -303,6 +304,7 @@
   padding-top: 2px;
   vertical-align: middle;
   margin-left: 5px;
+  margin-top: -1px;
 }
 
 .field-header,
@@ -337,14 +339,19 @@
 }
 
 .field-value-control {
-  background: none;
+  background: #3c4b64;
+  border-radius: 25%;
   border: none;
-  padding: 0;
-  margin: 0;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  color: #3c4b64;
+  color: #fff;
+  padding: 0px;
   margin-right: 5px;
-  font-size: 12px;
+  line-height: 2;
+  font-size: 1vmin;
+  padding-right: 1px;
+  padding-bottom: 1px;
 }
 
 /* Hide the focus outline on the buttons */
