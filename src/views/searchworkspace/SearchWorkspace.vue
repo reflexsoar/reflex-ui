@@ -333,7 +333,7 @@
                   />
                 </div>
               </div>
-              <LogTable :fields="column_fields(tab)" :items="tab.results" :totalItems="tab.total_results" :tab="tab" @viewLog="view_log" @filterAdded="filterByValue" @deselectField="deselectField"/>
+              <LogTable :fields="column_fields(tab)" :sortFields="tab.sort_by" :items="tab.results" :totalItems="tab.total_results" :tab="tab" @viewLog="view_log" @filterAdded="filterByValue" @deselectField="deselectField"/>
             </div>
           </div>
         </section>
@@ -1069,6 +1069,7 @@ export default {
         total_results: 0,
         fields: [],
         field_search: "",
+        sort_by: [],
         search_on_change: false,
         search_complete: true,
         search_failed: false,
