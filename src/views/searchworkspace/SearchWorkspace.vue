@@ -27,9 +27,9 @@
                 :grouped="true"
               />
             </div>
-            <div class="d-col-9">
+            <div class="d-col-8">
               <CInput
-                size="lg"
+                
                 v-on:keyup.enter="search(tab)"
                 v-model="tab.search"
                 placeholder="Enter your hunting query"
@@ -344,7 +344,7 @@
                               </button>
                               <button
                                 class="field-value-control"
-                                v-on:click="filterByValue(tab, value, field.key, true)"
+                                v-on:click="filterByValue(tab, result[field.key], field.key, true)"
                               >
                                 <i class="fas fa-minus" />
                               </button> </span
@@ -392,9 +392,10 @@
             </div>
           </div>
         </section>
+        <LogDrawer @filterAdded="filterByValue" :tab="tab"/>
       </CTab>
     </CTabs>
-    <LogDrawer />
+    
   </div>
 </template>
 
@@ -793,6 +794,8 @@ import SelectInput from "../components/SelectInput.vue";
 
 import LogDrawer from "@/views/searchworkspace/LogDrawer.vue";
 
+import ValuePopover from "@/views/searchworkspace/ValuePopover.vue";
+
 import { CChartBar } from "@coreui/vue-chartjs";
 
 export default {
@@ -803,6 +806,7 @@ export default {
     draggable,
     CChartBar,
     LogDrawer,
+    ValuePopover,
   },
   created() {
     this.$store.commit("set", ["logDrawerMinimize", true]);
@@ -1236,6 +1240,7 @@ export default {
       }
     },
     filterByValue(tab, value, field, exclude = false) {
+
       let _filter = {
         value: value,
         field: field,

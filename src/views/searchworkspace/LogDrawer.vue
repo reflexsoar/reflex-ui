@@ -196,6 +196,7 @@ export default {
   },
   props: {
     log: {},
+    tab: {},
     organization: {
       type: String,
       default: "",
@@ -241,8 +242,9 @@ export default {
         }, 500);
       });
     },
-    filterByValue(field, exlude=false) {
-        console.log(field)
+    filterByValue(field, exclude=false) {
+        
+        this.$emit('filterAdded', this.tab, field.value, field.key, exclude)
     }
   }
 };
