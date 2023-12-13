@@ -99,7 +99,7 @@
                   >
                     <button
                       class="field-value-control"
-                      @click="copyValue(value, i, field.key)"
+                      @click="copyValue(value, i, field.key, $event)"
                     >
                       <i class="far fa-copy" />
                     </button>
@@ -123,7 +123,7 @@
                 <span class="field-value-controls" v-if="result[field.key] != undefined">
                   <button
                     class="field-value-control"
-                    @click="copyValue(result[field.key], i, field.key)"
+                    @click="copyValue(result[field.key], i, field.key, $event)"
                   >
                     <i class="far fa-copy" />
                   </button>
@@ -566,8 +566,29 @@ export default {
     view_log(result) {
       this.$emit("viewLog", result);
     },
-    copyValue(value, i, field) {
-      this.$emit("copyValue", value, i, field);
+    copyValue(value, i, field, event) {
+      // Copy the value to the clipboard
+      navigator.clipboard.writeText(value).then(() => {
+
+        // Copy the contents of the target to a temporary variable
+        let target = event.target;
+        
+        // If the target is an icon, then get the parent element
+        if(target.tagName == "I") {
+          target = target.parentElement;
+        }
+
+        let value = target.innerHTML;
+
+        // Set the target text to a checkmark
+        target.innerHTML = "<i class='fas fa-check'></i>";
+
+        // After 1 second, set the target text back to the original value
+        setTimeout(() => {
+          target.innerHTML = value;
+        }, 1000);
+        
+      });
     },
     filterByValue(tab, value, key, exclude = false) {
       this.$emit("filterAdded", tab, value, key, exclude);
