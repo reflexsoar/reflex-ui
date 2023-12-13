@@ -522,6 +522,10 @@ export default {
               value: "artifacts",
               label: "Event Artifacts",
             },
+            {
+              value: 'agent-logs',
+              label: 'Agent Logs'
+            }
           ],
         },
         {
