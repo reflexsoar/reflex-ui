@@ -12,6 +12,9 @@
         <h3>Expanded Log</h3>
       </CCol>
       <CCol class="text-right">
+        <CButton color="secondary" @click="showEmptyFields = !showEmptyFields">
+          {{ showEmptyFields ? "Hide" : "Show" }} Empty Fields
+        </CButton>&nbsp;
         <CButton
           color="secondary"
           @click="$store.commit('set', ['logDrawerMinimize', true])"
@@ -35,7 +38,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="field in logAsTable(searchWorkspaceLog)" class="log-value">
+                <tr v-for="field in logAsTable(searchWorkspaceLog)" class="log-value" v-if="(field.value != undefined || field.value != null) || showEmptyFields">
                     <td class="field-value-controls fitwidth">
                         <button class="field-value-control" @click="copyValue(field.value)">
                             <i class="fas fa-copy"></i>
@@ -49,7 +52,10 @@
                         </button>
                     </td>
                     <td class="field-value">{{ field.key }}</td>
-                    <td class="field-value">{{ field.value }}</td>
+                    <td class="field-value">
+                        <span v-if="field.value == undefined || field.value == null" class="empty-value">empty</span>
+                        <span v-else>{{ field.value }}</span>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -170,6 +176,10 @@
 .modal-body {
   padding-left: 0px;
 }
+
+.empty-value {
+  color: #aaa;
+}
 </style>
 
 <script>
@@ -194,6 +204,7 @@ export default {
   data() {
     return {
       activeTab: 0,
+      showEmptyFields: false,
     };
   },
   computed: {

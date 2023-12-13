@@ -53,9 +53,7 @@
                   </CDropdownItem>
                   <CDropdownItem @click="tab.show_chart = !tab.show_chart">
                     <!-- show a checkmark if the search on change is enabled -->
-                    <span v-if="tab.show_chart"
-                      ><i class="fas fa-check"></i>&nbsp;</span
-                    >
+                    <span v-if="tab.show_chart"><i class="fas fa-check"></i>&nbsp;</span>
                     Show chart
                   </CDropdownItem>
                 </CDropdown>
@@ -78,7 +76,7 @@
                   <i
                     class="fas fa-times"
                     @click="removeFilter(tab, i)"
-                    style="cursor: pointer; margin-left:2px;"
+                    style="cursor: pointer; margin-left: 2px"
                   ></i>
                 </span>
               </li>
@@ -114,7 +112,10 @@
                   >
                     <div v-for="(field, i) in tab.fields" :key="i" :ref="field.name">
                       <div class="flex-grid field-picker-item text-left">
-                        <div class="d-col-11">
+                        <div class="d-col-1">
+                          <span class="field-type">{{ field.type }}</span>
+                        </div>
+                        <div class="d-col-10">
                           <div class="field-name">{{ field.name }}</div>
                         </div>
                         <div class="d-col-1">
@@ -136,7 +137,11 @@
                     :ref="field.name"
                   >
                     <div class="flex-grid field-picker-item text-left">
-                      <div class="d-col-11">
+                    
+                        <div class="d-col-1">
+                          <span class="field-type">{{ field.type }}</span>
+                        </div>
+                      <div class="d-col-10">
                         <div class="field-name">{{ field.name }}</div>
                       </div>
                       <div class="d-col-1">
@@ -159,148 +164,170 @@
               </div>
             </div>
             <div class="d-col-10 text-left search-results">
-                
-                  <div class="flex-grid" style="margin-bottom: 10px" v-if="tab.show_chart">
-                    <div class="d-col-12" style="background-color: #fff; border: 1px solid #ddd; padding: 10px">
-              <CChartBar
-                :datasets="timeline_datasets(tab)"
-                :labels="timeline_datalabels(tab)"
-                style="height: 150px; width:100%"
-                :options="{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  legend: {
-                    display: false
-                  },
-                  scales: {
-                    xAxes: [
-                      {
-                        type: 'time',
-                        time: {
-                          unit: 'day',
-                          displayFormats: {
-                            day: 'MMM D'
-                          }
-                        },
-                        gridLines: {
-                          display: true,
-                        },
-                        ticks: {
-                          display: true,
-                          autoSkip: true,
-                        },
+              <div class="flex-grid" style="margin-bottom: 10px" v-if="tab.show_chart">
+                <div
+                  class="d-col-12"
+                  style="background-color: #fff; border: 1px solid #ddd; padding: 10px"
+                >
+                  <CChartBar
+                    :datasets="timeline_datasets(tab)"
+                    :labels="timeline_datalabels(tab)"
+                    style="height: 150px; width: 100%"
+                    :options="{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      legend: {
+                        display: false,
                       },
-                    ],
-                    yAxes: [
-                      {
-                        beginAtZero: true,
-                        gridLines: {
-                          display: true,
-                        },
-                        ticks: {
-                          display: true,
-                          autoSkip: true,
-                          maxTicksLimit: 5
-                        },
+                      scales: {
+                        xAxes: [
+                          {
+                            type: 'time',
+                            time: {
+                              unit: 'day',
+                              displayFormats: {
+                                day: 'MMM D',
+                              },
+                            },
+                            gridLines: {
+                              display: true,
+                            },
+                            ticks: {
+                              display: true,
+                              autoSkip: true,
+                            },
+                          },
+                        ],
+                        yAxes: [
+                          {
+                            beginAtZero: true,
+                            gridLines: {
+                              display: true,
+                            },
+                            ticks: {
+                              display: true,
+                              autoSkip: true,
+                              maxTicksLimit: 5,
+                            },
+                          },
+                        ],
                       },
-                    ],
-                  },
-                }"
-              />
-          </div>
-          
-          </div>
-                <div class="table-wrapper">
-                  <table class="log-table">
-                    <thead >
-                      <tr >
-                        <th colspan="100%" class="table-controls">
+                    }"
+                  />
+                </div>
+              </div>
+              <div class="table-wrapper">
+                <table class="log-table">
+                  <thead>
+                    <tr>
+                      <th colspan="100%" class="table-controls">
                         <button class="field-value-control" @click="fullScreenTable(tab)">
-                      <i v-if="!tab.full_screen_log_table" class="fas fa-maximize"></i>
-                      <i v-if="tab.full_screen_log_table" class="fas fa-minimize"></i>
-                    </button>
-                        </th>
-                      </tr>
-                      <tr>
-                        <th class="fitwidth" scope="col"></th>
-                        <th scope="col"
-                          v-for="field in column_fields(tab)"
-                          :key="field.key"
-                          class="fitwidth field-header"
-                        >
-                          {{ field.label }}
-                          <span class="field-value-controls">
-                            <button class="field-value-control">
-                              <i class="fas fa-sort" />
-                            </button>
-                            <button
-                              class="field-value-control"
-                              @click="deselectField(tab, { name: field.key })"
-                            >
-                              <i class="fas fa-times" />
-                            </button>
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-if="tab.search_complete == false">
-                        <td class="text-center" colspan="100%" style="height: 160px">
-                          <CSpinner style="width: 125px; height: 125px" />
-                        </td>
-                      </tr>
-                      <tr
-                        v-if="flattened_results(tab).length == 0 && tab.search_complete"
+                          <i
+                            v-if="!tab.full_screen_log_table"
+                            class="fas fa-maximize"
+                          ></i>
+                          <i v-if="tab.full_screen_log_table" class="fas fa-minimize"></i>
+                        </button>
+                      </th>
+                    </tr>
+                    <tr>
+                      <th class="fitwidth" scope="col"></th>
+                      <th
+                        scope="col"
+                        v-for="field in column_fields(tab)"
+                        :key="field.key"
+                        class="fitwidth field-header"
                       >
-                        <td class="text-center" colspan="100%">
-                          <span v-if="tab.search_failed">
-                            <CAlert color="warning">
-                              <strong>Search failed</strong>
-                              <br />
-                              {{ tab.failure_reason }}
-                            </CAlert>
-                            </span>
-                          <span v-else>
-                          No results {{ tab.search_failed }}
-                          </span>
-                          </td>
-                      </tr>
-                      <tr
-                        v-for="(result, i) in flattened_results(tab)"
-                        :key="result._id"
-                        v-else-if="tab.search_complete"
-                      >
-                        <td class="fitwidth">
+                        {{ field.label }}
+                        <span class="field-value-controls">
+                          <button class="field-value-control">
+                            <i class="fas fa-sort" />
+                          </button>
                           <button
                             class="field-value-control"
-                            v-on:click="view_log(result)"
+                            @click="deselectField(tab, { name: field.key })"
                           >
-                            <i
-                              class="fa-solid fa-up-right-and-down-left-from-center expand-icon"
-                            ></i>
+                            <i class="fas fa-times" />
                           </button>
-                          <input type="checkbox" class="row-checkbox" />
-                        </td>
-                        <td
-                          v-for="field in column_fields(tab)"
-                          :key="field.key"
-                          class="fitwidth field-value"
-                        > 
-                          <span v-if="field.key === '_'">
-                            <span v-for="(v, k) in result" :key="k">
-                              <span class="reflex-badge reflex-badge-secondary">{{
-                                k
-                              }}</span>
-                              <span class="reflex-badge">{{ v }}</span>
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-if="tab.search_complete == false">
+                      <td class="text-center" colspan="100%" style="height: 160px">
+                        <CSpinner style="width: 125px; height: 125px" />
+                      </td>
+                    </tr>
+                    <tr v-if="flattened_results(tab).length == 0 && tab.search_complete">
+                      <td class="text-center" colspan="100%">
+                        <span v-if="tab.search_failed">
+                          <CAlert color="warning">
+                            <strong>Search failed</strong>
+                            <br />
+                            {{ tab.failure_reason }}
+                          </CAlert>
+                        </span>
+                        <span v-else> No results {{ tab.search_failed }} </span>
+                      </td>
+                    </tr>
+                    <tr
+                      v-for="(result, i) in flattened_results(tab)"
+                      :key="result._id"
+                      v-else-if="tab.search_complete"
+                    >
+                      <td class="fitwidth">
+                        <button class="field-value-control" v-on:click="view_log(result)">
+                          <i
+                            class="fa-solid fa-up-right-and-down-left-from-center expand-icon"
+                          ></i>
+                        </button>
+                        <input type="checkbox" class="row-checkbox" />
+                      </td>
+                      <td
+                        v-for="field in column_fields(tab)"
+                        :key="field.key"
+                        class="fitwidth field-value"
+                      >
+                        <span v-if="field.key === '_'">
+                          <span v-for="(v, k) in result" :key="k">
+                            <span class="reflex-badge reflex-badge-secondary">{{
+                              k
+                            }}</span>
+                            <span class="reflex-badge">{{ v }}</span>
+                          </span>
+                        </span>
+                        <span v-else>
+                          <span v-if="result[field.key] == undefined" class="empty-value"
+                            >empty</span
+                          >
+                          <span v-else-if="isArray(result[field.key])">
+                            <span
+                              v-for="(value, index) in result[field.key]"
+                              :key="index"
+                            >
+                              <span class="reflex-badge">{{ value }}</span>
+                              <span
+                                class="field-value-controls"
+                                v-if="result[field.key] != undefined"
+                              >
+                                <button class="field-value-control" @click="copyValue(value, i, field.key)">
+                                  <i class="fas fa-clipboard" />
+                                </button>
+                                <button class="field-value-control" v-on:click="filterByValue(tab, value, field.key)">
+                                  <i class="fas fa-plus" />
+                                </button>
+                                <button class="field-value-control" v-on:click="filterByValue(tab, value, field.key, true)">
+                                  <i class="fas fa-minus" />
+                                </button> </span><br />
                             </span>
                           </span>
-                          <span v-else>
-                            <span v-if="result[field.key] == undefined" class="empty-value">empty</span>
-                            <span :ref="i + '.' + field.key" v-else>{{ result[field.key] }}</span
+                          <span :ref="i + '.' + field.key" v-else
+                            >{{ result[field.key] }}
+                            <span
+                              class="field-value-controls"
+                              v-if="result[field.key] != undefined"
                             >
-                            
-                            &nbsp;
-                            <span class="field-value-controls" v-if="result[field.key] != undefined">
                               <button
                                 class="field-value-control"
                                 @click="copyValue(result[field.key], i, field.key)"
@@ -313,35 +340,55 @@
                                   filterByValue(tab, result[field.key], field.key)
                                 "
                               >
-                                <i class="fas fa-filter" />
+                                <i class="fas fa-plus" />
                               </button>
-                            </span>
+                              <button
+                                class="field-value-control"
+                                v-on:click="filterByValue(tab, value, field.key, true)"
+                              >
+                                <i class="fas fa-minus" />
+                              </button> </span
+                          ></span>
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="100%" class="table-controls">
+                        <span class="pagination">
+                          <span
+                            v-bind:disabled="tab.current_page > 1"
+                            class="page-number"
+                            v-on:click="nextPage(tab, tab.current_page - 1)"
+                          >
+                            <i class="fa-solid fa-chevron-left"></i>
                           </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td colspan="100%" class="table-controls">
-                          <span class="pagination"> 
-                            <span v-bind:disabled="tab.current_page > 1" class="page-number" v-on:click="nextPage(tab, tab.current_page-1)">
-                             <i class="fa-solid fa-chevron-left"></i>
-                            </span>
-                            <span v-for="page in maxPages(tab)" >
-                              <button class="page-number" v-bind:class="page == tab.current_page ? 'active' : null" v-on:click="nextPage(tab, page)">
-                                {{ page }}
-                              </button>
-                            </span>
-                            <span v-bind:disabled="tab.current_page < maxPages(tab)" class="page-number" v-on:click="nextPage(tab, tab.current_page+1)">
-                              <i class="fa-solid fa-chevron-right"></i>
-                              </span>
-                            <span class="result-count"> | {{ tab.results.length }} results</span>
+                          <span v-for="page in maxPages(tab)">
+                            <button
+                              class="page-number"
+                              v-bind:class="page == tab.current_page ? 'active' : null"
+                              v-on:click="nextPage(tab, page)"
+                            >
+                              {{ page }}
+                            </button>
                           </span>
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
+                          <span
+                            v-bind:disabled="tab.current_page < maxPages(tab)"
+                            class="page-number"
+                            v-on:click="nextPage(tab, tab.current_page + 1)"
+                          >
+                            <i class="fa-solid fa-chevron-right"></i>
+                          </span>
+                          <span class="result-count">
+                            | {{ tab.results.length }} results</span
+                          >
+                        </span>
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             </div>
           </div>
         </section>
@@ -352,6 +399,7 @@
 </template>
 
 <style scoped>
+
 
 .table-controls {
   background-color: #efefef;
@@ -468,6 +516,20 @@
   outline: none;
 }
 
+.field-type {
+  padding: 2px 2px 2px 0px;
+  text-align: center;
+  width: 15px;
+  display: inline-block;
+  line-height: 1.2;
+  font-weight: 500;
+  color: #fff;
+  background-color: #3c4b64;
+  border-radius: 2px;
+  font-size: 11px;
+  font-style: italic;
+}
+
 .page-chevron {
   padding: 2px 5px;
   margin: 0 2px;
@@ -562,6 +624,8 @@
   text-align: left;
   padding: 8px;
   border: 1px solid #ddd;
+  /* Align all text to the top of the cell */
+  vertical-align: top;
 }
 
 .log-table tr {
@@ -788,14 +852,14 @@ export default {
           fields: [],
           search_on_change: false,
           search_complete: true,
-        search_failed: false,
-        failure_reason: "",
+          search_failed: false,
+          failure_reason: "",
           pages: 0,
           current_page: 1,
           hide_empty_fields: false,
-        full_screen_log_table: false,
-        timefield: '@timestamp',
-        show_chart: true
+          full_screen_log_table: false,
+          timefield: "@timestamp",
+          show_chart: true,
         },
         {
           name: "User logins from new countries",
@@ -811,14 +875,14 @@ export default {
           fields: [],
           search_on_change: false,
           search_complete: true,
-        search_failed: false,
-        failure_reason: "",
+          search_failed: false,
+          failure_reason: "",
           pages: 0,
           current_page: 1,
           hide_empty_fields: false,
-        full_screen_log_table: false,
-        timefield: '@timestamp',
-        show_chart: true
+          full_screen_log_table: false,
+          timefield: "@timestamp",
+          show_chart: true,
         },
       ],
       results: [],
@@ -905,12 +969,12 @@ export default {
       return Math.ceil(tab.results.length / 100);
     },
     nextPage(tab, page) {
-      if(page < 1) {
-        page = 1
+      if (page < 1) {
+        page = 1;
       }
 
-      if(page > this.maxPages(tab)) {
-        page = this.maxPages(tab)
+      if (page > this.maxPages(tab)) {
+        page = this.maxPages(tab);
       }
       tab.current_page = page;
     },
@@ -926,11 +990,11 @@ export default {
       let data = {
         data: [],
         backgroundColor: "#3c4b64",
-        label: "Hits"
+        label: "Hits",
       };
 
-      if(tab.aggregations == undefined) {
-        return [data]
+      if (tab.aggregations == undefined) {
+        return [data];
       }
 
       for (let bucket in tab.aggregations.time_buckets.buckets) {
@@ -943,8 +1007,8 @@ export default {
       // Return the tab.aggregations.time_buckets.buckets in a format that can be used by the timeline chart
       let data = [];
 
-      if(tab.aggregations == undefined) {
-        return data
+      if (tab.aggregations == undefined) {
+        return data;
       }
 
       for (let bucket in tab.aggregations.time_buckets.buckets) {
@@ -963,8 +1027,6 @@ export default {
         log_wrapper.classList.remove("full-screen");
         tab.full_screen_log_table = false;
       }
-
-      
     },
     hide_field_selection() {
       // Find the field-selection-toggle and remove the hide class without using refs
@@ -1030,6 +1092,28 @@ export default {
         return a.name.localeCompare(b.name);
       });
     },
+    field_type(value) {
+      // Return the field type based on the value
+      if (this.isIpAddress(value)) {
+        return "ip";
+      } else if (this.isDomainName(value)) {
+        return "d";
+      } else if (value === true || value === false) {
+        return "b";
+      } else if (typeof value === "number") {
+        return "#";
+      } else if (value === null) {
+        return 'n'
+      } else if (typeof value === "object") {
+        return "o";
+      } else if (typeof value === "string") {
+        return "t";
+      } else if (this.isArray(value)) {
+        return "a";
+      } else {
+        return "t";
+      }
+    },
     available_fields(tab) {
       /* Find all the root level keys in the flattened results */
       let keys = [];
@@ -1040,6 +1124,7 @@ export default {
           if (!keys.includes(key)) {
             keys.push(key);
             fields.push({
+              type: this.field_type(result[key]),
               name: key,
             });
           }
@@ -1085,8 +1170,8 @@ export default {
         current_page: 1,
         hide_empty_fields: false,
         full_screen_log_table: false,
-        timefield: '@timestamp',
-        show_chart: true
+        timefield: "@timestamp",
+        show_chart: true,
       });
 
       this.active_tab = this.search_tabs.length - 1;
@@ -1102,6 +1187,31 @@ export default {
       if (this.search_tabs.length == 0) {
         this.addSearch();
       }
+    },
+    isArray(value) {
+      // Returns true if the value is an array
+      return value && typeof value === "object" && value.constructor === Array;
+    },
+    isIpAddress(value) {
+      if (value === undefined) {
+        return false;
+      }
+      
+      return (
+        value && typeof value === "string" && (value.match(
+          /^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?(\/([0-9]|[1-2][0-9]|3[0-2]))?$/)
+          || value.match(
+            /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}(:[0-9]{1,5})?(\/([0-9]|[1-2][0-9]|3[0-2]))?$/)
+        )
+      )
+    },
+    isDomainName(value) {
+      // Returns true if the value is a domain name
+      return (
+        value &&
+        typeof value === "string" &&
+        value.match(/^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$/)
+      );
     },
     copyValue(value, i, field) {
       // Copy the value to the clipboard
@@ -1125,11 +1235,11 @@ export default {
         this.search(tab);
       }
     },
-    filterByValue(tab, value, field) {
+    filterByValue(tab, value, field, exclude = false) {
       let _filter = {
         value: value,
         field: field,
-        exclude: false,
+        exclude: exclude,
         operator: "is",
         active: true,
       };
@@ -1185,23 +1295,26 @@ export default {
       };
 
       tab.search_complete = false;
-      this.$store.dispatch("runThreatHunt", query).then((resp) => {
-        tab.results = resp.data.response.hits.hits;
-        tab.pages = resp.data.pages;
-        tab.aggregations = resp.data.response.aggregations;
-        tab.timefield = resp.data.timefield;
-        tab.search_complete = true;
-        tab.search_failed = false;
-        tab.failure_reason = "";
-        tab.current_page = 1;
-      }).catch((err) => {
-        tab.search_complete = true;
-        tab.search_failed = true;
-        tab.failure_reason = err.response.data.message;
-        tab.timefield = '@timestamp';
-        tab.results = [];
-        tab.current_page = 1;
-      });
+      this.$store
+        .dispatch("runThreatHunt", query)
+        .then((resp) => {
+          tab.results = resp.data.response.hits.hits;
+          tab.pages = resp.data.pages;
+          tab.aggregations = resp.data.response.aggregations;
+          tab.timefield = resp.data.timefield;
+          tab.search_complete = true;
+          tab.search_failed = false;
+          tab.failure_reason = "";
+          tab.current_page = 1;
+        })
+        .catch((err) => {
+          tab.search_complete = true;
+          tab.search_failed = true;
+          tab.failure_reason = err.response.data.message;
+          tab.timefield = "@timestamp";
+          tab.results = [];
+          tab.current_page = 1;
+        });
     },
     flatten: function (obj) {
       var result = {};
