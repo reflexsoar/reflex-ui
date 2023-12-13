@@ -6,7 +6,7 @@
       addNavClasses="page-nav-tab"
       :activeTab.sync="active_tab"
     >
-      <CTab v-for="(tab, i) in log_searches">
+      <CTab v-for="(tab, i) in log_searches" >
         <template #title>
           {{ tab.name }}&nbsp;
             <button class="field-value-control"
@@ -63,10 +63,10 @@
         </section>
         <section class="flex-wrapper" id="filter" v-if="tab.filters.length > 0">
           <div class="flex-grid" id="search">
-            <div class="d-col-all text-left">
+            <div class="d-col-full text-left">
               <!-- horizontal list of badges with a close button that removes the filter -->
               <li
-                style="display: inline; margin-right: 2px"
+                class="filter-item"
                 v-for="(filter, i) in tab.filters"
                 :key="i"
               >
@@ -87,9 +87,9 @@
           <div class="flex-grid">
             <div class="d-col-2 text-left field-selector">
               <div class="field-selection">
-                <CInput v-model="field_search" placeholder="Search fields">
+                <CInput v-model="tab.field_search" placeholder="Search fields">
                   <template #append>
-                    <CButton color="secondary" size="sm" @click="hide_field_selection()"
+                    <CButton color="secondary" class="no-shadow" size="sm" @click="hide_field_selection()"
                       ><i class="fa-solid fa-square-caret-left"></i
                     ></CButton>
                   </template>
@@ -158,6 +158,7 @@
                   @click="show_field_selection()"
                   size="sm"
                   color="secondary"
+                  class="no-shadow"
                   v-c-tooltip="{ content: 'Show Fields', placement: 'right' }"
                   ><i class="fa-solid fa-square-caret-right"></i
                 ></CButton>
@@ -216,215 +217,26 @@
                   />
                 </div>
               </div>
-              <div class="table-wrapper">
-                <table class="log-table">
-                  <thead>
-                    <tr>
-                      <th colspan="100%" class="table-controls">
-                        <button class="field-value-control" @click="fullScreenTable(tab)">
-                          <i
-                            v-if="!tab.full_screen_log_table"
-                            class="fas fa-maximize"
-                          ></i>
-                          <i v-if="tab.full_screen_log_table" class="fas fa-minimize"></i>
-                        </button>
-                      </th>
-                    </tr>
-                    <tr>
-                      <th class="fitwidth" scope="col"></th>
-                      <th
-                        scope="col"
-                        v-for="field in column_fields(tab)"
-                        :key="field.key"
-                        class="fitwidth field-header"
-                      >
-                        {{ field.label }}
-                        <span class="field-value-controls">
-                          <button class="field-value-control">
-                            <i class="fas fa-sort" />
-                          </button>
-                          <button
-                            class="field-value-control"
-                            @click="deselectField(tab, { name: field.key })"
-                          >
-                            <i class="fas fa-times" />
-                          </button>
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-if="tab.search_complete == false">
-                      <td class="text-center" colspan="100%" style="height: 160px">
-                        <CSpinner style="width: 125px; height: 125px" />
-                      </td>
-                    </tr>
-                    <tr v-if="flattened_results(tab).length == 0 && tab.search_complete">
-                      <td class="text-center" colspan="100%">
-                        <span v-if="tab.search_failed">
-                          <CAlert color="warning">
-                            <strong>Search failed</strong>
-                            <br />
-                            {{ tab.failure_reason }}
-                          </CAlert>
-                        </span>
-                        <span v-else> No results {{ tab.search_failed }} </span>
-                      </td>
-                    </tr>
-                    <tr
-                      v-for="(result, i) in flattened_results(tab)"
-                      :key="result._id"
-                      v-else-if="tab.search_complete"
-                    >
-                      <td class="fitwidth">
-                        <button class="field-value-control" v-on:click="view_log(result)">
-                          <i
-                            class="fa-solid fa-up-right-and-down-left-from-center expand-icon"
-                          ></i>
-                        </button>
-                        <input type="checkbox" class="row-checkbox" />
-                      </td>
-                      <td
-                        v-for="field in column_fields(tab)"
-                        :key="field.key"
-                        class="fitwidth field-value"
-                      >
-                        <span v-if="field.key === '_'">
-                          <span v-for="(v, k) in result" :key="k">
-                            <span class="reflex-badge reflex-badge-secondary">{{
-                              k
-                            }}</span>
-                            <span class="reflex-badge">{{ v }}</span>
-                          </span>
-                        </span>
-                        <span v-else>
-                          <span v-if="result[field.key] == undefined" class="empty-value"
-                            >empty</span
-                          >
-                          <span v-else-if="isArray(result[field.key])">
-                            <span
-                              v-for="(value, index) in result[field.key]"
-                              :key="index"
-                            >
-                              <span class="reflex-badge">{{ value }}</span>
-                              <span
-                                class="field-value-controls"
-                                v-if="result[field.key] != undefined"
-                              >
-                                <button class="field-value-control" @click="copyValue(value, i, field.key)">
-                                  <i class="fas fa-clipboard" />
-                                </button>
-                                <button class="field-value-control" v-on:click="filterByValue(tab, value, field.key)">
-                                  <i class="fas fa-plus" />
-                                </button>
-                                <button class="field-value-control" v-on:click="filterByValue(tab, value, field.key, true)">
-                                  <i class="fas fa-minus" />
-                                </button> </span><br />
-                            </span>
-                          </span>
-                          <span :ref="i + '.' + field.key" v-else
-                            >{{ result[field.key] }}
-                            <span
-                              class="field-value-controls"
-                              v-if="result[field.key] != undefined"
-                            >
-                              <button
-                                class="field-value-control"
-                                @click="copyValue(result[field.key], i, field.key)"
-                              >
-                                <i class="fas fa-clipboard" />
-                              </button>
-                              <button
-                                class="field-value-control"
-                                v-on:click="
-                                  filterByValue(tab, result[field.key], field.key)
-                                "
-                              >
-                                <i class="fas fa-plus" />
-                              </button>
-                              <button
-                                class="field-value-control"
-                                v-on:click="filterByValue(tab, result[field.key], field.key, true)"
-                              >
-                                <i class="fas fa-minus" />
-                              </button> </span
-                          ></span>
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colspan="100%" class="table-controls">
-                        <span class="pagination">
-                          <span
-                            v-bind:disabled="tab.current_page > 1"
-                            class="page-number"
-                            v-on:click="nextPage(tab, tab.current_page - 1)"
-                          >
-                            <i class="fa-solid fa-chevron-left"></i>
-                          </span>
-                          <span v-for="page in maxPages(tab)">
-                            <button
-                              class="page-number"
-                              v-bind:class="page == tab.current_page ? 'active' : null"
-                              v-on:click="nextPage(tab, page)"
-                            >
-                              {{ page }}
-                            </button>
-                          </span>
-                          <span
-                            v-bind:disabled="tab.current_page < maxPages(tab)"
-                            class="page-number"
-                            v-on:click="nextPage(tab, tab.current_page + 1)"
-                          >
-                            <i class="fa-solid fa-chevron-right"></i>
-                          </span>
-                          <span class="result-count">
-                            | {{ tab.results.length }} results</span
-                          >
-                        </span>
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+              <LogTable :fields="column_fields(tab)" :items="tab.results" :totalItems="tab.total_results" :tab="tab" @viewLog="view_log" @filterAdded="filterByValue" @deselectField="deselectField"/>
             </div>
           </div>
         </section>
         <LogDrawer @filterAdded="filterByValue" :tab="tab"/>
       </CTab>
     </CTabs>
-    {{ log_searches }}
   </div>
 </template>
 
 <style scoped>
 
-
-.table-controls {
-  background-color: #efefef;
-  border-bottom: 1px solid #ddd;
-  padding: 5px;
-  font-size: 14px;
-  position: sticky;
+.no-shadow {
+  box-shadow: none !important;
 }
 
-.table-wrapper.full-screen {
-  /* Bring the log wrapper to the front and make it full screen */
-  z-index: 20000;
-  position: fixed;
-  display: block;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-  min-height: 100vh;
-}
-
-.empty-value {
-  color: #aaa;
+.filter-item {
+  float: left;
+  list-style: none;
+  display: flex;
 }
 
 .field-list-wrapper {
@@ -500,22 +312,7 @@
   font-size: 12px;
 }
 
-.pagination {
-  font-size: 13px;
-}
 
-.page-number {
-  padding: 2px 5px;
-  margin: 0 2px;
-  cursor: pointer;
-  line-height: 1.2;
-  font-weight: 500;
-  border: 0;
-}
-
-.page-number:focus {
-  outline: none;
-}
 
 .field-type {
   padding: 2px 2px 2px 0px;
@@ -531,23 +328,7 @@
   font-style: italic;
 }
 
-.page-chevron {
-  padding: 2px 5px;
-  margin: 0 2px;
-  cursor: pointer;
-  line-height: 1.2;
-  font-weight: 500;
-}
 
-.page-number.active {
-  background-color: #3c4b64;
-  color: #fff;
-  border-radius: 2px;
-}
-
-.result-count {
-  font-family: Inter;
-}
 
 /* Hide the focus outline on the buttons */
 .field-value-control:focus {
@@ -564,10 +345,10 @@
   border-radius: 2px;
   padding: 2px 5px;
   margin: 0 2px;
-  cursor: pointer;
   line-height: 1.2;
   font-weight: 500;
   padding: 6px 8px 6px 6px;
+  margin-bottom: 4px;
 }
 
 .field-picker-item {
@@ -579,109 +360,6 @@
 
 .field-picker-item div[class^="d-col-"] {
   padding: 0 !important;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-  overflow-y: auto;
-  min-height: calc(100vh - 310px);
-  background-color: #fff;
-  max-height: calc(100vh - 310px);
-}
-
-.log-table {
-  margin: auto;
-  border-collapse: collapse;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-}
-
-.log-table thead {
-  /* Make the table header stick to the top */
-  position: sticky;
-  top: 0;
-  background-color: #fff;
-  z-index: 1;
-  border: 1px solid #ddd;
-}
-
-.log-table tfoot {
-  /* Make sticky footer */
-  position: sticky;
-  bottom: 0;
-  background-color: #fff;
-  z-index: 1;
-  border-top: 1px solid #ddd;
-}
-
-.log-table tbody {
-  width: 100%;
-  height: 100% !important;
-}
-
-.log-table th,
-.log-table td {
-  text-align: left;
-  padding: 8px;
-  border: 1px solid #ddd;
-  /* Align all text to the top of the cell */
-  vertical-align: top;
-}
-
-.log-table tr {
-  max-height: 25px;
-  font-family: "Roboto Mono";
-}
-
-.log-table tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-.log-table th {
-  background-color: light-grey;
-}
-
-.log-table th.fitwidth,
-.log-table td.fitwidth {
-  /* Make the table cells expand to fit the content */
-  width: 1px;
-  white-space: nowrap;
-}
-
-.row-checkbox {
-  /* Style the checkbox so it looks nice */
-  width: 15px;
-  height: 15px;
-  border: 1px solid #ddd;
-  border-radius: 2px;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-  padding-top: 2px;
-  vertical-align: middle;
-  margin-left: 5px;
-}
-
-.field-header,
-.field-value {
-  font-family: "Roboto Mono";
-  font-size: 12px;
-}
-
-.field-header {
-  font-weight: 600;
-}
-
-.expand-icon {
-  /* Hide the expand icon by default */
-  opacity: 0;
-  cursor: pointer;
-}
-
-/* Show the expand icon when it's cell is hovered over */
-.log-table tr:hover .expand-icon {
-  opacity: 1;
 }
 
 .reset-fields {
@@ -798,6 +476,7 @@ import {v4 as uuidv4} from 'uuid';
 import LogDrawer from "@/views/searchworkspace/LogDrawer.vue";
 
 import ValuePopover from "@/views/searchworkspace/ValuePopover.vue";
+import LogTable from "@/views/searchworkspace/LogTable.vue";
 
 import { CChartBar } from "@coreui/vue-chartjs";
 
@@ -810,12 +489,16 @@ export default {
     CChartBar,
     LogDrawer,
     ValuePopover,
+    LogTable,
+  },
+  computed: {
+    ...mapState(["current_user", "log_searches"]),
   },
   created() {
     this.$store.commit("set", ["logDrawerMinimize", true]);
 
     if(this.log_searches.length == 0) {
-      this.addSearch();
+      this.addSearch()
     }
   },
   data() {
@@ -849,134 +532,13 @@ export default {
           ],
         },
       ],
-      search_tabs: [
-        {
-          name: "Reflex Events",
-          search: "title: *",
-          dataset: "events",
-          filters: [],
-          date_range: {
-            start: null,
-            end: null,
-          },
-          results: [],
-          fields: [],
-          search_on_change: false,
-          search_complete: true,
-          search_failed: false,
-          failure_reason: "",
-          pages: 0,
-          current_page: 1,
-          hide_empty_fields: false,
-          full_screen_log_table: false,
-          timefield: "@timestamp",
-          show_chart: true,
-        },
-        {
-          name: "User logins from new countries",
-          search:
-            "event.code:4624 AND NOT geoip.country_iso_code:US AND NOT geoip.country_iso_code:CA",
-          dataset: "events",
-          filters: [],
-          date_range: {
-            start: null,
-            end: null,
-          },
-          results: [],
-          fields: [],
-          search_on_change: false,
-          search_complete: true,
-          search_failed: false,
-          failure_reason: "",
-          pages: 0,
-          current_page: 1,
-          hide_empty_fields: false,
-          full_screen_log_table: false,
-          timefield: "@timestamp",
-          show_chart: true,
-        },
-      ],
-      results: [],
-      selected_fields: [],
-      field_search: "",
-      hunt_complete: true,
-      fields: [
-        {
-          type: "keyword",
-          name: "event.code",
-        },
-        {
-          type: "keyword",
-          name: "process.pid",
-        },
-        {
-          type: "keyword",
-          name: "process.name",
-        },
-        {
-          type: "keyword",
-          name: "process.path",
-        },
-        {
-          type: "keyword",
-          name: "process.command_line",
-        },
-        {
-          type: "ip",
-          name: "source.ip",
-        },
-        {
-          type: "ip",
-          name: "destination.ip",
-        },
-        {
-          type: "text",
-          name: "message",
-        },
-        {
-          type: "meta",
-          name: "_source",
-        },
-      ],
-      events: [
-        {
-          event: {
-            code: 1,
-          },
-          process: {
-            pid: 1,
-            name: "cmd.exe",
-            path: "C:\\Windows\\System32\\cmd.exe",
-            command_line: "cmd.exe /c echo hello world",
-          },
-          host: {
-            name: "DESKTOP-1234",
-          },
-        },
-        {
-          event: {
-            code: 3,
-          },
-          process: {
-            pid: 1,
-            name: "cmd.exe",
-            path: "C:\\Windows\\System32\\cmd.exe",
-          },
-          source: {
-            ip: "192.0.2.100",
-          },
-          destination: {
-            ip: "69.7.235.50",
-          },
-        },
-      ],
       dataset: "",
     };
   },
-  computed: {
-    ...mapState(["log_searches","current_user"]),
-  },
   methods: {
+    renameSearch() {
+      alert(1);
+    },
     maxPages(tab) {
       // Return the max number of pages based on the number of results and the page size of 100
       return Math.ceil(tab.results.length / 100);
@@ -1083,15 +645,15 @@ export default {
 
     filtered_selected(tab) {
       return tab.fields.filter((field) => {
-        return field.name.toLowerCase().includes(this.field_search.toLowerCase());
+        return field.name.toLowerCase().includes(tab.field_search.toLowerCase());
       });
     },
     filtered_fields(tab) {
       let fields = this.available_fields(tab).filter((field) => {
         // If the search string is not empty, filter the fields by the search string and selected fields
-        if (this.field_search.length > 0) {
+        if (tab.field_search != undefined && tab.field_search.length > 0) {
           return (
-            field.name.toLowerCase().includes(this.field_search.toLowerCase()) &&
+            field.name.toLowerCase().includes(tab.field_search.toLowerCase()) &&
             !tab.fields.filter((f) => f.name === field.name).length > 0
           );
         } else {
@@ -1174,7 +736,9 @@ export default {
           end: null,
         },
         results: [],
+        total_results: 0,
         fields: [],
+        field_search: "",
         search_on_change: false,
         search_complete: true,
         search_failed: false,
@@ -1189,7 +753,8 @@ export default {
       }
 
       // Save the search to the store
-      this.$store.commit('add_log_search', new_search)
+      //this.$store.commit('add_log_search', new_search)
+      this.log_searches.push(new_search)
 
       this.active_tab = this.log_searches.length - 1;
 
@@ -1205,17 +770,6 @@ export default {
       if (this.log_searches.length == 0) {
         this.addSearch();
       }
-
-      // In 1s set the active tab to the previous tab
-      setTimeout(() => {
-        // If the tab that was removed was the last tab, set the active tab to the previous tab
-        if (i == this.log_searches.length) {
-          this.active_tab = i - 1;
-        } else {
-          this.active_tab = i;
-        }
-        //this.active_tab = i - 1;
-      }, 0);
     },
     isArray(value) {
       // Returns true if the value is an array
@@ -1317,6 +871,11 @@ export default {
       });
     },
     search: function (tab) {
+
+      if (tab.search == undefined || tab.search.length == 0) {
+        tab.search = "*";
+      }
+
       let query = {
         query: tab.search,
         dataset: tab.dataset,
@@ -1329,6 +888,7 @@ export default {
         .dispatch("runThreatHunt", query)
         .then((resp) => {
           tab.results = resp.data.response.hits.hits;
+          tab.total_results = resp.data.response.hits.total.value;
           tab.pages = resp.data.pages;
           tab.aggregations = resp.data.response.aggregations;
           tab.timefield = resp.data.timefield;
@@ -1336,6 +896,7 @@ export default {
           tab.search_failed = false;
           tab.failure_reason = "";
           tab.current_page = 1;
+          this.$store.commit('update_log_search', tab)
         })
         .catch((err) => {
           tab.search_complete = true;
@@ -1343,6 +904,7 @@ export default {
           tab.failure_reason = err.response.data.message;
           tab.timefield = "@timestamp";
           tab.results = [];
+          tab.total_results = 0;
           tab.current_page = 1;
         });
     },

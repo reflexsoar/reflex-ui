@@ -1048,6 +1048,7 @@ const mutations = {
 }
 
 const getters = {
+  log_searches: state => { return state.log_searches },
   integration_outputs_select: state => {
     return state.integration_outputs.map(output => { return { label: output.integration_name + " - " + output.name + " - " + output.configuration_name, value: output.value } })
   },
