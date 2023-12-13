@@ -4,10 +4,25 @@
       <thead>
         <tr>
           <th colspan="100%" class="table-controls">
-            <button class="field-value-control" @click="fullScreenTable()">
+            <button class="field-value-control" @click="fullScreenTable()" style="display: inline">
               <i v-if="!full_screen_log_table" class="fas fa-expand"></i>
               <i v-if="full_screen_log_table" class="fas fa-compress"></i>
             </button>
+            <CDropdown style="display: inline">
+                <template #toggler>
+                <button v-bind:disabled="sort_fields.length == 0" type="button" aria-expanded="false" aria-haspopup="true" class="sort-field-btn dropdown-toggle"> Sort Fields: {{ sort_fields.length }} </button>
+                </template>
+                    <draggable v-model="sort_fields"
+                    group="sorted_fields"
+                    @start="drag = true"
+                    @end="drag = false">
+                <li class="sort-field" v-for="field in sort_fields" :key="field">
+                    <i class="fas fa-grip-lines">
+                      <span style="font-family: Inter; font-weight: 400; padding-left: 5px; font-size: 12.8px;">{{ field }}</span></i>
+                </li>
+                    </draggable>
+            </CDropdown>
+            
           </th>
         </tr>
         <tr>
@@ -20,8 +35,10 @@
           >
             {{ field.label }}
             <span class="field-value-controls">
-              <button class="field-value-control">
-                <i class="fas fa-sort" />
+              <button class="field-value-control" @click="sortByField(field.key)">
+                <i class="fas fa-sort-up" v-if="isPositiveSort(field.key)"/>
+                <i class="fas fa-sort-down" v-else-if="isNegativeSort(field.key)" />
+                <i class="fas fa-sort" v-else />
               </button>
               <button
                 class="field-value-control"
@@ -164,6 +181,34 @@
 </template>
 
 <style scoped>
+
+.sort-field-btn {
+    font-size: 12px;
+    font-family: Inter;
+    font-weight: 500;
+    border: 0;
+}
+
+.sort-field-remove-btn {
+    display: inline;
+    border: 0;
+    background-color: #fff;
+}
+
+.sort-field-remove-btn:focus,
+.sort-field-btn:focus {
+    outline: none;
+}
+
+.sort-field {
+    font-size: 12px;
+    padding-left: 10px;
+    padding-right:10px;
+    margin-bottom: 2px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
 .table-controls {
   background-color: #efefef;
   border-bottom: 1px solid #ddd;
@@ -369,10 +414,13 @@ import { isArray } from "lodash";
 
 import KeyedResult from "./KeyedResult.vue";
 
+import draggable from "vuedraggable";
+
 export default {
   name: "LogTable",
     components: {
         KeyedResult,
+        draggable,
     },
   props: {
     tab: {
@@ -391,16 +439,73 @@ export default {
       type: Number,
       default: 0,
     },
+    sortFields: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     return {
       current_page: 1,
       full_screen_log_table: false,
-      page_size: 50
+      page_size: 50,
+      sort_fields: []
     };
   },
   methods: {
     isArray,
+    sortByField(field) {
+        /* If the field is not already in the sort fields, in any direction, then add it to the sort fields */
+        let negative_sort = "-" + field;
+        let positive_sort = field;
+        if(!this.sort_fields.includes(negative_sort) && !this.sort_fields.includes(positive_sort)) {
+            this.sort_fields.push(positive_sort)
+        } else {
+            /* If the positive sort of the field is already in the sort fields, then remove it and add the negative sort */
+            if(this.sort_fields.includes(positive_sort)) {
+                this.sort_fields.splice(this.sort_fields.indexOf(positive_sort), 1);
+                this.sort_fields.push(negative_sort);
+            } else {
+                /* If the negative sort of the field is already in the sort fields, then remove it */
+                this.sort_fields.splice(this.sort_fields.indexOf(negative_sort), 1);
+            }
+        }
+    },
+    removeSortField(field) {
+        /* Remove the field regardless of direction */
+        let negative_sort = "-" + field;
+        let positive_sort = field;
+        if(this.sort_fields.includes(negative_sort)) {
+            this.sort_fields.splice(this.sort_fields.indexOf(negative_sort), 1);
+        }
+        if(this.sort_fields.includes(positive_sort)) {
+            this.sort_fields.splice(this.sort_fields.indexOf(positive_sort), 1);
+        }
+    },
+    isPositiveSort(field) {
+        return this.sort_fields.includes(field);
+    },
+    isNegativeSort(field) {
+        return this.sort_fields.includes("-" + field);
+    },
+    sortItems(items) {
+        /* Sort the items by multiple fields, if a field starts with a '-' then sort descending */
+        let sort_fields = this.sort_fields;
+        if (sort_fields.length == 0) return items;
+        return items.sort((a, b) => {
+            for (let i = 0; i < sort_fields.length; i++) {
+                let field = sort_fields[i];
+                let direction = 1;
+                if (field.startsWith('-')) {
+                    direction = -1;
+                    field = field.substring(1);
+                }
+                if (a[field] < b[field]) return -1 * direction;
+                if (a[field] > b[field]) return 1 * direction;
+            }
+            return 0;
+        });
+    },
     flattened_results() {
       /* Slice the results by the current page e.g 0-100, 100-200, etc */
       let tab_results = this.items.slice(
@@ -409,9 +514,11 @@ export default {
       );
 
       /* Flatten the results */
-      return tab_results.map((result) => {
+      let flattened_results = tab_results.map((result) => {
         return this.flatten_json(result._source);
       });
+
+      return this.sortItems(flattened_results)
     },
     flatten_json(o) {
       var out = {};
