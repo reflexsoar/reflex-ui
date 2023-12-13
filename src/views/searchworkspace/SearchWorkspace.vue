@@ -6,13 +6,14 @@
       addNavClasses="page-nav-tab"
       :activeTab.sync="active_tab"
     >
-      <CTab v-for="(tab, i) in search_tabs">
+      <CTab v-for="(tab, i) in log_searches">
         <template #title>
-          {{ tab.name }}&nbsp;<i
-            class="fas fa-times"
+          {{ tab.name }}&nbsp;
+            <button class="field-value-control"
             @click="removeSearch(i)"
-            style="cursor: pointer"
-          ></i>
+            
+          ><i
+            class="fas fa-times"></i></button>
         </template>
 
         <section class="flex-wrapper" id="search">
@@ -29,7 +30,6 @@
             </div>
             <div class="d-col-8">
               <CInput
-                
                 v-on:keyup.enter="search(tab)"
                 v-model="tab.search"
                 placeholder="Enter your hunting query"
@@ -395,7 +395,7 @@
         <LogDrawer @filterAdded="filterByValue" :tab="tab"/>
       </CTab>
     </CTabs>
-    
+    {{ log_searches }}
   </div>
 </template>
 
@@ -787,10 +787,13 @@
 </style>
 
 <script>
+
+import { mapState } from "vuex";
 import VueJsonPretty from "vue-json-pretty";
 import "vue-json-pretty/lib/styles.css";
 import draggable from "vuedraggable";
 import SelectInput from "../components/SelectInput.vue";
+import {v4 as uuidv4} from 'uuid';
 
 import LogDrawer from "@/views/searchworkspace/LogDrawer.vue";
 
@@ -810,6 +813,10 @@ export default {
   },
   created() {
     this.$store.commit("set", ["logDrawerMinimize", true]);
+
+    if(this.log_searches.length == 0) {
+      this.addSearch();
+    }
   },
   data() {
     return {
@@ -966,7 +973,9 @@ export default {
       dataset: "",
     };
   },
-
+  computed: {
+    ...mapState(["log_searches","current_user"]),
+  },
   methods: {
     maxPages(tab) {
       // Return the max number of pages based on the number of results and the page size of 100
@@ -1154,8 +1163,8 @@ export default {
       });
     },
     addSearch() {
-      // Add a new tab
-      this.search_tabs.push({
+      // Add a new tab'
+      let new_search = {
         name: "New search",
         search: "",
         dataset: "events",
@@ -1176,21 +1185,37 @@ export default {
         full_screen_log_table: false,
         timefield: "@timestamp",
         show_chart: true,
-      });
+        uuid: uuidv4()
+      }
 
-      this.active_tab = this.search_tabs.length - 1;
+      // Save the search to the store
+      this.$store.commit('add_log_search', new_search)
+
+      this.active_tab = this.log_searches.length - 1;
+
     },
-    removeSearch(i) {
-      // Set the active_tab to the previous tab
-      this.active_tab = i - 1;
+    removeSearch(i) {      
+      // Get the UUID of the tab to remove
+      let tab = this.log_searches[i];
 
-      // Remove the current tab
-      this.search_tabs.splice(i, 1);
+      // Remove the search from the state
+      this.$store.commit('remove_log_search', tab.uuid)
 
       // If there are no more tabs, add a new one
-      if (this.search_tabs.length == 0) {
+      if (this.log_searches.length == 0) {
         this.addSearch();
       }
+
+      // In 1s set the active tab to the previous tab
+      setTimeout(() => {
+        // If the tab that was removed was the last tab, set the active tab to the previous tab
+        if (i == this.log_searches.length) {
+          this.active_tab = i - 1;
+        } else {
+          this.active_tab = i;
+        }
+        //this.active_tab = i - 1;
+      }, 0);
     },
     isArray(value) {
       // Returns true if the value is an array

@@ -170,10 +170,24 @@ const state = {
   agent_tag: {},
   agent_tags: [],
   agent_logs: [],
-  benchmark_assets: []
+  benchmark_assets: [],
+  log_searches: [],
 }
 
 const mutations = {
+  add_log_search(state, search) {
+    state.log_searches.push(search)
+  },
+  update_log_search(state, search) {
+    state.log_searches = state.log_searches.map(s => s.uuid == search.uuid ? search : s)
+  },
+  remove_log_search(state, uuid) {
+    console.log(uuid);
+    state.log_searches = state.log_searches.filter(s => s.uuid != uuid)
+  },
+  clear_log_searches(state) {
+    state.log_searches = []
+  },
   save_benchmark_assets(state, assets) {
     state.benchmark_assets = assets
   },
@@ -5222,6 +5236,7 @@ export default new Vuex.Store({
   getters,
   plugins: [createPersistedState({
     key: 'reflex-state',
-    paths: ['observable_filters', 'case_filters', 'intel_filters', 'current_user', 'case_templates', 'quick_filters', 'selected_detection_filters']
+    paths: ['observable_filters', 'case_filters', 'intel_filters', 'current_user', 'case_templates', 'quick_filters', 'selected_detection_filters',
+  'log_searches']
   })]
 })
