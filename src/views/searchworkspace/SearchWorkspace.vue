@@ -166,11 +166,11 @@
         </section>
         <section class="flex-wrapper" id="results">
           <div class="flex-grid">
-            <div class="d-col-2 text-left field-selector">
-              <div class="field-selection">
+            <div class="d-col-2 text-left field-selector"  v-bind:class="tab.hide_field_selection ? 'shrink' : ''">
+              <div class="field-selection"  v-bind:class="tab.hide_field_selection ? 'hide' : ''">
                 <CInput v-model="tab.field_search" placeholder="Search fields">
                   <template #append>
-                    <CButton color="secondary" class="no-shadow" size="sm" @click="hide_field_selection()"
+                    <CButton color="secondary" class="no-shadow" size="sm" @click="toggleFieldSelection(tab)"
                       ><i class="fa-solid fa-square-caret-left"></i
                     ></CButton>
                   </template>
@@ -233,9 +233,9 @@
                   </div>
                 </div>
               </div>
-              <div class="field-selection-toggle">
+              <div class="field-selection-toggle" v-bind:class="tab.hide_field_selection ? 'show' : ''">
                 <CButton
-                  @click="show_field_selection()"
+                  @click="toggleFieldSelection(tab)"
                   size="sm"
                   color="secondary"
                   class="no-shadow"
@@ -244,7 +244,7 @@
                 ></CButton>
               </div>
             </div>
-            <div class="d-col-10 text-left search-results">
+            <div class="d-col-10 text-left search-results"  v-bind:class="tab.hide_field_selection ? 'expand' : ''">
               <div class="flex-grid" style="margin-bottom: 10px" v-if="tab.show_chart">
                 <div
                   class="d-col-12"
@@ -952,31 +952,12 @@ export default {
         tab.full_screen_log_table = false;
       }
     },
-    hide_field_selection() {
-      // Find the field-selection-toggle and remove the hide class without using refs
-      document.querySelector(".field-selection-toggle").classList.add("show");
-
-      // Find the field-selection and add the hide class
-      document.querySelector(".field-selection").classList.add("hide");
-
-      // Add the expand class to the search-results
-      document.querySelector(".search-results").classList.add("expand");
-
-      // Add the shrink class to the field-selector
-      document.querySelector(".field-selector").classList.add("shrink");
-    },
-    show_field_selection() {
-      // Find the field-selection-toggle and add the hide class without using refs
-      document.querySelector(".field-selection-toggle").classList.remove("show");
-
-      // Find the field-selection and remove the hide class
-      document.querySelector(".field-selection").classList.remove("hide");
-
-      // Replace the d-col-12 on search-results with d-col-10
-      document.querySelector(".search-results").classList.remove("expand");
-
-      // Remove the shrink class from the field-selector
-      document.querySelector(".field-selector").classList.remove("shrink");
+    toggleFieldSelection(tab) {
+      if(tab.hide_field_selection === undefined) {
+        tab.hide_field_selection = true;
+      } else {
+        tab.hide_field_selection = !tab.hide_field_selection;
+      }
     },
     column_fields(tab) {
       let locked_fields = [{ key: tab.timefield, label: tab.timefield }];
@@ -1095,6 +1076,7 @@ export default {
         pages: 0,
         current_page: 1,
         hide_empty_fields: false,
+        hide_field_selection: false,
         full_screen_log_table: false,
         timefield: "@timestamp",
         show_chart: true,
