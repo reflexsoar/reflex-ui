@@ -28,7 +28,7 @@
                 :grouped="true"
               />
             </div>
-            <div class="d-col-8">
+            <div class="d-col-9">
               <CInput
                 v-on:keyup.enter="search(tab)"
                 v-model="tab.search"
@@ -36,13 +36,95 @@
                 required
                 style="margin-bottom: 0px"
               >
+              <template #append>
+                
+                <CButton @click="search(tab)" color="primary" size="sm" class="no-shadow">Search</CButton>
+                
+              </template>
               </CInput>
             </div>
+            <div class="d-col-1">
+              <CDropdown color="secondary">
+                  <template #toggler>
+                    <button class="btn btn-secondary no-shadow">
+                      <i class="fas fa-calendar"></i>
+                    </button>
+                  </template>
+                  <div class="date-options">
+                    <label>Quick select</label>
+                    <div class="quick-dates">
+                      <div class="quick-date-part">
+                        <select class="form-control" v-model="quick_date_settings.period">
+                          <option value="last">Last</option>
+                          <option value="next">Next</option>
+                        </select>
+                      </div>
+                      <div class="quick-date-part">
+                        <input type="number" class="form-control" v-model="quick_date_settings.value">
+                      </div>
+                      <div class="quick-date-part">
+                        <select class="form-control" v-model="quick_date_settings.unit">
+                          <option value="s">Seconds</option>
+                          <option value="m">Minutes</option>
+                          <option value="h">Hours</option>
+                          <option value="d">Days</option>
+                          <option value="w">Weeks</option>
+                          <option value="M">Months</option>
+                          <option value="y">Years</option>
+                        </select>
+                      </div>
+                      <div class="quick-date-part">
+                        <CButton color="secondary" class="btn-block no-shadow" @click="setDateRange(tab)">Apply</CButton>
+                      </div>
+                    </div>
+                    <hr>
+                    <label>Commonly Used</label>
+                    <div class="quick-dates">
+                      <li class="date-option" v-for="d in quick_dates" @click="setQuickDate(tab, d)">
+                        {{ d.label }}
+                      </li>
+                    </div>
+                    <hr>
+                    <v-date-picker v-model="tab.date_range" mode="dateTime" :masks="masks" is-range>
+                      <template v-slot="{ inputValue, inputEvents }">
+                        <CInput label="Start Date" aria-label="Start Date" :value="inputValue.start" v-on="inputEvents.start">
+                          <template #prepend>
+                            <CButton aria-label="Start Date" disabled color="secondary" size="sm" class="no-shadow"><CIcon name='cil-calendar'/></CButton>
+                          </template>
+                        </CInput>
+                        <CInput label="End Date" aria-label="End Date" :value="inputValue.end" v-on="inputEvents.end">
+                          <template #prepend>
+                            <CButton aria-label="End Date" disabled color="secondary" size="sm" class="no-shadow"><CIcon name='cil-calendar'/></CButton>
+                          </template>
+                        </CInput>
+                        <button class="btn btn-secondary btn-block no-shadow" @click="search(tab)">
+                          Apply
+                        </button>
+                      </template>
+                    </v-date-picker>
+                    <hr>
+                    <label>Automatic Refresh</label>
+                    <div class="quick-dates">
+                      <div style="width: 10%">
+                        <RSwitch :checked.sync="tab.auto_refresh"color="success"/>
+                      </div>
+                      <div style="width: 40%">
+                        <input type="number" class="form-control" v-model.number="tab.refresh_interval" placeholder="Refresh Interval"/>
+                      </div>
+                      <div style="width: 40%">
+                        <select class="form-control" v-model="tab.refresh_interval_unit">
+                          <option value="s">Seconds</option>
+                          <option value="m">Minutes</option>
+                          <option value="h">Hours</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+              </CDropdown>
+            </div>
 
-            <div class="d-col-2">
-              <CButtonGroup>
-                <CButton @click="search(tab)" color="primary">Search</CButton>
-                <CDropdown toggler-text="Settings" color="secondary">
+            <div class="d-col-1 text-right">
+                <CDropdown toggler-text="Options" color="secondary">
                   <CDropdownItem @click="addSearch()">New Search</CDropdownItem>
                   <CDropdownItem @click="tab.search_on_change = !tab.search_on_change">
                     <!-- show a checkmark if the search on change is enabled -->
@@ -57,7 +139,6 @@
                     Show chart
                   </CDropdownItem>
                 </CDropdown>
-              </CButtonGroup>
             </div>
           </div>
         </section>
@@ -130,7 +211,6 @@
                     </div>
                   </draggable>
                   <div class="field-group-header">Available</div>
-
                   <div
                     v-for="field in filtered_fields(tab)"
                     :key="field.name"
@@ -170,6 +250,29 @@
                   class="d-col-12"
                   style="background-color: #fff; border: 1px solid #ddd; padding: 10px"
                 >
+                  <div class="text-right">
+                  <CButtonGroup>
+                    <CDropdown toggler-text="Chart Type" color="secondary" size="sm" style="background-color: none; padding: 5px">
+                      <template #toggler-content>
+                        <b>Chart type:</b>&nbsp;{{ tab.chart_type ? tab.chart_type : 'bar' }}
+                      </template>
+                      <CDropdownItem @click="tab.chart_type = 'bar'">Bar</CDropdownItem>
+                      <CDropdownItem @click="tab.chart_type = 'line'">Line</CDropdownItem>
+                      <CDropdownItem @click="tab.chart_type = 'pie'">Pie</CDropdownItem>
+                    </CDropdown>
+                    <CDropdown color="secondary" size="sm" style="background-color: none; padding: 5px">
+                      <template #toggler-content>
+                        <b>Group by:</b>&nbsp;{{ tab.chart_group_by }}
+                      </template>
+                      <div style="max-height: 200px; overflow-y: scroll">
+                        <CDropdownItem v-for="field in available_fields(tab)" @click="tab.chart_group_by = field.name" v-if="field.type == 't'">
+                          <span v-if="tab.chart_group_by == field.name"><i class="fas fa-check"></i>&nbsp;</span>
+                          {{ field.name }}
+                        </CDropdownItem>
+                      </div>
+                    </CDropdown>
+                  </CButtonGroup>
+                  </div>
                   <CChartBar
                     :datasets="timeline_datasets(tab)"
                     :labels="timeline_datalabels(tab)"
@@ -177,6 +280,19 @@
                     :options="{
                       responsive: true,
                       maintainAspectRatio: false,
+                      plugins: {
+                        annotation: {
+                          annotations: {
+                            today: {
+                              type: 'line',
+                              yMin: 3000,
+                              xMin: 3000,
+                              borderColor: 'rgb(255,99,132)',
+                              borderWidth: 5
+                            }
+                          }
+                        }
+                      },
                       legend: {
                         display: false,
                       },
@@ -228,6 +344,49 @@
 </template>
 
 <style scoped>
+
+hr {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.quick-dates {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.quick-date-part {
+  width: 22%;
+}
+
+.date-options {
+  padding: 10px;
+  width: 450px;
+  font-size:12.8px !important;
+}
+
+.date-option {
+  list-style: none;
+  width: 50%;
+  cursor: pointer;
+  margin-bottom: 4px;
+  color: #321fdb;
+}
+
+.add-field-alias-btn {
+  background: #3c4b64;
+  border-radius: 25%;
+  border: none;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  color: #fff;
+  padding: 0px;
+  margin-right: 5px;
+  line-height: 2;
+  font-size: 1vmin;
+}
 
 .no-shadow {
   box-shadow: none !important;
@@ -480,6 +639,8 @@ import LogTable from "@/views/searchworkspace/LogTable.vue";
 
 import { CChartBar } from "@coreui/vue-chartjs";
 
+import RSwitch from "@/views/components/Switch.vue";
+
 export default {
   name: "SearchWorkspace",
   components: {
@@ -490,6 +651,7 @@ export default {
     LogDrawer,
     ValuePopover,
     LogTable,
+    RSwitch
   },
   computed: {
     ...mapState(["current_user", "log_searches"]),
@@ -504,8 +666,68 @@ export default {
   data() {
     return {
       active_tab: 0,
+      masks: {
+        modelValue: 'YYYY-MM-DD'
+      },
+      quick_date_settings: {
+        period: 'last',
+        value: 4,
+        unit: 'd'
+      },
       field_filters: [],
       hunt_query: "",
+      quick_dates: [
+        {
+          'start': this.startOfToday(), // Set this to todays 00:00:00,
+          'end': this.endOfToday(), // Set this to todays 23:59:59,
+          'label': 'Today'
+        },
+        {
+          'start': this.startOfWeek(), // Set this to the start of the week at 00:00:00,
+          'end': this.endOfWeek(), // Set this to the end of the week at 23:59:59,
+          'label': 'This week'
+        },
+        {
+          'start': 'now-15m',
+          'end': 'now',
+          'label': 'Last 15 minutes'
+        },
+        {
+          'start': 'now-30m',
+          'end': 'now',
+          'label': 'Last 30 minutes'
+        },
+        {
+          'start': 'now-1h',
+          'end': 'now',
+          'label': 'Last 1 hour'
+        },
+        {
+          'start': 'now-24h',
+          'end': 'now',
+          'label': 'Last 24 hours'
+        },
+        {
+          'start': 'now-7d',
+          'end': 'now',
+          'label': 'Last 7 days'
+        },
+        {
+          'start': 'now-30d',
+          'end': 'now',
+          'label': 'Last 30 days'
+        },
+        {
+          'start': 'now-90d',
+          'end': 'now',
+          'label': 'Last 90 days'
+        },
+        {
+          'start': 'now-1y',
+          'end': 'now',
+          'label': 'Last 1 year'
+        }
+      ],
       datasets: [
         {
           name: "Tellaro",
@@ -537,9 +759,132 @@ export default {
         },
       ],
       dataset: "",
+      refresh_timers: []
     };
   },
+  watch: {
+    // Watch all the log_searches auto_refresh values
+    log_searches: {
+      handler: function (val, oldVal) {
+        // For each tab in val, find its associated tab in oldVal and if
+        // auto_refresh has changed then start or stop the timer
+        for(let i = 0; i < val.length; i++) {
+          
+            if(val[i].auto_refresh) {
+              // If no timer exists
+              if(!this.refresh_timers[val[i].uuid]) {
+                // Start the timer
+                this.startAutoRefresh(val[i])
+              }
+            } else {
+              // If a timer exists
+              if(this.refresh_timers[val[i].uuid]) {
+                // Stop the timer
+                this.stopAutoRefresh(val[i])
+              }
+            }
+        }
+      },
+      deep: true
+    }
+  },
   methods: {
+    startAutoRefresh(tab) {
+      if(tab.auto_refresh) {
+        this.refresh_timers[tab.uuid] = setInterval(() => {
+          this.search(tab)
+        }, tab.refresh_interval * 1000)
+      }
+    },
+    stopAutoRefresh(tab) {
+      if(this.refresh_timers[tab.uuid]) {
+        clearInterval(this.refresh_timers[tab.uuid])
+      }
+    },
+    startOfToday() {
+      // Returns the start of today in ISO format in the UTC timezone
+      let date = new Date();
+
+      // Convert to UTC time
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+
+      // Set the hours to 0, minutes to 0, seconds to 0, and milliseconds to 0
+      date.setHours(0, 0, 0, 0);
+
+      return date.toISOString();
+    },
+    endOfToday() {
+      // Returns the end of today in ISO format in the UTC timezone
+      let date = new Date();
+
+      // Convert to UTC time
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+
+      // Set the hours to 23, minutes to 59, seconds to 59, and milliseconds to 999
+      date.setHours(23, 59, 59, 999);
+
+      return date.toISOString();
+    },
+    endOfWeek() {
+      // Returns the last day of the week in ISO format in the UTC timezone
+      let date = new Date();
+
+      // Convert to UTC time 
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+
+      let day = date.getDay();
+      let diff = date.getDate() + (day == 0 ? 0 : 7) - day; // adjust when day is sunday
+      date.setDate(diff);
+
+      // Set the hours to 23, minutes to 59, seconds to 59, and milliseconds to 999
+      date.setHours(23, 59, 59, 999);
+
+      return date.toISOString();
+    },
+    startOfWeek() {
+      // Returns the first day of the week in ISO format in the UTC timezone
+      let date = new Date();
+
+      // Convert to UTC time
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+
+      let day = date.getDay();
+      let diff = date.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
+      date.setDate(diff);
+
+      // Set the hours to 0, minutes to 0, seconds to 0, and milliseconds to 0
+      date.setHours(0, 0, 0, 0);
+
+      return date.toISOString();
+    },
+    setDateRange(tab) {
+
+      if(this.quick_date_settings.period == 'last') {
+        tab.date_range = {
+          start: 'now-' + this.quick_date_settings.value + this.quick_date_settings.unit,
+          end: 'now'
+        }
+      } else {
+        tab.date_range = {
+          start: 'now+' + this.quick_date_settings.value + this.quick_date_settings.unit,
+          end: 'now'
+        }
+      }
+
+      if(tab.search_on_change) {
+        this.search(tab)
+      }
+    },
+    setQuickDate(tab, date) {
+      tab.date_range = {
+        start: date.start,
+        end: date.end,
+      };
+
+      if(tab.search_on_change) {
+        this.search(tab)
+      }
+    },
     renameSearch() {
       alert(1);
     },
@@ -753,7 +1098,12 @@ export default {
         full_screen_log_table: false,
         timefield: "@timestamp",
         show_chart: true,
-        uuid: uuidv4()
+        uuid: uuidv4(),
+        auto_refresh: false,
+        refresh_interval: 5,
+        refresh_interval_unit: 'm',
+        chart_type: 'bar',
+        chart_group_by: null
       }
 
       // Save the search to the store

@@ -350,8 +350,6 @@
   margin-right: 5px;
   line-height: 2;
   font-size: 1vmin;
-  padding-right: 1px;
-  padding-bottom: 1px;
 }
 
 /* Hide the focus outline on the buttons */
