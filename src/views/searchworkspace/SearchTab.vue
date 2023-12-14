@@ -420,6 +420,8 @@ hr {
 </style>
 
 <script>
+// Require socket.io from the CDN
+
 import SelectInput from "@/views/components/SelectInput.vue";
 import RSwitch from "@/views/components/Switch.vue";
 import LogTable from "@/views/searchworkspace/LogTable.vue";
@@ -699,13 +701,9 @@ export default {
         label: "Hits",
       };
 
-      console.log("datasets was called");
-
       if (aggs == undefined) {
         return [data];
       }
-
-      console.log(aggs);
 
       for (let bucket in aggs.time_buckets.buckets) {
         data.data.push(aggs.time_buckets.buckets[bucket].doc_count);
@@ -716,8 +714,6 @@ export default {
     timeline_datalabels(aggs) {
       // Return the tab.aggregations.time_buckets.buckets in a format that can be used by the timeline chart
       let data = [];
-
-      console.log("datalabels was called");
 
       if (aggs == undefined) {
         return data;
@@ -938,19 +934,91 @@ export default {
       this.$store
         .dispatch("runSearch", query)
         .then((resp) => {
-          this.results = resp.data.response.hits.hits;
-          this.total_results = resp.data.response.hits.total.value;
-          this.pages = resp.data.pages;
-          this.aggregations = resp.data.response.aggregations;
-          this.timefield = resp.data.timefield;
-          this.search_complete = true;
-          this.search_failed = false;
-          this.failure_reason = "";
-          this.current_page = 1;
+          if (resp.data.proxied) {
+            let base_url = this.$store.getters.base_url;
 
-          this.updateTab();
+            // Remove the path on the base_url leaving only the protocol and hostname like http://localhost
+            base_url = base_url.replace(/api\/.*$/, "");
+
+            let socket = io.connect(base_url, {
+              extraHeaders: {
+                Authorization: "Bearer " + localStorage.getItem("access_token"),
+              },
+            });
+
+            console.log(socket);
+
+            socket.on("connect", () => {
+              // Emit a join event to the search channel
+              socket.emit("join", {
+                room: resp.data.search_channel,
+                user_type: "ui",
+              });
+            });
+
+            socket.on("results", (data) => {
+              this.results = data.response.hits.hits;
+              this.total_results = data.total_results;
+              this.pages = data.pages;
+              this.aggregations = data.response.aggregations;
+              this.timefield = data.timefield;
+              this.search_complete = true;
+              this.search_failed = false;
+              this.failure_reason = "";
+              this.current_page = 1;
+              this.updateTab();
+              socket.close()
+            });
+            
+            console.log(this.results);
+
+            socket.on("search_error", (data) => {
+              console.log("Received search error");
+              this.search_complete = true;
+              this.search_failed = true;
+              this.failure_reason = data.message;
+              this.timefield = "@timestamp";
+              this.results = [];
+              this.total_results = 0;
+              this.current_page = 1;
+              this.updateTab();
+            });
+
+            setTimeout(() => {
+              if (!this.search_complete) {
+                socket.close();
+                this.search_complete = true;
+                this.search_failed = true;
+                this.failure_reason = "Search timed out";
+                this.timefield = "@timestamp";
+                this.results = [];
+                this.total_results = 0;
+                this.current_page = 1;
+              }
+            }, 60000);
+          } else {
+            this.total_results = resp.data.total_results;
+            if (this.total_results > 0) {
+              this.results = resp.data.response.hits.hits;
+            }
+            this.pages = resp.data.pages;
+
+            if (resp.data.response.aggregations != undefined) {
+              this.aggregations = resp.data.response.aggregations;
+            }
+
+            this.timefield = resp.data.timefield;
+            this.search_complete = true;
+            this.search_failed = false;
+            this.failure_reason = "";
+            this.current_page = 1;
+            this.updateTab();   
+          }
+
+          
         })
         .catch((err) => {
+          console.log(err);
           this.search_complete = true;
           this.search_failed = true;
           this.failure_reason = err.response.data.message;
@@ -988,6 +1056,8 @@ export default {
       tab_update.search_complete = this.search_complete;
       tab_update.dataset = this.dataset;
       tab_update.date_range = this.date_range;
+
+      console.log(tab_update);
 
       this.$store.commit("update_log_search", tab_update);
     },
