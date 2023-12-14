@@ -20,12 +20,12 @@
         >
       </div>
       <draggable
-        v-model="fields"
+        v-model="selected_fields"
         group="selected_fields"
         @start="drag = true"
         @end="drag = false"
       >
-        <div v-for="(field, i) in fields" :key="i" :ref="field.name">
+        <div v-for="(field, i) in selected_fields" :key="i" :ref="field.name">
           <div class="flex-grid field-picker-item text-left">
             <div class="d-col-1">
               <span class="field-type">{{ field.type }}</span>
@@ -179,10 +179,14 @@ export default {
       default: false,
     },
   },
+  created() {
+    this.selected_fields = this.fields;
+  },
   data() {
     return {
       field_search: "",
       drag: false,
+      selected_fields: [],
       hide_field_selection: false
     };
   },
@@ -193,11 +197,11 @@ export default {
         if (this.field_search != undefined && this.field_search.length > 0) {
           return (
             field.name.toLowerCase().includes(this.field_search.toLowerCase()) &&
-            !this.fields.filter((f) => f.name === field.name).length > 0
+            !this.selected_fields.filter((f) => f.name === field.name).length > 0
           );
         } else {
           // If the search string is empty, only return fields that are not selected
-          return !this.fields.filter((f) => f.name === field.name).length > 0;
+          return !this.selected_fields.filter((f) => f.name === field.name).length > 0;
         }
       });
 
@@ -207,15 +211,15 @@ export default {
       });
     },
     selectField(field) {
-      if (!this.fields.includes(field)) {
-        this.fields.push(field);
-        this.$emit("update:fields", this.fields);
+      if (!this.selected_fields.includes(field)) {
+        this.selected_fields.push(field);
+        this.$emit("update:fields", this.selected_fields);
       }
     },
     deselectField(field) {
-      if (this.fields.includes(field)) {
-        this.fields.splice(this.fields.indexOf(field), 1);
-        this.$emit("update:fields", this.fields);
+      if (this.selected_fields.includes(field)) {
+        this.selected_fields.splice(this.selected_fields.indexOf(field), 1);
+        this.$emit("update:fields", this.selected_fields);
       }
     },
     toggleFieldSelection(tab) {
@@ -227,17 +231,14 @@ export default {
       this.$emit("update:hide_field_filter", this.hide_field_selection);
     },
     clearFields() {
-        this.fields = [];
-        this.$emit("update:fields", this.fields);
+        this.selected_fields = [];
+        this.$emit("update:fields", this.selected_fields);
     }
   },
   watch: {
-    fields: {
+    selected_fields: {
       handler: function (val, oldVal) {
-        if (this.drag) {
-          return;
-        }
-        this.$emit("update:fields", val);
+        this.$emit("update:fields", this.selected_fields);
       },
       deep: true,
     },
