@@ -936,7 +936,7 @@ export default {
 
       this.search_complete = false;
       this.$store
-        .dispatch("runThreatHunt", query)
+        .dispatch("runSearch", query)
         .then((resp) => {
           this.results = resp.data.response.hits.hits;
           this.total_results = resp.data.response.hits.total.value;

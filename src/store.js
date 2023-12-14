@@ -4043,9 +4043,9 @@ const actions = {
         })
     })
   },
-  runThreatHunt({ commit }, query) {
+  runSearch({ commit }, query) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/hunting/query`, data: query, method: 'POST' })
+      Axios({ url: `${BASE_URL}/search/query`, data: query, method: 'POST' })
         .then(resp => {
           if (resp.status == 200) {
             resolve(resp)
