@@ -51,6 +51,8 @@
     "monaco-editor-webpack-plugin": "^7.0.1",
     "monaco-languageclient": "^4.0.0",
     "prismjs": "^1.25.0",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
     "uuid": "^9.0.0",
     "v-calendar": "^2.3.4",
     "v-markdown-editor": "^1.2.6",
