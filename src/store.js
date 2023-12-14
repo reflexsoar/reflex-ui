@@ -172,6 +172,7 @@ const state = {
   agent_logs: [],
   benchmark_assets: [],
   log_searches: [],
+  base_url: ""
 }
 
 const mutations = {
@@ -1048,6 +1049,7 @@ const mutations = {
 }
 
 const getters = {
+  base_url: state => { return state.base_url },
   log_searches: state => { return state.log_searches },
   integration_outputs_select: state => {
     return state.integration_outputs.map(output => { return { label: output.integration_name + " - " + output.name + " - " + output.configuration_name, value: output.value } })
@@ -1185,8 +1187,12 @@ const getters = {
 let BASE_URL = ""
 if (process.env.NODE_ENV == 'development') {
   BASE_URL = location.protocol + '//' + window.location.hostname + '/api/v2.0'
+  // Set the base_url in the store
+  state.base_url = BASE_URL
 } else {
   BASE_URL = location.protocol + '//' + window.location.host + '/api/v2.0'
+  // Set the base_url in the store
+  state.base_url = BASE_URL
 }
 
 const actions = {
