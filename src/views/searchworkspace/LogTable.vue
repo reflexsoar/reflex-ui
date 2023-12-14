@@ -557,7 +557,7 @@ export default {
       this.full_screen_log_table = !this.full_screen_log_table;
     },
     deselectField(tab, field) {
-      this.$emit("deselectField", tab, field);
+      this.$emit("deselectField", field);
     },
     view_log(result) {
       this.$emit("viewLog", result);

@@ -242,6 +242,12 @@ export default {
       },
       deep: true,
     },
+    fields : {
+        handler: function(val, oldVal) {
+            this.selected_fields = val;
+        },
+        deep: true,
+    },
   },
 };
 </script>
