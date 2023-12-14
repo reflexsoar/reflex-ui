@@ -870,3 +870,99 @@ html:not([dir="rtl"]) nav>.pagination {
 .integration-logo-wrapper {
     height: 50px;
 }
+
+.flex-wrapper {
+    margin-left: -30px;
+    margin-right: -30px;
+  }
+  
+  .flex-grid {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+  }
+  
+  .flex-grid:nth-child(odd) div[class^="d-col-"] {
+    padding: 0.5rem 0.5rem;
+  }
+  .flex-grid:nth-child(even) div[class^="d-col-"] {
+    padding: 0.5rem 0.5rem;
+  }
+  
+  @media (min-width: 980px) {
+    .flex-grid {
+      margin-top: 2rem;
+    }
+    .flex-grid:first-child {
+      margin-top: 0;
+    }
+  
+    .d-col-1 {
+      width: 7.05%;
+    }
+    .d-col-2 {
+      width: 15.5%;
+    }
+    .d-col-3,
+    .d-col-thirds {
+      width: 23.95%;
+    }
+    .d-col-4,
+    .d-col-quarters {
+      width: 32.4%;
+    }
+    .d-col-5 {
+      width: 40.85%;
+    }
+    .d-col-6,
+    .d-col-halfs {
+      width: 49.3%;
+    }
+    .d-col-7 {
+      width: 57.75%;
+    }
+    .d-col-8 {
+      width: 66.2%;
+    }
+    .d-col-9 {
+      width: 74.65%;
+    }
+    .d-col-10 {
+      width: 83.1%;
+    }
+    .d-col-11 {
+      width: 91.55%;
+    }
+    .d-col-12,
+    .d-col-full {
+      width: 100%;
+    }
+  }
+  
+  @media only screen and (min-width: 661px) and (max-width: 979px) {
+    .flex-grid {
+      flex-flow: row wrap;
+    }
+  
+    .t-col-4,
+    .t-col-6,
+    .t-col-12 {
+      margin-top: 2rem;
+    }
+  
+    .t-col-4 {
+      width: 31.46%;
+    }
+    .t-col-6 {
+      width: 48.6%;
+    }
+    .t-col-12 {
+      width: 100%;
+    }
+  
+    .flex-grid:first-child .t-col-4,
+    .flex-grid:first-child .t-col-6,
+    .flex-grid:first-child .t-col-12 {
+      margin-top: 0;
+    }
+  }
