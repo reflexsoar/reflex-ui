@@ -6,7 +6,8 @@
       addNavClasses="page-nav-tab"
       :activeTab.sync="active_tab"
     >
-      <CTab v-for="(tab, i) in log_searches" >
+      <CTab v-for="(tab, i) in log_searches" :key="i" >
+        
         <template #title>
           {{ tab.name }}&nbsp;
             <button class="field-value-control"
@@ -15,329 +16,10 @@
           ><i
             class="fas fa-times"></i></button>
         </template>
+        <SearchTab :tab="tab" @newSearch="addSearch" />
 
-        <section class="flex-wrapper" id="search">
-          <div class="flex-grid">
-            <div class="d-col-2">
-              <SelectInput
-                size="lg"
-                :value.sync="tab.dataset"
-                :options="datasets"
-                style="margin-bottom: 0px"
-                :taggable="true"
-                :grouped="true"
-              />
-            </div>
-            <div class="d-col-9">
-              <CInput
-                v-on:keyup.enter="search(tab)"
-                v-model="tab.search"
-                placeholder="Enter your hunting query"
-                required
-                style="margin-bottom: 0px"
-              >
-              <template #append>
-                
-                <CButton @click="search(tab)" color="primary" size="sm" class="no-shadow">Search</CButton>
-                
-              </template>
-              </CInput>
-            </div>
-            <div class="d-col-1">
-              <CDropdown color="secondary">
-                  <template #toggler>
-                    <button class="btn btn-secondary no-shadow">
-                      <i class="fas fa-calendar"></i>
-                    </button>
-                  </template>
-                  <div class="date-options">
-                    <label>Quick select</label>
-                    <div class="quick-dates">
-                      <div class="quick-date-part">
-                        <select class="form-control" v-model="quick_date_settings.period">
-                          <option value="last">Last</option>
-                          <option value="next">Next</option>
-                        </select>
-                      </div>
-                      <div class="quick-date-part">
-                        <input type="number" class="form-control" v-model="quick_date_settings.value">
-                      </div>
-                      <div class="quick-date-part">
-                        <select class="form-control" v-model="quick_date_settings.unit">
-                          <option value="s">Seconds</option>
-                          <option value="m">Minutes</option>
-                          <option value="h">Hours</option>
-                          <option value="d">Days</option>
-                          <option value="w">Weeks</option>
-                          <option value="M">Months</option>
-                          <option value="y">Years</option>
-                        </select>
-                      </div>
-                      <div class="quick-date-part">
-                        <CButton color="secondary" class="btn-block no-shadow" @click="setDateRange(tab)">Apply</CButton>
-                      </div>
-                    </div>
-                    <hr>
-                    <label>Commonly Used</label>
-                    <div class="quick-dates">
-                      <li class="date-option" v-for="d in quick_dates" @click="setQuickDate(tab, d)">
-                        {{ d.label }}
-                      </li>
-                    </div>
-                    <hr>
-                    <v-date-picker v-model="tab.date_range" mode="dateTime" :masks="masks" is-range>
-                      <template v-slot="{ inputValue, inputEvents }">
-                        <CInput label="Start Date" aria-label="Start Date" :value="inputValue.start" v-on="inputEvents.start">
-                          <template #prepend>
-                            <CButton aria-label="Start Date" disabled color="secondary" size="sm" class="no-shadow"><CIcon name='cil-calendar'/></CButton>
-                          </template>
-                        </CInput>
-                        <CInput label="End Date" aria-label="End Date" :value="inputValue.end" v-on="inputEvents.end">
-                          <template #prepend>
-                            <CButton aria-label="End Date" disabled color="secondary" size="sm" class="no-shadow"><CIcon name='cil-calendar'/></CButton>
-                          </template>
-                        </CInput>
-                        <button class="btn btn-secondary btn-block no-shadow" @click="search(tab)">
-                          Apply
-                        </button>
-                      </template>
-                    </v-date-picker>
-                    <hr>
-                    <label>Automatic Refresh</label>
-                    <div class="quick-dates">
-                      <div style="width: 10%">
-                        <RSwitch :checked.sync="tab.auto_refresh"color="success"/>
-                      </div>
-                      <div style="width: 40%">
-                        <input type="number" class="form-control" v-model.number="tab.refresh_interval" placeholder="Refresh Interval"/>
-                      </div>
-                      <div style="width: 40%">
-                        <select class="form-control" v-model="tab.refresh_interval_unit">
-                          <option value="s">Seconds</option>
-                          <option value="m">Minutes</option>
-                          <option value="h">Hours</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-              </CDropdown>
-            </div>
-
-            <div class="d-col-1 text-right">
-                <CDropdown toggler-text="Options" color="secondary">
-                  <CDropdownItem @click="addSearch()">New Search</CDropdownItem>
-                  <CDropdownItem @click="tab.search_on_change = !tab.search_on_change">
-                    <!-- show a checkmark if the search on change is enabled -->
-                    <span v-if="tab.search_on_change"
-                      ><i class="fas fa-check"></i>&nbsp;</span
-                    >
-                    Search on change
-                  </CDropdownItem>
-                  <CDropdownItem @click="tab.show_chart = !tab.show_chart">
-                    <!-- show a checkmark if the search on change is enabled -->
-                    <span v-if="tab.show_chart"><i class="fas fa-check"></i>&nbsp;</span>
-                    Show chart
-                  </CDropdownItem>
-                </CDropdown>
-            </div>
-          </div>
-        </section>
-        <section class="flex-wrapper" id="filter" v-if="tab.filters.length > 0">
-          <div class="flex-grid" id="search">
-            <div class="d-col-full text-left">
-              <!-- horizontal list of badges with a close button that removes the filter -->
-              <li
-                class="filter-item"
-                v-for="(filter, i) in tab.filters"
-                :key="i"
-              >
-                <span class="reflex-filter reflex-badge-secondary tag-list">
-                  <b>{{ filter.exclude ? "NOT" : "" }}</b> {{ filter.field }}:
-                  {{ filter.value }}
-                  <i
-                    class="fas fa-times"
-                    @click="removeFilter(tab, i)"
-                    style="cursor: pointer; margin-left: 2px"
-                  ></i>
-                </span>
-              </li>
-            </div>
-          </div>
-        </section>
-        <section class="flex-wrapper" id="results">
-          <div class="flex-grid">
-            <div class="d-col-2 text-left field-selector"  v-bind:class="tab.hide_field_selection ? 'shrink' : ''">
-              <div class="field-selection"  v-bind:class="tab.hide_field_selection ? 'hide' : ''">
-                <CInput v-model="tab.field_search" placeholder="Search fields">
-                  <template #append>
-                    <CButton color="secondary" class="no-shadow" size="sm" @click="toggleFieldSelection(tab)"
-                      ><i class="fa-solid fa-square-caret-left"></i
-                    ></CButton>
-                  </template>
-                </CInput>
-                <div class="field-list-wrapper">
-                  <div class="field-group-header">
-                    Selected Fields
-                    <span
-                      v-if="tab.fields.length > 0"
-                      class="reset-fields"
-                      @click="tab.fields = []"
-                      >| Clear All</span
-                    >
-                  </div>
-                  <draggable
-                    v-model="tab.fields"
-                    group="selected_fields"
-                    @start="drag = true"
-                    @end="drag = false"
-                  >
-                    <div v-for="(field, i) in tab.fields" :key="i" :ref="field.name">
-                      <div class="flex-grid field-picker-item text-left">
-                        <div class="d-col-1">
-                          <span class="field-type">{{ field.type }}</span>
-                        </div>
-                        <div class="d-col-10">
-                          <div class="field-name">{{ field.name }}</div>
-                        </div>
-                        <div class="d-col-1">
-                          <div
-                            class="field-picker-hide"
-                            @click="deselectField(tab, field)"
-                          >
-                            <i class="fas fa-times" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </draggable>
-                  <div class="field-group-header">Available</div>
-                  <div
-                    v-for="field in filtered_fields(tab)"
-                    :key="field.name"
-                    :ref="field.name"
-                  >
-                    <div class="flex-grid field-picker-item text-left">
-                    
-                        <div class="d-col-1">
-                          <span class="field-type">{{ field.type }}</span>
-                        </div>
-                      <div class="d-col-10">
-                        <div class="field-name">{{ field.name }}</div>
-                      </div>
-                      <div class="d-col-1">
-                        <div class="field-picker-show" @click="selectField(tab, field)">
-                          <i class="fas fa-eye" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="field-selection-toggle" v-bind:class="tab.hide_field_selection ? 'show' : ''">
-                <CButton
-                  @click="toggleFieldSelection(tab)"
-                  size="sm"
-                  color="secondary"
-                  class="no-shadow"
-                  v-c-tooltip="{ content: 'Show Fields', placement: 'right' }"
-                  ><i class="fa-solid fa-square-caret-right"></i
-                ></CButton>
-              </div>
-            </div>
-            <div class="d-col-10 text-left search-results"  v-bind:class="tab.hide_field_selection ? 'expand' : ''">
-              <div class="flex-grid" style="margin-bottom: 10px" v-if="tab.show_chart">
-                <div
-                  class="d-col-12"
-                  style="background-color: #fff; border: 1px solid #ddd; padding: 10px"
-                >
-                  <div class="text-right">
-                  <CButtonGroup>
-                    <CDropdown toggler-text="Chart Type" color="secondary" size="sm" style="background-color: none; padding: 5px">
-                      <template #toggler-content>
-                        <b>Chart type:</b>&nbsp;{{ tab.chart_type ? tab.chart_type : 'bar' }}
-                      </template>
-                      <CDropdownItem @click="tab.chart_type = 'bar'">Bar</CDropdownItem>
-                      <CDropdownItem @click="tab.chart_type = 'line'">Line</CDropdownItem>
-                      <CDropdownItem @click="tab.chart_type = 'pie'">Pie</CDropdownItem>
-                    </CDropdown>
-                    <CDropdown color="secondary" size="sm" style="background-color: none; padding: 5px">
-                      <template #toggler-content>
-                        <b>Group by:</b>&nbsp;{{ tab.chart_group_by }}
-                      </template>
-                      <div style="max-height: 200px; overflow-y: scroll">
-                        <CDropdownItem v-for="field in available_fields(tab)" @click="tab.chart_group_by = field.name" v-if="field.type == 't'">
-                          <span v-if="tab.chart_group_by == field.name"><i class="fas fa-check"></i>&nbsp;</span>
-                          {{ field.name }}
-                        </CDropdownItem>
-                      </div>
-                    </CDropdown>
-                  </CButtonGroup>
-                  </div>
-                  <CChartBar
-                    :datasets="timeline_datasets(tab)"
-                    :labels="timeline_datalabels(tab)"
-                    style="height: 150px; width: 100%"
-                    :options="{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        annotation: {
-                          annotations: {
-                            today: {
-                              type: 'line',
-                              yMin: 3000,
-                              xMin: 3000,
-                              borderColor: 'rgb(255,99,132)',
-                              borderWidth: 5
-                            }
-                          }
-                        }
-                      },
-                      legend: {
-                        display: false,
-                      },
-                      scales: {
-                        xAxes: [
-                          {
-                            type: 'time',
-                            time: {
-                              unit: 'day',
-                              displayFormats: {
-                                day: 'MMM D',
-                              },
-                            },
-                            gridLines: {
-                              display: true,
-                            },
-                            ticks: {
-                              display: true,
-                              autoSkip: true,
-                            },
-                          },
-                        ],
-                        yAxes: [
-                          {
-                            beginAtZero: true,
-                            gridLines: {
-                              display: true,
-                            },
-                            ticks: {
-                              display: true,
-                              autoSkip: true,
-                              maxTicksLimit: 5,
-                            },
-                          },
-                        ],
-                      },
-                    }"
-                  />
-                </div>
-              </div>
-              <LogTable :fields="column_fields(tab)" :sortFields="tab.sort_by" :items="tab.results" :totalItems="tab.total_results" :tab="tab" @viewLog="view_log" @filterAdded="filterByValue" @deselectField="deselectField"/>
-            </div>
-          </div>
-        </section>
-        <LogDrawer @filterAdded="filterByValue" :tab="tab"/>
+        
+        
       </CTab>
     </CTabs>
   </div>
@@ -470,7 +152,6 @@ hr {
   margin-right: 5px;
   font-size: 12px;
 }
-
 
 
 .field-type {
@@ -636,6 +317,8 @@ import LogDrawer from "@/views/searchworkspace/LogDrawer.vue";
 
 import ValuePopover from "@/views/searchworkspace/ValuePopover.vue";
 import LogTable from "@/views/searchworkspace/LogTable.vue";
+import ResultsChart from "@/views/searchworkspace/ResultsChart.vue";
+import SearchTab from "@/views/searchworkspace/SearchTab.vue";
 
 import { CChartBar } from "@coreui/vue-chartjs";
 
@@ -651,7 +334,9 @@ export default {
     LogDrawer,
     ValuePopover,
     LogTable,
-    RSwitch
+    RSwitch,
+    ResultsChart,
+    SearchTab
   },
   computed: {
     ...mapState(["current_user", "log_searches"]),
@@ -909,7 +594,7 @@ export default {
       ]);
       this.$store.commit("set", ["searchWorkspaceLog", entry]);
     },
-    timeline_datasets(tab) {
+    timeline_datasets(aggs) {
       // Return the tab.aggregations.time_buckets.buckets in a format that can be used by the timeline chart
       let data = {
         data: [],
@@ -917,12 +602,14 @@ export default {
         label: "Hits",
       };
 
-      if (tab.aggregations == undefined) {
+      console.log("datasets was called")
+
+      if (aggs == undefined) {
         return [data];
       }
 
-      for (let bucket in tab.aggregations.time_buckets.buckets) {
-        data.data.push(tab.aggregations.time_buckets.buckets[bucket].doc_count);
+      for (let bucket in aggs.time_buckets.buckets) {
+        data.data.push(aggs.time_buckets.buckets[bucket].doc_count);
       }
 
       return [data];
@@ -930,6 +617,8 @@ export default {
     timeline_datalabels(tab) {
       // Return the tab.aggregations.time_buckets.buckets in a format that can be used by the timeline chart
       let data = [];
+
+      console.log("datalabels was called")
 
       if (tab.aggregations == undefined) {
         return data;

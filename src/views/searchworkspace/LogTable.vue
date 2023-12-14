@@ -1,5 +1,5 @@
 <template>
-  <div class="table-wrapper">
+  <div class="table-wrapper" v-bind:class="full_screen_log_table ? 'full-screen': ''">
     <table class="log-table">
       <thead>
         <tr>
@@ -51,12 +51,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-if="tab.search_complete == false">
+        <tr v-if="search_complete == false">
           <td class="text-center" colspan="100%" style="height: 160px">
             <CSpinner style="width: 125px; height: 125px" />
           </td>
         </tr>
-        <tr v-if="items.length == 0 && tab.search_complete">
+        <tr v-if="items.length == 0 && search_complete">
           <td class="text-center" colspan="100%">
             <span v-if="tab.search_failed">
               <CAlert color="warning">
@@ -71,7 +71,7 @@
         <tr
           v-for="(result, i) in flattened_results()"
           :key="result._id"
-          v-else-if="tab.search_complete"
+          v-else-if="search_complete"
         >
           <td class="fitwidth field-value">
             <button class="expand-icon field-value-control" v-on:click="view_log(result)">
@@ -443,6 +443,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    search_complete: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -550,15 +554,7 @@ export default {
       return Math.ceil(this.items.length / this.page_size);
     },
     fullScreenTable() {
-      // Find the table-wrapper and add the full-screen class if it doesn't exist, otherwise remove it
-      let log_wrapper = document.querySelector(".table-wrapper");
-      if (!log_wrapper.classList.contains("full-screen")) {
-        this.full_screen_log_table = true;
-        log_wrapper.classList.add("full-screen");
-      } else {
-        log_wrapper.classList.remove("full-screen");
-        this.full_screen_log_table = false;
-      }
+      this.full_screen_log_table = !this.full_screen_log_table;
     },
     deselectField(tab, field) {
       this.$emit("deselectField", tab, field);
