@@ -147,7 +147,7 @@
       <tfoot>
         <tr>
           <td colspan="100%" class="table-controls">
-            <span class="pagination">
+            <span class="pagination" v-if="search_complete">
               <span
                 v-bind:disabled="current_page > 1"
                 class="page-number"
@@ -384,17 +384,20 @@
 }
 
 .field-value-control {
-  background: #3c4b64;
   border-radius: 25%;
   border: none;
   width: 18px;
   height: 18px;
   cursor: pointer;
-  color: #fff;
   padding: 0px;
   margin-right: 5px;
   line-height: 2;
   font-size: 1vmin;
+}
+
+.field-value-control:hover {
+  background-color: #3c4b64;
+  color: #fff;
 }
 
 /* Hide the focus outline on the buttons */

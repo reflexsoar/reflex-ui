@@ -32,7 +32,7 @@
             <table class="log-table">
                 <thead>
                 <tr>
-                    <th></th>
+                    <th>Actions</th>
                     <th>Field</th>
                     <th>Value</th>
                 </tr>
@@ -89,14 +89,20 @@
 }
 
 .field-value-control {
-  background: none;
+  border-radius: 25%;
   border: none;
-  padding: 0;
-  margin: 0;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  color: #3c4b64;
+  padding: 0px;
   margin-right: 5px;
-  font-size: 12px;
+  line-height: 2;
+  font-size: 1vmin;
+}
+
+.field-value-control:hover {
+  background-color: #3c4b64;
+  color: #fff;
 }
 
 /* Hide the focus outline on the buttons */
@@ -142,10 +148,11 @@
 
 .log-table tr {
   max-height: 25px;
+  border-bottom: 1px solid #ddd;
 }
 
 .log-table tr:nth-child(even) {
-  background-color: #f2f2f2;
+  
 }
 
 .log-table th {
@@ -243,7 +250,6 @@ export default {
       });
     },
     filterByValue(field, exclude=false) {
-        
         this.$emit('filterAdded', this.tab, field.value, field.key, exclude)
     }
   }
