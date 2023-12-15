@@ -928,6 +928,7 @@ export default {
         dataset: this.dataset,
         filters: this.filters,
         date_range: this.date_range,
+        timefield: this.timefield
       };
 
       this.search_complete = false;
@@ -957,6 +958,7 @@ export default {
             });
 
             socket.on("results", (data) => {
+                console.log(data)
               this.results = data.response.hits.hits;
               this.total_results = data.total_results;
               this.pages = data.pages;
