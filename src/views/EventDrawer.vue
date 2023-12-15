@@ -15,7 +15,7 @@
             <h2>{{ event_data.title }}</h2>
             <TagBucket :tags="event_data.tags" />
           </CCol>
-          <CCol col="2">
+          <CCol col="2" class="text-right">
             <CButton
               color="secondary"
               @click="$store.commit('set', ['eventDrawerMinimize', true])"
@@ -227,14 +227,19 @@
             </CCardBody>
           </CTab>
           <CTab title="Detection" v-if="this.event_data.detection_id">
+          
             <CCardBody class="tab-container" v-if="!this.detection_loading">
               <CRow>
                 <CCol>
                   <h3>Detection</h3>
                   {{ detection.description }}
-                  <hr>
+                  
+                </CCol>
+                <CCol>
+                  <CButton @click="showDetectionModal()" color="info" class="float-right">Edit Detection</CButton>
                 </CCol>
               </CRow>
+              <hr>
               <CRow>
                 <CCol>
                   <CTabs
@@ -455,7 +460,6 @@
             </CRow>
             </CCol>
           </CRow>
-          
         </CTab>
               </CTabs>
                 </CCol>
@@ -535,6 +539,13 @@
       :show.sync="show_exclusion_modal"
       :mode="exclusion_modal_mode"
     />
+    
+          
+          <DetectionRuleModal
+          :show.sync="show_detection_rule_modal"
+          :rule.sync="detection"
+          :mode="detection_modal_mode"
+        /> 
   </CRightDrawer>
 </template>
 
@@ -662,6 +673,8 @@ import ObjectAttribute from "./components/ObjectAttribute";
 import { Timeline, TimelineItem, TimelineTitle } from 'vue-cute-timeline'
 import 'vue-cute-timeline/dist/index.css'
 
+import DetectionRuleModal from "./DetectionRuleModal";
+
 export default {
   name: "EventDrawer",
   nav,
@@ -679,7 +692,8 @@ export default {
     CommentList,
     ObjectAttribute,
     Timeline,
-    TimelineItem
+    TimelineItem,
+    DetectionRuleModal
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
@@ -693,6 +707,8 @@ export default {
     minimize(val) {
       if (!val) {
         document.body.style.overflow = "hidden";
+
+        this.show_detection_rule_modal = false;
 
         this.event_data = this.$store.getters.event;
         this.comments_loading = true;
@@ -762,7 +778,9 @@ export default {
       exclusion: {},
       show_exclusion_modal: false,
       exclusion_modal_mode: "Create",
-      show_field: {}
+      show_field: {},
+      show_detection_rule_modal: false,
+      detection_modal_mode: "Edit",
     };
   },
   computed: {
@@ -774,6 +792,9 @@ export default {
     },
   },
   methods: {
+    showDetectionModal() {
+      this.show_detection_rule_modal = true;
+    },
     sumDocCount(top_hits) {
       let count = 0;
       for(let i in top_hits) {

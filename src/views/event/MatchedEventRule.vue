@@ -1,33 +1,80 @@
 <template>
   <div>
     <CCard>
-      <CCardHeader @click="show_details = !show_details" style="cursor: pointer"
-        ><CIcon name="cilChevronTop" v-if="!show_details" /><CIcon
-          name="cilChevronBottom"
-          v-else
-        />&nbsp;<b>{{ rule.name }}</b><br></CCardHeader
-      >
-      <CCollapse :show.sync="show_details">
         <CCardBody>
+          <CRow>
+            <CCol>
+              <h5>{{ rule.name }}</h5>
+            </CCol>
+            <CCol class="text-right">
+              <TagList :tags="tags" v-if="tags.length > 0" />
+            </CCol>
+          </CRow>
           <CRow>
             <CCol>
               <vue-markdown>{{ rule.description }}</vue-markdown>
             </CCol>
           </CRow>
-          <label>Rule Query</label>
-          <prism-editor
-            rows="10"
-            class="my-editor"
-            v-model="rule.query"
-            :highlight="highlighter"
-            line-numbers
-          ></prism-editor>
+          <CRow v-if="event_rule_actions().length > 0" style="margin-bottom: 5px">
+            <CCol>
+              <i class="fas fa-bolt"></i>&nbsp;
+              <li style="display: inline; margin-right: 2px;" v-for="action in event_rule_actions()">
+                 <CBadge color="dark" class="tag tag-list" size="sm"> {{ action }} </CBadge>
+              </li>
+            </CCol>
+          </CRow>
+          <CRow style="margin-top: 10px">
+            <CCol>
+            <button class="collapse-toggle" @click="show_details = !show_details">Show Query</button>
+            <CCollapse :show.sync="show_details" style="margin-top: 10px">
+            <prism-editor
+              rows="10"
+              class="my-editor"
+              v-model="rule.query"
+              :highlight="highlighter"
+              line-numbers
+            ></prism-editor>
+            </CCollapse>
+            </CCol>
+          </CRow>
         </CCardBody>
-      </CCollapse>
+      
     </CCard>
   </div>
 </template>
 <style scoped>
+
+.action-list-item {
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: #eee;
+}
+
+.collapse-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Show a chevron up or down depending on the state of the collapse */
+.collapse-toggle::after {
+  content: "\f078";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 12px;
+  margin-left: 5px;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Hide the focus ring on the button */
+.collapse-toggle:focus {
+  outline: none;
+}
+
 .my-editor {
   /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
   /*background: #fdfdfd;*/
@@ -70,10 +117,15 @@ export default {
   },
   computed: {
     tags() {
-      let fields_to_return = ["expire"];
+      let fields_to_return = ["expire","global_rule","run_retroactively"];
       let tags = [];
       for (let key in this.rule) {
-        if (fields_to_return.includes(key)) {
+        if (fields_to_return.includes(key) && this.rule[key] == true) {
+          /* Replace the _ with a space and uppercase the first letter of each word */
+          key = key.replace(/_/g, " ");
+          key = key.replace(/\w\S*/g, function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+          });
           tags.push(key);
         }
       }
@@ -93,6 +145,29 @@ export default {
     highlighter(code) {
       return highlight(code, languages.rql);
     },
+    event_rule_actions() {
+      let actions = [];
+      if (this.rule.dismiss) {
+        actions.push("Dismisses");
+      }
+      if (this.rule.add_tags) {
+        actions.push("Tags Event");
+      }
+      if (this.rule.create_new_case) {
+        actions.push("Creates New Case");
+      }
+      if (this.rule.merge_into_case) {
+        actions.push("Merges Into Case");
+      }
+      if (this.rule.run_retroactively) {
+        actions.push("Runs Retroactively");
+      }
+      if (this.rule.expire) {
+        actions.push("Expires");
+      }
+
+      return actions;
+    }
   },
 };
 </script>
