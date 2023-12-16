@@ -45,7 +45,8 @@
       <div v-for="field in filtered_fields()" :key="field.name" :ref="field.name">
         <div class="flex-grid field-picker-item text-left">
           <div class="d-col-1">
-            <span class="field-type">{{ field.type }}</span>
+            <span class="field-type" v-if="field.type == 'b'"><i class="fas fa-circle-half-stroke"></i></span>
+            <span class="field-type" v-else>{{ field.type }}</span>
           </div>
           <div class="d-col-10">
             <div class="field-name">{{ field.name }}</div>
@@ -79,16 +80,22 @@
 
 .field-type {
   padding: 2px 2px 2px 0px;
+  border-radius: 25%;
+  
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
   text-align: center;
-  width: 15px;
+  padding-right: 1px;
+  padding-left: 1px;
+  margin-right: 5px;
   display: inline-block;
-  line-height: 1.2;
-  font-weight: 500;
+  line-height: 1.4;
+  font-weight: 400;
   color: #fff;
   background-color: #3c4b64;
-  border-radius: 2px;
   font-size: 11px;
-  font-style: italic;
+
 }
 
 .field-selector.shrink {

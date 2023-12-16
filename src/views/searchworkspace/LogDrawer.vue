@@ -44,11 +44,14 @@
                             <i class="fas fa-copy"></i>
                         </button>
                         <button class="field-value-control" @click="filterByValue(field)">
-                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-circle-plus"></i>
                         </button>
                         
                         <button class="field-value-control" @click="filterByValue(field, true)">
                             <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="field-value-control" @click="filterByValue(field, true)">
+                            <i class="fas fa-filter"></i>
                         </button>
                     </td>
                     <td class="field-value">{{ field.key }}</td>
@@ -89,15 +92,21 @@
 }
 
 .field-value-control {
+  padding: 2px 2px 2px 0px;
+  
+  padding-right: 1px;
+  padding-left: 1px;
   border-radius: 25%;
   border: none;
   width: 18px;
   height: 18px;
   cursor: pointer;
-  padding: 0px;
+  display: inline-block;
+  text-align:center;
+  font-weight: 400;
   margin-right: 5px;
-  line-height: 2;
-  font-size: 1vmin;
+  line-height: 1.4;
+  font-size: 11px;  
 }
 
 .field-value-control:hover {
