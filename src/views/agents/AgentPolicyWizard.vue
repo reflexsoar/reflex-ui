@@ -30,567 +30,751 @@
           </CCol>
         </CRow>
         <CRow>
-        <CCol><h3>Agent Policy</h3>
-        <p>
-          Agent policies allow you to control how all agents behave without having to
-          manually configure each one. Agent policies can be assigned to Agent Groups or
-          directly to a single agent as a policy override.
-        </p>
-        </CCol>
+          <CCol
+            ><h3>Agent Policy</h3>
+            <p>
+              Agent policies allow you to control how all agents behave without having to
+              manually configure each one. Agent policies can be assigned to Agent Groups
+              or directly to a single agent as a policy override.
+            </p>
+          </CCol>
         </CRow>
         <CRow>
-        <CCol>
-        <CTabs
-          variant="pills"
-          :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
-          :fade="false"
-          :activeTab.sync="tab"
-        >
-          <CTab title="Details">
-            <CRow>
-              <CCol>
-                <CSelect
-                  v-if="current_user.default_org"
-                  placeholder="Select an Organization..."
-                  required
-                  :value.sync="policy.organization"
-                  :options="formattedOrganizations()"
-                  label="Organization"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model="policy.name"
-                  label="Policy Name"
-                  placeholder="Enter a name for the policy"
-                  required
-                  :isValid="validate(policy.name, validations.name)"
-                  :invalidFeedback="validations.name.message"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.priority"
-                  label="Priority"
-                  placeholder="Enter a priority for the policy"
-                  description="If more than one policy is assigned to an agent the higher priority policy will override all other policies when there is setting conflict. 1 is the highest priority."
-                  :isValid="validate(policy.priority, validations.priority)"
-                  :invalidFeedback="validations.priority.message"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CTextarea
-                  v-model="policy.description"
-                  label="Description"
-                  placeholder="Enter a description for the policy"
-                  rows="5"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <label for="policy_tags">Tags</label>
-                <multiselect
-                  id="agent_roles"
-                  v-model="policy.tags"
-                  placeholder="Select the groups this agent belongs to"
-                  :options="tags"
-                  :multiple="true"
-                  :taggable="true"
-                  :close-on-select="false"
-                  @tag="addTag"
-                >
-                </multiselect
-                ><br />
-              </CCol>
-            </CRow>
-          </CTab>
-          <CTab title="General Settings">
-            <CRow>
-              <CCol>
-                <MultiPicker label="Roles" :value.sync="policy.roles" :options="roles"/>
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.health_check_interval"
-                  label="Health Check Interval"
-                  placeholder="Enter a health check interval in seconds"
-                  description="How often the Agent will check in to the management for policy updates"
-                  :isValid="
-                    validate(
-                      policy.health_check_interval,
-                      validations.health_check_interval
-                    )
-                  "
-                  :invalidFeedback="validations.health_check_interval.message"
-                />
-              </CCol>
-              <CCol>
-                <CSelect
-                  :value.sync="policy.logging_level"
-                  label="Log Level"
-                  placeholder="Select a logging level"
-                  :options="log_levels"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              
-              <CCol>
-                <CInput
-                  disabled
-                  v-model.number="policy.max_intel_db_size"
-                  label="Max Intel DB Size"
-                  placeholder="Size in Mb"
-                  description="The agent will cache some intel locally to improve intel check performance"
-                />
-              </CCol>
-              <CCol>
-                
-              </CCol>
-            </CRow>
-          </CTab>
-          <CTab
-            title="Poller Settings"
-            v-bind:disabled="policy.roles && !policy.roles.includes('poller')"
-          >
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.poller_config.concurrent_inputs"
-                  label="Concurrent Inputs"
-                  placeholder="Enter the number of concurrent inputs"
-                  description="The number of concurrent inputs the poller will process"
-                  :isValid="
-                    validate(
-                      policy.poller_config.concurrent_inputs,
-                      validations.concurrent_inputs
-                    )
-                  "
-                  :invalidFeedback="validations.concurrent_inputs.message"
-                />
-              </CCol>
-              <CCol>
-                <CSelect
-                  :value.sync="policy.poller_config.logging_level"
-                  label="Log Level"
-                  placeholder="Select a logging level"
-                  :options="log_levels"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.poller_config.max_input_attempts"
-                  label="Max Input Attempts"
-                  placeholder="Enter the number of concurrent inputs"
-                  description="The number for how many times to try an input before skipping it"
-                  :isValid="
-                    validate(
-                      policy.poller_config.max_input_attempts,
-                      validations.max_input_attempts
-                    )
-                  "
-                  :invalidFeedback="validations.max_input_attempts.message"
-                />
-              </CCol>
-              <CCol>
-                <CInput
-                  v-model.number="policy.poller_config.signature_cache_ttl"
-                  label="Event Signature Cache TTL"
-                  placeholder="Enter a time in seconds"
-                  description="How long the poller role will cache Event Signatures before Event Realert will happen"
-                  :isValid="
-                    validate(
-                      policy.poller_config.signature_cache_ttl,
-                      validations.signature_cache_ttl
-                    )
-                  "
-                  :invalidFeedback="validations.signature_cache_ttl.message"
-                />
-              </CCol>
-            </CRow>
-          </CTab>
-          <CTab
-            title="Runner Settings"
-            v-bind:disabled="policy.roles && !policy.roles.includes('runner')"
-          >
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.runner_config.concurrent_actions"
-                  label="Concurrent Actions"
-                  placeholder="Enter the number of concurrent actions"
-                  description="The number of concurrent actions this agent can run at one time"
-                  :isValid="
-                    validate(
-                      policy.runner_config.concurrent_actions,
-                      validations.concurrent_actions
-                    )
-                  "
-                  :invalidFeedback="validations.concurrent_actions.message"
-                />
-              </CCol>
-              <CCol>
-                <CSelect
-                  :value.sync="policy.runner_config.logging_level"
-                  label="Log Level"
-                  placeholder="Select a logging level"
-                  :options="log_levels"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.runner_config.wait_interval"
-                  label="Wait Interval"
-                  placeholder="Enter a time in seconds"
-                  description="How long should the agent wait before polling for new actions to execute"
-                  :isValid="
-                    validate(
-                      policy.runner_config.wait_interval,
-                      validations.wait_interval
-                    )
-                  "
-                  :invalidFeedback="validations.wait_interval.message"
-                />
-              </CCol>
-              <CCol>
-                <CInput
-                  v-model.number="policy.runner_config.plugin_poll_interval"
-                  label="Plugin Poll Interval"
-                  placeholder="Enter a time in seconds"
-                  description="How often should the agent poll for new or updated plugins"
-                  :isValid="
-                    validate(
-                      policy.runner_config.plugin_poll_interval,
-                      validations.plugin_poll_interval
-                    )
-                  "
-                  :invalidFeedback="validations.plugin_poll_interval.message"
-                />
-              </CCol>
-            </CRow>
-          </CTab>
-          <CTab
-            title="Detector Settings"
-            v-bind:disabled="policy.roles && !policy.roles.includes('detector')"
-          >
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.detector_config.concurrent_rules"
-                  label="Concurrent Rules"
-                  placeholder="Enter the number of concurrent detection rules"
-                  description="The number of concurrent detection rules this agent can run at one time"
-                  :isValid="
-                    validate(
-                      policy.detector_config.concurrent_rules,
-                      validations.concurrent_rules
-                    )
-                  "
-                  :invalidFeedback="validations.concurrent_rules.message"
-                />
-              </CCol>
-              <CCol>
-                <CSelect
-                  :value.sync="policy.detector_config.logging_level"
-                  label="Log Level"
-                  placeholder="Select a logging level"
-                  :options="log_levels"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.detector_config.wait_interval"
-                  label="Wait Interval"
-                  placeholder="Enter a time in seconds"
-                  description="How long should the agent wait before polling for new detections to execute"
-                  :isValid="
-                    validate(
-                      policy.detector_config.wait_interval,
-                      validations.wait_interval
-                    )
-                  "
-                  :invalidFeedback="validations.wait_interval.message"
-                />
-              </CCol>
-              <CCol>
-                <CInput
-                  v-model.number="policy.detector_config.catchup_period"
-                  label="Max Catchup Period"
-                  placeholder="Enter a time in minutes"
-                  description="How  far can a detection rule go between runs to look for new data"
-                  :isValid="
-                    validate(
-                      policy.detector_config.catchup_period,
-                      validations.catchup_period
-                    )
-                  "
-                  :invalidFeedback="validations.catchup_period.message"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.detector_config.max_threshold_events"
-                  label="Max Threshold Events"
-                  placeholder="Enter the max number of events to send when a threshold rule matches"
-                  description="The max number of events to send when a threshold rule matches"
-                  :isValid="
-                    validate(
-                      policy.detector_config.max_threshold_events,
-                      validations.max_threshold_events
-                    )
-                  "
-                  :invalidFeedback="validations.max_threshold_events.message"
-                />
-              </CCol>
-              <CCol> </CCol>
-            </CRow>
-          </CTab>
-          <CTab title="MITRE Mapper Settings"
-          v-bind:disabled="policy.roles && !policy.roles.includes('mitre')">
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.mitre_mapper_config.concurrent_inputs"
-                  label="Concurrent Inputs"
-                  placeholder="Enter the number of concurrent inputs"
-                  description="The number of concurrent inputs the poller will process"
-                  :isValid="
-                    validate(
-                      policy.mitre_mapper_config.concurrent_inputs,
-                      validations.concurrent_inputs
-                    )
-                  "
-                  :invalidFeedback="validations.concurrent_inputs.message"
-                />
-              </CCol>
-              <CCol>
-                <CSelect
-                  :value.sync="policy.mitre_mapper_config.logging_level"
-                  label="Log Level"
-                  placeholder="Select a logging level"
-                  :options="log_levels"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.mitre_mapper_config.mapping_refresh_interval"
-                  label="Mapping Refresh Interval"
-                  placeholder="Enter a time in seconds"
-                  description="How often the MITRE mapper will refresh the mapping data"
-                  :isValid="
-                    validate(
-                      policy.mitre_mapper_config.mapping_refresh_interval,
-                      validations.mapping_refresh_interval
-                    )
-                  "
-                  :invalidFeedback="validations.mapping_refresh_interval.message"
-                />
-              </CCol>
-              <CCol>
-                <CInput
-                  v-model.number="policy.mitre_mapper_config.assessment_days"
-                  label="Assessment Days"
-                  placeholder="Enter a time in days"
-                  description="How many days back to look for new data source assessments"
-                  :isValid="
-                    validate(
-                      policy.mitre_mapper_config.assessment_days,
-                      validations.assessment_days
-                    )
-                  "
-                  :invalidFeedback="validations.assessment_days.message"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.mitre_mapper_config.timeout"
-                  label="Timeout"
-                  placeholder="Enter a time in seconds"
-                  description="How long the MITRE Mapper will wait for mapping queries to timeout"
-                  :isValid="
-                    validate(
-                      policy.mitre_mapper_config.timeout,
-                      validations.timeout
-                    )
-                  "
-                  :invalidFeedback="validations.timeout.message"
-                />
-                </CCol>
-                <CCol>
-                </CCol>
-              </CRow>
-          </CTab>
-          <CTab title="File Integrity Monitoring"
-          v-bind:disabled="policy.roles && !policy.roles.includes('fim')">
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.fim_config.max_parallel_rules"
-                  label="Concurrent Rules"
-                  placeholder="Enter the number of concurrent rules"
-                  description="The number of concurrent rules the FIM engine will process"
-                  :isValid="
-                    validate(
-                      policy.fim_config.max_parallel_rules,
-                      validations.max_parallel_rules
-                    )
-                  "
-                  :invalidFeedback="validations.max_parallel_rules.message"
-                />
-              </CCol>
-              <CCol>
-                <CSelect
-                  :value.sync="policy.fim_config.logging_level"
-                  label="Log Level"
-                  placeholder="Select a logging level"
-                  :options="log_levels"
-                />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <CInput
-                  v-model.number="policy.fim_config.max_cpu_time"
-                  label="Max CPU Time"
-                  placeholder="Enter a time in seconds"
-                  description="Tells the host how much CPU time to give the FIM process.  Higher numbers may impact system performance."
-                  :isValid="
-                    validate(
-                      policy.fim_config.max_cpu_time,
-                      validations.max_cpu_time
-                    )
-                  "
-                  :invalidFeedback="validations.max_cpu_time.message"
-                />
-                </CCol>
-                <CCol>
-                <CInput
-                  v-model.number="policy.fim_config.max_memory"
-                  label="Max Memory"
-                />
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol>
-                  <CInput
-                    v-model.number="policy.fim_config.max_cache_db_size"
-                    label="Max Cache DB Size"
-                    placeholder="Enter a size in Mb"
-                    description="The maximum size of the FIM cache database in Mb"
-                  />
-                </CCol>
-                <CCol>
-                  <CInput
-                    v-model.number="policy.fim_config.max_cache_db_age"
-                    label="Max Cache DB Age"
-                    placeholder="Enter a time in hours"
-                    description="The maximum age of the FIM cache database in hours"
-                  />
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol>
-                  <label>Alert on Cache Missing</label><br>
-                    <CSwitch :checked.sync="policy.fim_config.alert_on_cache_missing" label-on="Yes" label-of="No" color="success"/><br>
-                  <span class="text-muted"><small>If the FIM cache goes missing, fire an alert for further investigation.</small></span>
-                </CCol>
+          <CCol>
+            <CTabs
+              variant="pills"
+              :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
+              :fade="false"
+              :activeTab.sync="tab"
+            >
+              <CTab title="Details">
+                <CRow>
+                  <CCol>
+                    <SelectInput
+                      :options="formattedOrganizations()"
+                      label="Organization"
+                      placeholder="Select an organization"
+                      :value.sync="policy.organization"
+                      description="Select an organization related to this item."
+                      @change="reloadData"
+                    />
+                  </CCol>
                 </CRow>
-                  
-            {{ policy.fim_config }}
-          </CTab>
-          <CTab title="Review">
-            <CRow>
-              <CCol>
-                <h4>Review</h4>
-                <p>Review the policy settings and click save to create the policy.</p>
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <h5>General Settings</h5>
-                <label>Name:</label> {{ policy.name }}<br />
-                <label>Tags:</label> <li style="display: inline; margin-right: 2px;" v-for="tag in policy.tags" :key="tag">
-                    <CBadge color="info" size="sm" style="padding: 5px; margin-top:10px; margin-right:3px;">{{ tag }}</CBadge>
-                </li><br>
-                <label>Description:</label> {{ policy.description }}<br />
-                <label>Priority:</label> {{ policy.priority }}<br />
-                <label>Roles:</label><br />
-                <li
-                  style="display: inline; margin-right: 2px"
-                  v-for="role in policy.roles"
-                  :key="role"
-                >
-                  <CButton color="primary" style="cursor: auto" size="sm" disabled>
-                    {{ roles.find((r) => r.value == role) ? roles.find((r) => r.value == role).label : "Unknown: " + role }}
-                  </CButton>
-                </li>
-                <br /><br />
-                <label>Health Check Interval:</label> {{ policy.health_check_interval
-                }}<br />
-                <label>Log Level:</label> {{ policy.logging_level }}<br /><br>
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol>
-                <h5>Poller Settings</h5>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model="policy.name"
+                      label="Policy Name"
+                      placeholder="Enter a name for the policy"
+                      required
+                      :isValid="validate(policy.name, validations.name)"
+                      :invalidFeedback="validations.name.message"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.priority"
+                      label="Priority"
+                      placeholder="Enter a priority for the policy"
+                      description="If more than one policy is assigned to an agent the higher priority policy will override all other policies when there is setting conflict. 1 is the highest priority."
+                      :isValid="validate(policy.priority, validations.priority)"
+                      :invalidFeedback="validations.priority.message"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CTextarea
+                      v-model="policy.description"
+                      label="Description"
+                      placeholder="Enter a description for the policy"
+                      rows="5"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <label for="policy_tags">Tags</label>
+                    <multiselect
+                      id="agent_roles"
+                      v-model="policy.tags"
+                      placeholder="Select the groups this agent belongs to"
+                      :options="tags"
+                      :multiple="true"
+                      :taggable="true"
+                      :close-on-select="false"
+                      @tag="addTag"
+                    >
+                    </multiselect
+                    ><br />
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab title="General Settings">
+                <CRow>
+                  <CCol>
+                    <MultiPicker
+                      label="Roles"
+                      :value.sync="policy.roles"
+                      :options="agent_roles"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.health_check_interval"
+                      label="Health Check Interval"
+                      placeholder="Enter a health check interval in seconds"
+                      description="How often the Agent will check in to the management for policy updates"
+                      :isValid="
+                        validate(
+                          policy.health_check_interval,
+                          validations.health_check_interval
+                        )
+                      "
+                      :invalidFeedback="validations.health_check_interval.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      disabled
+                      v-model.number="policy.max_intel_db_size"
+                      label="Max Intel DB Size"
+                      placeholder="Size in Mb"
+                      description="The agent will cache some intel locally to improve intel check performance"
+                    />
+                  </CCol>
+                  <CCol> </CCol>
+                </CRow>
+              </CTab>
+              <CTab
+                title="Poller Settings"
+                v-bind:disabled="policy.roles && !policy.roles.includes('poller')"
+              >
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.poller_config.concurrent_inputs"
+                      label="Concurrent Inputs"
+                      placeholder="Enter the number of concurrent inputs"
+                      description="The number of concurrent inputs the poller will process"
+                      :isValid="
+                        validate(
+                          policy.poller_config.concurrent_inputs,
+                          validations.concurrent_inputs
+                        )
+                      "
+                      :invalidFeedback="validations.concurrent_inputs.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.poller_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.poller_config.max_input_attempts"
+                      label="Max Input Attempts"
+                      placeholder="Enter the number of concurrent inputs"
+                      description="The number for how many times to try an input before skipping it"
+                      :isValid="
+                        validate(
+                          policy.poller_config.max_input_attempts,
+                          validations.max_input_attempts
+                        )
+                      "
+                      :invalidFeedback="validations.max_input_attempts.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.poller_config.signature_cache_ttl"
+                      label="Event Signature Cache TTL"
+                      placeholder="Enter a time in seconds"
+                      description="How long the poller role will cache Event Signatures before Event Realert will happen"
+                      :isValid="
+                        validate(
+                          policy.poller_config.signature_cache_ttl,
+                          validations.signature_cache_ttl
+                        )
+                      "
+                      :invalidFeedback="validations.signature_cache_ttl.message"
+                    />
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab
+                title="Runner Settings"
+                v-bind:disabled="policy.roles && !policy.roles.includes('runner')"
+              >
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.runner_config.concurrent_actions"
+                      label="Concurrent Actions"
+                      placeholder="Enter the number of concurrent actions"
+                      description="The number of concurrent actions this agent can run at one time"
+                      :isValid="
+                        validate(
+                          policy.runner_config.concurrent_actions,
+                          validations.concurrent_actions
+                        )
+                      "
+                      :invalidFeedback="validations.concurrent_actions.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.runner_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.runner_config.wait_interval"
+                      label="Wait Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How long should the agent wait before polling for new actions to execute"
+                      :isValid="
+                        validate(
+                          policy.runner_config.wait_interval,
+                          validations.wait_interval
+                        )
+                      "
+                      :invalidFeedback="validations.wait_interval.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.runner_config.plugin_poll_interval"
+                      label="Plugin Poll Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How often should the agent poll for new or updated plugins"
+                      :isValid="
+                        validate(
+                          policy.runner_config.plugin_poll_interval,
+                          validations.plugin_poll_interval
+                        )
+                      "
+                      :invalidFeedback="validations.plugin_poll_interval.message"
+                    />
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab
+                title="Detector Settings"
+                v-bind:disabled="policy.roles && !policy.roles.includes('detector')"
+              >
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.detector_config.concurrent_rules"
+                      label="Concurrent Rules"
+                      placeholder="Enter the number of concurrent detection rules"
+                      description="The number of concurrent detection rules this agent can run at one time"
+                      :isValid="
+                        validate(
+                          policy.detector_config.concurrent_rules,
+                          validations.concurrent_rules
+                        )
+                      "
+                      :invalidFeedback="validations.concurrent_rules.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.detector_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.detector_config.wait_interval"
+                      label="Wait Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How long should the agent wait before polling for new detections to execute"
+                      :isValid="
+                        validate(
+                          policy.detector_config.wait_interval,
+                          validations.wait_interval
+                        )
+                      "
+                      :invalidFeedback="validations.wait_interval.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.detector_config.catchup_period"
+                      label="Max Catchup Period"
+                      placeholder="Enter a time in minutes"
+                      description="How  far can a detection rule go between runs to look for new data"
+                      :isValid="
+                        validate(
+                          policy.detector_config.catchup_period,
+                          validations.catchup_period
+                        )
+                      "
+                      :invalidFeedback="validations.catchup_period.message"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.detector_config.max_threshold_events"
+                      label="Max Threshold Events"
+                      placeholder="Enter the max number of events to send when a threshold rule matches"
+                      description="The max number of events to send when a threshold rule matches"
+                      :isValid="
+                        validate(
+                          policy.detector_config.max_threshold_events,
+                          validations.max_threshold_events
+                        )
+                      "
+                      :invalidFeedback="validations.max_threshold_events.message"
+                    />
+                  </CCol>
+                  <CCol> </CCol>
+                </CRow>
+              </CTab>
+              <CTab
+                title="MITRE Mapper Settings"
+                v-bind:disabled="policy.roles && !policy.roles.includes('mitre')"
+              >
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.mitre_mapper_config.concurrent_inputs"
+                      label="Concurrent Inputs"
+                      placeholder="Enter the number of concurrent inputs"
+                      description="The number of concurrent inputs the poller will process"
+                      :isValid="
+                        validate(
+                          policy.mitre_mapper_config.concurrent_inputs,
+                          validations.concurrent_inputs
+                        )
+                      "
+                      :invalidFeedback="validations.concurrent_inputs.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.mitre_mapper_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.mitre_mapper_config.mapping_refresh_interval"
+                      label="Mapping Refresh Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How often the MITRE mapper will refresh the mapping data"
+                      :isValid="
+                        validate(
+                          policy.mitre_mapper_config.mapping_refresh_interval,
+                          validations.mapping_refresh_interval
+                        )
+                      "
+                      :invalidFeedback="validations.mapping_refresh_interval.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.mitre_mapper_config.assessment_days"
+                      label="Assessment Days"
+                      placeholder="Enter a time in days"
+                      description="How many days back to look for new data source assessments"
+                      :isValid="
+                        validate(
+                          policy.mitre_mapper_config.assessment_days,
+                          validations.assessment_days
+                        )
+                      "
+                      :invalidFeedback="validations.assessment_days.message"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.mitre_mapper_config.timeout"
+                      label="Timeout"
+                      placeholder="Enter a time in seconds"
+                      description="How long the MITRE Mapper will wait for mapping queries to timeout"
+                      :isValid="
+                        validate(policy.mitre_mapper_config.timeout, validations.timeout)
+                      "
+                      :invalidFeedback="validations.timeout.message"
+                    />
+                  </CCol>
+                  <CCol> </CCol>
+                </CRow>
+              </CTab>
+              <CTab
+                title="File Integrity Monitoring"
+                v-bind:disabled="policy.roles && !policy.roles.includes('fim')"
+              >
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.fim_config.max_parallel_rules"
+                      label="Concurrent Rules"
+                      placeholder="Enter the number of concurrent rules"
+                      description="The number of concurrent rules the FIM engine will process"
+                      :isValid="
+                        validate(
+                          policy.fim_config.max_parallel_rules,
+                          validations.max_parallel_rules
+                        )
+                      "
+                      :invalidFeedback="validations.max_parallel_rules.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.fim_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.fim_config.max_cpu_time"
+                      label="Max CPU Time"
+                      placeholder="Enter a time in seconds"
+                      description="Tells the host how much CPU time to give the FIM process.  Higher numbers may impact system performance."
+                      :isValid="
+                        validate(policy.fim_config.max_cpu_time, validations.max_cpu_time)
+                      "
+                      :invalidFeedback="validations.max_cpu_time.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.fim_config.max_memory"
+                      label="Max Memory"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.fim_config.max_cache_db_size"
+                      label="Max Cache DB Size"
+                      placeholder="Enter a size in Mb"
+                      description="The maximum size of the FIM cache database in Mb"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.fim_config.max_cache_db_age"
+                      label="Max Cache DB Age"
+                      placeholder="Enter a time in hours"
+                      description="The maximum age of the FIM cache database in hours"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <label>Alert on Cache Missing</label><br />
+                    <CSwitch
+                      :checked.sync="policy.fim_config.alert_on_cache_missing"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    /><br />
+                    <span class="text-muted"
+                      ><small
+                        >If the FIM cache goes missing, fire an alert for further
+                        investigation.</small
+                      ></span
+                    >
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab
+                title="Search Proxy Settings"
+                v-bind:disabled="policy.roles && !policy.roles.includes('search_proxy')"
+              >
+                <CRow>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.search_proxy_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.search_proxy_config.query_timeout"
+                      label="Query Timeout"
+                      placeholder="Enter a time in seconds"
+                      description="How long the search proxy will wait for a query to timeout"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.search_proxy_config.max_concurrent_searches"
+                      label="Max Concurrent Searches"
+                      placeholder="Enter a number"
+                      description="The maximum number of concurrent searches the search proxy will process"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.search_proxy_config.event_wait_timeout"
+                      label="Event Wait Timeout"
+                      placeholder="Enter a time in seconds"
+                      description="How long the search proxy will wait for an event to timeout"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.search_proxy_config.max_results"
+                      label="Max Results"
+                      placeholder="Enter a number"
+                      description="The maximum number of results the search proxy will return"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model="policy.search_proxy_config.sudo_user"
+                      label="Sudo User"
+                      placeholder="Enter a user"
+                      description="The user masquerade as when authenticating searches"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <MultiPicker
+                      label="User Roles"
+                      :value.sync="policy.search_proxy_config.user_roles"
+                      :options="formattedRoles()"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <SelectInput
+                      :options="formattedInputs()"
+                      label="Target Input"
+                      placeholder="Select an input"
+                      :value.sync="policy.search_proxy_config.target_input"
+                      description="The input which provides cluster connection information to perform searches against"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <SelectInput
+                      :options="formattedCredentials('private_key')"
+                      label="Signing Key"
+                      placeholder="Select a signing key"
+                      :value.sync="policy.search_proxy_config.credential"
+                      description="The signing key to use when creating JWT auth tokens for auth proxy"
+                    />
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab title="Review">
+                <CRow>
+                  <CCol>
+                    <h4>Review</h4>
+                    <p>Review the policy settings and click save to create the policy.</p>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <h5>General Settings</h5>
+                    <CRow>
+                      <CCol><label>Description:</label> {{ policy.description }}</CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol><label>Name:</label> {{ policy.name }}</CCol>
 
-                <label>Signature Cache TTL:</label>
-                {{ policy.poller_config.signature_cache_ttl }}<br />
-                <label>Concurrent Inputs:</label>
-                {{ policy.poller_config.concurrent_inputs }}<br />
-                <label>Max Input Attempts:</label>
-                {{ policy.poller_config.max_input_attempts }}<br />
-                <label>Log Level:</label> {{ policy.poller_config.logging_level }}<br />
-              </CCol>
-              <CCol>
-                <h5>Runner Settings</h5>
-                <label>Concurrent Actions:</label>
-                {{ policy.runner_config.concurrent_actions }}<br />
+                      <CCol><label>Priority:</label> {{ policy.priority }}</CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol
+                        ><label>Roles:</label>&nbsp;
+                        <li
+                          style="display: inline; margin-right: 2px"
+                          v-for="role in policy.roles"
+                          :key="role"
+                        >
+                          <CBadge
+                            color="secondary"
+                            class="tag tag-sm"
+                            style="cursor: auto"
+                            size="sm"
+                            disabled
+                          >
+                            {{
+                              agent_roles.find((r) => r.value == role)
+                                ? agent_roles.find((r) => r.value == role).label
+                                : "Unknown: " + role
+                            }}
+                          </CBadge>
+                        </li></CCol
+                      >
+                    </CRow>
+                    <CRow>
+                      <CCol
+                        ><label>Health Check Interval:</label>
+                        {{ policy.health_check_interval }}</CCol
+                      >
+                      <CCol
+                        ><label>Log Level:</label> {{ policy.logging_level }}<br
+                      /></CCol>
+                    </CRow>
+                    <CRow
+                      ><CCol
+                        ><label>Tags:</label>&nbsp;
+                        <li
+                          style="display: inline; margin-right: 2px"
+                          v-for="tag in policy.tags"
+                          :key="tag"
+                        >
+                          <CBadge color="secondary" class="tag tag-sm" size="sm">{{
+                            tag
+                          }}</CBadge>
+                        </li></CCol
+                      ></CRow
+                    >
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <h5>Poller Settings</h5>
 
-                <label>Wait Interval:</label> {{ policy.runner_config.wait_interval
-                }}<br />
-                <label>Plugin Poll Interval:</label>
-                {{ policy.runner_config.plugin_poll_interval }}<br />
-                <label>Logging Level:</label> {{ policy.runner_config.logging_level
-                }}<br />
-              </CCol>
-              <CCol>
-                <h5>Detector Settings</h5>
-                <label>Concurrent Rules:</label>
-                {{ policy.detector_config.concurrent_rules }}<br />
-                <label>Wait Interval:</label> {{ policy.detector_config.wait_interval
-                }}<br />
-                <label>Catchup Period:</label> {{ policy.detector_config.catchup_period
-                }}<br />
-                <label>Max Threshold Events:</label>
-                {{ policy.detector_config.max_threshold_events }}<br />
-                <label>Logging Level:</label> {{ policy.detector_config.logging_level
-                }}<br />
-              </CCol>
-            </CRow>
-          </CTab>
-        </CTabs></CCol></CRow>
+                    <label>Signature Cache TTL:</label>
+                    {{ policy.poller_config.signature_cache_ttl }}<br />
+                    <label>Concurrent Inputs:</label>
+                    {{ policy.poller_config.concurrent_inputs }}<br />
+                    <label>Max Input Attempts:</label>
+                    {{ policy.poller_config.max_input_attempts }}<br />
+                    <label>Log Level:</label> {{ policy.poller_config.logging_level
+                    }}<br />
+                  </CCol>
+                  <CCol>
+                    <h5>Runner Settings</h5>
+                    <label>Concurrent Actions:</label>
+                    {{ policy.runner_config.concurrent_actions }}<br />
+
+                    <label>Wait Interval:</label> {{ policy.runner_config.wait_interval
+                    }}<br />
+                    <label>Plugin Poll Interval:</label>
+                    {{ policy.runner_config.plugin_poll_interval }}<br />
+                    <label>Logging Level:</label> {{ policy.runner_config.logging_level
+                    }}<br />
+                  </CCol>
+                  <CCol>
+                    <h5>Detector Settings</h5>
+                    <label>Concurrent Rules:</label>
+                    {{ policy.detector_config.concurrent_rules }}<br />
+                    <label>Wait Interval:</label> {{ policy.detector_config.wait_interval
+                    }}<br />
+                    <label>Catchup Period:</label>
+                    {{ policy.detector_config.catchup_period }}<br />
+                    <label>Max Threshold Events:</label>
+                    {{ policy.detector_config.max_threshold_events }}<br />
+                    <label>Logging Level:</label> {{ policy.detector_config.logging_level
+                    }}<br />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <h5>Search Proxy Settings</h5>
+                    <label>Event Wait Timeout:</label>
+                    {{ policy.search_proxy_config.event_wait_timeout }}<br />
+                    <label>Max Results:</label>
+                    {{ policy.search_proxy_config.max_results }}<br />
+                    <label>Query Timeout:</label>
+                    {{ policy.search_proxy_config.query_timeout }}<br />
+                    <label>Sudo User:</label>
+                    {{ policy.search_proxy_config.sudo_user }}<br />
+                    <label>Target Input:</label>
+                    {{ policy.search_proxy_config.target_input }}<br />
+                    <label>User Roles:</label>
+                    {{ policy.search_proxy_config.user_roles }}<br />
+                    <label>Logging Level:</label>
+                    {{ policy.search_proxy_config.logging_level }}<br />
+                  </CCol>
+                  <CCol>
+                    <h5>MITRE Mapper Settings</h5>
+                    <label>Concurrent Inputs:</label>
+                    {{ policy.mitre_mapper_config.concurrent_inputs }}<br />
+                    <label>Mapping Refresh Interval:</label>
+                    {{ policy.mitre_mapper_config.mapping_refresh_interval }}<br />
+                    <label>Assessment Days:</label>
+                    {{ policy.mitre_mapper_config.assessment_days }}<br />
+                    <label>Timeout:</label>
+                    {{ policy.mitre_mapper_config.timeout }}<br />
+                    <label>Logging Level:</label>
+                    {{ policy.mitre_mapper_config.logging_level }}<br />
+                  </CCol>
+                  <CCol>
+                    <h5>File Integrity Monitoring Settings</h5>
+                    <label>Max Parallel Rules:</label>
+                    {{ policy.fim_config.max_parallel_rules }}<br />
+                    <label>Max CPU Time:</label>
+                    {{ policy.fim_config.max_cpu_time }}<br />
+                    <label>Max Memory:</label>
+                    {{ policy.fim_config.max_memory }}<br />
+                    <label>Max Cache DB Size:</label>
+                    {{ policy.fim_config.max_cache_db_size }}<br />
+                    <label>Max Cache DB Age:</label>
+                    {{ policy.fim_config.max_cache_db_age }}<br />
+                    <label>Alert on Cache Missing:</label>
+                    {{ policy.fim_config.alert_on_cache_missing }}<br />
+                    <label>Wait Interval:</label>
+                    {{ policy.fim_config.wait_interval }}<br />
+                    <label>Logging Level:</label>
+                    {{ policy.fim_config.logging_level }}<br />
+                  </CCol>
+                </CRow>
+              </CTab> </CTabs></CCol
+        ></CRow>
       </div>
       <template #footer>
         <CButton @click="dismiss()" color="secondary">Dismiss</CButton>
@@ -608,12 +792,14 @@
 <script>
 import { mapState } from "vuex";
 
-import MultiPicker from '../components/MultiPicker.vue'
+import MultiPicker from "../components/MultiPicker.vue";
+import SelectInput from "../components/SelectInput.vue";
 
 export default {
   name: "AgentPolicyWizard",
   components: {
-    MultiPicker
+    MultiPicker,
+    SelectInput,
   },
   props: {
     show: {
@@ -635,11 +821,14 @@ export default {
           poller_config: {},
           runner_config: {},
           detector_config: {},
+          mitre_mapper_config: {},
+          fim_config: {},
+          search_proxy_config: {},
         };
       },
     },
   },
-  computed: mapState(["current_user", "organizations"]),
+  computed: mapState(["current_user", "organizations", "credentials", "inputs", "roles"]),
   watch: {
     show: function () {
       this.error = false;
@@ -650,6 +839,7 @@ export default {
       if (this.modalStatus) {
         this.tab = 0;
         this.test_failed = true;
+        this.reloadData();
       }
       this.$emit("update:show", this.modalStatus);
       if (!this.modalStatus) {
@@ -664,7 +854,7 @@ export default {
       error_message: "",
       modalStatus: this.show,
       submitted: false,
-      roles: [
+      agent_roles: [
         {
           label: "Detector",
           value: "detector",
@@ -684,8 +874,12 @@ export default {
         {
           label: "File Integrity Monitoring",
           value: "fim",
-        
-        }],
+        },
+        {
+          label: "Search Proxy",
+          value: "search_proxy",
+        },
+      ],
       log_levels: ["INFO", "ERROR", "WARNING", "DEBUG"],
       tags: [],
       validations: {
@@ -784,36 +978,36 @@ export default {
           max: 86400,
           required: true,
           type: "number",
-          message: "Must be between 1 and 86400"
+          message: "Must be between 1 and 86400",
         },
         assessment_days: {
           min: 1,
           max: 90,
           required: true,
           type: "number",
-          message: "Must be between 1 and 90"
+          message: "Must be between 1 and 90",
         },
         timeout: {
           min: 1,
           max: 86400,
           required: true,
           type: "number",
-          message: "Must be between 1 and 86400"
+          message: "Must be between 1 and 86400",
         },
         max_parallel_rules: {
           min: 1,
           max: 25,
           required: true,
           type: "number",
-          message: "Must be between 1 and 25"
+          message: "Must be between 1 and 25",
         },
         max_cpu_time: {
           min: 5,
           max: 60,
           required: true,
           type: "number",
-          message: "Must be between 5 and 60"
-        }
+          message: "Must be between 5 and 60",
+        },
       },
     };
   },
@@ -828,9 +1022,54 @@ export default {
         return { label: o.name, value: o.uuid };
       });
     },
+    formattedInputs() {
+      return this.inputs.map((i) => {
+        return { label: i.name, value: i.uuid };
+      });
+    },
+    formattedCredentials(type = null) {
+      if(type) {
+        return this.credentials
+        .filter((c) => c.type == type)
+        .map((c) => {
+          return { label: c.name, value: c.uuid };
+        });
+      }
+      return this.credentials.map((c) => {
+        return { label: c.name, value: c.uuid };
+      });
+    },
+    formattedRoles() {
+      return this.roles.map((r) => {
+        return { label: r.name, value: r.uuid };
+      });
+    },
     addTag(tag) {
       this.tags.push(tag);
       this.policy.tags.push(tag);
+    },
+    reloadData() {
+      this.getCredentials()
+      this.getInputs()
+      this.getRoles()
+    },
+    getCredentials() {
+      this.$store
+        .dispatch("getCredentialList", {organization: this.policy.organization}).then(() => {
+          this.policy.search_proxy_config.credential = null
+        })
+    },
+    getInputs() {
+      this.$store
+        .dispatch("getInputs", {organization: this.policy.organization}).then(() => { 
+          this.policy.search_proxy_config.target_input = null
+        })
+    },
+    getRoles() {
+      this.$store
+        .dispatch("getRoles", {organization: this.policy.organization}).then(() => {
+          this.policy.search_proxy_config.roles = []
+        })
     },
     create() {
       this.$store
@@ -844,8 +1083,8 @@ export default {
         });
     },
     update() {
-      let uuid = this.policy.uuid
-      let stripped_policy = JSON.parse(JSON.stringify(this.policy))
+      let uuid = this.policy.uuid;
+      let stripped_policy = JSON.parse(JSON.stringify(this.policy));
 
       let fields_to_remove = [
         "created_at",
@@ -854,12 +1093,12 @@ export default {
         "updated_at",
         "updated_by",
         "uuid",
-      ]
+      ];
 
-      fields_to_remove.forEach(element => {
-        delete stripped_policy[element]  
+      fields_to_remove.forEach((element) => {
+        delete stripped_policy[element];
       });
-      
+
       this.$store
         .dispatch("updateAgentPolicy", { uuid: uuid, data: stripped_policy })
         .then((response) => {
@@ -868,7 +1107,7 @@ export default {
         .catch((error) => {
           this.error = true;
           this.error_message = error.response.data.message;
-          console.log(this.policy)
+          console.log(this.policy);
         });
     },
     validate(field, validator) {

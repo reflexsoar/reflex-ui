@@ -165,6 +165,17 @@ export default {
           "logging_level": 'ERROR',
           "graceful_exit": true
         },
+        search_proxy_config: {
+          event_wait_timeout: 30,
+          logging_level: "ERROR",
+          max_concurrent_searches: 10,
+          max_results: 500,
+          query_timeout: 30,
+          sudo_user: null,
+          target_input: null,
+          user_roles: [],
+          credential: null
+        },
         "tags": [],
         "priority": 1,
       },
@@ -183,11 +194,6 @@ export default {
         "name": "",
         "description": null,
         "roles": [
-          "runner",
-          "detector",
-          "poller",
-          "mitre",
-          "fim"
         ],
         "health_check_interval": 30,
         "logging_level": "ERROR",
@@ -234,6 +240,17 @@ export default {
           "wait_interval": 30,
           "logging_level": 'ERROR',
           "graceful_exit": true
+        },
+        search_proxy_config: {
+          event_wait_timeout: 30,
+          logging_level: "ERROR",
+          max_concurrent_searches: 10,
+          max_results: 500,
+          query_timeout: 30,
+          sudo_user: null,
+          target_input: null,
+          user_roles: [],
+          credential: null
         },
         "tags": [],
         "priority": 1,
