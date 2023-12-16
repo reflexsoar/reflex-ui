@@ -84,14 +84,48 @@
           :value.sync="credential_data.organization"
           :options="organizations"
         />
-        <CInput
-          placeholder="Credential Name"
-          required
-          v-model="credential_data.name"
-          label="Name"
-        >
-        </CInput>
         <CRow>
+          <CCol>
+            <CInput
+              placeholder="Credential Name"
+              required
+              v-model="credential_data.name"
+              label="Name"
+            >
+            </CInput>
+          </CCol>
+          <CCol>
+            <CSelect
+              label="Credential Type"
+              placeholder="Select a credential type"
+              required
+              :value.sync="credential_data.credential_type"
+              :options="credential_types"
+            />
+          </CCol>
+        </CRow>
+        <CRow v-if="credential_data.credential_type == 'private_key'">
+          <CCol>
+            <CTextarea v-model="credential_data.secret" label="Private Key" rows="5" />
+          </CCol>
+        </CRow>
+        <CRow v-else-if="credential_data.credential_type == 'certificate'">
+          <CCol>
+            <CTextarea v-model="credential_data.secret" label="Certificate" rows="5" />
+          </CCol>
+        </CRow>
+        <CRow v-else-if="credential_data.credential_type == 'api_key'">
+          <CCol>
+            <CInput
+              placeholder="API Key"
+              required
+              v-model="credential_data.secret"
+              label="API Key"
+            >
+            </CInput>
+          </CCol>
+        </CRow>
+        <CRow v-else>
           <CCol>
             <CInput
               placeholder="Username"
@@ -250,6 +284,7 @@ export default {
         secret: "",
         description: "",
         organization: "",
+        credential_type: "password"
       },
       modal_title: "New Credential",
       modal_action: this.createCredential,
@@ -261,6 +296,12 @@ export default {
       organizations: [],
       active_page: 1,
       picker_filters: {},
+      credential_types: [
+        { label: 'Password', value: 'password' },
+        { label: 'API Key', value: 'api_key' },
+        { label: 'Private Key', value: 'private_key'},
+        { label: 'Certificate', value: 'certificate'}
+      ]
     };
   },
   watch: {
@@ -327,6 +368,8 @@ export default {
         username: "",
         secret: "",
         description: "",
+        organization: "",
+        credential_type: "password"
       };
     },
     getCredentialDetails(uuid) {
@@ -353,6 +396,7 @@ export default {
         description: this.credential_data.description,
         username: this.credential_data.username,
         organization: this.credential_data.organization,
+        credential_type: this.credential_data.credential_type
       };
       if (this.credential_data.secret != "") {
         credential.secret = this.credential_data.secret;
