@@ -440,12 +440,16 @@ export default {
         if (typeof option === "object" && option[this.option_key] == this.selected) {
           this.selected = null;
           this.wrapper.classList.remove("active");
+          
           this.$emit("update:value", this.selected);
+          this.$emit("change", this.selected);
           return;
         } else if (typeof option === "string" && option == this.selected) {
           this.selected = null;
           this.wrapper.classList.remove("active");
+          
           this.$emit("update:value", this.selected);
+          this.$emit("change", this.selected);
           return;
         }
 
@@ -462,7 +466,9 @@ export default {
 
       this.wrapper.classList.remove("active");
 
+      
       this.$emit("update:value", this.selected);
+      this.$emit("change", this.selected);
     },
     getSelectedLabel() {
 
