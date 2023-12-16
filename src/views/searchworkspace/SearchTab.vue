@@ -947,7 +947,7 @@ export default {
               },
             });
 
-            console.log(socket);
+            this.results = [];
 
             socket.on("connect", () => {
               // Emit a join event to the search channel
@@ -957,22 +957,26 @@ export default {
               });
             });
 
-            socket.on("results", (data) => {
-                console.log(data)
-              this.results = data.response.hits.hits;
-              this.total_results = data.total_results;
-              this.pages = data.pages;
-              this.aggregations = data.response.aggregations;
-              this.timefield = data.timefield;
-              this.search_complete = true;
-              this.search_failed = false;
-              this.failure_reason = "";
-              this.current_page = 1;
-              this.updateTab();
-              socket.close()
-            });
-            
-            console.log(this.results);
+            socket.on("result-hits", (data) => {
+                // Add the data array to the results array
+                this.results = this.results.concat(data);
+                socket.on("result-summary", (data) => {
+                    this.total_results = data.total_results;
+                    this.pages = data.pages;
+                    this.aggregations = data.response.aggregations;
+                    this.timefield = data.timefield;
+                    this.search_complete = true;
+                    this.search_failed = false;
+                    this.failure_reason = "";
+                    this.current_page = 1;
+                    
+                });
+
+                socket.on("result-finish", (data) => {
+                    this.updateTab();
+                    socket.close();
+                })
+            })
 
             socket.on("search_error", (data) => {
               console.log("Received search error");
