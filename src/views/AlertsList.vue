@@ -241,6 +241,8 @@
                     <CDropdownItem @click="dismissEventFromCard(event.uuid)"><i class="fas fa-bell-slash"></i>&nbsp;Dismiss</CDropdownItem>
                     <!-- Create Case -->
                     <CDropdownItem @click="caseFromCard(event.uuid)"><i class="fas fa-briefcase"></i>&nbsp;Create Case</CDropdownItem>
+                    <!-- Merge into Case -->
+                    <CDropdownItem @click="mergeIntoCase(event.uuid)"><i class="fas fa-briefcase"></i>&nbsp;Merge into Case</CDropdownItem>
                     <!-- Create Event Rule -->
                     <CDropdownItem @click="createEventRule(event.signature, event.uuid)"><i class="fas fa-diagram-project"></i>&nbsp;Create Event Rule</CDropdownItem>
                     <!-- Run Action -->
@@ -1221,6 +1223,15 @@ export default {
         this.case_from_card = true
         this.organization = event.organization
         this.createCaseModal = true
+      },
+      mergeIntoCase(uuid) {
+        this.selected = []
+        let event = this.filtered_events.filter(event => event.uuid === uuid)
+        if(event.length > 0) {
+          event = event[0]
+        }
+        this.selected = [uuid]
+        this.mergeIntoCaseModal = true
       },
       selectAllNew() {
         this.selected_orgs = {}
