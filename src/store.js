@@ -5123,10 +5123,23 @@ const actions = {
   },
   getAgentTags({ commit }, { organization = null, namespace = null, value = null }) {
 
-    let url = `${BASE_URL}/agent_tag`      
+    let url = `${BASE_URL}/agent_tag`
+    let params = [];
 
     if (organization) {
-      url += `&organization=${organization}`
+      params.push(`organization=${organization}`)
+    }
+
+    if (namespace) {
+      params.push(`namespace=${namespace}`)
+    }
+
+    if (value) {
+      params.push(`value=${value}`)
+    }
+
+    if (params.length > 0) {
+      url += `?${params.join('&')}`
     }
 
     return new Promise((resolve, reject) => {
