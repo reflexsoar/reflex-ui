@@ -182,7 +182,7 @@
                   >
                     {{ k.name }}</CCol
                   ><CCol class="text-right" col="3"
-                    ><CBadge color="secondary">{{
+                    ><CBadge color="secondary" style="font-size: 75% !important">{{
                       k.count.toLocaleString("en-US")
                     }}</CBadge></CCol
                   >
@@ -290,6 +290,11 @@ export default {
       this.$emit("filter_changed", this.filters);
     },
     getFilterDisplayName(type, value) {
+      // If the type is a __not type, remove the __not
+      if (type.endsWith("__not")) {
+        type = type.replace("__not", "");
+      }
+      
       if (this.filters[type] != undefined) {
         let filter = this.filters[type].find((item) => item.value === value);
         if (filter) {
@@ -350,8 +355,8 @@ export default {
     },
     selectFilter(filter, filter_out = false) {
       // If the filter is already selected, remove it
-      let allow_multiple = ['status','status__not', 'tags__not', 'tags', 'tactics','techniques','organization','warnings','warnings__not','rule_type','severity'];
-      let supported_for_not = ['status', 'warnings', 'tags', 'status__not', 'warnings__not', 'tags__not']
+      let allow_multiple = ['status','status__not', 'tags__not', 'tags', 'tactics','techniques','organization','organization__not', 'warnings','warnings__not','rule_type','severity'];
+      let supported_for_not = ['status', 'warnings', 'tags', 'status__not', 'warnings__not', 'tags__not', 'organization', 'organization__not']
 
       if(filter_out) {
         if(!supported_for_not.includes(filter.type)) {
@@ -396,7 +401,6 @@ export default {
 
       }
       this.$store.commit("update_selected_detection_filters", this.selected_filters);
-      console.log(this.selected_filters);
       this.getFilters();
 
       let filters = this.selected_filters;
