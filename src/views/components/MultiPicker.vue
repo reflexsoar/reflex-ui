@@ -13,7 +13,7 @@
       <div class="search">
         <input type="text" placeholder="Search..." v-model="search" />
       </div>
-      <ul class="options" v-if="filtered_options.length > 0">
+      <ul class="options" v-if="filtered_options.length > 0 || taggable">
         <li
           v-for="(option, i) in filtered_options"
           :key="i"
@@ -28,9 +28,16 @@
           <div>
             <CBadge v-if="showCount" class="tag" color="secondary">{{ option.count ? option.count : 0 }}</CBadge>
           </div>
-          
         </li>
+        <li class="option" v-if="search.length > 0 && taggable" @click="select(search, true)">
+          <div style="width: 98%">
+              <input type="checkbox" class="checkbox" :value="search" :checked="isSelected(search)">&nbsp;
+                <slot name="option" :option="search">{{ optionValue(search) }}</slot>
+              </input>
+            </div>
+          </li>
       </ul>
+      
       <span v-else class="no-results">No options found</span>
     </div>
     <slot name="description">
@@ -75,6 +82,7 @@
   line-height: 1.5;
   display: flex;
   cursor: pointer;
+  font-weight: 400;
   padding: 0.375rem 0.75rem;
   border-radius: 0.25rem;
   border: 1px solid #d8dbe0;
@@ -96,6 +104,10 @@
   transform: rotate(-180deg);
 }
 
+th > .wrapper {
+  margin-bottom: 0px !important;
+}
+
 .content {
   position: absolute;
   z-index: 2000 !important;
@@ -107,6 +119,7 @@
   background: #fff;
   border: 1px solid #d8dbe0;
   margin-bottom: 10px;
+  font-weight: 400;
 }
 
 .wrapper.active .content {
@@ -177,6 +190,14 @@
   font-weight: 500;
 }
 
+.no-results-tag {
+  display: flex;
+  justify-content: center;
+  /* Allow the words to wrap */
+  flex-wrap: wrap;
+  padding: 10px;
+}
+
 .selected {
   background-color: rgb(243, 243, 243);
 }
@@ -225,6 +246,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    taggable: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -268,7 +293,7 @@ export default {
 
       return this.selections.includes(option[this.option_key]);
     },
-    select(option) {
+    select(option, tag=false) {
 
       if (this.selections === null) {
         this.selections = [];
@@ -288,10 +313,12 @@ export default {
         if (typeof option === "object" && this.selections.includes(option[this.option_key])) {
           this.selections.splice(this.selections.indexOf(option[this.option_key]), 1);
           this.$emit("update:value", this.selections);
+          this.$emit("removeOption", option)
           return;
         } else if (typeof option === "string" && this.selections.includes(option)) {
           this.selections.splice(this.selections.indexOf(option), 1);
           this.$emit("update:value", this.selections);
+          this.$emit("removeOption", option)
           return;
         }
 
@@ -299,6 +326,10 @@ export default {
           this.selections.push(option[this.option_key])
         } else {
           this.selections.push(option)
+        }
+
+        if(tag) {
+         this.$emit("addOption", option);
         }
       } else {
         this.selections = [];
