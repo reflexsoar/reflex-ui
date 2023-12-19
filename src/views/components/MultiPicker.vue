@@ -260,7 +260,22 @@ export default {
   },
   computed: {
     filtered_options: function () {
-      return this.options.filter((o) => {
+      let options = [...this.options]
+
+      // Add the selected items to the bottom of the list if they are not already in the list
+      if (this.selections) {
+        this.selections.forEach((selection) => {
+          // If the selection is not one of the option_keys, add it to the list
+          if (!options.find((option) => option[this.option_key] === selection)) {
+            options.push({
+              [this.option_key]: selection,
+              [this.option_label]: selection,
+            });
+          }
+        });
+      }
+      
+      return options.filter((o) => {
         if (typeof o === "string") {
           return o.toLowerCase().includes(this.search.toLowerCase());
         }
