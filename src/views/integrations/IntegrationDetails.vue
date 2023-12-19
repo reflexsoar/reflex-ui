@@ -344,7 +344,7 @@ export default {
 
       // Replace all the global_settings
       for (let field in this.integration.manifest.configuration) {
-        if(config.global_settings[field]) {
+        if(config.global_settings != null && config.global_settings[field]) {
           configuration.global_settings[field] = config.global_settings[field]
         }
       }
