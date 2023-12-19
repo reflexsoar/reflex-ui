@@ -4,16 +4,62 @@
       <div>
         <p v-if="related_events_count > 1">This case will be associated with <b>{{related_events_count}}</b> events.</p>
         <CForm @submit.prevent="createCase()" id="create_case_form">
-            <CSelect
-                  v-if="current_user.default_org"
-                  placeholder="Select an Organization..."
-                  required
-                  :value.sync="organization"
-                  :options="formattedOrganizations()"
-                  @change="refreshDropdowns($event)"
-                  label="Organization"
-                />
-            <CInput
+            <CRow>
+            <CCol>
+                <CSelect
+                    v-if="current_user.default_org"
+                    placeholder="Select an Organization..."
+                    required
+                    :value.sync="organization"
+                    :options="formattedOrganizations()"
+                    @change="refreshDropdowns($event)"
+                    label="Organization"
+                    />
+                    <label>Case Owner</label>
+            <SelectInput
+                :value.sync="owner"
+                :options="users"
+                option_label="username"
+                option_key="uuid"
+                placeholder="Select a user"
+                @search-change="usersFind"
+                v-bind:disabled="current_user.permissions.view_organizations && organization == null"/>
+            <CSelect 
+                    label="TLP"
+                    :options="tlps"
+                    :value.sync="tlp"
+                    placeholder="Select a TLP"
+                    v-bind:disabled="current_user.permissions.view_organizations && organization == null"
+                  >
+                  </CSelect>
+<CSelect 
+                    label="Severity"
+                    :options="severities"
+                    :value.sync="severity"
+                    placeholder="Select a Severity"
+                    v-bind:disabled="current_user.permissions.view_organizations && organization == null"
+                  >
+                  </CSelect><div role="group" class="form-group">
+                <label class="typo__label">Tags</label>
+                <multiselect 
+                    v-model="selected_tags" 
+                    placeholder="Select tags to apply to this input"
+                    :taggable="true"
+                    tag-placeholder="Add new tag"
+                    track-by="name"
+                    label="name"
+                    :options="tag_list"
+                    :multiple="true"
+                    @tag="addTag"
+                    :close-on-select="false"
+                    aria-label="Tags"
+                    v-bind:disabled="current_user.permissions.view_organizations && organization == null"
+                >
+                </multiselect>
+            </div>
+                </CCol>
+                <CCol col=8 style="border-left: 1px solid #cfcfcf">
+                    <CInput
               placeholder="Case Title"
               required
               v-model="title"
@@ -21,6 +67,18 @@
               v-bind:disabled="current_user.permissions.view_organizations && organization == null"
             >
             </CInput>
+            <CTextarea
+              placeholder="Enter a description for the case.  The more detail the better."
+              required
+              v-model="description"
+              label="Description"
+              description="HINT: Use markdown to create a beautiful description."
+              rows=8
+              v-bind:disabled="current_user.permissions.view_organizations && organization == null"
+            >
+            </CTextarea>
+
+
             <label style="text-align:center; vertical-align:middle; padding-bottom:.8em">Assign Case Template?</label>&nbsp;&nbsp;&nbsp;<CSwitch aria-label="Assign Case Template" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="use_case_template" v-bind:disabled="settings.require_case_templates"/>
             <div role="group" class="form-group" v-if="use_case_template">
                 <multiselect 
@@ -39,71 +97,11 @@
                         <small>{{props.option.description}}<br>Contains {{props.option.task_count}} tasks.</small>
                     </template>
                 </multiselect>
-            </div><br v-else>
-            <span v-if="case_template && case_template.task_count > 0"><label>Tasks</label><br><b>{{case_template.task_count}}</b> tasks will be added automatically to this case.<br><br></span><label>Case Owner</label>
-            <multiselect 
-                v-model="owner" 
-                label="username" 
-                :options="users" 
-                track-by="username" 
-                :searchable="true"
-                :internal-search="false"
-                :options-limit="25"
-                :show-no-results="false"
-                @search-change="usersFind"
-                aria-label="Case Owner"
-                v-bind:disabled="current_user.permissions.view_organizations && organization == null">
-            </multiselect><br>
-            <CTextarea
-              placeholder="Enter a description for the case.  The more detail the better."
-              required
-              v-model="description"
-              label="Description"
-              description="HINT: Use markdown to create a beautiful description."
-              rows=5
-              v-bind:disabled="current_user.permissions.view_organizations && organization == null"
-            >
-            </CTextarea>
-            <CRow>
-              <CCol col="12" lg="6">
-                <CSelect 
-                    label="TLP"
-                    :options="tlps"
-                    :value.sync="tlp"
-                    placeholder="Select a TLP"
-                    v-bind:disabled="current_user.permissions.view_organizations && organization == null"
-                  >
-                  </CSelect>
-              </CCol>
-              <CCol col="12" lg="6">
-                <CSelect 
-                    label="Severity"
-                    :options="severities"
-                    :value.sync="severity"
-                    placeholder="Select a Severity"
-                    v-bind:disabled="current_user.permissions.view_organizations && organization == null"
-                  >
-                  </CSelect>
-              </CCol>
-            </CRow>
-            <div role="group" class="form-group">
-                <label class="typo__label">Tags</label>
-                <multiselect 
-                    v-model="selected_tags" 
-                    placeholder="Select tags to apply to this input"
-                    :taggable="true"
-                    tag-placeholder="Add new tag"
-                    track-by="name"
-                    label="name"
-                    :options="tag_list"
-                    :multiple="true"
-                    @tag="addTag"
-                    :close-on-select="false"
-                    aria-label="Tags"
-                    v-bind:disabled="current_user.permissions.view_organizations && organization == null"
-                >
-                </multiselect>
             </div>
+            <span v-if="case_template && case_template.task_count > 0"><label>Tasks</label><br><b>{{case_template.task_count}}</b> tasks will be added automatically to this case.<br><br></span>
+                </CCol>
+                
+            </CRow>
             <span v-if="case_from_card">
                 <label>Generate Event Rule</label><br><CSwitch aria-label="Generate Event Rule" color="success" label-on="Yes" label-off="No" v-bind:checked.sync="generate_event_rule" v-bind:disabled="current_user.permissions.view_organizations && organization == null"/><br>
                 <small class="form-text text-muted w-100">When enabled all future events will be merged into this case.</small><br>
@@ -123,10 +121,12 @@ import { PrismEditor } from 'vue-prism-editor';
 import {vSelect} from "vue-select";
 import { mapState} from 'vuex';
 import OrganizationMultiSelect from './inputs/OrganizationMultiSelect'
+import SelectInput from '@/views/components/SelectInput.vue'
 export default {
     name: 'CreateCaseModal',
     components: {
-        OrganizationMultiSelect
+        OrganizationMultiSelect,
+        SelectInput,
     },
     props: {
         show: Boolean,
@@ -304,7 +304,7 @@ export default {
 
             let request_data = {title,organization,description,events,tlp,severity,tags,generate_event_rule, include_related_events}
             if(this.owner) {
-                request_data['owner_uuid'] = this.owner.uuid
+                request_data['owner_uuid'] = this.owner
             }
 
             if(this.case_template) {
