@@ -125,6 +125,11 @@
             </CInput>
           </CCol>
         </CRow>
+        <CRow v-else-if="credential_data.credential_type == 'jwks'">
+          <CCol>
+            <CTextarea v-model="credential_data.secret" label="JSON Web Key Set" rows="5" />
+          </CCol>
+        </CRow>
         <CRow v-else>
           <CCol>
             <CInput
@@ -300,7 +305,8 @@ export default {
         { label: 'Password', value: 'password' },
         { label: 'API Key', value: 'api_key' },
         { label: 'Private Key', value: 'private_key'},
-        { label: 'Certificate', value: 'certificate'}
+        { label: 'Certificate', value: 'certificate'},
+        { label: "JSON Web Key Set", value: "jwks"}
       ]
     };
   },

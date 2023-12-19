@@ -224,7 +224,8 @@
                       <div v-else>
                         <CSelect
                           :value.sync="input.config['auth_method']"
-                          :options="['http_auth', 'api_key']"
+                          :options="['http_auth', 'api_key', 'jwt']"
+                          description="Authentication method to use when connecting to the index."
                         >
                         </CSelect>
                       </div>
