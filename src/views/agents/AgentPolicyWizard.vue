@@ -159,6 +159,23 @@
                   </CCol>
                   <CCol> </CCol>
                 </CRow>
+                <CRow>
+                  <CCol>
+                    <MultiPicker
+                      :value.sync="policy.agent_tags"
+                      :options="agent_tags"
+                      option_label="full_name"
+                      option_key="uuid"
+                      label="Agent Tags"
+                      description="Agents with these tags will have this policy applied">
+                        <template #option="{ option }">
+                          <AgentTag v-if="option.namespace !== undefined && option.value !== undefined" :namespace="option.namespace" :value="option.value" :color="option.color" />
+                          <span v-else>Unknown Option ({{option.uuid}})</span>
+                        </template>
+                      </MultiPicker>
+                          
+                  </CCol>
+                </CRow>
               </CTab>
               <CTab
                 title="Poller Settings"
@@ -794,12 +811,14 @@ import { mapState } from "vuex";
 
 import MultiPicker from "../components/MultiPicker.vue";
 import SelectInput from "../components/SelectInput.vue";
+import AgentTag from '../agents/AgentTag.vue';
 
 export default {
   name: "AgentPolicyWizard",
   components: {
     MultiPicker,
     SelectInput,
+    AgentTag
   },
   props: {
     show: {
@@ -818,6 +837,7 @@ export default {
           name: "",
           description: "",
           tags: [],
+          agent_tags: [],
           poller_config: {},
           runner_config: {},
           detector_config: {},
@@ -828,7 +848,7 @@ export default {
       },
     },
   },
-  computed: mapState(["current_user", "organizations", "credentials", "inputs", "roles"]),
+  computed: mapState(["current_user", "organizations", "credentials", "inputs", "roles", "agent_tags"]),
   watch: {
     show: function () {
       this.error = false;
@@ -1052,6 +1072,7 @@ export default {
       this.getCredentials()
       this.getInputs()
       this.getRoles()
+      this.getAgentTags()
     },
     getCredentials() {
       this.$store
@@ -1070,6 +1091,10 @@ export default {
         .dispatch("getRoles", {organization: this.policy.organization}).then(() => {
           this.policy.search_proxy_config.roles = []
         })
+    },
+    getAgentTags() {
+      this.$store
+        .dispatch("getAgentTags", {organization: this.policy.organization})
     },
     create() {
       this.$store

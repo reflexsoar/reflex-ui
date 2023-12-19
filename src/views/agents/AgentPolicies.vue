@@ -177,6 +177,7 @@ export default {
           credential: null
         },
         "tags": [],
+        agent_tags: [],
         "priority": 1,
       },
       loading: false,
@@ -253,13 +254,14 @@ export default {
           credential: null
         },
         "tags": [],
+        agent_tags: [],
         "priority": 1,
       };
       this.show_agent_wizard = true;
     },
     editAgentPolicy(uuid) {
       this.modal_mode = 'Edit'
-      this.agent_policy = Object.assign({},this.agent_policies.find((agent_policy) => agent_policy.uuid === uuid));
+      this.agent_policy = JSON.parse(JSON.stringify(this.agent_policies.find((p) => p.uuid === uuid)));
       this.show_agent_wizard = true;
     },
     listPolicies() {
