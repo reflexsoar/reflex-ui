@@ -7,9 +7,7 @@
   >
     <template #toggler>
       <CHeaderNavLink>
-        
-        {{current_user.username}}&nbsp;<CIcon name="cil-menu" size="xl"/>
-        
+        <UserLabel :user="current_user" /> <CIcon name="cil-menu" size="xl"/>
       </CHeaderNavLink>
     </template>
     
@@ -41,12 +39,16 @@
 
 <script>
 import {mapState} from "vuex";
+import UserLabel from '@/views/components/UserLabel.vue'
 export default {
   name: 'TheHeaderDropdownAccnt',
   data () {
     return { 
       itemsCount: 42
     }
+  },
+  components: {
+    UserLabel
   },
   computed: {
     isLoggedIn: function() {return this.$store.getters.isLoggedIn},

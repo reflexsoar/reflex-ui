@@ -5246,6 +5246,40 @@ const actions = {
           reject(err)
         })
     })
+  },
+  updateProfilePicture({commit}, {uuid, form}) {
+      // Submit the image to the server as a form-multipart file upload
+      return new Promise((resolve, reject) => {
+        Axios({ url: `${BASE_URL}/user/${uuid}/profile_picture`, data: form, method: 'POST', headers: { 'Content-Type': 'multipart/form-data' } })
+          .then(resp => {
+            resolve(resp)
+          })
+          .catch(err => {
+            reject(err)
+          })
+      })
+  },
+  getProfilePicture({commit}, {uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/user/${uuid}/profile_picture`, method: 'GET', responseType: 'blob' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  removeProfilePicture({commit}, {uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/user/${uuid}/profile_picture`, method: 'DELETE' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
   }
 }
 
