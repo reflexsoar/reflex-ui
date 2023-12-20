@@ -74,7 +74,15 @@
             <label class="text-muted"
               ><b>Owner</b></label
             >
-            <div role="group" class="form-group">
+            <h4
+                v-if="!edit_owner"
+                style="cursor: pointer"
+                id="owner-label"
+                @click="editOwner"
+              >
+                {{ case_data.owner.username ? case_data.owner.username : "Unassigned" }}
+              </h4>
+            <div v-else role="group" class="form-group">
               <multiselect
                 id="owner-select"
                 v-if="edit_owner"
@@ -91,15 +99,9 @@
                 @select="updateAssignee($event)"
               >
               </multiselect>
-              <h4
-                v-if="!edit_owner"
-                style="cursor: pointer"
-                id="owner-label"
-                @click="editOwner"
-              >
-                {{ case_data.owner.username }}
-              </h4>
             </div>
+              
+            
           </CCol>
           
           <CCol col="2" class="text-right">
@@ -812,6 +814,7 @@ import "@toast-ui/editor/dist/toastui-editor.css";
 import { Editor } from "@toast-ui/vue-editor";
 
 import OrganizationBadge from './OrganizationBadge.vue'
+import UserLabel from '@/views/components/UserLabel.vue'
 
 import { Mentionable } from "vue-mention";
 import moment from "moment";
@@ -834,7 +837,8 @@ export default {
     ObjectAttribute,
     Editor,
     CalloutCard,
-    OrganizationBadge
+    OrganizationBadge,
+    UserLabel,
   },
   computed: {
     ...mapState(["alert", "current_user", "settings", "tags", "case_observables"]),
@@ -1090,7 +1094,6 @@ export default {
         }
     },
     closeTitleEdit(e) {
-      console.log(e);
       if (!e.target.id.includes("case_title_input") && !e.target.classList.contains("case-title")) {
         this.edit_title = false;
         document.removeEventListener("click", this.closeTitleEdit);
@@ -1107,7 +1110,6 @@ export default {
     closeSeverityEdit(e) {
       // If the click is not on the severity select, close the edit
       if (!e.target.id.includes("severity")) {
-        console.log(e);
         this.edit_severity = false;
         document.removeEventListener("click", this.closeSeverityEdit);
       }
@@ -1132,21 +1134,17 @@ export default {
     closeOwnerEdit(e) {
       // If the click is not on the owner select, close the edit
       if (!e.target.id.includes("owner") && !e.target.classList.contains("multiselect__select")) {
-        console.log(e)
         this.edit_owner = false;
         document.removeEventListener("click", this.closeOwnerEdit);
       }
     },
     editTags() {      
-      console.log("ermmm")
       this.current_tags = this.case_data.tags;
       this.edit_tags = !this.edit_tags;
-      console.log(this.edit_tags);
       document.addEventListener("click", this.stopEditingTags);
       // If the tags have been edited, we need to update the current_tags
     },
     stopEditingTags(e) {
-      console.log(e);
       if (!e.target.id.includes("tagselect") && !e.target.id.includes("taglabel") && !e.target.classList.contains("multiselect__tags")) {
         this.edit_tags = false;
         document.removeEventListener("click", this.stopEditingTags);
