@@ -205,8 +205,22 @@
                   <h4>                    
                     <input type="checkbox" aria-label="Select Card" v-if="!(event.status.closed || event.case)" v-bind:checked="selected.includes(event.uuid)" :value="event.uuid" @change="selectEvents($event)"/>
                     &nbsp;<a @click="toggleObservableFilter({'filter_type':'title','data_type':'title','value':event.title})" style="cursor: pointer;">{{event.title}}</a></h4>
-                  {{event.description | truncate_description}}<br>
-                  <CIcon name="cilCenterFocus" />&nbsp;<li  style="display: inline; margin-right: 2px;" v-for="obs,i in event.observables.slice(0,max_observables)" :key="i"><CBadge @click.prevent.stop="setPopoverData(obs, event.organization)" :id="`popover-${obs.value}`" data-popover="test" color="secondary" class="tag tag-clickable tag-list" size="sm" style="margin-top:5px; margin-bottom:5px;" ><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CBadge></li><span v-if="event.observables.length > max_observables" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(event.observables.slice(max_observables))}"><small>&nbsp;+{{ event.observables.length - max_observables}}</small></span><br>
+                  <span v-if="event.templated_description" class="templated-description" >
+                    <vue-markdown :html="false" class="description-text">
+                      {{ event.templated_description }}
+                      
+                      </vue-markdown>                      
+                    </span><span v-else>{{event.description | truncate_description}}</span>
+                    <!-- TEST CODE
+                    <span v-for="(token, i) in dynamicDescription(event)">
+                      <span v-if="token.startsWith('{{')">
+                        <CBadge v-if="observableFromSourceField(event, token)" @click.prevent.stop="setPopoverData(observableFromSourceField(event, token), event.organization)" :id="`popover-${observableFromSourceField(event, token).value}`" data-popover="test" color="secondary" class="tag tag-clickable tag-list" size="sm" style="margin-top:5px; margin-bottom:5px;" ><b>{{observableFromSourceField(event, token).source_field}}</b>: {{ observableFromSourceField(event, token).value | truncate }}</CBadge>
+                        <CBadge v-else class="tag" color="secondary">{{token}}</CBadge>
+                      </span>
+                      <span v-else>{{token}}</span>
+
+                    </span> -->
+                  <CIcon name="cilCenterFocus" v-if="event.observables.length != 0" /><li v-if="event.observables.length != 0" style="display: inline; margin-right: 2px;" v-for="obs,i in event.observables.slice(0,max_observables)" :key="i"><CBadge @click.prevent.stop="setPopoverData(obs, event.organization)" :id="`popover-${obs.value}`" data-popover="test" color="secondary" class="tag tag-clickable tag-list" size="sm" style="margin-top:5px; margin-bottom:5px;" ><b>{{obs.source_field ? obs.source_field.toLowerCase() : obs.data_type }}</b>: {{ obs.value.toLowerCase() | truncate }}</CBadge></li><span v-if="event.observables.length > max_observables" style="cursor: pointer;" v-c-popover="{'header':'Additional Observables', 'content':extraObservables(event.observables.slice(max_observables))}"><small>&nbsp;+{{ event.observables.length - max_observables}}</small></span>
                   <!--<CIcon name="cilCenterFocus" style="margin-top:5px"/>&nbsp;<li style="display: inline; margin-right: 2px;" v-for="obs in getEventObservables(event.uuid)" :key="obs.uuid"><CButton color="secondary" class="tag"  v-c-tooltip.hover.click="`${obs.tags}`"  size="sm" style="margin-top:5px; margin-bottom:0px;" @click="toggleObservableFilter({'filter_type':'observable', 'data_type': obs.data_type, 'value': obs.value})"><b>{{obs.data_type}}</b>: {{ obs.value.toLowerCase() }}</CButton></li>-->
                 </CCol>
                 <CCol col="3" class="text-right">
@@ -218,17 +232,8 @@
               <CRow>
                 <CCol col="2">
                 <CButtonGroup>
-                    <!--<CButton v-if="!event.acknowledged" aria-label="Acknowlege" @click="ackEvent(event.uuid)" size="sm" color="success" v-c-tooltip="{'content':'Acknowledge Event','placement':'bottom'}"><CIcon name="cilCheck"/></CButton>
-                    <CButton v-if="event.acknowledged" aria-label="Unacknowledge" @click="unackEvent(event.uuid)" size="sm" color="warning" v-c-tooltip="{'content':'Acknowledge Event','placement':'bottom'}"><CIcon name="cilX"/></CButton>
-                    <CButton aria-label="Create Event Rule" size="sm" color="info" @click="createEventRule(event.signature, event.uuid)" v-c-tooltip="{'content':'Create Event Rule','placement':'bottom'}"><CIcon name='cilGraph'/></CButton>
-                    <CButton aria-label="Dismiss Event" v-if="!event.status.closed" color="danger" size="sm" @click="dismissEventFromCard(event.uuid)" v-c-tooltip="{'content':'Dismiss Event','placement':'bottom'}"><CIcon name="cilDeaf"/></CButton>
-                    <CButton aria-label="Run Action" size="sm" color="secondary" @click="showRunActionModal(event.uuid, true)" v-c-tooltip="{'content':'Run Action','placement':'bottom'}"><i class="fas fa-play"/></CButton>
-                    <CButton aria-label="Create Case" @click="caseFromCard(event.uuid)" v-if="event.status.name === 'New'" size="sm" color="secondary" v-c-tooltip="{'content':'Create Case','placement':'bottom'}"><CIcon name="cilBriefcase"/></CButton>-->
                     <CButton aria-label="View Event" @click="showDrawer(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'View Event','placement':'bottom'}"><i class="fas fa-magnifying-glass"></i></CButton>
                     
-                    <!--<CButton aria-label="Add Comment" @click="showEventCommentModal(event.uuid)" size="sm" color="secondary" v-c-tooltip="{'content':'Add Comment','placement':'bottom'}"><CIcon name="cilCommentBubble"/> {{event.total_comments ? event.total_comments : 0}}</CButton>
-                    <CButton aria-label="Reopen Event" v-if="event.status.closed" @click="reopenEvent(event.uuid)" v-c-tooltip="{'content':'Reopen Event','placement':'bottom'}" size="sm" color="success"><CIcon name="cilEnvelopeOpen"/></CButton>
-                    <CButton aria-label="View Case" v-if="event.case" size="sm" color="secondary" :to="`/cases/${event.case}`" v-c-tooltip="{'content':'View Case','placement':'bottom'}"><CIcon name="cil-folder-open"/></CButton>-->
                     &nbsp;<CDropdown toggler-text="Actions" size="sm" color="secondary" v-c-tooltip="{'content':'More Actions','placement':'bottom'}">
                       <template #toggler-content>
                         <i class="fas fa-ellipsis"></i>
@@ -282,6 +287,41 @@
         </CCol>
       </CRow>
     </CCol>
+    <div class="description-content">
+      <CRow>
+        <CCol>
+          <b>{{ clicked_field_value }}</b>
+        </CCol>
+      </CRow><br>
+      <label>Actions</label><br>
+      <CRow>
+        
+        <CCol>
+          Virus Total Lookup
+        </CCol>
+        <CCol>
+          Add to Intel List
+        </CCol>
+      </CRow>
+      <CRow>
+        
+        <CCol>
+          Copy Value
+        </CCol>
+        <CCol>
+          Add Exclusion
+        </CCol>
+      </CRow>
+      <CRow>
+        
+        <CCol>
+          Add Event Artifact
+        </CCol>
+        <CCol>
+          
+        </CCol>
+      </CRow>
+    </div>
     <CModal title="Dismiss Event" color="danger" :centered="true" size="lg" :show.sync="dismissEventModal" :close-on-backdrop="false">
       <CAlert :show.sync="error" color="danger">
         Failed to dismiss Event(s). {{error_message}}
@@ -394,7 +434,6 @@
 </template>
 
 <style scoped>
-
 
 .nav-item:not(:last-child) {
   border-right:1px solid #cfcfcf !important;
@@ -522,6 +561,29 @@ export default {
       if(this.settings) {
         this.card_per_page = this.settings.events_per_page
       }
+
+      // Add an event handler for any time .description-text p code is clicked
+      document.addEventListener('click', function (event) {
+        if (event.target.matches('.description-text p code')) {
+          this.clicked_field_value = event.target.innerText
+          var descriptionContent = document.getElementsByClassName('description-content')[0]
+
+          // Set the divs position to the mouse position
+          descriptionContent.style.top = event.clientY + 'px'
+          descriptionContent.style.left = event.clientX + 'px'
+
+          // Set the description-content div to visible
+          descriptionContent.style.display = 'block'
+          
+        } else {
+          // Hide the description-content div by setting display: none unless the user clicked on a code element or the description-content div
+          if (!event.target.matches('.description-content') && !event.target.matches('.description-content *')) {
+            document.getElementsByClassName('description-content')[0].style.display = 'none'
+          }
+        }
+      }.bind(this), false)
+
+      
       
       this.observableFilters = this.observable_filters
       
@@ -538,6 +600,7 @@ export default {
     },
     data(){
       return {
+        clicked_field_value: "",
         saved_filter_string: "",
         show_save_view_modal: false,
         show_load_view_modal: false,
@@ -552,6 +615,7 @@ export default {
           //{"name": "Run Action"},
           {"name": "Add to List"}
         ],
+        clicked_observable: null,
         name: "",
         description: "",
         severity: 0,
@@ -645,7 +709,28 @@ export default {
         show_export_wizard: false
       }
     },
-    methods: {
+    methods: {/*
+      dynamicDescription(event) {
+        
+        // We need to tokenize the entire description into an array of words so any time we encounter {{ field_name_here }}
+        // we can render a Badge instead
+        let description = event.description
+        let tokens = description.split(/({{.*?}})/g)
+        return tokens
+      },
+      observableFromSourceField(event, field_name) {
+        let obs = [{
+          "data_type": "host",
+          "value": "test",
+          "source_field": "host.hostname"
+        }]
+        // Replace the {{ }} on the field name
+        if(field_name) {
+          field_name = field_name.replace(/{{\s?|\s?}}/g, '').replace('raw_log.', '')
+          let data = obs.find(o => o.source_field == field_name)
+          return data
+        }
+      },*/
       ackBySig(uuid, signature) {
         this.$store.dispatch('acknowledgeEventBySignature', {'uuid': uuid, 'signature': signature}).then(() => {
           this.filtered_events = this.filterEvents()
