@@ -84,11 +84,11 @@
   /* Should extend all the way to the bottom of the page  */
   min-height: 100vh;
   background-color: #333;
-  background-image: url('https://media.discordapp.net/attachments/1053061816453976124/1187490984288862208/netsurge_a_cyber_security_center_full_of_desks_and_monitors_the_6ffdc80f-4046-49fa-a7c1-d8e30288efd8.webp?ex=65971429&is=65849f29&hm=a27fc1d0dda5db64700a1466ff8b365210e40a833adb1b42bf561e6f06213f4b&=&format=webp&width=1920&height=1080');
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
+
 }
 
 .login-box {
@@ -112,8 +112,13 @@ export default {
       email: "",
       password: "",
       logo_path: require("../assets/img/color-logo-dots.png"),
+      background_path: require("../assets/img/logon-background.png"),
       sso_disabled: false
     }
+  },
+  mounted() {
+    // Set the background of the logon-wrapper to background_path
+    document.getElementsByClassName("login-wrapper")[0].style.backgroundImage = "url(" + this.background_path + ")"
   },
   methods: {
     login: function () {
