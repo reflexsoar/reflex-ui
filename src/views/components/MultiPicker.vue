@@ -29,11 +29,15 @@
             <CBadge v-if="showCount" class="tag" color="secondary">{{ option.count ? option.count : 0 }}</CBadge>
           </div>
         </li>
-        <li class="option" v-if="search.length > 0 && taggable" @click="select(search, true)">
+        <li class="option" v-if="search.length > 0 && taggable && !validOption(search) && !alreadySelected(search)" @click="select(search, true)"> 
           <div style="width: 98%">
               <input type="checkbox" class="checkbox" :value="search" :checked="isSelected(search)">&nbsp;
                 <slot name="option" :option="search">{{ optionValue(search) }}</slot>
               </input>
+              <span class="add-new-value">
+                <slot name="new-value-placeholder">{{ newValuePlacholder }}
+                </slot>
+              </span>
             </div>
           </li>
       </ul>
@@ -52,6 +56,12 @@
   margin: 0 auto;
   position: relative;
   margin-bottom: 10px;
+}
+
+.add-new-value {
+  color: #999;
+  /* Make this all the way to the right */
+  float: right
 }
 
 .selected-option {
@@ -250,6 +260,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    newValuePlacholder: {
+      type: String,
+      default: "Add new value"
+    },
   },
   data() {
     return {
@@ -265,13 +279,20 @@ export default {
       // Add the selected items to the bottom of the list if they are not already in the list
       if (this.selections) {
         this.selections.forEach((selection) => {
+
+          if(typeof selection === "string") {
+            
+            if(!options.includes(selection)) {
+              options.push(selection)
+            }
+          } else {
           // If the selection is not one of the option_keys, add it to the list
           if (!options.find((option) => option[this.option_key] === selection)) {
             options.push({
               [this.option_key]: selection,
               [this.option_label]: selection,
             });
-          }
+          } }
         });
       }
       
@@ -351,6 +372,26 @@ export default {
       }
 
       this.$emit("update:value", this.selections);
+    },
+    validOption(val) {
+      /* Return true of the search value is contained in any of the options */
+      return this.options.filter((o) => {
+        if (typeof o === "string") {
+          return o.toLowerCase().includes(val.toLowerCase());
+        }
+  
+        return o[this.option_label].toLowerCase().includes(val.toLowerCase());
+      }).length > 0
+    },
+    alreadySelected(val) {
+      /* Return true of the search value is contained in any of the options */
+      return this.selections.filter((o) => {
+        if (typeof o === "string") {
+          return o.toLowerCase().includes(val.toLowerCase());
+        }
+  
+        return o[this.option_label].toLowerCase().includes(val.toLowerCase());
+      }).length > 0
     },
     getSelectedLabel(val) {
 
