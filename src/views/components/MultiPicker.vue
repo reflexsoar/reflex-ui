@@ -6,10 +6,14 @@
     <div class="select-btn">
       <span v-if="selections === null || selections.length == 0">{{ placeholder }}</span>
       <span v-if="selections && selections.length > 0 && asTags" class="selected-items">
-        <div v-for="(item, i) in selections" v-c-tooltip="{content: getSelectedLabel(item)}" :key="i" class="tag selected-option" color="secondary">
+        <div v-for="(item, i) in selections" :key="i" class="tag selected-option" color="secondary">
           <span class="option-text">{{ getSelectedLabel(item) }}</span>
           <i @click="select(item)" class="fas fa-x tag-remove"></i>
+          <div class="option-tooltip">
+            {{ getSelectedLabel(item) }}
+          </div>
         </div></span>
+        
       <span v-if="selections && selections.length > 0 && !asTags">Selected {{ selections.length }} of {{ options.length }} items.</span>
       <i class="fas fa-chevron-down"></i>
     </div>
@@ -253,6 +257,40 @@ th > .wrapper {
   text-overflow: ellipsis;
   text-wrap: nowrap;
   max-width: 225px;
+}
+
+.option-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  background: red;
+  padding: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 0.25rem;
+  /* Make the tooltip appear above the tag */
+  transform: translate(0, -125%);
+  /* Center the tooltip text*/
+  text-align: center;
+  color: #fff;
+  background: #000;
+  font-size: 95%;
+}
+
+/* Draw a triangle on the bottom of the tooltip */
+.option-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #000 transparent transparent transparent;
+}
+
+.selected-option:hover .option-tooltip {
+  display: block;
 }
 
 </style>
