@@ -122,14 +122,15 @@
                     <code>winlog.event_data.CommandLine</code> as the field name, but the
                     source input may use <code>process.args</code>.
                   </p>
-                  <CAlert color="info" show>
+                  <hr>
+                  <!--<CAlert color="info" show>
                     <strong>Note:</strong>
                     <p>
                       The Sigma Field is only used when converting a Sigma rule to a
                       Detection Rule. Also setting a data type of <code>none</code> will
                       prevent the fields value from becoming an observable.
                     </p>
-                  </CAlert>
+                  </CAlert>-->
                 </CCol>
               </CRow>
               <CRow>
@@ -144,17 +145,10 @@
                 <CCol>
                   <CDataTable
                     :items="template.field_mapping"
-                    :fields="[
-                      { key: 'field', label: 'Source Field' },
-                      'data_type',
-                      'alias',
-                      'sigma_field',
-                      'tags',
-                      { key: 'tlp', label: 'TLP' },
-                      { key: 'admin', label: '' },
-                    ]"
+                    :fields="field_columns"
                     size="sm"
                     small
+                    class="table-middle"
                   >
                     <template #field="{ item }">
                       <td>
@@ -203,6 +197,21 @@
                         /><br />
                       </td>
                     </template>
+                    <template #tag_field="{ item }">
+                      <td class="checkbox-field">
+                        <input type="checkbox" v-model="item.tag_field" />
+                      </td>
+                    </template>
+                    <template #signature_field="{ item }">
+                      <td class="checkbox-field">
+                        <input type="checkbox" v-model="item.signature_field" @change="updateSignatureFields()" />
+                      </td>
+                    </template>
+                    <template #observable_field="{ item }">
+                      <td class="checkbox-field">
+                        <input type="checkbox" v-model="item.observable_field" />
+                      </td>
+                    </template>
                     <template #tlp="{ item }">
                       <td>
                         <CSelect
@@ -223,8 +232,33 @@
                         /></CButton>
                       </td>
                     </template> </CDataTable
-                ></CCol>
+                >
+                  <span class="small text-muted">*Signature, Tag and Observable field settings will be supported in a future release.</span>
+                </CCol>
               </CRow>
+            </CTab>
+            <CTab title="Signature Field Ordering">
+              <h5>Signature Field Ordering</h5>
+              <p>Drag and drop the fields to set the order in which they will be used to create a signature.  Changing the order of these fields will result in a different signature being generated for any events or detections using this template.</p>
+              <draggable v-model="template.signature_fields" v-bind="dragOptions" >
+              <div v-for="(f, i) in template.signature_fields" class="signature-field" :key="i">
+                  <div class="drag-handle">
+                    <i class="fas fa-grip-lines"></i>
+                  </div>
+                  <div class="field-name">
+                    {{ f }}
+                  </div>
+                </div>
+                
+              </draggable><br>
+
+              <h6>Hash Calculation Preview</h6>
+              <span v-if="template.signature_fields === undefined || template.signature_fields.length == 0">No fields have been selected to be used in the signature.</span>
+              <span v-else>
+              <p>Below is how the hash will be calculated based on the order of the fields above.</p>
+              <!-- sha1(event_description + field1 + field2 + field3) -->
+              <p><code>signature = sha1(event_title + {{ template.signature_fields.join(" + ") }})</code></p>
+              </span>
             </CTab>
             <CTab title="Review">
               {{ template }}
@@ -244,11 +278,64 @@
 
 <style scope>
 @import "https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css";
+
+.checkbox-field {
+  text-align: center;
+}
+
+.checkbox-field input[type="checkbox"] {
+  margin: 0 auto;
+  width: 16px;
+  height: 16px;
+}
+
+.table-middle tr td {
+  vertical-align: middle;
+}
+
+.table-middle .form-group {
+  margin-bottom: 0px;
+}
+
+.signature-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  cursor: move;
+}
+
+.signature-field .drag-handle {
+  width: 5%;
+  /* Center the icon in the div */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signature-field .field-name {
+  width: 95%;
+  display: flex;  
+}
+
+.ghost {
+  opacity: 0.5;
+  background-color: #cfcfcf;
+}
+
 </style>
 
 <script>
 import { vSelect } from "vue-select";
 import { mapState } from "vuex";
+
+import draggable from "vuedraggable";
+
 export default {
   name: "FieldMappingModal",
   props: {
@@ -266,6 +353,9 @@ export default {
       default: "Create",
     },
   },
+  components: {
+    draggable
+  },
   data() {
     return {
       modal_status: this.show,
@@ -275,6 +365,21 @@ export default {
       lists_formatted: [],
       active_tab: 0,
       tags: [],
+      field_columns: [
+        { key: 'field', label: 'Source Field' },
+        'data_type',
+        'alias',
+        { key: 'signature_field', label: "Signature"},
+        { key: 'tag_field', label: "Tags"},
+        { key: 'observable_field', label: "Observable"},
+        { key: 'admin', label: '' },
+      ],
+      dragOptions: {
+        animation: 0,
+        group: "signature_fields",
+        disabled: false,
+        ghostClass: "ghost"
+      }
     };
   },
   computed: {
@@ -284,7 +389,8 @@ export default {
       return this.organizations.map((o) => {
         return { label: o.name, value: o.uuid };
       });
-    },
+    }
+    
   },
   watch: {
     show: function () {
@@ -310,6 +416,17 @@ export default {
   },
   created() {},
   methods: {
+    updateSignatureFields() {
+      /* Returns the field name for all fields that are marked as signature fields */
+      if (this.template.field_mapping == null) return [];
+      let signature_fields = this.template.field_mapping.filter((f) => {
+        return f.signature_field;
+      }).map((f) => {
+        return f.field;
+      });
+      
+      this.$set(this.template, "signature_fields", signature_fields);
+    },
     addTag(item, t) {
       if (item.tags == null) {
         this.$set(item, "tags", []);
@@ -371,6 +488,9 @@ export default {
           data_type: "none",
           alias: "",
           sigma_field: "",
+          signature_field: false,
+          tag_field: false,
+          observable_field: true,
           tags: [],
           tlp: 1,
         });
@@ -380,6 +500,9 @@ export default {
           data_type: "none",
           alias: "",
           sigma_field: "",
+          signature_field: false,
+          tag_field: false,
+          observable_field: true,
           tags: [],
           tlp: 1,
         });
