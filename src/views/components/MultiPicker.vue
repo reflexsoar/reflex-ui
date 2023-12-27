@@ -111,6 +111,8 @@
   cursor: pointer;
   font-weight: 400;
   padding: 0.375rem 0.75rem;
+  padding-top: 4px;
+  padding-bottom: 4px;
   border-radius: 0.25rem;
   border: 1px solid #d8dbe0;
   background: #fff;
