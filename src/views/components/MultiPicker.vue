@@ -5,7 +5,7 @@
     </slot>
     <div class="select-btn">
       <span v-if="selections === null || selections.length == 0">{{ placeholder }}</span>
-      <span v-if="selections && selections.length > 0 && asTags"><CBadge v-for="(item, i) in selections" :key="i" class="tag selected-option" color="secondary">{{ getSelectedLabel(item) }}&nbsp;<i @click="select(item)" class="fas fa-x"></i></CBadge></span>
+      <span v-if="selections && selections.length > 0 && asTags" class="selected-items"><CBadge v-for="(item, i) in selections" v-c-tooltip="{content: getSelectedLabel(item)}" :key="i" class="tag selected-option" color="secondary">{{ getSelectedLabel(item) }}&nbsp;<i @click="select(item)" class="fas fa-x"></i></CBadge></span>
       <span v-if="selections && selections.length > 0 && !asTags">Selected {{ selections.length }} of {{ options.length }} items.</span>
       <i class="fas fa-chevron-down"></i>
     </div>
@@ -67,6 +67,10 @@
 .selected-option {
   margin-right: 5px;
   cursor: pointer;
+  /* Set a max-width so the text doesn't wrap */
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .selected-option i {
@@ -88,9 +92,11 @@
 }
 
 .select-btn {
-  height: calc(1.5em + 0.75rem + 2px);
+  min-height: calc(1.5em + 0.75rem + 2px);
+  height: auto;
   line-height: 1.5;
   display: flex;
+  overflow-y: scroll;
   cursor: pointer;
   font-weight: 400;
   padding: 0.375rem 0.75rem;
@@ -166,6 +172,13 @@ th > .wrapper {
 
 .select-btn i {
   font-size: 80%;
+}
+
+.selected-items {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  row-gap:4px;
 }
 
 .content .options {
