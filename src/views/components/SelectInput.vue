@@ -179,7 +179,6 @@
 .content .options {
   margin-top: 10px;
   max-height: 200px;
-  overflow-y: auto;
 }
 
 .options::-webkit-scrollbar-track {
