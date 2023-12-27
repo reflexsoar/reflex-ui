@@ -156,6 +156,7 @@
                           size="sm"
                           v-model="item.field"
                           placeholder="Source Field Name"
+                          @change="updateSignatureFields()"
                         />
                       </td>
                     </template>
@@ -233,6 +234,12 @@
                       </td>
                     </template> </CDataTable
                 >
+                  
+                </CCol>
+
+              </CRow>
+              <CRow>
+                <CCol>
                   <span class="small text-muted">*Signature, Tag and Observable field settings will be supported in a future release.</span>
                 </CCol>
               </CRow>
@@ -295,6 +302,11 @@
 
 .table-middle .form-group {
   margin-bottom: 0px;
+}
+
+.table-middle tbody {
+  /* Clear the height */
+  height: auto !important;
 }
 
 .signature-field {
@@ -511,6 +523,7 @@ export default {
     deleteField(item) {
       let id = this.template.field_mapping.indexOf(item);
       this.template.field_mapping.splice(id, 1);
+      this.updateSignatureFields();
     },
     reset() {
       this.selected_list = "";
