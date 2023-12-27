@@ -5,7 +5,11 @@
     </slot>
     <div class="select-btn">
       <span v-if="selections === null || selections.length == 0">{{ placeholder }}</span>
-      <span v-if="selections && selections.length > 0 && asTags" class="selected-items"><CBadge v-for="(item, i) in selections" v-c-tooltip="{content: getSelectedLabel(item)}" :key="i" class="tag selected-option" color="secondary">{{ getSelectedLabel(item) }}&nbsp;<i @click="select(item)" class="fas fa-x"></i></CBadge></span>
+      <span v-if="selections && selections.length > 0 && asTags" class="selected-items">
+        <div v-for="(item, i) in selections" v-c-tooltip="{content: getSelectedLabel(item)}" :key="i" class="tag selected-option" color="secondary">
+          <span class="option-text">{{ getSelectedLabel(item) }}</span>
+          <i @click="select(item)" class="fas fa-x tag-remove"></i>
+        </div></span>
       <span v-if="selections && selections.length > 0 && !asTags">Selected {{ selections.length }} of {{ options.length }} items.</span>
       <i class="fas fa-chevron-down"></i>
     </div>
@@ -67,10 +71,13 @@
 .selected-option {
   margin-right: 5px;
   cursor: pointer;
-  /* Set a max-width so the text doesn't wrap */
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  border-radius: 0.25rem;
+  padding: 2px 5px;
+  background: #3c4b64;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
 }
 
 .selected-option i {
@@ -198,7 +205,10 @@ th > .wrapper {
 }
 
 .options li {
-  padding: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  paddnig-right: 10px;
   border-radius: 0.25rem;
 }
 
@@ -229,6 +239,22 @@ th > .wrapper {
   background-color: rgb(255, 106, 106);
   color: #fff;
 }
+
+.tag-remove {
+  /* This should float to the right over the tag */
+  float: right;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.option-text {
+  display: block;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
+  max-width: 225px;
+}
+
 </style>
 
 <script>
