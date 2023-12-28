@@ -75,7 +75,7 @@
 }*/
 
 .login-logo {
-  width: 60%;
+  object-fit: contain;
   max-width: 300px;
   margin-bottom: 10%;
 }
@@ -92,7 +92,7 @@
 }
 
 .login-box {
-  background-color: #ebedef;
+  background-color: rgba(255,255,255, 0.9);
   padding: 25px !important;
   justify-content: left;
   min-height: 100vh;
@@ -100,7 +100,9 @@
   -webkit-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.75);
   -moz-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.75);
   box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.75);
+  padding-top: 15% !important;
 }
+
 </style>
 
 <script>
