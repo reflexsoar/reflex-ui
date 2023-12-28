@@ -88,7 +88,7 @@
                         v-model.number="template.priority"
                         label="Priority"
                         placeholder="Priority"
-                        description="Determines what template takes precedence when multiple templates are used. High priority wins."
+                        description="Determines what template takes precedence when multiple templates are used. The lower the priority the higher the precedence. Example 1 overrides 100."
                       />
                     </CCol>
                     <CCol
@@ -116,11 +116,13 @@
                   <p>
                     Field settings are used to define the field name, data type, and other
                     settings for each field in the template. Fields defined here will be
-                    used to map a source fields value to an Observable. The Sigma Field is
-                    used to translate the default field after Sigma rule conversion to the
-                    field name in a source input. For example, Sigma may default to using
-                    <code>winlog.event_data.CommandLine</code> as the field name, but the
-                    source input may use <code>process.args</code>.
+                    used to map a source fields value to an Event Signature, Event Tag or an Observable.  Signature fields will be
+                    applied in alphanumeric order to create a signature hash for the event using a method like
+                    <code>signature = sha1(event.title + fielda + fieldb + fieldc)</code>.
+                    <h6>Field Attributes</h6>
+                    <li><b>Signature Field</b> - If enabled, the field will be used as part of the signature hash for the event.</li>
+                    <li><b>Tag Field</b> - If enabled, the field will be used to create a tag from the fields value on an event.</li>
+                    <li><b>Observable Field</b> - If enabled (default: true), the field will be used to create an observable for the event.</li>
                   </p>
                   <hr>
                   <!--<CAlert color="info" show>
@@ -143,100 +145,49 @@
               </CRow>
               <CRow style="max-height: 450px; overflow: auto; padding-top: 10px">
                 <CCol>
-                  <CDataTable
-                    :items="template.field_mapping"
-                    :fields="field_columns"
-                    size="sm"
-                    small
-                    class="table-middle"
-                  >
-                    <template #field="{ item }">
+                <table class="table table-sm table-middle">
+                  <tr>
+                    <th>Source Field</th>
+                    <th>Data Type</th>
+                    <th>Alias</th>
+                    <th>Signature</th>
+                    <th>Tag</th>
+                    <th>Observable</th>
+                    <th></th>
+                  </tr>
+                  <tbody>
+                    <tr v-for="f, i in template.field_mapping" :key="i">
                       <td>
-                        <CInput
-                          size="sm"
-                          v-model="item.field"
-                          placeholder="Source Field Name"
-                          @change="updateSignatureFields()"
-                        />
+                        <CInput size="sm" v-model="f.field" placeholder="Source field name"/>
                       </td>
-                    </template>
-                    <template #sigma_field="{ item }">
                       <td>
-                        <CInput
-                          size="sm"
-                          v-model="item.sigma_field"
-                          placeholder="Sigma Field Name"
-                        />
+                        <CSelect size="sm" :value.sync="f.data_type" :options="valid_data_types"/>
                       </td>
-                    </template>
-                    <template #data_type="{ item }">
                       <td>
-                        <CSelect
-                          size="sm"
-                          :value.sync="item.data_type"
-                          :options="valid_data_types"
-                        />
+                        <CInput size="sm" v-model="f.alias" placeholder="Alias"/>
                       </td>
-                    </template>
-                    <template #alias="{ item }">
-                      <td>
-                        <CInput size="sm" v-model="item.alias" placeholder="Alias" />
-                      </td>
-                    </template>
-                    <template #tags="{ item }">
-                      <td>
-                        <multiselect
-                          size="sm"
-                          v-model="item.tags"
-                          :options="tags"
-                          @tag="addTag(item, $event)"
-                          :multiple="true"
-                          :taggable="true"
-                          :close-on-select="false"
-                          :show-labels="false"
-                          placeholder="Tags"
-                        /><br />
-                      </td>
-                    </template>
-                    <template #tag_field="{ item }">
                       <td class="checkbox-field">
-                        <input type="checkbox" v-model="item.tag_field" />
+                        <input type="checkbox" v-model="f.signature_field"/>
                       </td>
-                    </template>
-                    <template #signature_field="{ item }">
                       <td class="checkbox-field">
-                        <input type="checkbox" v-model="item.signature_field" @change="updateSignatureFields()" />
+                        <input type="checkbox" v-model="f.tag_field"/>
                       </td>
-                    </template>
-                    <template #observable_field="{ item }">
                       <td class="checkbox-field">
-                        <input type="checkbox" v-model="item.observable_field" />
+                        <input type="checkbox" v-model="f.observable_field"/>
                       </td>
-                    </template>
-                    <template #tlp="{ item }">
-                      <td>
-                        <CSelect
-                          :options="[1, 2, 3, 4]"
-                          :value.sync="item.tlp"
-                          size="sm"
-                        />
-                      </td>
-                    </template>
-                    <template #admin="{ item }">
                       <td>
                         <CButton
                           aria-label="Delete Field"
-                          @click="deleteField(item)"
+                          @click="deleteField(f)"
                           size="sm"
                           color="danger"
                           ><CIcon name="cilTrash"
                         /></CButton>
                       </td>
-                    </template> </CDataTable
-                >
-                  
+                    </tr>
+                  </tbody>  
+                </table>
                 </CCol>
-
               </CRow>
               <CRow>
                 <CCol>
@@ -244,7 +195,7 @@
                 </CCol>
               </CRow>
             </CTab>
-            <CTab title="Signature Field Ordering">
+            <!--<CTab title="Signature Field Ordering">
               <h5>Signature Field Ordering</h5>
               <p>Drag and drop the fields to set the order in which they will be used to create a signature.  Changing the order of these fields will result in a different signature being generated for any events or detections using this template.</p>
               <draggable v-model="template.signature_fields" v-bind="dragOptions" >
@@ -263,10 +214,10 @@
               <span v-if="template.signature_fields === undefined || template.signature_fields.length == 0">No fields have been selected to be used in the signature.</span>
               <span v-else>
               <p>Below is how the hash will be calculated based on the order of the fields above.</p>
-              <!-- sha1(event_description + field1 + field2 + field3) -->
+              
               <p><code>signature = sha1(event_title + {{ template.signature_fields.join(" + ") }})</code></p>
               </span>
-            </CTab>
+            </CTab>-->
             <CTab title="Review">
               {{ template }}
             </CTab>
@@ -286,28 +237,7 @@
 <style scope>
 @import "https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css";
 
-.checkbox-field {
-  text-align: center;
-}
 
-.checkbox-field input[type="checkbox"] {
-  margin: 0 auto;
-  width: 16px;
-  height: 16px;
-}
-
-.table-middle tr td {
-  vertical-align: middle;
-}
-
-.table-middle .form-group {
-  margin-bottom: 0px;
-}
-
-.table-middle tbody {
-  /* Clear the height */
-  height: auto !important;
-}
 
 .signature-field {
   display: flex;
@@ -357,6 +287,7 @@ export default {
       default: () => {
         return {
           tags: [],
+          field_mapping: [],
         };
       },
     },
@@ -375,6 +306,7 @@ export default {
       selected_list: "",
       lists: [],
       lists_formatted: [],
+      field_mapping: [],
       active_tab: 0,
       tags: [],
       field_columns: [
@@ -414,7 +346,10 @@ export default {
         this.reset();
       } else {
         if (this.template == null) {
-          this.$set(this, "template", {});
+          this.$set(this, "template", {
+            field_mapping: [],
+            tags: []
+          });
         } else {
           if (this.template.tags != null) {
             this.tags = this.template.tags;
@@ -423,21 +358,15 @@ export default {
             this.$set(this.template, "priority", 1);
           }
         }
+
+        this.field_mapping = this.template.field_mapping;
       }
     },
   },
   created() {},
   methods: {
-    updateSignatureFields() {
-      /* Returns the field name for all fields that are marked as signature fields */
-      if (this.template.field_mapping == null) return [];
-      let signature_fields = this.template.field_mapping.filter((f) => {
-        return f.signature_field;
-      }).map((f) => {
-        return f.field;
-      });
-      
-      this.$set(this.template, "signature_fields", signature_fields);
+    updateField(field) {
+      console.log(field);
     },
     addTag(item, t) {
       if (item.tags == null) {
@@ -481,6 +410,7 @@ export default {
           this.$set(f, "tags", []);
         }
       });
+      
       this.$store
         .dispatch("updateFieldTemplate", { uuid: uuid, template: this.template })
         .then(() => {
@@ -523,7 +453,6 @@ export default {
     deleteField(item) {
       let id = this.template.field_mapping.indexOf(item);
       this.template.field_mapping.splice(id, 1);
-      this.updateSignatureFields();
     },
     reset() {
       this.selected_list = "";

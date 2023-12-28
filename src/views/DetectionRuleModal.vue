@@ -847,78 +847,50 @@
                 </CRow>
                 <CRow style="min-height: 300px; max-height: 300px; overflow: auto">
                   <CCol>
-                    <CDataTable
-                      :items="rule.observable_fields"
-                      :fields="[
-                        'field',
-                        'data_type',
-                        'alias',
-                        'tags',
-                        { key: 'tlp', label: 'TLP' },
-                        { key: 'admin', label: '' },
-                      ]"
-                      size="sm"
-                      small
-                    >
-                      <template #field="{ item }">
-                        <td>
-                          <CInput
-                            size="sm"
-                            v-model="item.field"
-                            placeholder="Field Name"
-                          />
-                        </td>
-                      </template>
-                      <template #data_type="{ item }">
-                        <td>
-                          <CSelect
-                            size="sm"
-                            :value.sync="item.data_type"
-                            :options="data_types"
-                          />
-                        </td>
-                      </template>
-                      <template #alias="{ item }">
-                        <td>
-                          <CInput size="sm" v-model="item.alias" placeholder="Alias" />
-                        </td>
-                      </template>
-                      <template #tags="{ item }">
-                        <td>
-                          <multiselect
-                            size="sm"
-                            v-model="item.tags"
-                            :options="tag_list"
-                            @tag="addTagToField(item.tags, $event)"
-                            :multiple="true"
-                            :taggable="true"
-                            :close-on-select="false"
-                            :show-labels="false"
-                            placeholder="Tags"
-                          /><br />
-                        </td>
-                      </template>
-                      <template #tlp="{ item }">
-                        <td>
-                          <CSelect
-                            :options="[1, 2, 3, 4]"
-                            :value.sync="item.tlp"
-                            size="sm"
-                          />
-                        </td>
-                      </template>
-                      <template #admin="{ item }">
-                        <td>
-                          <CButton
-                            aria-label="Delete Field"
-                            @click="deleteObservableField(item)"
-                            size="sm"
-                            color="danger"
-                            ><CIcon name="cilTrash"
-                          /></CButton>
-                        </td>
-                      </template> </CDataTable
-                  ></CCol>
+                    <table v-if="rule.observable_fields && rule.observable_fields.length > 0" class="table table-sm table-middle">
+                      <tr>
+                        <th>Source Field</th>
+                        <th>Data Type</th>
+                        <th>Alias</th>
+                        <th>Signature</th>
+                        <th>Tag</th>
+                        <th>Observable</th>
+                        <th></th>
+                      </tr>
+                      <tbody>
+                        <tr v-for="f, i in rule.observable_fields" :key="i">
+                          <td>
+                            <CInput size="sm" v-model="f.field" placeholder="Source field name"/>
+                          </td>
+                          <td>
+                            <CSelect size="sm" :value.sync="f.data_type" :options="data_types"/>
+                          </td>
+                          <td>
+                            <CInput size="sm" v-model="f.alias" placeholder="Alias"/>
+                          </td>
+                          <td class="checkbox-field">
+                            <input type="checkbox" v-model="f.signature_field"/>
+                          </td>
+                          <td class="checkbox-field">
+                            <input type="checkbox" v-model="f.tag_field"/>
+                          </td>
+                          <td class="checkbox-field">
+                            <input type="checkbox" v-model="f.observable_field"/>
+                          </td>
+                          <td>
+                            <CButton
+                              aria-label="Delete Field"
+                              @click="deleteObservableField(f)"
+                              size="sm"
+                              color="danger"
+                              ><CIcon name="cilTrash"
+                            /></CButton>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <span v-else>No additional fields</span>
+                    </CCol>
                 </CRow>
               </CTab>
               <CTab
@@ -1775,6 +1747,9 @@ export default {
           field: "",
           data_type: "",
           alias: "",
+          signature_field: false,
+          tag_field: false,
+          observable_field: true,
           tags: [],
           tlp: 1,
         });
@@ -1783,6 +1758,9 @@ export default {
           field: "",
           data_type: "",
           alias: "",
+          signature_field: false,
+          tag_field: false,
+          observable_field: true,
           tags: [],
           tlp: 1,
         });
