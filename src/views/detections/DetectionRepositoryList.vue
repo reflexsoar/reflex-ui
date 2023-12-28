@@ -56,6 +56,9 @@
             <CDropdownItem v-if="item.subscribed && item.organization != current_user.organization" @click="startUnsubscripeProcess(item.uuid)" size="sm">
                 <CIcon name="cilMinus" />&nbsp;Unsubscribe from Repository
             </CDropdownItem>
+            <CDropdownItem v-if="item.subscribed && item.organization != current_user.organization" @click="startEditSubscription(item.uuid)" size="sm">
+                <CIcon name="cilPencil" />&nbsp;Edit Subscription
+            </CDropdownItem>
             <CDropdownItem v-if="item.subscribed && item.organization != current_user.organization" @click="forceSync(item.uuid)" size="sm">
                 <CIcon name="cilSync" />&nbsp;Synchronize Now
             </CDropdownItem>
@@ -138,18 +141,18 @@
       </template>
     </CDataTable>
     </CCard>
-    <CModal title="Subscribe to Repository" :show.sync="show_subscription_modal" size="lg" :close-on-backdrop="false" @close="resetSubscriptionWizard()">
+    <CModal :title="`${modal_mode} Repository Subscription`" :show.sync="show_subscription_modal" size="lg" :close-on-backdrop="false" @close="resetSubscriptionWizard()">
         <p>Subscribing to a repository will automatically synchronize all detections from the target repository in to your own detection library.
             Based on an interval defined in this wizard, the system will automatically synchronize any new or updated detections from the target repository.
             The synchronization process will only update fields based on the synchronization settings below.  The process will not overwrite exclusions.
         </p>
-        <CInput v-model.number="sync_interval" label="Synchronization Interval (minutes)" description="How oftern to synchronize rules from this repository" />
+        <CInput v-model.number="subscription.sync_interval" label="Synchronization Interval (minutes)" description="How oftern to synchronize rules from this repository" />
         
         <label for="input">Default Input</label><br />
         <multiselect
           id="input"
           @search-change="searchInputs"
-          v-model="default_input"
+          v-model="subscription.default_input"
           placeholder="Select the input to be used for this detection"
           track-by="uuid"
           label="name"
@@ -159,7 +162,7 @@
         <br>
         <label for="field_template">Field Templates</label><br />
         <multiselect
-          v-model="default_field_template"
+          v-model="subscription.default_field_template"
           :options="field_templates_multiselect_options"
           :multiple="true"
           :close-on-select="false"
@@ -175,73 +178,74 @@
         <CRow>
         <CCol>
             <label>Risk Score</label><br>
-            <CSwitch :checked.sync="sync_settings.risk_score" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.risk_score" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Severity</label><br>
-            <CSwitch :checked.sync="sync_settings.severity" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.severity" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Run Interval</label><br>
-            <CSwitch :checked.sync="sync_settings.interval" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.interval" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Lookbehind</label><br>
-            <CSwitch :checked.sync="sync_settings.lookbehind" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.lookbehind" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Mute Period</label><br>
-            <CSwitch :checked.sync="sync_settings.mute_period" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.mute_period" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
         </CRow><br>
         <CRow><CCol>
             <label>Threshold</label><br>
-            <CSwitch :checked.sync="sync_settings.threshold_config" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.threshold_config" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Field Mismatch</label><br>
-            <CSwitch :checked.sync="sync_settings.field_mismatch_config" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.field_mismatch_config" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>New Terms</label><br>
-            <CSwitch :checked.sync="sync_settings.new_terms_config" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.new_terms_config" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Signature Fields</label><br>
-            <CSwitch :checked.sync="sync_settings.signature_fields" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.signature_fields" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Field Templates</label><br>
-            <CSwitch :checked.sync="sync_settings.field_templates" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.field_templates" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
         </CRow><br>
         <CRow>
         <CCol>
             <label>Observable Fields</label><br>
-            <CSwitch :checked.sync="sync_settings.observable_fields" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.observable_fields" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Triage Guide</label><br>
-            <CSwitch :checked.sync="sync_settings.guide" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.guide" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Setup Guide</label><br>
-            <CSwitch :checked.sync="sync_settings.setup_guide" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.setup_guide" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>Testing Guide</label><br>
-            <CSwitch :checked.sync="sync_settings.testing_guide" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.testing_guide" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
           <CCol>
             <label>False Positives</label><br>
-            <CSwitch :checked.sync="sync_settings.false_positives" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+            <CSwitch :checked.sync="subscription.sync_settings.false_positives" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
         </CRow>
 
         
         <template #footer>
             <CButton color="secondary" @click="resetSubscriptionWizard()" v-bind:disabled="synchronizing">Dismiss</CButton>
-            <CButton color="primary" @click="createSubscription()" v-bind:disabled="synchronizing"><span  v-if="synchronizing"><CSpinner size="sm"/>&nbsp;</span>Subscribe</CButton>
+            <CButton v-if="modal_mode == 'Edit'" color="primary" @click="updateSubscription()" v-bind:disabled="synchronizing"><span v-if="synchronizing"><CSpinner size="sm"/>&nbsp;</span>Update</CButton>
+            <CButton v-if="modal_mode == 'Create'" color="primary" @click="createSubscription()" v-bind:disabled="synchronizing"><span v-if="synchronizing"><CSpinner size="sm"/>&nbsp;</span>Subscribe</CButton>
         </template>
     </CModal>
     <CModal title="Unsubscribe from Repository" :show.sync="show_unsubscribe_modal" size="lg" color="danger" @close="resetUnsubscribeWarning()">
@@ -264,7 +268,7 @@ import TagList from '../components/TagList'
 export default {
   name: "DetectionRepositoryList",
   computed: {
-    ...mapState(["detection_repositories","current_user","input_list", "field_templates"]),
+    ...mapState(["detection_repositories","current_user","input_list", "field_templates", "repository_subscription"]),
     field_templates_multiselect_options: function () {
       return this.field_templates.map((o) => {
         return { name: o.name, uuid: o.uuid };
@@ -318,7 +322,14 @@ export default {
       selected_repo: this.default_repo(),
       default_input: null,
       default_field_template: [],
-      modal_mode: "Create"
+      modal_mode: "Create",
+      subscription: {
+        uuid: null,
+        sync_interval: 60,
+        sync_settings: this.defaultSyncSettings(),
+        default_input: null,
+        default_field_template: [],
+      }
     };
   },
   methods: {
@@ -361,9 +372,10 @@ export default {
       //alert("Not implemented yet");
     },
     startSubscriptionWizard(uuid) {
+        this.modal_mode = "Create";
         this.repository = this.detection_repositories.find((item) => item.uuid === uuid);
         this.$store.dispatch("getFieldTemplates", { organization: this.current_user.organization });
-        this.sync_settings = this.defaultSyncSettings();
+        this.subscription.sync_settings = this.defaultSyncSettings();
         this.show_subscription_modal = true;
     },
     startUnsubscripeProcess(uuid) {
@@ -372,27 +384,22 @@ export default {
     },
     createSubscription() {
         let data = {
-            sync_interval: this.sync_interval,
-            sync_settings: this.sync_settings,
+            sync_interval: this.subscription.sync_interval,
+            sync_settings: this.subscription.sync_settings,
         }
 
-        if (this.default_input != null) {
-          data['default_input'] = this.default_input.uuid;
+        if (this.subscription.default_input != null) {
+          data['default_input'] = this.subscription.default_input.uuid;
         }
-        if (this.default_field_template.length != 0) {
-          data['default_field_template'] = this.default_field_template.map((template) => {
+        if (this.subscription.default_field_template && this.subscription.default_field_template.length != 0) {
+          data['default_field_template'] = this.subscription.default_field_template.map((template) => {
             return template.uuid
           })
         }
 
         this.synchronizing = true;
         this.$store.dispatch("createDetectionRepositorySubscription", {repository_uuid: this.repository.uuid, data: data}).then(() => {
-          this.$store.dispatch("getDetections", {}).then(() => {
-            this.synchronizing = false;
-            this.show_subscription_modal = false;
-          }).catch(() => {
-            this.synchronizing = false;
-          });
+          this.getDetections();
         });
         
     },
@@ -416,15 +423,73 @@ export default {
     resetSubscriptionWizard() {
         this.show_subscription_modal = false;
         this.repository = null;
-        this.sync_interval = 60;
+        this.subscription = {
+          uuid: null,
+          sync_interval: 60,
+          sync_settings: this.defaultSyncSettings(),
+          default_input: null,
+          default_field_template: [],
+        };
     },
     resetUnsubscribeWarning() {
         this.show_unsubscribe_modal = false;
         this.repository = null;
     },
+    getSubscription(uuid) {
+        this.$store.dispatch("getDetectionRepositorySubscription", { uuid: uuid}).then(() => {
+          
+          this.subscription = JSON.parse(JSON.stringify(this.repository_subscription));
+          if(this.subscription.default_input) {
+            this.subscription.default_input = this.input_list.find((item) => item.uuid === this.subscription.default_input);
+          }
+
+          if(this.subscription.default_field_template && this.subscription.default_field_template.length != 0) {
+            
+            this.subscription.default_field_template = this.subscription.default_field_template.map((template) => {
+              return this.field_templates_multiselect_options.find((item) => item.uuid === template);
+            })
+          }
+
+          this.modal_mode = "Edit";
+          this.show_subscription_modal = true;
+        }).catch(() => {
+          this.show_subscription_modal = false;
+          this.modal_mode = "Create";
+        });
+    },
+    startEditSubscription(uuid) {
+      this.repository = this.detection_repositories.find((item) => item.uuid === uuid);
+      this.$store.dispatch("getFieldTemplates", { organization: this.current_user.organization });
+      this.searchInputs();
+      this.getSubscription(uuid)
+    },
+    updateSubscription() {
+
+      let data = {
+          sync_interval: this.subscription.sync_interval,
+          sync_settings: this.subscription.sync_settings,
+      }
+
+      if (this.subscription.default_input != null) {
+        data['default_input'] = this.subscription.default_input.uuid;
+      }
+      if (this.subscription.default_field_template.length != 0) {
+        data['default_field_template'] = this.subscription.default_field_template.map((template) => {
+          return template.uuid
+        })
+      }
+
+      this.$store.dispatch("updateDetectionRepositorySubscription", { repository_uuid: this.repository.uuid, data: data }).then((resp) => {
+        this.synchronizing = true;
+        this.getDetections();
+        this.resetSubscriptionWizard();
+      });
+    },
     deleteSubscription() {
         this.$store.dispatch("deleteDetectionRepositorySubscription", {repository_uuid: this.repository.uuid}).then(() => {
             this.show_unsubscribe_modal = false;
+            this.getDetections();
+            this.resetUnsubscribeWarning()
         });
     },
     searchInputs(name) {
@@ -456,17 +521,21 @@ export default {
     forceSync(uuid) {
         this.synchronizing = true;
         this.$store.dispatch("synchronizeDetectionRepository", {repository_uuid: uuid}).then(() => {
-            this.$store.dispatch("getDetections", {}).then(() => {
-                this.loading = false;
-                this.synchronizing = false;
-            }).catch(() => {
-                this.loading = false;
-                this.synchronizing = false;
-            })
+            this.getDetections();
         }).catch(() => {
             this.loading = false;
             this.synchronizing = false;
         })
+    },
+    getDetections() {
+      this.loading = true;
+      this.$store.dispatch("getDetections", {}).then(() => {
+        this.loading = false;
+        this.synchronizing = false;
+      }).catch(() => {
+        this.loading = false;
+        this.synchronizing = false;
+      });
     },
     syncLocalSubscribers(uuid) {
       this.$store.dispatch("synchronizeLocalSubscribers", { uuid: uuid})
