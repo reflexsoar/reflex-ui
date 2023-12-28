@@ -1023,3 +1023,26 @@ html:not([dir="rtl"]) nav>.pagination {
     display: inline-block;
     padding-bottom: 10px;
 }
+
+.checkbox-field {
+    text-align: center;
+  }
+  
+  .checkbox-field input[type="checkbox"] {
+    margin: 0 auto;
+    width: 16px;
+    height: 16px;
+  }
+
+.table-middle tr td {
+    vertical-align: middle;
+  }
+  
+  .table-middle .form-group {
+    margin-bottom: 0px;
+  }
+  
+  .table-middle tbody {
+    /* Clear the height */
+    height: auto !important;
+  }
