@@ -4497,6 +4497,17 @@ const actions = {
         })
     })
   },
+  synchronizeLocalSubscribers({ commit }, { uuid }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/detection_repository/${uuid}/sync_local_subscribers`, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
   addDetectionToRepository({ commit }, { uuid, detections }) {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/detection_repository/${uuid}/add_detections`, data: { detections: detections }, method: 'POST' })

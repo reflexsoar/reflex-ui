@@ -59,6 +59,9 @@
             <CDropdownItem v-if="item.subscribed && item.organization != current_user.organization" @click="forceSync(item.uuid)" size="sm">
                 <CIcon name="cilSync" />&nbsp;Synchronize Now
             </CDropdownItem>
+            <CDropdownItem v-if="current_user.permissions['sync_local_subscribers']" @click="syncLocalSubscribers(item.uuid)" size="sm">
+                <CIcon name="cilSync" />&nbsp;Synchronize Local Subscribers
+            </CDropdownItem>
           </CDropdown>
         </td>
       </template>
@@ -66,8 +69,9 @@
         <td>
           <CRow>
             <CCol>
-              <b>{{ item.name }}</b></span>
+              <span class="item-name">{{ item.name }}</span>
             </CCol>
+          
           <CCol col=2>
             <div style="display: inline-block; padding-right:2px;">
               <TagBucket v-if="item.tags && item.tags.length > 0" :tags="item.tags" />
@@ -77,7 +81,30 @@
             </div>
             </CCol>
           </CRow>
-          <p>{{ item.description }}</p>
+          <CRow>
+            <CCol>
+              <div v-if="item.subscription && item.subscription.uuid != undefined">
+                <ul class="repository-sync-status-list">
+                  <li><label>Synchronizing:&nbsp;</label> 
+                    <CBadge class="tag tag-sm" color="info" v-if="item.subscription.synchronizing">Yes</CBadge>
+                    <CBadge class="tag tag-sm" color="success" v-else>No</CBadge>
+                  </li>
+                  <li><label>Last Sync:&nbsp;</label> <CBadge color="secondary" class="tag tag-sm">{{ item.subscription.last_sync | moment("from","now") }}</CBadge></li>
+                  <li><label>Last Sync Status:&nbsp;</label> 
+                      <CBadge v-if="item.subscription.last_sync_status == 'success'" color="success" class="tag tag-sm">Success</CBadge>
+                      <CBadge v-else-if="item.subscription.last_sync_status == 'running'" color="info" class="tag tag-sm">Running</CBadge>
+                      <CBadge v-else-if="item.subscription.last_sync_status == 'pending'" color="info" class="tag tag-sm">Pending</CBadge>
+                      <CBadge v-else-if="item.subscription.last_sync_status == 'failed'" color="danger" class="tag tag-sm">Failed</CBadge>
+                      </li>
+                </ul>
+              </div>
+          </CCol>
+          </CRow>
+          <CRow>
+            <CCol>
+              <p>{{ item.description }}</p>
+            </CCol>
+          </CRow>
         </td>
       </template>
       <template #subscribed="{ item }">
@@ -440,6 +467,9 @@ export default {
             this.loading = false;
             this.synchronizing = false;
         })
+    },
+    syncLocalSubscribers(uuid) {
+      this.$store.dispatch("synchronizeLocalSubscribers", { uuid: uuid})
     }
   },
 };

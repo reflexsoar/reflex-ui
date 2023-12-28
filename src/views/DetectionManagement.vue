@@ -161,7 +161,7 @@
                       <CCol>
                         <CRow>
                           <CCol class="rule-name">
-                            <b >{{ item.name }}</b>
+                            <span class="item-name">{{ item.name }}</span>
                           </CCol>
                         </CRow>
                         <CRow>
