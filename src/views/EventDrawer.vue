@@ -482,8 +482,8 @@
                   >
                     <CRow>
                       <CCol>
-                        <CBadge class="tag" size="sm" color="secondary"><b>Integration:</b> {{ output.integration_name }}</CBadge> |
-                        <CBadge class="tag" color="secondary"><b>Action:</b> {{ output.action }}</CBadge> |
+                        <label>Integration:&nbsp;</label><code>{{ output.integration_name }}</code> |
+                        <label>Action:</label> <code>{{ output.action }}</code> |
                         {{ output.created_at | moment('from') }} at {{ output.created_at | moment }}</CBadge>
                         <CButton
                           color="info"
@@ -496,11 +496,11 @@
                     <CRow>
                       <CCol>
                       <CCollapse :show="output.show">
-                        <CCardBody style="padding-top: 5px; padding-bottom: 5px;">
+                        
                             <vue-markdown v-if="output.output_format == 'markdown'">
                             {{ output.output }}
                             </vue-markdown>
-                        </CCardBody>
+                        
                       </CCollapse>
                       </CCol>
                     </CRow>
