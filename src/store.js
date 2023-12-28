@@ -172,10 +172,14 @@ const state = {
   agent_logs: [],
   benchmark_assets: [],
   log_searches: [],
-  base_url: ""
+  base_url: "",
+  repository_subscription: {}
 }
 
 const mutations = {
+  set_detection_repository_subscription(state, subscription) {
+    state.repository_subscription = subscription
+  },
   add_log_search(state, search) {
     state.log_searches.push(search)
   },
@@ -183,7 +187,6 @@ const mutations = {
     state.log_searches = state.log_searches.map(s => s.uuid == search.uuid ? search : s)
   },
   remove_log_search(state, uuid) {
-    console.log(uuid);
     state.log_searches = state.log_searches.filter(s => s.uuid != uuid)
   },
   clear_log_searches(state) {
@@ -419,7 +422,6 @@ const mutations = {
     state.field_template = template
     if (state.field_templates.length > 0) {
       state.field_templates = [...state.field_templates.filter(t => t.uuid != template.uuid), template]
-      console.log(state.field_templates)
     } else {
       state.field_templates = [template]
     }
@@ -4461,6 +4463,30 @@ const actions = {
         })
     })
   },
+  getDetectionRepositorySubscription({ commit }, { uuid }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/detection_repository/${uuid}/subscription`, method: 'GET' })
+        .then(resp => {
+          commit('set_detection_repository_subscription', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateDetectionRepositorySubscription({ commit }, { repository_uuid, data }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/detection_repository/${repository_uuid}/subscription`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('set_detection_repository_subscription', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
   createDetectionRepositorySubscription({ commit }, { repository_uuid, data }) {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/detection_repository/${repository_uuid}/subscribe`, data: data, method: 'POST' })
@@ -5181,8 +5207,6 @@ const actions = {
     })
   },
   updateAgentTag({ commit }, { uuid, data }) {
-
-    console.log(data)
 
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/agent_tag/${uuid}`, data: data, method: 'PUT' })
