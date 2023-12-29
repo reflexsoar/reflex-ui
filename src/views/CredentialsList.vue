@@ -129,7 +129,7 @@
         {{ error_message }}
       </CAlert>
       <CForm name="credentialForm" id="credentialForm" @submit.prevent="modal_action">
-        <CSelect
+        <SelectInput 
           label="Organization"
           placeholder="Select an organization"
           v-if="current_user.default_org"
@@ -271,11 +271,13 @@
 import { mapState } from "vuex";
 import OrganizationBadge from "./OrganizationBadge";
 import RMultiCheck from "./components/MultiCheck";
+import SelectInput from "./components/SelectInput";
 export default {
   name: "Credentials",
   components: {
     OrganizationBadge,
     RMultiCheck,
+    SelectInput
   },
   props: {
     items: Array,
