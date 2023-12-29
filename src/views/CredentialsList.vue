@@ -90,13 +90,33 @@
       <CAlert :show.sync="this.public_key_error" color="danger" closeButton>
         {{ public_key_error_message }}
       </CAlert>
+      <CTabs v-if="public_key && base64_public_key">
+        <CTab title="Public Key">
+          <div class="flex-grid" style="margin-bottom: 10px; padding: 10px;">
+            <div class="d-col-11">
+              <textarea v-if="public_key" class="form-control" rows="10" readonly>{{ public_key }}</textarea>
+              </div>
+              
+            <div class="d-col-1">
+              <CButton size="sm" color="secondary" @click="copyToClipboard(public_key, $event)"><i class="fas fa-copy"/></CButton>
+            </div>
+          </div>
+          
+        </CTab>
+        <CTab title="Public Key (Base64 Encoded)">
 
-      <CTextarea
-        v-model="public_key"
-        label="Public Key"
-        rows="5"
-        v-bind:disabled="true"
-      />
+          <div class="flex-grid" style="margin-bottom: 10px;  padding: 10px;">
+            <div class="d-col-11">
+              <textarea v-if="base64_public_key" class="form-control" rows="10" readonly>{{ base64_public_key }}</textarea>    
+            </div>
+            <div class="d-col-1">
+              <CButton size="sm" color="secondary" @click="copyToClipboard(base64_public_key, $event)"><i class="fas fa-copy"/></CButton>
+            </div>
+          </div>
+          
+        </CTab>
+      </CTabs>
+      
       <template #footer>
         <CButton @click="dismissPublicKeyModal()" color="secondary">Dismiss</CButton>
       </template>
@@ -350,6 +370,7 @@ export default {
       error: false,
       error_message: "",
       public_key: "",
+      base64_public_key: "",
       public_key_error: false,
       public_key_error_message: "",
       public_key_modal: false,
@@ -372,6 +393,31 @@ export default {
     }
   },
   methods: {
+    copyToClipboard(text, $event) {
+
+      // If the user clicked on the button or the icon inside the button, then
+      // change the button text to "Copied!" for 1 second and then change it
+      // back to the copy icon.
+      if ($event.target.tagName == "BUTTON") {
+        let button = $event.target;
+        button.innerHTML = "<i class='fas fa-check'></i>&nbsp;Copied!";
+        setTimeout(() => {
+          button.innerHTML = "<i class='fas fa-copy'></i>";
+        }, 1000);
+      }
+      if ($event.target.tagName == "I") {
+        // If the user clicked on the icon, then change the button text to
+        // "Copied!" for 1 second and then change it back to the copy icon.
+        let parent_element = $event.target.parentElement;
+        parent_element.innerHTML = "<i class='fas fa-check'></i>&nbsp;Copied!";
+        setTimeout(() => {
+          parent_element.innerHTML = "<i class='fas fa-copy'></i>";
+        }, 1000);
+      }
+
+      
+      navigator.clipboard.writeText(text);
+    },
     sort(event) {
       let sort_direction = event.asc ? "asc" : "desc";
       event.column = event.column ? event.column : "created_at";
@@ -450,8 +496,13 @@ export default {
     getPublicKey(uuid) {
       this.$store.dispatch("getPublicKey", uuid).then((resp) => {
           this.public_key = resp.data.public_key;
+          // Encode the public key as base64 url safe
+          this.base64_public_key = btoa(this.public_key);
+          
           this.public_key_modal = true;
       }).catch((err) => {
+        this.public_key = "";
+        this.base64_public_key = "";
         this.public_key_error = true;
         this.public_key_error_message = err.response.data.message;
         this.public_key_modal = true;
@@ -462,6 +513,7 @@ export default {
       this.public_key_error = false;
       this.public_key_error_message = "";
       this.public_key = "";
+      this.base64_public_key = "";
     },
     createCredential() {
       let credential = this.credential_data;
