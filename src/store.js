@@ -2231,6 +2231,17 @@ const actions = {
         })
     })
   },
+  getPublicKey({ commit }, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/credential/public_key/${uuid}`, method: 'GET' })
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCredentialList({ commit }, { organization }) {
     return new Promise((resolve, reject) => {
 
@@ -2332,7 +2343,7 @@ const actions = {
         })
     })
   },
-  getCredentials({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc" }) {
+  getCredentials({ commit }, { page = 1, page_size = 1000, sort_by = "created_at", sort_direction = "asc" }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/credential?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
