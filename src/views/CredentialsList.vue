@@ -148,8 +148,14 @@
             </CRow>
             <CRow>
               <CCol>
-                <input type="checkbox" v-model="credential_data.generate_secret" id="generate_key" />&nbsp;<label for="generate_key">Automatically generate private key </label><br>
-                <p class="small muted">If checked, a new private key will be generated and stored in the credential.  If unchecked, the private key must be provided.</p>
+                <input type="checkbox" v-model="credential_data.generate_secret" id="generate_key" />&nbsp;<label style="margin-bottom: 0px" for="generate_key">Automatically generate private key </label><br>
+                <small class="text-muted">If checked, a new ECDSA private key will be generated and stored in the credential.  If unchecked, the private key must be provided.</small><br><br>
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol>
+                <CSelect :value.sync="credential_data.key_type" label="Key Type" :options="[{label: 'RSA', value: 'rsa'}, {label: 'ECDSA', value: 'ec'}]"
+                  description="The type of private key.  RSA is the most common."/>
               </CCol>
             </CRow>
           </CCol>
@@ -363,7 +369,7 @@ export default {
   watch: {
     active_page: function () {
       this.reloadCredentials(this.active_page);
-    },
+    }
   },
   methods: {
     sort(event) {
@@ -426,7 +432,8 @@ export default {
         description: "",
         organization: "",
         credential_type: "password",
-        generate_secret: false
+        generate_secret: false,
+        key_type: "ec"
       };
     },
     getCredentialDetails(uuid) {
@@ -470,7 +477,8 @@ export default {
         username: this.credential_data.username,
         organization: this.credential_data.organization,
         credential_type: this.credential_data.credential_type,
-        generate_secret: this.credential_data.generate_secret
+        generate_secret: this.credential_data.generate_secret,
+        key_type: this.credential_data.key_type
       };
       if (this.credential_data.secret != "") {
         credential.secret = this.credential_data.secret;
