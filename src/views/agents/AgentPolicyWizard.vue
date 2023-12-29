@@ -629,6 +629,7 @@
                       placeholder="Select a signing key"
                       :value.sync="policy.search_proxy_config.credential"
                       description="The signing key to use when creating JWT auth tokens for auth proxy"
+                      @search-change="searchCredentials"
                     />
                   </CCol>
                 </CRow>
@@ -1050,7 +1051,7 @@ export default {
     formattedCredentials(type = null) {
       if(type) {
         return this.credentials
-        .filter((c) => c.type == type)
+        .filter((c) => c.credential_type == type)
         .map((c) => {
           return { label: c.name, value: c.uuid };
         });
@@ -1073,6 +1074,9 @@ export default {
       this.getInputs()
       this.getRoles()
       this.getAgentTags()
+    },
+    searchCredentials(value) {
+      this.$store.dispatch("getCredentials", {organization: this.policy.organization, name__like: value})
     },
     getCredentials() {
       this.$store
