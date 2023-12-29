@@ -66,13 +66,13 @@
             <td class="text-right" style="width: 10%">
               <CDropdown color="secondary" size="sm" toggler-text="Manage">
                 <CDropdownItem @click="getPublicKey(item.uuid)" v-if="item.credential_type == 'private_key'">
-                  Generate Public Key
+                  <i class="fas fa-key"/>&nbsp;Generate Public Key
                 </CDropdownItem>
                 <CDropdownItem @click="getCredentialDetails(item.uuid)">
-                  <CIcon name="cilPencil" />&nbsp;Edit
+                  <i class="fas fa-pencil"/>&nbsp;Edit
                 </CDropdownItem>
                 <CDropdownItem @click="removeCredential(item.uuid)">
-                  <CIcon name="cilTrash"/>&nbsp;Delete
+                  <i class="fas fa-trash"/>&nbsp;Delete
                 </CDropdownItem>
               </CDropdown>
             </td>
