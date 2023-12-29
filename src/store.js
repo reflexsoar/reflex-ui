@@ -2343,11 +2343,23 @@ const actions = {
         })
     })
   },
-  getCredentials({ commit }, { page = 1, page_size = 1000, sort_by = "created_at", sort_direction = "asc" }) {
+  getCredentials({ commit }, { page = 1, page_size = 1000, sort_by = "created_at", sort_direction = "asc", name__like = null, organization = null }) {
     return new Promise((resolve, reject) => {
 
-      let url = `${BASE_URL}/credential?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
-      Axios({ url: url, method: 'GET' })
+      let base_url = `${BASE_URL}/credential`
+      let params = []
+
+      if (page) params.push(`page=${page}`);
+      if (page_size) params.push(`page_size=${page_size}`);
+      if (sort_by) params.push(`sort_by=${sort_by}`);
+      if (sort_direction) params.push(`sort_direction=${sort_direction}`);
+      if (name__like) params.push(`name__like=${name__like}`);
+      if (organization) params.push(`organization=${organization}`);
+      if (params.length > 0) {
+        base_url += `?${params.join('&')}`
+      }
+
+      Axios({ url: base_url, method: 'GET' })
         .then(resp => {
           commit('save_credentials', resp.data.credentials)
           commit('save_pagination', resp.data.pagination)
@@ -2508,7 +2520,7 @@ const actions = {
   },
   getEventExport({ commit }, report_params) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/event/export`, data: report_params, method: 'POST' })
+      Axios({ url: `${BASE_URL}/event/export`, data: report_params, method: 'POST', responseType:'blob' })
         .then(resp => {
           resolve(resp)
         })
