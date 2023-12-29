@@ -101,10 +101,8 @@
               <CButton size="sm" color="secondary" @click="copyToClipboard(public_key, $event)"><i class="fas fa-copy"/></CButton>
             </div>
           </div>
-          
         </CTab>
         <CTab title="Public Key (Base64 Encoded)">
-
           <div class="flex-grid" style="margin-bottom: 10px;  padding: 10px;">
             <div class="d-col-11">
               <textarea v-if="base64_public_key" class="form-control" rows="10" readonly>{{ base64_public_key }}</textarea>    
@@ -113,7 +111,6 @@
               <CButton size="sm" color="secondary" @click="copyToClipboard(base64_public_key, $event)"><i class="fas fa-copy"/></CButton>
             </div>
           </div>
-          
         </CTab>
       </CTabs>
       
