@@ -497,7 +497,7 @@
                       <CCol>
                       <CCollapse :show="output.show">
                         
-                            <vue-markdown v-if="output.output_format == 'markdown'">
+                            <vue-markdown v-if="output.output_format == 'markdown'" :linkify="false" table-class="table table-sm">
                             {{ output.output }}
                             </vue-markdown>
                         
