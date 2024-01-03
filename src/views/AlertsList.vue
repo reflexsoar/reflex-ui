@@ -286,7 +286,13 @@
           </CCard>
         </CCol>
       </CRow>
+      <CRow>
+      <CCol>
+        <CPagination :activePage.sync="current_page" :pages="page_data.pages"/>
     </CCol>
+    </CRow>
+    </CCol>
+    
     <div class="description-content">
       <CRow>
         <CCol>
