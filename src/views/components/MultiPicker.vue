@@ -360,10 +360,22 @@ export default {
         this.selections.forEach((selection) => {
 
           if(typeof selection === "string") {
-            
-            if(!options.includes(selection)) {
-              options.push(selection)
+
+            // If the options are objects attempt to compare the selection to the option_key
+            if (typeof options[0] === "object") {
+              if (!options.find((option) => option[this.option_key] === selection)) {
+                options.push({
+                  [this.option_key]: selection,
+                  [this.option_label]: selection,
+                });
+              }
+            } else {
+              // If the selection is not one of the option_keys, add it to the list
+              if (!options.includes(selection)) {
+                options.push(selection);
+              }
             }
+            
           } else {
           // If the selection is not one of the option_keys, add it to the list
           if (!options.find((option) => option[this.option_key] === selection)) {
