@@ -358,6 +358,33 @@
           </CCol>
         </CRow>
       </CTab>
+      <CTab title="Containers">
+        <h3 class="page-sub-header">Containers</h3>
+          <CCard>
+          <CDataTable
+            :items="agent.host_information.containers"
+            :fields="['name', 'image', 'state']"
+            :responsive="false"
+            :items-per-page="25"
+            :sorter="{ external: false, resetable: true }"
+            table-filter
+            pagination
+          >
+            <template #state="{item}">
+              <td>
+                <CBadge v-if="item.state.Running" color="success" class="tag"
+                  >Running</CBadge
+                >
+                <CBadge v-else color="danger" class="tag"
+                  >Stopped</CBadge>
+                <CBadge v-if="item.state.Paused" color="info" class="tag"
+                  >Paused</CBadge
+                >
+              </td>
+            </template>
+          </CDataTable>
+        </CCard>
+      </CTab>
       <CTab title="Advanced View">
         <h3 class="page-sub-header">JSON View</h3>
         <CCard>
