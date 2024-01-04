@@ -1,73 +1,109 @@
 <template>
-  <CContainer class="d-flex content-center min-vh-100">
-    <CRow>
-      <CCol>
-        <CAlert v-if="authStatus() == false"
-              closeButton
-              color="danger"
-              fade
-            >
-              Failed to login. Invalid username or password.
-            </CAlert>
-        <CAlert v-if="sso_disabled"
-            closeButton
-            color="danger"
-            fade
-          >
-            Unable to login with SSO.  Contact your ReflexSOAR Administrator.
-          </CAlert>
-        <CCardGroup>
-          <CCard color="light">
-            <CCardBody>
-              
-              <CForm @submit.prevent="login">
-                <h1>Login</h1>
-                <p class="text-muted">Sign In to your account</p>
-                <CInput
-                  placeholder="Email"
-                  autocomplete="username email"
-                  required
-                  v-model="email"
-                >
-                  <template #prepend-content><CIcon name="cil-user"/></template>
-                </CInput>
-                <CInput
-                  placeholder="Password"
-                  type="password"
-                  autocomplete="current-password"
-                  required
-                  v-model="password"
-                >
-                  <template #prepend-content><CIcon name="cil-lock-locked"/></template>
-                </CInput>
-                <CRow>
-                  <CCol col="6" class="text-left">
-                    <CButton color="primary" class="px-4" type="submit">Login</CButton>&nbsp;
-                    <CButton color="secondary" @click="loginWithSSO">Login with SSO</CButton>
-                  </CCol>
-                  <CCol col="6" class="text-right">
-                    <CButton color="secondary" to="/forgot_password">Forgot password?</CButton>
-                  </CCol>
-                </CRow>
-              </CForm>
-            </CCardBody>
-          </CCard>
-          <CCard
-            color="muted"
-            text-color="dark"
-            class="text-center py-5 d-sm-down-none"
-            body-wrapper
-          >
-            
-            <img v-bind:src="logo_path" width="80%"/>
-            <p>Welcome to Reflex, your Security Orchestration, Automation and Response Platform.  To get started, log in to the left. </p>
-            
-          </CCard>
-        </CCardGroup>
-      </CCol>
-    </CRow>
-  </CContainer>
+  <div class="flex-grid login-wrapper" style="margin-top: 0px">
+    <div class="d-col-3 login-box">
+      <CForm @submit.prevent="login">
+        <img v-bind:src="logo_path" class="login-logo"/>
+        <CInput
+          placeholder="Email"
+          autocomplete="username email"
+          required
+          v-model="email"
+        >
+          <template #prepend-content><CIcon name="cil-user"/></template>
+        </CInput>
+        <CInput
+          placeholder="Password"
+          type="password"
+          autocomplete="current-password"
+          required
+          v-model="password"
+        >
+          <template #prepend-content><CIcon name="cil-lock-locked"/></template>
+        </CInput>
+        <div class="flex-grid">
+          <div class="d-col">
+            <button class="btn btn-primary"  type="submit">Login</button>&nbsp;
+            <button class="btn btn-secondary" @click="loginWithSSO">Login with SSO</button>
+          </div>
+          <div class="d-col">
+            <button class="btn btn-secondary" to="/forgot_password">Forgot password?</button>
+          </div>
+        </div>
+      </CForm>
+    </div>
+    <div class="d-col-9 login-image">
+    </div>
+  </div>
 </template>
+
+<style scoped>
+
+/*
+.login-btn-primary {
+    background-color: #035657 !important;
+    border-color: #034444 !important ;
+    color: #fff
+}
+
+.login-btn-primary:hover {
+
+  background-color: rgba(0,0,0, 1.25)
+}
+
+.login-btn {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  font-weight: 400;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 1.5;
+  border: 1px solid;
+  border-radius: 0.25rem;
+  background-color: #cfcfcf;
+  border-color: #9f9f9f;
+}
+
+.login-btn:focus {
+  outline: 2;
+  outline-color: #cfcfcf;
+}
+
+
+.login-btn:hover {
+
+  background-color: rgba(0,0,0, 0.25)
+}*/
+
+.login-logo {
+  object-fit: contain;
+  max-width: 300px;
+  margin-bottom: 10%;
+}
+
+.login-wrapper {
+  /* Should extend all the way to the bottom of the page  */
+  min-height: 100vh;
+  background-color: #333;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+}
+
+.login-box {
+  background-color: rgba(255,255,255, 0.9);
+  padding: 25px !important;
+  justify-content: left;
+  min-height: 100vh;
+  /* Right shadow */
+  -webkit-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.75);
+  box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.75);
+  padding-top: 15% !important;
+}
+
+</style>
 
 <script>
 
@@ -78,8 +114,13 @@ export default {
       email: "",
       password: "",
       logo_path: require("../assets/img/color-logo-dots.png"),
+      background_path: require("../assets/img/logon-background.png"),
       sso_disabled: false
     }
+  },
+  mounted() {
+    // Set the background of the logon-wrapper to background_path
+    document.getElementsByClassName("login-wrapper")[0].style.backgroundImage = "url(" + this.background_path + ")"
   },
   methods: {
     login: function () {

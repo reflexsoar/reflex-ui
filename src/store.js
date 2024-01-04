@@ -10,6 +10,9 @@ const state = {
   eventDrawerMinimize: true,
   mitreDrawerShow: 'responsive',
   mitreDrawerMinimize: true,
+  logDrawerShow: 'responsive',
+  logDrawerMinimize: true,
+  searchWorkspaceLog: {},
   sidebarShow: 'responsive',
   sidebarMinimize: false,
   status: '',
@@ -167,10 +170,28 @@ const state = {
   agent_tag: {},
   agent_tags: [],
   agent_logs: [],
-  benchmark_assets: []
+  benchmark_assets: [],
+  log_searches: [],
+  base_url: "",
+  repository_subscription: {}
 }
 
 const mutations = {
+  set_detection_repository_subscription(state, subscription) {
+    state.repository_subscription = subscription
+  },
+  add_log_search(state, search) {
+    state.log_searches.push(search)
+  },
+  update_log_search(state, search) {
+    state.log_searches = state.log_searches.map(s => s.uuid == search.uuid ? search : s)
+  },
+  remove_log_search(state, uuid) {
+    state.log_searches = state.log_searches.filter(s => s.uuid != uuid)
+  },
+  clear_log_searches(state) {
+    state.log_searches = []
+  },
   save_benchmark_assets(state, assets) {
     state.benchmark_assets = assets
   },
@@ -401,7 +422,6 @@ const mutations = {
     state.field_template = template
     if (state.field_templates.length > 0) {
       state.field_templates = [...state.field_templates.filter(t => t.uuid != template.uuid), template]
-      console.log(state.field_templates)
     } else {
       state.field_templates = [template]
     }
@@ -1031,6 +1051,8 @@ const mutations = {
 }
 
 const getters = {
+  base_url: state => { return state.base_url },
+  log_searches: state => { return state.log_searches },
   integration_outputs_select: state => {
     return state.integration_outputs.map(output => { return { label: output.integration_name + " - " + output.name + " - " + output.configuration_name, value: output.value } })
   },
@@ -1099,6 +1121,9 @@ const getters = {
   eventDrawerMinimize: state => { return state.eventDrawerMinimize },
   mitreDrawerShow: state => { return state.mitreDrawerShow },
   mitreDrawerMinimize: state => { return state.mitreDrawerMinimize },
+  logDrawerShow: state => { return state.logDrawerShow },
+  logDrawerMinimize: state => { return state.logDrawerMinimize },
+  searchWorkspaceLog: state => { return state.searchWorkspaceLog },
   mfa_enabled: state => { return state.mfa_enabled },
   isLoggedIn: state => !!state.access_token,
   authStatus: state => state.status,
@@ -1164,8 +1189,12 @@ const getters = {
 let BASE_URL = ""
 if (process.env.NODE_ENV == 'development') {
   BASE_URL = location.protocol + '//' + window.location.hostname + '/api/v2.0'
+  // Set the base_url in the store
+  state.base_url = BASE_URL
 } else {
   BASE_URL = location.protocol + '//' + window.location.host + '/api/v2.0'
+  // Set the base_url in the store
+  state.base_url = BASE_URL
 }
 
 const actions = {
@@ -2202,6 +2231,17 @@ const actions = {
         })
     })
   },
+  getPublicKey({ commit }, uuid) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/credential/public_key/${uuid}`, method: 'GET' })
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
   getCredentialList({ commit }, { organization }) {
     return new Promise((resolve, reject) => {
 
@@ -2303,11 +2343,23 @@ const actions = {
         })
     })
   },
-  getCredentials({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc" }) {
+  getCredentials({ commit }, { page = 1, page_size = 1000, sort_by = "created_at", sort_direction = "asc", name__like = null, organization = null }) {
     return new Promise((resolve, reject) => {
 
-      let url = `${BASE_URL}/credential?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
-      Axios({ url: url, method: 'GET' })
+      let base_url = `${BASE_URL}/credential`
+      let params = []
+
+      if (page) params.push(`page=${page}`);
+      if (page_size) params.push(`page_size=${page_size}`);
+      if (sort_by) params.push(`sort_by=${sort_by}`);
+      if (sort_direction) params.push(`sort_direction=${sort_direction}`);
+      if (name__like) params.push(`name__like=${name__like}`);
+      if (organization) params.push(`organization=${organization}`);
+      if (params.length > 0) {
+        base_url += `?${params.join('&')}`
+      }
+
+      Axios({ url: base_url, method: 'GET' })
         .then(resp => {
           commit('save_credentials', resp.data.credentials)
           commit('save_pagination', resp.data.pagination)
@@ -2468,7 +2520,7 @@ const actions = {
   },
   getEventExport({ commit }, report_params) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/event/export`, data: report_params, method: 'POST' })
+      Axios({ url: `${BASE_URL}/event/export`, data: report_params, method: 'POST', responseType:'blob' })
         .then(resp => {
           resolve(resp)
         })
@@ -2930,7 +2982,7 @@ const actions = {
         })
     })
   },
-  getOrganizations({ commit }, { page = 1, page_size = 50, sort_by = "created_at", sort_direction = "asc" }) {
+  getOrganizations({ commit }, { page = 1, page_size = 100, sort_by = "created_at", sort_direction = "asc" }) {
     return new Promise((resolve, reject) => {
       let base_url = `${BASE_URL}/organization?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
       Axios({ url: base_url, method: 'GET' })
@@ -4022,9 +4074,9 @@ const actions = {
         })
     })
   },
-  runThreatHunt({ commit }, query) {
+  runSearch({ commit }, query) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/hunting/query`, data: query, method: 'POST' })
+      Axios({ url: `${BASE_URL}/search/query`, data: query, method: 'POST' })
         .then(resp => {
           if (resp.status == 200) {
             resolve(resp)
@@ -4434,6 +4486,30 @@ const actions = {
         })
     })
   },
+  getDetectionRepositorySubscription({ commit }, { uuid }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/detection_repository/${uuid}/subscription`, method: 'GET' })
+        .then(resp => {
+          commit('set_detection_repository_subscription', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  updateDetectionRepositorySubscription({ commit }, { repository_uuid, data }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/detection_repository/${repository_uuid}/subscription`, data: data, method: 'PUT' })
+        .then(resp => {
+          commit('set_detection_repository_subscription', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
   createDetectionRepositorySubscription({ commit }, { repository_uuid, data }) {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/detection_repository/${repository_uuid}/subscribe`, data: data, method: 'POST' })
@@ -4463,6 +4539,17 @@ const actions = {
       Axios({ url: `${BASE_URL}/detection_repository/${repository_uuid}/sync`, method: 'POST' })
         .then(resp => {
           commit('update_detection_repository', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  synchronizeLocalSubscribers({ commit }, { uuid }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/detection_repository/${uuid}/sync_local_subscribers`, method: 'POST' })
+        .then(resp => {
           resolve(resp)
         })
         .catch(err => {
@@ -5096,10 +5183,23 @@ const actions = {
   },
   getAgentTags({ commit }, { organization = null, namespace = null, value = null }) {
 
-    let url = `${BASE_URL}/agent_tag`      
+    let url = `${BASE_URL}/agent_tag`
+    let params = [];
 
     if (organization) {
-      url += `&organization=${organization}`
+      params.push(`organization=${organization}`)
+    }
+
+    if (namespace) {
+      params.push(`namespace=${namespace}`)
+    }
+
+    if (value) {
+      params.push(`value=${value}`)
+    }
+
+    if (params.length > 0) {
+      url += `?${params.join('&')}`
     }
 
     return new Promise((resolve, reject) => {
@@ -5130,8 +5230,6 @@ const actions = {
     })
   },
   updateAgentTag({ commit }, { uuid, data }) {
-
-    console.log(data)
 
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/agent_tag/${uuid}`, data: data, method: 'PUT' })
@@ -5206,6 +5304,40 @@ const actions = {
           reject(err)
         })
     })
+  },
+  updateProfilePicture({commit}, {uuid, form}) {
+      // Submit the image to the server as a form-multipart file upload
+      return new Promise((resolve, reject) => {
+        Axios({ url: `${BASE_URL}/user/${uuid}/profile_picture`, data: form, method: 'POST', headers: { 'Content-Type': 'multipart/form-data' } })
+          .then(resp => {
+            resolve(resp)
+          })
+          .catch(err => {
+            reject(err)
+          })
+      })
+  },
+  getProfilePicture({commit}, {uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/user/${uuid}/profile_picture`, method: 'GET', responseType: 'blob' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  removeProfilePicture({commit}, {uuid}) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/user/${uuid}/profile_picture`, method: 'DELETE' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
   }
 }
 
@@ -5216,6 +5348,7 @@ export default new Vuex.Store({
   getters,
   plugins: [createPersistedState({
     key: 'reflex-state',
-    paths: ['observable_filters', 'case_filters', 'intel_filters', 'current_user', 'case_templates', 'quick_filters', 'selected_detection_filters']
+    paths: ['observable_filters', 'case_filters', 'intel_filters', 'current_user', 'case_templates', 'quick_filters', 'selected_detection_filters',
+  'log_searches']
   })]
 })

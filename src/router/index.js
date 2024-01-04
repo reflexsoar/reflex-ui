@@ -46,7 +46,7 @@ const ListExplorer = () => import('@/views/ListExplorer')
 const Settings = () => import('@/views/Settings')
 const ObservableHistory = () => import('@/views/ObservableHistory')
 const UserProfile = () => import('@/views/UserProfile')
-const Hunter = () => import('@/views/Hunter')
+const SearchWorkspace = () => import('@/views/searchworkspace/SearchWorkspace')
 const DetectionManagement = () => import('@/views/DetectionManagement')
 const DetectionDetails = () => import('@/views/DetectionDetails')
 const MitreCoverage = () => import('@/views/detections/MitreCoverage')
@@ -252,9 +252,9 @@ function configRoutes () {
         },
         
         {
-          path: 'hunter',
-          name: 'Threat Hunting',
-          component: Hunter,
+          path: 'search',
+          name: 'Search Workspace',
+          component: SearchWorkspace,
           meta: {
             requiresAuth: true
           }

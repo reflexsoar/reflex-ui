@@ -35,6 +35,7 @@
           pagination
           column-filter
           :sorter="{ external: false, resetable: true }"
+          :responsive="false"
         >
           <template #organization-filter="{ item }">
             <RMultiCheck
@@ -45,7 +46,15 @@
           </template>
           <template #name="{ item }">
             <td>
-              <b>{{ item.name }}</b>
+              <span class="item-name">{{ item.name }}</span><br>
+              {{ item.description }}
+            </td>
+          </template>
+          <template #credential_type="{ item }">
+            <td>
+              <CBadge color="secondary" size="sm" class="tag">
+                {{ item.credential_type ? item.credential_type : "password" }}
+              </CBadge>
             </td>
           </template>
           <template #organization="{ item }">
@@ -55,17 +64,60 @@
           </template>
           <template #actions="{ item }">
             <td class="text-right" style="width: 10%">
-              <CButton color="info" size="sm" @click="getCredentialDetails(item.uuid)"
-                ><CIcon name="cilPencil" /></CButton
-              >&nbsp;
-              <CButton color="danger" size="sm" @click="removeCredential(item.uuid)"
-                ><CIcon name="cilTrash"
-              /></CButton>
+              <CDropdown color="secondary" size="sm" toggler-text="Manage">
+                <CDropdownItem @click="getPublicKey(item.uuid)" v-if="item.credential_type == 'private_key'">
+                  <i class="fas fa-key"/>&nbsp;Generate Public Key
+                </CDropdownItem>
+                <CDropdownItem @click="getCredentialDetails(item.uuid)">
+                  <i class="fas fa-pencil"/>&nbsp;Edit
+                </CDropdownItem>
+                <CDropdownItem @click="removeCredential(item.uuid)">
+                  <i class="fas fa-trash"/>&nbsp;Delete
+                </CDropdownItem>
+              </CDropdown>
             </td>
           </template>
         </CDataTable>
       </CCard>
     </CCol>
+    <CModal
+      title="Public Key"
+      :closeOnBackdrop="false"
+      :centered="true"
+      :show.sync="public_key_modal"
+      size="lg"
+    >
+      <CAlert :show.sync="this.public_key_error" color="danger" closeButton>
+        {{ public_key_error_message }}
+      </CAlert>
+      <CTabs v-if="public_key && base64_public_key">
+        <CTab title="Public Key">
+          <div class="flex-grid" style="margin-bottom: 10px; padding: 10px;">
+            <div class="d-col-11">
+              <textarea v-if="public_key" class="form-control" rows="10" readonly>{{ public_key }}</textarea>
+              </div>
+              
+            <div class="d-col-1">
+              <CButton size="sm" color="secondary" @click="copyToClipboard(public_key, $event)"><i class="fas fa-copy"/></CButton>
+            </div>
+          </div>
+        </CTab>
+        <CTab title="Public Key (Base64 Encoded)">
+          <div class="flex-grid" style="margin-bottom: 10px;  padding: 10px;">
+            <div class="d-col-11">
+              <textarea v-if="base64_public_key" class="form-control" rows="10" readonly>{{ base64_public_key }}</textarea>    
+            </div>
+            <div class="d-col-1">
+              <CButton size="sm" color="secondary" @click="copyToClipboard(base64_public_key, $event)"><i class="fas fa-copy"/></CButton>
+            </div>
+          </div>
+        </CTab>
+      </CTabs>
+      
+      <template #footer>
+        <CButton @click="dismissPublicKeyModal()" color="secondary">Dismiss</CButton>
+      </template>
+    </CModal>
     <CModal
       :title="modal_title"
       :centered="true"
@@ -77,21 +129,76 @@
         {{ error_message }}
       </CAlert>
       <CForm name="credentialForm" id="credentialForm" @submit.prevent="modal_action">
-        <CSelect
+        <SelectInput 
           label="Organization"
           placeholder="Select an organization"
           v-if="current_user.default_org"
           :value.sync="credential_data.organization"
           :options="organizations"
         />
-        <CInput
-          placeholder="Credential Name"
-          required
-          v-model="credential_data.name"
-          label="Name"
-        >
-        </CInput>
         <CRow>
+          <CCol>
+            <CInput
+              placeholder="Credential Name"
+              required
+              v-model="credential_data.name"
+              label="Name"
+            >
+            </CInput>
+          </CCol>
+          <CCol>
+            <CSelect
+              label="Credential Type"
+              placeholder="Select a credential type"
+              required
+              :value.sync="credential_data.credential_type"
+              :options="credential_types"
+            />
+          </CCol>
+        </CRow>
+        <CRow v-if="credential_data.credential_type == 'private_key'">
+          <CCol>
+            <CRow>
+              <CCol>
+                <CTextarea v-model="credential_data.secret" label="Private Key" rows="5" v-bind:disabled="credential_data.generate_secret" />
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol>
+                <input type="checkbox" v-model="credential_data.generate_secret" id="generate_key" />&nbsp;<label style="margin-bottom: 0px" for="generate_key">Automatically generate private key </label><br>
+                <small class="text-muted">If checked, a new ECDSA private key will be generated and stored in the credential.  If unchecked, the private key must be provided.</small><br><br>
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol>
+                <CSelect :value.sync="credential_data.key_type" label="Key Type" :options="[{label: 'RSA', value: 'rsa'}, {label: 'ECDSA', value: 'ec'}]"
+                  description="The type of private key.  RSA is the most common."/>
+              </CCol>
+            </CRow>
+          </CCol>
+        </CRow>
+        <CRow v-else-if="credential_data.credential_type == 'certificate'">
+          <CCol>
+            <CTextarea v-model="credential_data.secret" label="Certificate" rows="5" />
+          </CCol>
+        </CRow>
+        <CRow v-else-if="credential_data.credential_type == 'api_key'">
+          <CCol>
+            <CInput
+              placeholder="API Key"
+              required
+              v-model="credential_data.secret"
+              label="API Key"
+            >
+            </CInput>
+          </CCol>
+        </CRow>
+        <CRow v-else-if="credential_data.credential_type == 'jwks'">
+          <CCol>
+            <CTextarea v-model="credential_data.secret" label="JSON Web Key Set" rows="5" />
+          </CCol>
+        </CRow>
+        <CRow v-else>
           <CCol>
             <CInput
               placeholder="Username"
@@ -164,11 +271,13 @@
 import { mapState } from "vuex";
 import OrganizationBadge from "./OrganizationBadge";
 import RMultiCheck from "./components/MultiCheck";
+import SelectInput from "./components/SelectInput";
 export default {
   name: "Credentials",
   components: {
     OrganizationBadge,
     RMultiCheck,
+    SelectInput
   },
   props: {
     items: Array,
@@ -177,7 +286,7 @@ export default {
       default() {
         return [
           "name",
-          { key: "description", sorter: false },
+          "credential_type",
           { key: "actions", filter: false },
         ];
       },
@@ -197,7 +306,7 @@ export default {
     this.$store.dispatch("getCredentials", {});
     if (this.current_user.default_org) {
       if (!this.fields.includes("organization")) {
-        this.fields.splice(1, 0, {
+        this.fields.splice(2, 0, {
           key: "organization",
           sorter: false,
           filterable: false,
@@ -250,6 +359,8 @@ export default {
         secret: "",
         description: "",
         organization: "",
+        credential_type: "password",
+        generate: false
       },
       modal_title: "New Credential",
       modal_action: this.createCredential,
@@ -257,18 +368,55 @@ export default {
       modal_status: false,
       error: false,
       error_message: "",
+      public_key: "",
+      base64_public_key: "",
+      public_key_error: false,
+      public_key_error_message: "",
+      public_key_modal: false,
       organization: "",
       organizations: [],
       active_page: 1,
       picker_filters: {},
+      credential_types: [
+        { label: 'Password', value: 'password' },
+        { label: 'API Key', value: 'api_key' },
+        { label: 'Private Key', value: 'private_key'},
+        { label: 'Certificate', value: 'certificate'},
+        { label: "JSON Web Key Set", value: "jwks"}
+      ]
     };
   },
   watch: {
     active_page: function () {
       this.reloadCredentials(this.active_page);
-    },
+    }
   },
   methods: {
+    copyToClipboard(text, $event) {
+
+      // If the user clicked on the button or the icon inside the button, then
+      // change the button text to "Copied!" for 1 second and then change it
+      // back to the copy icon.
+      if ($event.target.tagName == "BUTTON") {
+        let button = $event.target;
+        button.innerHTML = "<i class='fas fa-check'></i>&nbsp;Copied!";
+        setTimeout(() => {
+          button.innerHTML = "<i class='fas fa-copy'></i>";
+        }, 1000);
+      }
+      if ($event.target.tagName == "I") {
+        // If the user clicked on the icon, then change the button text to
+        // "Copied!" for 1 second and then change it back to the copy icon.
+        let parent_element = $event.target.parentElement;
+        parent_element.innerHTML = "<i class='fas fa-check'></i>&nbsp;Copied!";
+        setTimeout(() => {
+          parent_element.innerHTML = "<i class='fas fa-copy'></i>";
+        }, 1000);
+      }
+
+      
+      navigator.clipboard.writeText(text);
+    },
     sort(event) {
       let sort_direction = event.asc ? "asc" : "desc";
       event.column = event.column ? event.column : "created_at";
@@ -327,6 +475,10 @@ export default {
         username: "",
         secret: "",
         description: "",
+        organization: "",
+        credential_type: "password",
+        generate_secret: false,
+        key_type: "ec"
       };
     },
     getCredentialDetails(uuid) {
@@ -339,6 +491,28 @@ export default {
       this.modal_submit_text = "Edit";
       this.modal_action = this.editCredential;
       this.modal_status = true;
+    },
+    getPublicKey(uuid) {
+      this.$store.dispatch("getPublicKey", uuid).then((resp) => {
+          this.public_key = resp.data.public_key;
+          // Encode the public key as base64 url safe
+          this.base64_public_key = btoa(this.public_key);
+          
+          this.public_key_modal = true;
+      }).catch((err) => {
+        this.public_key = "";
+        this.base64_public_key = "";
+        this.public_key_error = true;
+        this.public_key_error_message = err.response.data.message;
+        this.public_key_modal = true;
+      })
+    },
+    dismissPublicKeyModal() {
+      this.public_key_modal = false;
+      this.public_key_error = false;
+      this.public_key_error_message = "";
+      this.public_key = "";
+      this.base64_public_key = "";
     },
     createCredential() {
       let credential = this.credential_data;
@@ -353,6 +527,9 @@ export default {
         description: this.credential_data.description,
         username: this.credential_data.username,
         organization: this.credential_data.organization,
+        credential_type: this.credential_data.credential_type,
+        generate_secret: this.credential_data.generate_secret,
+        key_type: this.credential_data.key_type
       };
       if (this.credential_data.secret != "") {
         credential.secret = this.credential_data.secret;

@@ -157,9 +157,7 @@ export default {
       );
     },
     editFieldTemplate(uuid) {
-      this.template = {}
       this.template = JSON.parse(JSON.stringify(this.field_templates.find((item) => item.uuid === uuid)))
-      console.log(this.template)
       this.modal_mode = "Edit";
       this.show_modal = true;
     },

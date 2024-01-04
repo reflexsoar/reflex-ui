@@ -6,7 +6,7 @@
       </CCol>
       <CCol col=3>
         <h5>Secure Score</h5>
-        <h3>{{ potential_score }} / {{ actual_score }}</h3>
+        <h3>{{ actual_score }} / {{ potential_score }}</h3>
       </CCol>
     </CRow>
     <CRow>
@@ -28,7 +28,7 @@
                     item.name
                   }}</router-link></b
                 ><br />
-                <CBadge color="secondary" class="tag tag-sm"
+                <CBadge color="secondary" class="tag"
                   ><b>Version:</b> {{ item.version }}</CBadge
                 >
               </td>
@@ -126,7 +126,7 @@ export default {
       let total_score = 0;
       for(let rule in this.benchmark_rules) {
         let score = this.benchmark_rules[rule].secure_score;
-        if (score == 0 || score == null) {
+        if (score == null) {
           score = 1;
         }
         total_score += score;
@@ -137,7 +137,7 @@ export default {
       let total_score = 0;
       for(let rule in this.benchmark_rules) {
         let score = this.calculateRuleSecureScore(this.benchmark_rules[rule]);
-        if (score == 0 || score == null) {
+        if (score == null) {
           score = 1;
         }
         total_score += score;

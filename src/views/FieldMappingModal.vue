@@ -88,7 +88,7 @@
                         v-model.number="template.priority"
                         label="Priority"
                         placeholder="Priority"
-                        description="Determines what template takes precedence when multiple templates are used. High priority wins."
+                        description="Determines what template takes precedence when multiple templates are used. The lower the priority the higher the precedence. Example 1 overrides 100."
                       />
                     </CCol>
                     <CCol
@@ -116,20 +116,23 @@
                   <p>
                     Field settings are used to define the field name, data type, and other
                     settings for each field in the template. Fields defined here will be
-                    used to map a source fields value to an Observable. The Sigma Field is
-                    used to translate the default field after Sigma rule conversion to the
-                    field name in a source input. For example, Sigma may default to using
-                    <code>winlog.event_data.CommandLine</code> as the field name, but the
-                    source input may use <code>process.args</code>.
+                    used to map a source fields value to an Event Signature, Event Tag or an Observable.  Signature fields will be
+                    applied in alphanumeric order to create a signature hash for the event using a method like
+                    <code>signature = sha1(event.title + fielda + fieldb + fieldc)</code>.
+                    <h6>Field Attributes</h6>
+                    <li><b>Signature Field</b> - If enabled, the field will be used as part of the signature hash for the event.</li>
+                    <li><b>Tag Field</b> - If enabled, the field will be used to create a tag from the fields value on an event.</li>
+                    <li><b>Observable Field</b> - If enabled (default: true), the field will be used to create an observable for the event.</li>
                   </p>
-                  <CAlert color="info" show>
+                  <hr>
+                  <!--<CAlert color="info" show>
                     <strong>Note:</strong>
                     <p>
                       The Sigma Field is only used when converting a Sigma rule to a
                       Detection Rule. Also setting a data type of <code>none</code> will
                       prevent the fields value from becoming an observable.
                     </p>
-                  </CAlert>
+                  </CAlert>-->
                 </CCol>
               </CRow>
               <CRow>
@@ -142,90 +145,79 @@
               </CRow>
               <CRow style="max-height: 450px; overflow: auto; padding-top: 10px">
                 <CCol>
-                  <CDataTable
-                    :items="template.field_mapping"
-                    :fields="[
-                      { key: 'field', label: 'Source Field' },
-                      'data_type',
-                      'alias',
-                      'sigma_field',
-                      'tags',
-                      { key: 'tlp', label: 'TLP' },
-                      { key: 'admin', label: '' },
-                    ]"
-                    size="sm"
-                    small
-                  >
-                    <template #field="{ item }">
+                <table class="table table-sm table-middle">
+                  <tr>
+                    <th>Source Field</th>
+                    <th>Data Type</th>
+                    <th>Alias</th>
+                    <th>Signature</th>
+                    <th>Tag</th>
+                    <th>Observable</th>
+                    <th></th>
+                  </tr>
+                  <tbody>
+                    <tr v-for="f, i in template.field_mapping" :key="i">
                       <td>
-                        <CInput
-                          size="sm"
-                          v-model="item.field"
-                          placeholder="Source Field Name"
-                        />
+                        <CInput size="sm" v-model="f.field" placeholder="Source field name"/>
                       </td>
-                    </template>
-                    <template #sigma_field="{ item }">
                       <td>
-                        <CInput
-                          size="sm"
-                          v-model="item.sigma_field"
-                          placeholder="Sigma Field Name"
-                        />
+                        <CSelect size="sm" :value.sync="f.data_type" :options="valid_data_types"/>
                       </td>
-                    </template>
-                    <template #data_type="{ item }">
                       <td>
-                        <CSelect
-                          size="sm"
-                          :value.sync="item.data_type"
-                          :options="valid_data_types"
-                        />
+                        <CInput size="sm" v-model="f.alias" placeholder="Alias"/>
                       </td>
-                    </template>
-                    <template #alias="{ item }">
-                      <td>
-                        <CInput size="sm" v-model="item.alias" placeholder="Alias" />
+                      <td class="checkbox-field">
+                        <input type="checkbox" v-model="f.signature_field"/>
                       </td>
-                    </template>
-                    <template #tags="{ item }">
-                      <td>
-                        <multiselect
-                          size="sm"
-                          v-model="item.tags"
-                          :options="tags"
-                          @tag="addTag(item, $event)"
-                          :multiple="true"
-                          :taggable="true"
-                          :close-on-select="false"
-                          :show-labels="false"
-                          placeholder="Tags"
-                        /><br />
+                      <td class="checkbox-field">
+                        <input type="checkbox" v-model="f.tag_field"/>
                       </td>
-                    </template>
-                    <template #tlp="{ item }">
-                      <td>
-                        <CSelect
-                          :options="[1, 2, 3, 4]"
-                          :value.sync="item.tlp"
-                          size="sm"
-                        />
+                      <td class="checkbox-field">
+                        <input type="checkbox" v-model="f.observable_field"/>
                       </td>
-                    </template>
-                    <template #admin="{ item }">
                       <td>
                         <CButton
                           aria-label="Delete Field"
-                          @click="deleteField(item)"
+                          @click="deleteField(f)"
                           size="sm"
                           color="danger"
                           ><CIcon name="cilTrash"
                         /></CButton>
                       </td>
-                    </template> </CDataTable
-                ></CCol>
+                    </tr>
+                  </tbody>  
+                </table>
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol>
+                  <span class="small text-muted">*Signature, Tag and Observable field settings will be supported in a future release.</span>
+                </CCol>
               </CRow>
             </CTab>
+            <!--<CTab title="Signature Field Ordering">
+              <h5>Signature Field Ordering</h5>
+              <p>Drag and drop the fields to set the order in which they will be used to create a signature.  Changing the order of these fields will result in a different signature being generated for any events or detections using this template.</p>
+              <draggable v-model="template.signature_fields" v-bind="dragOptions" >
+              <div v-for="(f, i) in template.signature_fields" class="signature-field" :key="i">
+                  <div class="drag-handle">
+                    <i class="fas fa-grip-lines"></i>
+                  </div>
+                  <div class="field-name">
+                    {{ f }}
+                  </div>
+                </div>
+                
+              </draggable><br>
+
+              <h6>Hash Calculation Preview</h6>
+              <span v-if="template.signature_fields === undefined || template.signature_fields.length == 0">No fields have been selected to be used in the signature.</span>
+              <span v-else>
+              <p>Below is how the hash will be calculated based on the order of the fields above.</p>
+              
+              <p><code>signature = sha1(event_title + {{ template.signature_fields.join(" + ") }})</code></p>
+              </span>
+            </CTab>-->
             <CTab title="Review">
               {{ template }}
             </CTab>
@@ -244,11 +236,48 @@
 
 <style scope>
 @import "https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css";
+
+
+
+.signature-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  cursor: move;
+}
+
+.signature-field .drag-handle {
+  width: 5%;
+  /* Center the icon in the div */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signature-field .field-name {
+  width: 95%;
+  display: flex;  
+}
+
+.ghost {
+  opacity: 0.5;
+  background-color: #cfcfcf;
+}
+
 </style>
 
 <script>
 import { vSelect } from "vue-select";
 import { mapState } from "vuex";
+
+import draggable from "vuedraggable";
+
 export default {
   name: "FieldMappingModal",
   props: {
@@ -258,6 +287,7 @@ export default {
       default: () => {
         return {
           tags: [],
+          field_mapping: [],
         };
       },
     },
@@ -266,6 +296,9 @@ export default {
       default: "Create",
     },
   },
+  components: {
+    draggable
+  },
   data() {
     return {
       modal_status: this.show,
@@ -273,8 +306,24 @@ export default {
       selected_list: "",
       lists: [],
       lists_formatted: [],
+      field_mapping: [],
       active_tab: 0,
       tags: [],
+      field_columns: [
+        { key: 'field', label: 'Source Field' },
+        'data_type',
+        'alias',
+        { key: 'signature_field', label: "Signature"},
+        { key: 'tag_field', label: "Tags"},
+        { key: 'observable_field', label: "Observable"},
+        { key: 'admin', label: '' },
+      ],
+      dragOptions: {
+        animation: 0,
+        group: "signature_fields",
+        disabled: false,
+        ghostClass: "ghost"
+      }
     };
   },
   computed: {
@@ -284,7 +333,8 @@ export default {
       return this.organizations.map((o) => {
         return { label: o.name, value: o.uuid };
       });
-    },
+    }
+    
   },
   watch: {
     show: function () {
@@ -296,7 +346,10 @@ export default {
         this.reset();
       } else {
         if (this.template == null) {
-          this.$set(this, "template", {});
+          this.$set(this, "template", {
+            field_mapping: [],
+            tags: []
+          });
         } else {
           if (this.template.tags != null) {
             this.tags = this.template.tags;
@@ -305,11 +358,16 @@ export default {
             this.$set(this.template, "priority", 1);
           }
         }
+
+        this.field_mapping = this.template.field_mapping;
       }
     },
   },
   created() {},
   methods: {
+    updateField(field) {
+      console.log(field);
+    },
     addTag(item, t) {
       if (item.tags == null) {
         this.$set(item, "tags", []);
@@ -352,6 +410,7 @@ export default {
           this.$set(f, "tags", []);
         }
       });
+      
       this.$store
         .dispatch("updateFieldTemplate", { uuid: uuid, template: this.template })
         .then(() => {
@@ -371,6 +430,9 @@ export default {
           data_type: "none",
           alias: "",
           sigma_field: "",
+          signature_field: false,
+          tag_field: false,
+          observable_field: true,
           tags: [],
           tlp: 1,
         });
@@ -380,6 +442,9 @@ export default {
           data_type: "none",
           alias: "",
           sigma_field: "",
+          signature_field: false,
+          tag_field: false,
+          observable_field: true,
           tags: [],
           tlp: 1,
         });

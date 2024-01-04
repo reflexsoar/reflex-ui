@@ -115,7 +115,7 @@
                     <CCol v-else-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleCaseFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
                     <CCol v-else-if="title === 'escalated'" v-c-tooltip="{ content: `${v ? 'Yes' : 'No'}`, placement: 'left'}" @click="toggleCaseFilter({'filter_type': 'escalated', 'data_type':'escalated','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v ? 'Yes': 'No'}}</span></CCol>
                     <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleCaseFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
-                    <CCol class="text-right" col="3"><CBadge color="secondary">{{k.toLocaleString('en-US')}}</CBadge></CCol>
+                    <CCol class="text-right" col="3"><CBadge color="secondary badge-count">{{k.toLocaleString('en-US')}}</CBadge></CCol>
                   </CRow>                
                 </div>
               </div>

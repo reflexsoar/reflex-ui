@@ -41,6 +41,8 @@
       placeholder="My Report"
       description="OPTIONAL - A friendly name to identify this report"
     />
+    <input type="checkbox" v-model="report_params.compressed" />&nbsp;<label>Compress Report</label>
+    
     <RMultiCheck
       label="Fields"
       :items="available_fields"
@@ -290,7 +292,7 @@ export default {
           "detection_id",
 
         ],
-        severities: [1, 2, 3, 4],
+        severities: [0, 1, 2, 3, 4],
         as_json: false,
         date_range: {
           start: this.days_ago(30),
@@ -310,14 +312,17 @@ export default {
           let blob = new Blob([resp.data]);
           let link = document.createElement("a");
           link.href = window.URL.createObjectURL(blob);
-          console.log(resp);
           if (this.report_params.as_json) {
             link.download = this.report_params.report_name+".ndjson";
           } else {
             link.download = this.report_params.report_name+".csv";
           }
+          if (this.report_params.compressed) {
+            link.download = this.report_params.report_name + ".zip";
+          }
           link.click();
           this.submitted = false;
+          window.URL.revokeObjectURL(link.href);
           this.dismiss();
         })
         .catch((err) => {

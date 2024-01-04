@@ -15,7 +15,7 @@
             <h2>{{ event_data.title }}</h2>
             <TagBucket :tags="event_data.tags" />
           </CCol>
-          <CCol col="2">
+          <CCol col="2" class="text-right">
             <CButton
               color="secondary"
               @click="$store.commit('set', ['eventDrawerMinimize', true])"
@@ -227,14 +227,19 @@
             </CCardBody>
           </CTab>
           <CTab title="Detection" v-if="this.event_data.detection_id">
+          
             <CCardBody class="tab-container" v-if="!this.detection_loading">
               <CRow>
                 <CCol>
                   <h3>Detection</h3>
                   {{ detection.description }}
-                  <hr>
+                  
+                </CCol>
+                <CCol>
+                  <CButton @click="showDetectionModal()" color="info" class="float-right">Edit Detection</CButton>
                 </CCol>
               </CRow>
+              <hr>
               <CRow>
                 <CCol>
                   <CTabs
@@ -455,7 +460,6 @@
             </CRow>
             </CCol>
           </CRow>
-          
         </CTab>
               </CTabs>
                 </CCol>
@@ -467,35 +471,41 @@
           </CTab>
           <CTab title="Integration Output">
             <CRow>
-              <CCol><CCardBody class="tab-container">
-                <CCard v-for="output,i in event_data.integration_output" :key="i">
-                  <CCardHeader>
+              <CCol><CCardBody class="tab-container" style="font-size: 12px">
+                <timeline>
+                  <timeline-item
+                    v-for="output,i in event_data.integration_output"
+                    :key="i"
+                    :timestamp="output.created_at"
+                    :tag="output.integration_name"
+                    :color="output.action == 'success' ? 'success' : 'danger'"
+                  >
                     <CRow>
                       <CCol>
-                        {{ output.integration_name }} - {{ output.action }} - {{ output.created_at | moment("from") }}
-                      </CCol>
-                      <CCol>
+                        <label>Integration:&nbsp;</label><code>{{ output.integration_name }}</code> |
+                        <label>Action:</label> <code>{{ output.action }}</code> |
+                        {{ output.created_at | moment('from') }} at {{ output.created_at | moment }}</CBadge>
                         <CButton
                           color="info"
                           class="float-right"
                           @click="toggleOutputShow(output)"
                           size="sm"
-                        >
-                          <CIcon
-                            :name="output.show !== undefined && output.show != false ? 'cil-chevron-top' : 'cil-chevron-bottom'"
-                          />
-                        </CButton>
+                        >{{ output.show ? 'Hide' : 'Show' }} Output</CButton>
                       </CCol>
                     </CRow>
-                  </CCardHeader>
-                    <CCollapse :show.sync="(output.show !== undefined && output.show != false) || output.show">
-                      <CCardBody class="tab-container">
-                        <vue-markdown v-if="output.output_format == 'markdown'">
-                          {{ output.output }}
-                        </vue-markdown>
-                      </CCardBody>
-                    </CCollapse>
-                  </CCard>
+                    <CRow>
+                      <CCol>
+                      <CCollapse :show="output.show">
+                        
+                            <vue-markdown v-if="output.output_format == 'markdown'" :linkify="false" table-class="table table-sm">
+                            {{ output.output }}
+                            </vue-markdown>
+                        
+                      </CCollapse>
+                      </CCol>
+                    </CRow>
+                  </timeline-item>
+                </timeline>
                   </CCardBody>
               </CCol>
             </CRow>
@@ -529,10 +539,20 @@
       :show.sync="show_exclusion_modal"
       :mode="exclusion_modal_mode"
     />
+    
+          
+          <DetectionRuleModal
+          :show.sync="show_detection_rule_modal"
+          :rule.sync="detection"
+          :mode="detection_modal_mode"
+        /> 
   </CRightDrawer>
 </template>
 
 <style scoped>
+
+/* Create a simple table style that only applies for tables inside the style-reset
+css class */
 .observable-value {
   max-width: 50ch;
   overflow-y: clip;
@@ -650,6 +670,10 @@ import TagBucket from "./components/TagBucket";
 import DetectionExclusionModal from "./DetectionExclusionModal";
 import CommentList from './collaboration/CommentList'
 import ObjectAttribute from "./components/ObjectAttribute";
+import { Timeline, TimelineItem, TimelineTitle } from 'vue-cute-timeline'
+import 'vue-cute-timeline/dist/index.css'
+
+import DetectionRuleModal from "./DetectionRuleModal";
 
 export default {
   name: "EventDrawer",
@@ -666,7 +690,10 @@ export default {
     TagBucket,
     DetectionExclusionModal,
     CommentList,
-    ObjectAttribute
+    ObjectAttribute,
+    Timeline,
+    TimelineItem,
+    DetectionRuleModal
   },
   created: function () {
     if (this.$store.state.unread_alert_count > 0) {
@@ -680,6 +707,8 @@ export default {
     minimize(val) {
       if (!val) {
         document.body.style.overflow = "hidden";
+
+        this.show_detection_rule_modal = false;
 
         this.event_data = this.$store.getters.event;
         this.comments_loading = true;
@@ -749,7 +778,9 @@ export default {
       exclusion: {},
       show_exclusion_modal: false,
       exclusion_modal_mode: "Create",
-      show_field: {}
+      show_field: {},
+      show_detection_rule_modal: false,
+      detection_modal_mode: "Edit",
     };
   },
   computed: {
@@ -761,6 +792,9 @@ export default {
     },
   },
   methods: {
+    showDetectionModal() {
+      this.show_detection_rule_modal = true;
+    },
     sumDocCount(top_hits) {
       let count = 0;
       for(let i in top_hits) {

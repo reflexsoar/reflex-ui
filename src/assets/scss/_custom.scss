@@ -1,6 +1,23 @@
 // Here you can add other styles
 @import "vue-select/src/scss/vue-select.scss";
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Inter');
+@import url('https://fonts.googleapis.com/css?family=Fira+Code');
+
+body {
+    font-family: Inter !important;
+    font-size: 0.7835rem;
+    //font-weight: 400;
+}
+
+
+.dropdown-item, .btn, .multiselect__tags, .multiselect__option, .form-control {
+    font-size: 0.8rem !important;
+}
+
+.btn-sm {
+    font-size: .7rem;
+}
 
 input {
     color: #768192;
@@ -323,7 +340,7 @@ a {
 .raw_log {
     width: 100%;
     min-height: 30rem;
-    font-family: "Lucida Console", Monaco, monospace;
+    font-family: "Fira Code";
     font-size: 0.8rem;
     line-height: 1.2;
     max-height: 400px
@@ -369,7 +386,25 @@ a {
     padding-bottom: 1px !important;
     font-weight: normal !important;
     line-height: 1.5 !important;
-    font-size: 80% !important;
+    font-size: 90% !important;
+}
+
+.badge {
+    font-size: 95% !important;
+}
+
+.badge-mitre {
+    font-size: 75% !important;
+    padding: 1px;
+}
+
+.badge-count {
+    font-size: 75% !important;
+    padding-top: 4px;
+}
+
+.small {
+    font-size: 90% !important;
 }
 
 .badge.tag {
@@ -379,7 +414,7 @@ a {
     padding-bottom: 4px;
     font-weight: normal;
     line-height: 1.5;
-    font-size: 0.76563rem
+    //font-size: 0.76563rem
 }
 
 .horizontal-separator {
@@ -392,7 +427,7 @@ label {
     /* muted text */
     color: #6B7485;
     //font-size: 90%;
-    font-weight: 500 !important;
+    font-weight: 600;
 }
 
 .danger-accent {
@@ -667,7 +702,6 @@ html:not([dir="rtl"]) nav>.pagination {
 }
 
 .page-nav .nav-tabs .nav-link:hover {
-
     border-bottom: 3px solid $info !important;
 }
 
@@ -679,12 +713,14 @@ html:not([dir="rtl"]) nav>.pagination {
 }
 
 .page-nav-tab-body {
-    //border-radius: 5px;
-    //margin-right: 5px;
-    //margin-left: 5px;
     padding: 5px;
-    //background-color: #fff;
-    //border: 1px solid #d8dbe0;
+}
+
+
+
+.page-nav-tab > .button-tab > .nav-link {
+    padding-top: 6px;
+    padding-bottom: 5px;
 }
 
 .page-sub-header {
@@ -734,7 +770,7 @@ html:not([dir="rtl"]) nav>.pagination {
     object-fit: cover;
     width: 125px;
     height: 125px;
-    border: 5px solid $dark;
+    border: 3px solid $dark;
     float: left;
 }
 
@@ -834,3 +870,179 @@ html:not([dir="rtl"]) nav>.pagination {
 .integration-logo-wrapper {
     height: 50px;
 }
+
+.description-text div {
+  display: flex;
+  overflow: auto;
+  flex-direction:column;
+}
+
+/* Style the code blocks inside the templated-description div */
+.description-text p code {
+    display: inline-flex;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.description-content {
+    display: none;
+    border-radius: 5px;
+    background-color: #fff;
+    border: 1px solid #cfcfcf;
+    padding: 10px;
+    position: absolute;
+    max-width: 50%;
+    /* Wrap overflow content */
+    overflow-wrap: break-word;
+}
+
+.flex-wrapper {
+    margin-left: -30px;
+    margin-right: -30px;
+  }
+  
+  .flex-grid {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+  }
+  
+  .flex-grid:nth-child(odd) div[class^="d-col-"] {
+    padding: 0.5rem 0.5rem;
+  }
+  .flex-grid:nth-child(even) div[class^="d-col-"] {
+    padding: 0.5rem 0.5rem;
+  }
+  
+  @media (min-width: 980px) {
+    .flex-grid {
+      margin-top: 2rem;
+    }
+    .flex-grid:first-child {
+      margin-top: 0;
+    }
+  
+    .d-col-1 {
+      width: 7.05%;
+    }
+    .d-col-2 {
+      width: 15.5%;
+    }
+    .d-col-3,
+    .d-col-thirds {
+      width: 23.95%;
+    }
+    .d-col-4,
+    .d-col-quarters {
+      width: 32.4%;
+    }
+    .d-col-5 {
+      width: 40.85%;
+    }
+    .d-col-6,
+    .d-col-halfs {
+      width: 49.3%;
+    }
+    .d-col-7 {
+      width: 57.75%;
+    }
+    .d-col-8 {
+      width: 66.2%;
+    }
+    .d-col-9 {
+      width: 74.65%;
+    }
+    .d-col-10 {
+      width: 83.1%;
+    }
+    .d-col-11 {
+      width: 91.55%;
+    }
+    .d-col-12,
+    .d-col-full {
+      width: 100%;
+    }
+  }
+  
+  @media only screen and (min-width: 661px) and (max-width: 979px) {
+    .flex-grid {
+      flex-flow: row wrap;
+    }
+  
+    .t-col-4,
+    .t-col-6,
+    .t-col-12 {
+      margin-top: 2rem;
+    }
+  
+    .t-col-4 {
+      width: 31.46%;
+    }
+    .t-col-6 {
+      width: 48.6%;
+    }
+    .t-col-12 {
+      width: 100%;
+    }
+  
+    .flex-grid:first-child .t-col-4,
+    .flex-grid:first-child .t-col-6,
+    .flex-grid:first-child .t-col-12 {
+      margin-top: 0;
+    }
+  }
+
+.repository-sync-status-list {
+    /* Inline list without bullets */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.repository-sync-status-list li {
+    /* Inline list without bullets */
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.repository-sync-status-list li:last-child {
+    margin-right: 0;
+}
+
+/* Show a separator between the list items */
+.repository-sync-status-list li:not(:last-child)::after {
+    content: "|";
+    margin-left: 5px;
+    color: #6B7485;
+}
+
+.item-name {
+    font-weight: 600;
+    font-size: 13.5px;
+    line-height: 0.5;
+    display: inline-block;
+    padding-bottom: 10px;
+}
+
+.checkbox-field {
+    text-align: center;
+  }
+  
+  .checkbox-field input[type="checkbox"] {
+    margin: 0 auto;
+    width: 16px;
+    height: 16px;
+  }
+
+.table-middle tr td {
+    vertical-align: middle;
+  }
+  
+  .table-middle .form-group {
+    margin-bottom: 0px;
+  }
+  
+  .table-middle tbody {
+    /* Clear the height */
+    height: auto !important;
+  }

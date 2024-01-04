@@ -131,10 +131,10 @@
                 </template>
                 <template #status="{ item }">
                   <td>
-                    <CBadge class="tag tag-sm" color="info" v-if="item.status">{{
+                    <CBadge class="tag" color="info" v-if="item.status">{{
                       item.status
                     }}</CBadge
-                    ><CBadge class="tag tag-sm" color="danger" v-else>Unknown</CBadge>
+                    ><CBadge class="tag" color="danger" v-else>Unknown</CBadge>
                   </td>
                 </template>
                 <template #select-header="{ item }">
@@ -160,8 +160,8 @@
                     <CRow>
                       <CCol>
                         <CRow>
-                          <CCol>
-                            <b>{{ item.name }}</b>
+                          <CCol class="rule-name">
+                            <span class="item-name">{{ item.name }}</span>
                           </CCol>
                         </CRow>
                         <CRow>
@@ -172,21 +172,21 @@
                               >Inactive</CBadge
                             >
                             <CBadge class="tag tag-sm" color="info" v-if="item.status"
-                              ><b>Status:</b> {{ item.status }}</CBadge
+                              >Status: {{ item.status }}</CBadge
                             >
                             <CBadge class="tag tag-sm" color="danger" v-else
-                              ><b>Status:</b> Unknown</CBadge
+                              >Status: Unknown</CBadge
                             ><CBadge
                               class="tag tag-sm"
                               :color="getSeverityColor(item.severity)"
-                              ><b>Severity:</b
-                              > {{ getSeverityText(item.severity) }}</CBadge
+                              >Severity:
+                               {{ getSeverityText(item.severity) }}</CBadge
                             ><CBadge
                               v-if="item.risk_score"
                               class="tag tag-sm"
                               :color="getSeverityColor(item.severity)"
                               size="sm"
-                              ><b>Risk Score:</b> {{ item.risk_score }}</CBadge
+                              >Risk Score: {{ item.risk_score }}</CBadge
                             >
                             <div v-if="item.tags && item.tags.length > 0">
                               <TagBucket :tags="item.tags" />
@@ -212,7 +212,7 @@
                             </div>
                             <div v-if="item.status == 'Production - Enterprise'">
                               <CBadge
-                                class="tag tag-sm"
+                                class="tag"
                                 color="warning"
                                 size="sm"
                                 v-c-tooltip="{ content: '24/7 Eligible' }"
@@ -223,7 +223,7 @@
                         </CRow>
                         <CRow>
                           <CCol style="margin-top: 2px">
-                            <span class="small rule_description">{{
+                            <span class="rule_description">{{
                               item.description
                             }}</span></CCol
                           >
@@ -620,6 +620,7 @@ export default {
           excluded_sources: [],
           excluded_source_lists: [],
           autodiscover_data_streams: false,
+          ignore_data_streams_older_than_days: 0,
           delta_change: false,
           delta_window: 7,
           operator: "==",
@@ -830,6 +831,7 @@ export default {
           excluded_sources: [],
           excluded_source_lists: [],
           autodiscover_data_streams: false,
+          ignore_data_streams_older_than_days: 0,
           delta_change: false,
           delta_window: 7,
           operator: "==",

@@ -28,11 +28,11 @@
             </CRow>
             <CRow>
               <CCol>
-                <CCard style="background-color: #f9f9f9;">
-                  <CCardBody style="padding-top: 5px; padding-bottom: 10px;">
-                  <viewer :initialValue="comment.comment" />
+
+                  <CCardBody style="padding-top: 5px; padding-bottom: 5px;">
+                    <vue-markdown>{{ comment.comment }}</vue-markdown>
                   </CCardBody>
-                </CCard>
+
               </CCol>
             </CRow>          
       </CCol>

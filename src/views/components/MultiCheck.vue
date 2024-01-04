@@ -23,11 +23,9 @@
                 <template #label>
                   <label class="form-check-label"
                     >{{ item[labelField]
-                    }}<small v-if="item.description"
-                      >&nbsp;-&nbsp;<span class="muted">{{
+                    }}<span v-if="item.description" class="muted item-description"> - {{
                         item.description
-                      }}</span></small
-                    ></label
+                      }}</span></label
                   >
                 </template>
               </CInputCheckbox>
@@ -72,11 +70,9 @@
                   <template #label>
                     <label class="form-check-label"
                       >{{ item.label
-                      }}<small v-if="item.description"
-                        >&nbsp;-&nbsp;<span class="muted">{{
+                      }}<span v-if="item.description" class="muted item-description"> - {{
                           item.description
-                        }}</span></small
-                      ></label
+                        }}</span></label
                     >
                   </template>
                 </CInputCheckbox>
@@ -105,8 +101,8 @@
 }
 
 .multiselect {
-  width: auto;
-  max-width: 90%;
+  /* This should be as wide as the search input */
+  width: 95%;
   z-index: 1000;
   background-clip: padding-box;
   border: 1px solid;
@@ -141,7 +137,7 @@
 
 .multiselect ul li {
   padding: 5px;
-  font-size: 14px;
+  font-size: 0.785rem;
   font-weight: normal;
 }
 
@@ -152,6 +148,11 @@
   left: 0;
   right: 0;
 }
+
+.item-description {
+  font-weight: normal;
+}
+
 </style>
 
 <script>

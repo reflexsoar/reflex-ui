@@ -26,15 +26,15 @@
       >
       <template #name="{item}">
           <td>
-              <span v-if="item.active"><CBadge class="tag tag-sm" color="success">Active</CBadge>&nbsp;</span>
-              <span v-if="!item.active"><CBadge class="tag tag-sm" color="danger">Inactive</CBadge>&nbsp;</span>
+              <span v-if="item.active"><CBadge class="tag" color="success">Active</CBadge>&nbsp;</span>
+              <span v-if="!item.active"><CBadge class="tag" color="danger">Inactive</CBadge>&nbsp;</span>
               <b>{{item.name}}</b><br>
               <span class="list-attributes">
-                <span v-if="item.global_list"><CBadge color="secondary" class="tag tag-sm"><i class="fas fa-globe"></i> Global List</CBadge></span>
-                <span v-if="item.tag_on_match"><CBadge color="secondary" class="tag tag-sm"><i class="fas fa-tag"></i> Tag On Match</CBadge></span>
-                <span v-if="item.flag_ioc"><CBadge color="danger" class="tag tag-sm"><i class="fas fa-flag"></i> IOC</CBadge></span>
-                <span v-if="item.flag_safe"><CBadge color="success" class="tag tag-sm"><i class="fas fa-flag"></i> Safe</CBadge></span>
-                <span v-if="item.flag_spotted"><CBadge color="warning" class="tag tag-sm"><i class="fas fa-flag"></i> Spotted</CBadge></span>
+                <span v-if="item.global_list"><CBadge color="secondary" class="tag"><i class="fas fa-globe"></i> Global List</CBadge></span>
+                <span v-if="item.tag_on_match"><CBadge color="secondary" class="tag"><i class="fas fa-tag"></i> Tag On Match</CBadge></span>
+                <span v-if="item.flag_ioc"><CBadge color="danger" class="tag"><i class="fas fa-flag"></i> IOC</CBadge></span>
+                <span v-if="item.flag_safe"><CBadge color="success" class="tag"><i class="fas fa-flag"></i> Safe</CBadge></span>
+                <span v-if="item.flag_spotted"><CBadge color="warning" class="tag"><i class="fas fa-flag"></i> Spotted</CBadge></span>
               </span>
           </td>
       </template>

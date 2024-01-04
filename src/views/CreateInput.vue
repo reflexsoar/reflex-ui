@@ -184,10 +184,10 @@
                               </CCol>
                               <CCol col="4">
                                 <CSelect
-                                  :options="['http_auth', 'api_key']"
+                                  :options="['http_auth', 'api_key', 'jwt']"
                                   :value.sync="config['auth_method']"
                                   label="Auth Method"
-                                  description="api_key: Elastic API key | http_auth: Basic Auth"
+                                  description="api_key: Elastic API key | http_auth: Basic Auth | jwt: JWT Token"
                                 />
                               </CCol>
                               <CCol col="4">
