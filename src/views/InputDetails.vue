@@ -447,6 +447,42 @@
                   </CCol>
                   </CRow>
                 </CTab>
+                <CTab title="Field Templates">
+                  <CRow>
+                    <CCol>
+                      <h3>Field Templates</h3>
+                      <p>
+                        Field Templates provide a mechanism for automatically mapping
+                        fields to the input. Field templates also inform the input
+                        what fields to use for signaturing events or tagging events.
+                      </p>
+                      <div v-if="!edit_config">
+                        <h4>Selected Field Templates</h4>
+                        <div v-if="input.field_templates.length == 0">
+                          <p>No field templates mapped to this input.</p>
+                        </div>
+                        <li
+                          style="display: inline; margin-right: 2px"
+                          v-for="(field, i) in input.field_templates"
+                          :key="i"
+                        >
+                          <CBadge class="tag tag-list" color="info" size="sm">{{
+                            getFieldTemplateName(field)
+                          }}</CBadge>
+                        </li>
+                      </div>
+                      <MultiPicker v-else
+                        :options="field_templates"
+                        :value.sync="input.field_templates"
+                        option_label="name"
+                        option_key="uuid"
+                        label="Field Templates"
+                        :asTags="true"
+                      />
+                    </CCol>
+                  </CRow>
+
+                </CTab>
                 <CTab title="Data Source Mapping">
                   <CRow
                     ><CCol>
@@ -800,14 +836,16 @@ export default {
     "mitre_data_sources",
     "data_source_templates",
     "credentials",
+    "field_templates"
   ]),
   created() {
     this.$store.dispatch("getMitreDataSources", {});
     
     this.$store.dispatch("getInput", this.$route.params.uuid).then((resp) => {
       this.hosts = this.input.config["hosts"];
+      this.$store.dispatch("getFieldTemplates", this.input.organization);
       this.$store.dispatch("getDataSourceTemplates", this.input.organization);
-      this.$store.dispatch("getCredentialList", {
+      this.$store.dispatch("getCredentials", {
         organization: this.input.organization,
       });
       this.loading = false;
@@ -822,6 +860,13 @@ export default {
       });
   },
   methods: {
+    getFieldTemplateName(uuid) {
+      if (this.field_templates.length > 0) {
+        return this.field_templates.find((x) => x.uuid == uuid).name;
+      } else {
+        return null;
+      }
+    },
     dismiss() {
       this.delete_modal = false;
       this.delete_confirm = "";
@@ -935,6 +980,7 @@ export default {
         description: this.input.description,
         tags: this.input.tags,
         credential: this.input.credential,
+        field_templates: this.input.field_templates,
       };
 
       if (config) {
