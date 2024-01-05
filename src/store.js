@@ -6,6 +6,9 @@ import createPersistedState from "vuex-persistedstate";
 Vue.use(Vuex)
 
 const state = {
+  cancelToken: Axios.CancelToken,
+  eventSearchCancelToken: null,
+  eventFilterCancelToken: null,
   eventDrawerShow: 'responsive',
   eventDrawerMinimize: true,
   mitreDrawerShow: 'responsive',
@@ -177,10 +180,14 @@ const state = {
   application_summary: {
     total: 0,
     applications: []
-  }
+  },
+  search_on_change: false
 }
 
 const mutations = {
+  update_search_on_change(state, search_on_change) {
+    state.search_on_change = search_on_change
+  },
   save_application_summary(state, summary) {
     state.application_summary = summary
   },
@@ -2549,6 +2556,16 @@ const actions = {
   },
   getEventStats({ commit }, { title__like = null, signature = null, status = [], severity = [], source = [], tags = [], title = [], observables = [], top = null, metrics = ['title', 'observable', 'source', 'tag', 'status', 'severity', 'data_type', 'organization', 'event_rule', 'signature'], start = null, end = null, organization = [], event_rules = [] }) {
     commit('loading_status', true)
+
+    if(this.state.eventFilterCancelToken) {
+      this.state.eventFilterCancelToken.cancel('Operation canceled due to new request.')
+      
+    }
+      
+    //this.state.cancelToken = Axios.CancelToken
+    this.state.eventFilterCancelToken = this.state.cancelToken.source()
+
+
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event/stats?q=`
@@ -2593,13 +2610,17 @@ const actions = {
         url = url + `&title__like=${title__like}`
       }
 
-      Axios({ url: url, method: 'GET' })
+      Axios({ url: url, method: 'GET', cancelToken: this.state.eventFilterCancelToken.token })
         .then(resp => {
           commit('save_event_stats', resp.data)
           resolve(resp)
         })
-        .catch(err => {
-          reject(err)
+        .catch(function(thrown) {
+          if (Axios.isCancel(thrown)) {
+            console.log('Request canceled', thrown.message);
+          } else {
+            reject(thrown)
+          }
         })
     })
   },
@@ -2615,7 +2636,16 @@ const actions = {
         })
     })
   },
-  getEvents({ commit }, { title__like = null, signature = null, case_uuid, status = [], search, rql, severity = [], page, source = [], tags = [], title = [], observables = [], page_size = 25, sort_by = 'original_date', grouped = true, fields = '', sort_direction = 'desc', start = null, end = null, organization = null, event_rules = null }) {
+  getEvents({ commit }, { title__like = null, signature = null, case_uuid, status = [], search, rql, severity = [], page, source = [], tags = [], title = [], observables = [], page_size = 25, sort_by = 'original_date', grouped = true, fields = '', sort_direction = 'desc', start = null, end = null, organization = null, event_rules = null}) {
+
+    if(this.state.eventSearchCancelToken) {
+      this.state.eventSearchCancelToken.cancel('Operation canceled due to new request.')
+      
+    }
+      
+    //this.state.cancelToken = Axios.CancelToken
+    this.state.eventSearchCancelToken = this.state.cancelToken.source()
+
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/event?grouped=${grouped}&sort_by=${sort_by}&sort_direction=${sort_direction}`
@@ -2674,15 +2704,20 @@ const actions = {
         url = url + `&title__like=${title__like}`
       }
 
-      Axios({ url: url, method: 'GET', headers: { 'X-Fields': fields } })
+      Axios({ url: url, method: 'GET', headers: { 'X-Fields': fields }, cancelToken: this.state.eventSearchCancelToken.token })
         .then(resp => {
           commit('add_start')
           commit('save_events', resp.data.events)
           commit('loading_status', false)
           resolve(resp)
         })
-        .catch(err => {
-          reject(err)
+        .catch(function(thrown) {
+          if (Axios.isCancel(thrown)) {
+            console.log('Request canceled', thrown.message);
+            commit('loading_status', false)
+          } else {
+            reject(thrown)
+          }
         })
     })
   },
@@ -5374,6 +5409,6 @@ export default new Vuex.Store({
   plugins: [createPersistedState({
     key: 'reflex-state',
     paths: ['observable_filters', 'case_filters', 'intel_filters', 'current_user', 'case_templates', 'quick_filters', 'selected_detection_filters',
-  'log_searches']
+  'log_searches', 'search_on_change']
   })]
 })
