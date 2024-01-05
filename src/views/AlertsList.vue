@@ -1,7 +1,7 @@
 <template>
   <CRow>
     <CCol col="12">
-      <CRow class="page-heading page-heading-no-nav">
+      <CRow class="page-heading page-heading-row page-heading-no-nav">
         <CCol>
           <h2>Events<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
           <!-- START FILTER PICKERS TODO: Move this to it's own component-->
