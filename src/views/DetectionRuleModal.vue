@@ -160,7 +160,7 @@
                   :close-on-select="false"
                 /><br />
               </CTab>
-              <CTab title="Configuration" v-bind:disabled="rule.source['uuid'] === null">
+              <CTab title="Configuration" v-bind:disabled="rule.source.uuid === null">
                 <h5>Rule Configuration</h5>
                 <CRow
                   ><CCol>
@@ -1231,6 +1231,9 @@ export default {
         setup_guide: "",
         testing_guide: "",
         status: "Experimental",
+        source: {
+          uuid : null
+        }
       },
     },
     mode: {
