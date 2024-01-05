@@ -178,6 +178,111 @@
                 </CRow>
               </CTab>
               <CTab
+                title="Inventory Settings"
+              >
+                <CRow>
+                  <CCol>
+                    <label>Agent Inventory Enabled</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.enabled"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    /><br />
+                    </CCol>
+                  </CRow><br>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.inventory_config.collection_interval"
+                      label="Inventory Interval"
+                      placeholder="Enter an inventory interval in seconds"
+                      description="How often the Agent will check in to the management for inventory updates"
+                      :isValid="
+                        validate(
+                          policy.inventory_config.collection_interval,
+                          validations.inventory_collection_interval
+                        )
+                      "
+                      :invalidFeedback="validations.inventory_collection_interval.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.inventory_config.cache_expiration"
+                      label="Cache Expiration"
+                      placeholder="Enter a max cache age in seconds"
+                      description="How old can inventory data be before it is considered stale"
+                      :isValid="
+                        validate(
+                          policy.inventory_config.cache_expiration,
+                          validations.inventory_cache_expire
+                        )
+                      "
+                      :invalidFeedback="validations.inventory_cache_expire.message"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <label>Collect Installed Software</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.installed_software"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                  <CCol>
+                    <label>Collect Running Services</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.running_services"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                  <CCol>
+                    <label>Collect Network Adapters</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.network_adapters"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                </CRow><br>
+                <CRow>
+                  <CCol>
+                    <label>Collect Listening Ports</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.listening_ports"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                  <CCol>
+                    <label>Collect Local Users</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.local_users"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                  <CCol>
+                    <label>Collect Containers</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.containers"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab
                 title="Poller Settings"
                 v-bind:disabled="policy.roles && !policy.roles.includes('poller')"
               >
@@ -1028,6 +1133,20 @@ export default {
           required: true,
           type: "number",
           message: "Must be between 5 and 60",
+        },
+        inventory_collection_interval: {
+          min: 300,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 300 and 86400",
+        },
+        inventory_cache_expire: {
+          min: 300,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 300 and 86400",
         },
       },
     };

@@ -176,6 +176,17 @@ export default {
           user_roles: [],
           credential: null
         },
+        inventory_config : {
+          enabled: true,
+          collection_interval: 3600,
+          cache_expiration: 300,
+          installed_software: true,
+          running_services: true,
+          listening_ports: true,
+          local_users: true,
+          network_adapters: true,
+          containers: true
+        },
         "tags": [],
         agent_tags: [],
         "priority": 1,
@@ -252,6 +263,17 @@ export default {
           target_input: null,
           user_roles: [],
           credential: null
+        },
+        inventory_config : {
+          enabled: true,
+          collection_interval: 3600,
+          cache_expiration: 300,
+          installed_software: true,
+          running_services: true,
+          listening_ports: true,
+          local_users: true,
+          network_adapters: true,
+          containers: true
         },
         "tags": [],
         agent_tags: [],
