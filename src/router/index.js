@@ -61,6 +61,10 @@ const FimRules = () => import('@/views/fim/FimRules')
 const Benchmarks = () => import('@/views/benchmark/Benchmarks')
 const BenchmarkManagement = () => import('@/views/benchmark/BenchmarkManagement')
 const BenchmarkRuleDetails = () => import('@/views/benchmark/BenchmarkRuleDetails')
+const ApplicationInventorySummary = () => import('@/views/application/ApplicationInventorySummary')
+
+/* DEV ARTIFACT */
+const ComponentSandboxv2 = () => import('@/views/ComponentSandboxv2')
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
@@ -181,6 +185,11 @@ function configRoutes () {
           }
         },
         {
+          path: 'component_sandbox',
+          name: 'Component Sandbox',
+          component: ComponentSandboxv2,
+        },
+        {
           path: 'detections',
           name: 'Detections',
           component: DetectionManagement,
@@ -215,6 +224,16 @@ function configRoutes () {
           meta: {
             requiresAuth: true,
             requiresPermission: 'view_fim_rules',
+            fetchOrganizations: true
+          }
+        },
+        {
+          path: '/applications',
+          name: 'Application Inventory',
+          component: ApplicationInventorySummary,
+          meta: {
+            requiresAuth: true,
+            requiresPermission: 'view_agents',
             fetchOrganizations: true
           }
         },
