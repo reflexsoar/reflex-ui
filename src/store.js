@@ -173,10 +173,17 @@ const state = {
   benchmark_assets: [],
   log_searches: [],
   base_url: "",
-  repository_subscription: {}
+  repository_subscription: {},
+  application_summary: {
+    total: 0,
+    applications: []
+  }
 }
 
 const mutations = {
+  save_application_summary(state, summary) {
+    state.application_summary = summary
+  },
   set_detection_repository_subscription(state, subscription) {
     state.repository_subscription = subscription
   },
@@ -2589,7 +2596,6 @@ const actions = {
       Axios({ url: url, method: 'GET' })
         .then(resp => {
           commit('save_event_stats', resp.data)
-          commit('loading_status', false)
           resolve(resp)
         })
         .catch(err => {
@@ -2672,6 +2678,7 @@ const actions = {
         .then(resp => {
           commit('add_start')
           commit('save_events', resp.data.events)
+          commit('loading_status', false)
           resolve(resp)
         })
         .catch(err => {
@@ -5332,6 +5339,24 @@ const actions = {
     return new Promise((resolve, reject) => {
       Axios({ url: `${BASE_URL}/user/${uuid}/profile_picture`, method: 'DELETE' })
         .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getApplicationSummary({ commit }, { organization = null}) {
+    let url = `${BASE_URL}/application/summary`
+
+    if (organization) {
+      url += `?organization=${organization}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_application_summary', resp.data)
           resolve(resp)
         })
         .catch(err => {
