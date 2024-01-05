@@ -25,6 +25,7 @@
                     <CDropdownItem @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filter Menu</CDropdownItem>
                     <CDropdownItem @click="resetFilters()" color="secondary" size="sm">Reset Filter</CDropdownItem>
                     <CDropdownItem @click="showExportWizard()" color="secondary" size="sm"><i class="fas fa-download"/>&nbsp;Export Events</CDropdownItem>
+                    <CDropdownItem @click="search_on_change = !search_on_change" color="secondary" size="sm"><span v-if="search_on_change"><i class="fas fa-check"/>&nbsp;</span>Search on Change</CDropdownItem>
                   </CDropdown>
                 </CCol>
                 
@@ -606,6 +607,7 @@ export default {
     },
     data(){
       return {
+        search_on_change: false,
         clicked_field_value: "",
         saved_filter_string: "",
         show_save_view_modal: false,
@@ -1210,9 +1212,8 @@ export default {
           this.$store.dispatch('loadEventRules', {page_size: 500, save: false}).then(resp => {
             this.event_rules = resp.data.event_rules
           })
-        })
 
-        this.$store.dispatch('getEvents', {
+          this.$store.dispatch('getEvents', {
           signature: signature_filter,
           grouped: grouped,
           tags: tag_filters,
@@ -1239,6 +1240,9 @@ export default {
           this.page_data = resp.data.pagination
           this.$store.commit('add_success')
         })
+        })
+
+        
 
         
       },
@@ -1622,6 +1626,7 @@ export default {
           }
           this.search_text = ""
         }
+        this.filterEvents()
       },
       applyTimeFilter() {
         this.clearTimeFilter(false)
@@ -1676,7 +1681,9 @@ export default {
       },
       observable_filters: function() {
         this.observableFilters = this.observable_filters
-        this.filterEvents()
+        if(this.search_on_change) {
+          this.filterEvents()
+        }        
       },
     },
     filters: {
