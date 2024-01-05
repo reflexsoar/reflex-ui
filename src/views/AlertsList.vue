@@ -25,7 +25,7 @@
                     <CDropdownItem @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filter Menu</CDropdownItem>
                     <CDropdownItem @click="resetFilters()" color="secondary" size="sm">Reset Filter</CDropdownItem>
                     <CDropdownItem @click="showExportWizard()" color="secondary" size="sm"><i class="fas fa-download"/>&nbsp;Export Events</CDropdownItem>
-                    <CDropdownItem @click="search_on_change = !search_on_change" color="secondary" size="sm"><span v-if="search_on_change"><i class="fas fa-check"/>&nbsp;</span>Search on Change</CDropdownItem>
+                    <CDropdownItem @click="toggleSearchOnChange()" color="secondary" size="sm"><span v-if="search_on_change"><i class="fas fa-check"/>&nbsp;</span>Search on Change</CDropdownItem>
                   </CDropdown>
                 </CCol>
                 
@@ -561,7 +561,7 @@ export default {
     dark: Boolean,
     event: false
     },
-    computed: mapState(['status','alert','settings','current_user','observable_filters']),
+    computed: mapState(['status','alert','settings','current_user','observable_filters','search_on_change']),
     created: function () {
 
       /* Set the page size based on the global settings page */
@@ -607,7 +607,6 @@ export default {
     },
     data(){
       return {
-        search_on_change: false,
         clicked_field_value: "",
         saved_filter_string: "",
         show_save_view_modal: false,
@@ -739,6 +738,9 @@ export default {
           return data
         }
       },*/
+      toggleSearchOnChange() {
+        this.$store.commit('update_search_on_change', !this.search_on_change)
+      },
       ackBySig(uuid, signature) {
         this.$store.dispatch('acknowledgeEventBySignature', {'uuid': uuid, 'signature': signature}).then(() => {
           this.filtered_events = this.filterEvents()
