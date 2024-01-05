@@ -77,8 +77,9 @@ export default {
       organization: null,
       fields: [
         { key: "name", label: "Name", sortable: true },
-        { key: "version_count", label: "Unique Versions", sortable: true},
-        { key: "endpoint_count", label: "Unique Endpoints", sortable: true}
+        { key: "vendor", label: "Vendor", sortable: true},
+        { key: "version_count", label: "Versions", sortable: true},
+        { key: "endpoint_count", label: "Endpoints", sortable: true}
       ],
     };
   },
