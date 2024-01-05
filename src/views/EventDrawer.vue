@@ -769,7 +769,10 @@ export default {
       observable_fields: ["value", "ioc", "spotted", "safe", "tags"],
       activeTab: 1,
       rules: [],
-      detection: {},
+      detection: {
+        source: { uuid: null },
+        query: { query: null}
+      },
       comments: [],
       comments_loading: false,
       rules_loading: false,
