@@ -63,9 +63,6 @@ const BenchmarkManagement = () => import('@/views/benchmark/BenchmarkManagement'
 const BenchmarkRuleDetails = () => import('@/views/benchmark/BenchmarkRuleDetails')
 const ApplicationInventorySummary = () => import('@/views/application/ApplicationInventorySummary')
 
-/* DEV ARTIFACT */
-const ComponentSandboxv2 = () => import('@/views/ComponentSandboxv2')
-
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
 const Page404 = () => import('@/views/pages/Page404')
@@ -183,11 +180,6 @@ function configRoutes () {
             fetchSettings: true,
             requiresAuth: true
           }
-        },
-        {
-          path: 'component_sandbox',
-          name: 'Component Sandbox',
-          component: ComponentSandboxv2,
         },
         {
           path: 'detections',
