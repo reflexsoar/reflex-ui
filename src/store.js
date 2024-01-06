@@ -181,6 +181,10 @@ const state = {
     total: 0,
     applications: []
   },
+  application_endpoints: {
+    endpoints: [],
+    total: 0
+  },
   search_on_change: false
 }
 
@@ -190,6 +194,9 @@ const mutations = {
   },
   save_application_summary(state, summary) {
     state.application_summary = summary
+  },
+  save_application_endpoints(state, endpoints) {
+    state.application_endpoints = endpoints
   },
   set_detection_repository_subscription(state, subscription) {
     state.repository_subscription = subscription
@@ -5392,6 +5399,42 @@ const actions = {
       Axios({ url: url, method: 'GET' })
         .then(resp => {
           commit('save_application_summary', resp.data)
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+  getApplicationEndpoints({ commit }, { organization = null, name = [], vendor = [], version = []}) {
+
+    let url = `${BASE_URL}/application/summary/endpoints`
+
+    let params = [];
+    if (organization) {
+      params.push(`organization=${organization}`)
+    }
+
+    if (name.length > 0) {
+      params.push(`name=${name}`)
+    }
+
+    if (vendor.length > 0) {
+      params.push(`vendor=${vendor}`)
+    }
+
+    if (version.length > 0) {
+      params.push(`version=${version}`)
+    }
+
+    if (params.length > 0) {
+      url += `?${params.join('&')}`
+    }
+
+    return new Promise((resolve, reject) => {
+      Axios({ url: url, method: 'GET' })
+        .then(resp => {
+          commit('save_application_endpoints', resp.data.endpoints)
           resolve(resp)
         })
         .catch(err => {
