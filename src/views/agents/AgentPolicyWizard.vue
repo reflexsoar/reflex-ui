@@ -236,7 +236,7 @@
                   <CCol>
                     <label>Collect Running Services</label><br />
                     <CSwitch
-                      :checked.sync="policy.inventory_config.running_services"
+                      :checked.sync="policy.inventory_config.services"
                       label-on="Yes"
                       label-of="No"
                       color="success"
