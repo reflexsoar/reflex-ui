@@ -564,6 +564,33 @@
                 </CRow>
               </CTab>
               <CTab
+                title="Windows Log Collector"
+                v-bind:disabled="policy.roles && !policy.roles.includes('winlog')"
+              >
+                <CRow>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.winlog_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <MultiPicker label="Log Sources" :value.sync="policy.winlog_config.log_source_config" :options="[{value: 'abc', label:'Foo'}]"
+                    description="Select the log sources that this Windows Log Collector should consume from" />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <MultiPicker label="Default Output" :value.sync="policy.winlog_config.default_output" :options="[{value: 'abc', label:'Foo'}]"
+                    description="The Windows Log Collector will default to sending log sources to these outputs unless overridden by other policy settings" />
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab
                 title="File Integrity Monitoring"
                 v-bind:disabled="policy.roles && !policy.roles.includes('fim')"
               >
@@ -950,6 +977,8 @@ export default {
           mitre_mapper_config: {},
           fim_config: {},
           search_proxy_config: {},
+          winlog_config: {},
+          inventory_config: {}
         };
       },
     },
@@ -1000,6 +1029,10 @@ export default {
         {
           label: "File Integrity Monitoring",
           value: "fim",
+        },
+        {
+          label: "Windows Log Collector",
+          value: 'winlog'
         },
         {
           label: "Search Proxy",
