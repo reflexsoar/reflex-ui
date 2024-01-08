@@ -102,7 +102,7 @@
 
 .multiselect {
   /* This should be as wide as the search input */
-  width: 95%;
+  width: auto;
   z-index: 1000;
   background-clip: padding-box;
   border: 1px solid;
