@@ -24,6 +24,10 @@
     height: 26px;
 }
 
+input[type="checkbox"] {
+    display: none;
+}
+
 .switch-details {
     margin-left: 60px;
     padding-top: 7px;
