@@ -48,7 +48,7 @@
 
       <CRow v-if="action && action.parameters && !!Object.keys(action.parameters).length">
         <CCol>
-          <h3>Parameters</h3>
+          <h5>Parameters</h5>
           <CRow v-for="(field, name) in action.parameters">
             <CCol
             v-if="
@@ -71,7 +71,7 @@
                 :description="field.description"
                 :label="field.label"
                 
-              />
+              /> 
               <div v-if="field.type == 'str-multiple'">
                 <label style="text-transform: capitalize">{{ field.label }}</label
                 ><br />
@@ -100,16 +100,15 @@
                 <small>{{ field.description }}</small>
               </div>
 
-              <CSelect
+              <SelectInput
                 v-if="
-                  field.type == 'str-select' &&
-                  getSelectOptions(field, field.default_options_from).length != 0
-                "
+                  field.type == 'str-select'"
                 :options="getSelectOptions(field, field.default_options_from)"
                 :value.sync="action_payload.parameters[name]"
-                :label="field.label"
+                :option_label="field.label"
                 placeholder="Please select one"
                 :description="field.description"
+                :taggable="true"
               />
             </CCol>
           </CRow>
@@ -212,8 +211,14 @@ export default {
             event = this.events_data[i];
             for (let o in event.observables) {
               let observable = event.observables[o];
-              if (observable.data_type === field_config.observable_data_type) {
-                values.push(observable.value);
+              if(typeof field_config.observable_data_type === "object") {
+                if (field_config.observable_data_type.includes(observable.data_type)) {
+                  values.push(observable.value);
+                }
+              } else {
+                if (observable.data_type === field_config.observable_data_type) {
+                  values.push(observable.value);
+                }
               }
             }
           }
