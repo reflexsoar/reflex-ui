@@ -222,6 +222,36 @@
                       :invalidFeedback="validations.inventory_cache_expire.message"
                     />
                   </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.inventory_config.perf_interval"
+                      label="Performance Collection Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How often to pull performance data from the host"
+                      :isValid="
+                        validate(
+                          policy.inventory_config.perf_interval,
+                          validations.perf_interval
+                        )
+                      "
+                      :invalidFeedback="validations.perf_interval.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.inventory_config.service_interval"
+                      label="Service Collection Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How often to pull container service data from the host"
+                      :isValid="
+                        validate(
+                          policy.inventory_config.service_interval,
+                          validations.service_interval
+                        )
+                      "
+                      :invalidFeedback="validations.service_interval.message"
+                    />
+                  </CCol>
                 </CRow>
                 <CRow>
                   <CCol>
@@ -279,6 +309,25 @@
                       label-of="No"
                       color="success"
                     />
+                  </CCol>
+                </CRow><br>
+                <CRow>
+                  <CCol>
+                    <MultiPicker
+                      label="Metrics Outputs"
+                      :value.sync="policy.inventory_config.metrics_outputs"
+                      :options="integration_outputs"
+                      option_label="configuration_name"
+                      option_key="configuration_uuid"
+                      description="Select the outputs that should receive metrics data from this agent"
+                      :asTags="true"
+                    >
+                      <template #option="{ option }">
+                        <span style="display: inline">{{ option.integration_name }} - {{ option.configuration_name }}
+                        <small style="float: right">{{ option.configuration_uuid }}</small>
+                        </span>
+                      </template>
+                    </MultiPicker>
                   </CCol>
                 </CRow>
               </CTab>
@@ -983,7 +1032,7 @@ export default {
       },
     },
   },
-  computed: mapState(["current_user", "organizations", "credentials", "inputs", "roles", "agent_tags"]),
+  computed: mapState(["current_user", "organizations", "credentials", "inputs", "roles", "agent_tags", "integration_outputs"]),
   watch: {
     show: function () {
       this.error = false;
@@ -1000,7 +1049,7 @@ export default {
       if (!this.modalStatus) {
         this.dismiss();
       }
-    },
+    }
   },
   data() {
     return {
@@ -1181,6 +1230,20 @@ export default {
           type: "number",
           message: "Must be between 300 and 86400",
         },
+        perf_interval: {
+          min: 10,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 300 and 86400",
+        },
+        service_interval: {
+          min: 300,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 300 and 86400",
+        },
       },
     };
   },
@@ -1226,9 +1289,13 @@ export default {
       this.getInputs()
       this.getRoles()
       this.getAgentTags()
+      this.getConfiguredOutputs()
     },
     searchCredentials(value) {
       this.$store.dispatch("getCredentials", {organization: this.policy.organization, name__like: value})
+    },
+    getConfiguredOutputs(name) {
+      this.$store.dispatch("getConfiguredOutputs", {organization: this.policy.organization, name__like: name})
     },
     getCredentials() {
       this.$store

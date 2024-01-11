@@ -185,7 +185,13 @@ export default {
           listening_ports: true,
           local_users: true,
           network_adapters: true,
-          containers: true
+          containers: true,
+          perf_interval: 30,
+          service_interval: 300,
+          host_performance: false,
+          container_stats: false,
+          container_services: false,
+          metrics_outputs: []
         },
         winlog_config: {
           wait_interval: 60,
@@ -280,7 +286,13 @@ export default {
           listening_ports: true,
           local_users: true,
           network_adapters: true,
-          containers: true
+          containers: true,
+          perf_interval: 30,
+          service_interval: 300,
+          host_performance: false,
+          container_stats: false,
+          container_services: false,
+          metrics_outputs: []
         },
         winlog_config: {
           wait_interval: 60,
