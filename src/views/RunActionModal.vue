@@ -49,7 +49,7 @@
       <CRow v-if="action && action.parameters && !!Object.keys(action.parameters).length">
         <CCol>
           <h5>Parameters</h5>
-          <CRow v-for="(field, name) in action.parameters">
+          <CRow v-for="(field, name) in action.parameters" :key="name">
             <CCol
             v-if="
                       !field.conditions ||
