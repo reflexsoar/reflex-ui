@@ -1,7 +1,7 @@
 <template>
   <div class="flex-grid login-wrapper" style="margin-top: 0px">
     <div class="d-col-3 login-box">
-      <CForm @submit.prevent="login">
+      <CForm @submit.prevent="login" id="login-form">
         <img v-bind:src="logo_path" class="login-logo"/>
         <CInput
           placeholder="Email"
@@ -22,11 +22,11 @@
         </CInput>
         <div class="flex-grid">
           <div class="d-col">
-            <button class="btn btn-primary"  type="submit">Login</button>&nbsp;
-            <button class="btn btn-secondary" @click="loginWithSSO">Login with SSO</button>
+            <button class="btn btn-primary" type="submit" for="login-form">Login</button>&nbsp;
+            <button class="btn btn-secondary" type="button" @click="loginWithSSO">Login with SSO</button>
           </div>
           <div class="d-col">
-            <button class="btn btn-secondary" to="/forgot_password">Forgot password?</button>
+            <CButton class="btn btn-secondary" type="button" to="/forgot_password">Forgot password?</CButton>
           </div>
         </div>
       </CForm>
