@@ -178,6 +178,160 @@
                 </CRow>
               </CTab>
               <CTab
+                title="Inventory Settings"
+              >
+                <CRow>
+                  <CCol>
+                    <label>Agent Inventory Enabled</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.enabled"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    /><br />
+                    </CCol>
+                  </CRow><br>
+                <CRow>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.inventory_config.collection_interval"
+                      label="Inventory Interval"
+                      placeholder="Enter an inventory interval in seconds"
+                      description="How often the Agent will check in to the management for inventory updates"
+                      :isValid="
+                        validate(
+                          policy.inventory_config.collection_interval,
+                          validations.inventory_collection_interval
+                        )
+                      "
+                      :invalidFeedback="validations.inventory_collection_interval.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.inventory_config.cache_expiration"
+                      label="Cache Expiration"
+                      placeholder="Enter a max cache age in seconds"
+                      description="How old can inventory data be before it is considered stale"
+                      :isValid="
+                        validate(
+                          policy.inventory_config.cache_expiration,
+                          validations.inventory_cache_expire
+                        )
+                      "
+                      :invalidFeedback="validations.inventory_cache_expire.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.inventory_config.perf_interval"
+                      label="Performance Collection Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How often to pull performance data from the host"
+                      :isValid="
+                        validate(
+                          policy.inventory_config.perf_interval,
+                          validations.perf_interval
+                        )
+                      "
+                      :invalidFeedback="validations.perf_interval.message"
+                    />
+                  </CCol>
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.inventory_config.service_interval"
+                      label="Service Collection Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How often to pull container service data from the host"
+                      :isValid="
+                        validate(
+                          policy.inventory_config.service_interval,
+                          validations.service_interval
+                        )
+                      "
+                      :invalidFeedback="validations.service_interval.message"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <label>Collect Installed Software</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.installed_software"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                  <CCol>
+                    <label>Collect Running Services</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.services"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                  <CCol>
+                    <label>Collect Network Adapters</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.network_adapters"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                </CRow><br>
+                <CRow>
+                  <CCol>
+                    <label>Collect Listening Ports</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.listening_ports"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                  <CCol>
+                    <label>Collect Local Users</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.local_users"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                  <CCol>
+                    <label>Collect Containers</label><br />
+                    <CSwitch
+                      :checked.sync="policy.inventory_config.containers"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                </CRow><br>
+                <CRow>
+                  <CCol>
+                    <MultiPicker
+                      label="Metrics Outputs"
+                      :value.sync="policy.inventory_config.metrics_outputs"
+                      :options="integration_outputs"
+                      option_label="configuration_name"
+                      option_key="configuration_uuid"
+                      description="Select the outputs that should receive metrics data from this agent"
+                      :asTags="true"
+                    >
+                      <template #option="{ option }">
+                        <span style="display: inline">{{ option.integration_name }} - {{ option.configuration_name }}
+                        <small style="float: right">{{ option.configuration_uuid }}</small>
+                        </span>
+                      </template>
+                    </MultiPicker>
+                  </CCol>
+                </CRow>
+              </CTab>
+              <CTab
                 title="Poller Settings"
                 v-bind:disabled="policy.roles && !policy.roles.includes('poller')"
               >
@@ -456,6 +610,33 @@
                     />
                   </CCol>
                   <CCol> </CCol>
+                </CRow>
+              </CTab>
+              <CTab
+                title="Windows Log Collector"
+                v-bind:disabled="policy.roles && !policy.roles.includes('winlog')"
+              >
+                <CRow>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.winlog_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <MultiPicker label="Log Sources" :value.sync="policy.winlog_config.log_source_config" :options="[{value: 'abc', label:'Foo'}]"
+                    description="Select the log sources that this Windows Log Collector should consume from" />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <MultiPicker label="Default Output" :value.sync="policy.winlog_config.default_output" :options="[{value: 'abc', label:'Foo'}]"
+                    description="The Windows Log Collector will default to sending log sources to these outputs unless overridden by other policy settings" />
+                  </CCol>
                 </CRow>
               </CTab>
               <CTab
@@ -845,11 +1026,13 @@ export default {
           mitre_mapper_config: {},
           fim_config: {},
           search_proxy_config: {},
+          winlog_config: {},
+          inventory_config: {}
         };
       },
     },
   },
-  computed: mapState(["current_user", "organizations", "credentials", "inputs", "roles", "agent_tags"]),
+  computed: mapState(["current_user", "organizations", "credentials", "inputs", "roles", "agent_tags", "integration_outputs"]),
   watch: {
     show: function () {
       this.error = false;
@@ -866,7 +1049,7 @@ export default {
       if (!this.modalStatus) {
         this.dismiss();
       }
-    },
+    }
   },
   data() {
     return {
@@ -895,6 +1078,10 @@ export default {
         {
           label: "File Integrity Monitoring",
           value: "fim",
+        },
+        {
+          label: "Windows Log Collector",
+          value: 'winlog'
         },
         {
           label: "Search Proxy",
@@ -1029,6 +1216,34 @@ export default {
           type: "number",
           message: "Must be between 5 and 60",
         },
+        inventory_collection_interval: {
+          min: 300,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 300 and 86400",
+        },
+        inventory_cache_expire: {
+          min: 300,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 300 and 86400",
+        },
+        perf_interval: {
+          min: 10,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 300 and 86400",
+        },
+        service_interval: {
+          min: 300,
+          max: 86400,
+          required: true,
+          type: "number",
+          message: "Must be between 300 and 86400",
+        },
       },
     };
   },
@@ -1074,9 +1289,13 @@ export default {
       this.getInputs()
       this.getRoles()
       this.getAgentTags()
+      this.getConfiguredOutputs()
     },
     searchCredentials(value) {
       this.$store.dispatch("getCredentials", {organization: this.policy.organization, name__like: value})
+    },
+    getConfiguredOutputs(name) {
+      this.$store.dispatch("getConfiguredOutputs", {organization: this.policy.organization, name__like: name})
     },
     getCredentials() {
       this.$store

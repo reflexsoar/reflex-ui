@@ -1,7 +1,7 @@
 <template>
 
   <div>
-    <CRow class="page-heading page-heading-no-nav">
+    <CRow class="page-heading  page-heading-row page-heading-no-nav">
       <CCol>
         <h1>Dashboard</h1>
       </CCol>

@@ -249,23 +249,17 @@
                                   />
                                 </div>
                                 <div v-if="prop.type == 'str-multiple'">
-                                  <label>{{ prop.label }}</label><br>
-                                  <multiselect
-                                    v-model="item[prop.name]"
-                                    @tag="addItemOption(item, prop.name, $event)"
-                                    @remove="removeItemOption(item, prop.name, $event)"
+                                  <MultiPicker
                                     :options="getSelectOptions(prop.name)"
-                                    :multiple="true"
-                                    :close-on-select="false"
+                                    option_label="label"
+                                    option_key="value"
+                                    :value.sync="item[prop.name]"
+                                    :label="prop.label"
+                                    :description="prop.description"
                                     :placeholder="prop.description"
                                     :taggable="true"
-                                    v-if="prop.default_options_from === undefined"
-                                  ></multiselect>
-                                  <MultiPicker
-                                    :value.sync="item[prop.name]"
-                                    :options="getSelectOptions(prop.name)"
-                                    v-else
-                                  /><br>
+                                    :asTags="true"
+                                  />
                                 </div>
                               </CCol>
                             </CRow>

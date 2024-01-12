@@ -633,7 +633,6 @@ export default {
       }
     },
     dismissMfaSetup() {
-      console.log(this.current_user.mfa_enabled)
       if(this.current_user.mfa_enabled) {
         this.current_user.mfa_enabled = false;
       }

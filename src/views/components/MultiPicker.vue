@@ -111,8 +111,8 @@
   cursor: pointer;
   font-weight: 400;
   padding: 0.375rem 0.75rem;
-  padding-top: 4px;
-  padding-bottom: 4px;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
   border-radius: 0.25rem;
   border: 1px solid #d8dbe0;
   background: #fff;
@@ -250,6 +250,8 @@ th > .wrapper {
   /* This should float to the right over the tag */
   float: right;
   margin-left: 5px;
+  line-height: 1.5;
+  font-size: 70% !important;
   cursor: pointer;
 }
 

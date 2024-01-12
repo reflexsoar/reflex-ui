@@ -176,6 +176,30 @@ export default {
           user_roles: [],
           credential: null
         },
+        inventory_config : {
+          enabled: true,
+          collection_interval: 3600,
+          cache_expiration: 300,
+          installed_software: true,
+          services: true,
+          listening_ports: true,
+          local_users: true,
+          network_adapters: true,
+          containers: true,
+          perf_interval: 30,
+          service_interval: 300,
+          host_performance: false,
+          container_stats: false,
+          container_services: false,
+          metrics_outputs: []
+        },
+        winlog_config: {
+          wait_interval: 60,
+          logging_level: 'ERROR',
+          graceful_exit: true,
+          log_source_config: [],
+          default_output: []
+        },
         "tags": [],
         agent_tags: [],
         "priority": 1,
@@ -252,6 +276,30 @@ export default {
           target_input: null,
           user_roles: [],
           credential: null
+        },
+        inventory_config : {
+          enabled: true,
+          collection_interval: 3600,
+          cache_expiration: 300,
+          installed_software: true,
+          services: true,
+          listening_ports: true,
+          local_users: true,
+          network_adapters: true,
+          containers: true,
+          perf_interval: 30,
+          service_interval: 300,
+          host_performance: false,
+          container_stats: false,
+          container_services: false,
+          metrics_outputs: []
+        },
+        winlog_config: {
+          wait_interval: 60,
+          logging_level: 'ERROR',
+          graceful_exit: true,
+          log_source_config: [],
+          default_output: []
         },
         "tags": [],
         agent_tags: [],

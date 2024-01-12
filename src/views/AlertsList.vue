@@ -1,7 +1,7 @@
 <template>
   <CRow>
     <CCol col="12">
-      <CRow class="page-heading page-heading-no-nav">
+      <CRow class="page-heading page-heading-row page-heading-no-nav">
         <CCol>
           <h2>Events<button aria-label="Documentation" type="button" class="kb" onclick="window.open('https://docs.reflexsoar.com/en/latest/events')"><CIcon name='cil-book' size="lg"/></button></h2>
           <!-- START FILTER PICKERS TODO: Move this to it's own component-->
@@ -25,6 +25,7 @@
                     <CDropdownItem @click="toggleFilters()" color="info" size="sm">{{quick_filters ? 'Hide' : 'Show'}} Filter Menu</CDropdownItem>
                     <CDropdownItem @click="resetFilters()" color="secondary" size="sm">Reset Filter</CDropdownItem>
                     <CDropdownItem @click="showExportWizard()" color="secondary" size="sm"><i class="fas fa-download"/>&nbsp;Export Events</CDropdownItem>
+                    <CDropdownItem @click="toggleSearchOnChange()" color="secondary" size="sm"><span v-if="search_on_change"><i class="fas fa-check"/>&nbsp;</span>Search on Change</CDropdownItem>
                   </CDropdown>
                 </CCol>
                 
@@ -95,7 +96,8 @@
                         </v-date-picker>
               </div>
               <div class='event-stats-picker' v-for="bucket, title in event_stats" :key="title">
-                <b class='event-stats-title'>{{title}}</b>
+                <b class='event-stats-title'>{{title}}</b>&nbsp;<i class="fa fa-filter" style="cursor:pointer; opacity: 80%; font-size: .86em" @click="toggleStatsFilter(title)"/>
+                
                 <div v-if="status == 'loading'" class='event-stats-div' style="overflow-y: scroll; margin:auto; text-align:center; verticle-align:middle;">
                   <CSpinner
                         color="primary"
@@ -105,13 +107,14 @@
                     />
                 </div>
                 <div v-else class="event-stats-div" style="margin-top:5px; overflow-y: scroll">
-                  <CRow v-for="k,v in event_stats[title]" :key="v">
-                    <CCol v-if="title === 'severity'" v-c-tooltip="{ content: `${getSeverityText(parseInt(v))}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':parseInt(v)})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getSeverityText(parseInt(v))}}</span></CCol>
-                    <CCol v-else-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
-                    <CCol v-else-if="title === 'observable value'" v-c-tooltip="{ content: `${encodeURI(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'observable', 'data_type':'observable','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
-                    <CCol v-else-if="title === 'event rule'" v-c-tooltip="{ content: `${getEventRuleName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'event_rule', 'data_type':'event rule','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getEventRuleName(v)}}</span></CCol>
-                    <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
-                    <CCol class="text-right" col="3"><CBadge color="secondary badge-count">{{k.toLocaleString('en-US')}}</CBadge></CCol>
+                  <CInput size="sm" style="margin-left: 5px" placeholder="Search..." v-model="event_stats_filter[title]" v-if="showStatsFilter(title)"/>
+                  <CRow v-for="k,v in filtered_stats(title)" :key="v">
+                      <CCol v-if="title === 'severity'" v-c-tooltip="{ content: `${getSeverityText(parseInt(v))}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':parseInt(v)})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getSeverityText(parseInt(v))}}</span></CCol>
+                      <CCol v-else-if="title === 'organization'" v-c-tooltip="{ content: `${mapOrgToName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'organization', 'data_type':'organization','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{mapOrgToName(v)}}</span></CCol>
+                      <CCol v-else-if="title === 'observable value'" v-c-tooltip="{ content: `${encodeURI(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'observable', 'data_type':'observable','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
+                      <CCol v-else-if="title === 'event rule'" v-c-tooltip="{ content: `${getEventRuleName(v)}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': 'event_rule', 'data_type':'event rule','value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{getEventRuleName(v)}}</span></CCol>
+                      <CCol v-else v-c-tooltip="{ content: `${v}`, placement: 'left' }" @click="toggleObservableFilter({'filter_type': title, 'data_type':title,'value':v})" style="cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>{{v}}</span></CCol>
+                      <CCol class="text-right" col="3"><CBadge color="secondary badge-count">{{k.toLocaleString('en-US')}}</CBadge></CCol>
                   </CRow>                
                 </div>
               </div>
@@ -560,7 +563,8 @@ export default {
     dark: Boolean,
     event: false
     },
-    computed: mapState(['status','alert','settings','current_user','observable_filters']),
+    computed: {...mapState(['status','alert','settings','current_user','observable_filters','search_on_change'])
+    },
     created: function () {
 
       /* Set the page size based on the global settings page */
@@ -688,6 +692,8 @@ export default {
         event_data: {},
         dismiss_submitted: false,
         event_stats: {},
+        event_stats_filter: {},
+        show_stats_filter: {},
         free_search_options: ['Title','Tag','Signature','Observable'],
         selected_count: 0,
         target_event: {},
@@ -737,6 +743,58 @@ export default {
           return data
         }
       },*/
+      toggleStatsFilter(title) {
+        if (Object.keys(this.show_stats_filter).includes(title)) {
+          this.show_stats_filter[title] = !this.show_stats_filter[title]
+        } else {
+          this.$set(this.show_stats_filter, title, true)
+        }
+
+        
+        if(this.show_stats_filter[title] === false) {
+          this.$set(this.event_stats_filter, title, "")
+        }
+
+      },
+      showStatsFilter(title) {
+        if (Object.keys(this.show_stats_filter).includes(title)) {
+          return this.show_stats_filter[title]
+        } else {
+          return false
+        }
+      },
+      filtered_stats(title) {
+        
+        if (Object.keys(this.event_stats_filter).includes(title)) {
+          /* Return any of the keys of this.event_stats[title] that match the filter */
+          let filtered_stats = {}
+          Object.keys(this.event_stats[title]).forEach(key => {
+            let _key = key
+            let search = this.event_stats_filter[title].toLowerCase()
+
+            if(title === 'severity') {
+              _key = this.getSeverityText(Number(key))
+            } else if (title === 'event rule') {
+              _key = this.getEventRuleName(key)
+            } else if (title === 'organization') {
+              _key = this.mapOrgToName(key)
+            }
+
+            _key = _key.toLowerCase()
+            if (_key.includes(search)) {
+              filtered_stats[key] = this.event_stats[title][key]
+            }
+            
+          })
+          return filtered_stats
+        } else {
+          return this.event_stats[title]
+        }
+        return {}
+      },
+      toggleSearchOnChange() {
+        this.$store.commit('update_search_on_change', !this.search_on_change)
+      },
       ackBySig(uuid, signature) {
         this.$store.dispatch('acknowledgeEventBySignature', {'uuid': uuid, 'signature': signature}).then(() => {
           this.filtered_events = this.filterEvents()
@@ -1206,13 +1264,16 @@ export default {
           title__like: title__like_filter
         }).then(resp => {
           this.event_stats = this.$store.getters.event_stats
+          for(let title in this.event_stats) {
+            this.$set(this.event_stats_filter, title, "")
+            this.$set(this.show_stats_filter, title, false)
+          }
           let rule_ids = Object.keys(this.event_stats['event rule'])
           this.$store.dispatch('loadEventRules', {page_size: 500, save: false}).then(resp => {
             this.event_rules = resp.data.event_rules
           })
-        })
 
-        this.$store.dispatch('getEvents', {
+          this.$store.dispatch('getEvents', {
           signature: signature_filter,
           grouped: grouped,
           tags: tag_filters,
@@ -1239,6 +1300,9 @@ export default {
           this.page_data = resp.data.pagination
           this.$store.commit('add_success')
         })
+        })
+
+        
 
         
       },
@@ -1622,6 +1686,7 @@ export default {
           }
           this.search_text = ""
         }
+        this.filterEvents()
       },
       applyTimeFilter() {
         this.clearTimeFilter(false)
@@ -1676,7 +1741,9 @@ export default {
       },
       observable_filters: function() {
         this.observableFilters = this.observable_filters
-        this.filterEvents()
+        if(this.search_on_change) {
+          this.filterEvents()
+        }        
       },
     },
     filters: {
