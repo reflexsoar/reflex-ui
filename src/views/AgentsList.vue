@@ -140,6 +140,13 @@ python reflex-agent.py --pair --token "{{ pairingToken }}" --console {{
             current_url
           }} --roles detector</pre
         >
+        <!--<br><label>Agent Environmental Variables</label>
+        <pre
+          class="text-white bg-dark text-left prewrap"
+          style="padding: 10px; border-radius: 5px"
+        >CONSOLE_URL={{ current_url }}
+ACCESS_TOKEN={{ pairingToken }}
+AGENT_UUID={{ agentUUID }}</pre>-->
       </div>
     </CModal>
   </CRow>
@@ -366,7 +373,8 @@ export default {
     generateToken() {
       this.pairingModal = true;
       this.$store.dispatch("getPairingToken").then((resp) => {
-        this.pairingToken = resp.data;
+        this.pairingToken = resp.data.token;
+        this.agentUUID = resp.data.uuid;
       });
     },
     mapOrgToName(uuid) {
