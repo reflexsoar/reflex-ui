@@ -31,7 +31,7 @@
               <CCol>
 
                   <CCardBody style="padding-top: 5px; padding-bottom: 5px;">
-                    <vue-markdown>{{ comment.comment }}</vue-markdown>
+                    <vue-markdown :html="false">{{ comment.comment }}</vue-markdown>
                   </CCardBody>
 
               </CCol>
