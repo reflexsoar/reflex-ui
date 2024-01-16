@@ -35,6 +35,7 @@ const state = {
   events: [],
   event: {},
   event_comments: [],
+  event_comments_pagination: {},
   cases: [],
   case: {},
   tags: {},
@@ -503,6 +504,9 @@ const mutations = {
   },
   save_event_comments(state, comments) {
     state.event_comments = comments
+  },
+  save_event_comments_pagination(state, pagination) {
+    state.event_comments_pagination = pagination
   },
   add_event_comment(state, comment) {
     if (state.event_comments.length == 0) {
@@ -1121,6 +1125,7 @@ const getters = {
   },
   mitre_technique: state => { return state.mitre_technique },
   event_comments: state => { return state.event_comments },
+  event_comments_pagination: state => { return state.event_comments_pagination },
   notification_channels: state => { return state.notification_channels },
   event_rules: state => { return state.event_rules },
   source_input: state => { return state.source_input },
@@ -2550,11 +2555,12 @@ const actions = {
         })
     })
   },
-  getEventComments({ commit }, uuid) {
+  getEventComments({ commit }, {uuid, page = 1, page_size = 25}) {
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/event/${uuid}/comment`, method: 'GET' })
+      Axios({ url: `${BASE_URL}/event/${uuid}/comment?page=${page}&page_size=${page_size}`, method: 'GET' })
         .then(resp => {
           commit('save_event_comments', resp.data.comments)
+          commit('save_event_comments_pagination', resp.data.pagination)
           resolve(resp)
         }).catch(err => {
           reject(err)

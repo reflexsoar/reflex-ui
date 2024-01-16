@@ -510,23 +510,21 @@
               </CCol>
             </CRow>
           </CTab>
-          <CTab :title="`Comments (${this.event_data.total_comments})`">
+          <CTab :title="`Comments (${comments_pagination.total_results})`">
             <template #title>
               Comments&nbsp;<CBadge
                 color="info"
                 class="tag"
                 size="sm"
-                v-if="event_data.total_comments > 0"
-                >{{ event_data.total_comments }}</CBadge
+                v-if="comments_pagination.total_results > 0"
+                >{{ comments_pagination.total_results }}</CBadge
               >
             </template>
             
             <CCardBody class="tab-container">
-              <div v-if="!comments_loading">
-                <CommentList :event_uuid="event_data.uuid"/>
-              </div>
-              <div v-else class="text-center">
-                <CSpinner color="primary" size="xl"></CSpinner>
+              <div>
+                <CommentList :event_uuid="event_data.uuid" :loading="comments_loading"/>
+                <CPagination v-if="comments_pagination.pages > 1" :activePage.sync="comments_pagination.page" :pages="comments_pagination.pages" @update:activePage="getEventComments()"/>
               </div>
             </CCardBody>
           </CTab>
@@ -539,8 +537,6 @@
       :show.sync="show_exclusion_modal"
       :mode="exclusion_modal_mode"
     />
-    
-          
           <DetectionRuleModal
           :show.sync="show_detection_rule_modal"
           :rule.sync="detection"
@@ -707,6 +703,8 @@ export default {
     minimize(val) {
       if (!val) {
         document.body.style.overflow = "hidden";
+        
+        this.comments_pagination.page = 1;
 
         this.show_detection_rule_modal = false;
 
@@ -719,8 +717,9 @@ export default {
             this.event_index.push({ Field: key, Value: value });
           }
         });
-        this.$store.dispatch("getEventComments", this.event_data.uuid).then(() => {
+        this.$store.dispatch("getEventComments", {uuid: this.event_data.uuid, page: this.comments_pagination.page, page_size: this.page_size}).then(() => {
           this.comments = this.$store.state.event_comments;
+          this.comments_pagination = this.$store.state.event_comments_pagination;
           if(this.event_data.dismiss_comment) {
             let dismiss_comment = {
               comment: this.event_data.dismiss_comment,
@@ -774,6 +773,7 @@ export default {
         query: { query: null}
       },
       comments: [],
+      comments_pagination: {},
       comments_loading: false,
       rules_loading: false,
       detection_loading: false,
@@ -784,6 +784,8 @@ export default {
       show_field: {},
       show_detection_rule_modal: false,
       detection_modal_mode: "Edit",
+      comment_page: 1,
+      page_size: 25
     };
   },
   computed: {
@@ -795,6 +797,13 @@ export default {
     },
   },
   methods: {
+    getEventComments() {
+      this.comment_page = this.comments_pagination.page
+      this.comments_loading = true
+      this.$store.dispatch('getEventComments', { uuid: this.event_data.uuid, page: this.comment_page, page_size: this.page_size }).then(() => {
+        this.comments_loading = false;
+      })
+    },
     showDetectionModal() {
       this.show_detection_rule_modal = true;
     },
