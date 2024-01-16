@@ -371,10 +371,11 @@ export default {
       }
     },
     generateToken() {
-      this.pairingModal = true;
+      
       this.$store.dispatch("getPairingToken").then((resp) => {
         this.pairingToken = resp.data.token;
         this.agentUUID = resp.data.uuid;
+        this.pairingModal = true;
       });
     },
     mapOrgToName(uuid) {
