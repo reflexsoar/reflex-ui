@@ -4694,9 +4694,18 @@ const actions = {
         })
     })
   },
-  getIntegrationConfigurations({ commit }, uuid) {
+  getIntegrationConfigurations({ commit }, {uuid, organization = null}) {
+
     return new Promise((resolve, reject) => {
-      Axios({ url: `${BASE_URL}/integration/${uuid}/configurations`, method: 'GET' })
+
+      let url = `${BASE_URL}/integration/${uuid}/configurations`
+
+      if (organization) {
+        url += `?organization=${organization}`
+      }
+
+
+      Axios({ url: url, method: 'GET' })
         .then(resp => {
           commit('store_integration_configurations', resp.data['configurations'])
           resolve(resp)
