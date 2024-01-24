@@ -443,7 +443,7 @@ export default {
     getIntegrationConfigurations() {
         this.configurations_loading = true;
         this.$store
-          .dispatch("getIntegrationConfigurations", this.uuid)
+          .dispatch("getIntegrationConfigurations", {uuid: this.uuid})
           .then(() => {
             this.configurations_loading = false;
           })

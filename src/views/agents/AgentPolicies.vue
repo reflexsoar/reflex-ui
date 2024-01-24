@@ -200,6 +200,12 @@ export default {
           log_source_config: [],
           default_output: []
         },
+        sysmon_manager_config: {
+          wait_interval: 60,
+          logging_level: 'ERROR',
+          graceful_exit: true,
+          configurations: []
+        },
         "tags": [],
         agent_tags: [],
         "priority": 1,
@@ -300,6 +306,12 @@ export default {
           graceful_exit: true,
           log_source_config: [],
           default_output: []
+        },
+        sysmon_manager_config: {
+          wait_interval: 60,
+          logging_level: 'ERROR',
+          graceful_exit: true,
+          configurations: []
         },
         "tags": [],
         agent_tags: [],

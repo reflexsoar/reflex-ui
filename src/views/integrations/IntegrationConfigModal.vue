@@ -69,6 +69,9 @@
                 <CTextarea
                   v-model="configuration.global_settings[data]"
                   v-if="field.type == 'text'"
+                  :class="{ 'integration-config-code': field.is_code ? true : false }"
+                  :spellcheck="field.is_code ? false : true"
+                  :rows="field.is_code ? 10 : 5"
                   :label="field.label"
                   :description="field.description"
                   :placeholder="field.default"
@@ -293,6 +296,9 @@
                     <CTextarea
                       v-model="configuration.actions[action.name][data]"
                       v-if="field.type == 'text'"
+                      :class="{ 'integration-config-code': field.is_code ? true : false }"
+                      :rows="field.is_code ? 10 : 5"
+                      :spellcheck="field.is_code ? false : true"
                       :label="field.label"
                       :description="field.description"
                       :placeholder="field.default"
@@ -389,6 +395,7 @@
     </form>
   </div>
 </template>
+
 <script>
 import { mapState } from "vuex";
 

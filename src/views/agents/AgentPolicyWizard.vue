@@ -639,6 +639,62 @@
                   </CCol>
                 </CRow>
               </CTab>
+              <CTab title="Sysmon Manager" v-bind:disabled="policy.roles && !policy.roles.includes('sysmon_manager')">
+                <CRow>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.sysmon_manager_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <!-- Wait Interval -->
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.sysmon_manager_config.wait_interval"
+                      label="Wait Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How long should the Sysmon Manager wait before checking for new Sysmon configurations"
+                      :isValid="
+                        validate(
+                          policy.sysmon_manager_config.wait_interval,
+                          validations.wait_interval
+                        )
+                      "
+                      :invalidFeedback="validations.wait_interval.message"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <!-- Graceful Exit -->
+                  <CCol>
+                    <label>Graceful Exit</label><br />
+                    <CSwitch
+                      :checked.sync="policy.sysmon_manager_config.graceful_exit"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    /><br />
+                  </CCol>
+                </CRow><br>
+                <CRow>
+                  <CCol>
+                    <!-- Configurations -->
+                    <MultiPicker
+                        label="Sysmon Configurations"
+                        :value.sync="policy.sysmon_manager_config.configurations"
+                        :options="sysmon_configs"
+                        option_label="name"
+                        option_key="uuid"
+                    />
+                    
+                  </CCol>
+                </CRow>
+
+              </CTab>
               <CTab
                 title="File Integrity Monitoring"
                 v-bind:disabled="policy.roles && !policy.roles.includes('fim')"
@@ -1086,10 +1142,14 @@ export default {
         {
           label: "Search Proxy",
           value: "search_proxy",
-        },
+        },{
+          label: "Sysmon Manager",
+          value: "sysmon_manager",
+        }
       ],
       log_levels: ["INFO", "ERROR", "WARNING", "DEBUG"],
       tags: [],
+      sysmon_configs: [],
       validations: {
         event_realert_ttl: {
           min: 1,
@@ -1290,6 +1350,7 @@ export default {
       this.getRoles()
       this.getAgentTags()
       this.getConfiguredOutputs()
+      this.getSysmonConfigurations()
     },
     searchCredentials(value) {
       this.$store.dispatch("getCredentials", {organization: this.policy.organization, name__like: value})
@@ -1318,6 +1379,11 @@ export default {
     getAgentTags() {
       this.$store
         .dispatch("getAgentTags", {organization: this.policy.organization})
+    },
+    getSysmonConfigurations() {
+      this.$store.dispatch("getIntegrationConfigurations", {uuid: "dd3f1684-15f8-4410-9e87-821e4f82e4f5", organization: this.policy.organization}).then((resp) => {
+        this.sysmon_configs = resp.data.configurations
+      })
     },
     create() {
       this.$store
