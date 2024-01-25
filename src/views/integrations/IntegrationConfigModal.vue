@@ -16,20 +16,31 @@
           :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
         >
           <CTab title="Overview">
-            <h3>Basic Settings</h3>
-            <CInput
-              v-model="configuration.name"
-              label="Name"
-              placeholder="Enter a name for this configuration"
-              required
-              description="Providing a name for the configuration allows users to differentiate between configurations that may have the same action"
-            />
+            <CRow>
+              <CCol col=12>
+              <h3>Basic Settings</h3>
+              <CInput
+                v-model="configuration.name"
+                label="Name"
+                placeholder="Enter a name for this configuration"
+                required
+                description="Providing a name for the configuration allows users to differentiate between configurations that may have the same action"
+              />
+              </CCol>
+              <CCol col=12>
             <CTextarea
               v-model="configuration.description"
               label="Description"
               placeholder="Enter a description for this configuration"
               description="Providing a description for the configuration allows users to determine in more detail why this configuration exsits"
             />
+            </CCol>
+            <CCol col=4 v-if="current_user.default_org">
+              <label>Global Configuration</label><br>
+              <CSwitch :checked.sync="configuration.is_global_config" label-on="Yes" label-off="No" color="success" /><br>
+              <small class="text-muted">If selected this configuration can be used by any organization</small>
+              </CCol>
+            </CRow>
           </CTab>
           <CTab
             title="Global Settings"

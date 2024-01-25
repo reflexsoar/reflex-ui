@@ -94,7 +94,7 @@
                                 >
                                     <template #name="{item}">
                                       <td>
-                                        {{ item.name }}<br>
+                                        {{ item.name }} <i class="fas fa-globe" v-if="item.is_global_config"/><br>
                                         <small class="text-muted">{{ item.uuid }}</small>
                                         </td>
                                       </template>
@@ -334,6 +334,7 @@ export default {
       configuration.name = config.name;
       configuration.description = config.description;
       configuration.uuid = config.uuid;
+      configuration.is_global_config = config.is_global_config;
       
       // Replace all the actions with the ones from the config
       for (let action of this.integration.manifest.actions) {
