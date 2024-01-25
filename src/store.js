@@ -5245,6 +5245,17 @@ const actions = {
         })
     })
   },
+  getAgentInstalledApplications({ commit }, { uuid }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/application/agent/${uuid}`, method: 'GET' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
   getAgentTags({ commit }, { organization = null, namespace = null, value = null }) {
 
     let url = `${BASE_URL}/agent_tag`
