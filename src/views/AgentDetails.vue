@@ -76,7 +76,7 @@
                 </CRow>
                 <CRow>
                   <CCol>
-                    <ObjectAttribute label="Sysmon Version" :value="agent.sysmon_version" />
+                    <ObjectAttribute label="Sysmon Version" :value="agent.host_information.sysmon_version" />
                   </CCol>
                 </CRow>
               </CCardBody>
