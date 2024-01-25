@@ -48,7 +48,7 @@
               :activeTab.sync="tab"
             >
               <CTab title="Details">
-                <CRow>
+                <CRow v-if="current_user.default_org">
                   <CCol>
                     <SelectInput
                       :options="formattedOrganizations()"
