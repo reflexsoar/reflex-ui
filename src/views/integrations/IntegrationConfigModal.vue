@@ -19,6 +19,11 @@
             <CRow>
               <CCol col=12>
               <h3>Basic Settings</h3>
+              <CAlert color="warning" fade v-if="configuration.is_global_config">
+                  <strong>Warning!</strong> This configuration is global and will be
+                  available to all organizations.  Misconfiguration could result in unintended consequences
+                  for downstream organizations.
+                </CAlert>
               <CInput
                 v-model="configuration.name"
                 label="Name"
