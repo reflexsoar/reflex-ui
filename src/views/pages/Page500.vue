@@ -5,7 +5,7 @@
         <div class="clearfix">
           <h1 class="float-left display-3 mr-4">500</h1>
           <h4 class="pt-3">Houston, we have a problem!</h4>
-          <p class="text-muted">The page you are looking for is temporarily unavailable.</p>
+          <p class="text-muted">The page you are looking for is temporarily unavailable or an error has occurred.</p>
         </div>
         <CInput
           class="mb-3"
