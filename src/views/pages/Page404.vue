@@ -7,7 +7,6 @@
         <CButton color="info" @click='$router.go(-1)'>Go Back</CButton>       
       </CCol>
     </CRow>
-  
 </template>
 
 <script>
