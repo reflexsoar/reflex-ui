@@ -1043,6 +1043,7 @@ export default {
             this.error = false
             this.error_message = ""
             this.selected = []
+            this.selected_orgs = {}
             this.selected_count = 0
         }).catch(err => {
             this.error = true
