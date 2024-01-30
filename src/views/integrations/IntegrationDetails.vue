@@ -148,7 +148,7 @@
                     <h3>Global Parameters</h3>
                     <p>
                         <ul>
-                        <li v-for="item, key in integration.manifest.configuration">
+                        <li v-for="item, key in integration.manifest.configuration" style="margin-bottom: 5px">
                             <code>{{key}}</code> - {{item.description}}
                         </li>
                         </ul>
