@@ -150,19 +150,14 @@
             >
               <CRow>
                 <CCol>
-                <h3>Configure {{ action.friendly_name }}</h3>
-                <vue-markdown>{{ action.description }}</vue-markdown>
-                </CCol>
-                <CCol class="text-right">
-                  <div v-if="action.name in configuration.actions">
-                    <label>Active</label><br />
-                    <CSwitch
+                <h3><CSwitch
                       :checked.sync="configuration.actions[action.name].enabled"
-                      label-on="Yes"
-                      label-off="No"
+                      label-on="On"
+                      label-off="Off"
                       color="success"
-                    /><br />
-                  </div>
+                      style="padding-top:5px"
+                    />&nbsp;Configure {{ action.friendly_name }}</h3>
+                <vue-markdown>{{ action.description }}</vue-markdown>
                 </CCol>
               </CRow>
               <div
