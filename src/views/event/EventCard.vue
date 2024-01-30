@@ -259,7 +259,7 @@ export default {
       },
       getSeverityColor(severity) {
         switch(severity) {
-          case 0: return 'light';
+          case 0: return 'secondary';
           case 1: return 'dark';
           case 2: return 'info';
           case 3: return 'warning';

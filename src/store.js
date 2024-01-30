@@ -1092,7 +1092,7 @@ const getters = {
   },
   severity_color: state => function (severity) {
     switch (severity) {
-      case 0: return 'light';
+      case 0: return 'secondary'; // Informational
       case 1: return 'dark';
       case 2: return 'info';
       case 3: return 'warning';
