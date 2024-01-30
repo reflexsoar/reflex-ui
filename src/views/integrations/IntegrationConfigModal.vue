@@ -356,29 +356,17 @@
                       <small>{{ field.description }}</small><br>
                     </div>
                     <div v-if="field.type == 'str-multiple'">
-                      <label>{{ field.label }}</label
-                      ><br />
-                      <multiselect
-                        v-model="configuration.actions[action.name][data]"
-                        @tag="addMultiOption(action.name, data, $event)"
-                        @remove="removeMultiOption(action.name, data, $event)"
+                      <MultiPicker
                         :options="getSelectOptions(field)"
-                        :multiple="true"
-                        :close-on-select="false"
+                        option_label="label"
+                        option_key="value"
+                        :value.sync="configuration.actions[action.name][data]"
+                        :label="field.label"
+                        :description="field.description"
                         :placeholder="field.description"
                         :taggable="true"
-                        v-if="field.default_options_from === undefined && field.options === undefined"
-                      >
-                      </multiselect>
-                      <MultiPicker
-                    :value.sync="configuration.actions[action.name][data]"
-                    :options="getSelectOptions(field)"
-                    v-else
-                  />
-                      
-                      </multiselect>
-                      <small class="text-muted">{{ field.description }}</small
-                      ><br /><br />
+                        :asTags="true"
+                      />
                     </div>
                   </CCol>
                 </CRow>
