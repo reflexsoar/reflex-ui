@@ -5,7 +5,7 @@
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
     />
     <form id="createIntegrationConfig" @submit.prevent="submitForm">
-      <CModal :title="title" size="xl" :show.sync="modalStatus">
+      <CModal :title="title" size="xl" :show.sync="modalStatus" :closeOnBackdrop="false">
         <CAlert v-if="error" :show="error" color="danger" fade>
           {{ error_message }}
         </CAlert>
