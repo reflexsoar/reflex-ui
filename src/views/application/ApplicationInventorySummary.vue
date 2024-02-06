@@ -46,6 +46,15 @@
                   >
                 </td>
               </template>
+              <template #vendor="{ item }">
+                <td>
+                  <span
+                    class="application-name"
+                    @click="toggleFilter('vendor', item.vendor)"
+                    >{{ item.vendor }}</span
+                  >
+                </td>
+              </template>
             </CDataTable>
             <span v-if="hasFilters">
               <!-- show the filters as tags that can be removed -->
@@ -190,7 +199,17 @@ export default {
       } else {
         this.setFilter(key, value);
       }
-      this.getApplicationEndpoints(this.organization);
+      /* If there are filters set, then we need to get the application endpoints */
+      if (this.hasFilters) {
+        this.getApplicationEndpoints(this.organization);
+      } else {
+        this.getApplicationSummary(this.organization);
+      }
+    },
+    hasFilters() {
+      return Object.keys(this.filters).some((key) => {
+        return this.filters[key].length > 0;
+      });
     },
     removeFilter(key, value) {
       this.filters[key] = this.filters[key].filter((v) => {

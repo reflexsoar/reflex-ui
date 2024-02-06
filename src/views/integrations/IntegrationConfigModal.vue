@@ -5,7 +5,7 @@
       href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css"
     />
     <form id="createIntegrationConfig" @submit.prevent="submitForm">
-      <CModal :title="title" size="xl" :show.sync="modalStatus">
+      <CModal :title="title" size="xl" :show.sync="modalStatus" :closeOnBackdrop="false">
         <CAlert v-if="error" :show="error" color="danger" fade>
           {{ error_message }}
         </CAlert>
@@ -16,20 +16,36 @@
           :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
         >
           <CTab title="Overview">
-            <h3>Basic Settings</h3>
-            <CInput
-              v-model="configuration.name"
-              label="Name"
-              placeholder="Enter a name for this configuration"
-              required
-              description="Providing a name for the configuration allows users to differentiate between configurations that may have the same action"
-            />
+            <CRow>
+              <CCol col=12>
+              <h3>Basic Settings</h3>
+              <CAlert color="warning" fade v-if="configuration.is_global_config">
+                  <strong>Warning!</strong> This configuration is global and will be
+                  available to all organizations.  Misconfiguration could result in unintended consequences
+                  for downstream organizations.
+                </CAlert>
+              <CInput
+                v-model="configuration.name"
+                label="Name"
+                placeholder="Enter a name for this configuration"
+                required
+                description="Providing a name for the configuration allows users to differentiate between configurations that may have the same action"
+              />
+              </CCol>
+              <CCol col=12>
             <CTextarea
               v-model="configuration.description"
               label="Description"
               placeholder="Enter a description for this configuration"
               description="Providing a description for the configuration allows users to determine in more detail why this configuration exsits"
             />
+            </CCol>
+            <CCol col=4 v-if="current_user.default_org">
+              <label>Global Configuration</label><br>
+              <CSwitch :checked.sync="configuration.is_global_config" label-on="Yes" label-off="No" color="success" /><br>
+              <small class="text-muted">If selected this configuration can be used by any organization</small>
+              </CCol>
+            </CRow>
           </CTab>
           <CTab
             title="Global Settings"
@@ -69,6 +85,9 @@
                 <CTextarea
                   v-model="configuration.global_settings[data]"
                   v-if="field.type == 'text'"
+                  :class="{ 'integration-config-code': field.is_code ? true : false }"
+                  :spellcheck="field.is_code ? false : true"
+                  :rows="field.is_code ? 10 : 5"
                   :label="field.label"
                   :description="field.description"
                   :placeholder="field.default"
@@ -131,19 +150,14 @@
             >
               <CRow>
                 <CCol>
-                <h3>Configure {{ action.friendly_name }}</h3>
-                <vue-markdown>{{ action.description }}</vue-markdown>
-                </CCol>
-                <CCol class="text-right">
-                  <div v-if="action.name in configuration.actions">
-                    <label>Active</label><br />
-                    <CSwitch
+                <h3><CSwitch
                       :checked.sync="configuration.actions[action.name].enabled"
-                      label-on="Yes"
-                      label-off="No"
+                      label-on="On"
+                      label-off="Off"
                       color="success"
-                    /><br />
-                  </div>
+                      style="padding-top:5px"
+                    />&nbsp;Configure {{ action.friendly_name }}</h3>
+                <vue-markdown>{{ action.description }}</vue-markdown>
                 </CCol>
               </CRow>
               <div
@@ -293,6 +307,9 @@
                     <CTextarea
                       v-model="configuration.actions[action.name][data]"
                       v-if="field.type == 'text'"
+                      :class="{ 'integration-config-code': field.is_code ? true : false }"
+                      :rows="field.is_code ? 10 : 5"
+                      :spellcheck="field.is_code ? false : true"
                       :label="field.label"
                       :description="field.description"
                       :placeholder="field.default"
@@ -334,29 +351,17 @@
                       <small>{{ field.description }}</small><br>
                     </div>
                     <div v-if="field.type == 'str-multiple'">
-                      <label>{{ field.label }}</label
-                      ><br />
-                      <multiselect
-                        v-model="configuration.actions[action.name][data]"
-                        @tag="addMultiOption(action.name, data, $event)"
-                        @remove="removeMultiOption(action.name, data, $event)"
+                      <MultiPicker
                         :options="getSelectOptions(field)"
-                        :multiple="true"
-                        :close-on-select="false"
+                        option_label="label"
+                        option_key="value"
+                        :value.sync="configuration.actions[action.name][data]"
+                        :label="field.label"
+                        :description="field.description"
                         :placeholder="field.description"
                         :taggable="true"
-                        v-if="field.default_options_from === undefined && field.options === undefined"
-                      >
-                      </multiselect>
-                      <MultiPicker
-                    :value.sync="configuration.actions[action.name][data]"
-                    :options="getSelectOptions(field)"
-                    v-else
-                  />
-                      
-                      </multiselect>
-                      <small class="text-muted">{{ field.description }}</small
-                      ><br /><br />
+                        :asTags="true"
+                      />
                     </div>
                   </CCol>
                 </CRow>
@@ -389,6 +394,7 @@
     </form>
   </div>
 </template>
+
 <script>
 import { mapState } from "vuex";
 

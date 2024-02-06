@@ -74,6 +74,11 @@
                     <ObjectAttribute label="Country" :value="agent.geo.country" />
                   </CCol>
                 </CRow>
+                <CRow>
+                  <CCol>
+                    <ObjectAttribute label="Sysmon Version" :value="agent.host_information.sysmon_version" />
+                  </CCol>
+                </CRow>
               </CCardBody>
             </CCard>
           </CCol>
@@ -270,7 +275,6 @@
       </CTab>
       <CTab
         title="Installed Software"
-        v-if="propertyExistsAndNotNull(agent.host_information, 'installed_software')"
       >
         <CRow>
           <CCol>
@@ -484,9 +488,9 @@ export default {
     ...mapState(["input_list","agent_logs"]),
     vendors: function () {
       if (
-        this.propertyExistsAndNotNull(this.agent.host_information, "installed_software")
+        this.installed_software.length > 0
       ) {
-        let vendors = this.agent.host_information.installed_software.map(function (item) {
+        let vendors = this.installed_software.map(function (item) {
           if (item.vendor === null) {
             return "Unknown";
           } else {
@@ -504,11 +508,11 @@ export default {
     },
     filtered_software: function () {
       if (
-        this.propertyExistsAndNotNull(this.agent.host_information, "installed_software")
+        this.installed_software.length > 0
       ) {
         let software_list = [];
-        for (const item in this.agent.host_information.installed_software) {
-          let software = this.agent.host_information.installed_software[item];
+        for (const item in this.installed_software) {
+          let software = this.installed_software[item];
           if (this.selected_vendors.length > 0) {
             if (this.selected_vendors.includes(software.vendor)) {
               software_list.push(software);
@@ -568,7 +572,8 @@ export default {
       delete_error: "",
       current_tags: [],
       active_tab: 0,
-      logs_loading: false
+      logs_loading: false,
+      installed_software: [],
     };
   },
   created() {
@@ -582,6 +587,9 @@ export default {
         this.agent = resp.data;
         this.selectedInputs();
         this.selectedGroups();
+        this.$store.dispatch('getAgentInstalledApplications', { uuid: this.agent.uuid }).then((resp) => {
+          this.installed_software = resp.data.applications;
+        });
         this.loading = false;
       });
   },

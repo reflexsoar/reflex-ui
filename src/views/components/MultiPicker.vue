@@ -74,14 +74,15 @@
 
 .selected-option {
   margin-right: 5px;
-  cursor: pointer;
+  cursor: default;
   display: flex;
   border-radius: 0.25rem;
-  padding: 2px 5px;
+  padding: 4px 10px;
   background: #3c4b64;
   align-items: center;
   justify-content: space-between;
   color: #fff;
+  line-height: 1;
 }
 
 .selected-option i {
@@ -211,10 +212,10 @@ th > .wrapper {
 }
 
 .options li {
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   padding-left: 10px;
-  paddnig-right: 10px;
+  padding-right: 10px;
   border-radius: 0.25rem;
 }
 
@@ -249,10 +250,15 @@ th > .wrapper {
 .tag-remove {
   /* This should float to the right over the tag */
   float: right;
-  margin-left: 5px;
-  line-height: 1.5;
-  font-size: 70% !important;
+  margin-left: 8px;
+  line-height: 1.2;
+  font-size: 60% !important;
+  opacity: 0.85;
   cursor: pointer;
+}
+
+.tag-remove:hover {
+  opacity: 1;
 }
 
 .option-text {

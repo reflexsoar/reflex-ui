@@ -1046,3 +1046,22 @@ html:not([dir="rtl"]) nav>.pagination {
     /* Clear the height */
     height: auto !important;
   }
+
+  .integration-config-code > textarea {
+    background: #0e0e0e;
+  color: #ccc !important;
+  border: 1px solid rgb(216, 219, 224);
+  border-radius: 0.25rem;
+
+  /* you must provide font-family font-size line-height. Example: */
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 5px;
+  }
+
+/* clear focus on the above textarea */
+.integration-config-code > textarea:focus {
+  /* reset the background color */
+    background: #0e0e0e;
+}

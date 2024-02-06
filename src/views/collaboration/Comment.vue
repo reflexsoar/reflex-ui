@@ -11,7 +11,7 @@
                       comment.other_organization_name
                     }}</CBadge></span
                   >
-                  commented {{ comment.created_at | moment("from", "now") }}.
+                  commented {{ comment.created_at | moment("from", "now") }}
                   <span v-if="comment.edited"><i>edited</i></span></span
                 >
                 <span v-else
@@ -22,15 +22,16 @@
                     }}</CBadge></span
                   >
                   closed the {{ item_type }} with the following comment
-                  {{ comment.created_at | moment("from", "now") }}.</span
+                  {{ comment.created_at | moment("from", "now") }}</span
                 >
+                <span v-if="comment.from_related_event"> on a related event</span>.
               </CCol>
             </CRow>
             <CRow>
               <CCol>
 
                   <CCardBody style="padding-top: 5px; padding-bottom: 5px;">
-                    <vue-markdown>{{ comment.comment }}</vue-markdown>
+                    <vue-markdown :html="false">{{ comment.comment }}</vue-markdown>
                   </CCardBody>
 
               </CCol>

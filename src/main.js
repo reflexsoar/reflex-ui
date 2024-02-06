@@ -77,8 +77,10 @@ Vue.prototype.$http.interceptors.response.use(function(response) {
         window.location.href = '/#/404'
       }
       if(status === 403) {
-        store.dispatch('logout')
-        window.location.href = '/#/login'
+        window.location.href = '/#/403'
+      }
+      if(status === 500) {
+        window.location.href = '/#/500'
       }
       reject(error)
     }

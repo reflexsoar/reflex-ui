@@ -1,13 +1,13 @@
 <template>
   <div>
     <CRow class="page-heading page-heading-row page-heading-no-nav page-heading-pb-10">
-      <CCol>
+      <CCol col=2>
         <h1>Integrations</h1>
       </CCol>
-      <CCol>
+      <CCol col=9>
         <CInput v-model="search" placeholder="Search for an Integration" />
       </CCol>
-      <CCol>
+      <CCol col=1>
         <h1>
           <button
             type="button"
@@ -131,6 +131,11 @@ export default {
             categories.push({ name: category, count: 1 });
           }
         });
+      });
+
+      /* Sort the categories by count */
+      categories.sort((a, b) => {
+        return b.count - a.count;
       });
       return categories;
     },

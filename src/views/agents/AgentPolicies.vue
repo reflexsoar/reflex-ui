@@ -198,7 +198,24 @@ export default {
           logging_level: 'ERROR',
           graceful_exit: true,
           log_source_config: [],
-          default_output: []
+          default_output: [],
+          reader: {
+            max_cache_db_size: 100,
+            log_event_metrics: false,
+            max_queue_size: 10000,
+            queue_size_check_interval: 5,
+            output_health_check_interval: 5
+          },
+          shipper: {
+            max_batch_size: 250,
+            max_shipper_threads: 5
+          }
+        },
+        sysmon_manager_config: {
+          wait_interval: 60,
+          logging_level: 'ERROR',
+          graceful_exit: true,
+          configurations: []
         },
         "tags": [],
         agent_tags: [],
@@ -299,7 +316,24 @@ export default {
           logging_level: 'ERROR',
           graceful_exit: true,
           log_source_config: [],
-          default_output: []
+          default_output: [],
+          reader: {
+            max_cache_db_size: 100,
+            log_event_metrics: false,
+            max_queue_size: 10000,
+            queue_size_check_interval: 5,
+            output_health_check_interval: 5
+          },
+          shipper: {
+            max_batch_size: 250,
+            max_shipper_threads: 5
+          }
+        },
+        sysmon_manager_config: {
+          wait_interval: 60,
+          logging_level: 'ERROR',
+          graceful_exit: true,
+          configurations: []
         },
         "tags": [],
         agent_tags: [],

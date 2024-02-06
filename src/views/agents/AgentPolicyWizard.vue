@@ -46,9 +46,10 @@
               :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
               :fade="false"
               :activeTab.sync="tab"
+              addTabsClasses="tab-overflow"
             >
               <CTab title="Details">
-                <CRow>
+                <CRow v-if="current_user.default_org">
                   <CCol>
                     <SelectInput
                       :options="formattedOrganizations()"
@@ -618,6 +619,11 @@
               >
                 <CRow>
                   <CCol>
+                    <h5>Windows Log Collector Settings</h5>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
                     <CSelect
                       :value.sync="policy.winlog_config.logging_level"
                       label="Log Level"
@@ -637,7 +643,160 @@
                     <MultiPicker label="Default Output" :value.sync="policy.winlog_config.default_output" :options="[{value: 'abc', label:'Foo'}]"
                     description="The Windows Log Collector will default to sending log sources to these outputs unless overridden by other policy settings" />
                   </CCol>
+                </CRow><br>
+                <CRow>
+                  <CCol>
+                    <CRow>
+                      <CCol>
+                        <h5>Reader Settings</h5>
+                      </CCol>
+                    </CRow>
+                    <!-- 
+                      max_cache_db_size
+                      log_event_metrics
+                      max_queue_size
+                      queue_size_check_interval
+                      output_health_check_interval
+                    -->
+                    <CRow>
+                      <CCol>
+                        <CInput
+                          v-model.number="policy.winlog_config.reader.max_cache_db_size"
+                          label="Max Cache DB Size"
+                          placeholder="Enter a size in Mb"
+                          description="The maximum size of the Windows Log Collector cache database in Mb"
+                        />
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol>
+                        <CInput
+                          v-model.number="policy.winlog_config.reader.max_queue_size"
+                          label="Max Queue Size"
+                          placeholder="Enter a number of logs"
+                          description="The maximum size of the Windows Log Collector queue in number of logs"
+                        />
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol>
+                        <CInput
+                          v-model.number="policy.winlog_config.reader.queue_size_check_interval"
+                          label="Queue Size Check Interval"
+                          placeholder="Enter a time in seconds"
+                          description="How often the Windows Log Collector will check the queue size"
+                        />
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol>
+                        <CInput
+                          v-model.number="policy.winlog_config.reader.output_health_check_interval"
+                          label="Output Health Check Interval"
+                          placeholder="Enter a time in seconds"
+                          description="How often the Windows Log Collector will check the health of the outputs"
+                        />
+                      </CCol>
+                    </CRow>
+                      <CRow>
+                      <CCol>
+                        <label>Log Event Metrics</label><br />
+                        <CSwitch
+                          :checked.sync="policy.winlog_config.reader.log_event_metrics"
+                          label-on="Yes"
+                          label-of="No"
+                          color="success"
+                        /><br />
+                      </CCol>
+                    </CRow>
+                  </CCol>
+                  <CCol>
+                    <CRow>
+                      <CCol>
+                        <h5>Shipper Settings</h5>
+                      </CCol>
+                    </CRow>
+                    <!-- max_batch_size
+                        max_shipper_threads
+                    -->
+                    <CRow>
+                      <CCol>
+                        <CInput
+                          v-model.number="policy.winlog_config.shipper.max_batch_size"
+                          label="Max Batch Size"
+                          placeholder="Enter a size in number of logs"
+                          description="The maximum size of the Windows Log Collector batch ship in number of logs"
+                        />
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol>
+                        <CInput
+                          v-model.number="policy.winlog_config.shipper.max_shipper_threads"
+                          label="Max Shipper Threads"
+                          placeholder="Enter a number of threads"
+                          description="The maximum number of threads the Windows Log Collector shipper will use"
+                        />
+                      </CCol>
+                    </CRow>
+                  </CCol>
                 </CRow>
+              </CTab>
+              <CTab title="Sysmon Manager" v-bind:disabled="policy.roles && !policy.roles.includes('sysmon_manager')">
+                <CRow>
+                  <CCol>
+                    <CSelect
+                      :value.sync="policy.sysmon_manager_config.logging_level"
+                      label="Log Level"
+                      placeholder="Select a logging level"
+                      :options="log_levels"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <!-- Wait Interval -->
+                  <CCol>
+                    <CInput
+                      v-model.number="policy.sysmon_manager_config.wait_interval"
+                      label="Wait Interval"
+                      placeholder="Enter a time in seconds"
+                      description="How long should the Sysmon Manager wait before checking for new Sysmon configurations"
+                      :isValid="
+                        validate(
+                          policy.sysmon_manager_config.wait_interval,
+                          validations.wait_interval
+                        )
+                      "
+                      :invalidFeedback="validations.wait_interval.message"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <!-- Graceful Exit -->
+                  <CCol>
+                    <label>Graceful Exit</label><br />
+                    <CSwitch
+                      :checked.sync="policy.sysmon_manager_config.graceful_exit"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    /><br />
+                  </CCol>
+                </CRow><br>
+                <CRow>
+                  <CCol>
+                    <!-- Configurations -->
+                    <MultiPicker
+                        label="Sysmon Configurations"
+                        :value.sync="policy.sysmon_manager_config.configurations"
+                        :options="sysmon_configs"
+                        option_label="name"
+                        option_key="uuid"
+                    />
+                    
+                  </CCol>
+                </CRow>
+
               </CTab>
               <CTab
                 title="File Integrity Monitoring"
@@ -988,6 +1147,15 @@
   </div>
 </template>
 
+<style scoped>
+.tab-overflow > .tab-pane {
+  max-height: 55vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 10px;
+}
+</style>
+
 <script>
 import { mapState } from "vuex";
 
@@ -1086,10 +1254,14 @@ export default {
         {
           label: "Search Proxy",
           value: "search_proxy",
-        },
+        },{
+          label: "Sysmon Manager",
+          value: "sysmon_manager",
+        }
       ],
       log_levels: ["INFO", "ERROR", "WARNING", "DEBUG"],
       tags: [],
+      sysmon_configs: [],
       validations: {
         event_realert_ttl: {
           min: 1,
@@ -1290,6 +1462,7 @@ export default {
       this.getRoles()
       this.getAgentTags()
       this.getConfiguredOutputs()
+      this.getSysmonConfigurations()
     },
     searchCredentials(value) {
       this.$store.dispatch("getCredentials", {organization: this.policy.organization, name__like: value})
@@ -1318,6 +1491,11 @@ export default {
     getAgentTags() {
       this.$store
         .dispatch("getAgentTags", {organization: this.policy.organization})
+    },
+    getSysmonConfigurations() {
+      this.$store.dispatch("getIntegrationConfigurations", {uuid: "dd3f1684-15f8-4410-9e87-821e4f82e4f5", organization: this.policy.organization}).then((resp) => {
+        this.sysmon_configs = resp.data.configurations
+      })
     },
     create() {
       this.$store

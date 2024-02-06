@@ -65,6 +65,7 @@ const ApplicationInventorySummary = () => import('@/views/application/Applicatio
 
 // Views - Pages
 const Page401 = () => import('@/views/pages/Page401')
+const Page403 = () => import('@/views/pages/Page403')
 const Page404 = () => import('@/views/pages/Page404')
 const Page500 = () => import('@/views/pages/Page500')
 const Login = () => import('@/views/Login')
@@ -115,7 +116,8 @@ router.beforeEach((to, from, next) => {
     if(to.matched.some(record => {
         let current_user = store.getters.current_user
         if(record.meta.requiresPermission && !current_user.permissions[record.meta.requiresPermission]) {
-          next('/401')
+          console.log("User does not have permission to access this page")
+          next('/403')
         } else {
           next()
           return
@@ -684,9 +686,19 @@ function configRoutes () {
           component: Page401
         },
         {
+          path: '403',
+          name: 'Page403',
+          component: Page403
+        },
+        {
           path: '404',
           name: 'Page404',
           component: Page404
+        },
+        {
+          path: '500',
+          name: 'Page500',
+          component: Page500
         }
       ]
     },

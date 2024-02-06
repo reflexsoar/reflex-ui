@@ -147,6 +147,17 @@
                           </CCol>
                         </CRow>
                         <CRow>
+                        
+                          
+                          <CCol>
+                            <ObjectAttribute label="Kill Chain Phases">
+                              <template #value>
+                                <TagList :tags="detection.kill_chain_phase" :tagIcon="false" />
+                              </template>
+                            </ObjectAttribute>
+                          </CCol>
+                          </CRow>
+                        <CRow>
                           <CCol>
                             <ObjectAttribute label="Authors">
                               <template #value>
