@@ -806,6 +806,7 @@ export default {
       this.loading = true
       this.$store.dispatch("getDetection", {uuid}).then(() => {
         this.loading = false
+        this.getDetectionChangeLog()
       });
     },
     detectionType(i) {
