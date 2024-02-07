@@ -344,8 +344,8 @@
                 <timeline-item bg-color="#9dd8e0" style="padding-bottom:5px;" v-for="log in change_log['changes']" :hollow="true" :key="log.uuid">
                 <b>{{ log.updated_by.username }}</b> changed the property <code>{{ log.field}}</code> {{ log.updated_at | moment('from','now')}}<br>
                 
-                  <i>Old Value</i><pre style="white-space: pre-wrap;" class="query">{{ log.old_value.join(", ") }}</pre>
-                  <i>New Value</i><pre style="white-space: pre-wrap;" class="query">{{ log.new_value.join(", ") }}</pre>
+                  <i>Old Value</i><pre style="white-space: pre-wrap;" class="query">{{ log.old_value ? log.old_value.join(", ") : "" }}</pre>
+                  <i>New Value</i><pre style="white-space: pre-wrap;" class="query">{{ log.new_value ? log.new_value.join(", ") : "" }}</pre>
                 </timeline-item>
               </timeline>
             </CCol>
