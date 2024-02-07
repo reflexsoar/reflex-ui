@@ -634,14 +634,26 @@
                 </CRow>
                 <CRow>
                   <CCol>
-                    <MultiPicker label="Log Sources" :value.sync="policy.winlog_config.log_source_config" :options="[{value: 'abc', label:'Foo'}]"
-                    description="Select the log sources that this Windows Log Collector should consume from" />
+                    <MultiPicker
+                      label="Log Sources"
+                      :value.sync="policy.winlog_config.log_source_config"
+                      :options="log_source_configs"
+                      option_label="name"
+                      option_key="uuid"
+
+                    description="Select the log sources that this Windows Log Collector should consume from" /> 
                   </CCol>
                 </CRow>
                 <CRow>
                   <CCol>
-                    <MultiPicker label="Default Output" :value.sync="policy.winlog_config.default_output" :options="[{value: 'abc', label:'Foo'}]"
-                    description="The Windows Log Collector will default to sending log sources to these outputs unless overridden by other policy settings" />
+                  <MultiPicker
+                      label="Default Output"
+                      :value.sync="policy.winlog_config.default_output"
+                      :options="integration_outputs"
+                      option_label="configuration_name"
+                      option_key="configuration_uuid"
+                      description="The Windows Log Collector will default to sending log sources to these outputs unless overridden by other policy settings"
+                    />
                   </CCol>
                 </CRow><br>
                 <CRow>
@@ -1262,6 +1274,7 @@ export default {
       log_levels: ["INFO", "ERROR", "WARNING", "DEBUG"],
       tags: [],
       sysmon_configs: [],
+      log_source_configs: [],
       validations: {
         event_realert_ttl: {
           min: 1,
@@ -1463,6 +1476,7 @@ export default {
       this.getAgentTags()
       this.getConfiguredOutputs()
       this.getSysmonConfigurations()
+      this.getWindowsEventLogConfigurations()
     },
     searchCredentials(value) {
       this.$store.dispatch("getCredentials", {organization: this.policy.organization, name__like: value})
@@ -1495,6 +1509,11 @@ export default {
     getSysmonConfigurations() {
       this.$store.dispatch("getIntegrationConfigurations", {uuid: "dd3f1684-15f8-4410-9e87-821e4f82e4f5", organization: this.policy.organization}).then((resp) => {
         this.sysmon_configs = resp.data.configurations
+      })
+    },
+    getWindowsEventLogConfigurations() {
+      this.$store.dispatch("getIntegrationConfigurations", {uuid: "dab1a493-8d9c-4729-81e0-1f430999cc94", organization: this.policy.organization}).then((resp) => {
+        this.log_source_configs = resp.data.configurations
       })
     },
     create() {
