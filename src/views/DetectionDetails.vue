@@ -51,6 +51,7 @@
               :fade="false"
               variant="pills"
               :vertical="{ navs: 'col-md-2', content: 'col-md-10' }"
+              :activeTab.sync="activeTab"
             >
                       <CTab title="Overview">
                         <CRow>
@@ -330,6 +331,29 @@
           </CRow>
           
         </CTab>
+        <CTab title="Change Log">
+          <CRow>
+            <CCol>
+              <h4>Change Log</h4>
+            </CCol>
+          </CRow>
+          <CRow>
+            <CCol style="max-height: 450px; overflow: auto" v-if="!change_log_loading">
+              <!-- timeline -->
+              <timeline>
+                <timeline-item bg-color="#9dd8e0" style="padding-bottom:5px;" v-for="log in change_log['changes']" :hollow="true" :key="log.uuid">
+                <b>{{ log.updated_by.username }}</b> changed the property <code>{{ log.field}}</code> {{ log.updated_at | moment('from','now')}}<br>
+                
+                  <i>Old Value</i><pre style="white-space: pre-wrap;" class="query">{{ log.old_value.join(", ") }}</pre>
+                  <i>New Value</i><pre style="white-space: pre-wrap;" class="query">{{ log.new_value.join(", ") }}</pre>
+                </timeline-item>
+              </timeline>
+            </CCol>
+            <CCol v-else>
+              <CSpinner v-if="change_log_loading" color="primary" />
+            </CCol>
+          </CRow>
+        </CTab>
                     </CTabs>
                     
                   </CCardBody>
@@ -589,6 +613,8 @@ import { mapState } from "vuex";
 import moment from "moment";
 
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
+import { Timeline, TimelineItem, TimelineTitle } from 'vue-cute-timeline'
+import 'vue-cute-timeline/dist/index.css'
 
 import { Viewer } from '@toast-ui/vue-editor';
 
@@ -608,7 +634,10 @@ export default {
     Viewer,
     OrganizationBadge,
     TagBucket,
-    ObjectAttribute
+    ObjectAttribute,
+    Timeline,
+    TimelineItem,
+    TimelineTitle
   },
   computed: {
     ...mapState(["detection", "detection_hits", "current_user"]), 
@@ -632,6 +661,8 @@ export default {
       // If the tab is the hits tab go fetch them
       if (tab === 0) {
         this.getHits();
+      } else if (tab === 10) {
+        this.getDetectionChangeLog();
       }
     },
   },
@@ -650,7 +681,9 @@ export default {
       delete_exclusion_warning: false,
       target_exclusion: null,
       loading: true,
-      show_field: {}
+      show_field: {},
+      change_log: [],
+      change_log_loading: false
     };
   },
   created() {
@@ -693,6 +726,16 @@ export default {
       this.exclusion = {};
       this.exclusion_modal_mode = "Create";
       this.show_exclusion_modal = true;
+    },
+    getDetectionChangeLog() {
+      this.change_log_loading = true
+      this.$store.dispatch('getDetectionChangeLogs', { uuid: this.uuid }).then((resp) => {
+        this.change_log = resp.data
+        this.change_log_loading = false
+      }).catch((error) => {
+        this.change_log_loading = false
+        this.change_log = []
+      })
     },
     editExclusion(uuid) {
       if (this.detection.exceptions === undefined) {

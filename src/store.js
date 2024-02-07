@@ -1081,6 +1081,9 @@ const getters = {
   integration_outputs_select: state => {
     return state.integration_outputs.map(output => { return { label: output.integration_name + " - " + output.name + " - " + output.configuration_name, value: output.value } })
   },
+  credentials_select: state => {
+    return state.credentials.map(cred => { return { label: cred.name, value: cred.uuid } })
+  },
   integration_outputs: state => {
     return state.integration_outputs
   },
@@ -1578,6 +1581,17 @@ const actions = {
         .catch(err => {
           reject(err)
         })
+    })
+  },
+  getDetectionChangeLogs({ commit }, { uuid }) {
+    return new Promise((resolve, reject) => {
+      Axios({ url: `${BASE_URL}/detection/changelog/${uuid}`, method: 'GET' })
+      .then(resp => {
+        resolve(resp)
+      })
+      .catch(err => {
+        reject(err)
+      })
     })
   },
   getDetectionMitreMapping({ commit }, { organization = null }) {
