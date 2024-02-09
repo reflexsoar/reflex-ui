@@ -701,12 +701,24 @@
                       </CCol>
                     </CRow>
                     <CRow>
+                    
                       <CCol>
                         <CInput
                           v-model.number="policy.winlog_config.reader.output_health_check_interval"
                           label="Output Health Check Interval"
                           placeholder="Enter a time in seconds"
                           description="How often the Windows Log Collector will check the health of the outputs"
+                        />
+                      </CCol>
+                      </CRow>
+                    <CRow>
+                      <CCol>
+                        <SelectInput
+                          :options='[{label: "Per Channel", value: "per_channel"}, {label: "Enforce: On", value: "enforce_on"}, {label: "Enforce: Off", value: "enforce_off"}]'
+                          label="Preserve Original Event"
+                          placeholder="Select a setting"
+                          :value.sync="policy.winlog_config.reader.preserve_event_original"
+                          description="Preserve the original event when shipping to outputs.  Enforce: On will always preserve the original event.  Enforce: Off will never preserve the original event.  Per Channel will preserve the original event based on the log source configuration"
                         />
                       </CCol>
                     </CRow>

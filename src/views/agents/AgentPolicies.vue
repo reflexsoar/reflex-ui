@@ -204,7 +204,8 @@ export default {
             log_event_metrics: false,
             max_queue_size: 10000,
             queue_size_check_interval: 5,
-            output_health_check_interval: 5
+            output_health_check_interval: 5,
+            preserve_event_original: "per_channel"
           },
           shipper: {
             max_batch_size: 250,
@@ -322,7 +323,8 @@ export default {
             log_event_metrics: false,
             max_queue_size: 10000,
             queue_size_check_interval: 5,
-            output_health_check_interval: 5
+            output_health_check_interval: 5,
+            preserve_event_original: "per_channel"
           },
           shipper: {
             max_batch_size: 250,
