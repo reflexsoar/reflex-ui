@@ -138,7 +138,7 @@
               v-for="(bucket, title) in filters"
               :key="title"
             >
-              <b class="event-stats-title">{{ title.replace("_", " ") }}</b>
+              <b class="event-stats-title">{{ title.replace("_", " ") }}</b>&nbsp;<i class="fa fa-filter" style="cursor:pointer; opacity: 80%; font-size: .86em" v-if="!['active'].includes(title)" @click="toggleStatsFilter(title)"/>
               <div
                 v-if="loading"
                 class="event-stats-div"
@@ -161,7 +161,8 @@
                 class="event-stats-div"
                 style="margin-top: 5px; overflow-y: scroll"
               >
-                <CRow v-for="k in filters[title]" :key="k.value">
+              <CInput size="sm" style="margin-left: 5px" placeholder="Search..." v-model="detection_stats_filter[title]" v-if="showStatsFilter(title) && !['active'].includes(title)"/>
+                <CRow v-for="k in filtered_stats(title)" :key="k.value">
                   <CCol
                   @click.alt.exact="selectFilter({
                       type: title,
@@ -243,7 +244,9 @@ export default {
       rule_active: true,
       max_average_hits_per_day: 0,
       min_average_hits_per_day: 0,
-      tag_search: ""
+      tag_search: "",
+      show_stats_filter: {},
+      detection_stats_filter: {},
     };
   },
   computed: {
@@ -273,6 +276,73 @@ export default {
     },
   },
   methods: {
+    toggleStatsFilter(title) {
+        if (Object.keys(this.show_stats_filter).includes(title)) {
+          this.show_stats_filter[title] = !this.show_stats_filter[title]
+        } else {
+          this.$set(this.show_stats_filter, title, true)
+        }
+
+        
+        if(this.show_stats_filter[title] === false) {
+          this.$set(this.detection_stats_filter, title, "")
+        }
+
+      },
+      showStatsFilter(title) {
+        if (Object.keys(this.show_stats_filter).includes(title)) {
+          return this.show_stats_filter[title]
+        } else {
+          return false
+        }
+      },
+    filtered_stats(title) {
+      console.log(title)
+        if (Object.keys(this.detection_stats_filter).includes(title)) {
+          /* Return any of the keys of this.filters[title] that match the filter */
+          let filtered_stats = {}
+          Object.keys(this.filters[title]).forEach(key => {
+            let _key = this.filters[title][key].name
+            let search = this.detection_stats_filter[title].toLowerCase()
+
+            if(title === 'severity') {
+              _key = this.getSeverityText(Number(key))
+            } else if (title === 'event rule') {
+              _key = this.getEventRuleName(key)
+            } else if (title === 'organization') {
+              _key = this.mapOrgToName(key)
+            }
+
+            _key = _key.toLowerCase()
+            if (_key.includes(search)) {
+              filtered_stats[key] = this.filters[title][key]
+            }
+            
+          })
+          return filtered_stats
+        } else {
+          return this.filters[title]
+        }
+        return {}
+      },
+      getSeverityText(severity) {
+        switch(severity) {
+          case 0: return 'Informational';
+          case 1: return 'Low';
+          case 2: return 'Medium';
+          case 3: return 'High';
+          case 4: return 'Critical';
+          default: return 'Unknown';
+        }
+      },
+      mapOrgToName(uuid) {
+        let org = this.$store.getters.organizations.filter(o => o.uuid === uuid)
+        if (org.length > 0) {
+          return org[0].name
+        } else {
+          return "Unknown"
+        }
+      },
     getFilterValue(type) {
       if (type === 'tags') {
         return this.filtered_tags
