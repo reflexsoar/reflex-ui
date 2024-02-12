@@ -297,7 +297,6 @@ export default {
         }
       },
     filtered_stats(title) {
-      console.log(title)
         if (Object.keys(this.detection_stats_filter).includes(title)) {
           /* Return any of the keys of this.filters[title] that match the filter */
           let filtered_stats = {}
