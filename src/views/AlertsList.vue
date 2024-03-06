@@ -1539,10 +1539,8 @@ export default {
             this.selected_orgs = {'': []}
           } else {
             this.selected_orgs = resp.data.organizations
-          }
-          
-          
-          
+            this.organization = Object.keys(this.selected_orgs)[0]
+          }          
         })
       },
       selectAll() {

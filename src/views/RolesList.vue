@@ -460,7 +460,11 @@ export default {
           delete_detection_repository: false,
           view_detection_repositories: false,
           share_detection_repository: false,
-          subscribe_detection_repository: false
+          subscribe_detection_repository: false,
+          view_data_source_templates: false,
+          create_data_source_template: false,
+          update_data_source_template: false,
+          delete_data_source_template: false,
         }
       },
       permission_map: {
@@ -555,6 +559,12 @@ export default {
           'view_inputs',
           'update_input',
           'delete_input',
+        ],
+        "Data Source Templates": [
+          'create_data_source_template',
+          'update_data_source_template',
+          'delete_data_source_template',
+          'view_data_source_templates',
         ],
         "Case Management": [
           'create_case',

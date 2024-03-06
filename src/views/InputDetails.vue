@@ -843,6 +843,21 @@ export default {
     
     this.$store.dispatch("getInput", this.$route.params.uuid).then((resp) => {
       this.hosts = this.input.config["hosts"];
+    
+      // If the static_tags field is missing from config add it, empty
+      if (!this.input.config["static_tags"]) {
+        this.$set(this.input.config, "static_tags", []);
+      }
+      // If signature_fields is missing from config add it, empty
+      if (!this.input.config["signature_fields"]) {
+        this.$set(this.input.config, "signature_fields", []);
+      }
+
+      // If tag_fields is missing from config add it, empty
+      if (!this.input.config["tag_fields"]) {
+        this.$set(this.input.config, "tag_fields", []);
+      }
+
       this.$store.dispatch("getFieldTemplates", this.input.organization);
       this.$store.dispatch("getDataSourceTemplates", this.input.organization);
       this.$store.dispatch("getCredentials", {
@@ -919,6 +934,22 @@ export default {
     discardChanges() {
       this.loading = true;
       this.$store.dispatch("getInput", this.$route.params.uuid).then((resp) => {
+
+        // If the static_tags field is missing from config add it, empty
+        if (!this.input.config["static_tags"]) {
+          this.$set(this.input.config, "static_tags", []);
+        }
+        // If signature_fields is missing from config add it, empty
+        if (!this.input.config["signature_fields"]) {
+          this.$set(this.input.config, "signature_fields", []);
+        }
+
+        // If tag_fields is missing from config add it, empty
+        if (!this.input.config["tag_fields"]) {
+          this.$set(this.input.config, "tag_fields", []);
+        }
+
+        
         this.loading = false;
       });
       this.changes_made = false;

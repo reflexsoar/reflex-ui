@@ -101,8 +101,8 @@
                   :placeholder="field.default"
                   v-bind:required="field.required"
                 />
-                <CSelect
-                  v-model="configuration.global_settings[data]"
+                <SelectInput
+                  :value.sync="configuration.global_settings[data]"
                   v-if="field.type == 'str-select'"
                   :label="field.label"
                   :options="getSelectOptions(field)"
@@ -110,7 +110,7 @@
                   :placeholder="field.default ? field.default : 'Select an option'"
                   v-bind:required="field.required"
                 >
-                </CSelect>
+                </SelectInput>
                 <div v-if="field.type == 'str-multiple'">
                   <label>{{ field.label }}</label
                   ><br />
@@ -243,8 +243,8 @@
                                   :placeholder="prop.default"
                                   v-bind:required="prop.required"
                                 />
-                                <CSelect
-                                  v-model="item[prop.name]"
+                                <SelectInput
+                                  :value.sync="item[prop.name]"
                                   v-if="prop.type == 'str-select'"
                                   :label="prop.label"
                                   :options="getSelectOptions(prop)"
@@ -252,7 +252,7 @@
                                   :placeholder="prop.default ? prop.default : 'Select an option'"
                                   v-bind:required="prop.required"
                                 >
-                                </CSelect>
+                                </SelectInput>
                                 <div v-if="prop.type == 'bool'">
                                   <RSwitch
                                     :checked.sync="item[prop.name]"
@@ -327,18 +327,14 @@
                         field.required && configuration.actions[action.name].enabled
                       "
                     />
-                    <CSelect
-                      :value.sync="configuration.actions[action.name][data]"
-                      v-if="field.type == 'str-select'"
-                      :label="field.label"
-                      :options="getSelectOptions(field)"
-                      :ref="data"
-                      :description="field.description"
-                      :placeholder="field.default ? field.default : 'Select an option'"
-                      v-bind:required="
-                        field.required && configuration.actions[action.name].enabled
-                      "
-                    />
+                    <SelectInput
+                :value.sync="configuration.actions[action.name][data]"
+                v-if="field.type == 'str-select'"
+                :options="getSelectOptions(field)"
+                :label="field.label"
+                :description="field.description"
+                :ref="data"
+                :placeholder="field.default ? field.default : 'Select an option'"/>
                     <div v-if="field.type == 'bool'">
                       <label>{{ field.label }}</label
                       ><br />
@@ -399,12 +395,14 @@
 import { mapState } from "vuex";
 
 import MultiPicker from "../components/MultiPicker.vue";
+import SelectInput from "../components/SelectInput.vue";
 import RSwitch from '../components/Switch.vue';
 
 export default {
   name: "IntegrationConfigModal",
   components: {
     MultiPicker,
+    SelectInput,
     RSwitch
   },
   props: {
@@ -433,6 +431,7 @@ export default {
   created() {
     this.$store.dispatch("getCloseReasons", {});
     this.$store.dispatch("getConfiguredOutputs");
+    this.$store.dispatch("getCredentials", {})
   },
   data() {
     return {
@@ -608,6 +607,9 @@ export default {
           });
 
           return values;
+        }
+        if (options_field == "credentials") {
+          return this.$store.getters.credentials_select;
         }
         if (options_field == "integration_outputs") {
           return this.$store.getters.integration_outputs_select;

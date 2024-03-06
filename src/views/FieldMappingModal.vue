@@ -410,6 +410,11 @@ export default {
           this.$set(f, "tags", []);
         }
       });
+
+      // Fix for editing templates without tags
+      if (this.template.tags == null) {
+        this.$set(this.template, "tags", []);
+      }
       
       this.$store
         .dispatch("updateFieldTemplate", { uuid: uuid, template: this.template })
