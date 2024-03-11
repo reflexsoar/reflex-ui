@@ -92,27 +92,39 @@
               <td style="min-width: 80ch">
                 <CRow>
                   <CCol>
-                    <CBadge class="tag tag-sm" color="success" v-if="item.active"
-                      >Active</CBadge
-                    ><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge
-                    >&nbsp;<b>{{ item.name }}</b
-                    ><br />{{ item.description }}
-                  </CCol>
-                  <CCol col="3">
-                    <div style="display: inline-block; padding-right: 2px">
-                      <TagBucket
-                        v-if="item.tags && item.tags.length > 0"
-                        :tags="item.tags"
-                      />
-                    </div>
-                    <div style="display: inline-block">
+                    <CRow>
+                      <CCol class="item-name">
+                        <b>{{ item.name }}</b>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol class="detection-attributes">
+                        <CBadge class="tag tag-sm" color="success" v-if="item.active"
+                          >Active</CBadge
+                        ><CBadge class="tag tag-sm" color="danger" v-else>Inactive</CBadge
+                      >
+                      <CBadge class="tag tag-sm" color="info">Priority: {{ item.priority ? item.priority : '0' }}</CBadge>
                       <TagBucket
                         v-if="event_rule_actions(item).length > 0"
                         :tags="event_rule_actions(item)"
                         iconName="cil-bolt"
                         label="Actions"
                       />
-                    </div>
+                      <div v-if="item.tags && item.tags.length > 0">
+                        <TagBucket
+                        v-if="item.tags && item.tags.length > 0"
+                        :tags="item.tags"
+                      />
+                      </div>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol style="margin-top: 2px">
+                        <span class="rule_description">
+                          {{ item.description }}
+                        </span>
+                      </CCol>
+                    </CRow>
                   </CCol>
                 </CRow>
               </td>
@@ -206,9 +218,9 @@
                 {{ item.updated_by ? item.updated_by.username : "Unknown" }}
               </td>
             </template>
-            <template #priority="{ item }">
+            <template #updated_at="{ item }">
               <td class="text-center">
-                <CBadge class="tag" color="info">{{ item.priority }}</CBadge>
+                {{ item.updated_at | moment("from", "now") }}
               </td>
             </template>
             <template #properties="{ item }">
@@ -337,6 +349,28 @@
   max-height: 200px;
 }
 
+.detection-attributes > span {
+  margin-right: 4px;
+}
+
+.detection-attributes > div {
+  display: inline-block;
+  margin-right: 4px;
+  padding-bottom: 3px;
+}
+
+.rule_description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.rule_description:hover {
+  display: block;
+}
+
 /* optional class for removing the outline */
 .prism-editor__textarea:focus {
   outline: none;
@@ -377,11 +411,11 @@ export default {
       rule: {},
       fields: [
         "name",
-        "priority",
         "hits",
         { key: "last_matched_date", label: "Last Matched", filter: false,_style: "width: 10%" },
         {key: "created_by", _style: "width: 10%"},
         {key: "updated_by", _style: "width: 10%"},
+        {key: "updated_at", _style: "width: 10%", filter: false},
         { key: "manage", label: "", filter: false },
       ],
       modal_mode: "create",
