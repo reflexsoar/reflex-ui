@@ -430,6 +430,9 @@ export default {
       delete user["confirm_password"];
       delete user["locked"];
 
+      // Map the role_uuid to a list of uuids
+      user["role_uuid"] = user["role_uuid"].map((r) => r.value);
+
       this.$store
         .dispatch("createUser", user)
         .then((resp) => {
@@ -438,7 +441,21 @@ export default {
         })
         .catch((err) => {
           this.error = true;
-          this.error_message = err.response.data.message;
+
+          // If the error is an "Input payload validation failed" error,
+          // grab all the errors and display them in a list
+          if (err.response.data.message == "Input payload validation failed") {
+            // For each error key in the response, add the error to the error_message
+            let errors = err.response.data.errors;
+            let error_message = "";
+            for (let key in errors) {
+              error_message += `${key}: ${errors[key]}\n`;
+            }
+            this.error_message = error_message;
+          } else {
+            this.error_message = err.response.data.message;
+          }
+          
         });
     },
     editUser() {
