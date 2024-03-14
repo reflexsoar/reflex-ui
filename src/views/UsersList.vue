@@ -390,6 +390,7 @@ export default {
       this.modal_status = true;
       this.modal_mode = "new";
       this.modal_action = this.createUser;
+      this.user = Object.assign({}, this.empty_user);
     },
     editUserModal(uuid) {
       this.modal_title = "Edit User";
