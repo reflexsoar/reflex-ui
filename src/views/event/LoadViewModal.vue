@@ -7,9 +7,24 @@
         </div>
         <div v-else>
           <p>Select a view to load or edit.  The Event Queue will immediately be refreshed upon clicking <b>Load</b>.</p>
-          <multiselect v-model="selected_view" :options="event_views" label="name" track-by="uuid" placeholder="Select a view"></multiselect>
+          <SelectInput
+                :value.sync="selected_view"
+                :options="event_views"
+                option_label="name"
+                option_key="uuid"
+                placeholder="Select a view"
+            >
+              <template #option="{ option }">
+                    <CCol col="10" class="event-view-option-name">
+                       {{ option.name }}
+                    </CCol>
+                    <CCol class="text-right" v-if="option.shared">
+                      <CBadge color="info">Shared</CBadge>
+                    </CCol>
+              </template>
+            </SelectInput>
         </div>
-        <span v-if="selected_view != null && selected_view.created_by.uuid == current_user.uuid"><br>
+        <span v-if="view != null && view.created_by.uuid == current_user.uuid"><br>
           <label>Update view?</label><br />
           <CSwitch label-on="Yes" label-off="No" :checked.sync="update_view" color="success"></CSwitch><br />
           <div v-if="update_view"><br>
@@ -23,18 +38,29 @@
       
       <template v-slot:footer>
         <CButton color="secondary" @click="dismiss()">Cancel</CButton>
-        <CButton color="info" v-if="selected_view != null && update_view" @click="saveView()">Update</CButton>
+        <CButton color="info" v-if="view != null && update_view" @click="saveView()">Update</CButton>
         <CButton color="primary" @click="loadView()">Load</CButton>
       </template>
     </CModal>
   </div>
 </template>
 
+<style scoped>
+.event-view-option-name {
+  padding-left: 0px;
+}
+</style>
+
 <script>
 import { mapState } from "vuex";
 
+import SelectInput from "@/views/components/SelectInput.vue";
+
 export default {
   name: "LoadViewModal",
+  components: {
+    SelectInput
+  },
   props: {
     show: Boolean,
     filter_string: String,
@@ -63,7 +89,7 @@ export default {
     },
     selected_view: function () {
       // Clone the view so we can edit it without affecting the original
-      this.view = JSON.parse(JSON.stringify(this.selected_view));
+      this.view = this.event_views.find((view) => view.uuid == this.selected_view)
     },
     modalStatus: function () {
       if (this.modalStatus) {

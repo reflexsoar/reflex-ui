@@ -194,6 +194,8 @@
 
 .options li {
   padding: 10px;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
   border-radius: 0.25rem;
 }
 
