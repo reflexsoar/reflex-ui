@@ -758,7 +758,7 @@ const mutations = {
     if (state.detections.length == 0) {
       state.detections = [detection]
     } else {
-      state.detections.push(detection)
+      state.detections = [...state.detections, detection]
     }
     state.status = 'success'
   },
