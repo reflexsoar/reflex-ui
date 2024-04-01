@@ -533,7 +533,56 @@
                       :invalidFeedback="validations.max_threshold_events.message"
                     />
                   </CCol>
-                  <CCol> </CCol>
+                  <CCol>
+                    <!-- field_settings_cache_expire -->
+                    <CInput
+                      v-model.number="policy.detector_config.field_settings_cache_expire"
+                      label="Field Settings Cache Expire"
+                      placeholder="Enter a time in seconds"
+                      description="How long the field settings cache will be valid for"
+                      :isValid="
+                        validate(
+                          policy.detector_config.field_settings_cache_expire,
+                          validations.field_settings_cache_expire
+                        )
+                      "
+                      :invalidFeedback="validations.field_settings_cache_expire.message"
+                    />
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <!-- alert_writeback switch -->
+                    <label>Alert Writeback</label><br />
+                    <CSwitch
+                      :checked.sync="policy.detector_config.alert_writeback"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
+                  <CCol>
+                    <!-- alert_writeback_index -->
+                    <CInput
+                      v-model="policy.detector_config.alert_writeback_index"
+                      label="Alert Writeback Index"
+                      placeholder="Enter an index name"
+                      description="The index to write back alerts to"
+                      v-bind:disabled="!policy.detector_config.alert_writeback"
+                    />
+                    </CCol>
+                </CRow>
+                <CRow>
+                  <CCol>
+                    <!-- Drop Events switch -->
+                    <label>Drop Events</label><br />
+                    <CSwitch
+                      :checked.sync="policy.detector_config.drop_events"
+                      label-on="Yes"
+                      label-of="No"
+                      color="success"
+                    />
+                  </CCol>
                 </CRow>
               </CTab>
               <CTab
@@ -1102,6 +1151,14 @@
                     {{ policy.detector_config.max_threshold_events }}<br />
                     <label>Logging Level:</label> {{ policy.detector_config.logging_level
                     }}<br />
+                    <label>Field Setting Cache TTL:</label>
+                    {{ policy.detector_config.field_setting_cache_ttl }}<br />
+                    <label>Alert Writeback Enabled:</label>
+                    {{ policy.detector_config.alert_writeback }}<br />
+                    <label>Alert Writeback Index:</label>
+                    {{ policy.detector_config.alert_writeback_index }}<br />
+                    <label>Drop Events</label>
+                    {{ policy.detector_config.drop_events }}<br />
                   </CCol>
                 </CRow>
                 <CRow>
@@ -1288,6 +1345,13 @@ export default {
       sysmon_configs: [],
       log_source_configs: [],
       validations: {
+        field_settings_cache_expire: {
+          min: 1,
+          max: 86400,
+          required: false,
+          type: "number",
+          message: "Must be between 1 and 86400",
+        },
         event_realert_ttl: {
           min: 1,
           max: 86400,

@@ -137,7 +137,10 @@ export default {
           "catchup_period": 60,
           "wait_interval": 30,
           "max_threshold_events": 1000,
-          "logging_level": "ERROR"
+          "logging_level": "ERROR",
+          "alert_writeback": false,
+          "alert_writeback_index": "reflex-alerts",
+          "drop_events": false
         },
         "runner_config": {
           "concurrent_actions": 10,
@@ -256,7 +259,11 @@ export default {
           "catchup_period": 60,
           "wait_interval": 30,
           "max_threshold_events": 1000,
-          "logging_level": "ERROR"
+          "logging_level": "ERROR",
+          "field_settings_cache_expire": 1800,
+          "alert_writeback": false,
+          "alert_writeback_index": "reflex-alerts",
+          "drop_events": false
         },
         "runner_config": {
           "concurrent_actions": 10,
