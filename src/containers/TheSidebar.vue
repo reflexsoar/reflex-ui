@@ -16,7 +16,7 @@
       <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_cases')" name="Cases" to="/cases" icon="cil-briefcase"></CSidebarNavItem>
       <CSidebarNavDropdown v-if="this.$store.getters.user_has_permission('view_detections')" name="Detections" icon="cil-shield-alt">
         <CSidebarNavItem name="Detections" to="/detections"></CSidebarNavItem>
-        <CSidebarNavItem name="MITRE ATT&CK" to="/mitre_coverage" :badge="beta_badge"></CSidebarNavItem>
+        <CSidebarNavItem name="MITRE ATT&CK" to="/mitre_coverage"></CSidebarNavItem>
         <CSidebarNavItem name="File Integrity" to="/fim" :badge="beta_badge" v-if="this.$store.getters.user_has_permission('view_fim_rules')"></CSidebarNavItem>
       </CSidebarNavDropdown>
       <CSidebarNavItem v-if="this.$store.getters.user_has_permission('view_benchmarks')" name="Benchmarks" :badge="beta_badge" to="/benchmarks" icon="cil-chart"></CSidebarNavItem>
