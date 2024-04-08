@@ -239,6 +239,12 @@
             <label>False Positives</label><br>
             <CSwitch :checked.sync="subscription.sync_settings.false_positives" class="mr-1" color="success" labelOn="On" labelOff="Off" />
           </CCol>
+        </CRow><br>
+        <CRow>
+          <CCol>
+            <label>Repository Tags</label><br>
+            <CSwitch :checked.sync="subscription.sync_settings.repo_tags" class="mr-1" color="success" labelOn="On" labelOff="Off" />
+          </CCol>
         </CRow>
 
         
