@@ -53,7 +53,7 @@
                         <CRow>
                           <CCol>
                             <label>MFA Enabled</label>
-                            <RBlockSwitch :checked.sync="current_user.mfa_enabled" v-on:change="current_user.mfa_enabled ? start_mfa_wizard() : false" />
+                            <RBlockSwitch :checked.sync="current_user.mfa_enabled" v-on:change="current_user.mfa_enabled ? start_mfa_wizard() : disable_mfa()" />
                           </CCol>
                         </CRow>
                       </CCol>
