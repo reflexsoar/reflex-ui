@@ -25,9 +25,9 @@
             <button class="btn btn-primary" type="submit" for="login-form">Login</button>&nbsp;
             <button class="btn btn-secondary" type="button" @click="loginWithSSO">Login with SSO</button>
           </div>
-          <div class="d-col">
+          <!--<div class="d-col">
             <CButton class="btn btn-secondary" type="button" to="/forgot_password">Forgot password?</CButton>
-          </div>
+          </div>-->
         </div>
       </CForm>
     </div>
