@@ -100,8 +100,7 @@ export default {
             loading: true,
             active_page: 1,
             pagination: {
-                pages: 1,
-                total: 0,
+                pages: 1
 
             },
             fields: [
@@ -148,7 +147,7 @@ export default {
         getNotificationChannels(page = 1, sort_by = 'created_at', sort_direction = 'desc') {
             this.loading = true
             this.$store.dispatch("getNotificationChannels", { page: page, sort_by: sort_by, sort_direction: sort_direction }).then((resp) => {
-                this.pagination.pages = this.resp.data.pagination
+                this.pagination = this.resp.data.pagination
                 this.loading = false
             })
         },
