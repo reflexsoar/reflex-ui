@@ -370,7 +370,7 @@
                   <CCardBody>
                     <CRow>
                       <CCol>
-                      <ObjectAttribute label="Organization">
+                      <ObjectAttribute label="Organization" v-if="detection.organization">
                         <template #value>
                           <OrganizationBadge :uuid="detection.organization"/>
                         </template>

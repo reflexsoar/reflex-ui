@@ -1113,6 +1113,10 @@ const getters = {
     }
   },
   org_name: state => function (uuid) {
+    if (state.organization && state.organization.uuid === uuid) {
+      return state.organization.name
+    }
+
     let org = state.organizations.filter(o => o.uuid === uuid)
     if (org.length > 0) {
       return org[0].name
@@ -2359,7 +2363,7 @@ const actions = {
         })
     })
   },
-  getNotificationChannels({ commit }, { page = 1, page_size = 10, sort_by = "created_at", sort_direction = "asc", organization = null, name__like = null }) {
+  getNotificationChannels({ commit }, { page = 1, page_size = 1000, sort_by = "created_at", sort_direction = "asc", organization = null, name__like = null }) {
     return new Promise((resolve, reject) => {
 
       let url = `${BASE_URL}/notification/channel?page=${page}&page_size=${page_size}&sort_by=${sort_by}&sort_direction=${sort_direction}`
