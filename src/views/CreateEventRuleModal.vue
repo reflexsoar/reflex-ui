@@ -1104,6 +1104,8 @@ export default {
         organization: this.organization,
         description: this.description,
         priority: parseInt(this.priority),
+        create_new_case: this.create_new_case,
+        case_template: this.case_template ? this.case_template.uuid : null,
         merge_into_case: this.merge_into_case,
         target_case_uuid: this.target_case ? this.target_case.uuid : null,
         update_severity: this.update_severity,
